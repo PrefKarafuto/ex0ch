@@ -1,0 +1,1 @@
+package CGI::Session::ErrorHandler;use strict;$CGI::Session::ErrorHandler::VERSION='4.43';sub set_error{my$class=shift;my$message=shift;$class=ref($class)||$class;no strict 'refs';${"$class\::errstr"}=$message||"";return;}*error=\&errstr;sub errstr{my$class=shift;$class=ref($class)||$class;no strict 'refs';return${"$class\::errstr"}||'';}1;

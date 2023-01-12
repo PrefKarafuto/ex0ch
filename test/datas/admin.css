@@ -1,0 +1,186 @@
+/*------------------------------------------------------------------------------
+	基本
+ *------------------------------------------------------------------------------*/
+*				{
+					box-sizing : border-box;
+					-moz-box-sizing : border-box;
+					-webkit-box-sizing: border-box;
+				}
+
+body			{
+					margin: 5px;
+				}
+
+td				{
+					font-size: 12px;
+				}
+
+th				{
+					font-size: 12px;
+				}
+
+a				{
+					color: steelblue;
+				}
+
+/*------------------------------------------------------------------------------
+	ヘッダ
+ *------------------------------------------------------------------------------*/
+div.MainHead	{
+					vertical-align: middle;
+					background-color: darkslateblue;
+					font-family: Arial;
+					font-size: 20px;
+					color: #ffffff;
+					padding-right: 20px;
+					padding-top: 5px;
+					padding-bottom: 5px;
+				}
+
+/*------------------------------------------------------------------------------
+	システムメニュー
+ *------------------------------------------------------------------------------*/
+div.MainMenu	{
+					background-color: #ffffff;
+					font-family: Arial;
+					font-size: 12px;
+					height: 20px;
+				}
+
+/*------------------------------------------------------------------------------
+	フッタ
+ *------------------------------------------------------------------------------*/
+div.MainFoot	{
+					background-color: white;
+					font-family: Arial;
+					font-size: 12px;
+					border-style: solid;
+					border-color: black;
+					border-width: 1px 0px 0px 0px;
+					padding-top: 3px;
+					color: #336666;
+				}
+
+/*------------------------------------------------------------------------------
+	フッタ
+ *------------------------------------------------------------------------------*/
+td.Content		{
+					padding-top: 10px;
+				}
+
+/*------------------------------------------------------------------------------
+	機能メニューリスト
+ *------------------------------------------------------------------------------*/
+td.FunctionList	{
+					background-color: whitesmoke;
+					font-family: Arial;
+					font-size: 12px;
+					padding-top: 10px;
+					padding-bottom: 10px;
+					padding-left: 5px;
+					padding-right: 5px;
+					layout-grid-line: 10px;
+				}
+
+/*------------------------------------------------------------------------------
+	機能ブロック
+ *------------------------------------------------------------------------------*/
+td.Function		{
+					background-color: white;
+					font-size: 12px;
+					padding-left: 10px;
+					padding-top: 10px;
+				}
+
+/*------------------------------------------------------------------------------
+	機能タイトル
+ *------------------------------------------------------------------------------*/
+div.FuncTitle	{
+					vertical-align: middle;
+					background-color: white;
+					border-style: solid;
+					border-color: black;
+					border-width: 1px;
+					padding-left: 2px;
+					font-family: Arial;
+					font-size: 18px;
+					height: 26px;
+					margin-bottom: 10px;
+				}
+
+/*------------------------------------------------------------------------------
+	機能詳細タイトル
+ *------------------------------------------------------------------------------*/
+th.DetailTitle,
+td.DetailTitle	{
+					font-family: Arial;
+					font-size: 12px;
+					font-weight: bold;
+					border-width: 0px 0px 1px 0px;
+					border-color: silver;
+					border-style: solid;
+					background-color: #efefef;
+				}
+
+/*------------------------------------------------------------------------------
+	レス表示
+ *------------------------------------------------------------------------------*/
+td.Response		{
+					font-size: 12px;
+					border-width: 0px 0px 1px 0px;
+					border-color: silver;
+					border-style: solid;
+				}
+
+/*------------------------------------------------------------------------------
+	ログ表示
+ *------------------------------------------------------------------------------*/
+.LogExport		{
+					font-size: 10px;
+				}
+
+div.oExcuted	{
+					padding: 5px;
+					margin: 10px 0;
+					background-color: #eeeeff;
+					border: 1px solid #9999ff;
+					text-decoration: none;
+					color: blue;
+					font-size: 14px;
+				}
+
+div.xExcuted	{
+					padding: 5px;
+					padding:5px;
+					background-color:#ffeeee;
+					border:1px solid #ff9999;
+					font-size:18px;
+					text-decoration:none;
+					color:red;
+					font-size: 14px;
+				}
+
+div.LoginForm	{
+					padding: 50px 0;
+					width: 300px;
+				}
+
+/*------------------------------------------------------------------------------
+	その他
+ *------------------------------------------------------------------------------*/
+.NormalStyle	{
+					font-weight: normal;
+				}
+
+.GrayColor		{
+					color: #666666;
+				}
+
+.UnderLine		{
+					text-decoration: underline;
+				}
+
+input.delete	{
+					float: right;
+					color: red;
+				}

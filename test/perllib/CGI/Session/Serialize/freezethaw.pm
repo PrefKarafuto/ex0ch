@@ -1,0 +1,1 @@
+package CGI::Session::Serialize::freezethaw;use strict;use FreezeThaw;use CGI::Session::ErrorHandler;$CGI::Session::Serialize::freezethaw::VERSION=4.43;@CGI::Session::Serialize::freezethaw::ISA=("CGI::Session::ErrorHandler");sub freeze{my($self,$data)=@_;return FreezeThaw::freeze($data);}sub thaw{my($self,$string)=@_;return(FreezeThaw::thaw($string))[0];}1;__END__

@@ -1,0 +1,9 @@
+body			{
+					background-color: #FFFFFF;
+					background-image: url("./default_bac.gif");
+				}
+
+.res			{
+					background-color: yellow;
+					font-weight	: bold;
+				}

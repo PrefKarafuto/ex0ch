@@ -1,0 +1,1 @@
+package CGI::Session::ID::md5;use strict;use Digest::MD5;use CGI::Session::ErrorHandler;$CGI::Session::ID::md5::VERSION='4.43';@CGI::Session::ID::md5::ISA=qw(CGI::Session::ErrorHandler);*generate=\&generate_id;sub generate_id{my$md5=Digest::MD5->new();$md5->add($$,time(),rand(time));return$md5->hexdigest();}1;
