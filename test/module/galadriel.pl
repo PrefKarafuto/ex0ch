@@ -625,7 +625,7 @@ sub MakeID
 	}
 	else {
 		# IPを分解
-		my @nums = split(/\./, $ENV{'REMOTE_ADDR'});
+		my @nums = split(/\./, (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}));
 		# 上位3つの1桁目取得
 		$uid = substr($nums[3], -2) . substr($nums[2], -2) . substr($nums[1], -1);
 	}
