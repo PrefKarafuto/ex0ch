@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 #============================================================================================================
 #
-#	Œg‘Ñ—pƒy[ƒW•\¦ê—pCGI
+#	æºå¸¯ç”¨ãƒšãƒ¼ã‚¸è¡¨ç¤ºå°‚ç”¨CGI
 #	p.cgi
 #	---------------------------------------------
-#	2004.09.15 ƒVƒXƒeƒ€‰ü•Ï‚É”º‚¤V‹Kì¬
+#	2004.09.15 ã‚·ã‚¹ãƒ†ãƒ æ”¹å¤‰ã«ä¼´ã†æ–°è¦ä½œæˆ
 #
 #============================================================================================================
 
@@ -15,15 +15,15 @@ no warnings 'once';
 
 BEGIN { use lib './perllib'; }
 
-# CGI‚ÌÀsŒ‹‰Ê‚ğI—¹ƒR[ƒh‚Æ‚·‚é
+# CGIã®å®Ÿè¡Œçµæœã‚’çµ‚äº†ã‚³ãƒ¼ãƒ‰ã¨ã™ã‚‹
 exit(PCGI());
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	p.cgiƒƒCƒ“
+#	p.cgiãƒ¡ã‚¤ãƒ³
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PCGI
@@ -49,10 +49,10 @@ sub PCGI
 	$max = 0;
 	$err = 1;
 	
-	# url‚©‚çƒpƒX‚ğ‰ğÍ
+	# urlã‹ã‚‰ãƒ‘ã‚¹ã‚’è§£æ
 	GetPathData(\%pPath);
 	
-	# ƒ‚ƒWƒ…[ƒ‹‚Ì‰Šú‰»
+	# ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®åˆæœŸåŒ–
 	$Form->DecodeForm(1);
 	$Sys->Init();
 	$Sys->Set('BBS', $pPath{'bbs'});
@@ -61,35 +61,35 @@ sub PCGI
 	if ($err == 1) {
 		$Threads->Load($Sys);
 		
-		# ƒXƒŒƒbƒhƒŠƒXƒg‚Ìì¬
+		# ã‚¹ãƒ¬ãƒƒãƒ‰ãƒªã‚¹ãƒˆã®ä½œæˆ
 		if ($Form->Equal('method', '')) {
-			# ŒŸõ–³‚µ
+			# æ¤œç´¢ç„¡ã—
 			$max = CreateThreadList($Threads, $Set, \@tList, \%pPath, '');
 		}
 		else {
-			# ŒŸõ‚ ‚è
+			# æ¤œç´¢ã‚ã‚Š
 			$max = CreateThreadList($Threads, $Set, \@tList, \%pPath, $Form->Get('word', ''));
 		}
 	}
 	
-	# ƒy[ƒW‚Ìo—Í
+	# ãƒšãƒ¼ã‚¸ã®å‡ºåŠ›
 	PrintHead($Page, $Sys, $Set, $pPath{'st'}, $max);
 	PrintThreadList($Page, $Sys, $Conv, \@tList) if ($err == 1);
 	PrintFoot($Page, $Sys, $Set, $pPath{'st'}, $max);
 	
-	# ‰æ–Ê‚Öo—Í
+	# ç”»é¢ã¸å‡ºåŠ›
 	$Page->Flush(0, 0, '');
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒwƒbƒ_•”•ªo—Í
+#	ãƒ˜ãƒƒãƒ€éƒ¨åˆ†å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	THORIN
 #	@param	$Sys	MELKOR
-#	@param	$num	•\¦”
-#	@param	$last	ÅI”
-#	@return	‚È‚µ
+#	@param	$num	è¡¨ç¤ºæ•°
+#	@param	$last	æœ€çµ‚æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintHead
@@ -103,7 +103,7 @@ sub PrintHead
 	$st		= $start < 1 ? 1 : $start;
 	$code	= 'Shift_JIS';
 	
-	# HTMLƒwƒbƒ_‚Ìo—Í
+	# HTMLãƒ˜ãƒƒãƒ€ã®å‡ºåŠ›
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print('<html><!--nobanner--><head><title>i-mode 0ch</title>');
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
@@ -111,27 +111,27 @@ sub PrintHead
 	$Page->Print("<body><form action=\"$path/$bbs\" method=\"POST\">");
 	
 	if ($Sys->Get('PATHKIND')) {
-		$Page->Print("<a href=\"$path?bbs=$bbs&st=$st\">‘O</a> ");
-		$Page->Print("<a href=\"$path?bbs=$bbs&st=$last\">Ÿ</a><br>\n");
+		$Page->Print("<a href=\"$path?bbs=$bbs&st=$st\">å‰</a> ");
+		$Page->Print("<a href=\"$path?bbs=$bbs&st=$last\">æ¬¡</a><br>\n");
 	}
 	else {
-		$Page->Print("<a href=\"$path/$bbs/$st\">‘O</a> ");
-		$Page->Print("<a href=\"$path/$bbs/$last\">Ÿ</a><br>\n");
+		$Page->Print("<a href=\"$path/$bbs/$st\">å‰</a> ");
+		$Page->Print("<a href=\"$path/$bbs/$last\">æ¬¡</a><br>\n");
 	}
 	$Page->Print("<input type=hidden name=method value=search>");
-	$Page->Print("<input type=text name=word><input type=submit value=\"ŒŸõ\"><hr>");
+	$Page->Print("<input type=text name=word><input type=submit value=\"æ¤œç´¢\"><hr>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhƒŠƒXƒg‚Ì•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰ãƒªã‚¹ãƒˆã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	THORIN
 #	@param	$Sys	MELKOR
 #	@param	$Conv	GALADRIEL
-#	@param	$pList	ƒŠƒXƒgŠi”[ƒoƒbƒtƒ@
-#	@param	$base	ƒx[ƒXƒpƒX
-#	@return	‚È‚µ
+#	@param	$pList	ãƒªã‚¹ãƒˆæ ¼ç´ãƒãƒƒãƒ•ã‚¡
+#	@param	$base	ãƒ™ãƒ¼ã‚¹ãƒ‘ã‚¹
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadList
@@ -148,13 +148,13 @@ sub PrintThreadList
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒtƒbƒ^•”•ªo—Í - PrintHead
+#	ãƒ•ãƒƒã‚¿éƒ¨åˆ†å‡ºåŠ› - PrintHead
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	THORIN
 #	@param	$Sys	MELKOR
-#	@param	$num	•\¦”
-#	@param	$last	ÅI”
-#	@return	‚È‚µ
+#	@param	$num	è¡¨ç¤ºæ•°
+#	@param	$last	æœ€çµ‚æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintFoot
@@ -169,25 +169,25 @@ sub PrintFoot
 	$st		= $start < 1 ? 1 : $start;
 	
 	if ($Sys->Get('PATHKIND')) {
-		$Page->Print("<hr><a href=\"$path?bbs=$bbs&st=$st\">‘O</a> ");
-		$Page->Print("<a href=\"$path?bbs=$bbs&st=$last\">Ÿ</a><br>\n");
+		$Page->Print("<hr><a href=\"$path?bbs=$bbs&st=$st\">å‰</a> ");
+		$Page->Print("<a href=\"$path?bbs=$bbs&st=$last\">æ¬¡</a><br>\n");
 	}
 	else {
-		$Page->Print("<hr><a href=\"$path/$bbs/$st\">‘O</a> ");
-		$Page->Print("<a href=\"$path/$bbs/$last\">Ÿ</a><br>\n");
+		$Page->Print("<hr><a href=\"$path/$bbs/$st\">å‰</a> ");
+		$Page->Print("<a href=\"$path/$bbs/$last\">æ¬¡</a><br>\n");
 	}
 	$Page->Print("<hr>$ver</form></body></html>\n");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒpƒXƒf[ƒ^‰ğÍ
+#	ãƒ‘ã‚¹ãƒ‡ãƒ¼ã‚¿è§£æ
 #	-------------------------------------------------------------------------------------
-#	@param	$pHash	ƒnƒbƒVƒ…‚ÌQÆ
-#	@return	‚È‚µ
+#	@param	$pHash	ãƒãƒƒã‚·ãƒ¥ã®å‚ç…§
+#	@return	ãªã—
 #
-#	2010.08.12 windyakin š
-#	 -> http://0ch.mine.nu/test/read.cgi/jikken/1273239400/5 ‘Î‰
+#	2010.08.12 windyakin â˜…
+#	 -> http://0ch.mine.nu/test/read.cgi/jikken/1273239400/5 å¯¾å¿œ
 #
 #------------------------------------------------------------------------------------------------------------
 sub GetPathData
@@ -215,14 +215,14 @@ sub GetPathData
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhƒŠƒXƒg‚Ì¶¬
+#	ã‚¹ãƒ¬ãƒƒãƒ‰ãƒªã‚¹ãƒˆã®ç”Ÿæˆ
 #	-------------------------------------------------------------------------------------
 #	@param	$Threads	BILBO
 #	@param	$Set		ISILDUR
-#	@param	$pList		Œ‹‰ÊŠi”[—p”z—ñ
-#	@param	$pHash		î•ñƒnƒbƒVƒ…
-#	@param	$keyWord	ŒŸõƒ[ƒh
-#	@return	ƒŠƒXƒgÅŒã‚ÌƒCƒ“ƒfƒNƒX
+#	@param	$pList		çµæœæ ¼ç´ç”¨é…åˆ—
+#	@param	$pHash		æƒ…å ±ãƒãƒƒã‚·ãƒ¥
+#	@param	$keyWord	æ¤œç´¢ãƒ¯ãƒ¼ãƒ‰
+#	@return	ãƒªã‚¹ãƒˆæœ€å¾Œã®ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹
 #
 #------------------------------------------------------------------------------------------------------------
 sub CreateThreadList
@@ -231,11 +231,11 @@ sub CreateThreadList
 	my (@threadSet, $threadNum, $max, $start);
 	my ($key, $subject, $res, $i, $data);
 	
-	# ƒXƒŒƒbƒhˆê——‚Ìæ“¾
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ã®å–å¾—
 	$Threads->GetKeySet('ALL', '', \@threadSet);
 	$threadNum = @threadSet;
 	
-	# ŒŸõƒ[ƒh–³‚µ‚Ìê‡‚ÍŠJn‚©‚çƒXƒŒƒbƒh•\¦Å‘å”‚Ü‚Å‚ÌƒŠƒXƒg‚ğì¬
+	# æ¤œç´¢ãƒ¯ãƒ¼ãƒ‰ç„¡ã—ã®å ´åˆã¯é–‹å§‹ã‹ã‚‰ã‚¹ãƒ¬ãƒƒãƒ‰è¡¨ç¤ºæœ€å¤§æ•°ã¾ã§ã®ãƒªã‚¹ãƒˆã‚’ä½œæˆ
 	if ($keyWord eq '') {
 		$start	= $pHash->{'st'} > $threadNum ? $threadNum : $pHash->{'st'};
 		$start	= $start < 1 ? 1 : $start;
@@ -250,7 +250,7 @@ sub CreateThreadList
 			push @{$pList}, $data;
 		}
 	}
-	# ŒŸõƒ[ƒh‚ª‚ ‚éê‡‚ÍŒŸõƒ[ƒh‚ğŠÜ‚Ş‘S‚Ä‚ÌƒXƒŒƒbƒh‚ÌƒŠƒXƒg‚ğì¬
+	# æ¤œç´¢ãƒ¯ãƒ¼ãƒ‰ãŒã‚ã‚‹å ´åˆã¯æ¤œç´¢ãƒ¯ãƒ¼ãƒ‰ã‚’å«ã‚€å…¨ã¦ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã®ãƒªã‚¹ãƒˆã‚’ä½œæˆ
 	else {
 		my $nextNum = 1;
 		$max	= $threadNum;

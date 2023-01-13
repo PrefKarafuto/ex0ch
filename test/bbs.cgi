@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #============================================================================================================
 #
-#	�������ݗpCGI
+#	書き込み用CGI
 #
 #============================================================================================================
 
@@ -13,15 +13,15 @@ no warnings 'once';
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
-# CGI�̎��s���ʂ��I���R�[�h�Ƃ���
+# CGIの実行結果を終了コードとする
 exit(BBSCGI());
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	bbs.cgi���C��
+#	bbs.cgiメイン
 #	-------------------------------------------------------------------------------------
-#	@param	�Ȃ�
-#	@return	�G���[�ԍ�
+#	@param	なし
+#	@return	エラー番号
 #
 #------------------------------------------------------------------------------------------------------------
 sub BBSCGI
@@ -35,7 +35,7 @@ sub BBSCGI
 	my $err = $ZP::E_SUCCESS;
 	
 	$err = Initialize($CGI, $Page);
-	# �������ɐ��������珑�����ݏ������J�n
+	# 初期化に成功したら書き込み処理を開始
 	if ($err == $ZP::E_SUCCESS) {
 		my $Sys = $CGI->{'SYS'};
 		my $Form = $CGI->{'FORM'};
@@ -48,7 +48,7 @@ sub BBSCGI
 		$WriteAid->Init($Sys, $Form, $Set, $Threads, $Conv);
 		
 		$err = $WriteAid->Write();
-		# �������݂ɐ���������f���\���v�f���X�V����
+		# 書き込みに成功したら掲示板構成要素を更新する
 		if ($err == $ZP::E_SUCCESS) {
 			if (!$Sys->Equal('FASTMODE', 1)) {
 				require './module/varda.pl';
@@ -66,28 +66,28 @@ sub BBSCGI
 		}
 	}
 	else {
-		# �X���b�h�쐬��ʕ\��
+		# スレッド作成画面表示
 		if ($err == $ZP::E_PAGE_THREAD) {
 			PrintBBSThreadCreate($CGI, $Page);
 			$err = $ZP::E_SUCCESS;
 		}
-		# cookie�m�F��ʕ\��
+		# cookie確認画面表示
 		elsif ($err == $ZP::E_PAGE_COOKIE) {
 			PrintBBSCookieConfirm($CGI, $Page);
 			$err = $ZP::E_SUCCESS;
 		}
-		# �g�т���̃X���b�h�쐬��ʕ\��
+		# 携帯からのスレッド作成画面表示
 		elsif ($err == $ZP::E_PAGE_THREADMOBILE) {
 			PrintBBSMobileThreadCreate($CGI, $Page);
 			$err = $ZP::E_SUCCESS;
 		}
-		# �G���[��ʕ\��
+		# エラー画面表示
 		else {
 			PrintBBSError($CGI, $Page, $err);
 		}
 	}
 	
-	# ���ʂ̕\��
+	# 結果の表示
 	$Page->Flush('', 0, 0);
 	
 	return $err;
@@ -95,18 +95,18 @@ sub BBSCGI
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	bbs.cgi������
+#	bbs.cgi初期化
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	�Ȃ�
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub Initialize
 {
 	my ($CGI, $Page) = @_;
 	
-	# �g�p���W���[���̏�����
+	# 使用モジュールの初期化
 	require './module/melkor.pl';
 	require './module/isildur.pl';
 	require './module/radagast.pl';
@@ -120,7 +120,7 @@ sub Initialize
 	my $Cookie = RADAGAST->new;
 	my $Threads = BILBO->new;
 	
-	# �V�X�e�����ݒ�
+	# システム情報設定
 	return $ZP::E_SYSTEM_ERROR if ($Sys->Init());
 	
 	my $Form = SAMWISE->new($Sys->Get('BBSGET'));
@@ -135,14 +135,14 @@ sub Initialize
 		'THREADS'	=> $Threads,
 	);
 	
-	# �����L�����
+	# 夢が広がりんぐ
 	$Sys->Set('MainCGI', $CGI);
 	
-	# form���ݒ�
+	# form情報設定
 	$Form->DecodeForm(1);
 	
-	# �z�X�g���ݒ�(DNS�t����)
-	#�ϐ��������`�F�b�N��}���B
+	# ホスト情報設定(DNS逆引き)
+	#変数初期化チェックを挿入。
 	if(!defined $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq '') {
 		$ENV{'REMOTE_HOST'} = $Conv->GetRemoteHost();
 	}
@@ -160,7 +160,7 @@ sub Initialize
 	$Sys->Set('BBS_ABS', $Conv->MakePath($Sys->Get('BBSPATH_ABS'), $Sys->Get('BBS')));
 	$Sys->Set('BBS_REL', $Conv->MakePath($Sys->Get('BBSPATH'), $Sys->Get('BBS')));
 	
-	# �g�т̏ꍇ�͋@�����ݒ�
+	# 携帯の場合は機種情報を設定
 	if ($client & $ZP::C_MOBILE_IDGET) {
 		my $product = $Conv->GetProductInfo($client);
 		
@@ -171,12 +171,12 @@ sub Initialize
 		$Sys->Set('KOYUU', $product);
 	}
 	
-	# SETTING.TXT�̓ǂݍ���
+	# SETTING.TXTの読み込み
 	if (!$Set->Load($Sys)) {
 		return $ZP::E_POST_NOTEXISTBBS;
 	}
 	
-	# �g�т���̃X���b�h�쐬�t�H�[���\��
+	# 携帯からのスレッド作成フォーム表示
 	# $S->Equal('AGENT', 'O') && 
 	if ($Form->Equal('mb', 'on') && $Form->Equal('thread', 'on')) {
 		return $ZP::E_PAGE_THREADMOBILE;
@@ -187,11 +187,11 @@ sub Initialize
 	my $resmax = $Set->Get('BBS_RES_MAX') || $Sys->Get('RESMAX');
 	$Sys->Set('RESMAX', $resmax);
 	
-	# form����key�����݂����烌�X��������
+	# form情報にkeyが存在したらレス書き込み
 	if ($Form->IsExist('key'))	{ $Sys->Set('MODE', 2); }
 	else						{ $Sys->Set('MODE', 1); }
 	
-	# �X���b�h�쐬���[�h��MESSAGE�������F�X���b�h�쐬���
+	# スレッド作成モードでMESSAGEが無い：スレッド作成画面
 	if ($Sys->Equal('MODE', 1)) {
 		if (!$Form->IsExist('MESSAGE')) {
 			return $ZP::E_PAGE_THREAD;
@@ -200,26 +200,26 @@ sub Initialize
 		$Sys->Set('KEY', $Form->Get('key'));
 	}
 	
-	# cookie�̑��݃`�F�b�N(PC�̂�)
+	# cookieの存在チェック(PCのみ)
 	if ($client & $ZP::C_PC) {
 		if ($Set->Equal('SUBBBS_CGI_ON', 1)) {
-			# ���ϐ��擾���s
+			# 環境変数取得失敗
 			if (!$Cookie->Init()) {
 				return $ZP::E_PAGE_COOKIE;
 			}
 			
-			# ���O��cookie
+			# 名前欄cookie
 			if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked') && !$Cookie->IsExist('NAME')) {
 				return $ZP::E_PAGE_COOKIE;
 			}
-			# ���[����cookie
+			# メール欄cookie
 			if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked') && !$Cookie->IsExist('MAIL')) {
 				return $ZP::E_PAGE_COOKIE;
 			}
 		}
 	}
 	
-	# subject�̓ǂݍ���
+	# subjectの読み込み
 	$Threads->Load($Sys);
 	
 	return $ZP::E_SUCCESS;
@@ -227,11 +227,11 @@ sub Initialize
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	bbs.cgi�X���b�h�쐬�y�[�W�\��
+#	bbs.cgiスレッド作成ページ表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	�Ȃ�
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSThreadCreate
@@ -253,7 +253,7 @@ sub PrintBBSThreadCreate
 	my $code = $Sys->Get('ENCODE');
 	my $cgipath = $Sys->Get('CGIPATH');
 	
-	# HTML�w�b�_�̏o��
+	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n");
 	$Page->Print("<html lang=\"ja\">\n");
@@ -263,7 +263,7 @@ sub PrintBBSThreadCreate
 	$Page->Print(" <title>$title</title>\n\n");
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
-	# <body>�^�O�o��
+	# <body>タグ出力
 	{
 		my @work;
 		$work[0] = $Set->Get('BBS_BG_COLOR');
@@ -279,24 +279,24 @@ sub PrintBBSThreadCreate
 	}
 
 	$Page->Print("<div align=\"center\">");
-	# �Ŕ摜�\������
+	# 看板画像表示あり
 	if ($image ne '') {
-		# �Ŕ摜����̃����N����
+		# 看板画像からのリンクあり
 		if ($link ne '') {
 			$Page->Print("<a href=\"$link\"><img src=\"$image\" border=\"0\" alt=\"$image\"></a><br>");
 		}
-		# �Ŕ摜�Ƀ����N�͂Ȃ�
+		# 看板画像にリンクはなし
 		else {
 			$Page->Print("<img src=\"$image\" border=\"0\"><br>");
 		}
 	}
 	$Page->Print("</div>");
 
-	# �w�b�_�e�[�u���̕\��
+	# ヘッダテーブルの表示
 	$Caption->Load($Sys, 'HEAD');
 	$Caption->Print($Page, $Set);
 	
-	# �X���b�h�쐬�t�H�[���̕\��
+	# スレッド作成フォームの表示
 	{
 		my $tblCol = $Set->Get('BBS_MAKETHREAD_COLOR');
 		my $name = $Cookie->Get('NAME', '', 'utf8');
@@ -309,16 +309,16 @@ sub PrintBBSThreadCreate
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
   <td>
-  <b>�X���b�h�V�K�쐬</b><br>
+  <b>スレッド新規作成</b><br>
   <center>
   <form method="POST" action="./bbs.cgi?guid=ON">
   <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="time" value="$tm">
   <table border="0">
    <tr>
     <td align="left">
-    �^�C�g���F<input type="text" name="subject" size="25">�@<input type="submit" value="�V�K�X���b�h�쐬"><br>
-    ���O�F<input type="text" name="FROM" size="19" value="$name">
-    E-mail<font size="1">�i�ȗ��j</font>�F<input type="text" name="mail" size="19" value="$mail"><br>
+    タイトル：<input type="text" name="subject" size="25">　<input type="submit" value="新規スレッド作成"><br>
+    名前：<input type="text" name="FROM" size="19" value="$name">
+    E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
     <textarea rows="5" cols="64" name="MESSAGE"></textarea>
     </td>
    </tr>
@@ -340,11 +340,11 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	bbs.cgi�X���b�h�쐬�y�[�W(�g��)�\��
+#	bbs.cgiスレッド作成ページ(携帯)表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI	
 #	@param	$Page	THORIN
-#	@return	�Ȃ�
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSMobileThreadCreate
@@ -369,24 +369,24 @@ sub PrintBBSMobileThreadCreate
 	$Banner->Print($Page, 100, 2, 1);
 	
 	$Page->Print("</center>\n");
-	$Page->Print("�^�C�g��<br><input type=text name=subject><br>");
-	$Page->Print("���O<br><input type=text name=FROM><br>");
-	$Page->Print("���[��<br><input type=text name=mail><br>");
+	$Page->Print("タイトル<br><input type=text name=subject><br>");
+	$Page->Print("名前<br><input type=text name=FROM><br>");
+	$Page->Print("メール<br><input type=text name=mail><br>");
 	$Page->Print("<textarea name=MESSAGE></textarea><br>");
 	$Page->Print("<input type=hidden name=bbs value=$bbs>");
 	$Page->Print("<input type=hidden name=time value=$tm>");
 	$Page->Print("<input type=hidden name=mb value=on>");
-	$Page->Print("<input type=submit value=\"�X���b�h�쐬\">");
+	$Page->Print("<input type=submit value=\"スレッド作成\">");
 	$Page->Print("</form></body></html>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	bbs.cgi�N�b�L�[�m�F�y�[�W�\��
+#	bbs.cgiクッキー確認ページ表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI	
 #	@param	$Page	THORIN
-#	@return	�Ȃ�
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSCookieConfirm
@@ -415,7 +415,7 @@ sub PrintBBSCookieConfirm
 	my $subject = &$sanitize($Form->Get('subject'));
 	my $key = &$sanitize($Form->Get('key'));
 	
-	# cookie���̏o��
+	# cookie情報の出力
 	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
 	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
 	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * 30);
@@ -429,13 +429,13 @@ sub PrintBBSCookieConfirm
 
  <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
 
- <title>�� �������݊m�F ��</title>
+ <title>■ 書き込み確認 ■</title>
 
 </head>
 <!--nobanner-->
 HTML
 	
-	# <body>�^�O�o��
+	# <body>タグ出力
 	{
 		my @work;
 		$work[0] = $Set->Get('BBS_THREAD_COLOR');
@@ -449,21 +449,21 @@ HTML
 	}
 	
 	$Page->Print(<<HTML);
-<font size="4" color="#FF0000"><b>�������݁��N�b�L�[�m�F</b></font>
+<font size="4" color="#FF0000"><b>書きこみ＆クッキー確認</b></font>
 <blockquote style="margin-top:4em;">
- ���O�F $name<br>
- E-mail�F $mail<br>
- ���e�F<br>
+ 名前： $name<br>
+ E-mail： $mail<br>
+ 内容：<br>
  $msg<br>
 </blockquote>
 
 <div style="font-weight:bold;">
-���e�m�F<br>
-�E���e�҂́A���e�Ɋւ��Ĕ�������ӔC���S�ē��e�҂ɋA�����Ƃ��������܂��B<br>
-�E���e�҂́A�b��Ɩ��֌W�ȍL���̓��e�Ɋւ��āA�����̔�p���x�������Ƃ��������܂�<br>
-�E���e�҂́A���e���ꂽ���e�ɂ��āA�f���^�c�҂��R�s�[�A�ۑ��A���p�A�]�ړ��̗��p���邱�Ƃ��������܂��B<br>
-�@�܂��A�f���^�c�҂ɑ΂��āA����Ґl�i������؍s�g���Ȃ����Ƃ��������܂��B<br>
-�E���e�҂́A�f���^�c�҂��w�肷���O�҂ɑ΂��āA���앨�̗��p��������؂��Ȃ����Ƃ��������܂��B<br>
+投稿確認<br>
+・投稿者は、投稿に関して発生する責任が全て投稿者に帰すことを承諾します。<br>
+・投稿者は、話題と無関係な広告の投稿に関して、相応の費用を支払うことを承諾します<br>
+・投稿者は、投稿された内容について、掲示板運営者がコピー、保存、引用、転載等の利用することを許諾します。<br>
+　また、掲示板運営者に対して、著作者人格権を一切行使しないことを承諾します。<br>
+・投稿者は、掲示板運営者が指定する第三者に対して、著作物の利用許諾を一切しないことを承諾します。<br>
 </div>
 
 <form method="POST" action="./bbs.cgi?guid=ON">
@@ -478,22 +478,22 @@ HTML
 	$Page->HTMLInput('hidden', 'bbs', $bbs);
 	$Page->HTMLInput('hidden', 'time', $tm);
 	
-	# ���X�������݃��[�h�̏ꍇ��key��ݒ肷��
+	# レス書き込みモードの場合はkeyを設定する
 	if ($Sys->Equal('MODE', 2)) {
 		$Page->HTMLInput('hidden', 'key', $key);
 	}
 	
 	$Page->Print(<<HTML);
-<input type="submit" value="��L�S�Ă��������ď�������"><br>
+<input type="submit" value="上記全てを承諾して書き込む"><br>
 </form>
 
 <p>
-�ύX����ꍇ�͖߂�{�^���Ŗ߂��ď��������ĉ������B
+変更する場合は戻るボタンで戻って書き直して下さい。
 </p>
 
 <p>
-���݁A�r�炵�΍�ŃN�b�L�[��ݒ肵�Ă��Ȃ��Ə������݂ł��Ȃ��悤�ɂ��Ă��܂��B<br>
-<font size="2">(cookie��ݒ肷��Ƃ��̉�ʂ͂łȂ��Ȃ�܂��B)</font><br>
+現在、荒らし対策でクッキーを設定していないと書きこみできないようにしています。<br>
+<font size="2">(cookieを設定するとこの画面はでなくなります。)</font><br>
 </p>
 
 </body>
@@ -504,11 +504,11 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	bbs.cgi�W�����v�y�[�W�\��
+#	bbs.cgiジャンプページ表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	�Ȃ�
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSJump
@@ -521,15 +521,15 @@ sub PrintBBSJump
 	my $Conv = $CGI->{'CONV'};
 	my $Cookie = $CGI->{'COOKIE'};
 	
-	# �g�їp�\��
+	# 携帯用表示
 	if ($Form->Equal('mb', 'on') || ($Sys->Get('CLIENT') & $ZP::C_MOBILEBROWSER) ) {
 		my $bbsPath = $Conv->MakePath($Sys->Get('CGIPATH').'/r.cgi/'.$Form->Get('bbs').'/'.$Form->Get('key').'/l10');
 		$Page->Print("Content-type: text/html\n\n");
-		$Page->Print('<!--nobanner--><html><body>�������݊����ł�<br>');
-		$Page->Print("<a href=\"$bbsPath\">������</a>");
-		$Page->Print("����f���֖߂��Ă��������B\n");
+		$Page->Print('<!--nobanner--><html><body>書き込み完了です<br>');
+		$Page->Print("<a href=\"$bbsPath\">こちら</a>");
+		$Page->Print("から掲示板へ戻ってください。\n");
 	}
-	# PC�p�\��
+	# PC用表示
 	else {
 		my $bbsPath = $Conv->MakePath($Sys->Get('BBS_REL'));
 		my $name = $Form->Get('NAME', '');
@@ -543,15 +543,15 @@ sub PrintBBSJump
 		$Page->Print(<<HTML);
 <html>
 <head>
-	<title>�������݂܂����B</title>
+	<title>書きこみました。</title>
 <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
 <meta http-equiv="Refresh" content="5;URL=$bbsPath/">
 </head>
 <!--nobanner-->
 <body>
-�������݂��I���܂����B<br>
+書きこみが終わりました。<br>
 <br>
-��ʂ�؂�ւ���܂ł��΂炭���҂��������B<br>
+画面を切り替えるまでしばらくお待ち下さい。<br>
 <br>
 <br>
 <br>
@@ -560,7 +560,7 @@ sub PrintBBSJump
 HTML
 	
 	}
-	# ���m���\��(�\�����������Ȃ��ꍇ�̓R�����g�A�E�g��������0��)
+	# 告知欄表示(表示させたくない場合はコメントアウトか条件を0に)
 	if (0) {
 		require './module/denethor.pl';
 		my $Banner = DENETHOR->new;
@@ -572,12 +572,12 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	bbs.cgi�G���[�y�[�W�\��
+#	bbs.cgiエラーページ表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
 #	@param	$err
-#	@return	�Ȃ�
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSError

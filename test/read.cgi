@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #============================================================================================================
 #
-#	“Ç‚İo‚µê—pCGI
+#	èª­ã¿å‡ºã—å°‚ç”¨CGI
 #
 #============================================================================================================
 
@@ -13,15 +13,15 @@ no warnings 'once';
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
-# CGI‚ÌÀsŒ‹‰Ê‚ğI—¹ƒR[ƒh‚Æ‚·‚é
+# CGIã®å®Ÿè¡Œçµæœã‚’çµ‚äº†ã‚³ãƒ¼ãƒ‰ã¨ã™ã‚‹
 exit(ReadCGI());
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgiƒƒCƒ“
+#	read.cgiãƒ¡ã‚¤ãƒ³
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub ReadCGI
@@ -34,33 +34,33 @@ sub ReadCGI
 	my $CGI = {};
 	my $err = Initialize($CGI, $Page);
 	
-	# ‰Šú‰»E€”õ‚É¬Œ÷‚µ‚½‚ç“à—e•\¦
+	# åˆæœŸåŒ–ãƒ»æº–å‚™ã«æˆåŠŸã—ãŸã‚‰å†…å®¹è¡¨ç¤º
 	if ($err == $ZP::E_SUCCESS) {
-		# ƒwƒbƒ_•\¦
+		# ãƒ˜ãƒƒãƒ€è¡¨ç¤º
 		PrintReadHead($CGI, $Page);
 		
-		# ƒƒjƒ…[•\¦
+		# ãƒ¡ãƒ‹ãƒ¥ãƒ¼è¡¨ç¤º
 		PrintReadMenu($CGI, $Page);
 		
-		# “à—e•\¦
+		# å†…å®¹è¡¨ç¤º
 		PrintReadContents($CGI, $Page);
 		
-		# ƒtƒbƒ^•\¦
+		# ãƒ•ãƒƒã‚¿è¡¨ç¤º
 		PrintReadFoot($CGI, $Page);
 	}
-	# ‰Šú‰»‚É¸”s‚µ‚½‚çƒGƒ‰[•\¦
+	# åˆæœŸåŒ–ã«å¤±æ•—ã—ãŸã‚‰ã‚¨ãƒ©ãƒ¼è¡¨ç¤º
 	else {
-		# ‘ÎÛƒXƒŒƒbƒh‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡‚Í’Tõ‰æ–Ê‚ğ•\¦‚·‚é
+		# å¯¾è±¡ã‚¹ãƒ¬ãƒƒãƒ‰ãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆã¯æ¢ç´¢ç”»é¢ã‚’è¡¨ç¤ºã™ã‚‹
 		if ($err == $ZP::E_PAGE_FINDTHREAD) {
 			PrintReadSearch($CGI, $Page);
 		}
-		# ‚»‚êˆÈŠO‚Í’ÊíƒGƒ‰[
+		# ãã‚Œä»¥å¤–ã¯é€šå¸¸ã‚¨ãƒ©ãƒ¼
 		else {
 			PrintReadError($CGI, $Page, $err);
 		}
 	}
 	
-	# •\¦Œ‹‰Ê‚ğo—Í
+	# è¡¨ç¤ºçµæœã‚’å‡ºåŠ›
 	$Page->Flush(0, 0, '');
 	
 	return $err;
@@ -68,18 +68,18 @@ sub ReadCGI
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgi‰Šú‰»E‘O€”õ
+#	read.cgiåˆæœŸåŒ–ãƒ»å‰æº–å‚™
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub Initialize
 {
 	my ($CGI, $Page) = @_;
 	
-	# Šeg—pƒ‚ƒWƒ…[ƒ‹‚Ì¶¬‚Æ‰Šú‰»
+	# å„ä½¿ç”¨ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ç”Ÿæˆã¨åˆæœŸåŒ–
 	require './module/melkor.pl';
 	require './module/isildur.pl';
 	require './module/gondor.pl';
@@ -99,26 +99,26 @@ sub Initialize
 		'CODE'		=> 'Shift_JIS',
 	);
 	
-	# ƒVƒXƒeƒ€‰Šú‰»
+	# ã‚·ã‚¹ãƒ†ãƒ åˆæœŸåŒ–
 	$Sys->Init();
 	
-	# –²‚ªL‚ª‚è‚ñ‚®
+	# å¤¢ãŒåºƒãŒã‚Šã‚“ã
 	$Sys->Set('MainCGI', $CGI);
 	
-	# ‹N“®ƒpƒ‰ƒ[ƒ^‚Ì‰ğÍ
+	# èµ·å‹•ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®è§£æ
 	my @elem = $Conv->GetArgument(\%ENV);
 	
-	# BBSw’è‚ª‚¨‚©‚µ‚¢
+	# BBSæŒ‡å®šãŒãŠã‹ã—ã„
 	if (!defined $elem[0] || $elem[0] eq '') {
 		return $ZP::E_READ_INVALIDBBS;
 	}
-	# ƒXƒŒƒbƒhƒL[w’è‚ª‚¨‚©‚µ‚¢
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¼æŒ‡å®šãŒãŠã‹ã—ã„
 	elsif (!defined $elem[1] || $elem[1] eq '' || ($elem[1] =~ /[^0-9]/) ||
 			(length($elem[1]) != 10 && length($elem[1]) != 9)) {
 		return $ZP::E_READ_INVALIDKEY;
 	}
 	
-	# ƒVƒXƒeƒ€•Ï”İ’è
+	# ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°è¨­å®š
 	$Sys->Set('MODE', 0);
 	$Sys->Set('BBS', $elem[0]);
 	$Sys->Set('KEY', $elem[1]);
@@ -128,7 +128,7 @@ sub Initialize
 	$Sys->Set('BBS_ABS', $Conv->MakePath($Sys->Get('BBSPATH_ABS'), $Sys->Get('BBS')));
 	$Sys->Set('BBS_REL', $Conv->MakePath($Sys->Get('BBSPATH'), $Sys->Get('BBS')));
 	
-	# İ’èƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¸”s
+	# è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—
 	if ($Set->Load($Sys) == 0) {
 		return $ZP::E_READ_FAILEDLOADSET;
 	}
@@ -140,13 +140,13 @@ sub Initialize
 	
 	my $path = $Conv->MakePath($Sys->Get('BBSPATH')."/$elem[0]/dat/$elem[1].dat");
 	
-	# datƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¸”s
+	# datãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—
 	if ($Dat->Load($Sys, $path, 1) == 0) {
 		return $ZP::E_READ_FAILEDLOADDAT;
 	}
 	$Dat->Close();
 	
-	# •\¦ŠJnI—¹ˆÊ’u‚Ìİ’è
+	# è¡¨ç¤ºé–‹å§‹çµ‚äº†ä½ç½®ã®è¨­å®š
 	my @regs = $Conv->RegularDispNum(
 				$Sys, $Dat, $elem[2], $elem[3], $elem[4]);
 	$Sys->SetOption($elem[2], $regs[0], $regs[1], $elem[5], $elem[6]);
@@ -156,12 +156,12 @@ sub Initialize
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgiƒwƒbƒ_o—Í
+#	read.cgiãƒ˜ãƒƒãƒ€å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
 #	@param	$title
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadHead
@@ -184,7 +184,7 @@ sub PrintReadHead
 	$title = $Dat->GetSubject() if(!defined $title);
 	$title = '' if(!defined $title);
 	
-	# HTMLƒwƒbƒ_‚Ìo—Í
+	# HTMLãƒ˜ãƒƒãƒ€ã®å‡ºåŠ›
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -201,7 +201,7 @@ HTML
 	$Page->Print(" <title>$title</title>\n\n");
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
-	# <body>ƒ^ƒOo—Í
+	# <body>ã‚¿ã‚°å‡ºåŠ›
 	{
 		my @work;
 		$work[0] = $Set->Get('BBS_THREAD_COLOR');
@@ -214,24 +214,24 @@ HTML
 		$Page->Print("alink=\"$work[3]\" vlink=\"$work[4]\">\n\n");
 	}
 	
-	# ƒoƒi[o—Í
+	# ãƒãƒŠãƒ¼å‡ºåŠ›
 	$Banner->Print($Page, 100, 2, 0) if ($Sys->Get('BANNER') & 5);
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgiƒƒjƒ…[o—Í
+#	read.cgiãƒ¡ãƒ‹ãƒ¥ãƒ¼å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadMenu
 {
 	my ($CGI, $Page) = @_;
 	
-	# ‘O€”õ
+	# å‰æº–å‚™
 	my $Sys = $CGI->{'SYS'};
 	my $Set = $CGI->{'SET'};
 	my $Dat = $CGI->{'DAT'};
@@ -251,18 +251,18 @@ sub PrintReadMenu
 	
 	$Page->Print("<div style=\"margin:0px;\">\n");
 	
-	# ƒJƒEƒ“ƒ^[•\¦
+	# ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼è¡¨ç¤º
 	if ($account ne '') {
 		$Page->Print('<a href="http://ofuda.cc/"><img width="400" height="15" border="0" src="http://e.ofuda.cc/');
-		$Page->Print("disp/$account/00813400.gif\" alt=\"–³—¿ƒAƒNƒZƒXƒJƒEƒ“ƒ^[ofuda.ccu‘S¢ŠEƒJƒEƒ“ƒgŒv‰æv\"></a>\n");
+		$Page->Print("disp/$account/00813400.gif\" alt=\"ç„¡æ–™ã‚¢ã‚¯ã‚»ã‚¹ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ofuda.ccã€Œå…¨ä¸–ç•Œã‚«ã‚¦ãƒ³ãƒˆè¨ˆç”»ã€\"></a>\n");
 	}
 	
 	$Page->Print("<div style=\"margin-top:1em;\">\n");
 	$Page->Print(" <span style=\"float:left;\">\n");
-	$Page->Print(" <a href=\"$pathBBS/\">¡Œf¦”Â‚É–ß‚é¡</a>\n");
-	$Page->Print(" <a href=\"$pathAll\">‘S•”</a>\n");
+	$Page->Print(" <a href=\"$pathBBS/\">â– æ²ç¤ºæ¿ã«æˆ»ã‚‹â– </a>\n");
+	$Page->Print(" <a href=\"$pathAll\">å…¨éƒ¨</a>\n");
 	
-	# ƒXƒŒƒbƒhƒƒjƒ…[‚ğ•\¦
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’è¡¨ç¤º
 	for my $i (0 .. 9) {
 		last if ($resNum <= $i * 100);
 		
@@ -271,7 +271,7 @@ sub PrintReadMenu
 		my $pathMenu = $Conv->CreatePath($Sys, 0, $bbs, $key, "$st-$ed");
 		$Page->Print(" <a href=\"$pathMenu\">$st-</a>\n");
 	}
-	$Page->Print(" <a href=\"$pathLast\">ÅV50</a>\n");
+	$Page->Print(" <a href=\"$pathLast\">æœ€æ–°50</a>\n");
 	$Page->Print(" </span>\n");
 	$Page->Print(" <span style=\"float:right;\">\n");
 	if ($PRtext ne '') {
@@ -284,28 +284,28 @@ sub PrintReadMenu
 	$Page->Print("</div>\n");
 	$Page->Print("</div>\n\n");
 	
-	# ƒŒƒX”ŒÀŠEŒx•\¦
+	# ãƒ¬ã‚¹æ•°é™ç•Œè­¦å‘Šè¡¨ç¤º
 	{
 		my $rmax = $Sys->Get('RESMAX');
 		
 		if ($resNum >= $rmax) {
 			$Page->Print("<div style=\"background-color:red;color:white;line-height:3em;margin:1px;padding:1px;\">\n");
-			$Page->Print("ƒŒƒX”‚ª$rmax‚ğ’´‚¦‚Ä‚¢‚Ü‚·Bc”O‚È‚ª‚ç‘S•”‚Í•\\¦‚µ‚Ü‚¹‚ñB\n");
+			$Page->Print("ãƒ¬ã‚¹æ•°ãŒ$rmaxã‚’è¶…ãˆã¦ã„ã¾ã™ã€‚æ®‹å¿µãªãŒã‚‰å…¨éƒ¨ã¯è¡¨\ç¤ºã—ã¾ã›ã‚“ã€‚\n");
 			$Page->Print("</div>\n\n");
 		}
 		elsif ($resNum >= $rmax - int($rmax / 20)) {
 			$Page->Print("<div style=\"background-color:red;color:white;margin:1px;padding:1px;\">\n");
-			$Page->Print("ƒŒƒX”‚ª".($rmax-int($rmax/20))."‚ğ’´‚¦‚Ä‚¢‚Ü‚·B$rmax‚ğ’´‚¦‚é‚Æ•\\¦‚Å‚«‚È‚­‚È‚é‚æB\n");
+			$Page->Print("ãƒ¬ã‚¹æ•°ãŒ".($rmax-int($rmax/20))."ã‚’è¶…ãˆã¦ã„ã¾ã™ã€‚$rmaxã‚’è¶…ãˆã‚‹ã¨è¡¨\ç¤ºã§ããªããªã‚‹ã‚ˆã€‚\n");
 			$Page->Print("</div>\n\n");
 		}
 		elsif ($resNum >= $rmax - int($rmax / 10)) {
 			$Page->Print("<div style=\"background-color:yellow;margin:1px;padding:1px;\">\n");
-			$Page->Print("ƒŒƒX”‚ª".($rmax-int($rmax/10))."‚ğ’´‚¦‚Ä‚¢‚Ü‚·B$rmax‚ğ’´‚¦‚é‚Æ•\\¦‚Å‚«‚È‚­‚È‚é‚æB\n");
+			$Page->Print("ãƒ¬ã‚¹æ•°ãŒ".($rmax-int($rmax/10))."ã‚’è¶…ãˆã¦ã„ã¾ã™ã€‚$rmaxã‚’è¶…ãˆã‚‹ã¨è¡¨\ç¤ºã§ããªããªã‚‹ã‚ˆã€‚\n");
 			$Page->Print("</div>\n\n");
 		}
 	}
 	
-	# ƒXƒŒƒbƒhƒ^ƒCƒgƒ‹•\¦
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ã‚¿ã‚¤ãƒˆãƒ«è¡¨ç¤º
 	{
 		my $title = $Dat->GetSubject();
 		my $ttlCol = $Set->Get('BBS_SUBJECT_COLOR');
@@ -317,11 +317,11 @@ sub PrintReadMenu
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgi“à—eo—Í
+#	read.cgiå†…å®¹å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadContents
@@ -330,19 +330,19 @@ sub PrintReadContents
 	
 	my $Sys = $CGI->{'SYS'};
 	
-	# Šg’£‹@”\ƒ[ƒh
+	# æ‹¡å¼µæ©Ÿèƒ½ãƒ­ãƒ¼ãƒ‰
 	require './module/athelas.pl';
 	my $Plugin = ATHELAS->new;
 	$Plugin->Load($Sys);
 	
-	# —LŒø‚ÈŠg’£‹@”\ˆê——‚ğæ“¾
+	# æœ‰åŠ¹ãªæ‹¡å¼µæ©Ÿèƒ½ä¸€è¦§ã‚’å–å¾—
 	my @pluginSet = ();
 	$Plugin->GetKeySet('VALID', 1, \@pluginSet);
 	
 	my $count = 0;
 	my @commands = ();
 	foreach my $id (@pluginSet) {
-		# ƒ^ƒCƒv‚ªread.cgi‚Ìê‡‚Íƒ[ƒh‚µ‚ÄÀs
+		# ã‚¿ã‚¤ãƒ—ãŒread.cgiã®å ´åˆã¯ãƒ­ãƒ¼ãƒ‰ã—ã¦å®Ÿè¡Œ
 		if ($Plugin->Get('TYPE', $id) & 4) {
 			my $file = $Plugin->Get('FILE', $id);
 			my $className = $Plugin->Get('CLASS', $id);
@@ -359,11 +359,11 @@ sub PrintReadContents
 	my $work = $Sys->Get('OPTION');
 	my @elem = split(/\,/, $work);
 	
-	# 1•\¦ƒtƒ‰ƒO‚ªTRUE‚ÅŠJn‚ª1‚Å‚È‚¯‚ê‚Î1‚ğ•\¦‚·‚é
+	# 1è¡¨ç¤ºãƒ•ãƒ©ã‚°ãŒTRUEã§é–‹å§‹ãŒ1ã§ãªã‘ã‚Œã°1ã‚’è¡¨ç¤ºã™ã‚‹
 	if ($elem[3] == 0 && $elem[1] != 1) {
 		PrintResponse($CGI, $Page, \@commands, 1);
 	}
-	# c‚è‚ÌƒŒƒX‚ğ•\¦‚·‚é
+	# æ®‹ã‚Šã®ãƒ¬ã‚¹ã‚’è¡¨ç¤ºã™ã‚‹
 	for my $i ($elem[1] .. $elem[2]) {
 		PrintResponse($CGI, $Page, \@commands, $i);
 	}
@@ -371,18 +371,18 @@ sub PrintReadContents
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgiƒtƒbƒ^o—Í
+#	read.cgiãƒ•ãƒƒã‚¿å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadFoot
 {
 	my ($CGI, $Page) = @_;
 	
-	# ‘O€”õ
+	# å‰æº–å‚™
 	my $Sys = $CGI->{'SYS'};
 	my $Set = $CGI->{'SET'};
 	my $Conv = $CGI->{'CONV'};
@@ -396,33 +396,33 @@ sub PrintReadFoot
 	my $datSize = int((stat $datPath)[7] / 1024);
 	my $cgipath = $Sys->Get('CGIPATH');
 	
-	# datƒtƒ@ƒCƒ‹‚ÌƒTƒCƒY•\¦
+	# datãƒ•ã‚¡ã‚¤ãƒ«ã®ã‚µã‚¤ã‚ºè¡¨ç¤º
 	$Page->Print("</dl>\n\n<font color=\"red\" face=\"Arial\"><b>${datSize}KB</b></font>\n\n");
 	
-	# ŠÔ§ŒÀ‚ª‚ ‚éê‡‚Íà–¾•\¦
+	# æ™‚é–“åˆ¶é™ãŒã‚ã‚‹å ´åˆã¯èª¬æ˜è¡¨ç¤º
 	if ($Sys->Get('LIMTIME')) {
-		$Page->Print('@(08:00PM - 02:00AM ‚ÌŠÔˆê‹C‚É‘S•”‚Í“Ç‚ß‚Ü‚¹‚ñ)');
+		$Page->Print('ã€€(08:00PM - 02:00AM ã®é–“ä¸€æ°—ã«å…¨éƒ¨ã¯èª­ã‚ã¾ã›ã‚“)');
 	}
 	$Page->Print("<hr>\n");
 	
-	# ƒtƒbƒ^ƒƒjƒ…[‚Ì•\¦
+	# ãƒ•ãƒƒã‚¿ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¡¨ç¤º
 	{
-		# ƒƒjƒ…[ƒŠƒ“ƒN‚Ì€–Úİ’è
+		# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªãƒ³ã‚¯ã®é …ç›®è¨­å®š
 		my @elem = split(/\,/, $Sys->Get('OPTION'));
 		my $nxt = ($elem[2] + 100 > $rmax ? $rmax : $elem[2] + 100);
 		my $nxs = $elem[2];
 		my $prv = ($elem[1] - 100 < 1 ? 1 : $elem[1] - 100);
 		my $prs = $prv + 100;
 		
-		# V’…‚Ì•\¦
+		# æ–°ç€ã®è¡¨ç¤º
 		if ($rmax > $Dat->Size()) {
-			my $dispStr = ($Dat->Size() == $elem[2] ? 'V’…ƒŒƒX‚Ì•\\¦' : '‘±‚«‚ğ“Ç‚Ş');
+			my $dispStr = ($Dat->Size() == $elem[2] ? 'æ–°ç€ãƒ¬ã‚¹ã®è¡¨\ç¤º' : 'ç¶šãã‚’èª­ã‚€');
 			my $pathNew = $Conv->CreatePath($Sys, 0, $bbs, $key, "$elem[2]-");
 			$Page->Print("<center><a href=\"$pathNew\">$dispStr</a></center>\n");
 			$Page->Print("<hr>\n\n");
 		}
 		
-		# ƒpƒX‚Ìİ’è
+		# ãƒ‘ã‚¹ã®è¨­å®š
 		my $pathBBS = $Sys->Get('BBS_ABS');
 		my $pathAll = $Conv->CreatePath($Sys, 0, $bbs, $key, '');
 		my $pathPrev = $Conv->CreatePath($Sys, 0, $bbs, $key, "$prv-$prs");
@@ -430,22 +430,22 @@ sub PrintReadFoot
 		my $pathLast = $Conv->CreatePath($Sys, 0, $bbs, $key, 'l50');
 		
 		$Page->Print("<div class=\"links\">\n");
-		$Page->Print("<a href=\"$pathBBS/\">Œf¦”Â‚É–ß‚é</a>\n");
-		$Page->Print("<a href=\"$pathAll\">‘S•”</a>\n");
-		$Page->Print("<a href=\"$pathPrev\">‘O100</a>\n");
-		$Page->Print("<a href=\"$pathNext\">Ÿ100</a>\n");
-		$Page->Print("<a href=\"$pathLast\">ÅV50</a>\n");
+		$Page->Print("<a href=\"$pathBBS/\">æ²ç¤ºæ¿ã«æˆ»ã‚‹</a>\n");
+		$Page->Print("<a href=\"$pathAll\">å…¨éƒ¨</a>\n");
+		$Page->Print("<a href=\"$pathPrev\">å‰100</a>\n");
+		$Page->Print("<a href=\"$pathNext\">æ¬¡100</a>\n");
+		$Page->Print("<a href=\"$pathLast\">æœ€æ–°50</a>\n");
 		$Page->Print("</div>\n");
 	}
 	
-	# “ŠeƒtƒH[ƒ€‚Ì•\¦
-	# ƒŒƒXÅ‘å”‚ğ’´‚¦‚Ä‚¢‚éê‡‚ÍƒtƒH[ƒ€•\¦‚µ‚È‚¢
+	# æŠ•ç¨¿ãƒ•ã‚©ãƒ¼ãƒ ã®è¡¨ç¤º
+	# ãƒ¬ã‚¹æœ€å¤§æ•°ã‚’è¶…ãˆã¦ã„ã‚‹å ´åˆã¯ãƒ•ã‚©ãƒ¼ãƒ è¡¨ç¤ºã—ãªã„
 	if ($rmax > $Dat->Size()) {
 		my $cookName = '';
 		my $cookMail = '';
 		my $tm = int(time);
 		
-		# cookieİ’èON‚Ícookie‚ğæ“¾‚·‚é
+		# cookieè¨­å®šONæ™‚ã¯cookieã‚’å–å¾—ã™ã‚‹
 		if (($Sys->Get('CLIENT') & $ZP::C_PC) && $Set->Equal('SUBBBS_CGI_ON', 1)) {
 			require './module/radagast.pl';
 			my $Cookie = RADAGAST->new;
@@ -465,9 +465,9 @@ sub PrintReadFoot
 		$Page->Print(<<HTML);
 <form method="POST" action="$cgipath/bbs.cgi?guid=ON">
 <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
-<input type="submit" value="‘‚«‚Ş">
-–¼‘OF<input type="text" name="FROM" value="$cookName" size="19">
-E-mail<font size="1">iÈ—ª‰Âj</font>F<input type="text" name="mail" value="$cookMail" size="19"><br>
+<input type="submit" value="æ›¸ãè¾¼ã‚€">
+åå‰ï¼š<input type="text" name="FROM" value="$cookName" size="19">
+E-mail<font size="1">ï¼ˆçœç•¥å¯ï¼‰</font>ï¼š<input type="text" name="mail" value="$cookMail" size="19"><br>
 <textarea rows="5" cols="70" name="MESSAGE"></textarea>
 </form>
 HTML
@@ -476,7 +476,7 @@ HTML
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="http://zerochplus.sourceforge.jp/">‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX</a>
+<a href="http://zerochplus.sourceforge.jp/">ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹</a>
 </div>
 
 </body>
@@ -486,20 +486,20 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgiƒŒƒX•\¦
+#	read.cgiãƒ¬ã‚¹è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
 #	@param	$commands
 #	@param	$n
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResponse
 {
 	my ($CGI, $Page, $commands, $n) = @_;
 	
-	# ‘O€”õ
+	# å‰æº–å‚™
 	my $Sys = $CGI->{'SYS'};
 	my $Set = $CGI->{'SET'};
 	my $Conv = $CGI->{'CONV'};
@@ -509,38 +509,38 @@ sub PrintResponse
 	my @elem = split(/<>/, $$pDat);
 	my $nameCol	= $Set->Get('BBS_NAME_COLOR');
 	
-	# URL‚Æˆø—pŒÂŠ‚Ì“K‰
+	# URLã¨å¼•ç”¨å€‹æ‰€ã®é©å¿œ
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3]);
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	
-	# Šg’£‹@”\‚ğÀs
+	# æ‹¡å¼µæ©Ÿèƒ½ã‚’å®Ÿè¡Œ
 	$Sys->Set('_DAT_', \@elem);
 	$Sys->Set('_NUM_', $n);
 	foreach my $command (@$commands) {
 		$command->execute($Sys, undef, 4);
 	}
 	
-	$Page->Print(" <dt>$n F");
+	$Page->Print(" <dt>$n ï¼š");
 	
-	# ƒ[ƒ‹—“—L‚è
+	# ãƒ¡ãƒ¼ãƒ«æ¬„æœ‰ã‚Š
 	if ($elem[1] eq '') {
 		$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
 	}
-	# ƒ[ƒ‹—“–³‚µ
+	# ãƒ¡ãƒ¼ãƒ«æ¬„ç„¡ã—
 	else {
 		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	}
-	$Page->Print("F$elem[2]</dt>\n");
+	$Page->Print("ï¼š$elem[2]</dt>\n");
 	$Page->Print("  <dd>$elem[3]<br><br></dd>\n");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgi’Tõ‰æ–Ê•\¦
+#	read.cgiæ¢ç´¢ç”»é¢è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadSearch
@@ -560,38 +560,38 @@ sub PrintReadSearch
 	my $bbs = $Sys->Get('BBS_ABS') . '/';
 	my $server = $Sys->Get('SERVER');
 	
-	# ƒGƒ‰[—pdat‚Ì“Ç‚İ‚İ
+	# ã‚¨ãƒ©ãƒ¼ç”¨datã®èª­ã¿è¾¼ã¿
 	$Dat->Load($Sys, $Conv->MakePath('.'.$Sys->Get('DATA').'/2000000000.dat'), 1);
 	my $size = $Dat->Size();
 	
-	# ‘¶İ‚µ‚È‚¢‚Ì‚Å404‚ğ•Ô‚·B
+	# å­˜åœ¨ã—ãªã„ã®ã§404ã‚’è¿”ã™ã€‚
 	$Page->Print("Status: 404 Not Found\n");
 	
 	PrintReadHead($CGI, $Page);
 	
 	$Page->Print("\n<div style=\"margin-top:1em;\">\n");
-	$Page->Print(" <a href=\"$bbs\">¡Œf¦”Â‚É–ß‚é¡</a>\n");
+	$Page->Print(" <a href=\"$bbs\">â– æ²ç¤ºæ¿ã«æˆ»ã‚‹â– </a>\n");
 	$Page->Print("</div>\n");
 	
 	$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
-	$Page->Print("<h1 style=\"color:red;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">w’è‚³‚ê‚½ƒXƒŒƒbƒh‚Í‘¶İ‚µ‚Ü‚¹‚ñ</h1>\n\n");
+	$Page->Print("<h1 style=\"color:red;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">æŒ‡å®šã•ã‚ŒãŸã‚¹ãƒ¬ãƒƒãƒ‰ã¯å­˜åœ¨ã—ã¾ã›ã‚“</h1>\n\n");
 	
 	$Page->Print("\n<dl class=\"thread\">\n");
 	
 	for my $i (0 .. $size - 1) {
 		my $pDat = $Dat->Get($i);
 		my @elem = split(/<>/, $$pDat);
-		$Page->Print(' <dt>' . ($i + 1) . ' F');
+		$Page->Print(' <dt>' . ($i + 1) . ' ï¼š');
 		
-		# ƒ[ƒ‹—“—L‚è
+		# ãƒ¡ãƒ¼ãƒ«æ¬„æœ‰ã‚Š
 		if ($elem[1] eq '') {
 			$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
 		}
-		# ƒ[ƒ‹—“–³‚µ
+		# ãƒ¡ãƒ¼ãƒ«æ¬„ç„¡ã—
 		else {
 			$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 		}
-		$Page->Print("F$elem[2]</dt>\n  <dd>$elem[3]<br><br></dd>\n");
+		$Page->Print("ï¼š$elem[2]</dt>\n  <dd>$elem[3]<br><br></dd>\n");
 	}
 	$Page->Print("</dl>\n\n");
 	
@@ -602,7 +602,7 @@ sub PrintReadSearch
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $var<br>
-<a href="http://zerochplus.sourceforge.jp/">‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX</a>
+<a href="http://zerochplus.sourceforge.jp/">ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹</a>
 </div>
 
 </body>
@@ -613,12 +613,12 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgiƒGƒ‰[•\¦
+#	read.cgiã‚¨ãƒ©ãƒ¼è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
 #	@param	$err
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadError
@@ -627,9 +627,9 @@ sub PrintReadError
 	
 	my $code = $CGI->{'CODE'};
 	
-	# HTMLƒwƒbƒ_‚Ìo—Í
+	# HTMLãƒ˜ãƒƒãƒ€ã®å‡ºåŠ›
 	$Page->Print("Content-type: text/html\n\n");
-	$Page->Print('<html><head><title>‚d‚q‚q‚n‚qII</title>');
+	$Page->Print('<html><head><title>ï¼¥ï¼²ï¼²ï¼¯ï¼²ï¼ï¼</title>');
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print('</head><!--nobanner-->');
 	$Page->Print('<html><body>');
@@ -639,12 +639,12 @@ sub PrintReadError
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	read.cgi‰ß‹ƒƒO‘qŒÉ’Tõ
+#	read.cgiéå»ãƒ­ã‚°å€‰åº«æ¢ç´¢
 #	--------------------------------------------------------------------------------------
 #	@param	$CGI
 #	@param	$Page
-#	@return	ƒƒO‚ª‚Ç‚±‚É‚àŒ©‚Â‚©‚ç‚È‚¯‚ê‚Î 0 ‚ğ•Ô‚·
-#			ƒƒO‚ª‚ ‚é‚È‚ç 1 ‚ğ•Ô‚·
+#	@return	ãƒ­ã‚°ãŒã©ã“ã«ã‚‚è¦‹ã¤ã‹ã‚‰ãªã‘ã‚Œã° 0 ã‚’è¿”ã™
+#			ãƒ­ã‚°ãŒã‚ã‚‹ãªã‚‰ 1 ã‚’è¿”ã™
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintDiscovery
@@ -662,38 +662,38 @@ sub PrintDiscovery
 	my $ver = $Sys->Get('VERSION');
 	my $server = $Sys->Get('SERVER');
 	
-	# ‰ß‹ƒƒO‚É‚ ‚è
+	# éå»ãƒ­ã‚°ã«ã‚ã‚Š
 	if (-e $Conv->MakePath("$spath/kako/$kh/$key.html")) {
 		my $path = $Conv->MakePath("$lpath/kako/$kh/$key");
 		
-		my $title = "‘à’·I‰ß‹ƒƒO‘qŒÉ‚É";
+		my $title = "éšŠé•·ï¼éå»ãƒ­ã‚°å€‰åº«ã«";
 		PrintReadHead($CGI, $Page, $title);
 		$Page->Print("\n<div style=\"margin-top:1em;\">\n");
-		$Page->Print(" <a href=\"$lpath/\">¡Œf¦”Â‚É–ß‚é¡</a>\n");
+		$Page->Print(" <a href=\"$lpath/\">â– æ²ç¤ºæ¿ã«æˆ»ã‚‹â– </a>\n");
 		$Page->Print("</div>\n\n");
 		$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
 		$Page->Print("<h1 style=\"color:red;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title</h1>\n\n");
 		$Page->Print("\n<blockquote>\n");
-		$Page->Print("‘à’·! ‰ß‹ƒƒO‘qŒÉ‚ÅAƒXƒŒƒbƒh <a href=\"$path.html\">$server$path.html</a>");
-		$Page->Print(" <a href=\"$path.dat\">.dat</a> ‚ğ”­Œ©‚µ‚Ü‚µ‚½B");
+		$Page->Print("éšŠé•·! éå»ãƒ­ã‚°å€‰åº«ã§ã€ã‚¹ãƒ¬ãƒƒãƒ‰ <a href=\"$path.html\">$server$path.html</a>");
+		$Page->Print(" <a href=\"$path.dat\">.dat</a> ã‚’ç™ºè¦‹ã—ã¾ã—ãŸã€‚");
 		$Page->Print("</blockquote>\n");
 		
 	}
-	# pool‚É‚ ‚è
+	# poolã«ã‚ã‚Š
 	elsif (-e $Conv->MakePath("$spath/pool/$key.cgi")) {
-		my $title = "html‰»‘Ò‚¿‚Å‚·c";
+		my $title = "htmlåŒ–å¾…ã¡ã§ã™â€¦";
 		PrintReadHead($CGI, $Page, $title);
 		$Page->Print("\n<div style=\"margin-top:1em;\">\n");
-		$Page->Print(" <a href=\"$lpath/\">¡Œf¦”Â‚É–ß‚é¡</a>\n");
+		$Page->Print(" <a href=\"$lpath/\">â– æ²ç¤ºæ¿ã«æˆ»ã‚‹â– </a>\n");
 		$Page->Print("</div>\n\n");
 		$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
 		$Page->Print("<h1 style=\"color:red;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title</h1>\n\n");
 		$Page->Print("\n<blockquote>\n");
-		$Page->Print("$key.dat‚Íhtml‰»‚ğ‘Ò‚Á‚Ä‚¢‚Ü‚·B");
-		$Page->Print('‚±‚±‚Í‘Ò‚Â‚µ‚©‚È‚¢EEEB<br>'."\n");
+		$Page->Print("$key.datã¯htmlåŒ–ã‚’å¾…ã£ã¦ã„ã¾ã™ã€‚");
+		$Page->Print('ã“ã“ã¯å¾…ã¤ã—ã‹ãªã„ãƒ»ãƒ»ãƒ»ã€‚<br>'."\n");
 		$Page->Print("</blockquote>\n");
 	}
-	# ‚Ç‚±‚É‚à‚È‚¢
+	# ã©ã“ã«ã‚‚ãªã„
 	else {
 		return 0;
 	}
@@ -704,7 +704,7 @@ sub PrintDiscovery
 
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="http://zerochplus.sourceforge.jp/">‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX</a>
+<a href="http://zerochplus.sourceforge.jp/">ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹</a>
 </div>
 
 </body>

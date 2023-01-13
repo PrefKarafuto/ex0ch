@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	Œf¦”ÂŠÇ— - ƒƒO‰{—— ƒ‚ƒWƒ…[ƒ‹
+#	æ²ç¤ºæ¿ç®¡ç† - ãƒ­ã‚°é–²è¦§ ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	bbs.log.pl
 #	---------------------------------------------------------------------------
 #	2005.05.21 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -52,7 +52,7 @@ sub DoPrint
 	$BASE = SAURON->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	if (! defined $BBS){
 		require './module/nazguls.pl';
 		$BBS = NAZGUL->new;
@@ -62,35 +62,35 @@ sub DoPrint
 		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	}
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys, $Sys->Get('BBS'));
 	
-	if ($subMode eq 'INFO') {														# ƒgƒbƒv‰æ–Ê
+	if ($subMode eq 'INFO') {														# ãƒˆãƒƒãƒ—ç”»é¢
 		PrintLogsInfo($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'THREADLOG') {												# ƒXƒŒƒbƒhì¬ƒƒO‰æ–Ê
+	elsif ($subMode eq 'THREADLOG') {												# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆãƒ­ã‚°ç”»é¢
 		PrintLogs($Page, $Sys, $Form, 0);
 	}
-	elsif ($subMode eq 'HOSTLOG') {													# ƒzƒXƒgƒƒO‰æ–Ê
+	elsif ($subMode eq 'HOSTLOG') {													# ãƒ›ã‚¹ãƒˆãƒ­ã‚°ç”»é¢
 		PrintLogs($Page, $Sys, $Form, 1);
 	}
-	elsif ($subMode eq 'ERRORLOG') {												# ƒGƒ‰[ƒƒO‰æ–Ê
+	elsif ($subMode eq 'ERRORLOG') {												# ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°ç”»é¢
 		PrintLogs($Page, $Sys, $Form, 2);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# Š®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# å®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('ƒƒO‘€ìˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('ãƒ­ã‚°æ“ä½œå‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# å¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
 	
-	# Œf¦”Âî•ñ‚ğİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’è¨­å®š
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	
 	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
@@ -98,12 +98,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -115,7 +115,7 @@ sub DoFunction
 	require './module/nazguls.pl';
 	$BBS = NAZGUL->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$BBS->Load($Sys);
 	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$pSys->{'SECINFO'}->SetGroupInfo($Sys->Get('BBS'));
@@ -123,17 +123,17 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 9999;
 	
-	if ($subMode eq 'REMOVE_THREADLOG') {										# ƒƒOíœ
+	if ($subMode eq 'REMOVE_THREADLOG') {										# ãƒ­ã‚°å‰Šé™¤
 		$err = FunctionLogDelete($Sys, $Form, 0, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'REMOVE_HOSTLOG') {										# ƒƒOíœ
+	elsif ($subMode eq 'REMOVE_HOSTLOG') {										# ãƒ­ã‚°å‰Šé™¤
 		$err = FunctionLogDelete($Sys, $Form, 1, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'REMOVE_ERRORLOG') {										# ƒƒOíœ
+	elsif ($subMode eq 'REMOVE_ERRORLOG') {										# ãƒ­ã‚°å‰Šé™¤
 		$err = FunctionLogDelete($Sys, $Form, 2, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "BBS_LOG($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -149,37 +149,37 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
 	
-	$Base->SetMenu('ƒƒOî•ñ', "'bbs.log','DISP','INFO'");
+	$Base->SetMenu('ãƒ­ã‚°æƒ…å ±', "'bbs.log','DISP','INFO'");
 	$Base->SetMenu('<hr>', '');
 	
-	# ƒƒO‰{——Œ ŒÀ‚Ì‚İ
+	# ãƒ­ã‚°é–²è¦§æ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $bbs)) {
-		$Base->SetMenu('ƒXƒŒƒbƒhì¬ƒƒO', "'bbs.log','DISP','THREADLOG'");
-		$Base->SetMenu('ƒzƒXƒgƒƒO', "'bbs.log','DISP','HOSTLOG'");
-		$Base->SetMenu('ƒGƒ‰[ƒƒO', "'bbs.log','DISP','ERRORLOG'");
+		$Base->SetMenu('ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆãƒ­ã‚°', "'bbs.log','DISP','THREADLOG'");
+		$Base->SetMenu('ãƒ›ã‚¹ãƒˆãƒ­ã‚°', "'bbs.log','DISP','HOSTLOG'");
+		$Base->SetMenu('ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°', "'bbs.log','DISP','ERRORLOG'");
 		$Base->SetMenu('<hr>', '');
 	}
-	$Base->SetMenu('ƒVƒXƒeƒ€ŠÇ—‚Ö–ß‚é', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ã¸æˆ»ã‚‹', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒOî•ñ‚Ì•\¦
+#	ãƒ­ã‚°æƒ…å ±ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintLogsInfo
@@ -201,7 +201,7 @@ sub PrintLogsInfo
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Last Update</td></tr>\n");
 	
 	require './module/galadriel.pl';
-	my @logKind = ('ƒXƒŒƒbƒhì¬ƒƒO', 'ƒzƒXƒgƒƒO', 'ƒGƒ‰[ƒƒO');
+	my @logKind = ('ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆãƒ­ã‚°', 'ãƒ›ã‚¹ãƒˆãƒ­ã‚°', 'ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°');
 	
 	for ($i = 0 ; $i < 3 ; $i++) {
 		$size = (stat $logFiles[$i])[7];
@@ -220,15 +220,15 @@ sub PrintLogsInfo
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒO‚Ì•\¦
+#	ãƒ­ã‚°ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	0:ƒXƒŒƒbƒhì¬ƒƒO
-#					1:ƒzƒXƒgƒƒO
-#					2:ƒGƒ‰[ƒƒO
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	0:ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆãƒ­ã‚°
+#					1:ãƒ›ã‚¹ãƒˆãƒ­ã‚°
+#					2:ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintLogs
@@ -252,7 +252,7 @@ sub PrintLogs
 	$keyNum = 'DISPNUM_' . $Form->Get('MODE_SUB');
 	$keySt = 'DISPST_' . $Form->Get('MODE_SUB');
 	
-	# •\¦”‚Ìİ’è
+	# è¡¨ç¤ºæ•°ã®è¨­å®š
 	$listNum	= $Logger->Size();
 	$dispNum	= ($Form->Get($keyNum) eq '' ? 10 : $Form->Get($keyNum));
 	$dispSt		= ($Form->Get($keySt) eq '' ? 0 : $Form->Get($keySt));
@@ -265,11 +265,11 @@ sub PrintLogs
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('$keySt', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td align=right colspan=2>");
-	$Page->Print("•\\¦”<input type=text name=$keyNum size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"@•\\¦@\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("è¡¨\ç¤ºæ•°<input type=text name=$keyNum size=4 value=$dispNum>");
+	$Page->Print("<input type=button value=\"ã€€è¡¨\ç¤ºã€€\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	
-	# ƒJƒ‰ƒ€ƒwƒbƒ_‚Ì•\¦
+	# ã‚«ãƒ©ãƒ ãƒ˜ãƒƒãƒ€ã®è¡¨ç¤º
 	$Page->Print("<tr><td class=\"DetailTitle\">Date</td>");
 	if ($mode == 0) {
 		$Page->Print("<td class=\"DetailTitle\">Thread KEY</td>");
@@ -292,7 +292,7 @@ sub PrintLogs
 	my $Error = ORALD->new;
 	$Error->Load($Sys);
 	
-	# ƒƒOˆê——‚ğo—Í
+	# ãƒ­ã‚°ä¸€è¦§ã‚’å‡ºåŠ›
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$data = $Logger->Get($listNum - $i - 1);
 		@elem = split(/<>/, $data);
@@ -311,7 +311,7 @@ sub PrintLogs
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=4 align=left>");
-	$Page->Print("<input type=button value=\"@íœ@\" $common,'REMOVE_" . $Form->Get('MODE_SUB') . "')\" class=\"delete\"> ");
+	$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'REMOVE_" . $Form->Get('MODE_SUB') . "')\" class=\"delete\"> ");
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	$Page->HTMLInput('hidden', $keySt, '');
@@ -319,15 +319,15 @@ sub PrintLogs
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒOíœ
+#	ãƒ­ã‚°å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	0:ƒXƒŒƒbƒhì¬ƒƒO
-#					1:ƒzƒXƒgƒƒO
-#					2:ƒGƒ‰[ƒƒO
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	0:ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆãƒ­ã‚°
+#					1:ãƒ›ã‚¹ãƒˆãƒ­ã‚°
+#					2:ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionLogDelete
@@ -335,7 +335,7 @@ sub FunctionLogDelete
 	my ($Sys, $Form, $mode, $pLog) = @_;
 	my ($Logger, $logFile, $size, @dummy);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -351,18 +351,18 @@ sub FunctionLogDelete
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST'	if ($mode == 1);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/errs'	if ($mode == 2);
 	
-	# ƒƒOî•ñ‚Ìíœ
+	# ãƒ­ã‚°æƒ…å ±ã®å‰Šé™¤
 	$Logger->Open($logFile, 0, 2 | 4);
 	
-	# Šù‘¶ƒƒO‚ğ‘Ş”ğ‚·‚é
+	# æ—¢å­˜ãƒ­ã‚°ã‚’é€€é¿ã™ã‚‹
 	$Logger->MoveToOld();
-	push @$pLog, 'Šù‘¶ƒƒO‚Ì‘Ş”ğŠ®—¹...';
+	push @$pLog, 'æ—¢å­˜ãƒ­ã‚°ã®é€€é¿å®Œäº†...';
 	
-	# ƒƒO‚ÌƒNƒŠƒA‚Æ•Û‘¶
+	# ãƒ­ã‚°ã®ã‚¯ãƒªã‚¢ã¨ä¿å­˜
 	$Logger->Clear();
 	$Logger->Write();
 	$Logger->Close();
-	push @$pLog, 'ƒƒO‚ÌíœŠ®—¹...';
+	push @$pLog, 'ãƒ­ã‚°ã®å‰Šé™¤å®Œäº†...';
 	
 	return 0;
 }

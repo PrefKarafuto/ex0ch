@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #============================================================================================================
 #
-#	�K���ꗗ�\���pCGI
+#	規制一覧表示用CGI
 #	madakana.cgi
 #	---------------------------------------------------------------------------
 #	2011.03.18 start
@@ -16,15 +16,15 @@ no warnings 'once';
 
 BEGIN { use lib './perllib'; }
 
-# CGI�̎��s���ʂ��I���R�[�h�Ƃ���
+# CGIの実行結果を終了コードとする
 exit(MADAKANA());
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	madakana.cgi���C��
+#	madakana.cgiメイン
 #	-------------------------------------------------------------------------------------
-#	@param	�Ȃ�
-#	@return	�Ȃ�
+#	@param	なし
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub MADAKANA
@@ -35,16 +35,16 @@ sub MADAKANA
 	require './module/thorin.pl';
 	$Page = new THORIN;
 	
-	# �������ɐ�����������e��\��
+	# 初期化に成功したら内容を表示
 	if (($err = Initialize(\%SYS, $Page)) == 0) {
 		
-		# �w�b�_�\��
+		# ヘッダ表示
 		PrintMadaHead(\%SYS, $Page);
 		
-		# ���e�\��
+		# 内容表示
 		PrintMadaCont(\%SYS, $Page);
 		
-		# �t�b�^�\��
+		# フッタ表示
 		PrintMadaFoot(\%SYS, $Page);
 		
 	}
@@ -60,10 +60,10 @@ sub MADAKANA
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	madakana.cgi�������E�O����
+#	madakana.cgi初期化・前準備
 #	-------------------------------------------------------------------------------------
-#	@param	�Ȃ�
-#	@return	�Ȃ�
+#	@param	なし
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub Initialize
@@ -88,14 +88,14 @@ sub Initialize
 	
 	$pSYS->{'FORM'} = SAMWISE->new($oSYS->Get('BBSGET')),
 	
-	# �V�X�e��������
+	# システム初期化
 	$oSYS->Init();
 	
 	
-	# �����L�����
+	# 夢が広がりんぐ
 	$oSYS->{'MainCGI'} = $pSYS;
 	
-	# �z�X�g���ݒ�(DNS�t����)
+	# ホスト情報設定(DNS逆引き)
 	$ENV{'REMOTE_HOST'} = $oCONV->GetRemoteHost() unless ($ENV{'REMOTE_HOST'});
 	$pSYS->{'FORM'}->Set('HOST', $ENV{'REMOTE_HOST'});
 	
@@ -105,10 +105,10 @@ sub Initialize
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	madakana.cgi�w�b�_�o��
+#	madakana.cgiヘッダ出力
 #	-------------------------------------------------------------------------------------
-#	@param	�Ȃ�
-#	@return	�Ȃ�
+#	@param	なし
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintMadaHead
@@ -142,24 +142,24 @@ HTML
 	
 	$Caption->Print($Page, undef);
 	
-	$Page->Print(" <title>�܂����ȁA�܂�����</title>\n\n");
+	$Page->Print(" <title>まだかな、まだかな</title>\n\n");
 	$Page->Print("</head>\n<!--nobanner-->\n<body>\n");
 	
-	# �o�i�[�o��
+	# バナー出力
 	$Banner->Print($Page, 100, 2, 0) if ($Sys->{'SYS'}->Get('BANNER'));
 	
 	$Page->Print(<<HTML);
 <div style="color:navy;">
-<h1 style="font-size:1em;font-weight:normal;margin:0;">�܂����ȁA�܂����ȁA�܂Ȃ���(�K���ꗗ�\\)</h1>
+<h1 style="font-size:1em;font-weight:normal;margin:0;">まだかな、まだかな、まなかな(規制一覧表\)</h1>
 <p style="margin:0;">
-���Ȃ��̃����z[<span style="color:red;font-weight:bold;">$HOST</span>]
+あなたのリモホ[<span style="color:red;font-weight:bold;">$HOST</span>]
 </p>
 <p>
-by <font color="green">���낿���˂�v���X ��</font>
+by <font color="green">ぜろちゃんねるプラス ★</font>
 </p>
 <p>
 ##############################################################################<br>
-# ��������<br>
+# ここから<br>
 </p>
 HTML
 	
@@ -167,10 +167,10 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	madakana.cgi���e�o��
+#	madakana.cgi内容出力
 #	-------------------------------------------------------------------------------------
-#	@param	�Ȃ�
-#	@return	�Ȃ�
+#	@param	なし
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintMadaCont
@@ -190,17 +190,17 @@ sub PrintMadaCont
 	$BBSpath	= $Sys->{'SYS'}->Get('BBSPATH');
 	
 	#$sys->Set('HITS', $line);
-	# BBS�Z�b�g�̎擾
+	# BBSセットの取得
 	$BBS->GetKeySet('ALL', '', \@BBSkey);
 	
-	# �n�b�V���ɋl�ߍ���
+	# ハッシュに詰め込む
 	foreach my $id (@BBSkey) {
 		$BBSs{$BBS->Get('DIR', $id)} = $BBS->Get('NAME', $id);
 	}
 	
 	foreach my $dir ( keys %BBSs ) {
 		
-		# �f�B���N�g����.0ch_hidden�Ƃ����t�@�C��������Γǂݔ�΂�
+		# 板ディレクトリに.0ch_hiddenというファイルがあれば読み飛ばす
 		next if ( -e "$BBSpath/$dir/.0ch_hidden" );
 		
 		$Sys->{'SYS'}->Set('BBS', $dir);
@@ -224,7 +224,7 @@ sub PrintMadaCont
 			my ( $type, $method ) = split(/<>/, $line, 2);
 			
 			if ( $type eq 'enable' ) {
-				$Page->Print('<font color="red">�����̔͈ȉ��̃��[�U�[�̂ݏ������݂��s�����Ƃ��ł��܂��B</font><br>'."\n");
+				$Page->Print('<font color="red">※この板は以下のユーザーのみ書き込みを行うことができます。</font><br>'."\n");
 				$color = "blue";
 			}
 			
@@ -263,7 +263,7 @@ sub PrintMadaFoot
 	
 	$Page->Print(<<HTML);
 <p>
-# �����܂�<br>
+# ここまで<br>
 ##############################################################################<br>
 </p>
 </div>
@@ -271,7 +271,7 @@ sub PrintMadaFoot
 <hr>
 
 <div>
-<a href="http://zerochplus.sourceforge.jp/">���낿���˂�v���X</a>
+<a href="http://zerochplus.sourceforge.jp/">ぜろちゃんねるプラス</a>
 MADAKANA.CGI - $ver
 </div>
 
@@ -283,10 +283,10 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	madakana.cgi�G���[�\��
+#	madakana.cgiエラー表示
 #	-------------------------------------------------------------------------------------
-#	@param	�Ȃ�
-#	@return	�Ȃ�
+#	@param	なし
+#	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintMadaError
@@ -296,9 +296,9 @@ sub PrintMadaError
 	
 	$code = 'Shift_JIS';
 	
-	# HTML�w�b�_�̏o��
+	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
-	$Page->Print('<html><head><title>�d�q�q�n�q�I�I</title>');
+	$Page->Print('<html><head><title>ＥＲＲＯＲ！！</title>');
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print('</head><!--nobanner-->');
 	$Page->Print('<html><body>');

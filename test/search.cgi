@@ -1,12 +1,12 @@
 #!/usr/bin/perl
 #============================================================================================================
 #
-#	ŒŸõ—pCGI(‚Ü‚¿‚ª‚¦‚Ä‚·‚Ý‚Ü‚¹‚ñ)
+#	æ¤œç´¢ç”¨CGI(ã¾ã¡ãŒãˆã¦ã™ã¿ã¾ã›ã‚“)
 #	search.cgi
 #	-----------------------------------------------------
 #	2003.11.22 star
-#	2004.09.16 ƒVƒXƒeƒ€‰ü•Ï‚É”º‚¤•ÏX
-#	2009.06.19 HTML•”•ª‚Ì‘å•‚È‘‚«’¼‚µ
+#	2004.09.16 ã‚·ã‚¹ãƒ†ãƒ æ”¹å¤‰ã«ä¼´ã†å¤‰æ›´
+#	2009.06.19 HTMLéƒ¨åˆ†ã®å¤§å¹…ãªæ›¸ãç›´ã—
 #
 #============================================================================================================
 
@@ -17,15 +17,15 @@ no warnings 'once';
 
 BEGIN { use lib './perllib'; }
 
-# CGI‚ÌŽÀsŒ‹‰Ê‚ðI—¹ƒR[ƒh‚Æ‚·‚é
+# CGIã®å®Ÿè¡Œçµæžœã‚’çµ‚äº†ã‚³ãƒ¼ãƒ‰ã¨ã™ã‚‹
 exit(SearchCGI());
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	CGIƒƒCƒ“ˆ— - SearchCGI
+#	CGIãƒ¡ã‚¤ãƒ³å‡¦ç† - SearchCGI
 #	------------------------------------------------
-#	ˆø@”F‚È‚µ
-#	–ß‚è’lF‚È‚µ
+#	å¼•ã€€æ•°ï¼šãªã—
+#	æˆ»ã‚Šå€¤ï¼šãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SearchCGI
@@ -46,7 +46,7 @@ sub SearchCGI
 	$BBS->Load($Sys);
 	PrintHead($Sys, $Page, $BBS, $Form);
 	
-	# ŒŸõƒ[ƒh‚ª‚ ‚éê‡‚ÍŒŸõ‚ðŽÀs‚·‚é
+	# æ¤œç´¢ãƒ¯ãƒ¼ãƒ‰ãŒã‚ã‚‹å ´åˆã¯æ¤œç´¢ã‚’å®Ÿè¡Œã™ã‚‹
 	if ($Form->Get('WORD', '') ne '') {
 		Search($Sys, $Form, $Page, $BBS);
 	}
@@ -56,10 +56,10 @@ sub SearchCGI
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒwƒbƒ_o—Í - PrintHead
+#	ãƒ˜ãƒƒãƒ€å‡ºåŠ› - PrintHead
 #	------------------------------------------------
-#	ˆø@”F‚È‚µ
-#	–ß‚è’lF‚È‚µ
+#	å¼•ã€€æ•°ï¼šãªã—
+#	æˆ»ã‚Šå€¤ï¼šãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintHead
@@ -90,7 +90,7 @@ sub PrintHead
 	
 	$BBSpath = $Sys->Get('BBSPATH');
 	
-	# ƒoƒi[‚Ì“Ç‚Ýž‚Ý
+	# ãƒãƒŠãƒ¼ã®èª­ã¿è¾¼ã¿
 	require './module/denethor.pl';
 	$Banner = new DENETHOR;
 	$Banner->Load($Sys);
@@ -104,7 +104,7 @@ sub PrintHead
  <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Script-Type" content="text/css">
 
- <title>ŒŸõ—0chPlus</title>
+ <title>æ¤œç´¢ï¼ 0chPlus</title>
 
  <link rel="stylesheet" type="text/css" href="./datas/search.css">
 
@@ -115,36 +115,36 @@ sub PrintHead
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#ccffcc" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>
-  <font size="+1"><b>ŒŸõ—0chPlus</b></font>
+  <font size="+1"><b>æ¤œç´¢ï¼ 0chPlus</b></font>
   
   <div align="center" style="margin:1.2em 0;">
   <form action="./search.cgi" method="POST">
   <table border="0">
    <tr>
-    <td>ŒŸõƒ‚[ƒh</td>
+    <td>æ¤œç´¢ãƒ¢ãƒ¼ãƒ‰</td>
     <td>
     <select name="MODE">
 HTML
 
 	if ($sMODE eq 'ALL') {
 		$Page->Print(<<HTML);
-     <option value="ALL" selected>ŽI“à‘SŒŸõ</option>
-     <option value="BBS">BBSŽw’è‘SŒŸõ</option>
-     <option value="THREAD">ƒXƒŒƒbƒhŽw’è‘SŒŸõ</option>
+     <option value="ALL" selected>é¯–å†…å…¨æ¤œç´¢</option>
+     <option value="BBS">BBSæŒ‡å®šå…¨æ¤œç´¢</option>
+     <option value="THREAD">ã‚¹ãƒ¬ãƒƒãƒ‰æŒ‡å®šå…¨æ¤œç´¢</option>
 HTML
 	}
 	elsif ($sMODE eq 'BBS' || $sMODE eq '') {
 		$Page->Print(<<HTML);
-     <option value="ALL">ŽI“à‘SŒŸõ</option>
-     <option value="BBS" selected>BBSŽw’è‘SŒŸõ</option>
-     <option value="THREAD">ƒXƒŒƒbƒhŽw’è‘SŒŸõ</option>
+     <option value="ALL">é¯–å†…å…¨æ¤œç´¢</option>
+     <option value="BBS" selected>BBSæŒ‡å®šå…¨æ¤œç´¢</option>
+     <option value="THREAD">ã‚¹ãƒ¬ãƒƒãƒ‰æŒ‡å®šå…¨æ¤œç´¢</option>
 HTML
 	}
 	elsif ($sMODE eq 'THREAD') {
 		$Page->Print(<<HTML);
-     <option value="ALL">ŽI“à‘SŒŸõ</option>
-     <option value="BBS">BBSŽw’è‘SŒŸõ</option>
-     <option value="THREAD" selected>ƒXƒŒƒbƒhŽw’è‘SŒŸõ</option>
+     <option value="ALL">é¯–å†…å…¨æ¤œç´¢</option>
+     <option value="BBS">BBSæŒ‡å®šå…¨æ¤œç´¢</option>
+     <option value="THREAD" selected>ã‚¹ãƒ¬ãƒƒãƒ‰æŒ‡å®šå…¨æ¤œç´¢</option>
 HTML
 	}
 	$Page->Print(<<HTML);
@@ -152,19 +152,19 @@ HTML
     </td>
    </tr>
    <tr>
-    <td>Žw’èBBS</td>
+    <td>æŒ‡å®šBBS</td>
     <td>
     <select name="BBS">
 HTML
 
-	# BBSƒZƒbƒg‚ÌŽæ“¾
+	# BBSã‚»ãƒƒãƒˆã®å–å¾—
 	$BBS->GetKeySet('ALL', '', \@bbsSet);
 	
 	foreach $id (@bbsSet) {
 		$name = $BBS->Get('NAME', $id);
 		$dir = $BBS->Get('DIR', $id);
 		
-		# ”ÂƒfƒBƒŒƒNƒgƒŠ‚É.0ch_hidden‚Æ‚¢‚¤ƒtƒ@ƒCƒ‹‚ª‚ ‚ê‚Î“Ç‚Ý”ò‚Î‚·
+		# æ¿ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã«.0ch_hiddenã¨ã„ã†ãƒ•ã‚¡ã‚¤ãƒ«ãŒã‚ã‚Œã°èª­ã¿é£›ã°ã™
 		next if ( -e "$BBSpath/$dir/.0ch_hidden" && $sBBS ne $dir );
 		
 		if ($sBBS eq $dir) {
@@ -179,27 +179,27 @@ HTML
     </td>
    </tr>
    <tr>
-    <td>Žw’èƒXƒŒƒbƒhƒL[</td>
+    <td>æŒ‡å®šã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¼</td>
     <td>
     <input type="text" size="20" name="KEY" value="$sKEY">
     </td>
    </tr>
    <tr>
-    <td>ŒŸõƒ[ƒh</td>
+    <td>æ¤œç´¢ãƒ¯ãƒ¼ãƒ‰</td>
     <td><input type="text" size="40" name="WORD" value="$sWORD"></td>
    </tr>
    <tr>
-    <td>ŒŸõŽí•Ê</td>
+    <td>æ¤œç´¢ç¨®åˆ¥</td>
     <td>
-    <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>–¼‘OŒŸõ<br>
-    <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>IDE“ú•tŒŸõ<br>
-    <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>–{•¶ŒŸõ<br>
+    <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>åå‰æ¤œç´¢<br>
+    <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>IDãƒ»æ—¥ä»˜æ¤œç´¢<br>
+    <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>æœ¬æ–‡æ¤œç´¢<br>
     </td>
    </tr>
    <tr>
     <td colspan="2" align="right">
     <hr>
-    <input type="submit" value="ŒŸõ" style="width:150px;">
+    <input type="submit" value="æ¤œç´¢" style="width:150px;">
     </td>
    </tr>
   </table>
@@ -216,10 +216,10 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒtƒbƒ^o—Í - PrintHead
+#	ãƒ•ãƒƒã‚¿å‡ºåŠ› - PrintHead
 #	------------------------------------------------
-#	ˆø@”F‚È‚µ
-#	–ß‚è’lF‚È‚µ
+#	å¼•ã€€æ•°ï¼šãªã—
+#	æˆ»ã‚Šå€¤ï¼šãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintFoot
@@ -233,7 +233,7 @@ sub PrintFoot
 	$Page->Print(<<HTML);
 
 <div class="foot">
-<a href="http://zerochplus.sourceforge.jp/">‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX</a>
+<a href="http://zerochplus.sourceforge.jp/">ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹</a>
 SEARCH.CGI - $ver
 </div>
 
@@ -242,10 +242,10 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ŒŸõŒ‹‰Êo—Í - Search
+#	æ¤œç´¢çµæžœå‡ºåŠ› - Search
 #	------------------------------------------------
-#	ˆø@”F‚È‚µ
-#	–ß‚è’lF‚È‚µ
+#	å¼•ã€€æ•°ï¼šãªã—
+#	æˆ»ã‚Šå€¤ï¼šãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub Search
@@ -272,7 +272,7 @@ sub Search
 		return $_;
 	};
 	
-	# ŒŸõƒIƒuƒWƒFƒNƒg‚ÌÝ’è‚ÆŒŸõ‚ÌŽÀs
+	# æ¤œç´¢ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®è¨­å®šã¨æ¤œç´¢ã®å®Ÿè¡Œ
 	$Search->Create($Sys, $Mode, $Type, $Form->Get('BBS', ''), $Form->Get('KEY', ''));
 	$Search->Run(&$sanitize($Form->Get('WORD')));
 	
@@ -281,7 +281,7 @@ sub Search
 		return;
 	}
 	
-	# ŒŸõŒ‹‰ÊƒZƒbƒgŽæ“¾
+	# æ¤œç´¢çµæžœã‚»ãƒƒãƒˆå–å¾—
 	$Result = $Search->GetResultSet();
 	$n		= $Result ? @$Result : 0;
 	$base	= $Sys->Get('BBSPATH');
@@ -289,7 +289,7 @@ sub Search
 	
 	PrintResultHead($Page, $n);
 	
-	# ŒŸõƒqƒbƒg‚ª1ŒˆÈã‚ ‚è
+	# æ¤œç´¢ãƒ’ãƒƒãƒˆãŒ1ä»¶ä»¥ä¸Šã‚ã‚Š
 	if ($n > 0) {
 		require './module/galadriel.pl';
 		my $Conv = new GALADRIEL;
@@ -300,7 +300,7 @@ sub Search
 			$n++;
 		}
 	}
-	# ŒŸõƒqƒbƒg–³‚µ
+	# æ¤œç´¢ãƒ’ãƒƒãƒˆç„¡ã—
 	else {
 		PrintNoHit($Page);
 	}
@@ -310,10 +310,10 @@ sub Search
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ŒŸõŒ‹‰Êƒwƒbƒ_o—Í - PrintResultHead
+#	æ¤œç´¢çµæžœãƒ˜ãƒƒãƒ€å‡ºåŠ› - PrintResultHead
 #	------------------------------------------------
-#	ˆø@”FPage : o—Íƒ‚ƒWƒ…[ƒ‹
-#	–ß‚è’lF‚È‚µ
+#	å¼•ã€€æ•°ï¼šPage : å‡ºåŠ›ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
+#	æˆ»ã‚Šå€¤ï¼šãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResultHead
@@ -326,8 +326,8 @@ sub PrintResultHead
   <td>
   <div class="hit" style="margin-top:1.2em;">
    <b>
-   yƒqƒbƒg”F$nz
-   <font size="+2" color="red">ŒŸõŒ‹‰Ê</font>
+   ã€ãƒ’ãƒƒãƒˆæ•°ï¼š$nã€‘
+   <font size="+2" color="red">æ¤œç´¢çµæžœ</font>
    </b>
   </div>
   <dl>
@@ -336,10 +336,10 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ŒŸõŒ‹‰Ê“à—eo—Í
+#	æ¤œç´¢çµæžœå†…å®¹å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	THORIN
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResult
@@ -352,7 +352,7 @@ sub PrintResult
 	if (@bbsSet > 0) {
 		$name = $BBS->Get('NAME', $bbsSet[0]);
 		
-		$Page->Print("   <dt>$n –¼‘OF<b>");
+		$Page->Print("   <dt>$n åå‰ï¼š<b>");
 		if ($$pResult[4] eq '') {
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
 		}
@@ -361,14 +361,14 @@ sub PrintResult
 		}
 		
 	$Page->Print(<<HTML);
- </b>F$$pResult[5]</dt>
+ </b>ï¼š$$pResult[5]</dt>
     <dd>
     $$pResult[6]
     <br>
     <hr>
-    <a target="_blank" href="$base/$$pResult[0]/">y$namez</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">yƒXƒŒƒbƒhz</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">yƒŒƒXz</a>
+    <a target="_blank" href="$base/$$pResult[0]/">ã€$nameã€‘</a>
+    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">ã€ã‚¹ãƒ¬ãƒƒãƒ‰ã€‘</a>
+    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">ã€ãƒ¬ã‚¹ã€‘</a>
     <br>
     <br>
     </dd>
@@ -379,10 +379,10 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ŒŸõŒ‹‰Êƒtƒbƒ^o—Í
+#	æ¤œç´¢çµæžœãƒ•ãƒƒã‚¿å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	THORIN
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResultFoot
@@ -394,10 +394,10 @@ sub PrintResultFoot
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	NoHito—Í
+#	NoHitå‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	THORIN
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintNoHit
@@ -406,12 +406,12 @@ sub PrintNoHit
 	
 	$Page->Print(<<HTML);
 <dt>
- 0 –¼‘OF<font color="forestgreen"><b>ŒŸõƒGƒ“ƒWƒ\\—‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX</b></font>FNo Hit
+ 0 åå‰ï¼š<font color="forestgreen"><b>æ¤œç´¢ã‚¨ãƒ³ã‚¸ã‚½\ï¼ ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹</b></font>ï¼šNo Hit
 </dt>
 <dd>
  <br>
  <br>
- Q|P|›@ˆêŒ‚àƒqƒbƒg‚µ‚Ü‚¹‚ñ‚Å‚µ‚½BB<br>
+ ï¼¿|â€¾|â—‹ã€€ä¸€ä»¶ã‚‚ãƒ’ãƒƒãƒˆã—ã¾ã›ã‚“ã§ã—ãŸã€‚ã€‚<br>
  <br>
 </dd>
 HTML
@@ -419,11 +419,11 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒVƒXƒeƒ€ƒGƒ‰[o—Í
+#	ã‚·ã‚¹ãƒ†ãƒ ã‚¨ãƒ©ãƒ¼å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	THORIN
-#	@param	$msg	ƒGƒ‰[ƒƒbƒZ[ƒW
-#	@return	‚È‚µ
+#	@param	$msg	ã‚¨ãƒ©ãƒ¼ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintSystemError
@@ -437,9 +437,9 @@ sub PrintSystemError
   <td>
   <dl>
   <div class="title">
-  <small><b>yƒqƒbƒg”F0z</b></small><font size="+2" color="red">ƒVƒXƒeƒ€ƒGƒ‰[</font>
+  <small><b>ã€ãƒ’ãƒƒãƒˆæ•°ï¼š0ã€‘</b></small><font size="+2" color="red">ã‚·ã‚¹ãƒ†ãƒ ã‚¨ãƒ©ãƒ¼</font>
   </div>
-   <dt>0 –¼‘OF<font color="forestgreen"><b>ŒŸõƒGƒ“ƒWƒ\\—‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX</b></font>FSystem Error</dt>
+   <dt>0 åå‰ï¼š<font color="forestgreen"><b>æ¤œç´¢ã‚¨ãƒ³ã‚¸ã‚½\ï¼ ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹</b></font>ï¼šSystem Error</dt>
     <dd>
     <br>
     <br>

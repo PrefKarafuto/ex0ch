@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 #============================================================================================================
 #
-#	ƒVƒXƒeƒ€ŠÇ—CGI
+#	ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†CGI
 #
 #============================================================================================================
 
@@ -13,26 +13,26 @@ no warnings 'once';
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
-# CGI‚ÌÀsŒ‹‰Ê‚ğI—¹ƒR[ƒh‚Æ‚·‚é
+# CGIã®å®Ÿè¡Œçµæœã‚’çµ‚äº†ã‚³ãƒ¼ãƒ‰ã¨ã™ã‚‹
 exit(AdminCGI());
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	admin.cgiƒƒCƒ“
+#	admin.cgiãƒ¡ã‚¤ãƒ³
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒGƒ‰[”Ô†
+#	@param	ãªã—
+#	@return	ã‚¨ãƒ©ãƒ¼ç•ªå·
 #
 #------------------------------------------------------------------------------------------------------------
 sub AdminCGI
 {
 	require './module/constant.pl';
 	
-	# ƒVƒXƒeƒ€‰Šúİ’è
+	# ã‚·ã‚¹ãƒ†ãƒ åˆæœŸè¨­å®š
 	my $CGI = {};
 	SystemSetting($CGI);
 	
-	# 0chƒVƒXƒeƒ€î•ñ‚ğæ“¾
+	# 0chã‚·ã‚¹ãƒ†ãƒ æƒ…å ±ã‚’å–å¾—
 	require "./module/melkor.pl";
 	my $Sys = MELKOR->new;
 	$Sys->Init();
@@ -40,17 +40,17 @@ sub AdminCGI
 	$CGI->{'LOGGER'}->Open('.'.$Sys->Get('INFO').'/AdminLog', 100, 2 | 4);
 	$CGI->{'SECINFO'}->Init($Sys);
 	
-	# –²‚ªL‚ª‚è‚ñ‚®
+	# å¤¢ãŒåºƒãŒã‚Šã‚“ã
 	$Sys->Set('ADMIN', $CGI);
 	$Sys->Set('MainCGI', $CGI);
 	
-	# ƒtƒH[ƒ€î•ñ‚ğæ“¾
+	# ãƒ•ã‚©ãƒ¼ãƒ æƒ…å ±ã‚’å–å¾—
 	require "./module/samwise.pl";
 	my $Form = SAMWISE->new(0);
 	$Form->DecodeForm(0);
 	$Form->Set('FALSE', 0);
 	
-	# ƒƒOƒCƒ“ƒ†[ƒUİ’è
+	# ãƒ­ã‚°ã‚¤ãƒ³ãƒ¦ãƒ¼ã‚¶è¨­å®š
 	my $name = $Form->Get('UserName', '');
 	my $pass = $Form->Get('PassWord', '');
 	my $sid = $Form->Get('SessionID', '');
@@ -60,7 +60,7 @@ sub AdminCGI
 	$CGI->{'USER'} = $userID;
 	$Form->Set('SessionID', $SID);
 	
-	# ƒo[ƒWƒ‡ƒ“ƒ`ƒFƒbƒN
+	# ãƒãƒ¼ã‚¸ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
 	my $upcheck = $Sys->Get('UPCHECK', 1) - 0;
 	$CGI->{'NEWRELEASE'}->Init($Sys);
 	if ($upcheck) {
@@ -68,21 +68,21 @@ sub AdminCGI
 		$CGI->{'NEWRELEASE'}->Check;
 	}
 	
-	# ˆ—ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# å‡¦ç†ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	my $modName = $Form->Get('MODULE', 'login');
 	$modName = 'login' if (!$userID);
 	require "./mordor/$modName.pl";
 	my $oModule = MODULE->new;
 	
-	# •\¦ƒ‚[ƒh
+	# è¡¨ç¤ºãƒ¢ãƒ¼ãƒ‰
 	if ($Form->Get('MODE', '') eq 'DISP') {
 		$oModule->DoPrint($Sys, $Form, $CGI);
 	}
-	# ‹@”\ƒ‚[ƒh
+	# æ©Ÿèƒ½ãƒ¢ãƒ¼ãƒ‰
 	elsif ($Form->Get('MODE', '') eq 'FUNC') {
 		$oModule->DoFunction($Sys, $Form, $CGI);
 	}
-	# ƒƒOƒCƒ“
+	# ãƒ­ã‚°ã‚¤ãƒ³
 	else {
 		$CGI->{'SECINFO'}->Logout($SID);
 		$oModule->DoPrint($Sys, $Form, $CGI);
@@ -95,10 +95,10 @@ sub AdminCGI
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ŠÇ—ƒVƒXƒeƒ€İ’è
+#	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$pSYS	ƒVƒXƒeƒ€ŠÇ—ƒnƒbƒVƒ…‚ÌQÆ
-#	@return	‚È‚µ
+#	@param	$pSYS	ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ãƒãƒƒã‚·ãƒ¥ã®å‚ç…§
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SystemSetting
@@ -106,12 +106,12 @@ sub SystemSetting
 	my ($CGI) = @_;
 	
 	%$CGI = (
-		'SECINFO'	=> undef,		# ƒZƒLƒ…ƒŠƒeƒBî•ñ
-		'LOGGER'	=> undef,		# ƒƒOƒIƒuƒWƒFƒNƒg
-		'AD_BBS'	=> undef,		# BBSî•ñƒIƒuƒWƒFƒNƒg
-		'AD_DAT'	=> undef,		# datî•ñƒIƒuƒWƒFƒNƒg
-		'USER'		=> undef,		# ƒƒOƒCƒ“ƒ†[ƒUID
-		'NEWRELEASE'=> undef,		# ƒo[ƒWƒ‡ƒ“ƒ`ƒFƒbƒN
+		'SECINFO'	=> undef,		# ã‚»ã‚­ãƒ¥ãƒªãƒ†ã‚£æƒ…å ±
+		'LOGGER'	=> undef,		# ãƒ­ã‚°ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+		'AD_BBS'	=> undef,		# BBSæƒ…å ±ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+		'AD_DAT'	=> undef,		# datæƒ…å ±ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+		'USER'		=> undef,		# ãƒ­ã‚°ã‚¤ãƒ³ãƒ¦ãƒ¼ã‚¶ID
+		'NEWRELEASE'=> undef,		# ãƒãƒ¼ã‚¸ãƒ§ãƒ³ãƒã‚§ãƒƒã‚¯
 	);
 	
 	require './module/elves.pl';

@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	ƒVƒXƒeƒ€ŠÇ— - Œf¦”Â ƒ‚ƒWƒ…[ƒ‹
+#	ã‚·ã‚¹ãƒ†ãƒ ç®¡ç† - æ²ç¤ºæ¿ ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	sys.bbs.pl
 #	---------------------------------------------------------------------------
 #	2004.01.31 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -51,42 +51,42 @@ sub DoPrint
 	require './mordor/sauron.pl';
 	$BASE = SAURON->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$Sys->Set('ADMIN', $pSys);
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys);
 	
-	if ($subMode eq 'LIST') {														# Œf¦”Âˆê——‰æ–Ê
+	if ($subMode eq 'LIST') {														# æ²ç¤ºæ¿ä¸€è¦§ç”»é¢
 		PrintBBSList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CREATE') {													# Œf¦”Âì¬‰æ–Ê
+	elsif ($subMode eq 'CREATE') {													# æ²ç¤ºæ¿ä½œæˆç”»é¢
 		PrintBBSCreate($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'DELETE') {													# Œf¦”ÂíœŠm”F‰æ–Ê
+	elsif ($subMode eq 'DELETE') {													# æ²ç¤ºæ¿å‰Šé™¤ç¢ºèªç”»é¢
 		PrintBBSDelete($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CATCHANGE') {												# Œf¦”ÂƒJƒeƒSƒŠ•ÏX‰æ–Ê
+	elsif ($subMode eq 'CATCHANGE') {												# æ²ç¤ºæ¿ã‚«ãƒ†ã‚´ãƒªå¤‰æ›´ç”»é¢
 		PrintBBScategoryChange($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CATEGORY') {												# ƒJƒeƒSƒŠˆê——‰æ–Ê
+	elsif ($subMode eq 'CATEGORY') {												# ã‚«ãƒ†ã‚´ãƒªä¸€è¦§ç”»é¢
 		PrintCategoryList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CATEGORYADD') {												# ƒJƒeƒSƒŠ’Ç‰Á‰æ–Ê
+	elsif ($subMode eq 'CATEGORYADD') {												# ã‚«ãƒ†ã‚´ãƒªè¿½åŠ ç”»é¢
 		PrintCategoryAdd($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CATEGORYDEL') {												# ƒJƒeƒSƒŠíœ‰æ–Ê
+	elsif ($subMode eq 'CATEGORYDEL') {												# ã‚«ãƒ†ã‚´ãƒªå‰Šé™¤ç”»é¢
 		PrintCategoryDelete($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ˆ—Š®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# å‡¦ç†å®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('Œf¦”Âˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('æ²ç¤ºæ¿å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ˆ—¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# å‡¦ç†å¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
@@ -96,12 +96,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -110,35 +110,35 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err);
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$Sys->Set('ADMIN', $pSys);
 	
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'CREATE') {														# Œf¦”Âì¬
+	if ($subMode eq 'CREATE') {														# æ²ç¤ºæ¿ä½œæˆ
 		$err = FunctionBBSCreate($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'DELETE') {													# Œf¦”Âíœ
+	elsif ($subMode eq 'DELETE') {													# æ²ç¤ºæ¿å‰Šé™¤
 		$err = FunctionBBSDelete($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'CATCHANGE') {												# ƒJƒeƒSƒŠ•ÏX
+	elsif ($subMode eq 'CATCHANGE') {												# ã‚«ãƒ†ã‚´ãƒªå¤‰æ›´
 		$err = FunctionCategoryChange($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'CATADD') {													# ƒJƒeƒSƒŠ’Ç‰Á
+	elsif ($subMode eq 'CATADD') {													# ã‚«ãƒ†ã‚´ãƒªè¿½åŠ 
 		$err = FunctionCategoryAdd($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'CATDEL') {													# ƒJƒeƒSƒŠíœ
+	elsif ($subMode eq 'CATDEL') {													# ã‚«ãƒ†ã‚´ãƒªå‰Šé™¤
 		$err = FunctionCategoryDelete($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'UPDATE') {													# Œf¦”Âî•ñXV
+	elsif ($subMode eq 'UPDATE') {													# æ²ç¤ºæ¿æƒ…å ±æ›´æ–°
 		$err = FunctionBBSInfoUpdate($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'UPDATEBBS') {												# Œf¦”ÂXV
+	elsif ($subMode eq 'UPDATEBBS') {												# æ²ç¤ºæ¿æ›´æ–°
 		$err = FunctionBBSUpdate($Sys, $Form, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "BBS($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -153,34 +153,34 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys) = @_;
 	
-	$Base->SetMenu('Œf¦”Âˆê——', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('æ²ç¤ºæ¿ä¸€è¦§', "'sys.bbs','DISP','LIST'");
 	
-	# ƒVƒXƒeƒ€ŠÇ—Œ ŒÀ‚Ì‚İ
+	# ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†æ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_SYSADMIN, '*')) {
-		$Base->SetMenu('Œf¦”Âì¬', "'sys.bbs','DISP','CREATE'");
+		$Base->SetMenu('æ²ç¤ºæ¿ä½œæˆ', "'sys.bbs','DISP','CREATE'");
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('Œf¦”ÂƒJƒeƒSƒŠˆê——', "'sys.bbs','DISP','CATEGORY'");
+		$Base->SetMenu('æ²ç¤ºæ¿ã‚«ãƒ†ã‚´ãƒªä¸€è¦§', "'sys.bbs','DISP','CATEGORY'");
 	}
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Œf¦”Âˆê——‚Ì•\¦
+#	æ²ç¤ºæ¿ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSList
@@ -199,13 +199,13 @@ sub PrintBBSList
 	
 	$sCat = $Form->Get('BBS_CATEGORY', '');
 	
-	# ƒ†[ƒUŠ‘®‚ÌBBSˆê——‚ğæ“¾
+	# ãƒ¦ãƒ¼ã‚¶æ‰€å±ã®BBSä¸€è¦§ã‚’å–å¾—
 	$SYS->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($SYS->Get('ADMIN')->{'USER'}, $BBS, \@belongBBS);
 	
-	# ƒVƒXƒeƒ€ŠÇ—Œ ŒÀ‚ğæ“¾
+	# ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†æ¨©é™ã‚’å–å¾—
 	$isSysad = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_SYSADMIN, '*');
 	
-	# Œf¦”Âî•ñ‚ğæ“¾
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’å–å¾—
 	if ($sCat eq '' || $sCat eq 'ALL') {
 		$BBS->GetKeySet('ALL', '', \@bbsSet);
 	}
@@ -215,11 +215,11 @@ sub PrintBBSList
 	$Category->GetKeySet(\@catSet);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=4 align=right>ƒJƒeƒSƒŠ");
+	$Page->Print("<tr><td colspan=4 align=right>ã‚«ãƒ†ã‚´ãƒª");
 	$Page->Print("<select name=BBS_CATEGORY>");
-	$Page->Print("<option value=ALL>‚·‚×‚Ä</option>\n");
+	$Page->Print("<option value=ALL>ã™ã¹ã¦</option>\n");
 	
-	# ƒJƒeƒSƒŠƒŠƒXƒg‚ğo—Í
+	# ã‚«ãƒ†ã‚´ãƒªãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@catSet) {
 		$name = $Category->Get('NAME', $id);
 		if ($id eq $sCat) {
@@ -229,17 +229,17 @@ sub PrintBBSList
 			$Page->Print("<option value=\"$id\">$name</option>\n");
 		}
 	}
-	$Page->Print("</select><input type=button value=\"@•\\¦@\" onclick=");
+	$Page->Print("</select><input type=button value=\"ã€€è¡¨\ç¤ºã€€\" onclick=");
 	$Page->Print("\"DoSubmit('sys.bbs','DISP','LIST')\"></td></tr>\n");
 	
-	# Œf¦”ÂƒŠƒXƒg‚ğo—Í
-	$Page->Print("<tr><td style=\"width:20\">@</th>");
+	# æ²ç¤ºæ¿ãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
+	$Page->Print("<tr><td style=\"width:20\">ã€€</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">BBS Name</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Category</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">SubScription</th></tr>\n");
 	
 	foreach $id (@bbsSet) {
-		# Š‘®Œf¦”Â‚Ì‚İ•\¦
+		# æ‰€å±æ²ç¤ºæ¿ã®ã¿è¡¨ç¤º
 		foreach $belongID (@belongBBS) {
 			if ($id eq $belongID) {
 				$name		= $BBS->Get('NAME', $id);
@@ -261,21 +261,21 @@ sub PrintBBSList
 	
 	$Page->HTMLInput('hidden', 'TARGET_BBS', '');
 	$Page->Print("<tr><td colspan=4 align=left><hr>");
-	$Page->Print("<input type=button value=\"ƒJƒeƒSƒŠ•ÏX\" $common2,'CATCHANGE')\"> ")	if (1);
-	$Page->Print("<input type=button value=\"î•ñXV\" $common1,'UPDATE')\"> ")		if ($isSysad);
-	$Page->Print("<input type=button value=\"indexXV\" $common1,'UPDATEBBS')\"> ")	if (1);
-	$Page->Print("<input type=button value=\"@íœ@\" $common2,'DELETE')\" class=\"delete\"> ")		if ($isSysad);
+	$Page->Print("<input type=button value=\"ã‚«ãƒ†ã‚´ãƒªå¤‰æ›´\" $common2,'CATCHANGE')\"> ")	if (1);
+	$Page->Print("<input type=button value=\"æƒ…å ±æ›´æ–°\" $common1,'UPDATE')\"> ")		if ($isSysad);
+	$Page->Print("<input type=button value=\"indexæ›´æ–°\" $common1,'UPDATEBBS')\"> ")	if (1);
+	$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common2,'DELETE')\" class=\"delete\"> ")		if ($isSysad);
 	$Page->Print("</td></tr></table>\n");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Œf¦”Âì¬‰æ–Ê‚Ì•\¦
+#	æ²ç¤ºæ¿ä½œæˆç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSCreate
@@ -291,52 +291,52 @@ sub PrintBBSCreate
 	$BBS->Load($SYS);
 	$Category->Load($SYS);
 	
-	# Œf¦”Âî•ñ‚ğæ“¾
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’å–å¾—
 	$BBS->GetKeySet('ALL', '', \@bbsSet);
 	$Category->GetKeySet(\@catSet);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[ì¬]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[ä½œæˆ]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">Œf¦”ÂƒJƒeƒSƒŠ</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ²ç¤ºæ¿ã‚«ãƒ†ã‚´ãƒª</td>");
 	$Page->Print("<td><select name=BBS_CATEGORY>");
 	
-	# ƒJƒeƒSƒŠƒŠƒXƒg‚ğo—Í
+	# ã‚«ãƒ†ã‚´ãƒªãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@catSet) {
 		$name	= $Category->Get('NAME', $id);
 		$Page->Print("<option value=\"$id\">$name</option>\n");
 	}
 	$Page->Print("</select></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">Œf¦”ÂƒfƒBƒŒƒNƒgƒŠ</td><td>");
-	$Page->Print("<input type=text size=60 name=BBS_DIR value=\"[ƒfƒBƒŒƒNƒgƒŠ–¼]\"></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">Œf¦”Â–¼Ì</td><td>");
-	$Page->Print("<input type=text size=60 name=BBS_NAME value=\"[Œf¦”Â–¼]—0chŒf¦”Â\"></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">à–¾</td><td>");
-	$Page->Print("<input type=text size=60 name=BBS_EXPLANATION value=\"[à–¾]\"></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">Œf¦”Âİ’èŒp³</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ²ç¤ºæ¿ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª</td><td>");
+	$Page->Print("<input type=text size=60 name=BBS_DIR value=\"[ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªå]\"></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ²ç¤ºæ¿åç§°</td><td>");
+	$Page->Print("<input type=text size=60 name=BBS_NAME value=\"[æ²ç¤ºæ¿å]ï¼ 0chæ²ç¤ºæ¿\"></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">èª¬æ˜</td><td>");
+	$Page->Print("<input type=text size=60 name=BBS_EXPLANATION value=\"[èª¬æ˜]\"></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ²ç¤ºæ¿è¨­å®šç¶™æ‰¿</td>");
 	$Page->Print("<td><select name=BBS_INHERIT>");
-	$Page->Print("<option value=\"\">‚µ‚È‚¢</option>\n");
+	$Page->Print("<option value=\"\">ã—ãªã„</option>\n");
 	
-	# Œf¦”ÂƒŠƒXƒg‚ğo—Í
+	# æ²ç¤ºæ¿ãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@bbsSet) {
 		$name = $BBS->Get('NAME', $id);
 		$Page->Print("<option value=$id>$name</option>\n");
 	}
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"@ì¬@\" ");
+	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"ã€€ä½œæˆã€€\" ");
 	$Page->Print("onclick=\"DoSubmit('sys.bbs','FUNC','CREATE')\"></td></tr>");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Œf¦”ÂíœŠm”F‰æ–Ê‚Ì•\¦
+#	æ²ç¤ºæ¿å‰Šé™¤ç¢ºèªç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSDelete
@@ -355,14 +355,14 @@ sub PrintBBSDelete
 	@bbsSet = $Form->GetAtArray('BBSS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌŒf¦”Â‚ğíœ‚µ‚Ü‚·B<br><br></td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®æ²ç¤ºæ¿ã‚’å‰Šé™¤ã—ã¾ã™ã€‚<br><br></td></tr>");
 	
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">BBS Name</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Category</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">SubScription</th></tr>\n");
 	
-	# Œf¦”ÂƒŠƒXƒg‚ğo—Í
+	# æ²ç¤ºæ¿ãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@bbsSet) {
 		$name		= $BBS->Get('NAME', $id);
 		$subject	= $BBS->Get('SUBJECT', $id);
@@ -377,21 +377,21 @@ sub PrintBBSDelete
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>");
 	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-	$Page->Print("¦’Fíœ‚µ‚½Œf¦”Â‚ğŒ³‚É–ß‚·‚±‚Æ‚Í‚Å‚«‚Ü‚¹‚ñB</b></td></tr>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã—ãŸæ²ç¤ºæ¿ã‚’å…ƒã«æˆ»ã™ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚</b></td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>");
-	$Page->Print("<tr><td colspan=3 align=left><input type=button value=\"@íœ@\" ");
+	$Page->Print("<tr><td colspan=3 align=left><input type=button value=\"ã€€å‰Šé™¤ã€€\" ");
 	$Page->Print("onclick=\"DoSubmit('sys.bbs','FUNC','DELETE')\" class=\"delete\"></td></tr>");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Œf¦”ÂƒJƒeƒSƒŠ•ÏX‰æ–Ê‚Ì•\¦
+#	æ²ç¤ºæ¿ã‚«ãƒ†ã‚´ãƒªå¤‰æ›´ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBScategoryChange
@@ -411,14 +411,14 @@ sub PrintBBScategoryChange
 	$Category->GetKeySet(\@catSet);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌŒf¦”Â‚ÌƒJƒeƒSƒŠ‚ğ•ÏX‚µ‚Ü‚·B<br><br></td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®æ²ç¤ºæ¿ã®ã‚«ãƒ†ã‚´ãƒªã‚’å¤‰æ›´ã—ã¾ã™ã€‚<br><br></td></tr>");
 	
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">BBS Name</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Category</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">SubScription</th></tr>\n");
 	
-	# Œf¦”ÂƒŠƒXƒg‚ğo—Í
+	# æ²ç¤ºæ¿ãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@bbsSet) {
 		$name		= $BBS->Get('NAME', $id);
 		$subject	= $BBS->Get('SUBJECT', $id);
@@ -431,26 +431,26 @@ sub PrintBBScategoryChange
 		$Page->HTMLInput('hidden', 'BBSS', $id);
 	}
 	$Page->Print("<tr><td colspan=3><hr></td></tr>");
-	$Page->Print("<tr><td colspan=3 align=right>•ÏXŒãƒJƒeƒSƒŠF<select name=SEL_CATEGORY>");
+	$Page->Print("<tr><td colspan=3 align=right>å¤‰æ›´å¾Œã‚«ãƒ†ã‚´ãƒªï¼š<select name=SEL_CATEGORY>");
 	
-	# ƒJƒeƒSƒŠƒŠƒXƒg‚ğo—Í
+	# ã‚«ãƒ†ã‚´ãƒªãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@catSet) {
 		$name = $Category->Get('NAME', $id);
 		$Page->Print("<option value=\"$id\">$name</option>\n");
 	}
-	$Page->Print("</select><input type=button value=\"@•ÏX@\" ");
+	$Page->Print("</select><input type=button value=\"ã€€å¤‰æ›´ã€€\" ");
 	$Page->Print("onclick=\"DoSubmit('sys.bbs','FUNC','CATCHANGE')\"></td></tr>");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒJƒeƒSƒŠˆê——‰æ–Ê‚Ì•\¦
+#	ã‚«ãƒ†ã‚´ãƒªä¸€è¦§ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintCategoryList
@@ -470,12 +470,12 @@ sub PrintCategoryList
 	$Category->GetKeySet(\@catsSet);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td style=\"width:20\">@</th>");
+	$Page->Print("<tr><td style=\"width:20\">ã€€</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">Category Name</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:300\">SubScription</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:50\">Belonging</th></tr>\n");
 	
-	# ƒJƒeƒSƒŠˆê——‚Ìo—Í
+	# ã‚«ãƒ†ã‚´ãƒªä¸€è¦§ã®å‡ºåŠ›
 	foreach $id (@catsSet) {
 		$BBS->GetKeySet('CATEGORY', $id, \@bbsSet);
 		
@@ -492,19 +492,19 @@ sub PrintCategoryList
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left>");
-	$Page->Print("<input type=button value=\"@’Ç‰Á@\" $common,'CATEGORYADD')\"> ");
-	$Page->Print("<input type=button value=\"@íœ@\" $common,'CATEGORYDEL')\" class=\"delete\"> ");
+	$Page->Print("<input type=button value=\"ã€€è¿½åŠ ã€€\" $common,'CATEGORYADD')\"> ");
+	$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'CATEGORYDEL')\" class=\"delete\"> ");
 	$Page->Print("</td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒJƒeƒSƒŠ’Ç‰Á‰æ–Ê‚Ì•\¦
+#	ã‚«ãƒ†ã‚´ãƒªè¿½åŠ ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintCategoryAdd
@@ -516,24 +516,24 @@ sub PrintCategoryAdd
 	$common = "onclick=\"DoSubmit('sys.bbs','FUNC','CATADD');\"";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[’Ç‰Á]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>\n");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[è¿½åŠ ]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒJƒeƒSƒŠ–¼Ì</td><td><input type=text name=NAME size=60></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒJƒeƒSƒŠà–¾</td><td><input type=text name=SUBJ size=60></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚«ãƒ†ã‚´ãƒªåç§°</td><td><input type=text name=NAME size=60></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚«ãƒ†ã‚´ãƒªèª¬æ˜</td><td><input type=text name=SUBJ size=60></td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@’Ç‰Á@\" $common>");
+	$Page->Print("<input type=button value=\"ã€€è¿½åŠ ã€€\" $common>");
 	$Page->Print("</td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒJƒeƒSƒŠíœ‰æ–Ê‚Ì•\¦
+#	ã‚«ãƒ†ã‚´ãƒªå‰Šé™¤ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintCategoryDelete
@@ -550,13 +550,13 @@ sub PrintCategoryDelete
 	@catSet = $Form->GetAtArray('CATS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>ˆÈ‰º‚ÌƒJƒeƒSƒŠ‚ğíœ‚µ‚Ü‚·B<br><br></td></tr>");
+	$Page->Print("<tr><td colspan=2>ä»¥ä¸‹ã®ã‚«ãƒ†ã‚´ãƒªã‚’å‰Šé™¤ã—ã¾ã™ã€‚<br><br></td></tr>");
 	
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">Category Name</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">SubScription</th></tr>\n");
 	
-	# ƒ†[ƒUƒŠƒXƒg‚ğo—Í
+	# ãƒ¦ãƒ¼ã‚¶ãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@catSet) {
 		$name = $Category->Get('NAME', $id);
 		$subj = $Category->Get('SUBJECT', $id);
@@ -568,22 +568,22 @@ sub PrintCategoryDelete
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td bgcolor=yellow colspan=2><b><font color=red>");
-	$Page->Print("¦’Fíœ‚µ‚½ƒJƒeƒSƒŠ‚ğŒ³‚É–ß‚·‚±‚Æ‚Í‚Å‚«‚Ü‚¹‚ñB</b><br>");
-	$Page->Print("¦’FŠ‘®‚µ‚Ä‚¢‚éŒf¦”Â‚ÌƒJƒeƒSƒŠ‚Í‹­§“I‚Éuˆê”Êv‚É‚È‚è‚Ü‚·B</td></tr>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã—ãŸã‚«ãƒ†ã‚´ãƒªã‚’å…ƒã«æˆ»ã™ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚</b><br>");
+	$Page->Print("â€»æ³¨ï¼šæ‰€å±ã—ã¦ã„ã‚‹æ²ç¤ºæ¿ã®ã‚«ãƒ†ã‚´ãƒªã¯å¼·åˆ¶çš„ã«ã€Œä¸€èˆ¬ã€ã«ãªã‚Šã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"@íœ@\" ");
+	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"ã€€å‰Šé™¤ã€€\" ");
 	$Page->Print("onclick=\"DoSubmit('sys.bbs','FUNC','CATDEL')\" class=\"delete\"></td></tr>");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Œf¦”Â‚Ì¶¬
+#	æ²ç¤ºæ¿ã®ç”Ÿæˆ
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionBBSCreate
@@ -592,7 +592,7 @@ sub FunctionBBSCreate
 	my ($bbsCategory, $bbsDir, $bbsName, $bbsExplanation, $bbsInherit);
 	my ($createPath, $dataPath);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -601,7 +601,7 @@ sub FunctionBBSCreate
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = ('BBS_DIR', 'BBS_NAME', 'BBS_CATEGORY');
 		if (! $Form->IsInput(\@inList)) {
@@ -613,23 +613,23 @@ sub FunctionBBSCreate
 	}
 	require './module/earendil.pl';
 	
-	# POSTƒf[ƒ^‚Ìæ“¾
+	# POSTãƒ‡ãƒ¼ã‚¿ã®å–å¾—
 	$bbsCategory	= $Form->Get('BBS_CATEGORY');
 	$bbsDir			= $Form->Get('BBS_DIR');
 	$bbsName		= $Form->Get('BBS_NAME');
 	$bbsExplanation	= $Form->Get('BBS_EXPLANATION');
 	$bbsInherit		= $Form->Get('BBS_INHERIT');
 	
-	# ƒpƒX‚Ìİ’è
+	# ãƒ‘ã‚¹ã®è¨­å®š
 	$createPath		= $Sys->Get('BBSPATH') . '/' . $bbsDir;
 	$dataPath		= '.' . $Sys->Get('DATA');
 	
-	# Œf¦”ÂƒfƒBƒŒƒNƒgƒŠ‚Ìì¬‚É¬Œ÷‚µ‚½‚çA‚»‚Ì‰º‚ÌƒfƒBƒŒƒNƒgƒŠ‚ğì¬‚·‚é
+	# æ²ç¤ºæ¿ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã®ä½œæˆã«æˆåŠŸã—ãŸã‚‰ã€ãã®ä¸‹ã®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’ä½œæˆã™ã‚‹
 	if (! (EARENDIL::CreateDirectory($createPath, $Sys->Get('PM-BDIR')))) {
 		return 2000;
 	}
 	
-	# ƒTƒuƒfƒBƒŒƒNƒgƒŠ¶¬
+	# ã‚µãƒ–ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªç”Ÿæˆ
 	EARENDIL::CreateDirectory("$createPath/i", $Sys->Get('PM-BDIR'));
 	EARENDIL::CreateDirectory("$createPath/dat", $Sys->Get('PM-BDIR'));
 	EARENDIL::CreateDirectory("$createPath/log", $Sys->Get('PM-LDIR'));
@@ -637,7 +637,7 @@ sub FunctionBBSCreate
 	EARENDIL::CreateDirectory("$createPath/pool", $Sys->Get('PM-ADIR'));
 	EARENDIL::CreateDirectory("$createPath/info", $Sys->Get('PM-ADIR'));
 	
-	# ƒfƒtƒHƒ‹ƒgƒf[ƒ^‚ÌƒRƒs[
+	# ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ‡ãƒ¼ã‚¿ã®ã‚³ãƒ”ãƒ¼
 	EARENDIL::Copy("$dataPath/default_img.gif", "$createPath/kanban.gif");
 	EARENDIL::Copy("$dataPath/default_bac.gif", "$createPath/ba.gif");
 	EARENDIL::Copy("$dataPath/default_hed.txt", "$createPath/head.txt");
@@ -646,9 +646,9 @@ sub FunctionBBSCreate
 	EARENDIL::Copy("$dataPath/index.html", "$createPath/pool/index.html");
 	EARENDIL::Copy("$dataPath/index.html", "$createPath/info/index.html");
 	
-	push @$pLog, "¡Œf¦”ÂƒfƒBƒŒƒNƒgƒŠ¶¬Š®—¹...[$createPath]";
+	push @$pLog, "â– æ²ç¤ºæ¿ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªç”Ÿæˆå®Œäº†...[$createPath]";
 	
-	# İ’èŒp³î•ñ‚ÌƒRƒs[
+	# è¨­å®šç¶™æ‰¿æƒ…å ±ã®ã‚³ãƒ”ãƒ¼
 	if ($bbsInherit ne '') {
 		my ($BBS, $inheritPath);
 		require './module/nazguls.pl';
@@ -660,12 +660,12 @@ sub FunctionBBSCreate
 		EARENDIL::Copy("$inheritPath/info/groups.cgi", "$createPath/info/groups.cgi");
 		EARENDIL::Copy("$inheritPath/info/capgroups.cgi", "$createPath/info/capgroups.cgi");
 		
-		push @$pLog, "¡İ’èŒp³Š®—¹...[$inheritPath]";
+		push @$pLog, "â– è¨­å®šç¶™æ‰¿å®Œäº†...[$inheritPath]";
 	}
 	
 	my ($bbsSetting);
 	
-	# Œf¦”Âİ’èî•ñ¶¬
+	# æ²ç¤ºæ¿è¨­å®šæƒ…å ±ç”Ÿæˆ
 	require './module/isildur.pl';
 	$bbsSetting = ISILDUR->new;
 	
@@ -684,9 +684,9 @@ sub FunctionBBSCreate
 	
 	$bbsSetting->Save($Sys);
 	
-	push @$pLog, '¡Œf¦”Âİ’èŠ®—¹...';
+	push @$pLog, 'â– æ²ç¤ºæ¿è¨­å®šå®Œäº†...';
 	
-	# Œf¦”Â\¬—v‘f¶¬
+	# æ²ç¤ºæ¿æ§‹æˆè¦ç´ ç”Ÿæˆ
 	my ($BBSAid);
 	require './module/varda.pl';
 	$BBSAid = VARDA->new;
@@ -697,9 +697,9 @@ sub FunctionBBSCreate
 	$BBSAid->CreateIIndex();
 	$BBSAid->CreateSubback();
 	
-	push @$pLog, '¡Œf¦”Â\\¬—v‘f¶¬Š®—¹...';
+	push @$pLog, 'â– æ²ç¤ºæ¿æ§‹\æˆè¦ç´ ç”Ÿæˆå®Œäº†...';
 	
-	# ‰ß‹ƒƒOƒCƒ“ƒfƒNƒX¶¬
+	# éå»ãƒ­ã‚°ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ç”Ÿæˆ
 	require './module/thorin.pl';
 	require './module/celeborn.pl';
 	my $PastLog = CELEBORN->new;
@@ -709,20 +709,20 @@ sub FunctionBBSCreate
 	$PastLog->UpdateIndex($Sys, $Page);
 	$PastLog->Save($Sys);
 	
-	push @$pLog, '¡‰ß‹ƒƒOƒCƒ“ƒfƒNƒX¶¬Š®—¹...';
+	push @$pLog, 'â– éå»ãƒ­ã‚°ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ç”Ÿæˆå®Œäº†...';
 	
-	# Œf¦”Âî•ñ‚É’Ç‰Á
+	# æ²ç¤ºæ¿æƒ…å ±ã«è¿½åŠ 
 	require './module/nazguls.pl';
 	my $BBS = NAZGUL->new;
 	$BBS->Load($Sys);
 	$BBS->Add($bbsName, $bbsDir, $bbsExplanation, $bbsCategory);
 	$BBS->Save($Sys);
 	
-	push @$pLog, '¡Œf¦”Âî•ñ’Ç‰ÁŠ®—¹';
-	push @$pLog, "@@@@–¼‘OF$bbsName";
-	push @$pLog, "@@@@ƒTƒuƒWƒFƒNƒgF$bbsExplanation";
-	push @$pLog, "@@@@ƒJƒeƒSƒŠF$bbsCategory";
-	push @$pLog, '<hr>ˆÈ‰º‚ÌURL‚ÉŒf¦”Â‚ğì¬‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'â– æ²ç¤ºæ¿æƒ…å ±è¿½åŠ å®Œäº†';
+	push @$pLog, "ã€€ã€€ã€€ã€€åå‰ï¼š$bbsName";
+	push @$pLog, "ã€€ã€€ã€€ã€€ã‚µãƒ–ã‚¸ã‚§ã‚¯ãƒˆï¼š$bbsExplanation";
+	push @$pLog, "ã€€ã€€ã€€ã€€ã‚«ãƒ†ã‚´ãƒªï¼š$bbsCategory";
+	push @$pLog, '<hr>ä»¥ä¸‹ã®URLã«æ²ç¤ºæ¿ã‚’ä½œæˆã—ã¾ã—ãŸã€‚';
 	push @$pLog, "<a href=\"$createPath/\" target=_blank>$createPath/</a>";
 	
 	return 0;
@@ -730,12 +730,12 @@ sub FunctionBBSCreate
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Œf¦”Â‚ÌXV
+#	æ²ç¤ºæ¿ã®æ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionBBSUpdate
@@ -762,19 +762,19 @@ sub FunctionBBSUpdate
 		$BBSAid->CreateIIndex();
 		$BBSAid->CreateSubback();
 		
-		push @$pLog, "¡Œf¦”Âu$namev‚ğXV‚µ‚Ü‚µ‚½B";
+		push @$pLog, "â– æ²ç¤ºæ¿ã€Œ$nameã€ã‚’æ›´æ–°ã—ã¾ã—ãŸã€‚";
 	}
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Œf¦”Âî•ñ‚ÌXV
+#	æ²ç¤ºæ¿æƒ…å ±ã®æ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionBBSInfoUpdate
@@ -782,7 +782,7 @@ sub FunctionBBSInfoUpdate
 	my ($Sys, $Form, $pLog) = @_;
 	my ($BBS);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -798,20 +798,20 @@ sub FunctionBBSInfoUpdate
 	$BBS->Update($Sys, '');
 	$BBS->Save($Sys);
 	
-	push @$pLog, '¡Œf¦”Âî•ñ‚ÌXV‚ª³í‚ÉI—¹‚µ‚Ü‚µ‚½B';
-	push @$pLog, '¦ƒJƒeƒSƒŠ‚Í‘S‚Äuˆê”Êv‚Éİ’è‚³‚ê‚½‚Ì‚ÅAÄİ’è‚µ‚Ä‚­‚¾‚³‚¢B';
+	push @$pLog, 'â– æ²ç¤ºæ¿æƒ…å ±ã®æ›´æ–°ãŒæ­£å¸¸ã«çµ‚äº†ã—ã¾ã—ãŸã€‚';
+	push @$pLog, 'â€»ã‚«ãƒ†ã‚´ãƒªã¯å…¨ã¦ã€Œä¸€èˆ¬ã€ã«è¨­å®šã•ã‚ŒãŸã®ã§ã€å†è¨­å®šã—ã¦ãã ã•ã„ã€‚';
 	
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Œf¦”Â‚Ìíœ
+#	æ²ç¤ºæ¿ã®å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionBBSDelete
@@ -819,7 +819,7 @@ sub FunctionBBSDelete
 	my ($Sys, $Form, $pLog) = @_;
 	my ($BBS, @bbsSet, $id, $dir, $name, $path);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -841,11 +841,11 @@ sub FunctionBBSDelete
 		$name	= $BBS->Get('NAME', $id);
 		$path	= $Sys->Get('BBSPATH') . "/$dir";
 		
-		# Œf¦”ÂƒfƒBƒŒƒNƒgƒŠ‚ÆŒf¦”Âî•ñ‚Ìíœ
+		# æ²ç¤ºæ¿ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã¨æ²ç¤ºæ¿æƒ…å ±ã®å‰Šé™¤
 		EARENDIL::DeleteDirectory($path);
 		$BBS->Delete($id);
 		
-		push @$pLog, "¡Œf¦”Âu$name($dir)v‚ğíœ‚µ‚Ü‚µ‚½B<br>";
+		push @$pLog, "â– æ²ç¤ºæ¿ã€Œ$name($dir)ã€ã‚’å‰Šé™¤ã—ã¾ã—ãŸã€‚<br>";
 	}
 	$BBS->Save($Sys);
 	
@@ -854,12 +854,12 @@ sub FunctionBBSDelete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒJƒeƒSƒŠ‚Ì’Ç‰Á
+#	ã‚«ãƒ†ã‚´ãƒªã®è¿½åŠ 
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionCategoryAdd
@@ -867,7 +867,7 @@ sub FunctionCategoryAdd
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Category, $name, $subj);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -887,11 +887,11 @@ sub FunctionCategoryAdd
 	$Category->Add($name, $subj);
 	$Category->Save($Sys);
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	{
-		push @$pLog, '<b>¡ ƒJƒeƒSƒŠ’Ç‰Á</b>';
-		push @$pLog, "ƒJƒeƒSƒŠ–¼ÌF$name";
-		push @$pLog, "ƒJƒeƒSƒŠà–¾F$subj";
+		push @$pLog, '<b>â–  ã‚«ãƒ†ã‚´ãƒªè¿½åŠ </b>';
+		push @$pLog, "ã‚«ãƒ†ã‚´ãƒªåç§°ï¼š$name";
+		push @$pLog, "ã‚«ãƒ†ã‚´ãƒªèª¬æ˜ï¼š$subj";
 	}
 	
 	return 0;
@@ -899,12 +899,12 @@ sub FunctionCategoryAdd
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒJƒeƒSƒŠ‚Ìíœ
+#	ã‚«ãƒ†ã‚´ãƒªã®å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionCategoryDelete
@@ -913,7 +913,7 @@ sub FunctionCategoryDelete
 	my ($Category, $BBS, $name, $id, $bbsID);
 	my (@categorySet, @bbsSet);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -940,7 +940,7 @@ sub FunctionCategoryDelete
 			}
 			undef @bbsSet;
 			$Category->Delete($id);
-			push @$pLog, "ƒJƒeƒSƒŠu$namev‚ğíœ";
+			push @$pLog, "ã‚«ãƒ†ã‚´ãƒªã€Œ$nameã€ã‚’å‰Šé™¤";
 		}
 	}
 	$BBS->Save($Sys);
@@ -951,12 +951,12 @@ sub FunctionCategoryDelete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒJƒeƒSƒŠ‚Ì•ÏX
+#	ã‚«ãƒ†ã‚´ãƒªã®å¤‰æ›´
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionCategoryChange
@@ -964,7 +964,7 @@ sub FunctionCategoryChange
 	my ($Sys, $Form, $pLog) = @_;
 	my ($BBS, $Category, @bbsSet, $idCat, $nmCat, $nmBBS, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -987,7 +987,7 @@ sub FunctionCategoryChange
 	foreach $id (@bbsSet) {
 		$BBS->Set($id, 'CATEGORY', $idCat);
 		$nmBBS = $BBS->Get('NAME', $id);
-		push @$pLog, "u$nmBBSv‚ÌƒJƒeƒSƒŠ‚ğu$nmCatv‚É•ÏX";
+		push @$pLog, "ã€Œ$nmBBSã€ã®ã‚«ãƒ†ã‚´ãƒªã‚’ã€Œ$nmCatã€ã«å¤‰æ›´";
 	}
 	
 	$BBS->Save($Sys);

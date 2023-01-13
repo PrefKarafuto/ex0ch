@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	Œf¦”ÂŠÇ— - ƒXƒŒƒbƒh ƒ‚ƒWƒ…[ƒ‹
+#	æ²ç¤ºæ¿ç®¡ç† - ã‚¹ãƒ¬ãƒƒãƒ‰ ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	bbs.thread.pl
 #	---------------------------------------------------------------------------
 #	2004.02.07 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -53,7 +53,7 @@ sub DoPrint
 	$BASE = SAURON->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	if (! defined $BBS) {
 		require './module/nazguls.pl';
 		$BBS = NAZGUL->new;
@@ -63,47 +63,47 @@ sub DoPrint
 		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	}
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys, $Sys->Get('BBS'));
 	
-	if ($subMode eq 'LIST') {														# ƒXƒŒƒbƒhˆê——‰æ–Ê
+	if ($subMode eq 'LIST') {														# ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ç”»é¢
 		PrintThreadList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'STOP') {													# ƒXƒŒƒbƒh’â~Šm”F‰æ–Ê
+	elsif ($subMode eq 'STOP') {													# ã‚¹ãƒ¬ãƒƒãƒ‰åœæ­¢ç¢ºèªç”»é¢
 		PrintThreadStop($Page, $Sys, $Form, 1);
 	}
-	elsif ($subMode eq 'RESTART') {													# ƒXƒŒƒbƒh’â~‰ğœŠm”F‰æ–Ê
+	elsif ($subMode eq 'RESTART') {													# ã‚¹ãƒ¬ãƒƒãƒ‰åœæ­¢è§£é™¤ç¢ºèªç”»é¢
 		PrintThreadStop($Page, $Sys, $Form, 0);
 	}
-	elsif ($subMode eq 'ATTR') {													# ‘®«•t‰ÁŠm”F‰æ–Ê
+	elsif ($subMode eq 'ATTR') {													# å±æ€§ä»˜åŠ ç¢ºèªç”»é¢
 		PrintThreadAttr($Page, $Sys, $Form, 1);
 	}
-	elsif ($subMode eq 'DEATTR') {													# ‘®«‰ğœŠm”F‰æ–Ê
+	elsif ($subMode eq 'DEATTR') {													# å±æ€§è§£é™¤ç¢ºèªç”»é¢
 		PrintThreadAttr($Page, $Sys, $Form, 0);
 	}
-	elsif ($subMode eq 'POOL') {													# ƒXƒŒƒbƒhDAT—‚¿Šm”F‰æ–Ê
+	elsif ($subMode eq 'POOL') {													# ã‚¹ãƒ¬ãƒƒãƒ‰DATè½ã¡ç¢ºèªç”»é¢
 		PrintThreadPooling($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'DELETE') {													# ƒXƒŒƒbƒhíœŠm”F‰æ–Ê
+	elsif ($subMode eq 'DELETE') {													# ã‚¹ãƒ¬ãƒƒãƒ‰å‰Šé™¤ç¢ºèªç”»é¢
 		PrintThreadDelete($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'AUTOPOOL') {												# ˆêŠ‡DAT—‚¿‰æ–Ê
+	elsif ($subMode eq 'AUTOPOOL') {												# ä¸€æ‹¬DATè½ã¡ç”»é¢
 		PrintThreadAutoPooling($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ˆ—Š®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# å‡¦ç†å®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('ƒXƒŒƒbƒhˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('ã‚¹ãƒ¬ãƒƒãƒ‰å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ˆ—¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# å‡¦ç†å¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
 	
-	# Œf¦”Âî•ñ‚ğİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’è¨­å®š
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	
 	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
@@ -111,12 +111,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -128,7 +128,7 @@ sub DoFunction
 	require './module/nazguls.pl';
 	$BBS = NAZGUL->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$BBS->Load($Sys);
 	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$Sys->Set('ADMIN', $pSys);
@@ -137,35 +137,35 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'STOP') {														# ’â~
+	if ($subMode eq 'STOP') {														# åœæ­¢
 		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 1);
 	}
-	elsif ($subMode eq 'RESTART') {													# ÄŠJ
+	elsif ($subMode eq 'RESTART') {													# å†é–‹
 		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 0);
 	}
-	elsif ($subMode eq 'ATTR') {													# ‘®«•t‰Á
+	elsif ($subMode eq 'ATTR') {													# å±æ€§ä»˜åŠ 
 		$err = FunctionThreadAttr($Sys, $Form, $this->{'LOG'}, 1);
 	}
-	elsif ($subMode eq 'DEATTR') {													# ‘®«‰ğœ
+	elsif ($subMode eq 'DEATTR') {													# å±æ€§è§£é™¤
 		$err = FunctionThreadAttr($Sys, $Form, $this->{'LOG'}, 0);
 	}
-	elsif ($subMode eq 'POOL') {													# DAT—‚¿
+	elsif ($subMode eq 'POOL') {													# DATè½ã¡
 		$err = FunctionThreadPooling($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'DELETE') {													# íœ
+	elsif ($subMode eq 'DELETE') {													# å‰Šé™¤
 		$err = FunctionThreadDelete($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'UPDATE') {													# î•ñXV
+	elsif ($subMode eq 'UPDATE') {													# æƒ…å ±æ›´æ–°
 		$err = FunctionUpdateSubject($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'UPDATEALL') {												# ‘SXV
+	elsif ($subMode eq 'UPDATEALL') {												# å…¨æ›´æ–°
 		$err = FunctionUpdateSubjectAll($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'AUTOPOOL') {												# ˆêŠ‡dat—‚¿
+	elsif ($subMode eq 'AUTOPOOL') {												# ä¸€æ‹¬datè½ã¡
 		$err = FunctionThreadAutoPooling($Sys, $Form, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -181,34 +181,34 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
 	
-	$Base->SetMenu('ƒXƒŒƒbƒhˆê——', "'bbs.thread','DISP','LIST'");
+	$Base->SetMenu('ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§', "'bbs.thread','DISP','LIST'");
 	
-	# ƒXƒŒƒbƒhdat—‚¿Œ ŒÀ‚Ì‚İ
+	# ã‚¹ãƒ¬ãƒƒãƒ‰datè½ã¡æ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {
-		$Base->SetMenu('ˆêŠ‡DAT—‚¿', "'bbs.thread','DISP','AUTOPOOL'");
+		$Base->SetMenu('ä¸€æ‹¬DATè½ã¡', "'bbs.thread','DISP','AUTOPOOL'");
 	}
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('ƒVƒXƒeƒ€ŠÇ—‚Ö–ß‚é', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ã¸æˆ»ã‚‹', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhˆê——‚Ì•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadList
@@ -229,13 +229,13 @@ sub PrintThreadList
 	$ThreadNum = $Threads->GetNum();
 	$base = $SYS->Get('BBSPATH') . '/' . $SYS->Get('BBS') . '/dat';
 	
-	# •\¦”‚Ìİ’è
+	# è¡¨ç¤ºæ•°ã®è¨­å®š
 	$dispNum	= $Form->Get('DISPNUM', 10);
 	$dispSt		= $Form->Get('DISPST', 0) || 0;
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	$dispEd		= (($dispSt + $dispNum) > $ThreadNum ? $ThreadNum : ($dispSt + $dispNum));
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	my ($isStop, $isPool, $isDelete, $isUpdate, $isResEdit, $isResAbone);
 	$isStop		= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_THREADSTOP, $SYS->Get('BBS'));
 	$isPool		= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_THREADPOOL, $SYS->Get('BBS'));
@@ -244,7 +244,7 @@ sub PrintThreadList
 	$isResEdit	= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESEDIT, $SYS->Get('BBS'));
 	$isResAbone	= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $SYS->Get('BBS'));
 	
-	# ƒwƒbƒ_•”•ª‚Ì•\¦
+	# ãƒ˜ãƒƒãƒ€éƒ¨åˆ†ã®è¡¨ç¤º
 	$common = "DoSubmit('bbs.thread','DISP','LIST');";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
@@ -252,10 +252,10 @@ sub PrintThreadList
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("•\\¦”<input type=text name=DISPNUM size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"@•\\¦@\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("è¡¨\ç¤ºæ•°<input type=text name=DISPNUM size=4 value=$dispNum>");
+	$Page->Print("<input type=button value=\"ã€€è¡¨\ç¤ºã€€\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">‘S</a></th>");
+	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">å…¨</a></th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250px\">Thread Title</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Thread Key</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Res</td>");
@@ -276,12 +276,12 @@ sub PrintThreadList
 		my $perms = $SYS->Get('PM-STOP');
 		my $isstop = $permt == $perms;
 		
-		# •\¦”wŒiFİ’è
+		# è¡¨ç¤ºèƒŒæ™¯è‰²è¨­å®š
 		#if ($Threads->GetAttr($id, 'stop')) { # use from 0.8.x
-		if ($isstop) {								$bgColor = '#ffcfff'; }	# ’â~ƒXƒŒƒbƒh
-		elsif ($res > $resmax) {					$bgColor = '#cfffff'; }	# Å‘å”ƒXƒŒƒbƒh
-		elsif (ARAGORN::IsMoved("$base/$id.dat")) {	$bgColor = '#ffffcf'; }	# ˆÚ“]ƒXƒŒƒbƒh
-		else {										$bgColor = '#ffffff'; }	# ’ÊíƒXƒŒƒbƒh
+		if ($isstop) {								$bgColor = '#ffcfff'; }	# åœæ­¢ã‚¹ãƒ¬ãƒƒãƒ‰
+		elsif ($res > $resmax) {					$bgColor = '#cfffff'; }	# æœ€å¤§æ•°ã‚¹ãƒ¬ãƒƒãƒ‰
+		elsif (ARAGORN::IsMoved("$base/$id.dat")) {	$bgColor = '#ffffcf'; }	# ç§»è»¢ã‚¹ãƒ¬ãƒƒãƒ‰
+		else {										$bgColor = '#ffffff'; }	# é€šå¸¸ã‚¹ãƒ¬ãƒƒãƒ‰
 		
 		$common = "\"javascript:SetOption('TARGET_THREAD','$id');";
 		$common .= "DoSubmit('thread.res','DISP','LIST')\"";
@@ -289,8 +289,8 @@ sub PrintThreadList
 		$Page->Print("<tr bgcolor=$bgColor>");
 		$Page->Print("<td><input type=checkbox name=THREADS value=$id></td>");
 		if ($isResEdit || $isResAbone) {
-			if (! ($subj =~ /[^\s@]/) || $subj eq '') {
-				$subj = '(‹ó—“‚à‚µ‚­‚Í‹ó”’‚Ì‚İ)';
+			if (! ($subj =~ /[^\sã€€]/) || $subj eq '') {
+				$subj = '(ç©ºæ¬„ã‚‚ã—ãã¯ç©ºç™½ã®ã¿)';
 			}
 			$Page->Print("<td>$n: <a href=$common>$subj</a></td>");
 		}
@@ -299,10 +299,10 @@ sub PrintThreadList
 		}
 		$Page->Print("<td align=center>$id</td><td align=center>$res</td>");
 		my @attrstr = ();
-		push @attrstr, '’â~' if ($isstop);
-		push @attrstr, '•‚ã' if ($Threads->GetAttr($id, 'float'));
-		push @attrstr, '•s—' if ($Threads->GetAttr($id, 'nopool'));
-		push @attrstr, 'sageis' if ($Threads->GetAttr($id, 'sagemode'));
+		push @attrstr, 'åœæ­¢' if ($isstop);
+		push @attrstr, 'æµ®ä¸Š' if ($Threads->GetAttr($id, 'float'));
+		push @attrstr, 'ä¸è½' if ($Threads->GetAttr($id, 'nopool'));
+		push @attrstr, 'sageé€²è¡Œ' if ($Threads->GetAttr($id, 'sagemode'));
 		$Page->Print("<td>@attrstr</td></tr>\n");
 	}
 	$common		= "onclick=\"DoSubmit('bbs.thread','DISP'";
@@ -310,25 +310,25 @@ sub PrintThreadList
 	
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
-#	$Page->Print("<input type=button value=\" ƒRƒs[ \" $common2,'COPY')\"> ");
-#	$Page->Print("<input type=button value=\"@ˆÚ“®@\" $common2,'MOVE')\"> ");
-	$Page->Print("<input type=button value=\"subjectXV\" $common2,'UPDATE')\"> ")			if ($isUpdate);
-	$Page->Print("<input type=button value=\"subjectÄì¬\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
-	$Page->Print("<input type=button value=\"@’â~@\" $common,'STOP')\"> ")				if ($isStop);
-	$Page->Print("<input type=button value=\"@ÄŠJ@\" $common,'RESTART')\"> ")			if ($isStop);
-	$Page->Print("<input type=button value=\"DAT—‚¿\" $common,'POOL')\"> ")				if ($isPool);
+#	$Page->Print("<input type=button value=\" ã‚³ãƒ”ãƒ¼ \" $common2,'COPY')\"> ");
+#	$Page->Print("<input type=button value=\"ã€€ç§»å‹•ã€€\" $common2,'MOVE')\"> ");
+	$Page->Print("<input type=button value=\"subjectæ›´æ–°\" $common2,'UPDATE')\"> ")			if ($isUpdate);
+	$Page->Print("<input type=button value=\"subjectå†ä½œæˆ\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
+	$Page->Print("<input type=button value=\"ã€€åœæ­¢ã€€\" $common,'STOP')\"> ")				if ($isStop);
+	$Page->Print("<input type=button value=\"ã€€å†é–‹ã€€\" $common,'RESTART')\"> ")			if ($isStop);
+	$Page->Print("<input type=button value=\"DATè½ã¡\" $common,'POOL')\"> ")				if ($isPool);
 	
 	if ($isStop) {
-		$Page->Print("‘®«: <select name=ATTR>");
-		$Page->Print("<option value=float>•‚ã");
-		$Page->Print("<option value=nopool>•s—");
-		$Page->Print("<option value=sagemode>sageis");
+		$Page->Print("å±æ€§: <select name=ATTR>");
+		$Page->Print("<option value=float>æµ®ä¸Š");
+		$Page->Print("<option value=nopool>ä¸è½");
+		$Page->Print("<option value=sagemode>sageé€²è¡Œ");
 		$Page->Print("</select> ");
-		$Page->Print("<input type=button value=\"•t‰Á\" $common,'ATTR')\"> ");
-		$Page->Print("<input type=button value=\"‰ğœ\" $common,'DEATTR')\"> ");
+		$Page->Print("<input type=button value=\"ä»˜åŠ \" $common,'ATTR')\"> ");
+		$Page->Print("<input type=button value=\"è§£é™¤\" $common,'DEATTR')\"> ");
 	}
 	
-	$Page->Print("<input type=button value=\"@íœ@\" $common,'DELETE')\" class=\"delete\"> ")				if ($isDelete);
+	$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'DELETE')\" class=\"delete\"> ")				if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	
@@ -338,12 +338,12 @@ sub PrintThreadList
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒh’â~Šm”F•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰åœæ­¢ç¢ºèªè¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadStop
@@ -353,7 +353,7 @@ sub PrintThreadStop
 	my ($common, $text);
 	
 	$SYS->Set('_TITLE', ($mode ? 'Thread Stop' : 'Thread Restart'));
-	$text = ($mode ? '’â~' : 'ÄŠJ');
+	$text = ($mode ? 'åœæ­¢' : 'å†é–‹');
 	
 	require './module/baggins.pl';
 	$Threads = BILBO->new;
@@ -362,7 +362,7 @@ sub PrintThreadStop
 	@threadList = $Form->GetAtArray('THREADS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌƒXƒŒƒbƒh‚ğ$text‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’$textã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");
@@ -383,23 +383,23 @@ sub PrintThreadStop
 	
 	if ($mode) {
 		$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-		$Page->Print("¦’F’â~‚µ‚½ƒXƒŒƒbƒh‚Í[ÄŠJ]‚Å’â~ó‘Ô‚ğ‰ğœ‚Å‚«‚Ü‚·B</b><br>");
+		$Page->Print("â€»æ³¨ï¼šåœæ­¢ã—ãŸã‚¹ãƒ¬ãƒƒãƒ‰ã¯[å†é–‹]ã§åœæ­¢çŠ¶æ…‹ã‚’è§£é™¤ã§ãã¾ã™ã€‚</b><br>");
 		$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	}
 	$Page->Print("<tr><td colspan=3 align=left>");
-	$Page->Print('<input type=button value="@' . $text . "@\" onclick=\"$common;\"> ");
+	$Page->Print('<input type=button value="ã€€' . $text . "ã€€\" onclick=\"$common;\"> ");
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒh•‚ãŠm”F•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰æµ®ä¸Šç¢ºèªè¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadAttr
@@ -408,11 +408,11 @@ sub PrintThreadAttr
 	
 	$Sys->Set('_TITLE', ($mode ? 'Thread Add Attribute' : 'Thread Remove Attribute'));
 	
-	my %alist = ('float'=>'•‚ã', 'nopool'=>'•s—', 'sagemode'=>'sageis');
+	my %alist = ('float'=>'æµ®ä¸Š', 'nopool'=>'ä¸è½', 'sagemode'=>'sageé€²è¡Œ');
 	my $attr = $Form->Get('ATTR');
 	my $name = $attr;
 	$name = $alist{$attr} if (defined $alist{$name});
-	my $text = "[$name]‘®«" .($mode?'•t‰Á':'‰ğœ');
+	my $text = "[$name]å±æ€§" .($mode?'ä»˜åŠ ':'è§£é™¤');
 	
 	require './module/baggins.pl';
 	my $Threads = BILBO->new;
@@ -421,7 +421,7 @@ sub PrintThreadAttr
 	my @threadList = $Form->GetAtArray('THREADS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌƒXƒŒƒbƒh‚ğ$text‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’$textã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");
@@ -449,12 +449,12 @@ sub PrintThreadAttr
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhDAT—‚¿Šm”F•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰DATè½ã¡ç¢ºèªè¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadPooling
@@ -471,7 +471,7 @@ sub PrintThreadPooling
 	@threadList = $Form->GetAtArray('THREADS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌƒXƒŒƒbƒh‚ğDAT—‚¿‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’DATè½ã¡ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");
@@ -490,22 +490,22 @@ sub PrintThreadPooling
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-	$Page->Print("¦’FDAT—‚¿‚µ‚½ƒXƒŒƒbƒh‚Í[DAT—‚¿ƒXƒŒƒbƒh]‰æ–Ê‚Å•œ‹A‚Å‚«‚Ü‚·B</b><br>");
+	$Page->Print("â€»æ³¨ï¼šDATè½ã¡ã—ãŸã‚¹ãƒ¬ãƒƒãƒ‰ã¯[DATè½ã¡ã‚¹ãƒ¬ãƒƒãƒ‰]ç”»é¢ã§å¾©å¸°ã§ãã¾ã™ã€‚</b><br>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3 align=left>");
-	$Page->Print("<input type=button value=\"DAT—‚¿\" onclick=\"$common\"> ");
+	$Page->Print("<input type=button value=\"DATè½ã¡\" onclick=\"$common\"> ");
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhíœŠm”F•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰å‰Šé™¤ç¢ºèªè¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadDelete
@@ -522,12 +522,12 @@ sub PrintThreadDelete
 	@threadList = $Form->GetAtArray('THREADS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌƒXƒŒƒbƒh‚ğíœ‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å‰Šé™¤ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">ƒXƒŒƒbƒh–¼</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">ƒXƒŒƒbƒhƒL[</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:50\">ƒŒƒX”</td></td>\n");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">ã‚¹ãƒ¬ãƒƒãƒ‰å</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¼</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:50\">ãƒ¬ã‚¹æ•°</td></td>\n");
 	
 	foreach $id (@threadList) {
 		$subj	= $Threads->Get('SUBJECT', $id);
@@ -541,22 +541,22 @@ sub PrintThreadDelete
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-	$Page->Print("¦’Fíœ‚µ‚½ƒXƒŒƒbƒh‚ğŒ³‚É–ß‚·‚±‚Æ‚Í‚Å‚«‚Ü‚¹‚ñB</b><br>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã—ãŸã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å…ƒã«æˆ»ã™ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚</b><br>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3 align=left>");
-	$Page->Print("<input type=button value=\"@íœ@\" onclick=\"$common\" class=\"delete\"> ");
+	$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" onclick=\"$common\" class=\"delete\"> ");
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒh©“®DAT—‚¿‰æ–Ê•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰è‡ªå‹•DATè½ã¡ç”»é¢è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadAutoPooling
@@ -567,43 +567,43 @@ sub PrintThreadAutoPooling
 	$SYS->Set('_TITLE', 'Thread Auto Pooling');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>ˆÈ‰º‚ÌŠeğŒ‚É“–‚Ä‚Í‚Ü‚éƒXƒŒƒbƒh‚ğdat—‚¿‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=2>ä»¥ä¸‹ã®å„æ¡ä»¶ã«å½“ã¦ã¯ã¾ã‚‹ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’datè½ã¡ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">ğŒ(OR)</td>");
-	$Page->Print("<td class=\"DetailTitle\">ğŒİ’è’l</td></tr>\n");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">æ¡ä»¶(OR)</td>");
+	$Page->Print("<td class=\"DetailTitle\">æ¡ä»¶è¨­å®šå€¤</td></tr>\n");
 	
 	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYDATE value=on>");
-	$Page->Print("<b>ÅI‘‚«‚İ</b></td><td>ÅI‘‚«‚İ‚ª");
-	$Page->Print("<input type=text size=4 name=POOLDATE value=30>“úˆÈ‘O</td></tr>\n");
+	$Page->Print("<b>æœ€çµ‚æ›¸ãè¾¼ã¿</b></td><td>æœ€çµ‚æ›¸ãè¾¼ã¿ãŒ");
+	$Page->Print("<input type=text size=4 name=POOLDATE value=30>æ—¥ä»¥å‰</td></tr>\n");
 	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYPOS value=on>");
-	$Page->Print("<b>ƒXƒŒƒbƒhˆÊ’u</b></td><td>ƒXƒŒƒbƒhˆÊ’u‚ª");
-	$Page->Print("<input type=text size=4 name=POOLPOS value=500>ˆÈ~</td></tr>\n");
+	$Page->Print("<b>ã‚¹ãƒ¬ãƒƒãƒ‰ä½ç½®</b></td><td>ã‚¹ãƒ¬ãƒƒãƒ‰ä½ç½®ãŒ");
+	$Page->Print("<input type=text size=4 name=POOLPOS value=500>ä»¥é™</td></tr>\n");
 	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYRES value=on>");
-	$Page->Print("<b>ƒŒƒX”</b></td><td>ƒŒƒX”‚ª");
-	$Page->Print("<input type=text size=4 name=POOLRES value=1000>‚ğ’´‚¦‚½‚à‚Ì</td></tr>\n");
+	$Page->Print("<b>ãƒ¬ã‚¹æ•°</b></td><td>ãƒ¬ã‚¹æ•°ãŒ");
+	$Page->Print("<input type=text size=4 name=POOLRES value=1000>ã‚’è¶…ãˆãŸã‚‚ã®</td></tr>\n");
 	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYTITLE value=on>");
-	$Page->Print("<b>ƒ^ƒCƒgƒ‹</b></td><td>ƒ^ƒCƒgƒ‹‚ª");
-	$Page->Print("<input type=text size=15 name=POOLTITLE value=>‚Éƒ}ƒbƒ`‚·‚é‚à‚Ì(³‹K•\\Œ»)</td></tr>\n");
+	$Page->Print("<b>ã‚¿ã‚¤ãƒˆãƒ«</b></td><td>ã‚¿ã‚¤ãƒˆãƒ«ãŒ");
+	$Page->Print("<input type=text size=15 name=POOLTITLE value=>ã«ãƒãƒƒãƒã™ã‚‹ã‚‚ã®(æ­£è¦è¡¨\ç¾)</td></tr>\n");
 	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYSTOP value=on>");
-	$Page->Print("<b>’â~ƒXƒŒƒbƒh</b></td><td>ƒXƒŒƒbƒh‚ª’â~E‚Ü‚½‚ÍˆÚ“]‚³‚ê‚Ä‚¢‚é‚à‚Ì</td></tr>");
+	$Page->Print("<b>åœæ­¢ã‚¹ãƒ¬ãƒƒãƒ‰</b></td><td>ã‚¹ãƒ¬ãƒƒãƒ‰ãŒåœæ­¢ãƒ»ã¾ãŸã¯ç§»è»¢ã•ã‚Œã¦ã„ã‚‹ã‚‚ã®</td></tr>");
 	
 	$common = "DoSubmit('bbs.thread','FUNC','AUTOPOOL')";
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@Às@\" onclick=\"$common\">");
+	$Page->Print("<input type=button value=\"ã€€å®Ÿè¡Œã€€\" onclick=\"$common\">");
 	$Page->Print("</td></tr></td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒh’â~^‰ğœ
+#	ã‚¹ãƒ¬ãƒƒãƒ‰åœæ­¢ï¼è§£é™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionThreadStop
@@ -611,7 +611,7 @@ sub FunctionThreadStop
 	my ($Sys, $Form, $pLog, $mode) = @_;
 	my (@threadList, $Thread, $path, $base, $id, $subj);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -629,7 +629,7 @@ sub FunctionThreadStop
 	$base		= $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat';
 	$Threads->LoadAttr($Sys);
 	
-	# ƒXƒŒƒbƒh‚Ì’â~
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ã®åœæ­¢
 	if ($mode) {
 		foreach $id (@threadList) {
 			$Threads->SetAttr($id, 'stop', 1); # use from 0.8.x
@@ -637,16 +637,16 @@ sub FunctionThreadStop
 			if ($Thread->Load($Sys, $path, 0)) {
 				$subj = $Thread->GetSubject();
 				if ($Thread->Stop($Sys)) {
-					push @$pLog, "ƒXƒŒƒbƒhu$subjv‚ğ’â~B";
+					push @$pLog, "ã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ$subjã€ã‚’åœæ­¢ã€‚";
 					next;
 				}
 			}
 			$Thread->Save($Sys);
 			$Thread->Close();
-			push @$pLog, "ƒXƒŒƒbƒhu$subj/$idv‚Ì’â~‚É¸”s‚µ‚Ü‚µ‚½B";
+			push @$pLog, "ã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ$subj/$idã€ã®åœæ­¢ã«å¤±æ•—ã—ã¾ã—ãŸã€‚";
 		}
 	}
-	# ƒXƒŒƒbƒh‚ÌÄŠJ
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ã®å†é–‹
 	else {
 		foreach $id (@threadList) {
 			$Threads->SetAttr($id, 'stop', ''); # use from 0.8.x
@@ -654,13 +654,13 @@ sub FunctionThreadStop
 			if ($Thread->Load($Sys, $path, 0)) {
 				$subj = $Thread->GetSubject();
 				if ($Thread->Start($Sys)) {
-					push @$pLog, "ƒXƒŒƒbƒhu$subjv‚ğÄŠJB";
+					push @$pLog, "ã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ$subjã€ã‚’å†é–‹ã€‚";
 					next;
 				}
 			}
 			$Thread->Save($Sys);
 			$Thread->Close();
-			push @$pLog, "ƒXƒŒƒbƒhu$subj/$idv‚ÌÄŠJ‚É¸”s‚µ‚Ü‚µ‚½B";
+			push @$pLog, "ã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ$subj/$idã€ã®å†é–‹ã«å¤±æ•—ã—ã¾ã—ãŸã€‚";
 		}
 	}
 	
@@ -671,19 +671,19 @@ sub FunctionThreadStop
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒh•‚ã^‰ğœ
+#	ã‚¹ãƒ¬ãƒƒãƒ‰æµ®ä¸Šï¼è§£é™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionThreadAttr
 {
 	my ($Sys, $Form, $pLog, $mode) = @_;
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -703,7 +703,7 @@ sub FunctionThreadAttr
 	foreach my $id (@threadList) {
 		$Threads->SetAttr($id, $attr, ($mode?1:''));
 		my $subj = $Threads->Get('SUBJECT', $id, '');
-		push @$pLog, "ƒXƒŒƒbƒhu$subjv‚Ì[$attr]‘®«‚ğ".($mode?'•t‰Á':'‰ğœ').'B';
+		push @$pLog, "ã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ$subjã€ã®[$attr]å±æ€§ã‚’".($mode?'ä»˜åŠ ':'è§£é™¤').'ã€‚';
 	}
 	
 	$Threads->Save($Sys);
@@ -713,12 +713,12 @@ sub FunctionThreadAttr
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhdat—‚¿
+#	ã‚¹ãƒ¬ãƒƒãƒ‰datè½ã¡
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionThreadPooling
@@ -726,7 +726,7 @@ sub FunctionThreadPooling
 	my ($Sys, $Form, $pLog) = @_;
 	my (@threadList, $Threads, $Pools, $path, $bbs, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -749,7 +749,7 @@ sub FunctionThreadPooling
 	
 	foreach $id (@threadList) {
 		next if (! defined $Threads->Get('RES', $id));
-		push @$pLog, 'ƒXƒŒƒbƒhu' . $Threads->Get('SUBJECT', $id) . 'v‚ğDAT—‚¿';
+		push @$pLog, 'ã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ' . $Threads->Get('SUBJECT', $id) . 'ã€ã‚’DATè½ã¡';
 		$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 		$Threads->Delete($id);
 		
@@ -764,12 +764,12 @@ sub FunctionThreadPooling
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhíœ
+#	ã‚¹ãƒ¬ãƒƒãƒ‰å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionThreadDelete
@@ -777,7 +777,7 @@ sub FunctionThreadDelete
 	my ($Sys, $Form, $pLog) = @_;
 	my (@threadList, $Threads, $path, $bbs, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -797,7 +797,7 @@ sub FunctionThreadDelete
 	
 	foreach $id (@threadList) {
 		next if (! defined $Threads->Get('SUBJECT', $id));
-		push @$pLog, 'ƒXƒŒƒbƒhu' . $Threads->Get('SUBJECT', $id) . 'v‚ğíœ';
+		push @$pLog, 'ã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ' . $Threads->Get('SUBJECT', $id) . 'ã€ã‚’å‰Šé™¤';
 		$Threads->Delete($id);
 		$Threads->DeleteAttr($id);
 		unlink "$path/dat/$id.dat";
@@ -811,12 +811,12 @@ sub FunctionThreadDelete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhî•ñXV
+#	ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±æ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionUpdateSubject
@@ -824,7 +824,7 @@ sub FunctionUpdateSubject
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Threads);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -840,19 +840,19 @@ sub FunctionUpdateSubject
 	$Threads->Update($Sys);
 	$Threads->Save($Sys);
 	
-	push @$pLog, 'ƒXƒŒƒbƒhî•ñ(subject.txt)‚ğXV‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±(subject.txt)ã‚’æ›´æ–°ã—ã¾ã—ãŸã€‚';
 	
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhî•ñ‘SXV
+#	ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±å…¨æ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionUpdateSubjectAll
@@ -860,7 +860,7 @@ sub FunctionUpdateSubjectAll
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Threads);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -876,19 +876,19 @@ sub FunctionUpdateSubjectAll
 	$Threads->UpdateAll($Sys);
 	$Threads->Save($Sys);
 	
-	push @$pLog, 'ƒXƒŒƒbƒhî•ñ(subject.txt)‚ğÄì¬‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±(subject.txt)ã‚’å†ä½œæˆã—ã¾ã—ãŸã€‚';
 	
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhˆêŠ‡dat—‚¿
+#	ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€æ‹¬datè½ã¡
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionThreadAutoPooling
@@ -896,7 +896,7 @@ sub FunctionThreadAutoPooling
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Threads, $Pools, @threadList, $base, $id, $bPool);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -919,7 +919,7 @@ sub FunctionThreadAutoPooling
 	
 	foreach $id (@threadList) {
 		$bPool = 0;
-		# ÅI‘‚«‚İ“ú‚É‚æ‚é”»’è
+		# æœ€çµ‚æ›¸ãè¾¼ã¿æ—¥ã«ã‚ˆã‚‹åˆ¤å®š
 		if ($Form->Equal('CONDITION_BYDATE', 'on') && $bPool == 0) {
 			my ($ntime, $dtime, $ltime);
 			$ntime = time;
@@ -929,21 +929,21 @@ sub FunctionThreadAutoPooling
 				$bPool = 1;
 			}
 		}
-		# ƒXƒŒƒbƒhˆÊ’u‚É‚æ‚é”»’è
+		# ã‚¹ãƒ¬ãƒƒãƒ‰ä½ç½®ã«ã‚ˆã‚‹åˆ¤å®š
 		if ($Form->Equal('CONDITION_BYPOS', 'on') && $bPool == 0) {
 			my ($pos) = $Threads->GetPosition($id);
 			if (($pos != -1) && ($pos + 1 >= $Form->Get('POOLPOS'))) {
 				$bPool = 1;
 			}
 		}
-		# ƒŒƒX”‚É‚æ‚é”»’è
+		# ãƒ¬ã‚¹æ•°ã«ã‚ˆã‚‹åˆ¤å®š
 		if ($Form->Equal('CONDITION_BYRES', 'on') && $bPool == 0) {
 			my ($res) = $Threads->Get('RES', $id);
 			if ($res > $Form->Get('POOLRES')) {
 				$bPool = 1;
 			}
 		}
-		# ƒ^ƒCƒgƒ‹‚É‚æ‚é”»’è
+		# ã‚¿ã‚¤ãƒˆãƒ«ã«ã‚ˆã‚‹åˆ¤å®š
 		if ($Form->Equal('CONDITION_BYTITLE', 'on') && $bPool == 0) {
 			my ($subject) = $Threads->Get('SUBJECT', $id);
 			my $reg = $Form->Get('POOLTITLE');
@@ -951,7 +951,7 @@ sub FunctionThreadAutoPooling
 				$bPool = 1;
 			}
 		}
-		# ’â~EˆÚ“®ƒXƒŒƒbƒh
+		# åœæ­¢ãƒ»ç§»å‹•ã‚¹ãƒ¬ãƒƒãƒ‰
 		if ($Form->Equal('CONDITION_BYSTOP', 'on') && $bPool == 0) {
 			my ($permt, $perms);
 			$permt = ARAGORN::GetPermission("$base/dat/$id.dat");
@@ -961,9 +961,9 @@ sub FunctionThreadAutoPooling
 			}
 		}
 		
-		# ƒtƒ‰ƒO‚ ‚è‚Ìó‘Ô‚È‚çDAT—‚¿‚·‚é
+		# ãƒ•ãƒ©ã‚°ã‚ã‚Šã®çŠ¶æ…‹ãªã‚‰DATè½ã¡ã™ã‚‹
 		if ($bPool) {
-			push @$pLog, 'ƒXƒŒƒbƒhu' . $Threads->Get('SUBJECT', $id) . 'v‚ğDAT—‚¿';
+			push @$pLog, 'ã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ' . $Threads->Get('SUBJECT', $id) . 'ã€ã‚’DATè½ã¡';
 			$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 			$Threads->Delete($id);
 			

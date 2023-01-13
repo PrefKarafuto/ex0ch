@@ -319,7 +319,7 @@ sub ReadyBeforeWrite
 			}
 			elsif ($check == 2) {
 				return $ZP::E_REG_NGUSER if ($from !~ /$host/i); # $hostは正規表現
-				$Form->Set('FROM', "</b>[´･ω･｀] <b>$from");
+				$Form->Set('FROM', "</b>[´・ω・｀] <b>$from");
 			}
 		}
 		
@@ -456,7 +456,7 @@ sub IsRegulation
 	# PROXYチェック
 	if (!$islocalip && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {
 		if ($this->{'CONV'}->IsProxy($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {
-			#$this->{'FORM'}->Set('FROM', "</b> [―\{}\@{}\@{}-] <b>$from");
+			#$this->{'FORM'}->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs)) {
 				return $ZP::E_REG_DNSBL;
 			}

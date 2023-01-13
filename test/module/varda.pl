@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	bbs.cgix‰‡ƒ‚ƒWƒ…[ƒ‹
+#	bbs.cgiæ”¯æ´ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #
 #============================================================================================================
 package	VARDA;
@@ -10,10 +10,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -35,11 +35,11 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰Šú‰»
+#	åˆæœŸåŒ–
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys		MELKOR
 #	@param	$Setting	ISILDUR
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub Init
@@ -51,7 +51,7 @@ sub Init
 	require './module/galadriel.pl';
 	require './module/denethor.pl';
 	
-	# g—pƒ‚ƒWƒ…[ƒ‹‚ğİ’è
+	# ä½¿ç”¨ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚’è¨­å®š
 	$this->{'SYS'} = $Sys;
 	$this->{'THREADS'} = BILBO->new;
 	$this->{'CONV'} = GALADRIEL->new;
@@ -67,17 +67,17 @@ sub Init
 		$this->{'SET'} = $Setting;
 	}
 	
-	# î•ñ‚Ì“Ç‚İ‚İ
+	# æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$this->{'THREADS'}->Load($Sys);
 	$this->{'BANNER'}->Load($Sys);
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	index.html¶¬
+#	index.htmlç”Ÿæˆ
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	¶¬‚³‚ê‚½‚ç1‚ğ•Ô‚·
+#	@param	ãªã—
+#	@return	ç”Ÿæˆã•ã‚ŒãŸã‚‰1ã‚’è¿”ã™
 #
 #------------------------------------------------------------------------------------------------------------
 sub CreateIndex
@@ -88,7 +88,7 @@ sub CreateIndex
 	my $Threads = $this->{'THREADS'};
 	my $bbsSetting = $this->{'SET'};
 	
-	# CREATEƒ‚[ƒhA‚Ü‚½‚ÍƒXƒŒƒbƒh‚ªindex•\¦”ÍˆÍ“à‚Ìê‡‚Ì‚İindex‚ğXV‚·‚é
+	# CREATEãƒ¢ãƒ¼ãƒ‰ã€ã¾ãŸã¯ã‚¹ãƒ¬ãƒƒãƒ‰ãŒindexè¡¨ç¤ºç¯„å›²å†…ã®å ´åˆã®ã¿indexã‚’æ›´æ–°ã™ã‚‹
 	if ($Sys->Equal('MODE', 'CREATE')
 		|| ($Threads->GetPosition($Sys->Get('KEY')) < $bbsSetting->Get('BBS_MAX_MENU_THREAD'))) {
 		
@@ -112,10 +112,10 @@ sub CreateIndex
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	i/index.html¶¬
+#	i/index.htmlç”Ÿæˆ
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub CreateIIndex
@@ -125,28 +125,28 @@ sub CreateIIndex
 	require './module/thorin.pl';
 	my $Page = THORIN->new;
 	
-	# ‘O€”õ
+	# å‰æº–å‚™
 	my $Sys = $this->{'SYS'};
 	my $Threads = $this->{'THREADS'};
 	my $Set = $this->{'SET'};
 	my $Conv = $this->{'CONV'};
 	my $bbs = $Sys->Get('BBS');
 	
-	# HTMLƒwƒbƒ_‚Ìo—Í
+	# HTMLãƒ˜ãƒƒãƒ€ã®å‡ºåŠ›
 	my $title = $Set->Get('BBS_TITLE');
 	my $code = $this->{'CODE'};
 	$Page->Print("<html><!--nobanner--><head><title>$title</title>");
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print("</head><body><center>$title</center>");
 	
-	# ƒoƒi[•\¦
+	# ãƒãƒŠãƒ¼è¡¨ç¤º
 	$this->{'BANNER'}->Print($Page, 100, 3, 1)  if ($Sys->Get('BANNER') & 3);
 	
-	# ‘SƒXƒŒƒbƒh‚ğæ“¾
+	# å…¨ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å–å¾—
 	my @threadSet = ();
 	$Threads->GetKeySet('ALL', '', \@threadSet);
 	
-	# ƒXƒŒƒbƒh•ª‚¾‚¯ƒ‹[ƒv‚ğ‚Ü‚í‚·
+	# ã‚¹ãƒ¬ãƒƒãƒ‰åˆ†ã ã‘ãƒ«ãƒ¼ãƒ—ã‚’ã¾ã‚ã™
 	my $menuNum = $Set->Get('BBS_MAX_MENU_THREAD');
 	my $i = 0;
 	foreach my $key (@threadSet) {
@@ -159,29 +159,29 @@ sub CreateIIndex
 		$Page->Print("<a href=\"$path\">$i: $name($res)</a><br> \n");
 	}
 	
-	# ƒtƒbƒ^•”•ª‚Ìo—Í
+	# ãƒ•ãƒƒã‚¿éƒ¨åˆ†ã®å‡ºåŠ›
 	my $cgiPath = $Sys->Get('CGIPATH');
 	my $pathf = "$cgiPath/p.cgi" . ($Sys->Get('PATHKIND') ? "?bbs=$bbs&st=$i" : "/$bbs/$i");
 	$Page->Print("<hr>");
-	$Page->Print("<a href=\"$pathf\">‘±‚«</a>\n");
+	$Page->Print("<a href=\"$pathf\">ç¶šã</a>\n");
 	$Page->Print("<form action=\"$cgiPath/bbs.cgi?guid=ON\" method=\"POST\">");
 	$Page->Print("<input type=hidden name=bbs value=$bbs>");
 	$Page->Print("<input type=hidden name=mb value=on>");
 	$Page->Print("<input type=hidden name=thread value=on>");
-	$Page->Print("<input type=submit value=\"ƒXƒŒƒbƒhì¬\">");
+	$Page->Print("<input type=submit value=\"ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ\">");
 	$Page->Print("</form><hr></body></html>\n");
 	
-	# i/index.html‚É‘‚«‚İ
+	# i/index.htmlã«æ›¸ãè¾¼ã¿
 	my $pathi = $Sys->Get('BBSPATH') . "/$bbs";
 	$Page->Flush(1, $Sys->Get('PM-TXT'), "$pathi/i/index.html");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	subback.html¶¬
+#	subback.htmlç”Ÿæˆ
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub CreateSubback
@@ -200,7 +200,7 @@ sub CreateSubback
 	my $Caption = LEGOLAS->new;
 	$Caption->Load($Sys, 'META');
 	
-	# HTMLƒwƒbƒ_‚Ìo—Í
+	# HTMLãƒ˜ãƒƒãƒ€ã®å‡ºåŠ›
 	my $title = $Set->Get('BBS_TITLE');
 	my $code = $this->{'CODE'};
 	$Page->Print(<<HTML);
@@ -214,10 +214,10 @@ HTML
 	
 	$Caption->Print($Page, undef);
 	
-	$Page->Print(" <title>$title - ƒXƒŒƒbƒhˆê——</title>\n\n");
+	$Page->Print(" <title>$title - ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§</title>\n\n");
 	$Page->Print("</head>\n<body>\n\n");
 	
-	# ƒoƒi[•\¦
+	# ãƒãƒŠãƒ¼è¡¨ç¤º
 	if ($Sys->Get('BANNER') & 5) {
 		$this->{'BANNER'}->Print($Page, 100, 2, 0);
 	}
@@ -225,11 +225,11 @@ HTML
 	$Page->Print("<div class=\"threads\">");
 	$Page->Print("<small>\n");
 	
-	# ‘SƒXƒŒƒbƒh‚ğæ“¾
+	# å…¨ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å–å¾—
 	my @threadSet = ();
 	$Threads->GetKeySet('ALL', '', \@threadSet);
 	
-	# ƒXƒŒƒbƒh•ª‚¾‚¯ƒ‹[ƒv‚ğ‚Ü‚í‚·
+	# ã‚¹ãƒ¬ãƒƒãƒ‰åˆ†ã ã‘ãƒ«ãƒ¼ãƒ—ã‚’ã¾ã‚ã™
 	my $bbs = $Sys->Get('BBS');
 	my $max = $Sys->Get('SUBMAX');
 	my $i = 0;
@@ -243,7 +243,7 @@ HTML
 		$Page->Print("<a href=\"$path\" target=\"_blank\">$i: $name($res)</a>&nbsp;&nbsp;\n");
 	}
 	
-	# ƒtƒbƒ^•”•ª‚Ìo—Í
+	# ãƒ•ãƒƒã‚¿éƒ¨åˆ†ã®å‡ºåŠ›
 	my $cgipath = $Sys->Get('CGIPATH');
 	my $version = $Sys->Get('VERSION');
 	$Page->Print(<<HTML);
@@ -251,7 +251,7 @@ HTML
 </div>
 
 <div align="right" style="margin-top:1em;">
-<small><a href="./kako/" target="_blank"><b>‰ß‹ƒƒO‘qŒÉ‚Í‚±‚¿‚ç</b></a></small>
+<small><a href="./kako/" target="_blank"><b>éå»ãƒ­ã‚°å€‰åº«ã¯ã“ã¡ã‚‰</b></a></small>
 </div>
 
 <hr>
@@ -264,18 +264,18 @@ $version
 </html>
 HTML
 	
-	# subback.html‚É‘‚«‚İ
+	# subback.htmlã«æ›¸ãè¾¼ã¿
 	my $paths = $Sys->Get('BBSPATH') . "/$bbs";
 	$Page->Flush(1, $Sys->Get('PM-TXT'), "$paths/subback.html");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	index.html¶¬(ƒwƒbƒ_•”•ª)
+#	index.htmlç”Ÿæˆ(ãƒ˜ãƒƒãƒ€éƒ¨åˆ†)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page		
 #	@param	$Caption	
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintIndexHead
@@ -289,7 +289,7 @@ sub PrintIndexHead
 	my $image = $this->{'SET'}->Get('BBS_TITLE_PICTURE');
 #	my $code = $this->{'CODE'};
 	
-	# HTMLƒwƒbƒ_‚Ìo—Í
+	# HTMLãƒ˜ãƒƒãƒ€ã®å‡ºåŠ›
 	$Page->Print(<<HEAD);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
@@ -304,14 +304,14 @@ HEAD
 	
 	$Page->Print(" <title>$title</title>\n\n");
 	
-	# cookie—pscript‚Ìo—Í
+	# cookieç”¨scriptã®å‡ºåŠ›
 	if ($this->{'SET'}->Equal('SUBBBS_CGI_ON', 1)) {
 		require './module/radagast.pl';
 		RADAGAST::Print(undef, $Page);
 	}
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
-	# <body>ƒ^ƒOo—Í
+	# <body>ã‚¿ã‚°å‡ºåŠ›
 	{
 		my @work = ();
 		$work[0] = $this->{'SET'}->Get('BBS_BG_COLOR');
@@ -327,31 +327,31 @@ HEAD
 	}
 	$Page->Print("<a name=\"top\"></a>\n");
 	
-	# ŠÅ”Â‰æ‘œ•\¦‚ ‚è
+	# çœ‹æ¿ç”»åƒè¡¨ç¤ºã‚ã‚Š
 	if ($image ne '') {
 		$Page->Print("<div align=\"center\">");
-		# ŠÅ”Â‰æ‘œ‚©‚ç‚ÌƒŠƒ“ƒN‚ ‚è
+		# çœ‹æ¿ç”»åƒã‹ã‚‰ã®ãƒªãƒ³ã‚¯ã‚ã‚Š
 		if ($link ne '') {
 			$Page->Print("<a href=\"$link\"><img src=\"$image\" border=\"0\" alt=\"$link\"></a>");
 		}
-		# ŠÅ”Â‰æ‘œ‚ÉƒŠƒ“ƒN‚Í‚È‚µ
+		# çœ‹æ¿ç”»åƒã«ãƒªãƒ³ã‚¯ã¯ãªã—
 		else {
 			$Page->Print("<img src=\"$image\" border=\"0\" alt=\"$link\">");
 		}
 		$Page->Print("</div>\n");
 	}
 	
-	# ƒwƒbƒ_ƒe[ƒuƒ‹‚Ì•\¦
+	# ãƒ˜ãƒƒãƒ€ãƒ†ãƒ¼ãƒ–ãƒ«ã®è¡¨ç¤º
 	$Caption->Load($this->{'SYS'}, 'HEAD');
 	$Caption->Print($Page, $this->{'SET'});
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	index.html¶¬(ƒXƒŒƒbƒhƒƒjƒ…[•”•ª)
+#	index.htmlç”Ÿæˆ(ã‚¹ãƒ¬ãƒƒãƒ‰ãƒ¡ãƒ‹ãƒ¥ãƒ¼éƒ¨åˆ†)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintIndexMenu
@@ -362,7 +362,7 @@ sub PrintIndexMenu
 	my $Conv = $this->{'CONV'};
 	my $menuCol = $this->{'SET'}->Get('BBS_MENU_COLOR');
 	
-	# ƒoƒi[‚Ì•\¦
+	# ãƒãƒŠãƒ¼ã®è¡¨ç¤º
 	$this->{'BANNER'}->Print($Page, 95, 0, 0) if ($this->{'SYS'}->Get('BANNER') & 3);
 	
 	$Page->Print(<<MENU);
@@ -377,7 +377,7 @@ MENU
 	my @threadSet = ();
 	$this->{'THREADS'}->GetKeySet('ALL', '', \@threadSet);
 	
-	# ƒXƒŒƒbƒh•ª‚¾‚¯ƒ‹[ƒv‚ğ‚Ü‚í‚·
+	# ã‚¹ãƒ¬ãƒƒãƒ‰åˆ†ã ã‘ãƒ«ãƒ¼ãƒ—ã‚’ã¾ã‚ã™
 	my $prevNum = $this->{'SET'}->Get('BBS_THREAD_NUMBER');
 	my $menuNum = $this->{'SET'}->Get('BBS_MAX_MENU_THREAD');
 	my $max = $this->{'SYS'}->Get('SUBMAX');
@@ -389,25 +389,25 @@ MENU
 		my $res = $this->{'THREADS'}->Get('RES', $key);
 		my $path = $Conv->CreatePath($this->{'SYS'}, 0, $this->{'SYS'}->Get('BBS'), $key, 'l50');
 		
-		# ƒvƒŒƒrƒ…[ƒXƒŒƒbƒh‚Ìê‡‚ÍƒvƒŒƒrƒ…[‚Ö‚ÌƒŠƒ“ƒN‚ğ“\‚é
+		# ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã‚¹ãƒ¬ãƒƒãƒ‰ã®å ´åˆã¯ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã¸ã®ãƒªãƒ³ã‚¯ã‚’è²¼ã‚‹
 		if ($i <= $prevNum) {
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i:</a> ");
-			$Page->Print("<a href=\"#$i\">$name($res)</a>@\n");
+			$Page->Print("<a href=\"#$i\">$name($res)</a>ã€€\n");
 		}
 		else {
-			$Page->Print("  <a href=\"$path\" target=\"body\">$i: $name($res)</a>@\n");
+			$Page->Print("  <a href=\"$path\" target=\"body\">$i: $name($res)</a>ã€€\n");
 		}
 	}
 	$Page->Print(<<MENU);
   </small>
-  <div align="right"><small><b><a href="./subback.html">ƒXƒŒƒbƒhˆê——‚Í‚±‚¿‚ç</a></b></small></div>
+  <div align="right"><small><b><a href="./subback.html">ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ã¯ã“ã¡ã‚‰</a></b></small></div>
   </td>
  </tr>
 </table>
 
 MENU
 	
-	# ƒTƒuƒoƒi[‚Ì•\¦(•\¦‚µ‚½‚ç‹ós‚ğ‚Ğ‚Æ‚Â‘}“ü)
+	# ã‚µãƒ–ãƒãƒŠãƒ¼ã®è¡¨ç¤º(è¡¨ç¤ºã—ãŸã‚‰ç©ºè¡Œã‚’ã²ã¨ã¤æŒ¿å…¥)
 	if ($this->{'BANNER'}->PrintSub($Page)) {
 		$Page->Print("\n");
 	}
@@ -415,10 +415,10 @@ MENU
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	index.html¶¬(ƒXƒŒƒbƒhƒvƒŒƒrƒ…[•”•ª)
+#	index.htmlç”Ÿæˆ(ã‚¹ãƒ¬ãƒƒãƒ‰ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼éƒ¨åˆ†)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page		
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintIndexPreview
@@ -426,18 +426,18 @@ sub PrintIndexPreview
 	my $this = shift;
 	my ($Page) = @_;
 	
-	# Šg’£‹@”\ƒ[ƒh
+	# æ‹¡å¼µæ©Ÿèƒ½ãƒ­ãƒ¼ãƒ‰
 	require './module/athelas.pl';
 	my $Plugin = ATHELAS->new;
 	$Plugin->Load($this->{'SYS'});
 	
-	# —LŒø‚ÈŠg’£‹@”\ˆê——‚ğæ“¾
+	# æœ‰åŠ¹ãªæ‹¡å¼µæ©Ÿèƒ½ä¸€è¦§ã‚’å–å¾—
 	my @commands = ();
 	my @pluginSet = ();
 	$Plugin->GetKeySet('VALID', 1, \@pluginSet);
 	my $count = 0;
 	foreach my $id (@pluginSet) {
-		# ƒ^ƒCƒv‚ªread.cgi‚Ìê‡‚Íƒ[ƒh‚µ‚ÄÀs
+		# ã‚¿ã‚¤ãƒ—ãŒread.cgiã®å ´åˆã¯ãƒ­ãƒ¼ãƒ‰ã—ã¦å®Ÿè¡Œ
 		if ($Plugin->Get('TYPE', $id) & 8) {
 			my $file = $Plugin->Get('FILE', $id);
 			my $className = $Plugin->Get('CLASS', $id);
@@ -455,7 +455,7 @@ sub PrintIndexPreview
 	my @threadSet = ();
 	$this->{'THREADS'}->GetKeySet('ALL', '', \@threadSet);
 	
-	# ‘O€”õ
+	# å‰æº–å‚™
 	my $prevNum = $this->{'SET'}->Get('BBS_THREAD_NUMBER');
 	my $threadNum = (scalar(@threadSet) > $prevNum ? $prevNum : scalar(@threadSet));
 	my $tblCol = $this->{'SET'}->Get('BBS_THREAD_COLOR');
@@ -474,35 +474,35 @@ sub PrintIndexPreview
 		my $res = $this->{'THREADS'}->Get('RES', $key);
 		$nextT = 1 if ($cnt == $threadNum);
 		
-		# ƒwƒbƒ_•”•ª‚Ì•\¦
+		# ãƒ˜ãƒƒãƒ€éƒ¨åˆ†ã®è¡¨ç¤º
 		$Page->Print(<<THREAD);
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>
   <a name="$cnt"></a>
-  <div align="right"><a href="#menu">¡</a><a href="#$prevT">£</a><a href="#$nextT">¥</a></div>
-  <div style="font-weight:bold;margin-bottom:0.2em;">y$cnt:$resz<font size="+2" color="$ttlCol">$subject</font></div>
+  <div align="right"><a href="#menu">â– </a><a href="#$prevT">â–²</a><a href="#$nextT">â–¼</a></div>
+  <div style="font-weight:bold;margin-bottom:0.2em;">ã€$cnt:$resã€‘<font size="+2" color="$ttlCol">$subject</font></div>
   <dl style="margin-top:0px;">
 THREAD
 		
-		# ƒvƒŒƒrƒ…[‚Ì•\¦
+		# ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã®è¡¨ç¤º
 		my $datPath = "$basePath/dat/$key.dat";
 		$Dat->Load($this->{'SYS'}, $datPath, 1);
 		$this->{'SYS'}->Set('KEY', $key);
 		PrintThreadPreviewOne($this, $Page, $Dat, \@commands);
 		$Dat->Close();
 		
-		# ƒtƒbƒ^•”•ª‚Ì•\¦
+		# ãƒ•ãƒƒã‚¿éƒ¨åˆ†ã®è¡¨ç¤º
 		my $allPath = $Conv->CreatePath($this->{'SYS'}, 0, $this->{'SYS'}->Get('BBS'), $key, '');
 		my $lastPath = $Conv->CreatePath($this->{'SYS'}, 0, $this->{'SYS'}->Get('BBS'), $key, 'l50');
 		my $numPath = $Conv->CreatePath($this->{'SYS'}, 0, $this->{'SYS'}->Get('BBS'), $key, '1-100');
 		$Page->Print(<<KAKIKO);
     <div style="font-weight:bold;">
-     <a href="$allPath">‘S•”“Ç‚Ş</a>
-     <a href="$lastPath">ÅV50</a>
+     <a href="$allPath">å…¨éƒ¨èª­ã‚€</a>
+     <a href="$lastPath">æœ€æ–°50</a>
      <a href="$numPath">1-100</a>
-     <a href="#top">”Â‚Ìƒgƒbƒv</a>
-     <a href="./">ƒŠƒ[ƒh</a>
+     <a href="#top">æ¿ã®ãƒˆãƒƒãƒ—</a>
+     <a href="./">ãƒªãƒ­ãƒ¼ãƒ‰</a>
     </div>
     </blockquote>
    </blockquote>
@@ -513,7 +513,7 @@ THREAD
 
 KAKIKO
 		
-		# ƒJƒEƒ“ƒ^‚ÌXV
+		# ã‚«ã‚¦ãƒ³ã‚¿ã®æ›´æ–°
 		$nextT++;
 		$prevT++;
 		$prevT = 1 if ($cnt == 1);
@@ -522,11 +522,11 @@ KAKIKO
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	index.html¶¬(ƒtƒbƒ^•”•ª)
+#	index.htmlç”Ÿæˆ(ãƒ•ãƒƒã‚¿éƒ¨åˆ†)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page		
 #	@param	$Caption	
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintIndexFoot
@@ -544,14 +544,14 @@ sub PrintIndexFoot
 					? $Sys->Get('DEFSAMBA') : $Set->Get('BBS_SAMBATIME'));
 	my $tm = time;
 	
-	# ƒXƒŒƒbƒhì¬‰æ–Ê‚ğ•Ê‰æ–Ê‚Å•\¦
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆç”»é¢ã‚’åˆ¥ç”»é¢ã§è¡¨ç¤º
 	if ($Set->Equal('BBS_PASSWORD_CHECK', 'checked')) {
 		$Page->Print(<<FORM);
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
   <td>
   <form method="POST" action="$cgipath/bbs.cgi?guid=ON" style="margin:1.2em 0;">
-  <input type="submit" value="V‹KƒXƒŒƒbƒhì¬‰æ–Ê‚Ö"><br>
+  <input type="submit" value="æ–°è¦ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆç”»é¢ã¸"><br>
   <input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
   </form>
@@ -560,7 +560,7 @@ sub PrintIndexFoot
 </table>
 FORM
 	}
-	# ƒXƒŒƒbƒhì¬ƒtƒH[ƒ€‚Íindex‚Æ“¯‚¶‰æ–Ê‚É•\¦
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆãƒ•ã‚©ãƒ¼ãƒ ã¯indexã¨åŒã˜ç”»é¢ã«è¡¨ç¤º
 	else {
 		$Page->Print(<<FORM);
 <form method="POST" action="$cgipath/bbs.cgi?guid=ON">
@@ -568,9 +568,9 @@ FORM
  <tr>
   <td>&lrm;</td>
   <td nowrap>
-  ƒ^ƒCƒgƒ‹F<input type="text" name="subject" size="40"><input type="submit" value="V‹KƒXƒŒƒbƒhì¬"><br>
-  –¼‘OF<input type="text" name="FROM" size="19"> E-mailF<input type="text" name="mail" size="19"><br>
-  “à—eF<textarea rows="5" cols="60" name="MESSAGE"></textarea>
+  ã‚¿ã‚¤ãƒˆãƒ«ï¼š<input type="text" name="subject" size="40"><input type="submit" value="æ–°è¦ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ"><br>
+  åå‰ï¼š<input type="text" name="FROM" size="19"> E-mailï¼š<input type="text" name="mail" size="19"><br>
+  å†…å®¹ï¼š<textarea rows="5" cols="60" name="MESSAGE"></textarea>
   <input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
   </td>
@@ -580,18 +580,18 @@ FORM
 FORM
 	}
 	
-	# foot‚Ì•\¦
+	# footã®è¡¨ç¤º
 	$Caption->Load($Sys, 'FOOT');
 	$Caption->Print($Page, $Set);
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
-<a href="http://zerochplus.sourceforge.jp/">‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX</a>
+<a href="http://zerochplus.sourceforge.jp/">ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹</a>
 BBS.CGI - $ver (Perl)
 @{[ $Sys->Get('BBQ') ? '+<a href="http://bbq.uso800.net/" target="_blank">BBQ</a>' : '' ]}
 @{[ $Sys->Get('BBX') ? '+BBX' : '' ]}
 +Samba24=$samba<br>
-ƒy[ƒW‚Ì‚¨‚µ‚Ü‚¢‚¾‚æBB‚Æ</div>
+ãƒšãƒ¼ã‚¸ã®ãŠã—ã¾ã„ã ã‚ˆã€‚ã€‚ã¨</div>
 
 FOOT
 	
@@ -600,12 +600,12 @@ FOOT
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	index.html¶¬(ƒXƒŒƒbƒhƒvƒŒƒrƒ…[•”•ª)
+#	index.htmlç”Ÿæˆ(ã‚¹ãƒ¬ãƒƒãƒ‰ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼éƒ¨åˆ†)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page		
 #	@param	$Dat		
 #	@param	$commands	
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadPreviewOne
@@ -615,25 +615,25 @@ sub PrintThreadPreviewOne
 	
 	my $Sys = $this->{'SYS'};
 	
-	# ‘O€”õ
+	# å‰æº–å‚™
 	my $contNum = $this->{'SET'}->Get('BBS_CONTENTS_NUMBER');
 	my $cgiPath = $Sys->Get('SERVER') . $Sys->Get('CGIPATH');
 	my $bbs = $Sys->Get('BBS');
 	my $key = $Sys->Get('KEY');
 	my $tm = time;
 	
-	# •\¦”‚Ì³‹K‰»
+	# è¡¨ç¤ºæ•°ã®æ­£è¦åŒ–
 	my ($start, $end) = $this->{'CONV'}->RegularDispNum($Sys, $Dat, 1, $contNum, $contNum);
 	$start++ if ($start == 1);
 	
-	# 1‚Ì•\¦
+	# 1ã®è¡¨ç¤º
 	PrintResponse($this, $Page, $Dat, $commands, 1);
-	# c‚è‚Ì•\¦
+	# æ®‹ã‚Šã®è¡¨ç¤º
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
 	
-	# ‘‚«‚İƒtƒH[ƒ€‚Ì•\¦
+	# æ›¸ãè¾¼ã¿ãƒ•ã‚©ãƒ¼ãƒ ã®è¡¨ç¤º
 	$Page->Print(<<KAKIKO);
   </dl>
   <form method="POST" action="$cgiPath/bbs.cgi?guid=ON">
@@ -641,9 +641,9 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
-   <input type="submit" value="‘‚«‚Ş" name="submit"> 
-   –¼‘OF<input type="text" name="FROM" size="19">
-   E-mailF<input type="text" name="mail" size="19"><br>
+   <input type="submit" value="æ›¸ãè¾¼ã‚€" name="submit"> 
+   åå‰ï¼š<input type="text" name="FROM" size="19">
+   E-mailï¼š<input type="text" name="mail" size="19"><br>
    <blockquote style="margin-top:0px;">
     <textarea rows="5" cols="64" name="MESSAGE"></textarea>
 KAKIKO
@@ -652,13 +652,13 @@ KAKIKO
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	index.html¶¬(ƒŒƒX•\¦•”•ª)
+#	index.htmlç”Ÿæˆ(ãƒ¬ã‚¹è¡¨ç¤ºéƒ¨åˆ†)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page		
 #	@param	$Dat		
 #	@param	$commands	
 #	@param	$n			
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResponse
@@ -678,44 +678,44 @@ sub PrintResponse
 	my $nameCol = $this->{'SET'}->Get('BBS_NAME_COLOR');
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
 	
-	# URL‚Æˆø—pŒÂŠ‚Ì“K‰
+	# URLã¨å¼•ç”¨å€‹æ‰€ã®é©å¿œ
 	$Conv->ConvertURL($Sys, $this->{'SET'}, 0, \$elem[3]);
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	
-	# Šg’£‹@”\‚ğÀs
+	# æ‹¡å¼µæ©Ÿèƒ½ã‚’å®Ÿè¡Œ
 	$Sys->Set('_DAT_', \@elem);
 	$Sys->Set('_NUM_', $n);
 	foreach my $command (@$commands) {
 		$command->execute($this->{'SYS'}, undef, 8);
 	}
 	
-	$Page->Print("   <dt>$n –¼‘OF");
+	$Page->Print("   <dt>$n åå‰ï¼š");
 	
-	# ƒ[ƒ‹—“—L‚è
+	# ãƒ¡ãƒ¼ãƒ«æ¬„æœ‰ã‚Š
 	if ($elem[1] eq '') {
 		$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
 	}
-	# ƒ[ƒ‹—“–³‚µ
+	# ãƒ¡ãƒ¼ãƒ«æ¬„ç„¡ã—
 	else {
 		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	}
 	
-	# •\¦s”“à‚È‚ç‚·‚×‚Ä•\¦‚·‚é
+	# è¡¨ç¤ºè¡Œæ•°å†…ãªã‚‰ã™ã¹ã¦è¡¨ç¤ºã™ã‚‹
 	if ($contLine <= $dispLine || $n == 1) {
-		$Page->Print("F$elem[2]</dt>\n    <dd>$elem[3]<br><br></dd>\n");
+		$Page->Print("ï¼š$elem[2]</dt>\n    <dd>$elem[3]<br><br></dd>\n");
 	}
-	# •\¦s”‚ğ’´‚¦‚½‚çÈ—ª•\¦‚ğ•t‰Á‚·‚é
+	# è¡¨ç¤ºè¡Œæ•°ã‚’è¶…ãˆãŸã‚‰çœç•¥è¡¨ç¤ºã‚’ä»˜åŠ ã™ã‚‹
 	else {
 		my @dispBuff = split(/<br>/i, $elem[3]);
 		my $path = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), "${n}n");
 		
-		$Page->Print("F$elem[2]</dt>\n    <dd>");
+		$Page->Print("ï¼š$elem[2]</dt>\n    <dd>");
 		for (my $k = 0; $k < $dispLine; $k++) {
 			$Page->Print("$dispBuff[$k]<br>");
 		}
-		$Page->Print("<font color=\"green\">iÈ—ª‚³‚ê‚Ü‚µ‚½EE‘S‚Ä‚ğ“Ç‚Ş‚É‚Í");
-		$Page->Print("<a href=\"$path\" target=\"_blank\">‚±‚±</a>");
-		$Page->Print("‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢j</font><br><br></dd>\n");
+		$Page->Print("<font color=\"green\">ï¼ˆçœç•¥ã•ã‚Œã¾ã—ãŸãƒ»ãƒ»å…¨ã¦ã‚’èª­ã‚€ã«ã¯");
+		$Page->Print("<a href=\"$path\" target=\"_blank\">ã“ã“</a>");
+		$Page->Print("ã‚’æŠ¼ã—ã¦ãã ã•ã„ï¼‰</font><br><br></dd>\n");
 	}
 }
 

@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	ƒVƒXƒeƒ€ŠÇ— - ƒLƒƒƒbƒv ƒ‚ƒWƒ…[ƒ‹
+#	ã‚·ã‚¹ãƒ†ãƒ ç®¡ç† - ã‚­ãƒ£ãƒƒãƒ— ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	sys.cap.pl
 #	---------------------------------------------------------------------------
 #	2004.06.26 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -51,30 +51,30 @@ sub DoPrint
 	require './mordor/sauron.pl';
 	$BASE = SAURON->new;
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys);
 	
-	if ($subMode eq 'LIST') {														# ƒXƒŒƒbƒhˆê——‰æ–Ê
+	if ($subMode eq 'LIST') {														# ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ç”»é¢
 		PrintCapList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CREATE') {													# ƒLƒƒƒbƒvì¬‰æ–Ê
+	elsif ($subMode eq 'CREATE') {													# ã‚­ãƒ£ãƒƒãƒ—ä½œæˆç”»é¢
 		PrintCapSetting($Page, $Sys, $Form, 0);
 	}
-	elsif ($subMode eq 'EDIT') {													# ƒLƒƒƒbƒv•ÒW‰æ–Ê
+	elsif ($subMode eq 'EDIT') {													# ã‚­ãƒ£ãƒƒãƒ—ç·¨é›†ç”»é¢
 		PrintCapSetting($Page, $Sys, $Form, 1);
 	}
-	elsif ($subMode eq 'DELETE') {													# ƒLƒƒƒbƒvíœŠm”F‰æ–Ê
+	elsif ($subMode eq 'DELETE') {													# ã‚­ãƒ£ãƒƒãƒ—å‰Šé™¤ç¢ºèªç”»é¢
 		PrintCapDelete($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ƒLƒƒƒbƒvİ’èŠ®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# ã‚­ãƒ£ãƒƒãƒ—è¨­å®šå®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('ƒLƒƒƒbƒvˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('ã‚­ãƒ£ãƒƒãƒ—å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ƒLƒƒƒbƒvİ’è¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# ã‚­ãƒ£ãƒƒãƒ—è¨­å®šå¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
@@ -84,12 +84,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -101,17 +101,17 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'CREATE') {														# ƒLƒƒƒbƒvì¬
+	if ($subMode eq 'CREATE') {														# ã‚­ãƒ£ãƒƒãƒ—ä½œæˆ
 		$err = FuncCapSetting($Sys, $Form, 0, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'EDIT') {													# ƒLƒƒƒbƒv•ÒW
+	elsif ($subMode eq 'EDIT') {													# ã‚­ãƒ£ãƒƒãƒ—ç·¨é›†
 		$err = FuncCapSetting($Sys, $Form, 1, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'DELETE') {													# ƒLƒƒƒbƒvíœ
+	elsif ($subMode eq 'DELETE') {													# ã‚­ãƒ£ãƒƒãƒ—å‰Šé™¤
 		$err = FuncCapDelete($Sys, $Form, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"CAP($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -126,34 +126,34 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys) = @_;
 	
-	# ‹¤’Ê•\¦ƒƒjƒ…[
-	$Base->SetMenu('ƒLƒƒƒbƒvˆê——', "'sys.cap','DISP','LIST'");
+	# å…±é€šè¡¨ç¤ºãƒ¡ãƒ‹ãƒ¥ãƒ¼
+	$Base->SetMenu('ã‚­ãƒ£ãƒƒãƒ—ä¸€è¦§', "'sys.cap','DISP','LIST'");
 	
-	# ƒVƒXƒeƒ€ŠÇ—Œ ŒÀ‚Ì‚İ
+	# ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†æ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_SYSADMIN, '*')) {
-		$Base->SetMenu('ƒLƒƒƒbƒv“o˜^', "'sys.cap','DISP','CREATE'");
+		$Base->SetMenu('ã‚­ãƒ£ãƒƒãƒ—ç™»éŒ²', "'sys.cap','DISP','CREATE'");
 	}
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒLƒƒƒbƒvˆê——‚Ì•\¦
+#	ã‚­ãƒ£ãƒƒãƒ—ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintCapList
@@ -167,13 +167,13 @@ sub PrintCapList
 	require './module/ungoliants.pl';
 	$Cap = UNGOLIANT->new;
 	
-	# ƒLƒƒƒbƒvî•ñ‚Ì“Ç‚İ‚İ
+	# ã‚­ãƒ£ãƒƒãƒ—æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$Cap->Load($Sys);
 	
-	# ƒLƒƒƒbƒvî•ñ‚ğæ“¾
+	# ã‚­ãƒ£ãƒƒãƒ—æƒ…å ±ã‚’å–å¾—
 	$Cap->GetKeySet('ALL', '', \@userSet);
 	
-	# •\¦”‚Ìİ’è
+	# è¡¨ç¤ºæ•°ã®è¨­å®š
 	$userNum	= @userSet;
 	$dispNum	= ($Form->Get('DISPNUM') eq '' ? 10 : $Form->Get('DISPNUM'));
 	$dispSt		= ($Form->Get('DISPST') eq '' ? 0 : $Form->Get('DISPST'));
@@ -187,19 +187,19 @@ sub PrintCapList
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("•\\¦”<input type=text name=DISPNUM size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"@•\\¦@\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("è¡¨\ç¤ºæ•°<input type=text name=DISPNUM size=4 value=$dispNum>");
+	$Page->Print("<input type=button value=\"ã€€è¡¨\ç¤ºã€€\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><th style=\"width:30\">@</th>");
+	$Page->Print("<tr><th style=\"width:30\">ã€€</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Cap Display Name</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Cap Full Name</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Custom ID</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:200\">Explanation</td></tr>\n");
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_SYSADMIN, '*');
 	
-	# ƒLƒƒƒbƒvˆê——‚ğo—Í
+	# ã‚­ãƒ£ãƒƒãƒ—ä¸€è¦§ã‚’å‡ºåŠ›
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$id			= $userSet[$i];
 		$name		= $Cap->Get('NAME', $id);
@@ -210,7 +210,7 @@ sub PrintCapList
 		$common = "\"javascript:SetOption('SELECT_CAP','$id');";
 		$common .= "DoSubmit('sys.cap','DISP','EDIT')\"";
 		
-		# ƒVƒXƒeƒ€Œ ŒÀ—L–³‚É‚æ‚é•\¦—}§
+		# ã‚·ã‚¹ãƒ†ãƒ æ¨©é™æœ‰ç„¡ã«ã‚ˆã‚‹è¡¨ç¤ºæŠ‘åˆ¶
 		if ($isAuth) {
 			$Page->Print("<tr><td><input type=checkbox name=CAPS value=$id></td>");
 			$Page->Print("<td><a href=$common>$name</a></td>");
@@ -225,10 +225,10 @@ sub PrintCapList
 	$Page->HTMLInput('hidden', 'SELECT_CAP', '');
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	
-	# ƒVƒXƒeƒ€Œ ŒÀ—L–³‚É‚æ‚é•\¦—}§
+	# ã‚·ã‚¹ãƒ†ãƒ æ¨©é™æœ‰ç„¡ã«ã‚ˆã‚‹è¡¨ç¤ºæŠ‘åˆ¶
 	if ($isAuth) {
 		$Page->Print("<tr><td colspan=5 align=left>");
-		$Page->Print("<input type=button value=\"@íœ@\" $common,'DELETE')\" class=\"delete\">");
+		$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'DELETE')\" class=\"delete\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table>");
@@ -238,13 +238,13 @@ sub PrintCapList
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒLƒƒƒbƒvİ’è‚Ì•\¦
+#	ã‚­ãƒ£ãƒƒãƒ—è¨­å®šã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	ì¬‚Ìê‡:0, •ÒW‚Ìê‡:1
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	ä½œæˆã®å ´åˆ:0, ç·¨é›†ã®å ´åˆ:1
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintCapSetting
@@ -258,10 +258,10 @@ sub PrintCapSetting
 	require './module/ungoliants.pl';
 	$User = UNGOLIANT->new;
 	
-	# ƒLƒƒƒbƒvî•ñ‚Ì“Ç‚İ‚İ
+	# ã‚­ãƒ£ãƒƒãƒ—æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$User->Load($Sys);
 	
-	# •ÒWƒ‚[ƒh‚È‚çƒLƒƒƒbƒvî•ñ‚ğæ“¾‚·‚é
+	# ç·¨é›†ãƒ¢ãƒ¼ãƒ‰ãªã‚‰ã‚­ãƒ£ãƒƒãƒ—æƒ…å ±ã‚’å–å¾—ã™ã‚‹
 	if ($mode) {
 		$name		= $User->Get('NAME', $Form->Get('SELECT_CAP'));
 		$pass		= $User->Get('PASS', $Form->Get('SELECT_CAP'));
@@ -280,42 +280,42 @@ sub PrintCapSetting
 	}
 	
 	$Page->Print("<center><table border=0 cellspacing=2>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒLƒƒƒbƒv•\\¦–¼</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚­ãƒ£ãƒƒãƒ—è¡¨\ç¤ºå</td><td>");
 	$Page->Print("<input type=text size=30 name=NAME value=\"$name\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒpƒXƒ[ƒh</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰</td><td>");
 	$Page->Print("<input type=password size=30 name=PASS value=\"$pass\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒLƒƒƒbƒvƒtƒ‹ƒl[ƒ€</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚­ãƒ£ãƒƒãƒ—ãƒ•ãƒ«ãƒãƒ¼ãƒ </td><td>");
 	$Page->Print("<input type=text size=30 name=FULL value=\"$full\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">à–¾</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">èª¬æ˜</td><td>");
 	$Page->Print("<input type=text size=30 name=EXPL value=\"$expl\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ê—pID(—vŒ ŒÀ)</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å°‚ç”¨ID(è¦æ¨©é™)</td><td>");
 	$Page->Print("<input type=text size=30 name=CUSTOMID value=\"$customid\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2 valign=absmiddle>");
-	$Page->Print("<input type=checkbox name=SYSAD $sysad value=on>ƒVƒXƒeƒ€‹¤’ÊŒ ŒÀ</td></tr>");
+	$Page->Print("<input type=checkbox name=SYSAD $sysad value=on>ã‚·ã‚¹ãƒ†ãƒ å…±é€šæ¨©é™</td></tr>");
 	
 	$Page->HTMLInput('hidden', 'SELECT_CAP', $Form->Get('SELECT_CAP'));
 	
-	# submitİ’è
+	# submitè¨­å®š
 	$common = "'" . $Form->Get('MODE_SUB') . "'";
 	$common = "onclick=\"DoSubmit('sys.cap','FUNC',$common)\"";
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=center>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common></td></tr>\n");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common></td></tr>\n");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒLƒƒƒbƒvíœŠm”F‰æ–Ê‚Ì•\¦
+#	ã‚­ãƒ£ãƒƒãƒ—å‰Šé™¤ç¢ºèªç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintCapDelete
@@ -328,12 +328,12 @@ sub PrintCapDelete
 	require './module/ungoliants.pl';
 	$Cap = UNGOLIANT->new;
 	
-	# ƒLƒƒƒbƒvî•ñ‚ğæ“¾
+	# ã‚­ãƒ£ãƒƒãƒ—æƒ…å ±ã‚’å–å¾—
 	$Cap->Load($SYS);
 	@userSet = $Form->GetAtArray('CAPS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌƒLƒƒƒbƒv‚ğíœ‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®ã‚­ãƒ£ãƒƒãƒ—ã‚’å‰Šé™¤ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>");
 	
 	$Page->Print("<tr bgcolor=silver>");
@@ -341,7 +341,7 @@ sub PrintCapDelete
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">User Full Name</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:200\">Explanation</td></td>\n");
 	
-	# ƒLƒƒƒbƒvƒŠƒXƒg‚ğo—Í
+	# ã‚­ãƒ£ãƒƒãƒ—ãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@userSet) {
 		$name = $Cap->Get('NAME', $id);
 		$expl = $Cap->Get('EXPL', $id);
@@ -355,22 +355,22 @@ sub PrintCapDelete
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>");
 	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-	$Page->Print("¦’Fíœ‚µ‚½ƒLƒƒƒbƒv‚ğŒ³‚É–ß‚·‚±‚Æ‚Í‚Å‚«‚Ü‚¹‚ñB</td></tr>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã—ãŸã‚­ãƒ£ãƒƒãƒ—ã‚’å…ƒã«æˆ»ã™ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>");
-	$Page->Print("<tr><td colspan=3 align=left><input type=button value=\"@íœ@\" ");
+	$Page->Print("<tr><td colspan=3 align=left><input type=button value=\"ã€€å‰Šé™¤ã€€\" ");
 	$Page->Print("onclick=\"DoSubmit('sys.cap','FUNC','DELETE')\" class=\"delete\"></td></tr>");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒLƒƒƒbƒvì¬/•ÒW
+#	ã‚­ãƒ£ãƒƒãƒ—ä½œæˆ/ç·¨é›†
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	•ÒW:1, ì¬:0
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	ç·¨é›†:1, ä½œæˆ:0
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FuncCapSetting
@@ -378,7 +378,7 @@ sub FuncCapSetting
 	my ($Sys, $Form, $mode, $pLog) = @_;
 	my ($Cap, $name, $pass, $expl, $grop, $chg, $sysad, $full, $customid);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -387,7 +387,7 @@ sub FuncCapSetting
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = ('PASS');
 		if (! $Form->IsInput(\@inList)) {
@@ -402,7 +402,7 @@ sub FuncCapSetting
 	
 	$Cap->Load($Sys);
 	
-	# İ’è“ü—Íî•ñ‚ğæ“¾
+	# è¨­å®šå…¥åŠ›æƒ…å ±ã‚’å–å¾—
 	$name		= $Form->Get('NAME');
 	$pass		= $Form->Get('PASS');
 	$expl		= $Form->Get('EXPL');
@@ -411,8 +411,8 @@ sub FuncCapSetting
 	$sysad		= $Form->Equal('SYSAD', 'on') ? 1 : 0;
 	$chg		= 0;
 	
-	if ($mode) {																	# •ÒWƒ‚[ƒh
-		# ƒpƒXƒ[ƒh‚ª•ÏX‚³‚ê‚Ä‚¢‚½‚çÄİ’è‚·‚é
+	if ($mode) {																	# ç·¨é›†ãƒ¢ãƒ¼ãƒ‰
+		# ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ãŒå¤‰æ›´ã•ã‚Œã¦ã„ãŸã‚‰å†è¨­å®šã™ã‚‹
 		if ($pass ne $Cap->Get('PASS', $Form->Get('SELECT_CAP'))){
 			$Cap->Set($Form->Get('SELECT_CAP'), 'PASS', $pass);
 			$chg = 1;
@@ -423,22 +423,22 @@ sub FuncCapSetting
 		$Cap->Set($Form->Get('SELECT_CAP'), 'SYSAD', $sysad);
 		$Cap->Set($Form->Get('SELECT_CAP'), 'CUSTOMID', $customid);
 	}
-	else {																			# “o˜^ƒ‚[ƒh
+	else {																			# ç™»éŒ²ãƒ¢ãƒ¼ãƒ‰
 		$Cap->Add($name, $pass, $full, $expl, $sysad, $customid);
 		$chg = 1;
 	}
 	
-	# İ’èî•ñ‚ğ•Û‘¶
+	# è¨­å®šæƒ…å ±ã‚’ä¿å­˜
 	$Cap->Save($Sys);
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	{
-		push @$pLog, "¡ ƒLƒƒƒbƒv [ $name ] " . ($mode ? 'İ’è' : 'ì¬');
-		push @$pLog, '@@@@ƒpƒXƒ[ƒhF' . ($chg ? $pass : '•ÏX‚È‚µ');
-		push @$pLog, "@@@@ƒtƒ‹ƒl[ƒ€F$full";
-		push @$pLog, "@@@@à–¾F$expl";
-		push @$pLog, "@@@@ê—pIDF$customid";
-		push @$pLog, '@@@@ƒVƒXƒeƒ€ŠÇ—F' . ($sysad ? '—L‚è' : '–³‚µ');
+		push @$pLog, "â–  ã‚­ãƒ£ãƒƒãƒ— [ $name ] " . ($mode ? 'è¨­å®š' : 'ä½œæˆ');
+		push @$pLog, 'ã€€ã€€ã€€ã€€ãƒ‘ã‚¹ãƒ¯ãƒ¼ãƒ‰ï¼š' . ($chg ? $pass : 'å¤‰æ›´ãªã—');
+		push @$pLog, "ã€€ã€€ã€€ã€€ãƒ•ãƒ«ãƒãƒ¼ãƒ ï¼š$full";
+		push @$pLog, "ã€€ã€€ã€€ã€€èª¬æ˜ï¼š$expl";
+		push @$pLog, "ã€€ã€€ã€€ã€€å°‚ç”¨IDï¼š$customid";
+		push @$pLog, 'ã€€ã€€ã€€ã€€ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ï¼š' . ($sysad ? 'æœ‰ã‚Š' : 'ç„¡ã—');
 	}
 	
 	return 0;
@@ -446,12 +446,12 @@ sub FuncCapSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒLƒƒƒbƒvíœ
+#	ã‚­ãƒ£ãƒƒãƒ—å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FuncCapDelete
@@ -459,7 +459,7 @@ sub FuncCapDelete
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Cap, @userSet);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -474,23 +474,23 @@ sub FuncCapDelete
 	$Cap->Load($Sys);
 	@userSet = $Form->GetAtArray('CAPS');
 	
-	# ‘I‘ğƒLƒƒƒbƒv‚ğ‘Síœ
+	# é¸æŠã‚­ãƒ£ãƒƒãƒ—ã‚’å…¨å‰Šé™¤
 	foreach (@userSet) {
 		next if (! defined $Cap->Get('NAME', $_));
-		# Administrator‚Ííœ•s‰Â
+		# Administratorã¯å‰Šé™¤ä¸å¯
 		if ($_ eq '0000000001') {
-			push @$pLog, '  ƒLƒƒƒbƒv [ Administrator ] ‚Ííœ‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B';
+			push @$pLog, 'â–¡ ã‚­ãƒ£ãƒƒãƒ— [ Administrator ] ã¯å‰Šé™¤ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚';
 		}
-		# ‚»‚êˆÈŠO‚Ííœ‰Â
+		# ãã‚Œä»¥å¤–ã¯å‰Šé™¤å¯
 		else {
 			my $name = $Cap->Get('NAME', $_);
 			my $pass = $Cap->Get('PASS', $_);
-			push @$pLog, "¡ ƒLƒƒƒbƒv [ $name / $pass ] ‚ğíœ‚µ‚Ü‚µ‚½B";
+			push @$pLog, "â–  ã‚­ãƒ£ãƒƒãƒ— [ $name / $pass ] ã‚’å‰Šé™¤ã—ã¾ã—ãŸã€‚";
 			$Cap->Delete($_);
 		}
 	}
 	
-	# İ’èî•ñ‚ğ•Û‘¶
+	# è¨­å®šæƒ…å ±ã‚’ä¿å­˜
 	$Cap->Save($Sys);
 	
 	return 0;

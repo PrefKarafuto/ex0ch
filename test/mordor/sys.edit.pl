@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	ƒVƒXƒeƒ€ŠÇ— - •ÒW ƒ‚ƒWƒ…[ƒ‹
+#	ã‚·ã‚¹ãƒ†ãƒ ç®¡ç† - ç·¨é›† ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	sys.edit.pl
 #	---------------------------------------------------------------------------
 #	2004.09.15 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -51,30 +51,30 @@ sub DoPrint
 	require './mordor/sauron.pl';
 	$BASE = SAURON->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$Sys->Set('ADMIN', $pSys);
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys);
 	
-	if ($subMode eq 'BANNER_PC') {													# PC—p’m•ÒW‰æ–Ê
+	if ($subMode eq 'BANNER_PC') {													# PCç”¨å‘ŠçŸ¥ç·¨é›†ç”»é¢
 		PrintBannerForPCEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'BANNER_MOBILE') {											# Œg‘Ñ—p’m•ÒW‰æ–Ê
+	elsif ($subMode eq 'BANNER_MOBILE') {											# æºå¸¯ç”¨å‘ŠçŸ¥ç·¨é›†ç”»é¢
 		PrintBannerForMobileEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'BANNER_SUB') {												# ƒTƒu’m•ÒW‰æ–Ê
+	elsif ($subMode eq 'BANNER_SUB') {												# ã‚µãƒ–å‘ŠçŸ¥ç·¨é›†ç”»é¢
 		PrintBannerForSubEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ƒVƒXƒeƒ€İ’èŠ®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# ã‚·ã‚¹ãƒ†ãƒ è¨­å®šå®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('ƒVƒXƒeƒ€•ÒWˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('ã‚·ã‚¹ãƒ†ãƒ ç·¨é›†å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ƒVƒXƒeƒ€İ’è¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# ã‚·ã‚¹ãƒ†ãƒ è¨­å®šå¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
@@ -84,12 +84,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -98,23 +98,23 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err);
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$Sys->Set('ADMIN', $pSys);
 	
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'BANNER_PC') {														# PC—p’m
+	if ($subMode eq 'BANNER_PC') {														# PCç”¨å‘ŠçŸ¥
 		$err = FunctionBannerEdit($Sys, $Form, 1, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'BANNER_MOBILE') {												# Œg‘Ñ—p’m
+	elsif ($subMode eq 'BANNER_MOBILE') {												# æºå¸¯ç”¨å‘ŠçŸ¥
 		$err = FunctionBannerEdit($Sys, $Form, 2, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'BANNER_SUB') {													# ƒTƒuƒoƒi[
+	elsif ($subMode eq 'BANNER_SUB') {													# ã‚µãƒ–ãƒãƒŠãƒ¼
 		$err = FunctionBannerEdit($Sys, $Form, 3, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "SYSTEM_EDIT($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -129,29 +129,29 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys) = @_;
 	
-	$Base->SetMenu('’m•ÒW(PC—p)', "'sys.edit','DISP','BANNER_PC'");
-	$Base->SetMenu('’m•ÒW(Œg‘Ñ—p)', "'sys.edit','DISP','BANNER_MOBILE'");
-	$Base->SetMenu('’m•ÒW(ƒTƒu)', "'sys.edit','DISP','BANNER_SUB'");
+	$Base->SetMenu('å‘ŠçŸ¥ç·¨é›†(PCç”¨)', "'sys.edit','DISP','BANNER_PC'");
+	$Base->SetMenu('å‘ŠçŸ¥ç·¨é›†(æºå¸¯ç”¨)', "'sys.edit','DISP','BANNER_MOBILE'");
+	$Base->SetMenu('å‘ŠçŸ¥ç·¨é›†(ã‚µãƒ–)', "'sys.edit','DISP','BANNER_SUB'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	’m—“(PC)•ÒW‰æ–Ê‚Ì•\¦
+#	å‘ŠçŸ¥æ¬„(PC)ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBannerForPCEdit
@@ -169,7 +169,7 @@ sub PrintBannerForPCEdit
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>Preview</td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=center>");
 	
-	# ’m—“ƒvƒŒƒrƒ…[•\¦
+	# å‘ŠçŸ¥æ¬„ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼è¡¨ç¤º
 	if ($Form->IsExist('PC_CONTENT')) {
 		$Banner->Set('COLPC', $Form->Get('PC_BGCOLOR'));
 		$Banner->Set('TEXTPC', $Form->Get('PC_CONTENT'));
@@ -181,7 +181,7 @@ sub PrintBannerForPCEdit
 		$content = $Banner->Get('TEXTPC');
 	}
 	
-	# ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ìì¬
+	# ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	my $BannerPage = THORIN->new;
 	$Banner->Print($BannerPage, 100, 0, 0);
 	$BannerPage->{'BUFF'} = CreatePreviewData($BannerPage->{'BUFF'});
@@ -190,26 +190,26 @@ sub PrintBannerForPCEdit
 	$common = "onclick=\"DoSubmit('sys.edit'";
 	
 	$Page->Print("</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">”wŒiF</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">èƒŒæ™¯è‰²</td><td>");
 	$Page->Print("<input type=text size=20 name=PC_BGCOLOR value=\"$bgColor\"></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">“à—e</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å†…å®¹</td><td>");
 	$Page->Print("<textarea rows=10 cols=70 name=PC_CONTENT wrap=off>$content</textarea></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td colspan=2>¦’m—“‚Ì•\\¦‚Íİ’è‚ÅÁ‚·‚±‚Æ‚ª‚Å‚«‚Ü‚·B [ƒVƒXƒeƒ€İ’è]¨[•\\¦İ’è]¨’m—“•\\¦(index.htmlˆÈŠO‚Ì’m—“‚ğ•\\¦‚·‚é‚Ìƒ`ƒFƒbƒN‚ğOFF)</td></tr>\n");
+	$Page->Print("<tr><td colspan=2>â€»å‘ŠçŸ¥æ¬„ã®è¡¨\ç¤ºã¯è¨­å®šã§æ¶ˆã™ã“ã¨ãŒã§ãã¾ã™ã€‚ [ã‚·ã‚¹ãƒ†ãƒ è¨­å®š]â†’[è¡¨\ç¤ºè¨­å®š]â†’å‘ŠçŸ¥æ¬„è¡¨\ç¤º(index.htmlä»¥å¤–ã®å‘ŠçŸ¥æ¬„ã‚’è¡¨\ç¤ºã™ã‚‹ã®ãƒã‚§ãƒƒã‚¯ã‚’OFF)</td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common,'FUNC','BANNER_PC');\"> ");
-	$Page->Print("<input type=button value=\"@Šm”F@\" $common,'DISP','BANNER_PC');\">");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common,'FUNC','BANNER_PC');\"> ");
+	$Page->Print("<input type=button value=\"ã€€ç¢ºèªã€€\" $common,'DISP','BANNER_PC');\">");
 	$Page->Print("</td></tr>\n</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	’m—“(Œg‘Ñ)•ÒW‰æ–Ê‚Ì•\¦
+#	å‘ŠçŸ¥æ¬„(æºå¸¯)ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBannerForMobileEdit
@@ -227,7 +227,7 @@ sub PrintBannerForMobileEdit
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>Preview</td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=center>");
 	
-	# ’m—“ƒvƒŒƒrƒ…[•\¦
+	# å‘ŠçŸ¥æ¬„ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼è¡¨ç¤º
 	if ($Form->IsExist('MOBILE_CONTENT')) {
 		$Banner->Set('COLMB', $Form->Get('MOBILE_BGCOLOR'));
 		$Banner->Set('TEXTMB', $Form->Get('MOBILE_CONTENT'));
@@ -239,7 +239,7 @@ sub PrintBannerForMobileEdit
 		$content = $Banner->Get('TEXTMB');
 	}
 	
-	# ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ìì¬
+	# ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	my $BannerPage = THORIN->new;
 	$Banner->Print($BannerPage, 100, 0, 1);
 	$BannerPage->{'BUFF'} = CreatePreviewData($BannerPage->{'BUFF'});
@@ -248,25 +248,25 @@ sub PrintBannerForMobileEdit
 	$common = "onclick=\"DoSubmit('sys.edit'";
 	
 	$Page->Print("</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">”wŒiF</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">èƒŒæ™¯è‰²</td><td>");
 	$Page->Print("<input type=text size=20 name=MOBILE_BGCOLOR value=\"$bgColor\"></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">“à—e</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å†…å®¹</td><td>");
 	$Page->Print("<textarea rows=10 cols=70 name=MOBILE_CONTENT wrap=off>$content</textarea></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common,'FUNC','BANNER_MOBILE');\"> ");
-	$Page->Print("<input type=button value=\"@Šm”F@\" $common,'DISP','BANNER_MOBILE');\">");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common,'FUNC','BANNER_MOBILE');\"> ");
+	$Page->Print("<input type=button value=\"ã€€ç¢ºèªã€€\" $common,'DISP','BANNER_MOBILE');\">");
 	$Page->Print("</td></tr>\n</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	’m—“(ƒTƒu)•ÒW‰æ–Ê‚Ì•\¦
+#	å‘ŠçŸ¥æ¬„(ã‚µãƒ–)ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBannerForSubEdit
@@ -284,7 +284,7 @@ sub PrintBannerForSubEdit
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>Preview</td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=center>");
 	
-	# ’m—“ƒvƒŒƒrƒ…[•\¦
+	# å‘ŠçŸ¥æ¬„ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼è¡¨ç¤º
 	if ($Form->IsExist('SUB_CONTENT')) {
 		$Banner->Set('TEXTSB', $Form->Get('SUB_CONTENT'));
 		$content = $Form->Get('SUB_CONTENT');
@@ -293,7 +293,7 @@ sub PrintBannerForSubEdit
 		$content = $Banner->Get('TEXTSB');
 	}
 	
-	# ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ìì¬
+	# ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	my $BannerPage = THORIN->new;
 	$Banner->PrintSub($BannerPage);
 	$BannerPage->{'BUFF'} = CreatePreviewData($BannerPage->{'BUFF'});
@@ -302,23 +302,23 @@ sub PrintBannerForSubEdit
 	$common = "onclick=\"DoSubmit('sys.edit'";
 	
 	$Page->Print("</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">“à—e</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å†…å®¹</td><td>");
 	$Page->Print("<textarea rows=10 cols=70 name=SUB_CONTENT wrap=off>$content</textarea></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common,'FUNC','BANNER_SUB');\"> ");
-	$Page->Print("<input type=button value=\"@Šm”F@\" $common,'DISP','BANNER_SUB');\">");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common,'FUNC','BANNER_SUB');\"> ");
+	$Page->Print("<input type=button value=\"ã€€ç¢ºèªã€€\" $common,'DISP','BANNER_SUB');\">");
 	$Page->Print("</td></tr>\n</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	’m—“•ÒW
+#	å‘ŠçŸ¥æ¬„ç·¨é›†
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionBannerEdit
@@ -326,7 +326,7 @@ sub FunctionBannerEdit
 	my ($Sys, $Form, $mode, $pLog) = @_;
 	my ($Banner);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -335,7 +335,7 @@ sub FunctionBannerEdit
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	if ($mode != 3) {
 		my @inList;
 		
@@ -353,19 +353,19 @@ sub FunctionBannerEdit
 	if ($mode == 1) {
 		$Banner->Set('TEXTPC', $Form->Get('PC_CONTENT'));
 		$Banner->Set('COLPC', $Form->Get('PC_BGCOLOR'));
-		push @$pLog, 'PC—p’m—“‚ğİ’è‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'PCç”¨å‘ŠçŸ¥æ¬„ã‚’è¨­å®šã—ã¾ã—ãŸã€‚';
 	}
 	elsif ($mode == 2) {
 		$Banner->Set('TEXTMB', $Form->Get('MOBILE_CONTENT'));
 		$Banner->Set('COLMB', $Form->Get('MOBILE_BGCOLOR'));
-		push @$pLog, 'Œg‘Ñ—p’m—“‚ğİ’è‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'æºå¸¯ç”¨å‘ŠçŸ¥æ¬„ã‚’è¨­å®šã—ã¾ã—ãŸã€‚';
 	}
 	elsif ($mode == 3) {
 		$Banner->Set('TEXTSB', $Form->Get('SUB_CONTENT'));
-		push @$pLog, 'ƒTƒuƒoƒi[‚ğİ’è‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'ã‚µãƒ–ãƒãƒŠãƒ¼ã‚’è¨­å®šã—ã¾ã—ãŸã€‚';
 	}
 	
-	# İ’è‚Ì•Û‘¶
+	# è¨­å®šã®ä¿å­˜
 	$Banner->Save($Sys);
 	
 	return 0;
@@ -373,10 +373,10 @@ sub FunctionBannerEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ìì¬
+#	ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 #	-------------------------------------------------------------------------------------
-#	@param	$pData	ì¬Œ³”z—ñ‚ÌQÆ
-#	@return	ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ì”z—ñ
+#	@param	$pData	ä½œæˆå…ƒé…åˆ—ã®å‚ç…§
+#	@return	ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®é…åˆ—
 #
 #------------------------------------------------------------------------------------------------------------
 sub CreatePreviewData

@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	Œf¦”ÂŠÇ— - POOLƒXƒŒƒbƒh ƒ‚ƒWƒ…[ƒ‹
+#	æ²ç¤ºæ¿ç®¡ç† - POOLã‚¹ãƒ¬ãƒƒãƒ‰ ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	bbs.pool.pl
 #	---------------------------------------------------------------------------
 #	2004.02.07 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -53,7 +53,7 @@ sub DoPrint
 	$BASE = SAURON->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	if (! defined $BBS){
 		require './module/nazguls.pl';
 		$BBS = NAZGUL->new;
@@ -63,35 +63,35 @@ sub DoPrint
 		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	}
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE);
 	
-	if ($subMode eq 'LIST') {														# ƒXƒŒƒbƒhˆê——‰æ–Ê
+	if ($subMode eq 'LIST') {														# ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ç”»é¢
 		PrintThreadList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'REPARE') {													# ƒXƒŒƒbƒh•œ‹AŠm”F‰æ–Ê
+	elsif ($subMode eq 'REPARE') {													# ã‚¹ãƒ¬ãƒƒãƒ‰å¾©å¸°ç¢ºèªç”»é¢
 		PrintThreadRepare($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CREATE') {													# ‰ß‹ƒƒOì¬Šm”F‰æ–Ê
+	elsif ($subMode eq 'CREATE') {													# éå»ãƒ­ã‚°ä½œæˆç¢ºèªç”»é¢
 		PrintThreadCreate($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'DELETE') {													# ƒXƒŒƒbƒhíœŠm”F‰æ–Ê
+	elsif ($subMode eq 'DELETE') {													# ã‚¹ãƒ¬ãƒƒãƒ‰å‰Šé™¤ç¢ºèªç”»é¢
 		PrintThreadDelete($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ƒXƒŒƒbƒhˆ—Š®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# ã‚¹ãƒ¬ãƒƒãƒ‰å‡¦ç†å®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('‰ß‹ƒƒOˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('éå»ãƒ­ã‚°å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ƒXƒŒƒbƒhˆ—¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# ã‚¹ãƒ¬ãƒƒãƒ‰å‡¦ç†å¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
 	
-	# Œf¦”Âî•ñ‚ğİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’è¨­å®š
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	
 	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
@@ -99,12 +99,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -116,7 +116,7 @@ sub DoFunction
 	require './module/nazguls.pl';
 	$BBS = NAZGUL->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$BBS->Load($Sys);
 	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$Sys->Set('ADMIN', $pSys);
@@ -125,23 +125,23 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'REPARE') {														# •œ‹A
+	if ($subMode eq 'REPARE') {														# å¾©å¸°
 		$err = FunctionThreadRepare($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'DELETE') {													# íœ
+	elsif ($subMode eq 'DELETE') {													# å‰Šé™¤
 		$err = FunctionThreadDelete($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'UPDATE') {													# î•ñXV
+	elsif ($subMode eq 'UPDATE') {													# æƒ…å ±æ›´æ–°
 		$err = FunctionUpdateSubject($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'UPDATEALL') {												# ‘SXV
+	elsif ($subMode eq 'UPDATEALL') {												# å…¨æ›´æ–°
 		$err = FunctionUpdateSubjectAll($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'CREATE') {													# ‰ß‹ƒƒO¶¬
+	elsif ($subMode eq 'CREATE') {													# éå»ãƒ­ã‚°ç”Ÿæˆ
 		$err = FunctionCreateLogs($Sys, $Form, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"POOL($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -157,29 +157,29 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base) = @_;
 	
-	$Base->SetMenu('POOLƒXƒŒƒbƒhˆê——', "'bbs.pool','DISP','LIST'");
+	$Base->SetMenu('POOLã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§', "'bbs.pool','DISP','LIST'");
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('ƒVƒXƒeƒ€ŠÇ—‚Ö–ß‚é', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ã¸æˆ»ã‚‹', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhˆê——‚Ì•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadList
@@ -198,7 +198,7 @@ sub PrintThreadList
 	$Threads->GetKeySet('ALL', '', \@threadSet);
 	$ThreadNum = $Threads->GetNum();
 	
-	# •\¦”‚Ìİ’è
+	# è¡¨ç¤ºæ•°ã®è¨­å®š
 	$dispNum	= ($Form->Get('DISPNUM') eq '' ? 10 : $Form->Get('DISPNUM'));
 	$dispSt		= ($Form->Get('DISPST') eq '' ? 0 : $Form->Get('DISPST'));
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
@@ -211,16 +211,16 @@ sub PrintThreadList
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("•\\¦”<input type=text name=DISPNUM size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"@•\\¦@\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("è¡¨\ç¤ºæ•°<input type=text name=DISPNUM size=4 value=$dispNum>");
+	$Page->Print("<input type=button value=\"ã€€è¡¨\ç¤ºã€€\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">‘S</a></th>");
+	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">å…¨</a></th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250px\">Thread Title</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Thread Key</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Res</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">Attribute</td></tr>\n");
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	my ($isRepare, $isDelete, $isUpdate, $isCreate);
 	
 	$isRepare = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_THREADPOOL, $SYS->Get('BBS'));
@@ -238,11 +238,11 @@ sub PrintThreadList
 		$Page->Print("<td align=center>$id</td><td align=center>$res</td>");
 		
 		my @attrstr = ();
-		#push @attrstr, '’â~' if ($Threads->GetAttr($id, 'stop'));
-		#push @attrstr, '’â~' if ($isstop);
-		push @attrstr, '•‚ã' if ($Threads->GetAttr($id, 'float'));
-		push @attrstr, '•s—' if ($Threads->GetAttr($id, 'nopool'));
-		push @attrstr, 'sageis' if ($Threads->GetAttr($id, 'sagemode'));
+		#push @attrstr, 'åœæ­¢' if ($Threads->GetAttr($id, 'stop'));
+		#push @attrstr, 'åœæ­¢' if ($isstop);
+		push @attrstr, 'æµ®ä¸Š' if ($Threads->GetAttr($id, 'float'));
+		push @attrstr, 'ä¸è½' if ($Threads->GetAttr($id, 'nopool'));
+		push @attrstr, 'sageé€²è¡Œ' if ($Threads->GetAttr($id, 'sagemode'));
 		$Page->Print("<td>@attrstr</td></tr>\n");
 	}
 	$common		= "onclick=\"DoSubmit('bbs.pool','DISP'";
@@ -250,11 +250,11 @@ sub PrintThreadList
 	
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
-	$Page->Print("<input type=button value=\"@XV@\" $common2,'UPDATE')\"> ")	if ($isUpdate);
-	$Page->Print("<input type=button value=\" ‘SXV \" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
-	$Page->Print("<input type=button value=\"@•œ‹A@\" $common,'REPARE')\"> ")		if ($isRepare);
-	$Page->Print("<input type=button value=\"‰ß‹ƒƒO‰»\" $common,'CREATE')\"> ")	if ($isCreate);
-	$Page->Print("<input type=button value=\"@íœ@\" $common,'DELETE')\" class=\"delete\"> ")		if ($isDelete);
+	$Page->Print("<input type=button value=\"ã€€æ›´æ–°ã€€\" $common2,'UPDATE')\"> ")	if ($isUpdate);
+	$Page->Print("<input type=button value=\" å…¨æ›´æ–° \" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
+	$Page->Print("<input type=button value=\"ã€€å¾©å¸°ã€€\" $common,'REPARE')\"> ")		if ($isRepare);
+	$Page->Print("<input type=button value=\"éå»ãƒ­ã‚°åŒ–\" $common,'CREATE')\"> ")	if ($isCreate);
+	$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'DELETE')\" class=\"delete\"> ")		if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	
@@ -263,12 +263,12 @@ sub PrintThreadList
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhDAT—‚¿•œ‹AŠm”F•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰DATè½ã¡å¾©å¸°ç¢ºèªè¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadRepare
@@ -285,7 +285,7 @@ sub PrintThreadRepare
 	@threadList = $Form->GetAtArray('THREADS');
 	
 	$Page->Print("<br><center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌPOOLƒXƒŒƒbƒh‚ğ•œ‹A‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®POOLã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å¾©å¸°ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");
@@ -304,19 +304,19 @@ sub PrintThreadRepare
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3 align=left>");
-	$Page->Print("<input type=button value=\"@•œ‹A@\" onclick=\"$common\"> ");
+	$Page->Print("<input type=button value=\"ã€€å¾©å¸°ã€€\" onclick=\"$common\"> ");
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰ß‹ƒƒO‰»Šm”F•\¦
+#	éå»ãƒ­ã‚°åŒ–ç¢ºèªè¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadCreate
@@ -333,7 +333,7 @@ sub PrintThreadCreate
 	@threadList = $Form->GetAtArray('THREADS');
 	
 	$Page->Print("<br><center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌPOOLƒXƒŒƒbƒh‚ğ‰ß‹ƒƒO‰»‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®POOLã‚¹ãƒ¬ãƒƒãƒ‰ã‚’éå»ãƒ­ã‚°åŒ–ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");
@@ -353,20 +353,20 @@ sub PrintThreadCreate
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3 align=left>");
-	$Page->Print("<input type=button value=\"‰ß‹ƒƒO‰»\" onclick=\"$common\"> ");
-	$Page->Print("<label style=\"color:red;\"><input type=checkbox name=\"DELPOOL\" value=\"test\">ƒv[ƒ‹ƒXƒŒƒbƒh‚ğíœ</label>") if ($isDelete);
+	$Page->Print("<input type=button value=\"éå»ãƒ­ã‚°åŒ–\" onclick=\"$common\"> ");
+	$Page->Print("<label style=\"color:red;\"><input type=checkbox name=\"DELPOOL\" value=\"test\">ãƒ—ãƒ¼ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å‰Šé™¤</label>") if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhíœŠm”F•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰å‰Šé™¤ç¢ºèªè¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadDelete
@@ -383,7 +383,7 @@ sub PrintThreadDelete
 	@threadList = $Form->GetAtArray('THREADS');
 	
 	$Page->Print("<br><center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ˆÈ‰º‚ÌƒXƒŒƒbƒh‚ğíœ‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=3>ä»¥ä¸‹ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å‰Šé™¤ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");
@@ -402,22 +402,22 @@ sub PrintThreadDelete
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-	$Page->Print("¦’Fíœ‚µ‚½ƒXƒŒƒbƒh‚ğŒ³‚É–ß‚·‚±‚Æ‚Í‚Å‚«‚Ü‚¹‚ñB</b><br>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã—ãŸã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å…ƒã«æˆ»ã™ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚</b><br>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3 align=left>");
-	$Page->Print("<input type=button value=\"@íœ@\" onclick=\"$common\" class=\"delete\"> ");
+	$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" onclick=\"$common\" class=\"delete\"> ");
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhdat—‚¿•œ‹A
+#	ã‚¹ãƒ¬ãƒƒãƒ‰datè½ã¡å¾©å¸°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionThreadRepare
@@ -425,7 +425,7 @@ sub FunctionThreadRepare
 	my ($Sys, $Form, $pLog) = @_;
 	my (@threadList, $Threads, $Pools, $path, $bbs, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -448,7 +448,7 @@ sub FunctionThreadRepare
 	
 	foreach $id (@threadList) {
 		next if (! defined $Pools->Get('SUBJECT', $id));
-		push @$pLog, '"POOLƒXƒŒƒbƒhu' . $Pools->Get('SUBJECT', $id) . 'v‚ğ•œ‹A';
+		push @$pLog, '"POOLã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ' . $Pools->Get('SUBJECT', $id) . 'ã€ã‚’å¾©å¸°';
 		$Threads->Add($id, $Pools->Get('SUBJECT', $id), $Pools->Get('RES', $id));
 		$Pools->Delete($id);
 		
@@ -462,12 +462,12 @@ sub FunctionThreadRepare
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhíœ
+#	ã‚¹ãƒ¬ãƒƒãƒ‰å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionThreadDelete
@@ -475,7 +475,7 @@ sub FunctionThreadDelete
 	my ($Sys, $Form, $pLog) = @_;
 	my (@threadList, $Pools, $path, $bbs, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -495,7 +495,7 @@ sub FunctionThreadDelete
 	
 	foreach $id (@threadList) {
 		next if (! defined $Pools->Get('SUBJECT', $id));
-		push @$pLog, 'POOLƒXƒŒƒbƒhu' . $Pools->Get('SUBJECT', $id) . 'v‚ğíœ';
+		push @$pLog, 'POOLã‚¹ãƒ¬ãƒƒãƒ‰ã€Œ' . $Pools->Get('SUBJECT', $id) . 'ã€ã‚’å‰Šé™¤';
 		$Pools->Delete($id);
 		$Pools->DeleteAttr($id);
 		unlink "$path/pool/$id.cgi";
@@ -509,12 +509,12 @@ sub FunctionThreadDelete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhî•ñXV
+#	ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±æ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionUpdateSubject
@@ -522,7 +522,7 @@ sub FunctionUpdateSubject
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Pools);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -538,19 +538,19 @@ sub FunctionUpdateSubject
 	$Pools->Update($Sys);
 	$Pools->Save($Sys);
 	
-	push @$pLog, 'POOLƒXƒŒƒbƒhî•ñ(subject.cgi)‚ğXV‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'POOLã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±(subject.cgi)ã‚’æ›´æ–°ã—ã¾ã—ãŸã€‚';
 	
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhî•ñ‘SXV
+#	ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±å…¨æ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionUpdateSubjectAll
@@ -558,7 +558,7 @@ sub FunctionUpdateSubjectAll
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Pools);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -574,19 +574,19 @@ sub FunctionUpdateSubjectAll
 	$Pools->UpdateAll($Sys);
 	$Pools->Save($Sys);
 	
-	push @$pLog, 'POOLƒXƒŒƒbƒhî•ñ(subject.cgi)‚ğÄì¬‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'POOLã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±(subject.cgi)ã‚’å†ä½œæˆã—ã¾ã—ãŸã€‚';
 	
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰ß‹ƒƒO‚Ì¶¬
+#	éå»ãƒ­ã‚°ã®ç”Ÿæˆ
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionCreateLogs
@@ -595,7 +595,7 @@ sub FunctionCreateLogs
 	
 	my $isDelete = $Form->Get('DELPOOL', 0);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -653,9 +653,9 @@ sub FunctionCreateLogs
 					$Logs->Add(0, 0, 0, $path1);
 				}
 				$bCreate = 1;
-				push @$pLog, "¡$keyF‰ß‹ƒƒO¶¬Š®—¹";
+				push @$pLog, "â– $keyï¼šéå»ãƒ­ã‚°ç”Ÿæˆå®Œäº†";
 				if ($isDelete) {
-					push @$pLog, "¡$keyFƒv[ƒ‹ƒXƒŒƒbƒh‚ğíœ";
+					push @$pLog, "â– $keyï¼šãƒ—ãƒ¼ãƒ«ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’å‰Šé™¤";
 					$Pools->Delete($key);
 					$Pools->DeleteAttr($key);
 					unlink "$path/pool/$key.cgi";
@@ -665,7 +665,7 @@ sub FunctionCreateLogs
 			}
 		}
 		if (! $bCreate){
-			push @$pLog, "¡$keyF‰ß‹ƒƒO¶¬¸”s";
+			push @$pLog, "â– $keyï¼šéå»ãƒ­ã‚°ç”Ÿæˆå¤±æ•—";
 		}
 	}
 	
@@ -678,12 +678,12 @@ sub FunctionCreateLogs
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰ß‹ƒƒO‚Ì¶¬ - 1ƒtƒ@ƒCƒ‹‚Ìo—Í
+#	éå»ãƒ­ã‚°ã®ç”Ÿæˆ - 1ãƒ•ã‚¡ã‚¤ãƒ«ã®å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub CreateKAKOLog
@@ -698,7 +698,7 @@ sub CreateKAKOLog
 	$Caption = LEGOLAS->new;
 	$Caption->Load($Sys, 'META');
 	
-	# ‰ß‹ƒƒO¶¬pooldatƒpƒX‚Ì¶¬
+	# éå»ãƒ­ã‚°ç”Ÿæˆpooldatãƒ‘ã‚¹ã®ç”Ÿæˆ
 	$datPath	= $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/pool/' . $key . '.cgi';
 	$logDir		= $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/kako/' . substr($key, 0, 4) . '/' . substr($key, 0, 5);
 	$logPath	= $logDir . '/' . $key . '.html';
@@ -708,7 +708,7 @@ sub CreateKAKOLog
 	$board		= $Sys->Get('CGIPATH') . '/' . $Sys->Get('BBSPATH') . '/'. $Sys->Get('BBS');
 	$var		= $Sys->Get('VERSION');
 	
-	# Fî•ñæ“¾
+	# è‰²æƒ…å ±å–å¾—
 	$color[0]	= $Set->Get('BBS_THREAD_COLOR');
 	$color[1]	= $Set->Get('BBS_SUBJECT_COLOR');
 	$color[2]	= $Set->Get('BBS_TEXT_COLOR');
@@ -740,15 +740,15 @@ HTML
 
 HTML
 
-	# ’m—“o—Í
+	# å‘ŠçŸ¥æ¬„å‡ºåŠ›
 	$Banner->Print($Page, 100, 2, 0) if ($Sys->Get('BANNER') & 5);
 	
 	$Page->Print(<<HTML);
 <div style="margin:0px;">
- <a href="http://ofuda.cc/"><img width="400" height="15" border="0" src="http://e.ofuda.cc/disp/$account/00813400.gif" alt="–³—¿ƒAƒNƒZƒXƒJƒEƒ“ƒ^[ofuda.ccu‘S¢ŠEƒJƒEƒ“ƒgŒv‰æv"></a>
+ <a href="http://ofuda.cc/"><img width="400" height="15" border="0" src="http://e.ofuda.cc/disp/$account/00813400.gif" alt="ç„¡æ–™ã‚¢ã‚¯ã‚»ã‚¹ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ofuda.ccã€Œå…¨ä¸–ç•Œã‚«ã‚¦ãƒ³ãƒˆè¨ˆç”»ã€"></a>
  <div style="margin-top:1em;">
-  <a href="$board/">¡Œf¦”Â‚É–ß‚é¡</a>
-  <a href="$board/kako/">¡‰ß‹ƒƒO‘qŒÉ‚Ö–ß‚é¡</a>
+  <a href="$board/">â– æ²ç¤ºæ¿ã«æˆ»ã‚‹â– </a>
+  <a href="$board/kako/">â– éå»ãƒ­ã‚°å€‰åº«ã¸æˆ»ã‚‹â– </a>
  </div>
 </div>
 
@@ -760,7 +760,7 @@ HTML
 	
 	$Page->Print("<dl>\n");
 	
-	# ƒŒƒX‚Ìo—Í
+	# ãƒ¬ã‚¹ã®å‡ºåŠ›
 	for ($i = 0 ; $i < $Dat->Size() ; $i++) {
 		PrintResponse($Sys, $Page, $Dat->Get($i), $i + 1, $Conv, $Set);
 	}
@@ -772,8 +772,8 @@ HTML
 <hr>
 
 <div style="margin-top:1em;">
- <a href="$board/">¡Œf¦”Â‚É–ß‚é¡</a>
- <a href="$board/kako/">¡‰ß‹ƒƒO‘qŒÉ‚Ö–ß‚é¡</a>
+ <a href="$board/">â– æ²ç¤ºæ¿ã«æˆ»ã‚‹â– </a>
+ <a href="$board/kako/">â– éå»ãƒ­ã‚°å€‰åº«ã¸æˆ»ã‚‹â– </a>
 </div>
 <div align="right">
 $var
@@ -785,7 +785,7 @@ HTML
 	$Page->Print("</body>\n</html>\n");
 	$Dat->Close();
 	
-	# ‰ß‹ƒƒO‚Ìo—Í
+	# éå»ãƒ­ã‚°ã®å‡ºåŠ›
 	EARENDIL::CreateFolderHierarchy($logDir, $Sys->Get('PM-KDIR'));
 	EARENDIL::Copy($datPath, "$logDir/$key.dat") or return 0;
 	$Page->Flush(1, $Sys->Get('PM-TXT'), $logPath);
@@ -795,12 +795,12 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰ß‹ƒƒO‚Ì¶¬ - 1ƒŒƒX‚Ìo—Í
+#	éå»ãƒ­ã‚°ã®ç”Ÿæˆ - 1ãƒ¬ã‚¹ã®å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResponse
@@ -811,13 +811,13 @@ sub PrintResponse
 	$nameCol	= $Set->Get('BBS_NAME_COLOR');
 	@elem		= split(/<>/, $$pDat);
 	
-	# URL‚Æˆø—pŒÂŠ‚Ì“K‰
+	# URLã¨å¼•ç”¨å€‹æ‰€ã®é©å¿œ
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3]);
 	
-	$Page->Print(" <dt><a name=\"$n\">$n</a> F");
+	$Page->Print(" <dt><a name=\"$n\">$n</a> ï¼š");
 	$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>")	if ($elem[1] eq '');
 	$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>")	if ($elem[1] ne '');
-	$Page->Print("F$elem[2]</dt>\n  <dd>$elem[3]<br><br></dd>\n");
+	$Page->Print("ï¼š$elem[2]</dt>\n  <dd>$elem[3]<br><br></dd>\n");
 }
 
 #============================================================================================================

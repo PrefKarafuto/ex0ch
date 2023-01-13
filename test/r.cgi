@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 #============================================================================================================
 #
-#	“Ç‚İo‚µê—pCGI
+#	èª­ã¿å‡ºã—å°‚ç”¨CGI
 #	r.cgi
 #	-------------------------------------------------------------------------------------
-#	2004.04.08 ƒVƒXƒeƒ€‰ü•Ï‚É”º‚¤V‹Kì¬
+#	2004.04.08 ã‚·ã‚¹ãƒ†ãƒ æ”¹å¤‰ã«ä¼´ã†æ–°è¦ä½œæˆ
 #
 #============================================================================================================
 
@@ -16,15 +16,15 @@ use strict;
 no warnings 'once';
 
 
-# CGI‚ÌÀsŒ‹‰Ê‚ğI—¹ƒR[ƒh‚Æ‚·‚é
+# CGIã®å®Ÿè¡Œçµæœã‚’çµ‚äº†ã‚³ãƒ¼ãƒ‰ã¨ã™ã‚‹
 exit(ReadCGI());
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgiƒƒCƒ“
+#	r.cgiãƒ¡ã‚¤ãƒ³
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub ReadCGI
@@ -36,33 +36,33 @@ sub ReadCGI
 	require './module/thorin.pl';
 	$Page = new THORIN;
 	
-	# ‰Šú‰»E€”õ‚É¬Œ÷‚µ‚½‚ç“à—e•\¦
+	# åˆæœŸåŒ–ãƒ»æº–å‚™ã«æˆåŠŸã—ãŸã‚‰å†…å®¹è¡¨ç¤º
 	if (($err = Initialize(\%SYS, $Page)) == $ZP::E_SUCCESS) {
-		# ƒwƒbƒ_•\¦
+		# ãƒ˜ãƒƒãƒ€è¡¨ç¤º
 		PrintReadHead(\%SYS, $Page);
 		
-		# ƒƒjƒ…[•\¦
+		# ãƒ¡ãƒ‹ãƒ¥ãƒ¼è¡¨ç¤º
 		PrintReadMenu(\%SYS, $Page);
 		
-		# “à—e•\¦
+		# å†…å®¹è¡¨ç¤º
 		PrintReadContents(\%SYS, $Page);
 		
-		# ƒtƒbƒ^•\¦
+		# ãƒ•ãƒƒã‚¿è¡¨ç¤º
 		PrintReadFoot(\%SYS, $Page);
 	}
-	# ‰Šú‰»‚É¸”s‚µ‚½‚çƒGƒ‰[•\¦
+	# åˆæœŸåŒ–ã«å¤±æ•—ã—ãŸã‚‰ã‚¨ãƒ©ãƒ¼è¡¨ç¤º
 	else {
-		# ‘ÎÛƒXƒŒƒbƒh‚ªŒ©‚Â‚©‚ç‚È‚©‚Á‚½ê‡‚Í’Tõ‰æ–Ê‚ğ•\¦‚·‚é
+		# å¯¾è±¡ã‚¹ãƒ¬ãƒƒãƒ‰ãŒè¦‹ã¤ã‹ã‚‰ãªã‹ã£ãŸå ´åˆã¯æ¢ç´¢ç”»é¢ã‚’è¡¨ç¤ºã™ã‚‹
 		if ($err == $ZP::E_PAGE_FINDTHREAD) {
 			PrintReadSearch(\%SYS, $Page, $err);
 		}
-		# ‚»‚êˆÈŠO‚Í’ÊíƒGƒ‰[
+		# ãã‚Œä»¥å¤–ã¯é€šå¸¸ã‚¨ãƒ©ãƒ¼
 		else {
 			PrintReadError(\%SYS, $Page, $err);
 		}
 	}
 	
-	# •\¦Œ‹‰Ê‚ğo—Í
+	# è¡¨ç¤ºçµæœã‚’å‡ºåŠ›
 	$Page->Flush(0, 0, '');
 	
 	return $err;
@@ -70,10 +70,10 @@ sub ReadCGI
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgi‰Šú‰»E‘O€”õ
+#	r.cgiåˆæœŸåŒ–ãƒ»å‰æº–å‚™
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub Initialize
@@ -82,7 +82,7 @@ sub Initialize
 	my (@elem, @regs, $path);
 	my ($oSYS, $oSET, $oCONV, $oDAT);
 	
-	# Šeg—pƒ‚ƒWƒ…[ƒ‹‚Ì¶¬‚Æ‰Šú‰»
+	# å„ä½¿ç”¨ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®ç”Ÿæˆã¨åˆæœŸåŒ–
 	require './module/melkor.pl';
 	require './module/isildur.pl';
 	require './module/gondor.pl';
@@ -102,26 +102,26 @@ sub Initialize
 		'CODE'	=> 'sjis'
 	);
 	
-	# ƒVƒXƒeƒ€‰Šú‰»
+	# ã‚·ã‚¹ãƒ†ãƒ åˆæœŸåŒ–
 	$oSYS->Init();
 	
-	# –²‚ªL‚ª‚è‚ñ‚®
+	# å¤¢ãŒåºƒãŒã‚Šã‚“ã
 	$oSYS->{'MainCGI'} = $pSYS;
 	
-	# ‹N“®ƒpƒ‰ƒ[ƒ^‚Ì‰ğÍ
+	# èµ·å‹•ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã®è§£æ
 	@elem = $oCONV->GetArgument(\%ENV);
 	
-	# BBSw’è‚ª‚¨‚©‚µ‚¢
+	# BBSæŒ‡å®šãŒãŠã‹ã—ã„
 	if (! defined $elem[0] || $elem[0] eq '') {
 		return $ZP::E_READ_R_INVALIDBBS;
 	}
-	# ƒXƒŒƒbƒhƒL[w’è‚ª‚¨‚©‚µ‚¢
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¼æŒ‡å®šãŒãŠã‹ã—ã„
 	elsif (! defined $elem[1] || $elem[1] eq '' || ($elem[1] =~ /[^0-9]/) ||
 			(length($elem[1]) != 10 && length($elem[1]) != 9)) {
 		return $ZP::E_READ_R_INVALIDKEY;
 	}
 	
-	# ƒVƒXƒeƒ€•Ï”İ’è
+	# ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°è¨­å®š
 	$oSYS->Set('MODE', 0);
 	$oSYS->Set('BBS', $elem[0]);
 	$oSYS->Set('KEY', $elem[1]);
@@ -133,13 +133,13 @@ sub Initialize
 	
 	$path = $oCONV->MakePath($oSYS->Get('BBSPATH')."/$elem[0]/dat/$elem[1].dat");
 	
-	# datƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¸”s
+	# datãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—
 	if ($oDAT->Load($oSYS, $path, 1) == 0) {
 		return $ZP::E_READ_FAILEDLOADDAT;
 	}
 	$oDAT->Close();
 	
-	# İ’èƒtƒ@ƒCƒ‹‚Ì“Ç‚İ‚İ‚É¸”s
+	# è¨­å®šãƒ•ã‚¡ã‚¤ãƒ«ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—
 	if ($oSET->Load($oSYS) == 0) {
 		return $ZP::E_READ_FAILEDLOADSET;
 	}
@@ -149,7 +149,7 @@ sub Initialize
 	my $resmax = $oSET->Get('BBS_RES_MAX') || $oSYS->Get('RESMAX');
 	$oSYS->Set('RESMAX', $resmax);
 	
-	# •\¦ŠJnI—¹ˆÊ’u‚Ìİ’è
+	# è¡¨ç¤ºé–‹å§‹çµ‚äº†ä½ç½®ã®è¨­å®š
 	@regs = $oCONV->RegularDispNum(
 				$oSYS, $oDAT, $elem[2], $elem[3], $elem[4]);
 	$oSYS->SetOption($elem[2], $regs[0], $regs[1], $elem[5], $elem[6]);
@@ -159,10 +159,10 @@ sub Initialize
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgiƒwƒbƒ_o—Í
+#	r.cgiãƒ˜ãƒƒãƒ€å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadHead
@@ -181,7 +181,7 @@ sub PrintReadHead
 	$code	= $Sys->{'CODE'};
 	$title	= $Sys->{'DAT'}->GetSubject();
 	
-	# HTMLƒwƒbƒ_‚Ìo—Í
+	# HTMLãƒ˜ãƒƒãƒ€ã®å‡ºåŠ›
 	$Page->Print("Content-type: text/html\n\n");
 $Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -199,21 +199,21 @@ $Page->Print(<<HTML);
 <!--nobanner-->
 HTML
 	
-	# <body>ƒ^ƒOo—Í
+	# <body>ã‚¿ã‚°å‡ºåŠ›
 	{
 		$Page->Print('<body>'."\n");
 	}
 	
-	# ƒoƒi[o—Í
+	# ãƒãƒŠãƒ¼å‡ºåŠ›
 	$Banner->Print($Page, 100, 2, 1);
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgiƒƒjƒ…[o—Í
+#	r.cgiãƒ¡ãƒ‹ãƒ¥ãƒ¼å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadMenu
@@ -222,16 +222,16 @@ sub PrintReadMenu
 	my ($oSYS, $bbs, $key, $baseBBS, $resNum);
 #	my ($pathBBS, $pathAll, $pathLast, $pathMenu, $pathNext, $pathPrev);
 	
-	# ‘O€”õ
+	# å‰æº–å‚™
 	$oSYS		= $Sys->{'SYS'};
 	$bbs		= $oSYS->Get('BBS');
 	$key		= $oSYS->Get('KEY');
 	
 $Page->Print(<<HTML);
-‘O4)<a href="#down" accesskey="8">‰º</a>8)Ÿ6) ‰1)V3)<a href="#res" accesskey="7">‘</a>7) ”Â5)
+å‰4)<a href="#down" accesskey="8">ä¸‹</a>8)æ¬¡6) åˆ1)æ–°3)<a href="#res" accesskey="7">æ›¸</a>7) æ¿5)
 HTML
 
-	# ƒXƒŒƒbƒhƒ^ƒCƒgƒ‹•\¦
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ã‚¿ã‚¤ãƒˆãƒ«è¡¨ç¤º
 	{
 		my $title	= $Sys->{'DAT'}->GetSubject();
 		my $ttlCol	= $Sys->{'SET'}->Get('BBS_SUBJECT_COLOR');
@@ -243,10 +243,10 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgi“à—eo—Í
+#	r.cgiå†…å®¹å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadContents
@@ -257,11 +257,11 @@ sub PrintReadContents
 	$work = $Sys->{'SYS'}->Get('OPTION');
 	@elem = split(/\,/, $work);
 	
-	# 1•\¦ƒtƒ‰ƒO‚ªTRUE‚ÅŠJn‚ª1‚Å‚È‚¯‚ê‚Î1‚ğ•\¦‚·‚é
+	# 1è¡¨ç¤ºãƒ•ãƒ©ã‚°ãŒTRUEã§é–‹å§‹ãŒ1ã§ãªã‘ã‚Œã°1ã‚’è¡¨ç¤ºã™ã‚‹
 	if ($elem[3] == 0 && $elem[1] != 1) {
 		PrintResponse($Sys, $Page, 1, 0);
 	}
-	# c‚è‚ÌƒŒƒX‚ğ•\¦‚·‚é
+	# æ®‹ã‚Šã®ãƒ¬ã‚¹ã‚’è¡¨ç¤ºã™ã‚‹
 	for ($i = $elem[1] ; $i <= $elem[2] ; $i++) {
 		PrintResponse($Sys, $Page, $i, $elem[2]);
 	}
@@ -269,10 +269,10 @@ sub PrintReadContents
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgiƒtƒbƒ^o—Í
+#	r.cgiãƒ•ãƒƒã‚¿å‡ºåŠ›
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadFoot
@@ -281,7 +281,7 @@ sub PrintReadFoot
 	my ($oSYS, $Conv, $bbs, $key, $ver, $rmax, $pathNext, $pathPrev);
 	my ($baseBBS, $pathBBS, $pathAll, $pathLast, $resNum, $cgipath);
 	
-	# ‘O€”õ
+	# å‰æº–å‚™
 	$oSYS		= $Sys->{'SYS'};
 	$Conv		= $Sys->{'CONV'};
 	$bbs		= $oSYS->Get('BBS');
@@ -296,7 +296,7 @@ sub PrintReadFoot
 	$pathLast	= $Sys->{'CONV'}->CreatePath($oSYS, 1, $bbs, $key, 'l10');
 	$resNum		= $Sys->{'DAT'}->Size();
 	
-	# ‘OAŸ”Ô†‚Ìæ“¾
+	# å‰ã€æ¬¡ç•ªå·ã®å–å¾—
 	{
 		my ($st, $ed, $b1, $b2, $f1, $f2);
 		
@@ -312,16 +312,16 @@ sub PrintReadFoot
 	}
 	$Page->Print('<hr>');
 	
-	# ƒƒjƒ…[‚Ì•\¦
-	$Page->Print("<a href=\"#top\" accesskey=\"2\">ã</a>");
-	$Page->Print("<a href=\"$pathPrev\" accesskey=\"4\">‘O</a>");
-	$Page->Print("<a href=\"$pathNext\" accesskey=\"6\">Ÿ</a>");
-	$Page->Print("<a href=\"$pathLast?guid=ON\" accesskey=\"3\">V</a>");
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¡¨ç¤º
+	$Page->Print("<a href=\"#top\" accesskey=\"2\">ä¸Š</a>");
+	$Page->Print("<a href=\"$pathPrev\" accesskey=\"4\">å‰</a>");
+	$Page->Print("<a href=\"$pathNext\" accesskey=\"6\">æ¬¡</a>");
+	$Page->Print("<a href=\"$pathLast?guid=ON\" accesskey=\"3\">æ–°</a>");
 	$Page->Print("<a href=\"$pathAll\" accesskey=\"1\">1-</a>");
-	$Page->Print("<a href=\"$pathBBS\" accesskey=\"5\">”Â</a>");
+	$Page->Print("<a href=\"$pathBBS\" accesskey=\"5\">æ¿</a>");
 	
-	# “ŠeƒtƒH[ƒ€‚Ì•\¦
-	# ƒŒƒXÅ‘å”‚ğ’´‚¦‚Ä‚¢‚éê‡‚ÍƒtƒH[ƒ€•\¦‚µ‚È‚¢
+	# æŠ•ç¨¿ãƒ•ã‚©ãƒ¼ãƒ ã®è¡¨ç¤º
+	# ãƒ¬ã‚¹æœ€å¤§æ•°ã‚’è¶…ãˆã¦ã„ã‚‹å ´åˆã¯ãƒ•ã‚©ãƒ¼ãƒ è¡¨ç¤ºã—ãªã„
 	if ($rmax > $Sys->{'DAT'}->Size()) {
 $Page->Print(<<HTML);
 <hr>
@@ -330,10 +330,10 @@ $Page->Print(<<HTML);
 <input type="hidden" name="bbs" value="$bbs">
 <input type="hidden" name="key" value="$key">
 <input type="hidden" name="mb" value="on">
-–¼‘O<br><input type="text" name="FROM"><br>
+åå‰<br><input type="text" name="FROM"><br>
 E-mail<br><input type="text" name="mail"><br>
 <textarea rows="3" wrap="off" name="MESSAGE"></textarea>
-<br><input type="submit" value="‘‚«‚Ş"><br>
+<br><input type="submit" value="æ›¸ãè¾¼ã‚€"><br>
 HTML
 	}
 	$Page->Print("<small>$ver</small></form></body></html>\n");
@@ -341,10 +341,10 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgiƒŒƒX•\¦
+#	r.cgiãƒ¬ã‚¹è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResponse
@@ -361,12 +361,12 @@ sub PrintResponse
 	$maxLen	= int($maxLen * 5);
 	$resNum	= $Sys->{'DAT'}->Size();
 	
-	# •\¦”ÍˆÍ“à‚©w’è•\¦‚È‚ç‚·‚×‚Ä•\¦‚·‚é
+	# è¡¨ç¤ºç¯„å›²å†…ã‹æŒ‡å®šè¡¨ç¤ºãªã‚‰ã™ã¹ã¦è¡¨ç¤ºã™ã‚‹
 	if ($oSYS->GetOption(5) == 1 || $len <= $maxLen) {
 		$oConv->ConvertURL($oSYS, $Sys->{'SET'}, 1, \$elem[3]);
 		$oConv->ConvertQuotation($oSYS, \$elem[3], 1);
 	}
-	# •\¦”ÍˆÍ‚ğ’´‚¦‚Ä‚¢‚½‚çÈ—ª•\¦‚ğ‚·‚é
+	# è¡¨ç¤ºç¯„å›²ã‚’è¶…ãˆã¦ã„ãŸã‚‰çœç•¥è¡¨ç¤ºã‚’ã™ã‚‹
 	else {
 		my ($bbs, $key, $path);
 		
@@ -380,11 +380,11 @@ sub PrintResponse
 		$oConv->ConvertQuotation($oSYS, \$elem[3], 1);
 		
 		#if ($maxLen) {
-			$elem[3] .= " <a href=\"$path\">È$maxLen</a>";
+			$elem[3] .= " <a href=\"$path\">çœ$maxLen</a>";
 		#}
 	}
 	
-	# AASƒŠƒ“ƒNæ“¾
+	# AASãƒªãƒ³ã‚¯å–å¾—
 	my ( $server, $path, $obama );
 	
 	$server	= $oSYS->Get('SERVER') || $ENV{'SERVER_NAME'};
@@ -395,34 +395,34 @@ sub PrintResponse
 	$obama	= 'http://example.ddo.jp' . $oConv->MakePath("/aas/a.i/$path/".$oSYS->Get('KEY')."/$n?guid=ON");
 		
 	$Page->Print("<a name=\"down\"></a>") if ( $n == $last );
-	$Page->Print("<hr>[$n]$elem[0]</b>F$elem[2]<br><a href=\"$obama\">AAS</a><br>$elem[3]<br>\n");
+	$Page->Print("<hr>[$n]$elem[0]</b>ï¼š$elem[2]<br><a href=\"$obama\">AAS</a><br>$elem[3]<br>\n");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgi’Tõ‰æ–Ê•\¦
+#	r.cgiæ¢ç´¢ç”»é¢è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadSearch
 {
 	my ($Sys, $Page, $err) = @_;
 	
-	# ‘¶İ‚µ‚È‚¢‚Ì‚Å404‚ğ•Ô‚·B
+	# å­˜åœ¨ã—ãªã„ã®ã§404ã‚’è¿”ã™ã€‚
 	$Page->Print("Status: 404 Not Found\n");
 	
-	# ‰¼ƒGƒ‰[ƒy[ƒW
+	# ä»®ã‚¨ãƒ©ãƒ¼ãƒšãƒ¼ã‚¸
 	PrintReadError($Sys, $Page, $err);
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	r.cgiƒGƒ‰[•\¦
+#	r.cgiã‚¨ãƒ©ãƒ¼è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintReadError
@@ -432,9 +432,9 @@ sub PrintReadError
 	
 	$code = 'Shift_JIS';
 	
-	# HTMLƒwƒbƒ_‚Ìo—Í
+	# HTMLãƒ˜ãƒƒãƒ€ã®å‡ºåŠ›
 	$Page->Print("Content-type: text/html\n\n");
-	$Page->Print('<html><head><title>‚d‚q‚q‚n‚qII</title>');
+	$Page->Print('<html><head><title>ï¼¥ï¼²ï¼²ï¼¯ï¼²ï¼ï¼</title>');
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print('</head><!--nobanner-->');
 	$Page->Print('<html><body>');

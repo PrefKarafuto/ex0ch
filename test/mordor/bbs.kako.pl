@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	Œf¦”ÂŠÇ— - ‰ß‹ƒƒO ƒ‚ƒWƒ…[ƒ‹
+#	æ²ç¤ºæ¿ç®¡ç† - éå»ãƒ­ã‚° ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	bbs.kako.pl
 #	---------------------------------------------------------------------------
 #	2004.08.24 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -52,7 +52,7 @@ sub DoPrint
 	$BASE = SAURON->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	if (! defined $BBS){
 		require './module/nazguls.pl';
 		$BBS = NAZGUL->new;
@@ -62,26 +62,26 @@ sub DoPrint
 		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	}
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE);
 	
-	if ($subMode eq 'LIST') {													# ƒƒOˆê——‰æ–Ê
+	if ($subMode eq 'LIST') {													# ãƒ­ã‚°ä¸€è¦§ç”»é¢
 		PrintKakoLogList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ˆ—Š®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# å‡¦ç†å®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('‰ß‹ƒƒOˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('éå»ãƒ­ã‚°å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ˆ—¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# å‡¦ç†å¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
 	
-	# Œf¦”Âî•ñ‚ğİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’è¨­å®š
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	
 	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
@@ -89,12 +89,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -106,7 +106,7 @@ sub DoFunction
 	require './module/nazguls.pl';
 	$BBS = NAZGUL->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$BBS->Load($Sys);
 	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$Sys->Set('ADMIN', $pSys);
@@ -115,17 +115,17 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'UPDATEINFO') {												# î•ñXV
+	if ($subMode eq 'UPDATEINFO') {												# æƒ…å ±æ›´æ–°
 		$err = FunctionUpdateInfo($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'UPDATEIDX') {												# indexXV
+	elsif ($subMode eq 'UPDATEIDX') {												# indexæ›´æ–°
 		$err = FunctionUpdateIndex($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'REMOVE') {													# ‰ß‹ƒƒOíœ
+	elsif ($subMode eq 'REMOVE') {													# éå»ãƒ­ã‚°å‰Šé™¤
 		$err = FunctionLogDelete($Sys, $Form, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"KAKO($subMode)", 'ERROR:'.$err);
 		push @{$this->{'LOG'}}, $err;
@@ -141,29 +141,29 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base) = @_;
 	
-	$Base->SetMenu('‰ß‹ƒƒOˆê——', "'bbs.kako','DISP','LIST'");
+	$Base->SetMenu('éå»ãƒ­ã‚°ä¸€è¦§', "'bbs.kako','DISP','LIST'");
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('ƒVƒXƒeƒ€ŠÇ—‚Ö–ß‚é', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ã¸æˆ»ã‚‹', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒXƒŒƒbƒhˆê——‚Ì•\¦
+#	ã‚¹ãƒ¬ãƒƒãƒ‰ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintKakoLogList
@@ -182,7 +182,7 @@ sub PrintKakoLogList
 	$Logs->Load($SYS);
 	$Logs->GetKeySet('ALL', '', \@logSet);
 	
-	# •\¦”‚Ìİ’è
+	# è¡¨ç¤ºæ•°ã®è¨­å®š
 	$logNum		= @logSet;
 	$dispNum	= $Form->Get('DISPNUM_KAKO', 10) || 0;
 	$dispSt		= $Form->Get('DISPST_KAKO', 0) || 0;
@@ -191,27 +191,27 @@ sub PrintKakoLogList
 	
 	$common		= "DoSubmit('bbs.kako','DISP','LIST');";
 	
-	# •\¦ƒtƒH[ƒ€‚Ì•\¦
+	# è¡¨ç¤ºãƒ•ã‚©ãƒ¼ãƒ ã®è¡¨ç¤º
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><b><a href=\"javascript:SetOption('DISPST_KAKO', " . ($dispSt - $dispNum));
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST_KAKO', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("•\\¦”<input type=text name=DISPNUM_KAKO size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"@•\\¦@\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("è¡¨\ç¤ºæ•°<input type=text name=DISPNUM_KAKO size=4 value=$dispNum>");
+	$Page->Print("<input type=button value=\"ã€€è¡¨\ç¤ºã€€\" onclick=\"$common\"></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
-	$Page->Print("<tr><th style=\"width:30\"><a href=\"javascript:toggleAll('LOGS')\">‘S</a></th>");
+	$Page->Print("<tr><th style=\"width:30\"><a href=\"javascript:toggleAll('LOGS')\">å…¨</a></th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Thread Key</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Date</td></td>\n");
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	my ($isUpdate, $isDelete);
 	$isUpdate = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_KAKOCREATE, $SYS->Get('BBS'));
 	$isDelete = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_KAKODELETE, $SYS->Get('BBS'));
 	
-	# ‰ß‹ƒƒOˆê——‚Ì•\¦
+	# éå»ãƒ­ã‚°ä¸€è¦§ã®è¡¨ç¤º
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$n		= $i + 1;
 		$key	= $Logs->Get('KEY', $logSet[$i]);
@@ -228,21 +228,21 @@ sub PrintKakoLogList
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=4 align=left>");
-	$Page->Print("<input type=button value=\"î•ñXV\" $common,'UPDATEINFO')\"> ")	if ($isUpdate);
-	$Page->Print("<input type=button value=\"indexXV\" $common,'UPDATEIDX')\"> ")	if ($isUpdate);
-	$Page->Print("<input type=button value=\"@íœ@\" $common,'REMOVE')\" class=\"delete\"> ")		if ($isDelete);
+	$Page->Print("<input type=button value=\"æƒ…å ±æ›´æ–°\" $common,'UPDATEINFO')\"> ")	if ($isUpdate);
+	$Page->Print("<input type=button value=\"indexæ›´æ–°\" $common,'UPDATEIDX')\"> ")	if ($isUpdate);
+	$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'REMOVE')\" class=\"delete\"> ")		if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰ß‹ƒƒOî•ñXV
+#	éå»ãƒ­ã‚°æƒ…å ±æ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionUpdateInfo
@@ -250,7 +250,7 @@ sub FunctionUpdateInfo
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Logs);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -266,10 +266,10 @@ sub FunctionUpdateInfo
 	$Logs->UpdateInfo($Sys);
 	$Logs->Save($Sys);
 	
-	push @$pLog, '‰ß‹ƒƒOî•ñ(kako.idx)‚ğÄì¬‚µ‚Ü‚µ‚½B';
-	# ƒCƒ“ƒfƒNƒX‚ğXV‚·‚é
+	push @$pLog, 'éå»ãƒ­ã‚°æƒ…å ±(kako.idx)ã‚’å†ä½œæˆã—ã¾ã—ãŸã€‚';
+	# ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ã‚’æ›´æ–°ã™ã‚‹
 	if (FunctionUpdateIndex($Sys, $Form, $pLog) != 0){
-		push @$pLog, '‰ß‹ƒƒOindex(index.html)‚ÌÄì¬‚É¸”s‚µ‚Ü‚µ‚½Bè“®‚ÅXV‚µ‚Ä‚­‚¾‚³‚¢B';
+		push @$pLog, 'éå»ãƒ­ã‚°index(index.html)ã®å†ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚æ‰‹å‹•ã§æ›´æ–°ã—ã¦ãã ã•ã„ã€‚';
 	}
 	
 	return 0;
@@ -277,12 +277,12 @@ sub FunctionUpdateInfo
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰ß‹ƒƒOindexXV
+#	éå»ãƒ­ã‚°indexæ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionUpdateIndex
@@ -290,7 +290,7 @@ sub FunctionUpdateIndex
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Logs, $Page);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -308,19 +308,19 @@ sub FunctionUpdateIndex
 	$Logs->UpdateIndex($Sys, $Page);
 #	$Logs->Save($Sys);
 	
-	push @$pLog, '‰ß‹ƒƒOindex(index.html)‚ğÄì¬‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'éå»ãƒ­ã‚°index(index.html)ã‚’å†ä½œæˆã—ã¾ã—ãŸã€‚';
 	
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰ß‹ƒƒOíœ
+#	éå»ãƒ­ã‚°å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionLogDelete
@@ -328,7 +328,7 @@ sub FunctionLogDelete
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Logs, @logSet, $id, $base, $removePath, @pathList, $logPath, $logPath2, $removePath2, %Dirs, @DirList);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -347,18 +347,18 @@ sub FunctionLogDelete
 	
 	foreach $id (@logSet) {
 		next if (! defined $Logs->Get('KEY', $id));
-		push @$pLog, '‰ß‹ƒƒOu' . $Logs->Get('SUBJECT', $id) . 'v‚ğíœ‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'éå»ãƒ­ã‚°ã€Œ' . $Logs->Get('SUBJECT', $id) . 'ã€ã‚’å‰Šé™¤ã—ã¾ã—ãŸã€‚';
 		
-		# ‰ß‹ƒƒOƒtƒ@ƒCƒ‹‚Ìíœ
+		# éå»ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«ã®å‰Šé™¤
 		$logPath = $Logs->Get('PATH', $id);
 		$removePath = $base . $logPath;
 		unlink $removePath . '/' . $Logs->Get('KEY', $id) . '.dat';
 		unlink $removePath . '/' . $Logs->Get('KEY', $id) . '.html';
 		
-		# ‰ß‹ƒƒOî•ñ‚Ìíœ
+		# éå»ãƒ­ã‚°æƒ…å ±ã®å‰Šé™¤
 		$Logs->Delete($id);
 		
-		# ƒOƒ‹[ƒv“à‚ÌƒƒO‚ª‚·‚×‚Äíœ‚³‚ê‚½ê‡‚ÍƒfƒBƒŒƒNƒgƒŠ‚ğíœ‚·‚é
+		# ã‚°ãƒ«ãƒ¼ãƒ—å†…ã®ãƒ­ã‚°ãŒã™ã¹ã¦å‰Šé™¤ã•ã‚ŒãŸå ´åˆã¯ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’å‰Šé™¤ã™ã‚‹
 		if ($Logs->GetKeySet('PATH', $logPath, \@pathList) == 1) {
 			if ($Logs->Get('PATH', $pathList[0], '') eq '') {
 				EARENDIL::DeleteDirectory($removePath);
@@ -388,9 +388,9 @@ sub FunctionLogDelete
 	}
 	$Logs->Save($Sys);
 	
-	# ƒCƒ“ƒfƒNƒX‚ğXV‚·‚é
+	# ã‚¤ãƒ³ãƒ‡ã‚¯ã‚¹ã‚’æ›´æ–°ã™ã‚‹
 	if (FunctionUpdateIndex($Sys, $Form, $pLog) != 0) {
-		push @$pLog, '‰ß‹ƒƒOindex(index.html)‚ÌÄì¬‚É¸”s‚µ‚Ü‚µ‚½Bè“®‚ÅXV‚µ‚Ä‚­‚¾‚³‚¢B';
+		push @$pLog, 'éå»ãƒ­ã‚°index(index.html)ã®å†ä½œæˆã«å¤±æ•—ã—ã¾ã—ãŸã€‚æ‰‹å‹•ã§æ›´æ–°ã—ã¦ãã ã•ã„ã€‚';
 	}
 	
 	return 0;

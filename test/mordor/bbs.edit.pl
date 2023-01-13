@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	Œf¦”ÂŠÇ— - Šeí•ÒW ƒ‚ƒWƒ…[ƒ‹
+#	æ²ç¤ºæ¿ç®¡ç† - å„ç¨®ç·¨é›† ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	bbs.edit.pl
 #	---------------------------------------------------------------------------
 #	2004.06.23 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -52,7 +52,7 @@ sub DoPrint
 	$BASE = SAURON->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	if (! defined $BBS){
 		require './module/nazguls.pl';
 		$BBS = NAZGUL->new;
@@ -62,41 +62,41 @@ sub DoPrint
 		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	}
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys, $Sys->Get('BBS'));
 	
-	if ($subMode eq 'HEAD') {														# ƒwƒbƒ_•ÒW‰æ–Ê
+	if ($subMode eq 'HEAD') {														# ãƒ˜ãƒƒãƒ€ç·¨é›†ç”»é¢
 		PrintHeaderEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'FOOT') {													# ƒtƒbƒ^•ÒW‰æ–Ê
+	elsif ($subMode eq 'FOOT') {													# ãƒ•ãƒƒã‚¿ç·¨é›†ç”»é¢
 		PrintFooterEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'META') {													# META•ÒW‰æ–Ê
+	elsif ($subMode eq 'META') {													# METAç·¨é›†ç”»é¢
 		PrintMETAEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'USER') {													# ‹K§ƒ†[ƒU•ÒW‰æ–Ê
+	elsif ($subMode eq 'USER') {													# è¦åˆ¶ãƒ¦ãƒ¼ã‚¶ç·¨é›†ç”»é¢
 		PrintValidUserEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'NGWORD') {													# NGƒ[ƒh•ÒW‰æ–Ê
+	elsif ($subMode eq 'NGWORD') {													# NGãƒ¯ãƒ¼ãƒ‰ç·¨é›†ç”»é¢
 		PrintNGWordsEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'LAST') {													# 1001•ÒW‰æ–Ê
+	elsif ($subMode eq 'LAST') {													# 1001ç·¨é›†ç”»é¢
 		PrintLastEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# İ’èŠ®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# è¨­å®šå®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('Šeí•ÒWˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('å„ç¨®ç·¨é›†å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# İ’è¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# è¨­å®šå¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
 	
-	# Œf¦”Âî•ñ‚ğİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’è¨­å®š
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	
 	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
@@ -104,12 +104,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -121,7 +121,7 @@ sub DoFunction
 	require './module/nazguls.pl';
 	$BBS = NAZGUL->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$BBS->Load($Sys);
 	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$Sys->Set('ADMIN', $pSys);
@@ -130,26 +130,26 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 9999;
 	
-	if ($subMode eq 'HEAD') {														# ƒwƒbƒ_•ÒW
+	if ($subMode eq 'HEAD') {														# ãƒ˜ãƒƒãƒ€ç·¨é›†
 		$err = FunctionTextEdit($Sys, $Form, 1, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FOOT') {													# ƒtƒbƒ^•ÒW
+	elsif ($subMode eq 'FOOT') {													# ãƒ•ãƒƒã‚¿ç·¨é›†
 		$err = FunctionTextEdit($Sys, $Form, 2, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'META') {													# META•ÒW
+	elsif ($subMode eq 'META') {													# METAç·¨é›†
 		$err = FunctionTextEdit($Sys, $Form, 3, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'USER') {													# ‹K§ƒ†[ƒU•ÒW
+	elsif ($subMode eq 'USER') {													# è¦åˆ¶ãƒ¦ãƒ¼ã‚¶ç·¨é›†
 		$err = FunctionValidUserEdit($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'NGWORD') {													# NGƒ[ƒh•ÒW
+	elsif ($subMode eq 'NGWORD') {													# NGãƒ¯ãƒ¼ãƒ‰ç·¨é›†
 		$err = FunctionNGWordEdit($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'LAST') {													# 1001•ÒW
+	elsif ($subMode eq 'LAST') {													# 1001ç·¨é›†
 		$err = FunctionLastEdit($Sys, $Form, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "BBS_EDIT($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -166,10 +166,10 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
@@ -177,37 +177,37 @@ sub SetMenuList
 	my ($Base, $pSys, $bbs) = @_;
 	my ($bAuth) = 0;
 	
-	$Base->SetMenu('ƒwƒbƒ_‚Ì•ÒW', "'bbs.edit','DISP','HEAD'");
-	$Base->SetMenu('ƒtƒbƒ^‚Ì•ÒW', "'bbs.edit','DISP','FOOT'");
-	$Base->SetMenu('METAî•ñ‚Ì•ÒW', "'bbs.edit','DISP','META'");
+	$Base->SetMenu('ãƒ˜ãƒƒãƒ€ã®ç·¨é›†', "'bbs.edit','DISP','HEAD'");
+	$Base->SetMenu('ãƒ•ãƒƒã‚¿ã®ç·¨é›†', "'bbs.edit','DISP','FOOT'");
+	$Base->SetMenu('METAæƒ…å ±ã®ç·¨é›†', "'bbs.edit','DISP','META'");
 	$Base->SetMenu('<hr>', '');
 	
-	# ŠÇ—ƒOƒ‹[ƒvİ’èŒ ŒÀ‚Ì‚İ
+	# ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šæ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_ACCESUSER, $bbs)) {
-		$Base->SetMenu("‹K§ƒ†[ƒU‚Ì•ÒW","'bbs.edit','DISP','USER'");
+		$Base->SetMenu("è¦åˆ¶ãƒ¦ãƒ¼ã‚¶ã®ç·¨é›†","'bbs.edit','DISP','USER'");
 		$bAuth = 1;
 	}
-	# ŠÇ—ƒOƒ‹[ƒvİ’èŒ ŒÀ‚Ì‚İ
+	# ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šæ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_NGWORDS, $bbs)) {
-		$Base->SetMenu("NGƒ[ƒh‚Ì•ÒW","'bbs.edit','DISP','NGWORD'");
+		$Base->SetMenu("NGãƒ¯ãƒ¼ãƒ‰ã®ç·¨é›†","'bbs.edit','DISP','NGWORD'");
 		$bAuth = 1;
 	}
 	if ($bAuth) {
 		$Base->SetMenu('<hr>', '');
 	}
-	$Base->SetMenu('1001‚Ì•ÒW', "'bbs.edit','DISP','LAST'");
+	$Base->SetMenu('1001ã®ç·¨é›†', "'bbs.edit','DISP','LAST'");
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('ƒVƒXƒeƒ€ŠÇ—‚Ö–ß‚é', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ã¸æˆ»ã‚‹', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒwƒbƒ_•ÒW‰æ–Ê‚Ì•\¦
+#	ãƒ˜ãƒƒãƒ€ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintHeaderEdit
@@ -224,7 +224,7 @@ sub PrintHeaderEdit
 	$Head->Load($SYS, 'HEAD');
 	$Setting->Load($SYS);
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BBSEDIT, $SYS->Get('BBS'));
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
@@ -232,7 +232,7 @@ sub PrintHeaderEdit
 	$Page->Print("<tr><td colspan=2 align=center>");
 	
 	$data = $Form->Get('HEAD_TEXT', '');
-	# ƒwƒbƒ_ƒvƒŒƒrƒ…[•\¦
+	# ãƒ˜ãƒƒãƒ€ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼è¡¨ç¤º
 	if ($data ne '') {
 		$Head->Set(\$data);
 	}
@@ -241,17 +241,17 @@ sub PrintHeaderEdit
 		$data = join '', @$pHead;
 	}
 	
-	# ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ìì¬
+	# ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	my $PreviewPage = THORIN->new;
 	$Head->Print($PreviewPage, $Setting);
 	$PreviewPage->{'BUFF'} = CreatePreviewData($PreviewPage->{'BUFF'});
 	$Page->Merge($PreviewPage);
 	
 	$Page->Print("</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">“à—e•ÒW</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å†…å®¹ç·¨é›†</td><td>");
 	$Page->Print("<textarea name=HEAD_TEXT rows=11 cols=80 wrap=off>");
 	
-	# ƒwƒbƒ_“à—eƒeƒLƒXƒg‚Ì•\¦
+	# ãƒ˜ãƒƒãƒ€å†…å®¹ãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤º
 	$data =~ s/&/&amp;/g;
 	$data =~ s/</&lt;/g;
 	$data =~ s/>/&gt;/g;
@@ -260,12 +260,12 @@ sub PrintHeaderEdit
 	$Page->Print("</textarea></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	# Œ ŒÀ‚É‚æ‚Á‚Ä•\¦‚ğ—}§
+	# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.edit'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"@•ÏX@\" $common,'FUNC','HEAD')\"> ");
-		$Page->Print("<input type=button value=\"@Šm”F@\" $common,'DISP','HEAD')\">");
+		$Page->Print("<input type=button value=\"ã€€å¤‰æ›´ã€€\" $common,'FUNC','HEAD')\"> ");
+		$Page->Print("<input type=button value=\"ã€€ç¢ºèªã€€\" $common,'DISP','HEAD')\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -273,12 +273,12 @@ sub PrintHeaderEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒtƒbƒ^•ÒW‰æ–Ê‚Ì•\¦
+#	ãƒ•ãƒƒã‚¿ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintFooterEdit
@@ -292,7 +292,7 @@ sub PrintFooterEdit
 	$Foot = LEGOLAS->new;
 	$Foot->Load($SYS, 'FOOT');
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BBSEDIT, $SYS->Get('BBS'));
 	
 	$Page->Print("<table border=0 cellspacing=2 width=100%>");
@@ -300,7 +300,7 @@ sub PrintFooterEdit
 	$Page->Print("<tr><td colspan=2 style=\"background-image:url(./datas/default_bac.gif)\">");
 	
 	$data = $Form->Get('FOOT_TEXT', '');
-	# ƒtƒbƒ^ƒvƒŒƒrƒ…[•\¦
+	# ãƒ•ãƒƒã‚¿ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼è¡¨ç¤º
 	if ($data ne '') {
 		$Foot->Set(\$data);
 	}
@@ -309,17 +309,17 @@ sub PrintFooterEdit
 		$data = join '', @$pFoot;
 	}
 	
-	# ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ìì¬
+	# ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 	my $PreviewPage = THORIN->new;
 	$Foot->Print($PreviewPage, undef);
 	$PreviewPage->{'BUFF'} = CreatePreviewData($PreviewPage->{'BUFF'});
 	$Page->Merge($PreviewPage);
 	
 	$Page->Print("</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">“à—e•ÒW</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å†…å®¹ç·¨é›†</td><td>");
 	$Page->Print("<textarea name=FOOT_TEXT rows=11 cols=80 wrap=off>");
 	
-	# ƒtƒbƒ^“à—eƒeƒLƒXƒg‚Ì•\¦
+	# ãƒ•ãƒƒã‚¿å†…å®¹ãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤º
 	$data =~ s/&/&amp;/g;
 	$data =~ s/</&lt;/g;
 	$data =~ s/>/&gt;/g;
@@ -328,12 +328,12 @@ sub PrintFooterEdit
 	$Page->Print("</textarea></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	# Œ ŒÀ‚É‚æ‚Á‚Ä•\¦‚ğ—}§
+	# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.edit'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"@•ÏX@\" $common,'FUNC','FOOT')\"> ");
-		$Page->Print("<input type=button value=\"@Šm”F@\" $common,'DISP','FOOT')\">");
+		$Page->Print("<input type=button value=\"ã€€å¤‰æ›´ã€€\" $common,'FUNC','FOOT')\"> ");
+		$Page->Print("<input type=button value=\"ã€€ç¢ºèªã€€\" $common,'DISP','FOOT')\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -341,12 +341,12 @@ sub PrintFooterEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	METAî•ñ•ÒW‰æ–Ê‚Ì•\¦
+#	METAæƒ…å ±ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintMETAEdit
@@ -363,15 +363,15 @@ sub PrintMETAEdit
 	$pMeta = $Meta->Get();
 	$data = join '', @$pMeta;
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BBSEDIT, $SYS->Get('BBS'));
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">“à—e•ÒW</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å†…å®¹ç·¨é›†</td><td>");
 	$Page->Print("<textarea name=META_TEXT rows=11 cols=80 wrap=off>");
 	
-	# ƒtƒbƒ^“à—eƒeƒLƒXƒg‚Ì•\¦
+	# ãƒ•ãƒƒã‚¿å†…å®¹ãƒ†ã‚­ã‚¹ãƒˆã®è¡¨ç¤º
 	$data =~ s/&/&amp;/g;
 	$data =~ s/</&lt;/g;
 	$data =~ s/>/&gt;/g;
@@ -380,11 +380,11 @@ sub PrintMETAEdit
 	$Page->Print("</textarea></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	# Œ ŒÀ‚É‚æ‚Á‚Ä•\¦‚ğ—}§
+	# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.edit'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"@•ÏX@\" $common,'FUNC','META')\">");
+		$Page->Print("<input type=button value=\"ã€€å¤‰æ›´ã€€\" $common,'FUNC','META')\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -392,12 +392,12 @@ sub PrintMETAEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒAƒNƒZƒX‹K§ƒ†[ƒU•ÒW‰æ–Ê‚Ì•\¦
+#	ã‚¢ã‚¯ã‚»ã‚¹è¦åˆ¶ãƒ¦ãƒ¼ã‚¶ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintValidUserEdit
@@ -411,7 +411,7 @@ sub PrintValidUserEdit
 	$vUsers = FARAMIR->new;
 	$vUsers->Load($SYS);
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_ACCESUSER, $SYS->Get('BBS'));
 	$pUsers = $vUsers->Get('USER');
 	
@@ -423,20 +423,20 @@ sub PrintValidUserEdit
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">‹L–@</td><td style=\"font-size: 14px\">");
-	$Page->Print("EƒzƒXƒg–¼(³‹K•\\Œ»)<br>");
+	$Page->Print("<tr><td class=\"DetailTitle\">è¨˜æ³•</td><td style=\"font-size: 14px\">");
+	$Page->Print("ãƒ»ãƒ›ã‚¹ãƒˆå(æ­£è¦è¡¨\ç¾)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">\\.host\\d+\\.jp\$</b><br>");
-	$Page->Print("EIPƒAƒhƒŒƒX(”ÍˆÍw’è‚ ‚è)<br>");
+	$Page->Print("ãƒ»IPã‚¢ãƒ‰ãƒ¬ã‚¹(ç¯„å›²æŒ‡å®šã‚ã‚Š)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.0.123</b><br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.1.0-192.168.10.255</b><br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.0.0/16</b><br>");
-	$Page->Print("E’[––ŒÅ—L”Ô†<br>");
+	$Page->Print("ãƒ»ç«¯æœ«å›ºæœ‰ç•ªå·<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">12345678901234_xx</b> (au)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">AbCd123</b> (docomo)<br>");
-	$Page->Print("<span style=\"margin-left: 20px\">‚»‚Ì‘¼</span><br>");
+	$Page->Print("<span style=\"margin-left: 20px\">ãã®ä»–</span><br>");
 	$Page->Print("</td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">‘ÎÛƒzƒXƒgE<br>’[––¯•Êqˆê——</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å¯¾è±¡ãƒ›ã‚¹ãƒˆãƒ»<br>ç«¯æœ«è­˜åˆ¥å­ä¸€è¦§</td><td>");
 	$Page->Print("<textarea name=VALID_USERS rows=10 cols=70 wrap=off>");
 	
 	my $sanitize = sub {
@@ -452,24 +452,24 @@ sub PrintValidUserEdit
 	
 	$Page->Print("</textarea></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒ†[ƒUí•Ê</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ¦ãƒ¼ã‚¶ç¨®åˆ¥</td><td>");
 	$Page->Print("<select name=VALID_TYPE>");
-	$Page->Print("<option value=enable $kind[0]>ŒÀ’èƒ†[ƒU</option>");
-	$Page->Print("<option value=disable $kind[1]>‹K§ƒ†[ƒU</option>");
+	$Page->Print("<option value=enable $kind[0]>é™å®šãƒ¦ãƒ¼ã‚¶</option>");
+	$Page->Print("<option value=disable $kind[1]>è¦åˆ¶ãƒ¦ãƒ¼ã‚¶</option>");
 	$Page->Print("</select></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">‹K§•û–@</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">è¦åˆ¶æ–¹æ³•</td><td>");
 	$Page->Print("<select name=VALID_METHOD>");
-	$Page->Print("<option value=host $kind[2]>ƒzƒXƒg•\\¦</option>");
-	$Page->Print("<option value=disable $kind[3]>‘‚«‚İ•s‰Â</option>");
+	$Page->Print("<option value=host $kind[2]>ãƒ›ã‚¹ãƒˆè¡¨\ç¤º</option>");
+	$Page->Print("<option value=disable $kind[3]>æ›¸ãè¾¼ã¿ä¸å¯</option>");
 	$Page->Print("</select></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	# Œ ŒÀ‚É‚æ‚Á‚Ä•\¦‚ğ—}§
+	# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.edit'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"@İ’è@\" $common,'FUNC','USER')\">");
+		$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common,'FUNC','USER')\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -477,12 +477,12 @@ sub PrintValidUserEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	NGƒ[ƒh•ÒW‰æ–Ê‚Ì•\¦
+#	NGãƒ¯ãƒ¼ãƒ‰ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintNGWordsEdit
@@ -496,7 +496,7 @@ sub PrintNGWordsEdit
 	$Words = WORMTONGUE->new;
 	$Words->Load($SYS);
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NGWORDS, $SYS->Get('BBS'));
 	$pWords = $Words->Get('NGWORD');
 	$pRepls = $Words->Get('REPLACE');
@@ -509,8 +509,8 @@ sub PrintNGWordsEdit
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">NGƒ[ƒhˆê——");
-	$Page->Print("<br><br>NGƒ[ƒh<br>NGƒ[ƒh&lt;&gt;’uŠ·•¶š—ñ</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">NGãƒ¯ãƒ¼ãƒ‰ä¸€è¦§");
+	$Page->Print("<br><br>NGãƒ¯ãƒ¼ãƒ‰<br>NGãƒ¯ãƒ¼ãƒ‰&lt;&gt;ç½®æ›æ–‡å­—åˆ—</td><td>");
 	$Page->Print("<textarea name=NG_WORDS rows=10 cols=70 wrap=off>");
 	
 	my $sanitize = sub {
@@ -528,22 +528,22 @@ sub PrintNGWordsEdit
 	
 	$Page->Print("</textarea></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">NGƒ[ƒhˆ—</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">NGãƒ¯ãƒ¼ãƒ‰å‡¦ç†</td><td>");
 	$Page->Print("<select name=NG_METHOD>");
-	$Page->Print("<option value=disable $kind[0]>‘‚«‚İ•s‰Â</option>");
-	$Page->Print("<option value=host $kind[1]>ƒzƒXƒg•\\¦</option>");
-	$Page->Print("<option value=delete $kind[2]>NGƒ[ƒhíœ</option>");
-	$Page->Print("<option value=substitute $kind[3]>NGƒ[ƒh’uŠ·</option>");
+	$Page->Print("<option value=disable $kind[0]>æ›¸ãè¾¼ã¿ä¸å¯</option>");
+	$Page->Print("<option value=host $kind[1]>ãƒ›ã‚¹ãƒˆè¡¨\ç¤º</option>");
+	$Page->Print("<option value=delete $kind[2]>NGãƒ¯ãƒ¼ãƒ‰å‰Šé™¤</option>");
+	$Page->Print("<option value=substitute $kind[3]>NGãƒ¯ãƒ¼ãƒ‰ç½®æ›</option>");
 	$Page->Print("</select></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒfƒtƒHƒ‹ƒg’uŠ·•¶š—ñ</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆç½®æ›æ–‡å­—åˆ—</td><td>");
 	$Page->Print("<input type=text name=NG_SUBSTITUTE value=\"$kind[4]\" size=60></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	# Œ ŒÀ‚É‚æ‚Á‚Ä•\¦‚ğ—}§
+	# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.edit'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"@İ’è@\" $common,'FUNC','NGWORD')\">");
+		$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common,'FUNC','NGWORD')\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -551,12 +551,12 @@ sub PrintNGWordsEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	1001•ÒW‰æ–Ê‚Ì•\¦
+#	1001ç·¨é›†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintLastEdit
@@ -576,13 +576,13 @@ sub PrintLastEdit
 	$resmax1	= $resmax + 1;
 	$resmaxz	= $resmax;
 	$resmaxz1	= $resmax1;
-	$resmaxz	=~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # ‘SŠp”š
-	$resmaxz1	=~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # ‘SŠp”š
+	$resmaxz	=~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # å…¨è§’æ•°å­—
+	$resmaxz1	=~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # å…¨è§’æ•°å­—
 	
-	$data = "$resmaxz1<><>Over $resmax Thread<>‚±‚ÌƒXƒŒƒbƒh‚Í$resmaxz‚ğ’´‚¦‚Ü‚µ‚½B<br>";
-	$data .= '‚à‚¤‘‚¯‚È‚¢‚Ì‚ÅAV‚µ‚¢ƒXƒŒƒbƒh‚ğ—§‚Ä‚Ä‚­‚¾‚³‚¢‚Å‚·BBB<>';
+	$data = "$resmaxz1<><>Over $resmax Thread<>ã“ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã¯$resmaxzã‚’è¶…ãˆã¾ã—ãŸã€‚<br>";
+	$data .= 'ã‚‚ã†æ›¸ã‘ãªã„ã®ã§ã€æ–°ã—ã„ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ç«‹ã¦ã¦ãã ã•ã„ã§ã™ã€‚ã€‚ã€‚<>';
 	if (! $Form->IsExist('LAST_FROM')) {
-		# 1000.txt‚Ì“Ç‚İ‚İ
+		# 1000.txtã®èª­ã¿è¾¼ã¿
 		$path = $SYS->Get('BBSPATH') . '/' . $SYS->Get('BBS') . '/1000.txt';
 		$isLast = 0;
 		
@@ -649,7 +649,7 @@ sub PrintLastEdit
 		$elem[$_] = '' if (! defined $elem[$_]);
 	}
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BBSEDIT, $SYS->Get('BBS'));
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
@@ -657,10 +657,10 @@ sub PrintLastEdit
 	$Page->Print("<tr><td colspan=2><center><dl><table border cellspacing=7 bgcolor=#efefef width=100%>");
 	$Page->Print("<tr><td>");
 	
-	# ƒvƒŒƒrƒ…[•\¦
-	$Page->Print("<dt>$resmax1 –¼‘OF<b><font color=green>$elem[0]</font></b>")			if ($elem[1] eq '');
-	$Page->Print("<dt>$resmax1 –¼‘OF<b><a href=\"mailto:$elem[1]\">$elem[0]</a></b>")	if ($elem[1] ne '');
-	$Page->Print("F$elem[2]</dt><dd>$elem[3]<br><br></dd>");
+	# ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼è¡¨ç¤º
+	$Page->Print("<dt>$resmax1 åå‰ï¼š<b><font color=green>$elem[0]</font></b>")			if ($elem[1] eq '');
+	$Page->Print("<dt>$resmax1 åå‰ï¼š<b><a href=\"mailto:$elem[1]\">$elem[0]</a></b>")	if ($elem[1] ne '');
+	$Page->Print("ï¼š$elem[2]</dt><dd>$elem[3]<br><br></dd>");
 	@elem = ('', '', '', '', '') if (! $isLast);
 	
 	$elem[3] =~ s/ ?<br> ?/\n/g;
@@ -672,28 +672,28 @@ sub PrintLastEdit
 	}
 	
 	$Page->Print("</td></tr></table></dl></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>“à—e•ÒW</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">–¼‘O</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>å†…å®¹ç·¨é›†</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">åå‰</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_FROM value=\"$elem[0]\"><br>");
-	$Page->Print("<input type=checkbox name=SANIT_NAME value=on>ƒGƒXƒP[ƒv(ƒTƒjƒ^ƒCƒY)‚ğs‚¤B–³Œø‚ÅHTML’¼Ú•ÒW</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒ[ƒ‹</td><td>");
+	$Page->Print("<input type=checkbox name=SANIT_NAME value=on>ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—(ã‚µãƒ‹ã‚¿ã‚¤ã‚º)ã‚’è¡Œã†ã€‚ç„¡åŠ¹ã§HTMLç›´æ¥ç·¨é›†</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ¡ãƒ¼ãƒ«</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_mail value=\"$elem[1]\"><br>");
-	$Page->Print("<input type=checkbox name=SANIT_MAIL value=on>ƒGƒXƒP[ƒv(ƒTƒjƒ^ƒCƒY)‚ğs‚¤B–³Œø‚ÅHTML’¼Ú•ÒW</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">“ú•tEID</td><td>");
+	$Page->Print("<input type=checkbox name=SANIT_MAIL value=on>ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—(ã‚µãƒ‹ã‚¿ã‚¤ã‚º)ã‚’è¡Œã†ã€‚ç„¡åŠ¹ã§HTMLç›´æ¥ç·¨é›†</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ—¥ä»˜ãƒ»ID</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_date value=\"$elem[2]\"><br>");
-	$Page->Print("<input type=checkbox name=SANIT_DATE value=on>ƒGƒXƒP[ƒv(ƒTƒjƒ^ƒCƒY)‚ğs‚¤B–³Œø‚ÅHTML’¼Ú•ÒW</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">–{•¶</td><td>");
+	$Page->Print("<input type=checkbox name=SANIT_DATE value=on>ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—(ã‚µãƒ‹ã‚¿ã‚¤ã‚º)ã‚’è¡Œã†ã€‚ç„¡åŠ¹ã§HTMLç›´æ¥ç·¨é›†</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">æœ¬æ–‡</td><td>");
 	$Page->Print("<textarea name=LAST_MESSAGE rows=10 cols=70 wrap=off>");
 	$Page->Print("$elem[3]</textarea><br>");
-	$Page->Print("<input type=checkbox name=SANIT_TEXT value=on>ƒGƒXƒP[ƒv(ƒTƒjƒ^ƒCƒY)‚ğs‚¤B–³Œø‚ÅHTML’¼Ú•ÒW</td></tr>\n");
+	$Page->Print("<input type=checkbox name=SANIT_TEXT value=on>ã‚¨ã‚¹ã‚±ãƒ¼ãƒ—(ã‚µãƒ‹ã‚¿ã‚¤ã‚º)ã‚’è¡Œã†ã€‚ç„¡åŠ¹ã§HTMLç›´æ¥ç·¨é›†</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	# Œ ŒÀ‚É‚æ‚Á‚Ä•\¦‚ğ—}§
+	# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.edit'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"@•ÏX@\" $common,'FUNC','LAST')\"> ");
-		$Page->Print("<input type=button value=\"@Šm”F@\" $common,'DISP','LAST')\">");
+		$Page->Print("<input type=button value=\"ã€€å¤‰æ›´ã€€\" $common,'FUNC','LAST')\"> ");
+		$Page->Print("<input type=button value=\"ã€€ç¢ºèªã€€\" $common,'DISP','LAST')\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -701,13 +701,13 @@ sub PrintLastEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒeƒLƒXƒg•ÒW
+#	ãƒ†ã‚­ã‚¹ãƒˆç·¨é›†
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	İ’èƒ‚[ƒh(1:HEAD 2:FOOT 3:META)
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	è¨­å®šãƒ¢ãƒ¼ãƒ‰(1:HEAD 2:FOOT 3:META)
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionTextEdit
@@ -715,7 +715,7 @@ sub FunctionTextEdit
 	my ($Sys, $Form, $mode, $pLog) = @_;
 	my ($Texts, $readKey, $formKey, $value);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -725,21 +725,21 @@ sub FunctionTextEdit
 		}
 	}
 	
-	# “Ç‚İæ‚è—p‚ÌƒL[‚ğİ’è‚·‚é
+	# èª­ã¿å–ã‚Šç”¨ã®ã‚­ãƒ¼ã‚’è¨­å®šã™ã‚‹
 	if ($mode == 1) {
 		$readKey = 'HEAD';
 		$formKey = 'HEAD_TEXT';
-		push @$pLog, 'head.txt‚ğİ’è‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'head.txtã‚’è¨­å®šã—ã¾ã—ãŸã€‚';
 	}
 	elsif ($mode == 2) {
 		$readKey = 'FOOT';
 		$formKey = 'FOOT_TEXT';
-		push @$pLog, 'foot.txt‚ğİ’è‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'foot.txtã‚’è¨­å®šã—ã¾ã—ãŸã€‚';
 	}
 	elsif ($mode == 3) {
 		$readKey = 'META';
 		$formKey = 'META_TEXT';
-		push @$pLog, 'meta.txt‚ğİ’è‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'meta.txtã‚’è¨­å®šã—ã¾ã—ãŸã€‚';
 	}
 	
 	require './module/legolas.pl';
@@ -749,7 +749,7 @@ sub FunctionTextEdit
 	$value = $Form->Get($formKey);
 	$Texts->Set(\$value);
 	
-	# İ’è‚Ì•Û‘¶
+	# è¨­å®šã®ä¿å­˜
 	$Texts->Save($Sys);
 	
 	return 0;
@@ -757,12 +757,12 @@ sub FunctionTextEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹K§ƒ†[ƒU•ÒW
+#	è¦åˆ¶ãƒ¦ãƒ¼ã‚¶ç·¨é›†
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionValidUserEdit
@@ -770,7 +770,7 @@ sub FunctionValidUserEdit
 	my ($Sys, $Form, $pLog) = @_;
 	my ($vUsers, @validUsers);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -796,13 +796,13 @@ sub FunctionValidUserEdit
 		s/>/&gt;/g;
 		return $_;
 	};
-	push @$pLog, '¡ˆÈ‰º‚Ìƒ†[ƒU‚ğw’è';
+	push @$pLog, 'â– ä»¥ä¸‹ã®ãƒ¦ãƒ¼ã‚¶ã‚’æŒ‡å®š';
 	foreach (@validUsers) {
 		$vUsers->Add($_);
-		push @$pLog, '@@' . &$sanitize($_);
+		push @$pLog, 'ã€€ã€€' . &$sanitize($_);
 	}
-	push @$pLog, '¡w’èƒ†[ƒUí•ÊF' . $Form->Get('VALID_TYPE');
-	push @$pLog, '¡w’èƒ†[ƒUˆ’uF' . $Form->Get('VALID_METHOD');
+	push @$pLog, 'â– æŒ‡å®šãƒ¦ãƒ¼ã‚¶ç¨®åˆ¥ï¼š' . $Form->Get('VALID_TYPE');
+	push @$pLog, 'â– æŒ‡å®šãƒ¦ãƒ¼ã‚¶å‡¦ç½®ï¼š' . $Form->Get('VALID_METHOD');
 	
 	$vUsers->Save($Sys);
 	
@@ -811,12 +811,12 @@ sub FunctionValidUserEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	NGƒ[ƒh•ÒW
+#	NGãƒ¯ãƒ¼ãƒ‰ç·¨é›†
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionNGWordEdit
@@ -824,7 +824,7 @@ sub FunctionNGWordEdit
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Words, @ngWords);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -850,14 +850,14 @@ sub FunctionNGWordEdit
 		s/>/&gt;/g;
 		return $_;
 	};
-	push @$pLog, '¡NGƒ[ƒh‚Æ‚µ‚ÄˆÈ‰º‚ğİ’è';
+	push @$pLog, 'â– NGãƒ¯ãƒ¼ãƒ‰ã¨ã—ã¦ä»¥ä¸‹ã‚’è¨­å®š';
 	foreach (@ngWords) {
 		my ($word, $repl) = split(/<>/, $_, -1);
 		if ($Words->Add($word, $repl)) {
-			push @$pLog, '@@'.&$sanitize($word).(defined $repl ? &$sanitize("<>$repl") : '');
+			push @$pLog, 'ã€€ã€€'.&$sanitize($word).(defined $repl ? &$sanitize("<>$repl") : '');
 		}
 	}
-	push @$pLog, '¡NGƒ[ƒhˆ’uF' . $Form->Get('NG_METHOD');
+	push @$pLog, 'â– NGãƒ¯ãƒ¼ãƒ‰å‡¦ç½®ï¼š' . $Form->Get('NG_METHOD');
 	
 	$Words->Save($Sys);
 	
@@ -866,12 +866,12 @@ sub FunctionNGWordEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	1001•ÒW
+#	1001ç·¨é›†
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionLastEdit
@@ -879,7 +879,7 @@ sub FunctionLastEdit
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Texts, $readKey, $formKey, $value, $lastPath, $name, $mail, $date, $cont, $forCheck);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -890,22 +890,22 @@ sub FunctionLastEdit
 	}
 	$Form->DecodeForm(1);
 	
-	# 1000.txt‚ÌƒpƒX
+	# 1000.txtã®ãƒ‘ã‚¹
 	$lastPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/1000.txt';
 	
-	# ƒtƒH[ƒ€î•ñ‚Ìæ“¾
+	# ãƒ•ã‚©ãƒ¼ãƒ æƒ…å ±ã®å–å¾—
 	$name = $Form->Get('LAST_FROM', '');
 	$mail = $Form->Get('LAST_mail', '');
 	$date = $Form->Get('LAST_date', '');
 	$cont = $Form->Get('LAST_MESSAGE', '');
 	$forCheck = $name . $mail . $date . $cont;
 	
-	# ‘S‚Ä‹ó—“‚Ìê‡‚Í1000.txt‚ğíœ‚µƒfƒtƒHƒ‹ƒg1001‚ğg—p
+	# å…¨ã¦ç©ºæ¬„ã®å ´åˆã¯1000.txtã‚’å‰Šé™¤ã—ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ1001ã‚’ä½¿ç”¨
 	if ($forCheck eq ''){
 		unlink $lastPath;
-		push @$pLog, '¡1000.txt‚ğ”jŠü‚µ‚ÄƒfƒtƒHƒ‹ƒg‚Ì1001‚ğg—p‚µ‚Ü‚·B';
+		push @$pLog, 'â– 1000.txtã‚’ç ´æ£„ã—ã¦ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®1001ã‚’ä½¿ç”¨ã—ã¾ã™ã€‚';
 	}
-	# ’l‚ªİ’è‚³‚ê‚½ê‡‚Í1000.txt‚ğì¬‚·‚é
+	# å€¤ãŒè¨­å®šã•ã‚ŒãŸå ´åˆã¯1000.txtã‚’ä½œæˆã™ã‚‹
 	else {
 		$name =~ s/\n//g;
 		$mail =~ s/\n//g;
@@ -951,7 +951,7 @@ sub FunctionLastEdit
 			close($f_last);
 		}
 		
-		push @$pLog, '¡1000.txt‚ğİ’è‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'â– 1000.txtã‚’è¨­å®šã—ã¾ã—ãŸã€‚';
 	}
 	
 	return 0;
@@ -959,10 +959,10 @@ sub FunctionLastEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ìì¬
+#	ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®ä½œæˆ
 #	-------------------------------------------------------------------------------------
-#	@param	$pData	ì¬Œ³”z—ñ‚ÌQÆ
-#	@return	ƒvƒŒƒrƒ…[ƒf[ƒ^‚Ì”z—ñ
+#	@param	$pData	ä½œæˆå…ƒé…åˆ—ã®å‚ç…§
+#	@return	ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ‡ãƒ¼ã‚¿ã®é…åˆ—
 #
 #------------------------------------------------------------------------------------------------------------
 sub CreatePreviewData

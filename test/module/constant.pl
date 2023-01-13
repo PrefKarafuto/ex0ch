@@ -1,8 +1,8 @@
 #============================================================================================================
 #
-#	’è”ƒ‚ƒWƒ…[ƒ‹(ZP)
+#	å®šæ•°ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«(ZP)
 #
-#	by ‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX
+#	by ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹
 #	http://zerochplus.sourceforge.jp/
 #
 #============================================================================================================
@@ -46,7 +46,7 @@ our $C_MOBILE_IDGET		= $C_DOCOMO_M | $C_AU_M | $C_SOFTBANK_M | $C_EMOBILE_M | $C
 
 # ERRORNUM
 our $E_SUCCESS				= 0; # must FALSE
-#  “ü—Í“à—e‚ÉŠÖ‚·‚éƒGƒ‰[
+#  å…¥åŠ›å†…å®¹ã«é–¢ã™ã‚‹ã‚¨ãƒ©ãƒ¼
 our $E_FORM_LONGSUBJECT		= 100;
 our $E_FORM_LONGNAME		= 101;
 our $E_FORM_LONGMAIL		= 102;
@@ -57,7 +57,7 @@ our $E_FORM_MANYANCHOR		= 106;
 our $E_FORM_NOSUBJECT		= 150;
 our $E_FORM_NOTEXT			= 151;
 our $E_FORM_NONAME			= 152;
-#  §ŒÀ‚ÉŠÖ‚·‚éƒGƒ‰[
+#  åˆ¶é™ã«é–¢ã™ã‚‹ã‚¨ãƒ©ãƒ¼
 our $E_LIMIT_STOPPEDTHREAD	= 200;
 our $E_LIMIT_OVERMAXRES		= 201;
 our $E_LIMIT_MOVEDTHREAD	= 202;
@@ -66,7 +66,7 @@ our $E_LIMIT_MOBILETHREAD	= 204;
 our $E_LIMIT_FORBIDDENCGI	= 205;
 our $E_LIMIT_OVERDATSIZE	= 206;
 our $E_LIMIT_THREADCAPONLY	= 504;
-#  ‹K§‚ÉŠÖ‚·‚éƒGƒ‰[
+#  è¦åˆ¶ã«é–¢ã™ã‚‹ã‚¨ãƒ©ãƒ¼
 our $E_REG_MANYTHREAD		= 500;
 our $E_REG_NOBREAKPOST		= 501;
 our $E_REG_DOUBLEPOST		= 502;
@@ -82,13 +82,13 @@ our $E_REG_NGWORD			= 600;
 our $E_REG_NGUSER			= 601;
 our $E_REG_NOTJPHOST		= 207;
 our $E_REG_DNSBL			= 997;
-#  BE‚ÉŠÖ‚·‚éƒGƒ‰[
+#  BEã«é–¢ã™ã‚‹ã‚¨ãƒ©ãƒ¼
 our $E_BE_GETFAILED			= 890;
 our $E_BE_CONNECTFAILED		= 891;
 our $E_BE_LOGINFAILED		= 892;
 our $E_BE_MUSTLOGIN			= 893;
 our $E_BE_MUSTLOGIN2		= 894;
-#  ƒŠƒNƒGƒXƒgƒGƒ‰[
+#  ãƒªã‚¯ã‚¨ã‚¹ãƒˆã‚¨ãƒ©ãƒ¼
 our $E_THREAD_INVALIDKEY	= 900;
 our $E_THREAD_WRONGLENGTH	= 901;
 our $E_THREAD_NOTEXIST		= 902;
@@ -97,16 +97,16 @@ our $E_POST_INVALIDREFERER	= 998;
 our $E_POST_INVALIDFORM		= 999;
 our $E_POST_NOTEXISTBBS		= $E_POST_INVALIDFORM;
 our $E_POST_NOTEXISTDAT		= $E_POST_INVALIDFORM;
-#  read.cgi—pƒGƒ‰[
+#  read.cgiç”¨ã‚¨ãƒ©ãƒ¼
 our $E_READ_R_INVALIDBBS	= 1001; # 2ch errnum
 our $E_READ_R_INVALIDKEY	= 1002; # 2ch errnum
 our $E_READ_FAILEDLOADDAT	= 1003; # 2ch errnum
 our $E_READ_FAILEDLOADSET	= 1004; # 2ch errnum
 our $E_READ_INVALIDBBS		= 2011; # 2ch errnum
 our $E_READ_INVALIDKEY		= 3001; # 2ch errnum
-#  ƒVƒXƒeƒ€E‚»‚Ì‘¼‚ÌƒGƒ‰[
+#  ã‚·ã‚¹ãƒ†ãƒ ãƒ»ãã®ä»–ã®ã‚¨ãƒ©ãƒ¼
 our $E_SYSTEM_ERROR			= 990;
-#  ƒy[ƒW•\Ž¦—p”Ô†
+#  ãƒšãƒ¼ã‚¸è¡¨ç¤ºç”¨ç•ªå·
 our $E_PAGE_FINDTHREAD		= $E_READ_FAILEDLOADDAT;
 our $E_PAGE_THREAD			= 9000;
 our $E_PAGE_COOKIE			= 9001;
@@ -115,48 +115,48 @@ our $E_PAGE_THREADMOBILE	= 9003;
 
 
 # CAP PERMISSION
-our $CAP_FORM_LONGSUBJECT		=  1; # ƒ^ƒCƒgƒ‹•¶Žš” §ŒÀ‰ðœ
-our $CAP_FORM_LONGNAME			=  2; # –¼‘O•¶Žš” §ŒÀ‰ðœ
-our $CAP_FORM_LONGMAIL			=  3; # ƒ[ƒ‹•¶Žš” §ŒÀ‰ðœ
-our $CAP_FORM_LONGTEXT			=  4; # –{•¶•¶Žš” §ŒÀ‰ðœ
-our $CAP_FORM_MANYLINE			=  5; # –{•¶s” §ŒÀ‰ðœ
-our $CAP_FORM_LONGLINE			=  6; # –{•¶1s•¶Žš” §ŒÀ‰ðœ
-our $CAP_FORM_NONAME			=  7; # –¼–³‚µ §ŒÀ‰ðœ
-our $CAP_REG_MANYTHREAD			=  8; # ƒXƒŒƒbƒhì¬ ‹K§‰ðœ
-our $CAP_LIMIT_THREADCAPONLY	=  9; # ƒXƒŒƒbƒhì¬‰Â”\
-our $CAP_REG_NOBREAKPOST		= 10; # ˜A‘±“Še ‹K§‰ðœ
-our $CAP_REG_DOUBLEPOST			= 11; # “ñd‘‚«ž‚Ý ‹K§‰ðœ
-our $CAP_REG_NOTIMEPOST			= 12; # ’ZŽžŠÔ“Še ‹K§‰ðœ
-our $CAP_LIMIT_READONLY			= 13; # “ÇŽæê—p §ŒÀ‰ðœ
-our $CAP_DISP_NOID				= 14; # ID”ñ•\Ž¦
-our $CAP_DISP_NOHOST			= 15; # –{•¶ƒzƒXƒg”ñ•\Ž¦
-our $CAP_LIMIT_MOBILETHREAD		= 16; # Œg‘Ñ‚©‚ç‚ÌƒXƒŒƒbƒhì¬ §ŒÀ‰ðœ
-our $CAP_DISP_HANLDLE			= 17; # ƒRƒeƒnƒ“š•\Ž¦
-our $CAP_REG_SAMBA				= 18; # Samba ‹K§‰ðœ
-our $CAP_REG_DNSBL				= 19; # ƒvƒƒLƒV ‹K§‰ðœ
-our $CAP_REG_NOTJPHOST			= 20; # ŠCŠOƒzƒXƒg ‹K§‰ðœ
-our $CAP_REG_NGUSER				= 21; # ƒ†[ƒU[ ‹K§‰ðœ
-our $CAP_REG_NGWORD				= 22; # NGƒ[ƒh ‹K§‰ðœ
-our $CAP_DISP_NOSLIP			= 23; # ’[––Ž¯•ÊŽq”ñ•\Ž¦
-our $CAP_DISP_CUSTOMID			= 24; # ê—pID‹–‰Â
+our $CAP_FORM_LONGSUBJECT		=  1; # ã‚¿ã‚¤ãƒˆãƒ«æ–‡å­—æ•° åˆ¶é™è§£é™¤
+our $CAP_FORM_LONGNAME			=  2; # åå‰æ–‡å­—æ•° åˆ¶é™è§£é™¤
+our $CAP_FORM_LONGMAIL			=  3; # ãƒ¡ãƒ¼ãƒ«æ–‡å­—æ•° åˆ¶é™è§£é™¤
+our $CAP_FORM_LONGTEXT			=  4; # æœ¬æ–‡æ–‡å­—æ•° åˆ¶é™è§£é™¤
+our $CAP_FORM_MANYLINE			=  5; # æœ¬æ–‡è¡Œæ•° åˆ¶é™è§£é™¤
+our $CAP_FORM_LONGLINE			=  6; # æœ¬æ–‡1è¡Œæ–‡å­—æ•° åˆ¶é™è§£é™¤
+our $CAP_FORM_NONAME			=  7; # åç„¡ã— åˆ¶é™è§£é™¤
+our $CAP_REG_MANYTHREAD			=  8; # ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ è¦åˆ¶è§£é™¤
+our $CAP_LIMIT_THREADCAPONLY	=  9; # ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆå¯èƒ½
+our $CAP_REG_NOBREAKPOST		= 10; # é€£ç¶šæŠ•ç¨¿ è¦åˆ¶è§£é™¤
+our $CAP_REG_DOUBLEPOST			= 11; # äºŒé‡æ›¸ãè¾¼ã¿ è¦åˆ¶è§£é™¤
+our $CAP_REG_NOTIMEPOST			= 12; # çŸ­æ™‚é–“æŠ•ç¨¿ è¦åˆ¶è§£é™¤
+our $CAP_LIMIT_READONLY			= 13; # èª­å–å°‚ç”¨ åˆ¶é™è§£é™¤
+our $CAP_DISP_NOID				= 14; # IDéžè¡¨ç¤º
+our $CAP_DISP_NOHOST			= 15; # æœ¬æ–‡ãƒ›ã‚¹ãƒˆéžè¡¨ç¤º
+our $CAP_LIMIT_MOBILETHREAD		= 16; # æºå¸¯ã‹ã‚‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ åˆ¶é™è§£é™¤
+our $CAP_DISP_HANLDLE			= 17; # ã‚³ãƒ†ãƒãƒ³â˜…è¡¨ç¤º
+our $CAP_REG_SAMBA				= 18; # Samba è¦åˆ¶è§£é™¤
+our $CAP_REG_DNSBL				= 19; # ãƒ—ãƒ­ã‚­ã‚· è¦åˆ¶è§£é™¤
+our $CAP_REG_NOTJPHOST			= 20; # æµ·å¤–ãƒ›ã‚¹ãƒˆ è¦åˆ¶è§£é™¤
+our $CAP_REG_NGUSER				= 21; # ãƒ¦ãƒ¼ã‚¶ãƒ¼ è¦åˆ¶è§£é™¤
+our $CAP_REG_NGWORD				= 22; # NGãƒ¯ãƒ¼ãƒ‰ è¦åˆ¶è§£é™¤
+our $CAP_DISP_NOSLIP			= 23; # ç«¯æœ«è­˜åˆ¥å­éžè¡¨ç¤º
+our $CAP_DISP_CUSTOMID			= 24; # å°‚ç”¨IDè¨±å¯
 our $CAP_MAXNUM					= 24;
 # USER AUTHORITY
-our $AUTH_SYSADMIN		=  0; # ƒVƒXƒeƒ€ŠÇ—Œ ŒÀ(Œ`Ž®“I‚É)
-our $AUTH_USERGROUP		=  1; # ŠÇ—ƒOƒ‹[ƒvÝ’è
-our $AUTH_CAPGROUP		=  2; # ƒLƒƒƒbƒvƒOƒ‹[ƒvÝ’è
-our $AUTH_THREADSTOP	=  3; # ƒXƒŒƒbƒh’âŽ~EÄŠJ
-our $AUTH_THREADPOOL	=  4; # ƒXƒŒƒbƒhdat—Ž‚¿E•œŠˆ
-our $AUTH_TREADDELETE	=  5; # ƒXƒŒƒbƒhíœ
-our $AUTH_THREADINFO	=  6; # ƒXƒŒƒbƒhî•ñXV
-our $AUTH_KAKOCREATE	=  7; # ‰ß‹ŽƒƒO¶¬
-our $AUTH_KAKODELETE	=  8; # ‰ß‹ŽƒƒOíœ
-our $AUTH_BBSSETTING	=  9; # ŒfŽ¦”ÂÝ’è
-our $AUTH_NGWORDS		= 10; # NGƒ[ƒh•ÒW
-our $AUTH_ACCESUSER		= 11; # ƒAƒNƒZƒX§ŒÀ•ÒW
-our $AUTH_RESDELETE		= 12; # ƒŒƒX‚ ‚Ú[‚ñ
-our $AUTH_RESEDIT		= 13; # ƒŒƒX•ÒW
-our $AUTH_BBSEDIT		= 14; # ŠeŽí•ÒW
-our $AUTH_LOGVIEW		= 15; # ƒƒO‚Ì‰{——Eíœ
+our $AUTH_SYSADMIN		=  0; # ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†æ¨©é™(å½¢å¼çš„ã«)
+our $AUTH_USERGROUP		=  1; # ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
+our $AUTH_CAPGROUP		=  2; # ã‚­ãƒ£ãƒƒãƒ—ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
+our $AUTH_THREADSTOP	=  3; # ã‚¹ãƒ¬ãƒƒãƒ‰åœæ­¢ãƒ»å†é–‹
+our $AUTH_THREADPOOL	=  4; # ã‚¹ãƒ¬ãƒƒãƒ‰datè½ã¡ãƒ»å¾©æ´»
+our $AUTH_TREADDELETE	=  5; # ã‚¹ãƒ¬ãƒƒãƒ‰å‰Šé™¤
+our $AUTH_THREADINFO	=  6; # ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±æ›´æ–°
+our $AUTH_KAKOCREATE	=  7; # éŽåŽ»ãƒ­ã‚°ç”Ÿæˆ
+our $AUTH_KAKODELETE	=  8; # éŽåŽ»ãƒ­ã‚°å‰Šé™¤
+our $AUTH_BBSSETTING	=  9; # æŽ²ç¤ºæ¿è¨­å®š
+our $AUTH_NGWORDS		= 10; # NGãƒ¯ãƒ¼ãƒ‰ç·¨é›†
+our $AUTH_ACCESUSER		= 11; # ã‚¢ã‚¯ã‚»ã‚¹åˆ¶é™ç·¨é›†
+our $AUTH_RESDELETE		= 12; # ãƒ¬ã‚¹ã‚ã¼ãƒ¼ã‚“
+our $AUTH_RESEDIT		= 13; # ãƒ¬ã‚¹ç·¨é›†
+our $AUTH_BBSEDIT		= 14; # å„ç¨®ç·¨é›†
+our $AUTH_LOGVIEW		= 15; # ãƒ­ã‚°ã®é–²è¦§ãƒ»å‰Šé™¤
 our $AUTH_MAXNUM		= 15;
 
 
@@ -165,6 +165,6 @@ our $RE_SJIS	= '(?:[\x00-\x7f\xa1-\xdf]|[\x81-\x9f\xe0-\xef][\x40-\x7e\x80-\xfc]
 
 
 #============================================================================================================
-#	ƒ‚ƒWƒ…[ƒ‹I’[
+#	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«çµ‚ç«¯
 #============================================================================================================
 1;

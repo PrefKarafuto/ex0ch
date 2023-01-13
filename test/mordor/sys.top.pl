@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	ƒVƒXƒeƒ€ŠÇ— - ƒ†[ƒU ƒ‚ƒWƒ…[ƒ‹
+#	ã‚·ã‚¹ãƒ†ãƒ ç®¡ç† - ãƒ¦ãƒ¼ã‚¶ ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	sys.top.pl
 #	---------------------------------------------------------------------------
 #	2004.09.11 start
@@ -14,10 +14,10 @@ no warnings 'redefine';
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -35,12 +35,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -52,28 +52,28 @@ sub DoPrint
 	require './mordor/sauron.pl';
 	$BASE = SAURON->new;
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys);
 	
-	if ($subMode eq 'NOTICE') {														# ’Ê’mˆê——‰æ–Ê
+	if ($subMode eq 'NOTICE') {														# é€šçŸ¥ä¸€è¦§ç”»é¢
 		CheckVersionUpdate($Sys);
 		PrintNoticeList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'NOTICE_CREATE') {											# ’Ê’mˆê——‰æ–Ê
+	elsif ($subMode eq 'NOTICE_CREATE') {											# é€šçŸ¥ä¸€è¦§ç”»é¢
 		PrintNoticeCreate($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'ADMINLOG') {												# ƒƒO‰{——‰æ–Ê
+	elsif ($subMode eq 'ADMINLOG') {												# ãƒ­ã‚°é–²è¦§ç”»é¢
 		PrintAdminLog($Page, $Sys, $Form, $pSys->{'LOGGER'});
 	}
-	elsif ($subMode eq 'COMPLETE') {												# İ’èŠ®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# è¨­å®šå®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('ƒ†[ƒU’Ê’mˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('ãƒ¦ãƒ¼ã‚¶é€šçŸ¥å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# İ’è¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# è¨­å®šå¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
@@ -83,12 +83,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -100,17 +100,17 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'CREATE') {														# ’Ê’mì¬
+	if ($subMode eq 'CREATE') {														# é€šçŸ¥ä½œæˆ
 		$err = FunctionNoticeCreate($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'DELETE') {													# ’Ê’míœ
+	elsif ($subMode eq 'DELETE') {													# é€šçŸ¥å‰Šé™¤
 		$err = FunctionNoticeDelete($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'LOG_REMOVE') {												# ‘€ìƒƒOíœ
+	elsif ($subMode eq 'LOG_REMOVE') {												# æ“ä½œãƒ­ã‚°å‰Šé™¤
 		$err = FunctionLogRemove($Sys, $Form, $pSys->{'LOGGER'}, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "SYSTEM_TOP($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -125,36 +125,36 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
 #	@param	$Sys	MELKOR
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys) = @_;
 	
-	# ‹¤’Ê•\¦ƒƒjƒ…[
-	$Base->SetMenu('ƒ†[ƒU’Ê’mˆê——', "'sys.top','DISP','NOTICE'");
-	$Base->SetMenu('ƒ†[ƒU’Ê’mì¬', "'sys.top','DISP','NOTICE_CREATE'");
+	# å…±é€šè¡¨ç¤ºãƒ¡ãƒ‹ãƒ¥ãƒ¼
+	$Base->SetMenu('ãƒ¦ãƒ¼ã‚¶é€šçŸ¥ä¸€è¦§', "'sys.top','DISP','NOTICE'");
+	$Base->SetMenu('ãƒ¦ãƒ¼ã‚¶é€šçŸ¥ä½œæˆ', "'sys.top','DISP','NOTICE_CREATE'");
 	
-	# ƒVƒXƒeƒ€ŠÇ—Œ ŒÀ‚Ì‚İ
+	# ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†æ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_SYSADMIN, '*')) {
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('‘€ìƒƒO‰{——', "'sys.top','DISP','ADMINLOG'");
+		$Base->SetMenu('æ“ä½œãƒ­ã‚°é–²è¦§', "'sys.top','DISP','ADMINLOG'");
 	}
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒ†[ƒU’Ê’mˆê——‚Ì•\¦
+#	ãƒ¦ãƒ¼ã‚¶é€šçŸ¥ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintNoticeList
@@ -170,15 +170,15 @@ sub PrintNoticeList
 	require './module/galadriel.pl';
 	$Notices = GANDALF->new;
 	
-	# ’Ê’mî•ñ‚Ì“Ç‚İ‚İ
+	# é€šçŸ¥æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$Notices->Load($Sys);
 	
-	# ’Ê’mî•ñ‚ğæ“¾
+	# é€šçŸ¥æƒ…å ±ã‚’å–å¾—
 	$Notices->GetKeySet('ALL', '', \@noticeSet);
 	@noticeSet = sort @noticeSet;
 	@noticeSet = reverse @noticeSet;
 	
-	# •\¦”‚Ìİ’è
+	# è¡¨ç¤ºæ•°ã®è¨­å®š
 	$listNum	= @noticeSet;
 	$dispNum	= $Form->Get('DISPNUM_NOTICE', 5) || 5;
 	$dispSt		= $Form->Get('DISPST_NOTICE', 0) || 0;
@@ -200,8 +200,8 @@ $Page->Print(<<HTML);
     <a href="javascript:SetOption('DISPST_NOTICE', $or2);$common">NEXT &gt;&gt;</a>
     </td>
     <td align=right colspan="2">
-    •\\¦” <input type=text name="DISPNUM_NOTICE" size="4" value="$dispNum">
-    <input type=button value="@•\\¦@" onclick="$common">
+    è¡¨\ç¤ºæ•° <input type=text name="DISPNUM_NOTICE" size="4" value="$dispNum">
+    <input type=button value="ã€€è¡¨\ç¤ºã€€" onclick="$common">
     </td>
    </tr>
    <tr>
@@ -210,15 +210,15 @@ $Page->Print(<<HTML);
    </tr>
 HTML
 	
-	# ƒJƒŒƒ“ƒgƒ†[ƒU
+	# ã‚«ãƒ¬ãƒ³ãƒˆãƒ¦ãƒ¼ã‚¶
 	$curUser = $Sys->Get('ADMIN')->{'USER'};
 	
-	# ’Ê’mˆê——‚ğo—Í
+	# é€šçŸ¥ä¸€è¦§ã‚’å‡ºåŠ›
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$id = $noticeSet[$i];
 		if ($Notices->IsInclude($id, $curUser) && ! $Notices->IsLimitOut($id)) {
 			if ($Notices->Get('FROM', $id) eq '0000000000') {
-				$from = '0ch+ŠÇ—ƒVƒXƒeƒ€';
+				$from = '0ch+ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ ';
 			}
 			else {
 				$from = $Sys->Get('ADMIN')->{'SECINFO'}->{'USER'}->Get('NAME', $Notices->Get('FROM', $id));
@@ -232,7 +232,7 @@ $Page->Print(<<HTML);
     <td><input type=checkbox name="NOTICES" value="$id"></td>
     <td class="Response" colspan="3">
     <dl style="margin:0px;">
-     <dt><b>$subj</b> <font color="blue">FromF$from</font> $date</dt>
+     <dt><b>$subj</b> <font color="blue">Fromï¼š$from</font> $date</dt>
       <dd>
       $text<br>
       <br></dd>
@@ -250,7 +250,7 @@ HTML
 $Page->Print(<<HTML);
    <tr>
     <td colspan="4" align="left">
-    <input type="button" class="delete" value="@íœ@" onclick="DoSubmit('sys.top','FUNC','DELETE')">
+    <input type="button" class="delete" value="ã€€å‰Šé™¤ã€€" onclick="DoSubmit('sys.top','FUNC','DELETE')">
     </td>
    </tr>
   </table>
@@ -261,12 +261,12 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒ†[ƒU’Ê’mì¬‰æ–Ê‚Ì•\¦
+#	ãƒ¦ãƒ¼ã‚¶é€šçŸ¥ä½œæˆç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintNoticeCreate
@@ -283,17 +283,17 @@ sub PrintNoticeCreate
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
     <tr>
-    <td class="DetailTitle">ƒ^ƒCƒgƒ‹</td>
+    <td class="DetailTitle">ã‚¿ã‚¤ãƒˆãƒ«</td>
     <td><input type="text" size="60" name="NOTICE_TITLE"></td>
    </tr>
    <tr>
-    <td class="DetailTitle">–{•¶</td>
+    <td class="DetailTitle">æœ¬æ–‡</td>
     <td>
     <textarea rows="10" cols="70" name="NOTICE_CONTENT"></textarea>
     </td>
    </tr>
    <tr>
-    <td class="DetailTitle">’Ê’mæƒ†[ƒU</td>
+    <td class="DetailTitle">é€šçŸ¥å…ˆãƒ¦ãƒ¼ã‚¶</td>
     <td>
     <table width="100%" cellspacing="2">
 HTML
@@ -303,15 +303,15 @@ HTML
 $Page->Print(<<HTML);
      <tr>
       <td class="DetailTitle">
-      <input type="radio" name="NOTICE_KIND" value="ALL">‘S‘Ì’Ê’m
+      <input type="radio" name="NOTICE_KIND" value="ALL">å…¨ä½“é€šçŸ¥
       </td>
       <td>
-      —LŒøŠúŒÀF<input type="text" name="NOTICE_LIMIT" size="10" value="30">“ú
+      æœ‰åŠ¹æœŸé™ï¼š<input type="text" name="NOTICE_LIMIT" size="10" value="30">æ—¥
       </td>
      </tr>
      <tr>
       <td class="DetailTitle">
-      <input type="radio" name="NOTICE_KIND" value="ONE" checked>ŒÂ•Ê’Ê’m
+      <input type="radio" name="NOTICE_KIND" value="ONE" checked>å€‹åˆ¥é€šçŸ¥
       </td>
       <td>
 HTML
@@ -320,13 +320,13 @@ HTML
 $Page->Print(<<HTML);
      <tr>
       <td class="DetailTitle">
-      <input type="radio" name="NOTICE_KIND" value="ONE" checked>ŒÂ•Ê’Ê’m
+      <input type="radio" name="NOTICE_KIND" value="ONE" checked>å€‹åˆ¥é€šçŸ¥
       </td>
       <td>
 HTML
 	}
 	
-	# ƒ†[ƒUˆê——‚ğ•\¦
+	# ãƒ¦ãƒ¼ã‚¶ä¸€è¦§ã‚’è¡¨ç¤º
 	foreach $id (@userSet) {
 		$name = $User->Get('NAME', $id);
 		$full = $User->Get('FULL', $id);
@@ -341,7 +341,7 @@ $Page->Print(<<HTML);
    </tr>
    <tr>
     <td colspan="2" align="left">
-    <input type="button" value="@‘—M@" onclick="DoSubmit('sys.top','FUNC','CREATE')">
+    <input type="button" value="ã€€é€ä¿¡ã€€" onclick="DoSubmit('sys.top','FUNC','CREATE')">
     </td>
    </tr>
   </table>
@@ -350,12 +350,12 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ŠÇ—‘€ìƒƒO‰{——‰æ–Ê‚Ì•\¦
+#	ç®¡ç†æ“ä½œãƒ­ã‚°é–²è¦§ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintAdminLog
@@ -368,7 +368,7 @@ sub PrintAdminLog
 	$Sys->Set('_TITLE', 'Operation Log');
 	$isSysad = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_SYSADMIN, '*');
 	
-	# •\¦”‚Ìİ’è
+	# è¡¨ç¤ºæ•°ã®è¨­å®š
 	$listNum	= $Logger->Size();
 	$dispNum	= ($Form->Get('DISPNUM_LOG') eq '' ? 10 : $Form->Get('DISPNUM_LOG'));
 	$dispSt		= ($Form->Get('DISPST_LOG') eq '' ? 0 : $Form->Get('DISPST_LOG'));
@@ -387,8 +387,8 @@ $Page->Print(<<HTML);
     <a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
     </td>
     <td align="right" colspan="2">
-    •\\¦” <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
-    <input type="button" value="@•\\¦@" onclick="$common">
+    è¡¨\ç¤ºæ•° <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
+    <input type="button" value="ã€€è¡¨\ç¤ºã€€" onclick="$common">
     </td>
    </tr>
    <tr>
@@ -401,7 +401,7 @@ HTML
 	
 	require './module/galadriel.pl';
 	
-	# ƒƒOˆê——‚ğo—Í
+	# ãƒ­ã‚°ä¸€è¦§ã‚’å‡ºåŠ›
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$data = $Logger->Get($listNum - $i - 1);
 		@elem = split(/<>/, $data);
@@ -421,7 +421,7 @@ $Page->Print(<<HTML);
    </tr>
    <tr>
     <td colspan="4" align="right">
-    <input type="button" value="ƒƒO‚Ìíœ" onclick="DoSubmit('sys.top','FUNC','LOG_REMOVE')" class=\"delete\">
+    <input type="button" value="ãƒ­ã‚°ã®å‰Šé™¤" onclick="DoSubmit('sys.top','FUNC','LOG_REMOVE')" class=\"delete\">
     </td>
    </tr>
   </table>
@@ -434,12 +434,12 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒ†[ƒU’Ê’mì¬
+#	ãƒ¦ãƒ¼ã‚¶é€šçŸ¥ä½œæˆ
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionNoticeCreate
@@ -447,7 +447,7 @@ sub FunctionNoticeCreate
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Notice, $subject, $content, $date, $limit, $users);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -456,7 +456,7 @@ sub FunctionNoticeCreate
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = ('NOTICE_TITLE', 'NOTICE_CONTENT');
 		if (! $Form->IsInput(\@inList)) {
@@ -493,23 +493,23 @@ sub FunctionNoticeCreate
 		$users = join(',', @toSet);
 		$limit = 0;
 	}
-	# ’Ê’mî•ñ‚ğ’Ç‰Á
+	# é€šçŸ¥æƒ…å ±ã‚’è¿½åŠ 
 	$Notice->Add($users, $Sys->Get('ADMIN')->{'USER'}, $subject, $content, $limit);
 	$Notice->Save($Sys);
 	
-	push @$pLog, 'ƒ†[ƒU‚Ö‚Ì’Ê’mI—¹';
+	push @$pLog, 'ãƒ¦ãƒ¼ã‚¶ã¸ã®é€šçŸ¥çµ‚äº†';
 	
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	’Ê’míœ
+#	é€šçŸ¥å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionNoticeDelete
@@ -517,7 +517,7 @@ sub FunctionNoticeDelete
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Notice, @noticeSet, $curUser, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -538,18 +538,18 @@ sub FunctionNoticeDelete
 		if ($Notice->Get('TO', $id) eq '*') {
 			if ($Notice->Get('FROM', $id) ne $curUser) {
 				my $subj = $Notice->Get('SUBJECT', $id);
-				push @$pLog, "’Ê’mu$subjv‚Í‘S‘Ì’Ê’m‚È‚Ì‚Åíœ‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B";
+				push @$pLog, "é€šçŸ¥ã€Œ$subjã€ã¯å…¨ä½“é€šçŸ¥ãªã®ã§å‰Šé™¤ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚";
 			}
 			else {
 				my $subj = $Notice->Get('SUBJECT', $id);
 				$Notice->Delete($id);
-				push @$pLog, "‘S‘Ì’Ê’mu$subjv‚ğíœ‚µ‚Ü‚µ‚½B";
+				push @$pLog, "å…¨ä½“é€šçŸ¥ã€Œ$subjã€ã‚’å‰Šé™¤ã—ã¾ã—ãŸã€‚";
 			}
 		}
 		else {
 			my $subj = $Notice->Get('SUBJECT', $id);
 			$Notice->RemoveToUser($id, $curUser);
-			push @$pLog, "’Ê’mu$subjv‚ğíœ‚µ‚Ü‚µ‚½B";
+			push @$pLog, "é€šçŸ¥ã€Œ$subjã€ã‚’å‰Šé™¤ã—ã¾ã—ãŸã€‚";
 		}
 	}
 	$Notice->Save($Sys);
@@ -559,12 +559,12 @@ sub FunctionNoticeDelete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‘€ìƒƒOíœ
+#	æ“ä½œãƒ­ã‚°å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionLogRemove
@@ -572,7 +572,7 @@ sub FunctionLogRemove
 	my ($Sys, $Form, $Logger, $pLog) = @_;
 	my ($Notice, @noticeSet, $curUser, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -582,7 +582,7 @@ sub FunctionLogRemove
 		}
 	}
 	$Logger->Clear();
-	push @$pLog, '‘€ìƒƒO‚ğíœ‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'æ“ä½œãƒ­ã‚°ã‚’å‰Šé™¤ã—ã¾ã—ãŸã€‚';
 	
 	return 0;
 }
@@ -598,27 +598,27 @@ sub CheckVersionUpdate
 		my $newver = $nr->Get('Ver');
 		my $reldate = $nr->Get('Date');
 		
-		# ƒ†[ƒU’Ê’m €”õ
+		# ãƒ¦ãƒ¼ã‚¶é€šçŸ¥ æº–å‚™
 		require './module/gandalf.pl';
 		my $Notice = GANDALF->new;
 		$Notice->Load($Sys);
 		my $nid = 'verupnotif';
 		
-		# ’Ê’m
+		# é€šçŸ¥æ™‚åˆ»
 		use Time::Local;
 		$_ = [split /\./, $reldate];
 		my $date = timelocal(0, 0, 0, $_->[2], $_->[1] - 1, $_->[0]);
 		my $limit = 0;
 		
-		# ’Ê’m“à—e
+		# é€šçŸ¥å†…å®¹
 		my $note = join('<br>', @{$nr->Get('Detail')});
 		my $subject = "0ch+ New Version $newver is Released.";
 		my $content = "<!-- \*Ver=$newver\* --> $note";
 		
-		# ’Ê’mÒ 0ch+ŠÇ—ƒVƒXƒeƒ€
+		# é€šçŸ¥è€… 0ch+ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
 		my $from = '0000000000';
 		
-		# ’Ê’mæ ŠÇ—ÒŒ ŒÀ‚ğ‚Âƒ†[ƒU
+		# é€šçŸ¥å…ˆ ç®¡ç†è€…æ¨©é™ã‚’æŒã¤ãƒ¦ãƒ¼ã‚¶
 		require './module/elves.pl';
 		my $User = GLORFINDEL->new;
 		$User->Load($Sys);
@@ -626,7 +626,7 @@ sub CheckVersionUpdate
 		$User->GetKeySet('SYSAD', 1, \@toSet);
 		my $users = join(',', @toSet, 'nouser');
 		
-		# ’Ê’m‚ğ’Ç‰Á
+		# é€šçŸ¥ã‚’è¿½åŠ 
 		if ($Notice->Get('TEXT', $nid, '') =~ /\*Ver=(.+?)\*/ && $1 eq $newver) {
 			$Notice->{'TO'}->{$nid}			= $users;
 			$Notice->{'TEXT'}->{$nid}		= $content;

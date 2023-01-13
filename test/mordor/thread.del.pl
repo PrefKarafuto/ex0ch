@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	ƒXƒŒƒbƒhŠÇ— - íœƒŒƒX ƒ‚ƒWƒ…[ƒ‹
+#	ã‚¹ãƒ¬ãƒƒãƒ‰ç®¡ç† - å‰Šé™¤ãƒ¬ã‚¹ ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	thread.del.pl
 #	---------------------------------------------------------------------------
 #	2004.08.02 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -53,7 +53,7 @@ sub DoPrint
 	$BBS = $pSys->{'AD_BBS'};
 	$DAT = $pSys->{'AD_DAT'};
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	if (! defined $pSys->{'AD_BBS'}) {
 		require './module/nazguls.pl';
 		$BBS = NAZGUL->new;
@@ -63,7 +63,7 @@ sub DoPrint
 		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	}
 	
-	# dat‚Ì“Ç‚İ‚İ
+	# datã®èª­ã¿è¾¼ã¿
 	if (! defined $pSys->{'AD_DAT'}) {
 		require './module/gondor.pl';
 		$DAT = ARAGORN->new;
@@ -73,39 +73,39 @@ sub DoPrint
 		$DAT->Load($Sys, $datPath, 1);
 	}
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys, $Form->Get('TARGET_BBS'));
 	
-	if ($subMode eq 'LIST') {														# ƒŒƒXˆê——‰æ–Ê
+	if ($subMode eq 'LIST') {														# ãƒ¬ã‚¹ä¸€è¦§ç”»é¢
 		PrintResList($Page, $Sys, $Form, $DAT);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# Š®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# å®Œäº†ç”»é¢
 		PrintComplete($Page, $Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# å¤±æ•—ç”»é¢
 		PrintError($Page, $Sys, $Form, $this->{'LOG'});
 	}
 	
-	# Œf¦”ÂEƒXƒŒƒbƒhî•ñ‚ğİ’è
+	# æ²ç¤ºæ¿ãƒ»ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±ã‚’è¨­å®š
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 	
 	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS'))
-					. ' - íœƒŒƒX', 3);
+					. ' - å‰Šé™¤ãƒ¬ã‚¹', 3);
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -119,12 +119,12 @@ sub DoFunction
 	$BBS = NAZGUL->new;
 	$DAT = ARAGORN->new;
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	$BBS->Load($Sys);
 	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	
-	# dat‚Ì“Ç‚İ‚İ
+	# datã®èª­ã¿è¾¼ã¿
 	$Sys->Set('KEY', $Form->Get('TARGET_THREAD'));
 	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/del_' . $Sys->Get('KEY') . '.cgi';
 	$DAT->Load($Sys, $datPath, 1);
@@ -132,11 +132,11 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 9999;
 	
-	if ($subMode eq 'DELETE') {													# ƒŒƒXŠ®‘Síœ
+	if ($subMode eq 'DELETE') {													# ãƒ¬ã‚¹å®Œå…¨å‰Šé™¤
 		$err = FunctionResDelete($Sys, $Form, $DAT, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"DELETE_RES($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -153,30 +153,30 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
 	
-	$Base->SetMenu('íœƒŒƒXˆê——', "'thread.del','DISP','LIST'");
+	$Base->SetMenu('å‰Šé™¤ãƒ¬ã‚¹ä¸€è¦§', "'thread.del','DISP','LIST'");
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('Œf¦”ÂŠÇ—‚Ö–ß‚é', "'bbs.thread','DISP','LIST'");
+	$Base->SetMenu('æ²ç¤ºæ¿ç®¡ç†ã¸æˆ»ã‚‹', "'bbs.thread','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒŒƒXˆê——‚Ì•\¦
+#	ãƒ¬ã‚¹ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$Dat	dat•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$Dat	datå¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResList
@@ -187,51 +187,51 @@ sub PrintResList
 	
 	$Sys->Set('_TITLE', 'Delete Res List');
 	
-	# •\¦‘®‚Ìİ’è
+	# è¡¨ç¤ºæ›¸å¼ã®è¨­å®š
 	$format = $Form->Get('DISP_FORMAT_DEL') eq '' ? '-10' : $Form->Get('DISP_FORMAT_DEL');
 	($dispSt, $dispEd) = AnalyzeFormat($format, $Dat);
 	
 	$common = "DoSubmit('thread.del','DISP','LIST');";
 	
 	$Page->Print("<center><dl><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2 align=right>•\\¦‘®F<input type=text name=DISP_FORMAT_DEL");
-	$Page->Print(" value=\"$format\"><input type=button value=\"@•\\¦@\" onclick=\"$common\">");
+	$Page->Print("<tr><td colspan=2 align=right>è¡¨\ç¤ºæ›¸å¼ï¼š<input type=text name=DISP_FORMAT_DEL");
+	$Page->Print(" value=\"$format\"><input type=button value=\"ã€€è¡¨\ç¤ºã€€\" onclick=\"$common\">");
 	$Page->Print("</td></tr>\n<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><th style=\"width:30\">@</th>");
+	$Page->Print("<tr><th style=\"width:30\">ã€€</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:300\">Deleted Contents</td></tr>\n");
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
 	
-	# ƒŒƒXˆê——‚ğo—Í
+	# ãƒ¬ã‚¹ä¸€è¦§ã‚’å‡ºåŠ›
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$pRes	= $Dat->Get($i);
 		@elem	= split(/<>/, $$pRes);
 		
-		# ©•ª‚ªíœ‚µ‚½‚à‚Ì‚¾‚¯‚ğ•\¦(Administrator‚Í‘S‚Ä•\¦)
+		# è‡ªåˆ†ãŒå‰Šé™¤ã—ãŸã‚‚ã®ã ã‘ã‚’è¡¨ç¤º(Administratorã¯å…¨ã¦è¡¨ç¤º)
 		if ($elem[1] eq $Form->Get('UserName') || $Sys->Get('ADMIN')->{'USER'} eq '0000000001') {
 			$Page->Print("<tr><td class=\"Response\" valign=top>");
 			
-			# ƒŒƒXíœŒ ‚É‚æ‚é•\¦—}§
+			# ãƒ¬ã‚¹å‰Šé™¤æ¨©ã«ã‚ˆã‚‹è¡¨ç¤ºæŠ‘åˆ¶
 			if ($isAbone) {
 				$Page->Print("<input type=checkbox name=DEL_RESS value=$i></td>");
 			}
 			else {
 				$Page->Print("</td>");
 			}
-			$common = ($elem[3] ? 'y‚ ‚Ú[‚ñz' : 'y“§–¾‚ ‚Ú[‚ñz');
+			$common = ($elem[3] ? 'ã€ã‚ã¼ãƒ¼ã‚“ã€‘' : 'ã€é€æ˜ã‚ã¼ãƒ¼ã‚“ã€‘');
 			$Page->Print("<td class=\"Response\"><dt>$common<br>" . ($elem[2] + 1));
-			$Page->Print("F<font color=forestgreen><b>$elem[4]</b></font>[$elem[5]]");
-			$Page->Print("F$elem[6]</dt><dd>$elem[7]<br><br></dd></td></tr>\n");
+			$Page->Print("ï¼š<font color=forestgreen><b>$elem[4]</b></font>[$elem[5]]");
+			$Page->Print("ï¼š$elem[6]</dt><dd>$elem[7]<br><br></dd></td></tr>\n");
 		}
 	}
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	# ƒVƒXƒeƒ€Œ ŒÀ—L–³‚É‚æ‚é•\¦—}§
+	# ã‚·ã‚¹ãƒ†ãƒ æ¨©é™æœ‰ç„¡ã«ã‚ˆã‚‹è¡¨ç¤ºæŠ‘åˆ¶
 	if ($isAbone) {
 		$common = "onclick=\"DoSubmit('thread.del','FUNC'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"@íœ@\" $common,'DELETE')\" class=\"delete\"> ");
+		$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'DELETE')\" class=\"delete\"> ");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
@@ -239,13 +239,13 @@ sub PrintResList
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒŒƒXíœŠm”F‚Ì•\¦
+#	ãƒ¬ã‚¹å‰Šé™¤ç¢ºèªã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$Dat	dat•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$Dat	datå¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintResDelete
@@ -255,35 +255,35 @@ sub PrintResDelete
 	
 	$Sys->Set('_TITLE', 'Res Delete Confirm');
 	
-	# ‘I‘ğƒŒƒX‚ğæ“¾
+	# é¸æŠãƒ¬ã‚¹ã‚’å–å¾—
 	@resSet = $Form->GetAtArray('DEL_RESS');
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
 	
 	$Page->Print("<center><dl><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td>ˆÈ‰º‚ÌíœƒŒƒX‚ğŠ®‘S‚Éíœ‚µ‚Ü‚·B</td></tr>\n");
+	$Page->Print("<tr><td>ä»¥ä¸‹ã®å‰Šé™¤ãƒ¬ã‚¹ã‚’å®Œå…¨ã«å‰Šé™¤ã—ã¾ã™ã€‚</td></tr>\n");
 	$Page->Print("<tr><td><hr></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Contents</td></tr>\n");
 	
-	# ƒŒƒXˆê——‚ğo—Í
+	# ãƒ¬ã‚¹ä¸€è¦§ã‚’å‡ºåŠ›
 	foreach $num (@resSet) {
 		$pRes	= $Dat->Get($num);
 		@elem	= split(/<>/, $$pRes);
 		
 		$Page->Print("<tr><td class=\"Response\"><dt>" . ($num + 1));
-		$Page->Print("F<font color=forestgreen><b>$elem[0]</b></font>[$elem[1]]");
-		$Page->Print("F$elem[2]</dt><dd>$elem[3]<br><br></dd></td></tr>\n");
+		$Page->Print("ï¼š<font color=forestgreen><b>$elem[0]</b></font>[$elem[1]]");
+		$Page->Print("ï¼š$elem[2]</dt><dd>$elem[3]<br><br></dd></td></tr>\n");
 		$Page->HTMLInput('hidden', 'RESS', $num);
 	}
 	$Page->Print("<tr><td><hr></td></tr>\n");
 	
-	# ƒVƒXƒeƒ€Œ ŒÀ—L–³‚É‚æ‚é•\¦—}§
+	# ã‚·ã‚¹ãƒ†ãƒ æ¨©é™æœ‰ç„¡ã«ã‚ˆã‚‹è¡¨ç¤ºæŠ‘åˆ¶
 	if ($isAbone) {
 		$common = "onclick=\"DoSubmit('thread.res','FUNC','";
 		$common .= ($mode ? 'ABONE' : 'DELETE') . "')\"";
 		$Page->Print("<tr><td align=left>");
-		$Page->Print("<input type=button value=\"@Às@\" $common> ");
+		$Page->Print("<input type=button value=\"ã€€å®Ÿè¡Œã€€\" $common> ");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
@@ -291,13 +291,13 @@ sub PrintResDelete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Š®—¹‰æ–Ê‚Ì•\¦
+#	å®Œäº†ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintComplete
@@ -308,10 +308,10 @@ sub PrintComplete
 	$Sys->Set('_TITLE', 'Process Complete');
 	
 	$Page->Print("<center><table border=0 cellspacing=0 width=100%>");
-	$Page->Print("<tr><td><b>ƒŒƒXİ’è‚ğ³í‚ÉŠ®—¹‚µ‚Ü‚µ‚½B</b><br><br>");
-	$Page->Print("<small>ˆ—ƒƒO<hr><blockquote>");
+	$Page->Print("<tr><td><b>ãƒ¬ã‚¹è¨­å®šã‚’æ­£å¸¸ã«å®Œäº†ã—ã¾ã—ãŸã€‚</b><br><br>");
+	$Page->Print("<small>å‡¦ç†ãƒ­ã‚°<hr><blockquote>");
 	
-	# ƒƒO‚Ì•\¦
+	# ãƒ­ã‚°ã®è¡¨ç¤º
 	foreach $text (@$pLog) {
 		$Page->Print("$text<br>\n");
 	}
@@ -321,12 +321,12 @@ sub PrintComplete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒGƒ‰[‚Ì•\¦
+#	ã‚¨ãƒ©ãƒ¼ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintError
@@ -336,7 +336,7 @@ sub PrintError
 	
 	$Sys->Set('_TITLE', 'Process Error');
 	
-	# ƒGƒ‰[ƒR[ƒh‚Ì’Šo
+	# ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã®æŠ½å‡º
 	$ecode = pop @$pLog;
 	
 	$Page->Print("<center><table border=0 cellspacing=0 width=100%>");
@@ -344,13 +344,13 @@ sub PrintError
 	$Page->Print("ERROR:$ecode<hr><blockquote>\n");
 	
 	if ($ecode == 1000) {
-		$Page->Print("ƒŒƒX‘€ì‚ğÀs‚·‚éŒ ŒÀ‚ª‚ ‚è‚Ü‚¹‚ñB");
+		$Page->Print("ãƒ¬ã‚¹æ“ä½œã‚’å®Ÿè¡Œã™ã‚‹æ¨©é™ãŒã‚ã‚Šã¾ã›ã‚“ã€‚");
 	}
 	elsif ($ecode == 1001) {
-		$Page->Print("“ü—Í•K{€–Ú‚ª‹ó—“‚É‚È‚Á‚Ä‚¢‚Ü‚·B");
+		$Page->Print("å…¥åŠ›å¿…é ˆé …ç›®ãŒç©ºæ¬„ã«ãªã£ã¦ã„ã¾ã™ã€‚");
 	}
 	else {
-		$Page->Print("•s–¾‚ÈƒGƒ‰[<hr>");
+		$Page->Print("ä¸æ˜ãªã‚¨ãƒ©ãƒ¼<hr>");
 		foreach (@$pLog) {
 			$Page->Print("$_<br>");
 		}
@@ -362,13 +362,13 @@ sub PrintError
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒŒƒXŠ®‘Síœ
+#	ãƒ¬ã‚¹å®Œå…¨å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$Dat	Dat•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$Dat	Datå¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionResDelete
@@ -376,7 +376,7 @@ sub FunctionResDelete
 	my ($Sys, $Form, $Dat, $pLog) = @_;
 	my (@resSet, $abone, $path, $delCnt);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID	= $Sys->Get('ADMIN')->{'USER'};
@@ -386,7 +386,7 @@ sub FunctionResDelete
 		}
 	}
 	
-	# Še’l‚ğİ’è
+	# å„å€¤ã‚’è¨­å®š
 	@resSet	= $Form->GetAtArray('DEL_RESS');
 	$path	= $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/del_' . $Sys->Get('KEY') . '.cgi';
 	my @dellist = ();
@@ -400,10 +400,10 @@ sub FunctionResDelete
 	}
 	$Dat->Save($Sys);
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	$delCnt = 0;
 	$abone	= '';
-	push @$pLog, 'ˆÈ‰º‚ÌíœƒŒƒX‚ğŠ®‘S‚Éíœ‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'ä»¥ä¸‹ã®å‰Šé™¤ãƒ¬ã‚¹ã‚’å®Œå…¨ã«å‰Šé™¤ã—ã¾ã—ãŸã€‚';
 	foreach (@dellist) {
 		if ($delCnt > 5) {
 			push @$pLog, $abone;
@@ -422,11 +422,11 @@ sub FunctionResDelete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‘®‚Ì‰ğÍ
+#	æ›¸å¼ã®è§£æ
 #	-------------------------------------------------------------------------------------
-#	@param	$format	‘®•¶š—ñ
-#	@param	$Dat	ARAGORNƒIƒuƒWƒFƒNƒg
-#	@return	(ŠJn”Ô†, I—¹”Ô†)
+#	@param	$format	æ›¸å¼æ–‡å­—åˆ—
+#	@param	$Dat	ARAGORNã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
+#	@return	(é–‹å§‹ç•ªå·, çµ‚äº†ç•ªå·)
 #
 #------------------------------------------------------------------------------------------------------------
 sub AnalyzeFormat
@@ -434,7 +434,7 @@ sub AnalyzeFormat
 	my ($format, $Dat) = @_;
 	my ($start, $end, $max);
 	
-	# ‘®ƒGƒ‰[
+	# æ›¸å¼ã‚¨ãƒ©ãƒ¼
 	if ($format =~ /[^0-9\-l]/ || $format eq '') {
 		return (0, 0);
 	}
@@ -443,33 +443,33 @@ sub AnalyzeFormat
 		return (0, 0);
 	}
 	
-	# ÅVnŒ
+	# æœ€æ–°nä»¶
 	if ($format =~ /l(\d+)/) {
 		$end	= $max;
 		$start	= ($max - $1 + 1) > 0 ? ($max - $1 + 1) : 1;
 	}
-	# n`m
+	# nã€œm
 	elsif ($format =~ /(\d+)-(\d+)/) {
 		$start	= $1 > $max ? $max : $1;
 		$end	= $2 > $max ? $max : $2;
 	}
-	# nˆÈ~‚·‚×‚Ä
+	# nä»¥é™ã™ã¹ã¦
 	elsif ($format =~ /(\d+)-/) {
 		$start	= $1 > $max ? $max : $1;
 		$end	= $max;
 	}
-	# nˆÈ‘O‚·‚×‚Ä
+	# nä»¥å‰ã™ã¹ã¦
 	elsif ($format =~ /-(\d+)/) {
 		$start	= 1;
 		$end	= $1 > $max ? $max : $1;
 	}
-	# n‚Ì‚İ
+	# nã®ã¿
 	elsif ($format =~ /(\d+)/) {
 		$start	= $1 > $max ? $max : $1;
 		$end	= $1 > $max ? $max : $1;
 	}
 	
-	# ‡˜³‹K‰»
+	# é †åºæ­£è¦åŒ–
 	if ($start > $end) {
 		$max = $start;
 		$start = $end;

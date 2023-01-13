@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	Œf¦”ÂŠÇ— - ŠÇ—ƒOƒ‹[ƒv ƒ‚ƒWƒ…[ƒ‹
+#	æ²ç¤ºæ¿ç®¡ç† - ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ— ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	bbs.user.pl
 #	---------------------------------------------------------------------------
 #	2004.07.10 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -52,7 +52,7 @@ sub DoPrint
 	$BASE = SAURON->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	if (! defined $BBS) {
 		require './module/nazguls.pl';
 		$BBS = NAZGUL->new;
@@ -62,38 +62,38 @@ sub DoPrint
 		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	}
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys, $Sys->Get('BBS'));
 	
-	if ($subMode eq 'LIST') {														# ƒOƒ‹[ƒvˆê——‰æ–Ê
+	if ($subMode eq 'LIST') {														# ã‚°ãƒ«ãƒ¼ãƒ—ä¸€è¦§ç”»é¢
 		PrintGroupList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CREATE') {													# ƒOƒ‹[ƒvì¬‰æ–Ê
+	elsif ($subMode eq 'CREATE') {													# ã‚°ãƒ«ãƒ¼ãƒ—ä½œæˆç”»é¢
 		PrintGroupSetting($Page, $Sys, $Form, 0);
 	}
-	elsif ($subMode eq 'EDIT') {													# ƒOƒ‹[ƒv•ÒW‰æ–Ê
+	elsif ($subMode eq 'EDIT') {													# ã‚°ãƒ«ãƒ¼ãƒ—ç·¨é›†ç”»é¢
 		PrintGroupSetting($Page, $Sys, $Form, 1);
 	}
-	elsif ($subMode eq 'DELETE') {													# ƒOƒ‹[ƒvíœŠm”F‰æ–Ê
+	elsif ($subMode eq 'DELETE') {													# ã‚°ãƒ«ãƒ¼ãƒ—å‰Šé™¤ç¢ºèªç”»é¢
 		PrintGroupDelete($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'IMPORT') {													# ƒOƒ‹[ƒvƒCƒ“ƒ|[ƒg‰æ–Ê
+	elsif ($subMode eq 'IMPORT') {													# ã‚°ãƒ«ãƒ¼ãƒ—ã‚¤ãƒ³ãƒãƒ¼ãƒˆç”»é¢
 		PrintGroupImport($Page, $Sys, $Form, $BBS);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ƒOƒ‹[ƒvİ’èŠ®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šå®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('ŠÇ—ƒOƒ‹[ƒvˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ—å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ƒOƒ‹[ƒvİ’è¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šå¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
 	
-	# Œf¦”Âî•ñ‚ğİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’è¨­å®š
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	
 	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
@@ -101,12 +101,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -118,7 +118,7 @@ sub DoFunction
 	require './module/nazguls.pl';
 	$BBS = NAZGUL->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$BBS->Load($Sys);
 	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$pSys->{'SECINFO'}->SetGroupInfo($Sys->Get('BBS'));
@@ -126,20 +126,20 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 9999;
 	
-	if ($subMode eq 'CREATE') {													# ƒOƒ‹[ƒvì¬
+	if ($subMode eq 'CREATE') {													# ã‚°ãƒ«ãƒ¼ãƒ—ä½œæˆ
 		$err = FunctionGroupSetting($Sys, $Form, 0, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'EDIT') {													# ƒOƒ‹[ƒv•ÒW
+	elsif ($subMode eq 'EDIT') {													# ã‚°ãƒ«ãƒ¼ãƒ—ç·¨é›†
 		$err = FunctionGroupSetting($Sys, $Form, 1, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'DELETE') {													# ƒOƒ‹[ƒvíœ
+	elsif ($subMode eq 'DELETE') {													# ã‚°ãƒ«ãƒ¼ãƒ—å‰Šé™¤
 		$err = FunctionGroupDelete($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'IMPORT') {													# ƒOƒ‹[ƒvƒCƒ“ƒ|[ƒg
+	elsif ($subMode eq 'IMPORT') {													# ã‚°ãƒ«ãƒ¼ãƒ—ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 		$err = FunctionGroupImport($Sys, $Form, $this->{'LOG'}, $BBS);
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"USER_GROUP($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -155,35 +155,35 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
 	
-	$Base->SetMenu('ƒOƒ‹[ƒvˆê——', "'bbs.user','DISP','LIST'");
+	$Base->SetMenu('ã‚°ãƒ«ãƒ¼ãƒ—ä¸€è¦§', "'bbs.user','DISP','LIST'");
 	
-	# ŠÇ—ƒOƒ‹[ƒvİ’èŒ ŒÀ‚Ì‚İ
+	# ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šæ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_USERGROUP, $bbs)) {
-		$Base->SetMenu('ƒOƒ‹[ƒv“o˜^', "'bbs.user','DISP','CREATE'");
-		$Base->SetMenu('ƒOƒ‹[ƒvƒCƒ“ƒ|[ƒg', "'bbs.user','DISP','IMPORT'");
+		$Base->SetMenu('ã‚°ãƒ«ãƒ¼ãƒ—ç™»éŒ²', "'bbs.user','DISP','CREATE'");
+		$Base->SetMenu('ã‚°ãƒ«ãƒ¼ãƒ—ã‚¤ãƒ³ãƒãƒ¼ãƒˆ', "'bbs.user','DISP','IMPORT'");
 	}
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('ƒVƒXƒeƒ€ŠÇ—‚Ö–ß‚é', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ã¸æˆ»ã‚‹', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvˆê——‚Ì•\¦
+#	ã‚°ãƒ«ãƒ¼ãƒ—ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintGroupList
@@ -196,21 +196,21 @@ sub PrintGroupList
 	require './module/elves.pl';
 	$Group = GILDOR->new;
 	
-	# ƒOƒ‹[ƒvî•ñ‚Ì“Ç‚İ‚İ
+	# ã‚°ãƒ«ãƒ¼ãƒ—æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$Group->Load($Sys);
 	$Group->GetKeySet(\@groupSet);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
-	$Page->Print("<tr><td style=\"width:30\">@</td>");
+	$Page->Print("<tr><td style=\"width:30\">ã€€</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">Group Name</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:200\">Subscription</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:30\">Users</td></tr>\n");
 	
-	# Œ ŒÀæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_USERGROUP, $Sys->Get('BBS'));
 	
-	# ƒOƒ‹[ƒvˆê——‚ğo—Í
+	# ã‚°ãƒ«ãƒ¼ãƒ—ä¸€è¦§ã‚’å‡ºåŠ›
 	foreach $id (@groupSet) {
 		$name = $Group->Get('NAME', $id, '');
 		$expl = $Group->Get('EXPL', $id, '');
@@ -220,7 +220,7 @@ sub PrintGroupList
 		$common = "\"javascript:SetOption('SELECT_GROUP','$id');";
 		$common .= "DoSubmit('bbs.user','DISP','EDIT')\"";
 		
-		# Œ ŒÀ‚É‚æ‚Á‚Ä•\¦‚ğ—}§
+		# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 		$Page->Print("<tr><td><input type=checkbox name=GROUPS value=$id></td>");
 		if ($isAuth) {
 			$Page->Print("<td><a href=$common>$name</a></td><td>$expl</td><td>$n</td></tr>\n");
@@ -232,11 +232,11 @@ sub PrintGroupList
 	$Page->HTMLInput('hidden', 'SELECT_GROUP', '');
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	
-	# Œ ŒÀ‚É‚æ‚Á‚Ä•\¦‚ğ—}§
+	# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.user','DISP'";
 		$Page->Print("<tr><td colspan=4 align=left>");
-		$Page->Print("<input type=button value=\"@íœ@\" $common,'DELETE')\" class=\"delete\">");
+		$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'DELETE')\" class=\"delete\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table>");
@@ -244,13 +244,13 @@ sub PrintGroupList
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvİ’è‚Ì•\¦
+#	ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	ì¬‚Ìê‡:0, •ÒW‚Ìê‡:1
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	ä½œæˆã®å ´åˆ:0, ç·¨é›†ã®å ´åˆ:1
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintGroupSetting
@@ -266,19 +266,19 @@ sub PrintGroupSetting
 	$User = GLORFINDEL->new;
 	$Group = GILDOR->new;
 	
-	# ƒ†[ƒUî•ñ‚Ì“Ç‚İ‚İ
+	# ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$User->Load($Sys);
 	$Group->Load($Sys);
 	$User->GetKeySet('ALL', '', \@userSet);
 	
-	# •ÒWƒ‚[ƒh‚È‚çƒ†[ƒUî•ñ‚ğæ“¾‚·‚é
+	# ç·¨é›†ãƒ¢ãƒ¼ãƒ‰ãªã‚‰ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã‚’å–å¾—ã™ã‚‹
 	if ($mode) {
 		$name = $Group->Get('NAME', $Form->Get('SELECT_GROUP', ''), '');
 		$expl = $Group->Get('EXPL', $Form->Get('SELECT_GROUP', ''), '');
 		@auth = split(/\, ?/, $Group->Get('AUTH', $Form->Get('SELECT_GROUP', ''), ''));
 		@user = split(/\, ?/, $Group->Get('USERS', $Form->Get('SELECT_GROUP', ''), ''));
 		
-		# Œ ŒÀ”Ô†ƒ}ƒbƒsƒ“ƒO”z—ñ‚ğì¬
+		# æ¨©é™ç•ªå·ãƒãƒƒãƒ”ãƒ³ã‚°é…åˆ—ã‚’ä½œæˆ
 		for ($i = 0 ; $i < 15 ; $i++) {
 			$authNum[$i] = '';
 		}
@@ -298,41 +298,41 @@ sub PrintGroupSetting
 	}
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Šeî•ñ‚ğ“ü—Í‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„æƒ…å ±ã‚’å…¥åŠ›ã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>Šî–{î•ñ</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>åŸºæœ¬æƒ…å ±</td></tr>");
 	$Page->Print("<tr><td colspan=2><table cellspcing=2>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒOƒ‹[ƒv–¼Ì</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚°ãƒ«ãƒ¼ãƒ—åç§°</td><td>");
 	$Page->Print("<input name=GROUPNAME type=text size=50 value=\"$name\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">à–¾</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">èª¬æ˜</td><td>");
 	$Page->Print("<input name=GROUPSUBS type=text size=50 value=\"$expl\"></td></tr>");
 	$Page->Print("</table><br></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\" width=40%>Œ ŒÀî•ñ</td>");
-	$Page->Print("<td class=\"DetailTitle\">Š‘®ƒ†[ƒU</td></tr><tr><td valign=top>");
+	$Page->Print("<tr><td class=\"DetailTitle\" width=40%>æ¨©é™æƒ…å ±</td>");
+	$Page->Print("<td class=\"DetailTitle\">æ‰€å±ãƒ¦ãƒ¼ã‚¶</td></tr><tr><td valign=top>");
 	
-	# Œ ŒÀˆê——•\¦
-	$Page->Print("<input type=checkbox name=A_USERGROUP $authNum[0] value=on>ŠÇ—ƒOƒ‹[ƒvİ’è<br>");
-	$Page->Print("<input type=checkbox name=A_CAPGROUP $authNum[1] value=on>ƒLƒƒƒbƒvƒOƒ‹[ƒvİ’è<br>");
-	$Page->Print("<input type=checkbox name=A_LOGVIEW $authNum[14] value=on>ƒƒO‚Ì‰{——Eíœ<br>");
+	# æ¨©é™ä¸€è¦§è¡¨ç¤º
+	$Page->Print("<input type=checkbox name=A_USERGROUP $authNum[0] value=on>ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š<br>");
+	$Page->Print("<input type=checkbox name=A_CAPGROUP $authNum[1] value=on>ã‚­ãƒ£ãƒƒãƒ—ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š<br>");
+	$Page->Print("<input type=checkbox name=A_LOGVIEW $authNum[14] value=on>ãƒ­ã‚°ã®é–²è¦§ãƒ»å‰Šé™¤<br>");
 	$Page->Print("<hr>");
-	$Page->Print("<input type=checkbox name=A_THREADSTOP $authNum[2] value=on>ƒXƒŒƒbƒh’â~EÄŠJ<br>");
-	$Page->Print("<input type=checkbox name=A_THREADPOOL $authNum[3] value=on>ƒXƒŒƒbƒhdat—‚¿E•œŠˆ<br>");
-	$Page->Print("<input type=checkbox name=A_TREADDELETE $authNum[4] value=on>ƒXƒŒƒbƒhíœ<br>");
-	$Page->Print("<input type=checkbox name=A_THREADINFO $authNum[5] value=on>ƒXƒŒƒbƒhî•ñXV<br>");
-	$Page->Print("<input type=checkbox name=A_PASTCREATE $authNum[6] value=on>‰ß‹ƒƒO¶¬<br>");
-	$Page->Print("<input type=checkbox name=A_PASTDELETE $authNum[7] value=on>‰ß‹ƒƒOíœ<br>");
-	$Page->Print("<input type=checkbox name=A_BBSSETTING $authNum[8] value=on>Œf¦”Âİ’è<br>");
-	$Page->Print("<input type=checkbox name=A_BBSEDIT $authNum[13] value=on>Šeí•ÒW<br>");
-	$Page->Print("<input type=checkbox name=A_NGWORDS $authNum[9] value=on>NGƒ[ƒh•ÒW<br>");
-	$Page->Print("<input type=checkbox name=A_ACCESUSER $authNum[10] value=on>ƒAƒNƒZƒX§ŒÀ•ÒW<br>");
+	$Page->Print("<input type=checkbox name=A_THREADSTOP $authNum[2] value=on>ã‚¹ãƒ¬ãƒƒãƒ‰åœæ­¢ãƒ»å†é–‹<br>");
+	$Page->Print("<input type=checkbox name=A_THREADPOOL $authNum[3] value=on>ã‚¹ãƒ¬ãƒƒãƒ‰datè½ã¡ãƒ»å¾©æ´»<br>");
+	$Page->Print("<input type=checkbox name=A_TREADDELETE $authNum[4] value=on>ã‚¹ãƒ¬ãƒƒãƒ‰å‰Šé™¤<br>");
+	$Page->Print("<input type=checkbox name=A_THREADINFO $authNum[5] value=on>ã‚¹ãƒ¬ãƒƒãƒ‰æƒ…å ±æ›´æ–°<br>");
+	$Page->Print("<input type=checkbox name=A_PASTCREATE $authNum[6] value=on>éå»ãƒ­ã‚°ç”Ÿæˆ<br>");
+	$Page->Print("<input type=checkbox name=A_PASTDELETE $authNum[7] value=on>éå»ãƒ­ã‚°å‰Šé™¤<br>");
+	$Page->Print("<input type=checkbox name=A_BBSSETTING $authNum[8] value=on>æ²ç¤ºæ¿è¨­å®š<br>");
+	$Page->Print("<input type=checkbox name=A_BBSEDIT $authNum[13] value=on>å„ç¨®ç·¨é›†<br>");
+	$Page->Print("<input type=checkbox name=A_NGWORDS $authNum[9] value=on>NGãƒ¯ãƒ¼ãƒ‰ç·¨é›†<br>");
+	$Page->Print("<input type=checkbox name=A_ACCESUSER $authNum[10] value=on>ã‚¢ã‚¯ã‚»ã‚¹åˆ¶é™ç·¨é›†<br>");
 	$Page->Print("<hr>");
-	$Page->Print("<input type=checkbox name=A_RESABONE $authNum[11] value=on>ƒŒƒX‚ ‚Ú[‚ñ<br>");
-	$Page->Print("<input type=checkbox name=A_RESEDIT $authNum[12] value=on>ƒŒƒX•ÒW<br>");
+	$Page->Print("<input type=checkbox name=A_RESABONE $authNum[11] value=on>ãƒ¬ã‚¹ã‚ã¼ãƒ¼ã‚“<br>");
+	$Page->Print("<input type=checkbox name=A_RESEDIT $authNum[12] value=on>ãƒ¬ã‚¹ç·¨é›†<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
-	# Š‘®ƒ†[ƒUˆê——•\¦
+	# æ‰€å±ãƒ¦ãƒ¼ã‚¶ä¸€è¦§è¡¨ç¤º
 	foreach $id (@userSet) {
-		# ƒVƒXƒeƒ€Œ ŒÀƒ†[ƒUA‘¼‚ÌƒOƒ‹[ƒv‚ÉŠ‘®‚µ‚Ä‚¢‚éƒ†[ƒU‚Í”ñ•\¦
+		# ã‚·ã‚¹ãƒ†ãƒ æ¨©é™ãƒ¦ãƒ¼ã‚¶ã€ä»–ã®ã‚°ãƒ«ãƒ¼ãƒ—ã«æ‰€å±ã—ã¦ã„ã‚‹ãƒ¦ãƒ¼ã‚¶ã¯éè¡¨ç¤º
 		if (0 == $User->Get('SYSAD', $id) &&
 			($Group->GetBelong($id) eq '' || $Group->GetBelong($id) eq $Form->Get('SELECT_GROUP'))) {
 			my $userName = $User->Get('NAME', $id);
@@ -347,7 +347,7 @@ sub PrintGroupSetting
 		}
 	}
 	
-	# submitİ’è
+	# submitè¨­å®š
 	$common = "'" . $Form->Get('MODE_SUB') . "'";
 	$common = "onclick=\"DoSubmit('bbs.user','FUNC',$common)\"";
 	
@@ -355,18 +355,18 @@ sub PrintGroupSetting
 	$Page->Print("</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=submit value=\"@İ’è@\" $common></td></tr>");
+	$Page->Print("<input type=submit value=\"ã€€è¨­å®šã€€\" $common></td></tr>");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvíœŠm”F‰æ–Ê‚Ì•\¦
+#	ã‚°ãƒ«ãƒ¼ãƒ—å‰Šé™¤ç¢ºèªç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintGroupDelete
@@ -380,18 +380,18 @@ sub PrintGroupDelete
 	$Group = GILDOR->new;
 	$Group->Load($SYS);
 	
-	# ƒ†[ƒUî•ñ‚ğæ“¾
+	# ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã‚’å–å¾—
 	@groupSet = $Form->GetAtArray('GROUPS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>ˆÈ‰º‚ÌƒOƒ‹[ƒv‚ğíœ‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=2>ä»¥ä¸‹ã®ã‚°ãƒ«ãƒ¼ãƒ—ã‚’å‰Šé™¤ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">Group Name</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:200\">Subscription</td>");
 	
-	# ƒ†[ƒUƒŠƒXƒg‚ğo—Í
+	# ãƒ¦ãƒ¼ã‚¶ãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@groupSet) {
 		$name = $Group->Get('NAME', $id);
 		$expl = $Group->Get('EXPL', $id);
@@ -403,24 +403,24 @@ sub PrintGroupDelete
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-	$Page->Print("¦’Fíœ‚µ‚½ƒOƒ‹[ƒv‚ğŒ³‚É–ß‚·‚±‚Æ‚Í‚Å‚«‚Ü‚¹‚ñB</b><br>");
-	$Page->Print("¦’F©•ª‚ªŠ‘®‚µ‚Ä‚¢‚éƒOƒ‹[ƒv‚Ííœ‚Å‚«‚Ü‚¹‚ñB<br>");
-	$Page->Print("¦’Fíœ‚·‚éƒOƒ‹[ƒv‚ÉŠ‘®‚µ‚Ä‚¢‚éƒ†[ƒU‚Í‚·‚×‚Ä–¢Š‘®ó‘Ô‚É‚È‚è‚Ü‚·B</td></tr>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã—ãŸã‚°ãƒ«ãƒ¼ãƒ—ã‚’å…ƒã«æˆ»ã™ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚</b><br>");
+	$Page->Print("â€»æ³¨ï¼šè‡ªåˆ†ãŒæ‰€å±ã—ã¦ã„ã‚‹ã‚°ãƒ«ãƒ¼ãƒ—ã¯å‰Šé™¤ã§ãã¾ã›ã‚“ã€‚<br>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã™ã‚‹ã‚°ãƒ«ãƒ¼ãƒ—ã«æ‰€å±ã—ã¦ã„ã‚‹ãƒ¦ãƒ¼ã‚¶ã¯ã™ã¹ã¦æœªæ‰€å±çŠ¶æ…‹ã«ãªã‚Šã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td colspan=2 align=right><input type=button value=\"@íœ@\" ");
+	$Page->Print("<tr><td colspan=2 align=right><input type=button value=\"ã€€å‰Šé™¤ã€€\" ");
 	$Page->Print("onclick=\"DoSubmit('bbs.user','FUNC','DELETE')\" class=\"delete\"></td></tr>");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒCƒ“ƒ|[ƒg‰æ–Ê‚Ì•\¦
+#	ã‚¤ãƒ³ãƒãƒ¼ãƒˆç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$BBS	BBSî•ñ
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$BBS	BBSæƒ…å ±
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintGroupImport
@@ -430,15 +430,15 @@ sub PrintGroupImport
 	
 	$SYS->Set('_TITLE', 'Group Import');
 	
-	# Š‘®BBS‚ğæ“¾
+	# æ‰€å±BBSã‚’å–å¾—
 	$SYS->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($SYS->Get('ADMIN')->{'USER'}, $BBS, \@bbsSet);
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">Šù‘¶BBS‚©‚çƒCƒ“ƒ|[ƒg</td>");
-	$Page->Print("<td><select name=IMPORT_BBS><option value=\"\">--Œf¦”Â‚ğ‘I‘ğ--</option>");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ—¢å­˜BBSã‹ã‚‰ã‚¤ãƒ³ãƒãƒ¼ãƒˆ</td>");
+	$Page->Print("<td><select name=IMPORT_BBS><option value=\"\">--æ²ç¤ºæ¿ã‚’é¸æŠ--</option>");
 	
-	# Œf¦”Âˆê——‚Ìo—Í
+	# æ²ç¤ºæ¿ä¸€è¦§ã®å‡ºåŠ›
 	foreach $id (@bbsSet) {
 		$name	= $BBS->Get('NAME', $id);
 		$Page->Print("<option value=$id>$name</option>\n");
@@ -446,19 +446,19 @@ sub PrintGroupImport
 	
 	$Page->Print("</select></td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"ƒCƒ“ƒ|[ƒg\"");
+	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"ã‚¤ãƒ³ãƒãƒ¼ãƒˆ\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.user','FUNC','IMPORT');\"></td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvì¬/•ÒW
+#	ã‚°ãƒ«ãƒ¼ãƒ—ä½œæˆ/ç·¨é›†
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	•ÒW:1, ì¬:0
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	ç·¨é›†:1, ä½œæˆ:0
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionGroupSetting
@@ -467,7 +467,7 @@ sub FunctionGroupSetting
 	my ($Group, $User, @userSet, @authNum, @belongUser);
 	my ($name, $expl, $auth, $user, $i);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -476,7 +476,7 @@ sub FunctionGroupSetting
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = ('GROUPNAME');
 		if (! $Form->IsInput(\@inList)) {
@@ -487,15 +487,15 @@ sub FunctionGroupSetting
 	$User = GLORFINDEL->new;
 	$Group = GILDOR->new;
 	
-	# ƒ†[ƒUî•ñ‚Ì“Ç‚İ‚İ
+	# ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$User->Load($Sys);
 	$Group->Load($Sys);
 	
-	# Šî–{î•ñ‚Ìİ’è
+	# åŸºæœ¬æƒ…å ±ã®è¨­å®š
 	$name = $Form->Get('GROUPNAME');
 	$expl = $Form->Get('GROUPSUBS');
 	
-	# Œ ŒÀî•ñ‚Ì¶¬
+	# æ¨©é™æƒ…å ±ã®ç”Ÿæˆ
 	my %field2auth = (
 		'A_USERGROUP'	=> $ZP::AUTH_USERGROUP,
 		'A_CAPGROUP'	=> $ZP::AUTH_CAPGROUP,
@@ -521,11 +521,11 @@ sub FunctionGroupSetting
 	}
 	$auth = join(',', @auths);
 	
-	# Š‘®ƒ†[ƒUî•ñ‚Ì¶¬
+	# æ‰€å±ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã®ç”Ÿæˆ
 	@belongUser = $Form->GetAtArray('BELONGUSER');
 	$user = join(',', @belongUser);
 	
-	# İ’èî•ñ‚Ì“o˜^
+	# è¨­å®šæƒ…å ±ã®ç™»éŒ²
 	if ($mode) {
 		my $groupID = $Form->Get('SELECT_GROUP');
 		$Group->Set($groupID, 'NAME', $name);
@@ -537,19 +537,19 @@ sub FunctionGroupSetting
 		$Group->Add($name, $expl, $auth, $user);
 	}
 	
-	# İ’è‚ğ•Û‘¶
+	# è¨­å®šã‚’ä¿å­˜
 	$Group->Save($Sys);
 	
-	# ˆ—ƒƒO
+	# å‡¦ç†ãƒ­ã‚°
 	{
 		my $id;
-		push @$pLog, '¡ˆÈ‰º‚ÌƒOƒ‹[ƒv‚ğ“o˜^‚µ‚Ü‚µ‚½B';
-		push @$pLog, "ƒOƒ‹[ƒv–¼ÌF$name";
-		push @$pLog, "à–¾F$expl";
-		push @$pLog, "Œ ŒÀF$auth";
-		push @$pLog, 'Š‘®ƒ†[ƒUF';
+		push @$pLog, 'â– ä»¥ä¸‹ã®ã‚°ãƒ«ãƒ¼ãƒ—ã‚’ç™»éŒ²ã—ã¾ã—ãŸã€‚';
+		push @$pLog, "ã‚°ãƒ«ãƒ¼ãƒ—åç§°ï¼š$name";
+		push @$pLog, "èª¬æ˜ï¼š$expl";
+		push @$pLog, "æ¨©é™ï¼š$auth";
+		push @$pLog, 'æ‰€å±ãƒ¦ãƒ¼ã‚¶ï¼š';
 		foreach $id (@belongUser) {
-			push @$pLog,"@@> " . $User->Get('NAME', $id);
+			push @$pLog,"ã€€ã€€> " . $User->Get('NAME', $id);
 		}
 	}
 	
@@ -558,12 +558,12 @@ sub FunctionGroupSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvíœ
+#	ã‚°ãƒ«ãƒ¼ãƒ—å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionGroupDelete
@@ -571,7 +571,7 @@ sub FunctionGroupDelete
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Group, @groupSet, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -583,17 +583,17 @@ sub FunctionGroupDelete
 	require './module/elves.pl';
 	$Group = GILDOR->new;
 	
-	# ƒ†[ƒUî•ñ‚Ì“Ç‚İ‚İ
+	# ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$Group->Load($Sys);
 	
-	push @$pLog, '¡ˆÈ‰º‚ÌƒOƒ‹[ƒv‚ğíœ‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'â– ä»¥ä¸‹ã®ã‚°ãƒ«ãƒ¼ãƒ—ã‚’å‰Šé™¤ã—ã¾ã—ãŸã€‚';
 	@groupSet = $Form->GetAtArray('GROUPS');
 	
 	foreach $id (@groupSet) {
 		next if (! defined $Group->Get('NAME', $id));
 		if ($Group->GetBelong($Sys->Get('ADMIN')->{'USER'}) eq $id) {
 			push(@$pLog,
-				'¦©•ª‚ÌŠ‘®ƒOƒ‹[ƒv‚Ì‚½‚ßu' . $Group->Get('NAME', $id) . 'v‚ğíœ‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½B');
+				'â€»è‡ªåˆ†ã®æ‰€å±ã‚°ãƒ«ãƒ¼ãƒ—ã®ãŸã‚ã€Œ' . $Group->Get('NAME', $id) . 'ã€ã‚’å‰Šé™¤ã§ãã¾ã›ã‚“ã§ã—ãŸã€‚');
 		}
 		else {
 			push @$pLog, $Group->Get('NAME', $id) . '(' . $Group->Get('EXPL', $id) . ')';
@@ -601,7 +601,7 @@ sub FunctionGroupDelete
 		}
 	}
 	
-	# İ’è‚Ì•Û‘¶
+	# è¨­å®šã®ä¿å­˜
 	$Group->Save($Sys);
 	
 	return 0;
@@ -609,12 +609,12 @@ sub FunctionGroupDelete
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvƒCƒ“ƒ|[ƒg
+#	ã‚°ãƒ«ãƒ¼ãƒ—ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionGroupImport
@@ -622,7 +622,7 @@ sub FunctionGroupImport
 	my ($Sys, $Form, $pLog, $BBS) = @_;
 	my ($src, $dst);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -638,12 +638,12 @@ sub FunctionGroupImport
 	
 	return 0 if ($src eq $dst);
 	
-	# ƒOƒ‹[ƒvİ’è‚ğƒRƒs[
+	# ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šã‚’ã‚³ãƒ”ãƒ¼
 	EARENDIL::Copy($src, $dst);
 	
-	# ƒƒO‚Ìo—Í
+	# ãƒ­ã‚°ã®å‡ºåŠ›
 	my $name = $BBS->Get('NAME', $Form->Get('IMPORT_BBS'));
-	push @$pLog, "u$namev‚ÌƒOƒ‹[ƒvİ’è‚ğƒCƒ“ƒ|[ƒg‚µ‚Ü‚µ‚½B";
+	push @$pLog, "ã€Œ$nameã€ã®ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šã‚’ã‚¤ãƒ³ãƒãƒ¼ãƒˆã—ã¾ã—ãŸã€‚";
 	
 	return 0;
 }

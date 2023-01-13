@@ -1,9 +1,9 @@
 #============================================================================================================
 #
-#	ƒVƒXƒeƒ€ŠÇ— - ‹¤’ÊƒLƒƒƒbƒvƒOƒ‹[ƒv ƒ‚ƒWƒ…[ƒ‹
+#	ã‚·ã‚¹ãƒ†ãƒ ç®¡ç† - å…±é€šã‚­ãƒ£ãƒƒãƒ—ã‚°ãƒ«ãƒ¼ãƒ— ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	sys.capg.pl
 #	---------------------------------------------------------------------------
-#	2011.02.12 start ‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX
+#	2011.02.12 start ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹
 #
 #============================================================================================================
 package	MODULE;
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\Ž¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -51,30 +51,30 @@ sub DoPrint
 	require './mordor/sauron.pl';
 	$BASE = SAURON->new;
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒžã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚ÌÝ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys);
 	
-	if ($subMode eq 'LIST') {													# ƒOƒ‹[ƒvˆê——‰æ–Ê
+	if ($subMode eq 'LIST') {													# ã‚°ãƒ«ãƒ¼ãƒ—ä¸€è¦§ç”»é¢
 		PrintGroupList($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'CREATE') {													# ƒOƒ‹[ƒvì¬‰æ–Ê
+	elsif ($subMode eq 'CREATE') {													# ã‚°ãƒ«ãƒ¼ãƒ—ä½œæˆç”»é¢
 		PrintGroupSetting($Page, $Sys, $Form, 0);
 	}
-	elsif ($subMode eq 'EDIT') {													# ƒOƒ‹[ƒv•ÒW‰æ–Ê
+	elsif ($subMode eq 'EDIT') {													# ã‚°ãƒ«ãƒ¼ãƒ—ç·¨é›†ç”»é¢
 		PrintGroupSetting($Page, $Sys, $Form, 1);
 	}
-	elsif ($subMode eq 'DELETE') {													# ƒOƒ‹[ƒvíœŠm”F‰æ–Ê
+	elsif ($subMode eq 'DELETE') {													# ã‚°ãƒ«ãƒ¼ãƒ—å‰Šé™¤ç¢ºèªç”»é¢
 		PrintGroupDelete($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ƒOƒ‹[ƒvÝ’èŠ®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šå®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('ƒLƒƒƒbƒvƒOƒ‹[ƒvˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('ã‚­ãƒ£ãƒƒãƒ—ã‚°ãƒ«ãƒ¼ãƒ—å‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ƒOƒ‹[ƒvÝ’èŽ¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šå¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
@@ -84,12 +84,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -101,17 +101,17 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'CREATE') {														# ƒOƒ‹[ƒvì¬
+	if ($subMode eq 'CREATE') {														# ã‚°ãƒ«ãƒ¼ãƒ—ä½œæˆ
 		$err = FunctionGroupSetting($Sys, $Form, 0, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'EDIT') {													# ƒOƒ‹[ƒv•ÒW
+	elsif ($subMode eq 'EDIT') {													# ã‚°ãƒ«ãƒ¼ãƒ—ç·¨é›†
 		$err = FunctionGroupSetting($Sys, $Form, 1, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'DELETE') {													# ƒOƒ‹[ƒvíœ
+	elsif ($subMode eq 'DELETE') {													# ã‚°ãƒ«ãƒ¼ãƒ—å‰Šé™¤
 		$err = FunctionGroupDelete($Sys, $Form, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\Ž¦
+	# å‡¦ç†çµæžœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "SYSCAP_GROUP($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -126,32 +126,32 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgÝ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys) = @_;
 	
-	$Base->SetMenu('ƒOƒ‹[ƒvˆê——', "'sys.capg','DISP','LIST'");
+	$Base->SetMenu('ã‚°ãƒ«ãƒ¼ãƒ—ä¸€è¦§', "'sys.capg','DISP','LIST'");
 	
-	# ŠÇ—ƒOƒ‹[ƒvÝ’èŒ ŒÀ‚Ì‚Ý
+	# ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šæ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_SYSADMIN, '*')) {
-		$Base->SetMenu('ƒOƒ‹[ƒv“o˜^', "'sys.capg','DISP','CREATE'");
+		$Base->SetMenu('ã‚°ãƒ«ãƒ¼ãƒ—ç™»éŒ²', "'sys.capg','DISP','CREATE'");
 	}
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvˆê——‚Ì•\Ž¦
+#	ã‚°ãƒ«ãƒ¼ãƒ—ä¸€è¦§ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintGroupList
@@ -164,22 +164,22 @@ sub PrintGroupList
 	require './module/ungoliants.pl';
 	$Group = SHELOB->new;
 	
-	# ƒOƒ‹[ƒvî•ñ‚Ì“Ç‚Ýž‚Ý
+	# ã‚°ãƒ«ãƒ¼ãƒ—æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$Group->Load($Sys, 1);
 	$Group->GetKeySet(\@groupSet, 1);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><td style=\"width:30\">@</td>");
+	$Page->Print("<tr><td style=\"width:30\">ã€€</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">Group Name</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:200\">Subscription</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:30\">Cap Color</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:30\">Caps</td></tr>\n");
 	
-	# Œ ŒÀŽæ“¾
+	# æ¨©é™å–å¾—
 	$isAuth = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_CAPGROUP, $Sys->Get('BBS'));
 	
-	# ƒOƒ‹[ƒvˆê——‚ðo—Í
+	# ã‚°ãƒ«ãƒ¼ãƒ—ä¸€è¦§ã‚’å‡ºåŠ›
 	foreach $id (@groupSet) {
 		$name = $Group->Get('NAME', $id);
 		$expl = $Group->Get('EXPL', $id);
@@ -190,7 +190,7 @@ sub PrintGroupList
 		$common = "\"javascript:SetOption('SELECT_CAPGROUP', '$id');";
 		$common .= "DoSubmit('sys.capg', 'DISP', 'EDIT')\"";
 		
-		# Œ ŒÀ‚É‚æ‚Á‚Ä•\Ž¦‚ð—}§
+		# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 		$Page->Print("<tr><td><input type=checkbox name=CAP_GROUPS value=$id></td>");
 		if ($isAuth) {
 			$Page->Print("<td><a href=$common>$name</a></td><td>$expl</td><td>$color</td><td>$n</td></tr>\n");
@@ -204,10 +204,10 @@ sub PrintGroupList
 	$Page->HTMLInput('hidden', 'SELECT_CAPGROUP', '');
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	
-	# Œ ŒÀ‚É‚æ‚Á‚Ä•\Ž¦‚ð—}§
+	# æ¨©é™ã«ã‚ˆã£ã¦è¡¨ç¤ºã‚’æŠ‘åˆ¶
 	if ($isAuth) {
 		$Page->Print("<tr><td colspan=5 align=left>");
-		$Page->Print("<input type=button value=\"@íœ@\" $common,'DELETE')\" class=\"delete\">");
+		$Page->Print("<input type=button value=\"ã€€å‰Šé™¤ã€€\" $common,'DELETE')\" class=\"delete\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table>");
@@ -215,13 +215,13 @@ sub PrintGroupList
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvÝ’è‚Ì•\Ž¦
+#	ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	ì¬‚Ìê‡:0, •ÒW‚Ìê‡:1
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	ä½œæˆã®å ´åˆ:0, ç·¨é›†ã®å ´åˆ:1
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintGroupSetting
@@ -237,12 +237,12 @@ sub PrintGroupSetting
 	$User = UNGOLIANT->new;
 	$Group = SHELOB->new;
 	
-	# ƒ†[ƒUî•ñ‚Ì“Ç‚Ýž‚Ý
+	# ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$User->Load($Sys);
 	$Group->Load($Sys, 1);
 	$User->GetKeySet('ALL', '', \@userSet);
 	
-	# •ÒWƒ‚[ƒh‚È‚çƒ†[ƒUî•ñ‚ðŽæ“¾‚·‚é
+	# ç·¨é›†ãƒ¢ãƒ¼ãƒ‰ãªã‚‰ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã‚’å–å¾—ã™ã‚‹
 	if ($mode) {
 		$name = $Group->Get('NAME', $Form->Get('SELECT_CAPGROUP'));
 		$expl = $Group->Get('EXPL', $Form->Get('SELECT_CAPGROUP'));
@@ -250,7 +250,7 @@ sub PrintGroupSetting
 		@auth = split(/\,/, (defined ($_ = $Group->Get('AUTH', $Form->Get('SELECT_CAPGROUP'))) ? $_ : ''));
 		@user = split(/\,/, (defined ($_ = $Group->Get('CAPS', $Form->Get('SELECT_CAPGROUP'))) ? $_ : ''));
 		
-		# Œ ŒÀ”Ô†ƒ}ƒbƒsƒ“ƒO”z—ñ‚ðì¬
+		# æ¨©é™ç•ªå·ãƒžãƒƒãƒ”ãƒ³ã‚°é…åˆ—ã‚’ä½œæˆ
 		for ($i = 0 ; $i < $ZP::CAP_MAXNUM ; $i++) {
 			$authNum[$i] = '';
 		}
@@ -269,51 +269,51 @@ sub PrintGroupSetting
 	}
 	
 	$Page->Print("<center><br><table border=0 cellspacing=2 width=90%>");
-	$Page->Print("<tr><td colspan=2>Šeî•ñ‚ð“ü—Í‚µ‚Ä[Ý’è]ƒ{ƒ^ƒ“‚ð‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„æƒ…å ±ã‚’å…¥åŠ›ã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>Šî–{î•ñ</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>åŸºæœ¬æƒ…å ±</td></tr>");
 	$Page->Print("<tr><td colspan=2><table cellspcing=2>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒOƒ‹[ƒv–¼Ì</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚°ãƒ«ãƒ¼ãƒ—åç§°</td><td>");
 	$Page->Print("<input name=GROUPNAME_CAP type=text size=50 value=\"$name\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">à–¾</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">èª¬æ˜Ž</td><td>");
 	$Page->Print("<input name=GROUPSUBS_CAP type=text size=50 value=\"$expl\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒLƒƒƒbƒv‚ÌF(–³‹L“ü‚ÅƒfƒtƒHƒ‹ƒg)</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚­ãƒ£ãƒƒãƒ—ã®è‰²(ç„¡è¨˜å…¥ã§ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆ)</td><td>");
 	$Page->Print("<input name=GROUPCOLOR_CAP type=text size=50 value=\"$color\"></td></tr>");
 	$Page->Print("</table><br></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\" width=40%>Œ ŒÀî•ñ</td>");
-	$Page->Print("<td class=\"DetailTitle\">Š‘®ƒLƒƒƒbƒv</td></tr><tr><td valign=top>");
+	$Page->Print("<tr><td class=\"DetailTitle\" width=40%>æ¨©é™æƒ…å ±</td>");
+	$Page->Print("<td class=\"DetailTitle\">æ‰€å±žã‚­ãƒ£ãƒƒãƒ—</td></tr><tr><td valign=top>");
 	
-	# Œ ŒÀˆê——•\Ž¦
-	$Page->Print("<input type=checkbox name=C_SUBJECT $authNum[0] value=on>ƒ^ƒCƒgƒ‹•¶Žš”‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_NAME $authNum[1] value=on>–¼‘O•¶Žš”‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_MAIL $authNum[2] value=on>ƒ[ƒ‹•¶Žš”‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_CONTENTS $authNum[3] value=on>–{•¶•¶Žš”‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_CONTLINE $authNum[4] value=on>–{•¶s”‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_LINECOUNT $authNum[5] value=on>–{•¶1s•¶Žš”‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_NONAME $authNum[6] value=on>–¼–³‚µ‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_THREAD $authNum[7] value=on>ƒXƒŒƒbƒhì¬‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_THREADCAP $authNum[8] value=on>ƒXƒŒƒbƒhì¬‰Â”\\(ƒLƒƒƒbƒv)<br>");
-	$Page->Print("<input type=checkbox name=C_CONTINUAS $authNum[9] value=on>˜A‘±“Še‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_DUPLICATE $authNum[10] value=on>“ñd‘‚«ž‚Ý‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_SHORTWRITE $authNum[11] value=on>’ZŽžŠÔ“Še‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_READONLY $authNum[12] value=on>“ÇŽæê—p‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_CUSTOMID $authNum[23] value=on>ê—pID‹–‰Â<br>");
-	$Page->Print("<input type=checkbox name=C_IDDISP $authNum[13] value=on>ID”ñ•\\Ž¦<br>");
-	$Page->Print("<input type=checkbox name=C_NOSLIP $authNum[22] value=on>’[––Ž¯•ÊŽq”ñ•\\Ž¦<br>");
-	$Page->Print("<input type=checkbox name=C_HOSTDISP $authNum[14] value=on>–{•¶ƒzƒXƒg”ñ•\\Ž¦<br>");
-	$Page->Print("<input type=checkbox name=C_MOBILETHREAD $authNum[15] value=on>Œg‘Ñ‚©‚ç‚ÌƒXƒŒƒbƒhì¬<br>");
-	$Page->Print("<input type=checkbox name=C_FIXHANLDLE $authNum[16] value=on>ƒRƒeƒnƒ“š•\\Ž¦<br>");
-	$Page->Print("<input type=checkbox name=C_SAMBA $authNum[17] value=on>Samba‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_PROXY $authNum[18] value=on>ƒvƒƒLƒV‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_JPHOST $authNum[19] value=on>ŠCŠOƒzƒXƒg‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_NGUSER $authNum[20] value=on>ƒ†[ƒU[‹K§‰ðœ<br>");
-	$Page->Print("<input type=checkbox name=C_NGWORD $authNum[21] value=on>NGƒ[ƒh‹K§‰ðœ<br>");
+	# æ¨©é™ä¸€è¦§è¡¨ç¤º
+	$Page->Print("<input type=checkbox name=C_SUBJECT $authNum[0] value=on>ã‚¿ã‚¤ãƒˆãƒ«æ–‡å­—æ•°è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_NAME $authNum[1] value=on>åå‰æ–‡å­—æ•°è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_MAIL $authNum[2] value=on>ãƒ¡ãƒ¼ãƒ«æ–‡å­—æ•°è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_CONTENTS $authNum[3] value=on>æœ¬æ–‡æ–‡å­—æ•°è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_CONTLINE $authNum[4] value=on>æœ¬æ–‡è¡Œæ•°è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_LINECOUNT $authNum[5] value=on>æœ¬æ–‡1è¡Œæ–‡å­—æ•°è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_NONAME $authNum[6] value=on>åç„¡ã—è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_THREAD $authNum[7] value=on>ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆè¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_THREADCAP $authNum[8] value=on>ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆå¯èƒ½\(ã‚­ãƒ£ãƒƒãƒ—)<br>");
+	$Page->Print("<input type=checkbox name=C_CONTINUAS $authNum[9] value=on>é€£ç¶šæŠ•ç¨¿è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_DUPLICATE $authNum[10] value=on>äºŒé‡æ›¸ãè¾¼ã¿è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_SHORTWRITE $authNum[11] value=on>çŸ­æ™‚é–“æŠ•ç¨¿è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_READONLY $authNum[12] value=on>èª­å–å°‚ç”¨è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_CUSTOMID $authNum[23] value=on>å°‚ç”¨IDè¨±å¯<br>");
+	$Page->Print("<input type=checkbox name=C_IDDISP $authNum[13] value=on>IDéžè¡¨\ç¤º<br>");
+	$Page->Print("<input type=checkbox name=C_NOSLIP $authNum[22] value=on>ç«¯æœ«è­˜åˆ¥å­éžè¡¨\ç¤º<br>");
+	$Page->Print("<input type=checkbox name=C_HOSTDISP $authNum[14] value=on>æœ¬æ–‡ãƒ›ã‚¹ãƒˆéžè¡¨\ç¤º<br>");
+	$Page->Print("<input type=checkbox name=C_MOBILETHREAD $authNum[15] value=on>æºå¸¯ã‹ã‚‰ã®ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ<br>");
+	$Page->Print("<input type=checkbox name=C_FIXHANLDLE $authNum[16] value=on>ã‚³ãƒ†ãƒãƒ³â˜…è¡¨\ç¤º<br>");
+	$Page->Print("<input type=checkbox name=C_SAMBA $authNum[17] value=on>Sambaè¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_PROXY $authNum[18] value=on>ãƒ—ãƒ­ã‚­ã‚·è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_JPHOST $authNum[19] value=on>æµ·å¤–ãƒ›ã‚¹ãƒˆè¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_NGUSER $authNum[20] value=on>ãƒ¦ãƒ¼ã‚¶ãƒ¼è¦åˆ¶è§£é™¤<br>");
+	$Page->Print("<input type=checkbox name=C_NGWORD $authNum[21] value=on>NGãƒ¯ãƒ¼ãƒ‰è¦åˆ¶è§£é™¤<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
-	# Š‘®ƒ†[ƒUˆê——•\Ž¦
+	# æ‰€å±žãƒ¦ãƒ¼ã‚¶ä¸€è¦§è¡¨ç¤º
 	foreach $id (@userSet) {
 		my $groupid = $Group->GetBelong($id);
-		# ƒVƒXƒeƒ€‹¤’ÊƒLƒƒƒbƒvA‘¼‚ÌƒOƒ‹[ƒv‚ÉŠ‘®‚µ‚Ä‚¢‚éƒLƒƒƒbƒv‚Í”ñ•\Ž¦
+		# ã‚·ã‚¹ãƒ†ãƒ å…±é€šã‚­ãƒ£ãƒƒãƒ—ã€ä»–ã®ã‚°ãƒ«ãƒ¼ãƒ—ã«æ‰€å±žã—ã¦ã„ã‚‹ã‚­ãƒ£ãƒƒãƒ—ã¯éžè¡¨ç¤º
 		if (0 == $User->Get('SYSAD', $id) &&
 			( $groupid eq '' || $groupid eq $Form->Get('SELECT_CAPGROUP') )) {
 			my $userName = $User->Get('NAME', $id);
@@ -328,7 +328,7 @@ sub PrintGroupSetting
 		}
 	}
 	
-	# submitÝ’è
+	# submitè¨­å®š
 	$common = "'" . $Form->Get('MODE_SUB') . "'";
 	$common = "onclick=\"DoSubmit('sys.capg', 'FUNC', $common)\"";
 	
@@ -336,18 +336,18 @@ sub PrintGroupSetting
 	$Page->Print("</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=submit value=\"@Ý’è@\" $common></td></tr>");
+	$Page->Print("<input type=submit value=\"ã€€è¨­å®šã€€\" $common></td></tr>");
 	$Page->Print("</table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvíœŠm”F‰æ–Ê‚Ì•\Ž¦
+#	ã‚°ãƒ«ãƒ¼ãƒ—å‰Šé™¤ç¢ºèªç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintGroupDelete
@@ -361,18 +361,18 @@ sub PrintGroupDelete
 	$Group = SHELOB->new;
 	$Group->Load($SYS, 1);
 	
-	# ƒ†[ƒUî•ñ‚ðŽæ“¾
+	# ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã‚’å–å¾—
 	@groupSet = $Form->GetAtArray('CAP_GROUPS');
 	
 	$Page->Print("<br><center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>ˆÈ‰º‚ÌƒLƒƒƒbƒvƒOƒ‹[ƒv‚ðíœ‚µ‚Ü‚·B</td></tr>");
+	$Page->Print("<tr><td colspan=2>ä»¥ä¸‹ã®ã‚­ãƒ£ãƒƒãƒ—ã‚°ãƒ«ãƒ¼ãƒ—ã‚’å‰Šé™¤ã—ã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">Group Name</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:200\">Subscription</td>");
 	
-	# ƒ†[ƒUƒŠƒXƒg‚ðo—Í
+	# ãƒ¦ãƒ¼ã‚¶ãƒªã‚¹ãƒˆã‚’å‡ºåŠ›
 	foreach $id (@groupSet) {
 		$name = $Group->Get('NAME', $id);
 		$expl = $Group->Get('EXPL', $id);
@@ -383,26 +383,26 @@ sub PrintGroupDelete
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-	$Page->Print("¦’Fíœ‚µ‚½ƒOƒ‹[ƒv‚ðŒ³‚É–ß‚·‚±‚Æ‚Í‚Å‚«‚Ü‚¹‚ñB</b><br>");
-	$Page->Print("¦’Fíœ‚·‚éƒOƒ‹[ƒv‚ÉŠ‘®‚µ‚Ä‚¢‚éƒLƒƒƒbƒv‚Í‚·‚×‚Ä–¢Š‘®ó‘Ô‚É‚È‚è‚Ü‚·B</td></tr>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã—ãŸã‚°ãƒ«ãƒ¼ãƒ—ã‚’å…ƒã«æˆ»ã™ã“ã¨ã¯ã§ãã¾ã›ã‚“ã€‚</b><br>");
+	$Page->Print("â€»æ³¨ï¼šå‰Šé™¤ã™ã‚‹ã‚°ãƒ«ãƒ¼ãƒ—ã«æ‰€å±žã—ã¦ã„ã‚‹ã‚­ãƒ£ãƒƒãƒ—ã¯ã™ã¹ã¦æœªæ‰€å±žçŠ¶æ…‹ã«ãªã‚Šã¾ã™ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"@íœ@\" ");
+	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"ã€€å‰Šé™¤ã€€\" ");
 	$Page->Print("onclick=\"DoSubmit('sys.capg','FUNC','DELETE')\" class=\"delete\"></td></tr>");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvì¬/•ÒW
+#	ã‚°ãƒ«ãƒ¼ãƒ—ä½œæˆ/ç·¨é›†
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$mode	•ÒW:1, ì¬:0
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$mode	ç·¨é›†:1, ä½œæˆ:0
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
-#	2010.08.12 windyakin š
-#	 -> ƒLƒƒƒbƒvŒ ŒÀ‚Ì’Ç‰Á
+#	2010.08.12 windyakin â˜…
+#	 -> ã‚­ãƒ£ãƒƒãƒ—æ¨©é™ã®è¿½åŠ 
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionGroupSetting
@@ -411,7 +411,7 @@ sub FunctionGroupSetting
 	my ($Group, $User, @userSet, @authNum, @belongUser);
 	my ($name, $expl, $color, $auth, $user, $i);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -420,7 +420,7 @@ sub FunctionGroupSetting
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = ('GROUPNAME_CAP');
 		if (! $Form->IsInput(\@inList)) {
@@ -431,17 +431,17 @@ sub FunctionGroupSetting
 	$User = UNGOLIANT->new;
 	$Group = SHELOB->new;
 	
-	# ƒ†[ƒUî•ñ‚Ì“Ç‚Ýž‚Ý
+	# ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$User->Load($Sys);
 	$Group->Load($Sys, 1);
 	
-	# Šî–{î•ñ‚ÌÝ’è
+	# åŸºæœ¬æƒ…å ±ã®è¨­å®š
 	$name = $Form->Get('GROUPNAME_CAP');
 	$expl = $Form->Get('GROUPSUBS_CAP');
 	$color = $Form->Get('GROUPCOLOR_CAP');
 	$color =~ s/[^\w\d\#]//ig;
 	
-	# Œ ŒÀî•ñ‚Ì¶¬
+	# æ¨©é™æƒ…å ±ã®ç”Ÿæˆ
 	my %field2auth = (
 		'C_SUBJECT'			=> $ZP::CAP_FORM_LONGSUBJECT,
 		'C_NAME'			=> $ZP::CAP_FORM_LONGNAME,
@@ -476,11 +476,11 @@ sub FunctionGroupSetting
 	}
 	$auth = join(',', @auths);
 	
-	# Š‘®ƒ†[ƒUî•ñ‚Ì¶¬
+	# æ‰€å±žãƒ¦ãƒ¼ã‚¶æƒ…å ±ã®ç”Ÿæˆ
 	@belongUser = $Form->GetAtArray('BELONGUSER_CAP');
 	$user = join(',', @belongUser);
 	
-	# Ý’èî•ñ‚Ì“o˜^
+	# è¨­å®šæƒ…å ±ã®ç™»éŒ²
 	if ($mode){
 		my $groupID = $Form->Get('SELECT_CAPGROUP');
 		$Group->Set($groupID, 'NAME', $name);
@@ -494,20 +494,20 @@ sub FunctionGroupSetting
 		$Group->Add($name, $expl, $color, $auth, $user, 1);
 	}
 	
-	# Ý’è‚ð•Û‘¶
+	# è¨­å®šã‚’ä¿å­˜
 	$Group->Save($Sys, 1);
 	
-	# ˆ—ƒƒO
+	# å‡¦ç†ãƒ­ã‚°
 	{
 		my $id;
-		push @$pLog, '¡ˆÈ‰º‚ÌƒLƒƒƒbƒvƒOƒ‹[ƒv‚ð“o˜^‚µ‚Ü‚µ‚½B';
-		push @$pLog, "ƒOƒ‹[ƒv–¼ÌF$name";
-		push @$pLog, "à–¾F$expl";
-		push @$pLog, "FF$color";
-		push @$pLog, "Œ ŒÀF$auth";
-		push @$pLog, 'Š‘®ƒLƒƒƒbƒvF';
+		push @$pLog, 'â– ä»¥ä¸‹ã®ã‚­ãƒ£ãƒƒãƒ—ã‚°ãƒ«ãƒ¼ãƒ—ã‚’ç™»éŒ²ã—ã¾ã—ãŸã€‚';
+		push @$pLog, "ã‚°ãƒ«ãƒ¼ãƒ—åç§°ï¼š$name";
+		push @$pLog, "èª¬æ˜Žï¼š$expl";
+		push @$pLog, "è‰²ï¼š$color";
+		push @$pLog, "æ¨©é™ï¼š$auth";
+		push @$pLog, 'æ‰€å±žã‚­ãƒ£ãƒƒãƒ—ï¼š';
 		foreach	$id (@belongUser){
-			push @$pLog, '@@> ' . $User->Get('NAME', $id);
+			push @$pLog, 'ã€€ã€€> ' . $User->Get('NAME', $id);
 		}
 	}
 	
@@ -516,12 +516,12 @@ sub FunctionGroupSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒOƒ‹[ƒvíœ
+#	ã‚°ãƒ«ãƒ¼ãƒ—å‰Šé™¤
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionGroupDelete
@@ -529,7 +529,7 @@ sub FunctionGroupDelete
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Group, @groupSet, $id);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -541,10 +541,10 @@ sub FunctionGroupDelete
 	require './module/ungoliants.pl';
 	$Group = SHELOB->new;
 	
-	# ƒ†[ƒUî•ñ‚Ì“Ç‚Ýž‚Ý
+	# ãƒ¦ãƒ¼ã‚¶æƒ…å ±ã®èª­ã¿è¾¼ã¿
 	$Group->Load($Sys, 1);
 	
-	push @$pLog, '¡ˆÈ‰º‚ÌƒOƒ‹[ƒv‚ðíœ‚µ‚Ü‚µ‚½B';
+	push @$pLog, 'â– ä»¥ä¸‹ã®ã‚°ãƒ«ãƒ¼ãƒ—ã‚’å‰Šé™¤ã—ã¾ã—ãŸã€‚';
 	@groupSet = $Form->GetAtArray('CAP_GROUPS');
 	
 	foreach $id (@groupSet) {
@@ -553,7 +553,7 @@ sub FunctionGroupDelete
 		$Group->Delete($id);
 	}
 	
-	# Ý’è‚Ì•Û‘¶
+	# è¨­å®šã®ä¿å­˜
 	$Group->Save($Sys, 1);
 	
 	return 0;

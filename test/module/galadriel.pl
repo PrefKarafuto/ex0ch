@@ -632,7 +632,7 @@ sub MakeID
 	
 	my @times = localtime time;
 	
-	# サーバー名･板名を結合する
+	# サーバー名・板名を結合する
 	$uid .= substr(crypt($server, $times[4]), 2, 1) . substr(crypt($bbs, $times[4]), 2, 2);
 	
 	# 桁を設定
@@ -1220,7 +1220,7 @@ sub IsProxy
 	my $addr = join('.', reverse( split(/\./, (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}))));
 	foreach my $dnsbl (@dnsbls) {
 		if (CheckDNSBL("$addr.$dnsbl") eq '127.0.0.2') {
-			$Form->Set('FROM', "</b> [―\{}\@{}\@{}-] <b>$from");
+			$Form->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
 			return ($mode eq 'P' ? 0 : 1);
 		}
 	}

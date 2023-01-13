@@ -1,12 +1,12 @@
 #============================================================================================================
 #
-#	ƒVƒXƒeƒ€ŠÇ— - İ’è ƒ‚ƒWƒ…[ƒ‹
+#	ã‚·ã‚¹ãƒ†ãƒ ç®¡ç† - è¨­å®š ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	sys.setting.pl
 #	---------------------------------------------------------------------------
 #	2004.02.14 start
 #
-#	‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒX
-#	2010.08.12 İ’è€–Ú’Ç‰Á‚É‚æ‚é‰ü•Ï
+#	ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹
+#	2010.08.12 è¨­å®šé …ç›®è¿½åŠ ã«ã‚ˆã‚‹æ”¹å¤‰
 #
 #============================================================================================================
 package	MODULE;
@@ -16,10 +16,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -37,12 +37,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -54,53 +54,53 @@ sub DoPrint
 	require './mordor/sauron.pl';
 	$BASE = SAURON->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$Sys->Set('ADMIN', $pSys);
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys);
 	
-	if ($subMode eq 'INFO') {														# ƒVƒXƒeƒ€î•ñ‰æ–Ê
+	if ($subMode eq 'INFO') {														# ã‚·ã‚¹ãƒ†ãƒ æƒ…å ±ç”»é¢
 		PrintSystemInfo($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'BASIC') {													# Šî–{İ’è‰æ–Ê
+	elsif ($subMode eq 'BASIC') {													# åŸºæœ¬è¨­å®šç”»é¢
 		PrintBasicSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'PERMISSION') {												# ƒp[ƒ~ƒbƒVƒ‡ƒ“İ’è‰æ–Ê
+	elsif ($subMode eq 'PERMISSION') {												# ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³è¨­å®šç”»é¢
 		PrintPermissionSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'LIMITTER') {												# ƒŠƒ~ƒbƒ^İ’è‰æ–Ê
+	elsif ($subMode eq 'LIMITTER') {												# ãƒªãƒŸãƒƒã‚¿è¨­å®šç”»é¢
 		PrintLimitterSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'OTHER') {													# ‚»‚Ì‘¼İ’è‰æ–Ê
+	elsif ($subMode eq 'OTHER') {													# ãã®ä»–è¨­å®šç”»é¢
 		PrintOtherSetting($Page, $Sys, $Form);
 	}
 =pod
-	elsif ($subMode eq 'PLUS') {													# ‚º‚ëƒvƒ‰ƒXƒIƒŠƒWƒiƒ‹
+	elsif ($subMode eq 'PLUS') {													# ãœã‚ãƒ—ãƒ©ã‚¹ã‚ªãƒªã‚¸ãƒŠãƒ«
 		PrintPlusSetting($Page, $Sys, $Form);
 	}
 =cut
-	elsif ($subMode eq 'VIEW') {													# •\¦İ’è
+	elsif ($subMode eq 'VIEW') {													# è¡¨ç¤ºè¨­å®š
 		PrintPlusViewSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'SEC') {														# ‹K§İ’è
+	elsif ($subMode eq 'SEC') {														# è¦åˆ¶è¨­å®š
 		PrintPlusSecSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'PLUGIN') {													# Šg’£‹@”\İ’è‰æ–Ê
+	elsif ($subMode eq 'PLUGIN') {													# æ‹¡å¼µæ©Ÿèƒ½è¨­å®šç”»é¢
 		PrintPluginSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'PLUGINCONF') {												# Šg’£‹@”\ŒÂ•Êİ’èİ’è‰æ–Ê
+	elsif ($subMode eq 'PLUGINCONF') {												# æ‹¡å¼µæ©Ÿèƒ½å€‹åˆ¥è¨­å®šè¨­å®šç”»é¢
 		PrintPluginOptionSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# ƒVƒXƒeƒ€İ’èŠ®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# ã‚·ã‚¹ãƒ†ãƒ è¨­å®šå®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('ƒVƒXƒeƒ€İ’èˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('ã‚·ã‚¹ãƒ†ãƒ è¨­å®šå‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# ƒVƒXƒeƒ€İ’è¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# ã‚·ã‚¹ãƒ†ãƒ è¨­å®šå¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
@@ -110,12 +110,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -124,46 +124,46 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err);
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$Sys->Set('ADMIN', $pSys);
 	
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'BASIC') {														# Šî–{İ’è
+	if ($subMode eq 'BASIC') {														# åŸºæœ¬è¨­å®š
 		$err = FunctionBasicSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'PERMISSION') {												# ƒp[ƒ~ƒbƒVƒ‡ƒ“İ’è
+	elsif ($subMode eq 'PERMISSION') {												# ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³è¨­å®š
 		$err = FunctionPermissionSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'LIMITTER') {												# §ŒÀİ’è
+	elsif ($subMode eq 'LIMITTER') {												# åˆ¶é™è¨­å®š
 		$err = FunctionLimitterSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'OTHER') {													# ‚»‚Ì‘¼İ’è
+	elsif ($subMode eq 'OTHER') {													# ãã®ä»–è¨­å®š
 		$err = FunctionOtherSetting($Sys, $Form, $this->{'LOG'});
 	}
 =pod
-	elsif ($subMode eq 'PLUS') {													# ‚º‚ëƒvƒ‰ƒXƒIƒŠƒWƒiƒ‹
+	elsif ($subMode eq 'PLUS') {													# ãœã‚ãƒ—ãƒ©ã‚¹ã‚ªãƒªã‚¸ãƒŠãƒ«
 		$err = FunctionPlusSetting($Sys, $Form, $this->{'LOG'});
 	}
 =cut
-	elsif ($subMode eq 'VIEW') {													# •\¦İ’è
+	elsif ($subMode eq 'VIEW') {													# è¡¨ç¤ºè¨­å®š
 		$err = FunctionPlusViewSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'SEC') {														# ‹K§İ’è
+	elsif ($subMode eq 'SEC') {														# è¦åˆ¶è¨­å®š
 		$err = FunctionPlusSecSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'SET_PLUGIN') {												# Šg’£‹@”\î•ñİ’è
+	elsif ($subMode eq 'SET_PLUGIN') {												# æ‹¡å¼µæ©Ÿèƒ½æƒ…å ±è¨­å®š
 		$err = FunctionPluginSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'UPDATE_PLUGIN') {											# Šg’£‹@”\î•ñXV
+	elsif ($subMode eq 'UPDATE_PLUGIN') {											# æ‹¡å¼µæ©Ÿèƒ½æƒ…å ±æ›´æ–°
 		$err = FunctionPluginUpdate($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'SET_PLUGINCONF') {											# Šg’£‹@”\ŒÂ•Êİ’èİ’è
+	elsif ($subMode eq 'SET_PLUGINCONF') {											# æ‹¡å¼µæ©Ÿèƒ½å€‹åˆ¥è¨­å®šè¨­å®š
 		$err = FunctionPluginOptionSetting($Sys, $Form, $this->{'LOG'});
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"SYSTEM_SETTING($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -178,41 +178,41 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys) = @_;
 	
-	$Base->SetMenu('î•ñ', "'sys.setting','DISP','INFO'");
+	$Base->SetMenu('æƒ…å ±', "'sys.setting','DISP','INFO'");
 	
-	# ƒVƒXƒeƒ€ŠÇ—Œ ŒÀ‚Ì‚İ
+	# ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†æ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_SYSADMIN, '*')) {
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('Šî–{İ’è', "'sys.setting','DISP','BASIC'");
-		$Base->SetMenu('ƒp[ƒ~ƒbƒVƒ‡ƒ“İ’è', "'sys.setting','DISP','PERMISSION'");
-		$Base->SetMenu('ƒŠƒ~ƒbƒ^İ’è', "'sys.setting','DISP','LIMITTER'");
-		$Base->SetMenu('‚»‚Ì‘¼İ’è', "'sys.setting','DISP','OTHER'");
+		$Base->SetMenu('åŸºæœ¬è¨­å®š', "'sys.setting','DISP','BASIC'");
+		$Base->SetMenu('ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³è¨­å®š', "'sys.setting','DISP','PERMISSION'");
+		$Base->SetMenu('ãƒªãƒŸãƒƒã‚¿è¨­å®š', "'sys.setting','DISP','LIMITTER'");
+		$Base->SetMenu('ãã®ä»–è¨­å®š', "'sys.setting','DISP','OTHER'");
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('•\¦İ’è', "'sys.setting','DISP','VIEW'");
-		$Base->SetMenu('‹K§İ’è', "'sys.setting','DISP','SEC'");
+		$Base->SetMenu('è¡¨ç¤ºè¨­å®š', "'sys.setting','DISP','VIEW'");
+		$Base->SetMenu('è¦åˆ¶è¨­å®š', "'sys.setting','DISP','SEC'");
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('Šg’£‹@”\\İ’è', "'sys.setting','DISP','PLUGIN'");
+		$Base->SetMenu('æ‹¡å¼µæ©Ÿèƒ½\è¨­å®š', "'sys.setting','DISP','PLUGIN'");
 	}
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒVƒXƒeƒ€î•ñ‰æ–Ê‚Ì•\¦
+#	ã‚·ã‚¹ãƒ†ãƒ æƒ…å ±ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintSystemInfo
@@ -255,10 +255,10 @@ sub PrintSystemInfo
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>¡0ch+ Information</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>â– 0ch+ Information</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Version</td><td>$zerover</td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>¡Perl Information</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>â– Perl Information</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Version</td><td>$perlver</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Perl Path</td><td>$perlpath</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Server Software</td><td>$serversoft</td></tr>\n");
@@ -266,7 +266,7 @@ sub PrintSystemInfo
 	$Page->Print("<tr><td class=\"DetailTitle\">Server Host</td><td>$serverhost</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Script Path</td><td>$filename</td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>¡Perl Packages (include perllib)</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>â– Perl Packages (include perllib)</td></tr>\n");
 	foreach my $pkg (@checklist) {
 		my $var = eval("require $pkg;return \${${pkg}::VERSION};");
 		$var = 'undefined' if ($@ || !defined $var);
@@ -285,12 +285,12 @@ sub PrintSystemInfo
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒVƒXƒeƒ€Šî–{İ’è‰æ–Ê‚Ì•\¦
+#	ã‚·ã‚¹ãƒ†ãƒ åŸºæœ¬è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBasicSetting
@@ -318,46 +318,46 @@ sub PrintBasicSetting
 	}
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B<br>\n");
-	$Page->Print("‚¢‚­‚Â‚©‚Ì—á‚ğ‹“‚°‚Ü‚·B<br>\n");
-	$Page->Print("@—á1: http://example.jp/test/admin.cgi<br>\n");
-	$Page->Print("@—á2: http://example.net/~user/test/admin.cgi<br>\n");
-	$Page->Print("@—á3: http://example.com/cgi-bin/test/admin.cgi</td></tr>\n");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚<br>\n");
+	$Page->Print("ã„ãã¤ã‹ã®ä¾‹ã‚’æŒ™ã’ã¾ã™ã€‚<br>\n");
+	$Page->Print("ã€€ä¾‹1: http://example.jp/test/admin.cgi<br>\n");
+	$Page->Print("ã€€ä¾‹2: http://example.net/~user/test/admin.cgi<br>\n");
+	$Page->Print("ã€€ä¾‹3: http://example.com/cgi-bin/test/admin.cgi</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">‰Ò“®ƒT[ƒo(––”ö‚Ì / ‚Í—v‚è‚Ü‚¹‚ñ)<br><span class=\"NormalStyle\">");
-	$Page->Print("@—á1: http://example.jp<br>");
-	$Page->Print("@—á2: http://example.net</span></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ç¨¼å‹•ã‚µãƒ¼ãƒ(æœ«å°¾ã® / ã¯è¦ã‚Šã¾ã›ã‚“)<br><span class=\"NormalStyle\">");
+	$Page->Print("ã€€ä¾‹1: http://example.jp<br>");
+	$Page->Print("ã€€ä¾‹2: http://example.net</span></td>");
 	$Page->Print("<td><input type=text size=60 name=SERVER value=\"$server\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">CGIİ’uƒfƒBƒŒƒNƒgƒŠ(â‘ÎƒpƒX)<br><span class=\"NormalStyle\">");
-	$Page->Print("@—á1: /test<br>");
-	$Page->Print("@—á2: /~user/test<br>");
-	$Page->Print("@—á3: /cgi-bin/test</span></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">CGIè¨­ç½®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª(çµ¶å¯¾ãƒ‘ã‚¹)<br><span class=\"NormalStyle\">");
+	$Page->Print("ã€€ä¾‹1: /test<br>");
+	$Page->Print("ã€€ä¾‹2: /~user/test<br>");
+	$Page->Print("ã€€ä¾‹3: /cgi-bin/test</span></td>");
 	$Page->Print("<td><input type=text size=60 name=CGIPATH value=\"$cgi\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">Œf¦”Â”z’uƒfƒBƒŒƒNƒgƒŠ(‘Š‘ÎƒpƒX)<br><span class=\"NormalStyle\">");
-	$Page->Print("@—á1: .jp/bbs1/ ¨ <span class=\"UnderLine\">..</span><br>");
-	$Page->Print("@—á2: .net/~user/bbs2/ ¨ <span class=\"UnderLine\">..</span><br>");
-	$Page->Print("@—á3: .com/bbs3/ ¨ <span class=\"UnderLine\">../..</span></span></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ²ç¤ºæ¿é…ç½®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª(ç›¸å¯¾ãƒ‘ã‚¹)<br><span class=\"NormalStyle\">");
+	$Page->Print("ã€€ä¾‹1: .jp/bbs1/ â†’ <span class=\"UnderLine\">..</span><br>");
+	$Page->Print("ã€€ä¾‹2: .net/~user/bbs2/ â†’ <span class=\"UnderLine\">..</span><br>");
+	$Page->Print("ã€€ä¾‹3: .com/bbs3/ â†’ <span class=\"UnderLine\">../..</span></span></td>");
 	$Page->Print("<td><input type=text size=60 name=BBSPATH value=\"$bbs\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒVƒXƒeƒ€î•ñƒfƒBƒŒƒNƒgƒŠ(/ ‚©‚çn‚ß‚é)<br><span class=\"NormalStyle\">");
-	$Page->Print("@—á1: .jp/test/info ¨ <span class=\"UnderLine\">/info</span><br>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚·ã‚¹ãƒ†ãƒ æƒ…å ±ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª(/ ã‹ã‚‰å§‹ã‚ã‚‹)<br><span class=\"NormalStyle\">");
+	$Page->Print("ã€€ä¾‹1: .jp/test/info â†’ <span class=\"UnderLine\">/info</span><br>");
 	$Page->Print("<td><input type=text size=60 name=INFO value=\"$info\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒVƒXƒeƒ€ƒf[ƒ^ƒfƒBƒŒƒNƒgƒŠ(/ ‚©‚çn‚ß‚é)<br><span class=\"NormalStyle\">");
-	$Page->Print("@—á1: .jp/test/info ¨ <span class=\"UnderLine\">/datas</span><br>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚·ã‚¹ãƒ†ãƒ ãƒ‡ãƒ¼ã‚¿ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒª(/ ã‹ã‚‰å§‹ã‚ã‚‹)<br><span class=\"NormalStyle\">");
+	$Page->Print("ã€€ä¾‹1: .jp/test/info â†’ <span class=\"UnderLine\">/datas</span><br>");
 	$Page->Print("<td><input type=text size=60 name=DATA value=\"$data\" ></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common></td></tr>\n");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common></td></tr>\n");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒp[ƒ~ƒbƒVƒ‡ƒ“İ’è‰æ–Ê‚Ì•\¦
+#	ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintPermissionSetting
@@ -379,46 +379,46 @@ sub PrintPermissionSetting
 	my $common = "onclick=\"DoSubmit('sys.setting','FUNC','PERMISSION');\"";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B<br>");
-	$Page->Print("<b>i8i’l‚Åİ’è‚·‚é‚±‚Æj</b></td></tr>\n");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚<br>");
+	$Page->Print("<b>ï¼ˆ8é€²å€¤ã§è¨­å®šã™ã‚‹ã“ã¨ï¼‰</b></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">datƒtƒ@ƒCƒ‹ƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">datãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_DAT value=\"$datP\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒeƒLƒXƒgƒtƒ@ƒCƒ‹ƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ†ã‚­ã‚¹ãƒˆãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_TXT value=\"$txtP\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒƒOƒtƒ@ƒCƒ‹ƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ­ã‚°ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_LOG value=\"$logP\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ŠÇ—ƒtƒ@ƒCƒ‹ƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ç®¡ç†ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_ADMIN value=\"$admP\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">’â~ƒXƒŒƒbƒhƒtƒ@ƒCƒ‹ƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">åœæ­¢ã‚¹ãƒ¬ãƒƒãƒ‰ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_STOP value=\"$stopP\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ŠÇ—ƒfƒBƒŒƒNƒgƒŠƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ç®¡ç†ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_ADMIN_DIR value=\"$admDP\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">Œf¦”ÂƒfƒBƒŒƒNƒgƒŠƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ²ç¤ºæ¿ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_BBS_DIR value=\"$bbsDP\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒƒO•Û‘¶ƒfƒBƒŒƒNƒgƒŠƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ­ã‚°ä¿å­˜ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_LOG_DIR value=\"$logDP\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">‰ß‹ƒƒO‘qŒÉƒfƒBƒŒƒNƒgƒŠƒp[ƒ~ƒbƒVƒ‡ƒ“</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">éå»ãƒ­ã‚°å€‰åº«ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³</td>");
 	$Page->Print("<td><input type=text size=10 name=PERM_KAKO_DIR value=\"$kakoDP\" ></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common></td></tr>\n");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common></td></tr>\n");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	§ŒÀİ’è‰æ–Ê‚Ì•\¦
+#	åˆ¶é™è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
-#	2010.08.12 windyakin š
-#	 -> ƒVƒXƒeƒ€•ÏX‚É”º‚¤İ’è€–Ú‚Ì’Ç‰Á
+#	2010.08.12 windyakin â˜…
+#	 -> ã‚·ã‚¹ãƒ†ãƒ å¤‰æ›´ã«ä¼´ã†è¨­å®šé …ç›®ã®è¿½åŠ 
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintLimitterSetting
@@ -437,36 +437,36 @@ sub PrintLimitterSetting
 	$vSYS[5] = $SYS->Get('ADMMAX');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">1Œf¦”Â‚ÌsubjectÅ‘å•Û”</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">1æ²ç¤ºæ¿ã®subjectæœ€å¤§ä¿æŒæ•°</td>");
 	$Page->Print("<td><input type=text size=10 name=SUBMAX value=\"$vSYS[1]\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">1ƒXƒŒƒbƒh‚ÌƒŒƒXÅ‘å”</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">1ã‚¹ãƒ¬ãƒƒãƒ‰ã®ãƒ¬ã‚¹æœ€å¤§æ•°</td>");
 	$Page->Print("<td><input type=text size=10 name=RESMAX value=\"$vSYS[0]\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">1ƒŒƒX‚ÌƒAƒ“ƒJ[Å‘å”(0‚Å–³§ŒÀ)</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">1ãƒ¬ã‚¹ã®ã‚¢ãƒ³ã‚«ãƒ¼æœ€å¤§æ•°(0ã§ç„¡åˆ¶é™)</td>");
 	$Page->Print("<td><input type=text size=10 name=ANKERS value=\"$vSYS[2]\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒGƒ‰[ƒƒOÅ‘å•Û”</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°æœ€å¤§ä¿æŒæ•°</td>");
 	$Page->Print("<td><input type=text size=10 name=ERRMAX value=\"$vSYS[3]\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒzƒXƒgƒƒOÅ‘å•Û”</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ›ã‚¹ãƒˆãƒ­ã‚°æœ€å¤§ä¿æŒæ•°</td>");
 	$Page->Print("<td><input type=text size=10 name=HSTMAX value=\"$vSYS[4]\" ></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ŠÇ—‘€ìƒƒOÅ‘å•Û”</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ç®¡ç†æ“ä½œãƒ­ã‚°æœ€å¤§ä¿æŒæ•°</td>");
 	$Page->Print("<td><input type=text size=10 name=ADMMAX value=\"$vSYS[5]\" ></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common></td></tr>\n");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common></td></tr>\n");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‚»‚Ì‘¼İ’è‰æ–Ê‚Ì•\¦
+#	ãã®ä»–è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintOtherSetting
@@ -497,42 +497,42 @@ sub PrintOtherSetting
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ƒwƒbƒ_ŠÖ˜A</td></tr>\n");
-	$Page->Print("<tr><td>ƒwƒbƒ_‰º•”‚É•\\¦‚·‚éƒeƒLƒXƒg</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ãƒ˜ãƒƒãƒ€é–¢é€£</td></tr>\n");
+	$Page->Print("<tr><td>ãƒ˜ãƒƒãƒ€ä¸‹éƒ¨ã«è¡¨\ç¤ºã™ã‚‹ãƒ†ã‚­ã‚¹ãƒˆ</td>");
 	$Page->Print("<td><input type=text size=60 name=HEADTEXT value=\"$headText\" ></td></tr>\n");
-	$Page->Print("<tr><td>ã‹LƒeƒLƒXƒg‚É“\\‚éƒŠƒ“ƒN‚ÌURL</td>");
+	$Page->Print("<tr><td>ä¸Šè¨˜ãƒ†ã‚­ã‚¹ãƒˆã«è²¼\ã‚‹ãƒªãƒ³ã‚¯ã®URL</td>");
 	$Page->Print("<td><input type=text size=60 name=HEADURL value=\"$headUrl\" ></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">–{•¶’†‚ÌURL</td></tr>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">æœ¬æ–‡ä¸­ã®URL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=URLLINK $linkChk value=on>");
-	$Page->Print("–{•¶’†URL‚Ö‚Ì©“®ƒŠƒ“ƒN</td>");
-	$Page->Print("<tr><td colspan=2><b>ˆÈ‰º©“®ƒŠƒ“ƒNOFF‚Ì‚İ—LŒø</b></td></tr>\n");
-	$Page->Print("<tr><td>@@ƒŠƒ“ƒN‹Ö~ŠÔ‘Ñ</td>");
-	$Page->Print("<td><input type=text size=2 name=LINKST value=\"$linkSt\" > ` ");
-	$Page->Print("<input type=text size=2 name=LINKED value=\"$linkEd\" ></td></tr>\n");
+	$Page->Print("æœ¬æ–‡ä¸­URLã¸ã®è‡ªå‹•ãƒªãƒ³ã‚¯</td>");
+	$Page->Print("<tr><td colspan=2><b>ä»¥ä¸‹è‡ªå‹•ãƒªãƒ³ã‚¯OFFæ™‚ã®ã¿æœ‰åŠ¹</b></td></tr>\n");
+	$Page->Print("<tr><td>ã€€ã€€ãƒªãƒ³ã‚¯ç¦æ­¢æ™‚é–“å¸¯</td>");
+	$Page->Print("<td><input type=text size=2 name=LINKST value=\"$linkSt\" >æ™‚ ã€œ ");
+	$Page->Print("<input type=text size=2 name=LINKED value=\"$linkEd\" >æ™‚</td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">“®ìƒ‚[ƒh(read.cgi)</td></tr>\n");
-	$Page->Print("<tr><td>PATHí•Ê</td>");
-	$Page->Print("<td><input type=radio name=PATHKIND value=\"0\" $pathInfo>PATHINFO@");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">å‹•ä½œãƒ¢ãƒ¼ãƒ‰(read.cgi)</td></tr>\n");
+	$Page->Print("<tr><td>PATHç¨®åˆ¥</td>");
+	$Page->Print("<td><input type=radio name=PATHKIND value=\"0\" $pathInfo>PATHINFOã€€");
 	$Page->Print("<input type=radio name=PATHKIND value=\"1\" $pathQuery>QUERYSTRING</td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
-	$Page->Print("‘‚«‚İ‚Éindex.html‚ğXV‚µ‚È‚¢(‚‘¬‘‚«‚İƒ‚[ƒh)</td>");
+	$Page->Print("æ›¸ãè¾¼ã¿æ™‚ã«index.htmlã‚’æ›´æ–°ã—ãªã„(é«˜é€Ÿæ›¸ãè¾¼ã¿ãƒ¢ãƒ¼ãƒ‰)</td>");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgi‚ÌGETƒƒ\\ƒbƒh</td></tr>\n");
-	$Page->Print("<tr><td>bbs.cgi‚ÅGETƒƒ\\ƒbƒh‚ğg—p‚·‚é</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgiã®GETãƒ¡ã‚½\ãƒƒãƒ‰</td></tr>\n");
+	$Page->Print("<tr><td>bbs.cgiã§GETãƒ¡ã‚½\ãƒƒãƒ‰ã‚’ä½¿ç”¨ã™ã‚‹</td>");
 	$Page->Print("<td><input type=checkbox name=BBSGET $bbsget value=on></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">XVƒ`ƒFƒbƒNŠÖ˜A</td></tr>\n");
-	$Page->Print("<tr><td>XVƒ`ƒFƒbƒN‚ÌŠÔŠu</td>");
-	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\">“ú(0‚Åƒ`ƒFƒbƒN–³Œø)</td></tr>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">æ›´æ–°ãƒã‚§ãƒƒã‚¯é–¢é€£</td></tr>\n");
+	$Page->Print("<tr><td>æ›´æ–°ãƒã‚§ãƒƒã‚¯ã®é–“éš”</td>");
+	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\">æ—¥(0ã§ãƒã‚§ãƒƒã‚¯ç„¡åŠ¹)</td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common></td></tr>\n");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common></td></tr>\n");
 	
 	$Page->Print("</table>");
 	
@@ -540,15 +540,15 @@ sub PrintOtherSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦İ’è‰æ–Ê‚Ì•\¦(‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒXƒIƒŠƒWƒiƒ‹)
+#	è¡¨ç¤ºè¨­å®šç”»é¢ã®è¡¨ç¤º(ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹ã‚ªãƒªã‚¸ãƒŠãƒ«)
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
-#	2010.09.08 windyakin š
-#	 -> •\¦İ’è‚Æ‹K§İ’è‚Ì•ª—£
+#	2010.09.08 windyakin â˜…
+#	 -> è¡¨ç¤ºè¨­å®šã¨è¦åˆ¶è¨­å®šã®åˆ†é›¢
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintPlusViewSetting
@@ -570,45 +570,45 @@ sub PrintPlusViewSetting
 	my $common = "onclick=\"DoSubmit('sys.setting','FUNC','VIEW');\"";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Read.cgiŠÖ˜A</td></tr>\n");
-	$Page->Print("<tr><td>ofuda.cc‚ÌƒAƒJƒEƒ“ƒg–¼‚ğ“ü—Í <small>(–¢“ü—Í‚ÅƒJƒEƒ“ƒ^[”ñ•\\¦)</small></td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Read.cgié–¢é€£</td></tr>\n");
+	$Page->Print("<tr><td>ofuda.ccã®ã‚¢ã‚«ã‚¦ãƒ³ãƒˆåã‚’å…¥åŠ› <small>(æœªå…¥åŠ›ã§ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼éè¡¨\ç¤º)</small></td>");
 	$Page->Print("<td><input type=text size=60 name=COUNTER value=\"$Counter\"></td></tr>\n");
-	$Page->Print("<tr><td>PR—“‚Ì•\\¦•¶š—ñ <small>(–¢“ü—Í‚ÅPR—“”ñ•\\¦)</small></td>");
+	$Page->Print("<tr><td>PRæ¬„ã®è¡¨\ç¤ºæ–‡å­—åˆ— <small>(æœªå…¥åŠ›ã§PRæ¬„éè¡¨\ç¤º)</small></td>");
 	$Page->Print("<td><input type=text size=60 name=PRTEXT value=\"$Prtext\"></td></tr>\n");
-	$Page->Print("<tr><td>PR—“‚ÌƒŠƒ“ƒNURL</td>");
+	$Page->Print("<tr><td>PRæ¬„ã®ãƒªãƒ³ã‚¯URL</td>");
 	$Page->Print("<td><input type=text size=60 name=PRLINK value=\"$Prlink\"></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">’m—“•\\¦</td></tr>\n");
-	$Page->Print("<tr><td>index.html‚Ì’m—“‚ğ•\\¦‚·‚é</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">å‘ŠçŸ¥æ¬„è¡¨\ç¤º</td></tr>\n");
+	$Page->Print("<tr><td>index.htmlã®å‘ŠçŸ¥æ¬„ã‚’è¡¨\ç¤ºã™ã‚‹</td>");
 	$Page->Print("<td><input type=checkbox name=BANNERINDEX $bannerindex value=on></td></tr>\n");
-	$Page->Print("<tr><td>index.htmlˆÈŠO‚Ì’m—“‚ğ•\\¦‚·‚é</td>");
+	$Page->Print("<tr><td>index.htmlä»¥å¤–ã®å‘ŠçŸ¥æ¬„ã‚’è¡¨\ç¤ºã™ã‚‹</td>");
 	$Page->Print("<td><input type=checkbox name=BANNER $banner value=on></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">msec•\\¦</td></tr>\n");
-	$Page->Print("<tr><td>ƒ~ƒŠ•b‚Ü‚Å•\\¦‚·‚é</small></td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">msecè¡¨\ç¤º</td></tr>\n");
+	$Page->Print("<tr><td>ãƒŸãƒªç§’ã¾ã§è¡¨\ç¤ºã™ã‚‹</small></td>");
 	$Page->Print("<td><input type=checkbox name=MSEC $msec value=on></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common></td></tr>\n");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common></td></tr>\n");
 	$Page->Print("</table>");
 	
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹K§İ’è‰æ–Ê‚Ì•\¦(‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒXƒIƒŠƒWƒiƒ‹)
+#	è¦åˆ¶è¨­å®šç”»é¢ã®è¡¨ç¤º(ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹ã‚ªãƒªã‚¸ãƒŠãƒ«)
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
-#	2010.09.08 windyakin š
-#	 -> •\¦İ’è‚Æ‹K§İ’è‚Ì•ª—£
+#	2010.09.08 windyakin â˜…
+#	 -> è¡¨ç¤ºè¨­å®šã¨è¦åˆ¶è¨­å®šã®åˆ†é›¢
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintPlusSecSetting
@@ -637,30 +637,30 @@ sub PrintPlusSecSetting
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Še€–Ú‚ğİ’è‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„é …ç›®ã‚’è¨­å®šã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">‚Qd‚©‚«‚±‚Å‚·‚©HH</td></tr>\n");
-	$Page->Print("<tr><td>“¯‚¶IP‚©‚ç‚Ì‘‚«‚İ‚Ì•¶š”‚ª•Ï‰»‚µ‚È‚¢ê‡‹K§‚·‚é</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ï¼’é‡ã‹ãã“ã§ã™ã‹ï¼Ÿï¼Ÿ</td></tr>\n");
+	$Page->Print("<tr><td>åŒã˜IPã‹ã‚‰ã®æ›¸ãè¾¼ã¿ã®æ–‡å­—æ•°ãŒå¤‰åŒ–ã—ãªã„å ´åˆè¦åˆ¶ã™ã‚‹</td>");
 	$Page->Print("<td><input type=checkbox name=KAKIKO $kakiko value=on></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">’ZŠÔ“Še‹K§</td></tr>\n");
-	$Page->Print("<tr><td>’ZŠÔ“Še‹K§•b”‚ğ“ü—Í(0‚Å‹K§–³Œø)</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">çŸ­æ™‚é–“æŠ•ç¨¿è¦åˆ¶</td></tr>\n");
+	$Page->Print("<tr><td>çŸ­æ™‚é–“æŠ•ç¨¿è¦åˆ¶ç§’æ•°ã‚’å…¥åŠ›(0ã§è¦åˆ¶ç„¡åŠ¹)</td>");
 	$Page->Print("<td><input type=text size=60 name=SAMBATM value=\"$Samba\"></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Samba‹K§</td></tr>\n");
-	$Page->Print("<tr><td>Samba‘Ò‹@•b”ƒfƒtƒHƒ‹ƒg’l‚ğ“ü—Í(0‚Å‹K§–³Œø)<br>");
-	$Page->Print("<small>Samba‚Ìİ’è‚ÍŒf¦”Â‚²‚Æ‚Éİ’è‚Å‚«‚Ü‚·</small></td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Sambaè¦åˆ¶</td></tr>\n");
+	$Page->Print("<tr><td>Sambaå¾…æ©Ÿç§’æ•°ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ã‚’å…¥åŠ›(0ã§è¦åˆ¶ç„¡åŠ¹)<br>");
+	$Page->Print("<small>Sambaã®è¨­å®šã¯æ²ç¤ºæ¿ã”ã¨ã«è¨­å®šã§ãã¾ã™</small></td>");
 	$Page->Print("<td><input type=text size=60  name=DEFSAMBA value=\"$DefSamba\"></td></tr>\n");
-	$Page->Print("<tr><td>Samba•òdŠÔ(•ª)ƒfƒtƒHƒ‹ƒg’l‚ğ“ü—Í</td>");
+	$Page->Print("<tr><td>Sambaå¥‰ä»•æ™‚é–“(åˆ†)ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆå€¤ã‚’å…¥åŠ›</td>");
 	$Page->Print("<td><input type=text size=60 name=DEFHOUSHI value=\"$DefHoushi\"></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Vd—lƒgƒŠƒbƒv</td></tr>\n");
-	$Page->Print("<tr><td>Vd—lƒgƒŠƒbƒv(12Œ…=SHA-1)‚ğ—LŒø‚É‚·‚é</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">æ–°ä»•æ§˜ãƒˆãƒªãƒƒãƒ—</td></tr>\n");
+	$Page->Print("<tr><td>æ–°ä»•æ§˜ãƒˆãƒªãƒƒãƒ—(12æ¡=SHA-1)ã‚’æœ‰åŠ¹ã«ã™ã‚‹</td>");
 	$Page->Print("<td><input type=checkbox name=TRIP12 $trip12 value=on></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">DNSBLİ’è</td></tr>\n");
-	$Page->Print("<tr><td colspan=2>“K—p‚·‚éDNSBL‚Éƒ`ƒFƒbƒN‚ğ‚¢‚ê‚Ä‚­‚¾‚³‚¢<br>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">DNSBLè¨­å®š</td></tr>\n");
+	$Page->Print("<tr><td colspan=2>é©ç”¨ã™ã‚‹DNSBLã«ãƒã‚§ãƒƒã‚¯ã‚’ã„ã‚Œã¦ãã ã•ã„<br>\n");
 	$Page->Print("<input type=checkbox name=BBQ $bbq value=on>");
 	$Page->Print("<a href=\"http://bbq.uso800.net/\" target=\"_blank\">BBQ</a>\n");
 	$Page->Print("<input type=checkbox name=BBX $bbx value=on>BBX\n");
@@ -668,19 +668,19 @@ sub PrintPlusSecSetting
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common></td></tr>\n");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common></td></tr>\n");
 	$Page->Print("</table>");
 	
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Šg’£‹@”\İ’è‰æ–Ê‚Ì•\¦
+#	æ‹¡å¼µæ©Ÿèƒ½è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintPluginSetting
@@ -696,12 +696,12 @@ sub PrintPluginSetting
 	$Plugin->Load($SYS);
 	$num = $Plugin->GetKeySet('ALL', '', \@pluginSet);
 	
-	# Šg’£‹@”\‚ª‘¶İ‚·‚éê‡‚Í—LŒøE–³Œøİ’è‰æ–Ê‚ğ•\¦
+	# æ‹¡å¼µæ©Ÿèƒ½ãŒå­˜åœ¨ã™ã‚‹å ´åˆã¯æœ‰åŠ¹ãƒ»ç„¡åŠ¹è¨­å®šç”»é¢ã‚’è¡¨ç¤º
 	if ($num > 0) {
 		my ($id, $file, $class, $name, $expl, $valid);
 		
 		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-		$Page->Print("<tr><td colspan=5>—LŒø‚É‚·‚é‹@”\\‚Éƒ`ƒFƒbƒN‚ğ“ü‚ê‚Ä‚­‚¾‚³‚¢B</td></tr>\n");
+		$Page->Print("<tr><td colspan=5>æœ‰åŠ¹ã«ã™ã‚‹æ©Ÿèƒ½\ã«ãƒã‚§ãƒƒã‚¯ã‚’å…¥ã‚Œã¦ãã ã•ã„ã€‚</td></tr>\n");
 		$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 		$Page->Print("<tr>");
 		$Page->Print("<td class=\"DetailTitle\">Order</td>");
@@ -722,7 +722,7 @@ sub PrintPluginSetting
 			$Page->Print("<td>$expl</td><td>$file</td>");
 			if ($class->can('getConfig') && scalar(keys %{$class->getConfig()}) > 0) {
 				$Page->Print("<td><a href=\"javascript:SetOption('PLGID','$id');");
-				$Page->Print("DoSubmit('sys.setting','DISP','PLUGINCONF');\">ŒÂ•Êİ’è</a></td>");
+				$Page->Print("DoSubmit('sys.setting','DISP','PLUGINCONF');\">å€‹åˆ¥è¨­å®š</a></td>");
 			}
 			else {
 				$Page->Print("<td></td>");
@@ -731,29 +731,29 @@ sub PrintPluginSetting
 		}
 		$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 		$Page->Print("<tr><td colspan=5 align=left>");
-		$Page->Print("<input type=button value=\"@İ’è@\" $common,'SET_PLUGIN');\"> ");
+		$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common,'SET_PLUGIN');\"> ");
 	}
 	else {
 		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 		$Page->Print("<tr><td><hr></td></tr>\n");
-		$Page->Print("<tr><td><b>ƒvƒ‰ƒOƒCƒ“‚Í‘¶İ‚µ‚Ü‚¹‚ñB</b></td></tr>\n");
+		$Page->Print("<tr><td><b>ãƒ—ãƒ©ã‚°ã‚¤ãƒ³ã¯å­˜åœ¨ã—ã¾ã›ã‚“ã€‚</b></td></tr>\n");
 		$Page->Print("<tr><td><hr></td></tr>\n");
 		$Page->Print("<tr><td align=left>");
 	}
 		$Page->Print("<input type=hidden name=PLGID value=\"\">");
-		$Page->Print("<input type=button value=\"@XV@\" $common,'UPDATE_PLUGIN');\">");
+		$Page->Print("<input type=button value=\"ã€€æ›´æ–°ã€€\" $common,'UPDATE_PLUGIN');\">");
 	$Page->Print("</td></tr>");
 	$Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Šg’£‹@”\ŒÂ•Êİ’èİ’è‰æ–Ê‚Ì•\¦
+#	æ‹¡å¼µæ©Ÿèƒ½å€‹åˆ¥è¨­å®šè¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintPluginOptionSetting
@@ -782,7 +782,7 @@ sub PrintPluginOptionSetting
 	}
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=4>ŒÂ•Êİ’è</td></tr>\n");
+	$Page->Print("<tr><td colspan=4>å€‹åˆ¥è¨­å®š</td></tr>\n");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">Name</td>");
@@ -791,9 +791,9 @@ sub PrintPluginOptionSetting
 	$Page->Print("<td class=\"DetailTitle\">Type</td></tr>\n");
 	
 	%conftype = (
-		1	=>	'”’l',
-		2	=>	'•¶š—ñ',
-		3	=>	'^‹U’l',
+		1	=>	'æ•°å€¤',
+		2	=>	'æ–‡å­—åˆ—',
+		3	=>	'çœŸå½å€¤',
 	);
 	
 	if (defined $conf) {
@@ -819,7 +819,7 @@ sub PrintPluginOptionSetting
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=4 align=left>");
 	$Page->Print("<input type=hidden name=PLGID value=\"$id\">");
-	$Page->Print("<input type=button value=\"@İ’è@\" $common,'SET_PLUGINCONF');\">");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" $common,'SET_PLUGINCONF');\">");
 	
 	$Page->Print("</td></tr>");
 	$Page->Print("</table>");
@@ -827,12 +827,12 @@ sub PrintPluginOptionSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Šg’£‹@”\ŒÂ•Êİ’èİ’è
+#	æ‹¡å¼µæ©Ÿèƒ½å€‹åˆ¥è¨­å®šè¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionPluginOptionSetting
@@ -841,7 +841,7 @@ sub FunctionPluginOptionSetting
 	my ($common, $Plugin, $Config, %conftype);
 	my ($id, $file, $className, $plugin, $conf);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -873,7 +873,7 @@ sub FunctionPluginOptionSetting
 			my ($val);
 			$val = $Form->Get('PLUGIN_OPT_' . unpack('H*', $key));
 			$Config->SetConfig($key, $val);
-			push @$pLog, "$key ‚ğİ’è‚µ‚Ü‚µ‚½B";
+			push @$pLog, "$key ã‚’è¨­å®šã—ã¾ã—ãŸã€‚";
 		}
 	}
 	
@@ -882,12 +882,12 @@ sub FunctionPluginOptionSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Šî–{İ’è
+#	åŸºæœ¬è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionBasicSetting
@@ -895,7 +895,7 @@ sub FunctionBasicSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($SYSTEM);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -904,7 +904,7 @@ sub FunctionBasicSetting
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = ('SERVER', 'CGIPATH', 'BBSPATH', 'INFO', 'DATA');
 		if (! $Form->IsInput(\@inList)) {
@@ -923,26 +923,26 @@ sub FunctionBasicSetting
 	
 	$SYSTEM->Save();
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	{
-		push @$pLog, '¡ Šî–{İ’è';
-		push @$pLog, '@@@ ƒT[ƒoF' . $Form->Get('SERVER');
-		push @$pLog, '@@@ CGIƒpƒXF' . $Form->Get('CGIPATH');
-		push @$pLog, '@@@ Œf¦”ÂƒpƒXF' . $Form->Get('BBSPATH');
-		push @$pLog, '@@@ ŠÇ—ƒf[ƒ^ƒtƒHƒ‹ƒ_F' . $Form->Get('INFO');
-		push @$pLog, '@@@ Šî–{ƒf[ƒ^ƒtƒHƒ‹ƒ_F' . $Form->Get('DATA');
+		push @$pLog, 'â–  åŸºæœ¬è¨­å®š';
+		push @$pLog, 'ã€€ã€€ã€€ ã‚µãƒ¼ãƒï¼š' . $Form->Get('SERVER');
+		push @$pLog, 'ã€€ã€€ã€€ CGIãƒ‘ã‚¹ï¼š' . $Form->Get('CGIPATH');
+		push @$pLog, 'ã€€ã€€ã€€ æ²ç¤ºæ¿ãƒ‘ã‚¹ï¼š' . $Form->Get('BBSPATH');
+		push @$pLog, 'ã€€ã€€ã€€ ç®¡ç†ãƒ‡ãƒ¼ã‚¿ãƒ•ã‚©ãƒ«ãƒ€ï¼š' . $Form->Get('INFO');
+		push @$pLog, 'ã€€ã€€ã€€ åŸºæœ¬ãƒ‡ãƒ¼ã‚¿ãƒ•ã‚©ãƒ«ãƒ€ï¼š' . $Form->Get('DATA');
 	}
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒp[ƒ~ƒbƒVƒ‡ƒ“İ’è
+#	ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionPermissionSetting
@@ -950,7 +950,7 @@ sub FunctionPermissionSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($SYSTEM);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -975,30 +975,30 @@ sub FunctionPermissionSetting
 	
 	$SYSTEM->Save();
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	{
-		push @$pLog, '¡ Šî–{İ’è';
-		push @$pLog, '@@@ datƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_DAT');
-		push @$pLog, '@@@ txtƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_TXT');
-		push @$pLog, '@@@ logƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_LOG');
-		push @$pLog, '@@@ ŠÇ—ƒtƒ@ƒCƒ‹ƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_ADMIN');
-		push @$pLog, '@@@ ’â~ƒXƒŒƒbƒhƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_STOP');
-		push @$pLog, '@@@ ŠÇ—DIRƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_ADMIN_DIR');
-		push @$pLog, '@@@ Œf¦”ÂDIRƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_BBS_DIR');
-		push @$pLog, '@@@ ƒƒODIRƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_LOG_DIR');
-		push @$pLog, '@@@ ‘qŒÉDIRƒp[ƒ~ƒbƒVƒ‡ƒ“F' . $Form->Get('PERM_KAKO_DIR');
+		push @$pLog, 'â–  åŸºæœ¬è¨­å®š';
+		push @$pLog, 'ã€€ã€€ã€€ datãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_DAT');
+		push @$pLog, 'ã€€ã€€ã€€ txtãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_TXT');
+		push @$pLog, 'ã€€ã€€ã€€ logãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_LOG');
+		push @$pLog, 'ã€€ã€€ã€€ ç®¡ç†ãƒ•ã‚¡ã‚¤ãƒ«ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_ADMIN');
+		push @$pLog, 'ã€€ã€€ã€€ åœæ­¢ã‚¹ãƒ¬ãƒƒãƒ‰ãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_STOP');
+		push @$pLog, 'ã€€ã€€ã€€ ç®¡ç†DIRãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_ADMIN_DIR');
+		push @$pLog, 'ã€€ã€€ã€€ æ²ç¤ºæ¿DIRãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_BBS_DIR');
+		push @$pLog, 'ã€€ã€€ã€€ ãƒ­ã‚°DIRãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_LOG_DIR');
+		push @$pLog, 'ã€€ã€€ã€€ å€‰åº«DIRãƒ‘ãƒ¼ãƒŸãƒƒã‚·ãƒ§ãƒ³ï¼š' . $Form->Get('PERM_KAKO_DIR');
 	}
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	§ŒÀ’lİ’è
+#	åˆ¶é™å€¤è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionLimitterSetting
@@ -1006,7 +1006,7 @@ sub FunctionLimitterSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($SYSTEM);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -1028,27 +1028,27 @@ sub FunctionLimitterSetting
 	
 	$SYSTEM->Save();
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	{
-		push @$pLog, '¡ Šî–{İ’è';
-		push @$pLog, '@@@ subjectÅ‘å”F' . $Form->Get('SUBMAX');
-		push @$pLog, '@@@ ƒŒƒXÅ‘å”F' . $Form->Get('RESMAX');
-		push @$pLog, '@@@ ƒAƒ“ƒJ[Å‘å”F' . $Form->Get('ANKERS');
-		push @$pLog, '@@@ ƒGƒ‰[ƒƒOÅ‘å”F' . $Form->Get('ERRMAX');
-		push @$pLog, '@@@ ƒzƒXƒgƒƒOÅ‘å”F' . $Form->Get('HSTMAX');
-		push @$pLog, '@@@ ŠÇ—‘€ìƒƒOÅ‘å”F' . $Form->Get('ADMMAX');
+		push @$pLog, 'â–  åŸºæœ¬è¨­å®š';
+		push @$pLog, 'ã€€ã€€ã€€ subjectæœ€å¤§æ•°ï¼š' . $Form->Get('SUBMAX');
+		push @$pLog, 'ã€€ã€€ã€€ ãƒ¬ã‚¹æœ€å¤§æ•°ï¼š' . $Form->Get('RESMAX');
+		push @$pLog, 'ã€€ã€€ã€€ ã‚¢ãƒ³ã‚«ãƒ¼æœ€å¤§æ•°ï¼š' . $Form->Get('ANKERS');
+		push @$pLog, 'ã€€ã€€ã€€ ã‚¨ãƒ©ãƒ¼ãƒ­ã‚°æœ€å¤§æ•°ï¼š' . $Form->Get('ERRMAX');
+		push @$pLog, 'ã€€ã€€ã€€ ãƒ›ã‚¹ãƒˆãƒ­ã‚°æœ€å¤§æ•°ï¼š' . $Form->Get('HSTMAX');
+		push @$pLog, 'ã€€ã€€ã€€ ç®¡ç†æ“ä½œãƒ­ã‚°æœ€å¤§æ•°ï¼š' . $Form->Get('ADMMAX');
 	}
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‚»‚Ì‘¼İ’è
+#	ãã®ä»–è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionOtherSetting
@@ -1056,7 +1056,7 @@ sub FunctionOtherSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($SYSTEM);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -1081,33 +1081,33 @@ sub FunctionOtherSetting
 	
 	$SYSTEM->Save();
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	{
-		push @$pLog, '¡ ‚»‚Ì‘¼İ’è';
-		push @$pLog, '@@@ ƒwƒbƒ_ƒeƒLƒXƒgF' . $SYSTEM->Get('HEADTEXT');
-		push @$pLog, '@@@ ƒwƒbƒ_URLF' . $SYSTEM->Get('HEADURL');
-		push @$pLog, '@@@ URL©“®ƒŠƒ“ƒNF' . $SYSTEM->Get('URLLINK');
-		push @$pLog, '@@@ @ŠJnŠÔF' . $SYSTEM->Get('LINKST');
-		push @$pLog, '@@@ @I—¹ŠÔF' . $SYSTEM->Get('LINKED');
-		push @$pLog, '@@@ PATHí•ÊF' . $SYSTEM->Get('PATHKIND');
-		push @$pLog, '@@@ index.html‚ğXV‚µ‚È‚¢F' . $SYSTEM->Get('FASTMODE');
-		push @$pLog, '@@@ bbs.cgi‚ÌGETƒƒ\\ƒbƒhF' . $SYSTEM->Get('BBSGET');
-		push @$pLog, '@@@ XVƒ`ƒFƒbƒNŠÔŠuF' . $SYSTEM->Get('UPCHECK');
+		push @$pLog, 'â–  ãã®ä»–è¨­å®š';
+		push @$pLog, 'ã€€ã€€ã€€ ãƒ˜ãƒƒãƒ€ãƒ†ã‚­ã‚¹ãƒˆï¼š' . $SYSTEM->Get('HEADTEXT');
+		push @$pLog, 'ã€€ã€€ã€€ ãƒ˜ãƒƒãƒ€URLï¼š' . $SYSTEM->Get('HEADURL');
+		push @$pLog, 'ã€€ã€€ã€€ URLè‡ªå‹•ãƒªãƒ³ã‚¯ï¼š' . $SYSTEM->Get('URLLINK');
+		push @$pLog, 'ã€€ã€€ã€€ ã€€é–‹å§‹æ™‚é–“ï¼š' . $SYSTEM->Get('LINKST');
+		push @$pLog, 'ã€€ã€€ã€€ ã€€çµ‚äº†æ™‚é–“ï¼š' . $SYSTEM->Get('LINKED');
+		push @$pLog, 'ã€€ã€€ã€€ PATHç¨®åˆ¥ï¼š' . $SYSTEM->Get('PATHKIND');
+		push @$pLog, 'ã€€ã€€ã€€ index.htmlã‚’æ›´æ–°ã—ãªã„ï¼š' . $SYSTEM->Get('FASTMODE');
+		push @$pLog, 'ã€€ã€€ã€€ bbs.cgiã®GETãƒ¡ã‚½\ãƒƒãƒ‰ï¼š' . $SYSTEM->Get('BBSGET');
+		push @$pLog, 'ã€€ã€€ã€€ æ›´æ–°ãƒã‚§ãƒƒã‚¯é–“éš”ï¼š' . $SYSTEM->Get('UPCHECK');
 	}
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦İ’è(‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒXƒIƒŠƒWƒiƒ‹)
+#	è¡¨ç¤ºè¨­å®š(ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹ã‚ªãƒªã‚¸ãƒŠãƒ«)
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
-#	2010.09.08 windyakin š
-#	 -> •\¦İ’è‚Æ‹K§İ’è‚Ì•ª—£
+#	2010.09.08 windyakin â˜…
+#	 -> è¡¨ç¤ºè¨­å®šã¨è¦åˆ¶è¨­å®šã®åˆ†é›¢
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionPlusViewSetting
@@ -1115,7 +1115,7 @@ sub FunctionPlusViewSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($SYSTEM);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -1137,28 +1137,28 @@ sub FunctionPlusViewSetting
 	
 	$SYSTEM->Save();
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	{
-		push @$pLog, '@@@ ƒJƒEƒ“ƒ^[ƒAƒJƒEƒ“ƒgF' . $SYSTEM->Get('COUNTER');
-		push @$pLog, '@@@ PR—“•\\¦•¶š—ñF' . $SYSTEM->Get('PRTEXT');
-		push @$pLog, '@@@ PR—“ƒŠƒ“ƒNURLF' . $SYSTEM->Get('PRLINK');
-		push @$pLog, '@@@ ƒoƒi[•\\¦F' . $SYSTEM->Get('BANNER');
-		push @$pLog, '@@@ ƒ~ƒŠ•b•\¦F' . $SYSTEM->Get('MSEC');
+		push @$pLog, 'ã€€ã€€ã€€ ã‚«ã‚¦ãƒ³ã‚¿ãƒ¼ã‚¢ã‚«ã‚¦ãƒ³ãƒˆï¼š' . $SYSTEM->Get('COUNTER');
+		push @$pLog, 'ã€€ã€€ã€€ PRæ¬„è¡¨\ç¤ºæ–‡å­—åˆ—ï¼š' . $SYSTEM->Get('PRTEXT');
+		push @$pLog, 'ã€€ã€€ã€€ PRæ¬„ãƒªãƒ³ã‚¯URLï¼š' . $SYSTEM->Get('PRLINK');
+		push @$pLog, 'ã€€ã€€ã€€ ãƒãƒŠãƒ¼è¡¨\ç¤ºï¼š' . $SYSTEM->Get('BANNER');
+		push @$pLog, 'ã€€ã€€ã€€ ãƒŸãƒªç§’è¡¨ç¤ºï¼š' . $SYSTEM->Get('MSEC');
 	}
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹K§İ’è(‚º‚ë‚¿‚á‚ñ‚Ë‚éƒvƒ‰ƒXƒIƒŠƒWƒiƒ‹)
+#	è¦åˆ¶è¨­å®š(ãœã‚ã¡ã‚ƒã‚“ã­ã‚‹ãƒ—ãƒ©ã‚¹ã‚ªãƒªã‚¸ãƒŠãƒ«)
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
-#	2010.09.08 windyakin š
-#	 -> •\¦İ’è‚Æ‹K§İ’è‚Ì•ª—£
+#	2010.09.08 windyakin â˜…
+#	 -> è¡¨ç¤ºè¨­å®šã¨è¦åˆ¶è¨­å®šã®åˆ†é›¢
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionPlusSecSetting
@@ -1166,7 +1166,7 @@ sub FunctionPlusSecSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($SYSTEM);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -1190,25 +1190,25 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Save();
 	
 	{
-		push @$pLog, '@@@ 2dƒJƒLƒR‹K§F' . $SYSTEM->Get('KAKIKO');
-		push @$pLog, '@@@ ˜A‘±“Še‹K§•b”F' . $SYSTEM->Get('SAMBATM');
-		push @$pLog, '@@@ Samba‘Ò‹@•b”F' . $SYSTEM->Get('DEFSAMBA');
-		push @$pLog, '@@@ Samba•òdŠÔF' . $SYSTEM->Get('DEFHOUSHI');
-		push @$pLog, '@@@ 12Œ…ƒgƒŠƒbƒvF' . $SYSTEM->Get('TRIP12');
-		push @$pLog, '@@@ BBQF' . $SYSTEM->Get('BBQ');
-		push @$pLog, '@@@ BBXF' . $SYSTEM->Get('BBX');
+		push @$pLog, 'ã€€ã€€ã€€ 2é‡ã‚«ã‚­ã‚³è¦åˆ¶ï¼š' . $SYSTEM->Get('KAKIKO');
+		push @$pLog, 'ã€€ã€€ã€€ é€£ç¶šæŠ•ç¨¿è¦åˆ¶ç§’æ•°ï¼š' . $SYSTEM->Get('SAMBATM');
+		push @$pLog, 'ã€€ã€€ã€€ Sambaå¾…æ©Ÿç§’æ•°ï¼š' . $SYSTEM->Get('DEFSAMBA');
+		push @$pLog, 'ã€€ã€€ã€€ Sambaå¥‰ä»•æ™‚é–“ï¼š' . $SYSTEM->Get('DEFHOUSHI');
+		push @$pLog, 'ã€€ã€€ã€€ 12æ¡ãƒˆãƒªãƒƒãƒ—ï¼š' . $SYSTEM->Get('TRIP12');
+		push @$pLog, 'ã€€ã€€ã€€ BBQï¼š' . $SYSTEM->Get('BBQ');
+		push @$pLog, 'ã€€ã€€ã€€ BBXï¼š' . $SYSTEM->Get('BBX');
 	}
 	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒvƒ‰ƒOƒCƒ“î•ñİ’è
+#	ãƒ—ãƒ©ã‚°ã‚¤ãƒ³æƒ…å ±è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionPluginSetting
@@ -1216,7 +1216,7 @@ sub FunctionPluginSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Plugin);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -1243,7 +1243,7 @@ sub FunctionPluginSetting
 				last;
 			}
 		}
-		push @$pLog, $Plugin->Get('NAME', $id) . ' ‚ğ' . ($valid ? '—LŒø' : '–³Œø') . '‚Éİ’è‚µ‚Ü‚µ‚½B';
+		push @$pLog, $Plugin->Get('NAME', $id) . ' ã‚’' . ($valid ? 'æœ‰åŠ¹' : 'ç„¡åŠ¹') . 'ã«è¨­å®šã—ã¾ã—ãŸã€‚';
 		$Plugin->Set($id, 'VALID', $valid);
 		
 		$_ = $Form->Get("PLUGIN_${id}_ORDER", $i + 1);
@@ -1261,12 +1261,12 @@ sub FunctionPluginSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒvƒ‰ƒOƒCƒ“î•ñXV
+#	ãƒ—ãƒ©ã‚°ã‚¤ãƒ³æƒ…å ±æ›´æ–°
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionPluginUpdate
@@ -1274,7 +1274,7 @@ sub FunctionPluginUpdate
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Plugin);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -1286,15 +1286,15 @@ sub FunctionPluginUpdate
 	require './module/athelas.pl';
 	$Plugin = ATHELAS->new;
 	
-	# î•ñ‚ÌXV‚Æ•Û‘¶
+	# æƒ…å ±ã®æ›´æ–°ã¨ä¿å­˜
 	$Plugin->Load($Sys);
 	$Plugin->Update();
 	$Plugin->Save($Sys);
 	
-	# ƒƒO‚Ìİ’è
+	# ãƒ­ã‚°ã®è¨­å®š
 	{
-		push @$pLog, '¡ ƒvƒ‰ƒOƒCƒ“î•ñ‚ÌXV';
-		push @$pLog, '@ƒvƒ‰ƒOƒCƒ“î•ñ‚ÌXV‚ğŠ®—¹‚µ‚Ü‚µ‚½B';
+		push @$pLog, 'â–  ãƒ—ãƒ©ã‚°ã‚¤ãƒ³æƒ…å ±ã®æ›´æ–°';
+		push @$pLog, 'ã€€ãƒ—ãƒ©ã‚°ã‚¤ãƒ³æƒ…å ±ã®æ›´æ–°ã‚’å®Œäº†ã—ã¾ã—ãŸã€‚';
 	}
 	return 0;
 }

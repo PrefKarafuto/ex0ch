@@ -1,10 +1,10 @@
 #!/usr/bin/perl
 #============================================================================================================
 #
-#	indexXV—pCGI
+#	indexæ›´æ–°ç”¨CGI
 #	remake.cgi
 #	-------------------------------------------------------------------------------------
-#	2006.08.05 bbs.cgi‚©‚ç•K—v‚È•”•ª‚¾‚¯”²‚«o‚µ
+#	2006.08.05 bbs.cgiã‹ã‚‰å¿…è¦ãªéƒ¨åˆ†ã ã‘æŠœãå‡ºã—
 #
 #============================================================================================================
 
@@ -15,14 +15,14 @@ no warnings 'once';
 
 BEGIN { use lib './perllib'; }
 
-# CGI‚ÌÀsŒ‹‰Ê‚ğI—¹ƒR[ƒh‚Æ‚·‚é
+# CGIã®å®Ÿè¡Œçµæœã‚’çµ‚äº†ã‚³ãƒ¼ãƒ‰ã¨ã™ã‚‹
 exit(REMAKECGI());
 #------------------------------------------------------------------------------------------------------------
 #
-#	remake.cgiƒƒCƒ“
+#	remake.cgiãƒ¡ã‚¤ãƒ³
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub REMAKECGI
@@ -34,7 +34,7 @@ sub REMAKECGI
 	require './module/thorin.pl';
 	$Page = new THORIN;
 	
-	# ‰Šú‰»‚É¬Œ÷‚µ‚½‚çXVˆ—‚ğŠJn
+	# åˆæœŸåŒ–ã«æˆåŠŸã—ãŸã‚‰æ›´æ–°å‡¦ç†ã‚’é–‹å§‹
 	if (($err = Initialize(\%SYS, $Page)) == 0) {
 		#require './module/baggins.pl';
 		require './module/varda.pl';
@@ -59,7 +59,7 @@ sub REMAKECGI
 		PrintBBSError(\%SYS, $Page, $err);
 	}
 	
-	# Œ‹‰Ê‚Ì•\¦
+	# çµæœã®è¡¨ç¤º
 	$Page->Flush('', 0, 0);
 	
 	return $err;
@@ -67,10 +67,10 @@ sub REMAKECGI
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	remake.cgi‰Šú‰»
+#	remake.cgiåˆæœŸåŒ–
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub Initialize
@@ -78,7 +78,7 @@ sub Initialize
 	my ($Sys, $Page) = @_;
 	my ($bbs);
 	
-	# g—pƒ‚ƒWƒ…[ƒ‹‚Ì‰Šú‰»
+	# ä½¿ç”¨ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã®åˆæœŸåŒ–
 	require './module/melkor.pl';
 	require './module/isildur.pl';
 	require './module/radagast.pl';
@@ -94,15 +94,15 @@ sub Initialize
 		'PAGE'		=> $Page,
 	);
 	
-	# formî•ñİ’è
+	# formæƒ…å ±è¨­å®š
 	$Sys->{'FORM'}->DecodeForm(1);
 	
-	# ƒVƒXƒeƒ€î•ñİ’è
+	# ã‚·ã‚¹ãƒ†ãƒ æƒ…å ±è¨­å®š
 	if ($Sys->{'SYS'}->Init()) {
 		return 990;
 	}
 	
-	# –²‚ªL‚ª‚è‚ñ‚®
+	# å¤¢ãŒåºƒãŒã‚Šã‚“ã
 	$Sys->{'SYS'}->{'MainCGI'} = $Sys;
 	
 	$bbs = $Sys->{'FORM'}->Get('bbs', '');
@@ -119,7 +119,7 @@ sub Initialize
 	$Sys->{'SYS'}->Set('AGENT', $Sys->{'CONV'}->GetAgentMode($Sys->{'SYS'}->Get('CLIENT')));
 	$Sys->{'SYS'}->Set('MODE', 'CREATE');
 	
-	# SETTING.TXT‚Ì“Ç‚İ‚İ
+	# SETTING.TXTã®èª­ã¿è¾¼ã¿
 	if (! $Sys->{'SET'}->Load($Sys->{'SYS'})) {
 		return 999;
 	}
@@ -130,10 +130,10 @@ sub Initialize
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	remake.cgiƒWƒƒƒ“ƒvƒy[ƒW•\¦
+#	remake.cgiã‚¸ãƒ£ãƒ³ãƒ—ãƒšãƒ¼ã‚¸è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSJump
@@ -144,27 +144,27 @@ sub PrintBBSJump
 	$SYS		= $Sys->{'SYS'};
 	$bbsPath	= $SYS->Get('BBS_REL');
 	
-	# Œg‘Ñ—p•\¦
+	# æºå¸¯ç”¨è¡¨ç¤º
 	if ($SYS->Get('CLIENT') & $ZP::C_MOBILEBROWSER) {
 		$Page->Print("Content-type: text/html\n\n");
-		$Page->Print('<!--nobanner--><html><body>index‚ğXV‚µ‚Ü‚µ‚½B<br>');
-		$Page->Print("<a href=\"$bbsPath/i/\">‚±‚¿‚ç</a>");
-		$Page->Print("‚©‚çŒf¦”Â‚Ö–ß‚Á‚Ä‚­‚¾‚³‚¢B\n");
+		$Page->Print('<!--nobanner--><html><body>indexã‚’æ›´æ–°ã—ã¾ã—ãŸã€‚<br>');
+		$Page->Print("<a href=\"$bbsPath/i/\">ã“ã¡ã‚‰</a>");
+		$Page->Print("ã‹ã‚‰æ²ç¤ºæ¿ã¸æˆ»ã£ã¦ãã ã•ã„ã€‚\n");
 	}
-	# PC—p•\¦
+	# PCç”¨è¡¨ç¤º
 	else {
 		my $oSET = $Sys->{'SET'};
 		
 		$Page->Print("Content-type: text/html\n\n<html><head><title>");
-		$Page->Print('index‚ğXV‚µ‚Ü‚µ‚½B</title><!--nobanner-->');
+		$Page->Print('indexã‚’æ›´æ–°ã—ã¾ã—ãŸã€‚</title><!--nobanner-->');
 		$Page->Print('<meta http-equiv="Content-Type" content="text/html; ');
 		$Page->Print("charset=Shift_JIS\"><meta content=0;URL=$bbsPath/ ");
-		$Page->Print('http-equiv=refresh></head><body>index‚ğXV‚µ‚Ü‚µ‚½B');
-		$Page->Print('<br><br>‰æ–Ê‚ğØ‚è‘Ö‚¦‚é‚Ü‚Å‚µ‚Î‚ç‚­‚¨‘Ò‚¿‰º‚³‚¢B');
+		$Page->Print('http-equiv=refresh></head><body>indexã‚’æ›´æ–°ã—ã¾ã—ãŸã€‚');
+		$Page->Print('<br><br>ç”»é¢ã‚’åˆ‡ã‚Šæ›¿ãˆã‚‹ã¾ã§ã—ã°ã‚‰ããŠå¾…ã¡ä¸‹ã•ã„ã€‚');
 		$Page->Print('<br><br><br><br><br><hr>');
 		
 	}
-	# ’m—“•\¦(•\¦‚³‚¹‚½‚­‚È‚¢ê‡‚ÍƒRƒƒ“ƒgƒAƒEƒg‚©ğŒ‚ğ0‚É)
+	# å‘ŠçŸ¥æ¬„è¡¨ç¤º(è¡¨ç¤ºã•ã›ãŸããªã„å ´åˆã¯ã‚³ãƒ¡ãƒ³ãƒˆã‚¢ã‚¦ãƒˆã‹æ¡ä»¶ã‚’0ã«)
 	if (0) {
 		require './module/denethor.pl';
 		my $BANNER = new DENETHOR;
@@ -176,10 +176,10 @@ sub PrintBBSJump
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	remake.cgiƒGƒ‰[ƒy[ƒW•\¦
+#	remake.cgiã‚¨ãƒ©ãƒ¼ãƒšãƒ¼ã‚¸è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSError
