@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	Œf¦”Â‘‚«‚İx‰‡ƒ‚ƒWƒ…[ƒ‹
+#	æ²ç¤ºæ¿æ›¸ãè¾¼ã¿æ”¯æ´ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #
 #============================================================================================================
 package	VARA;
@@ -10,10 +10,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -36,14 +36,14 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‰Šú‰»
+#	åˆæœŸåŒ–
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR(•K{)
-#	@param	$Form	SAMWISE(•K{)
+#	@param	$Sys	MELKOR(å¿…é ˆ)
+#	@param	$Form	SAMWISE(å¿…é ˆ)
 #	@param	$Set	ISILDUR
 #	@param	$Thread	BILBO
 #	@param	$Conv	GALADRIEL
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub Init
@@ -57,7 +57,7 @@ sub Init
 	$this->{'THREADS'} = $Threads;
 	$this->{'CONV'} = $Conv;
 	
-	# ƒ‚ƒWƒ…[ƒ‹‚ª—pˆÓ‚³‚ê‚Ä‚È‚¢ê‡‚Í‚±‚±‚Å¶¬‚·‚é
+	# ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ãŒç”¨æ„ã•ã‚Œã¦ãªã„å ´åˆã¯ã“ã“ã§ç”Ÿæˆã™ã‚‹
 	if (!defined $Set) {
 		require './module/isildur.pl';
 		$this->{'SET'} = ISILDUR->new;
@@ -73,13 +73,13 @@ sub Init
 		$this->{'CONV'} = GALADRIEL->new;
 	}
 	
-	# ƒLƒƒƒbƒvŠÇ—ƒ‚ƒWƒ…[ƒ‹ƒ[ƒh
+	# ã‚­ãƒ£ãƒƒãƒ—ç®¡ç†ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ãƒ­ãƒ¼ãƒ‰
 	require './module/ungoliants.pl';
 	$this->{'SECURITY'} = SECURITY->new;
 	$this->{'SECURITY'}->Init($Sys);
 	$this->{'SECURITY'}->SetGroupInfo($Sys->Get('BBS'));
 	
-	# Šg’£‹@”\î•ñŠÇ—ƒ‚ƒWƒ…[ƒ‹ƒ[ƒh
+	# æ‹¡å¼µæ©Ÿèƒ½æƒ…å ±ç®¡ç†ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ãƒ­ãƒ¼ãƒ‰
 	require './module/athelas.pl';
 	$this->{'PLUGIN'} = ATHELAS->new;
 	$this->{'PLUGIN'}->Load($Sys);
@@ -87,32 +87,32 @@ sub Init
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‘‚«‚İˆ— - WriteData
+#	æ›¸ãè¾¼ã¿å‡¦ç† - WriteData
 #	-------------------------------------------
-#	ˆø@”F‚È‚µ
-#	–ß‚è’lF‚È‚µ
+#	å¼•ã€€æ•°ï¼šãªã—
+#	æˆ»ã‚Šå€¤ï¼šãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub Write
 {
 	my $this = shift;
 	
-	# ‘‚«‚İ‘O€”õ
+	# æ›¸ãè¾¼ã¿å‰æº–å‚™
 	$this->ReadyBeforeCheck();
 	
 	my $err = $ZP::E_SUCCESS;
 	
-	# “ü—Í“à—eƒ`ƒFƒbƒN(–¼‘OAƒ[ƒ‹)
+	# å…¥åŠ›å†…å®¹ãƒã‚§ãƒƒã‚¯(åå‰ã€ãƒ¡ãƒ¼ãƒ«)
 	return $err if (($err = $this->NormalizationNameMail()) != $ZP::E_SUCCESS);
 	
-	# “ü—Í“à—eƒ`ƒFƒbƒN(–{•¶)
+	# å…¥åŠ›å†…å®¹ãƒã‚§ãƒƒã‚¯(æœ¬æ–‡)
 	return $err if (($err = $this->NormalizationContents()) != $ZP::E_SUCCESS);
 	
-	# ‹K§ƒ`ƒFƒbƒN
+	# è¦åˆ¶ãƒã‚§ãƒƒã‚¯
 	return $err if (($err = $this->IsRegulation()) != $ZP::E_SUCCESS);
 	
 	
-	# ƒf[ƒ^‚Ì‘‚«‚İ
+	# ãƒ‡ãƒ¼ã‚¿ã®æ›¸ãè¾¼ã¿
 	require './module/gondor.pl';
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
@@ -124,7 +124,7 @@ sub Write
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
 	
-	# î•ñ—“
+	# æƒ…å ±æ¬„
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
 	my $id = $Conv->MakeIDnew($Sys, 8);
 	my $idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
@@ -140,11 +140,11 @@ sub Write
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
 	$Sys->Set('updown', $updown);
 	
-	# ‘‚«‚İ’¼‘Oˆ—
+	# æ›¸ãè¾¼ã¿ç›´å‰å‡¦ç†
 	$err = $this->ReadyBeforeWrite(ARAGORN::GetNumFromFile($Sys->Get('DATPATH')) + 1);
 	return $err if ($err != $ZP::E_SUCCESS);
 	
-	# ƒŒƒX—v‘f‚Ìæ“¾
+	# ãƒ¬ã‚¹è¦ç´ ã®å–å¾—
 	my $subject = $Form->Get('subject', '');
 	my $name = $Form->Get('FROM', '');
 	my $mail = $Form->Get('mail', '');
@@ -164,31 +164,31 @@ sub Write
 	
 	my $datPath = $Sys->Get('DATPATH');
 	
-	# ƒƒO‘‚«‚İ
+	# ãƒ­ã‚°æ›¸ãè¾¼ã¿
 	require './module/peregrin.pl';
 	my $Log = PEREGRIN->new;
 	$Log->Load($Sys, 'WRT', $threadid);
 	$Log->Set($Set, length($Form->Get('MESSAGE')), $Sys->Get('VERSION'), $Sys->Get('KOYUU'), $data, $Sys->Get('AGENT', 0));
 	$Log->Save($Sys);
 	
-	# ƒŠƒ‚[ƒgƒzƒXƒg•Û‘¶(SETTING.TXT•ÏX‚É‚æ‚èAí‚É•Û‘¶)
+	# ãƒªãƒ¢ãƒ¼ãƒˆãƒ›ã‚¹ãƒˆä¿å­˜(SETTING.TXTå¤‰æ›´ã«ã‚ˆã‚Šã€å¸¸ã«ä¿å­˜)
 	SaveHost($Sys, $Form);
 	
-	# datƒtƒ@ƒCƒ‹‚Ö’¼Ú‘‚«‚İ
+	# datãƒ•ã‚¡ã‚¤ãƒ«ã¸ç›´æ¥æ›¸ãè¾¼ã¿
 	my $resNum = 0;
 	my $err2 = ARAGORN::DirectAppend($Sys, $datPath, $line);
 	if ($err2 == 0) {
-		# ƒŒƒX”‚ªÅ‘å”‚ğ’´‚¦‚½‚çoverİ’è‚ğ‚·‚é
+		# ãƒ¬ã‚¹æ•°ãŒæœ€å¤§æ•°ã‚’è¶…ãˆãŸã‚‰overè¨­å®šã‚’ã™ã‚‹
 		$resNum = ARAGORN::GetNumFromFile($datPath);
 		if ($resNum >= $Sys->Get('RESMAX')) {
-			# dat‚ÉOVERƒXƒŒƒbƒhƒŒƒX‚ğ‘‚«‚Ş
+			# datã«OVERã‚¹ãƒ¬ãƒƒãƒ‰ãƒ¬ã‚¹ã‚’æ›¸ãè¾¼ã‚€
 			Get1001Data($Sys, \$line);
 			ARAGORN::DirectAppend($Sys, $datPath, $line);
 			$resNum++;
 		}
 		$err = $ZP::E_SUCCESS;
 	}
-	# datƒtƒ@ƒCƒ‹’Ç‹L¸”s
+	# datãƒ•ã‚¡ã‚¤ãƒ«è¿½è¨˜å¤±æ•—
 	elsif ($err2 == 1) {
 		$err = $ZP::E_POST_NOTEXISTDAT;
 	}
@@ -197,8 +197,8 @@ sub Write
 	}
 	
 	if ($err == $ZP::E_SUCCESS) {
-		# subject.txt‚ÌXV
-		# ƒXƒŒƒbƒhì¬ƒ‚[ƒh‚È‚çV‹K‚É’Ç‰Á‚·‚é
+		# subject.txtã®æ›´æ–°
+		# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆãƒ¢ãƒ¼ãƒ‰ãªã‚‰æ–°è¦ã«è¿½åŠ ã™ã‚‹
 		if ($Sys->Equal('MODE', 1)) {
 			require './module/earendil.pl';
 			my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
@@ -206,14 +206,14 @@ sub Write
 			$Pools->Load($Sys);
 			$Threads->Add($threadid, $subject, 1);
 			
-			# ƒXƒŒƒbƒh”ŒÀŠE‚É‚æ‚édat—‚¿ˆ—
+			# ã‚¹ãƒ¬ãƒƒãƒ‰æ•°é™ç•Œã«ã‚ˆã‚‹datè½ã¡å‡¦ç†
 			my $submax = $Sys->Get('SUBMAX');
 			my @tlist;
 			$Threads->GetKeySet('ALL', undef, \@tlist);
 			foreach my $lid (reverse @tlist) {
 				last if ($Threads->GetNum() <= $submax);
 				
-				# •s—‘®«‚ ‚è
+				# ä¸è½å±æ€§ã‚ã‚Š
 				next if ($Threads->GetAttr($lid, 'nopool'));
 				
 				$Pools->Add($lid, $Threads->Get('SUBJECT', $lid), $Threads->Get('RES', $lid));
@@ -225,7 +225,7 @@ sub Write
 			$Pools->Save($Sys);
 			$Threads->Save($Sys);
 		}
-		# ‘‚«‚İƒ‚[ƒh‚È‚çƒŒƒX”‚ÌXV
+		# æ›¸ãè¾¼ã¿ãƒ¢ãƒ¼ãƒ‰ãªã‚‰ãƒ¬ã‚¹æ•°ã®æ›´æ–°
 		else {
 			$updown = $Sys->Get('updown', '');
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
@@ -237,10 +237,10 @@ sub Write
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‘O€”õ
+#	å‰æº–å‚™
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‚È‚µ
+#	@param	ãªã—
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub ReadyBeforeCheck
@@ -250,7 +250,7 @@ sub ReadyBeforeCheck
 	my $Sys = $this->{'SYS'};
 	my $Form = $this->{'FORM'};
 	
-	# cookie—p‚ÉƒIƒŠƒWƒiƒ‹‚ğ•Û‘¶‚·‚é
+	# cookieç”¨ã«ã‚ªãƒªã‚¸ãƒŠãƒ«ã‚’ä¿å­˜ã™ã‚‹
 	my $from = $Form->Get('FROM');
 	my $mail = $Form->Get('mail');
 	$from =~ s/[\r\n]//g;
@@ -258,22 +258,22 @@ sub ReadyBeforeCheck
 	$Form->Set('NAME', $from);
 	$Form->Set('MAIL', $mail);
 	
-	# ƒLƒƒƒbƒvƒpƒX‚Ì’Šo‚Æíœ
+	# ã‚­ãƒ£ãƒƒãƒ—ãƒ‘ã‚¹ã®æŠ½å‡ºã¨å‰Šé™¤
 	$Sys->Set('CAPID', '');
-	if ($mail =~ s/(?:#|”)(.+)//) {
+	if ($mail =~ s/(?:#|ï¼ƒ)(.+)//) {
 		my $capPass = $1;
 		
-		# ƒLƒƒƒbƒvî•ñİ’è
+		# ã‚­ãƒ£ãƒƒãƒ—æƒ…å ±è¨­å®š
 		my $capID = $this->{'SECURITY'}->GetCapID($capPass);
 		$Sys->Set('CAPID', $capID);
 		$Form->Set('mail', $mail);
 	}
 	
-	# datƒpƒX‚Ì¶¬
+	# datãƒ‘ã‚¹ã®ç”Ÿæˆ
 	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $Sys->Get('KEY') . '.dat';
 	$Sys->Set('DATPATH', $datPath);
 	
-	# –{•¶‹Ö‘¥•¶š•ÏŠ·
+	# æœ¬æ–‡ç¦å‰‡æ–‡å­—å¤‰æ›
 	my $text = $Form->Get('MESSAGE');
 	$this->{'CONV'}->ConvertCharacter1(\$text, 2);
 	$Form->Set('MESSAGE', $text);
@@ -281,11 +281,11 @@ sub ReadyBeforeCheck
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‘‚«‚İ’¼‘Oˆ—
+#	æ›¸ãè¾¼ã¿ç›´å‰å‡¦ç†
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
+#	@param	ãªã—
 #	@param	$res
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub ReadyBeforeWrite
@@ -302,11 +302,11 @@ sub ReadyBeforeWrite
 	my $koyuu = $Sys->Get('KOYUU');
 	my $client = $Sys->Get('CLIENT');
 	my $host = $ENV{'REMOTE_HOST'};
-	my $addr = $ENV{'REMOTE_ADDR'};
+	my $addr = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
 	
-	# ‹K§ƒ†[ƒUENGƒ[ƒhƒ`ƒFƒbƒN
+	# è¦åˆ¶ãƒ¦ãƒ¼ã‚¶ãƒ»NGãƒ¯ãƒ¼ãƒ‰ãƒã‚§ãƒƒã‚¯
 	{
-		# ‹K§ƒ†[ƒU
+		# è¦åˆ¶ãƒ¦ãƒ¼ã‚¶
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NGUSER, $bbs)) {
 			require './module/faramir.pl';
 			my $vUser = FARAMIR->new;
@@ -318,12 +318,12 @@ sub ReadyBeforeWrite
 				return $ZP::E_REG_NGUSER;
 			}
 			elsif ($check == 2) {
-				return $ZP::E_REG_NGUSER if ($from !~ /$host/i); # $host‚Í³‹K•\Œ»
-				$Form->Set('FROM', "</b>[L¥ƒÖ¥M] <b>$from");
+				return $ZP::E_REG_NGUSER if ($from !~ /$host/i); # $hostã¯æ­£è¦è¡¨ç¾
+				$Form->Set('FROM', "</b>[Â´ï½¥Ï‰ï½¥ï½€] <b>$from");
 			}
 		}
 		
-		# NGƒ[ƒh
+		# NGãƒ¯ãƒ¼ãƒ‰
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NGWORD, $bbs)) {
 			require './module/wormtongue.pl';
 			my $ngWord = WORMTONGUE->new;
@@ -338,12 +338,12 @@ sub ReadyBeforeWrite
 				$ngWord->Method($Form, \@checkKey);
 			}
 			elsif ($check == 2) {
-				$Form->Set('FROM', "</b>[L+ƒÖ+M] $host <b>$from");
+				$Form->Set('FROM', "</b>[Â´+Ï‰+ï½€] $host <b>$from");
 			}
 		}
 	}
 	
-	# plugin‚É“n‚·’l‚ğİ’è
+	# pluginã«æ¸¡ã™å€¤ã‚’è¨­å®š
 	$Sys->Set('_ERR', 0);
 	$Sys->Set('_NUM_', $res);
 	$Sys->Set('_THREAD_', $this->{'THREADS'});
@@ -355,7 +355,7 @@ sub ReadyBeforeWrite
 	$text =~ s/<br>/ <br> /g;
 	$Form->Set('MESSAGE', " $text ");
 	
-	# –¼–³‚µİ’è
+	# åç„¡ã—è¨­å®š
 	$from = $Form->Get('FROM', '');
 	if ($from eq '') {
 		$from = $this->{'SET'}->Get('BBS_NONAME_NAME');
@@ -367,10 +367,10 @@ sub ReadyBeforeWrite
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒvƒ‰ƒOƒCƒ“ˆ—
+#	ãƒ—ãƒ©ã‚°ã‚¤ãƒ³å‡¦ç†
 #	-------------------------------------------------------------------------------------
 #	@param	$type
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub ExecutePlugin
@@ -382,11 +382,11 @@ sub ExecutePlugin
 	my $Form = $this->{'FORM'};
 	my $Plugin = $this->{'PLUGIN'};
 	
-	# —LŒø‚ÈŠg’£‹@”\ˆê——‚ğæ“¾
+	# æœ‰åŠ¹ãªæ‹¡å¼µæ©Ÿèƒ½ä¸€è¦§ã‚’å–å¾—
 	my @pluginSet = ();
 	$Plugin->GetKeySet('VALID', 1, \@pluginSet);
 	foreach my $id (@pluginSet) {
-		# ƒ^ƒCƒv‚ªæŒÄ‚Ño‚µ‚Ìê‡‚Íƒ[ƒh‚µ‚ÄÀs
+		# ã‚¿ã‚¤ãƒ—ãŒå…ˆå‘¼ã³å‡ºã—ã®å ´åˆã¯ãƒ­ãƒ¼ãƒ‰ã—ã¦å®Ÿè¡Œ
 		if ($Plugin->Get('TYPE', $id) & $type) {
 			my $file = $Plugin->Get('FILE', $id);
 			my $className = $Plugin->Get('CLASS', $id);
@@ -401,11 +401,11 @@ sub ExecutePlugin
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹K§ƒ`ƒFƒbƒN
+#	è¦åˆ¶ãƒã‚§ãƒƒã‚¯
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‹K§’Ê‰ß‚È‚ç0‚ğ•Ô‚·
-#			‹K§ƒ`ƒFƒbƒN‚É‚©‚©‚Á‚½‚çƒGƒ‰[ƒR[ƒh‚ğ•Ô‚·
+#	@param	ãªã—
+#	@return	è¦åˆ¶é€šéãªã‚‰0ã‚’è¿”ã™
+#			è¦åˆ¶ãƒã‚§ãƒƒã‚¯ã«ã‹ã‹ã£ãŸã‚‰ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’è¿”ã™
 #
 #------------------------------------------------------------------------------------------------------------
 sub IsRegulation
@@ -424,22 +424,22 @@ sub IsRegulation
 	my $mode = $Sys->Get('AGENT');
 	my $koyuu = $Sys->Get('KOYUU');
 	my $host = $ENV{'REMOTE_HOST'};
-	my $addr = $ENV{'REMOTE_ADDR'};
+	my $addr = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
 	my $islocalip = 0;
 	
 	$islocalip = 1 if ($addr =~ /^(127|172|192|10)\./);
 	
-	# ƒŒƒX‘‚«‚İƒ‚[ƒh‚Ì‚İ
+	# ãƒ¬ã‚¹æ›¸ãè¾¼ã¿ãƒ¢ãƒ¼ãƒ‰æ™‚ã®ã¿
 	if ($Sys->Equal('MODE', 2)) {
 		require './module/gondor.pl';
 		
-		# ˆÚ“]ƒXƒŒƒbƒh
+		# ç§»è»¢ã‚¹ãƒ¬ãƒƒãƒ‰
 		return $ZP::E_LIMIT_MOVEDTHREAD if (ARAGORN::IsMoved($datPath));
 		
-		# ƒŒƒXÅ‘å”
+		# ãƒ¬ã‚¹æœ€å¤§æ•°
 		return $ZP::E_LIMIT_OVERMAXRES if ($Sys->Get('RESMAX') < ARAGORN::GetNumFromFile($datPath));
 		
-		# datƒtƒ@ƒCƒ‹ƒTƒCƒY§ŒÀ
+		# datãƒ•ã‚¡ã‚¤ãƒ«ã‚µã‚¤ã‚ºåˆ¶é™
 		if ($Set->Get('BBS_DATMAX')) {
 			my $datSize = int((stat $datPath)[7] / 1024);
 			if ($Set->Get('BBS_DATMAX') < $datSize) {
@@ -447,28 +447,28 @@ sub IsRegulation
 			}
 		}
 	}
-	# REFERERƒ`ƒFƒbƒN
+	# REFERERãƒã‚§ãƒƒã‚¯
 	if ($Set->Equal('BBS_REFERER_CHECK', 'checked')) {
 		if ($this->{'CONV'}->IsReferer($this->{'SYS'}, \%ENV)) {
 			return $ZP::E_POST_INVALIDREFERER;
 		}
 	}
-	# PROXYƒ`ƒFƒbƒN
+	# PROXYãƒã‚§ãƒƒã‚¯
 	if (!$islocalip && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {
 		if ($this->{'CONV'}->IsProxy($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {
-			#$this->{'FORM'}->Set('FROM', "</b> [\\{}\@{}\@{}-] <b>$from");
+			#$this->{'FORM'}->Set('FROM', "</b> [â€•\{}\@{}\@{}-] <b>$from");
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs)) {
 				return $ZP::E_REG_DNSBL;
 			}
 		}
 	}
-	# “Çæê—p
+	# èª­å–å°‚ç”¨
 	if (!$Set->Equal('BBS_READONLY', 'none')) {
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_LIMIT_READONLY, $bbs)) {
 			return $ZP::E_LIMIT_READONLY;
 		}
 	}
-	# JPƒzƒXƒgˆÈŠO‹K§
+	# JPãƒ›ã‚¹ãƒˆä»¥å¤–è¦åˆ¶
 	if (!$islocalip && $Set->Equal('BBS_JP_CHECK', 'checked')) {
 		if ($host !~ /\.jp$/i) {
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTJPHOST, $bbs)) {
@@ -477,28 +477,28 @@ sub IsRegulation
 		}
 	}
 	
-	# ƒXƒŒƒbƒhì¬ƒ‚[ƒh
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆãƒ¢ãƒ¼ãƒ‰
 	if ($Sys->Equal('MODE', 1)) {
-		# ƒXƒŒƒbƒhƒL[‚ªd•¡‚µ‚È‚¢‚æ‚¤‚É‚·‚é
+		# ã‚¹ãƒ¬ãƒƒãƒ‰ã‚­ãƒ¼ãŒé‡è¤‡ã—ãªã„ã‚ˆã†ã«ã™ã‚‹
 		my $tPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/';
 		my $key = $Sys->Get('KEY');
 		$key++ while (-e "$tPath$key.dat");
 		$Sys->Set('KEY', $key);
 		$datPath = "$tPath$key.dat";
 		
-		# ƒXƒŒƒbƒhì¬(Œg‘Ñ‚©‚ç)
+		# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ(æºå¸¯ã‹ã‚‰)
 		if (!$Set->Equal('BBS_THREADMOBILE', 'checked') && ($client & $ZP::C_MOBILE)) {
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_LIMIT_MOBILETHREAD, $bbs)) {
 				return $ZP::E_LIMIT_MOBILETHREAD;
 			}
 		}
-		# ƒXƒŒƒbƒhì¬(ƒLƒƒƒbƒv‚Ì‚İ)
+		# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ(ã‚­ãƒ£ãƒƒãƒ—ã®ã¿)
 		if ($Set->Equal('BBS_THREADCAPONLY', 'checked')) {
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_LIMIT_THREADCAPONLY, $bbs)) {
 				return $ZP::E_LIMIT_THREADCAPONLY;
 			}
 		}
-		# ƒXƒŒƒbƒhì¬(ƒXƒŒƒbƒh—§‚Ä‚·‚¬)
+		# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ(ã‚¹ãƒ¬ãƒƒãƒ‰ç«‹ã¦ã™ã)
 		require './module/peregrin.pl';
 		my $Log = PEREGRIN->new;
 		$Log->Load($Sys, 'THR');
@@ -517,7 +517,7 @@ sub IsRegulation
 		$Log->Set($Set, $Sys->Get('KEY'), $Sys->Get('VERSION'), $koyuu, undef, $mode);
 		$Log->Save($Sys);
 		
-		# SambaƒƒO
+		# Sambaãƒ­ã‚°
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_SAMBA, $bbs) || !$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTIMEPOST, $bbs)) {
 			my $Logs = PEREGRIN->new;
 			$Logs->Load($Sys, 'SMB');
@@ -525,7 +525,7 @@ sub IsRegulation
 			$Logs->Save($Sys);
 		}
 	}
-	# ƒŒƒX‘‚«‚İƒ‚[ƒh
+	# ãƒ¬ã‚¹æ›¸ãè¾¼ã¿ãƒ¢ãƒ¼ãƒ‰
 	else {
 		require './module/peregrin.pl';
 		
@@ -555,7 +555,7 @@ sub IsRegulation
 				($n, $tm) = $Logs->IsSamba($Samba, $koyuu);
 			}
 				
-			# ’ZŠÔ“Še (Samba—Dæ)
+			# çŸ­æ™‚é–“æŠ•ç¨¿ (Sambaå„ªå…ˆ)
 			if (!$n && $Holdtm && !$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTIMEPOST, $bbs)) {
 				$tm = $Logs->IsTime($Holdtm, $koyuu);
 			}
@@ -581,7 +581,7 @@ sub IsRegulation
 			}
 		}
 		
-		# ƒŒƒX‘‚«‚İ(˜A‘±“Še)
+		# ãƒ¬ã‚¹æ›¸ãè¾¼ã¿(é€£ç¶šæŠ•ç¨¿)
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOBREAKPOST, $bbs)) {
 			if ($Set->Get('timeclose') && $Set->Get('timecount') ne '') {
 				my $Log = PEREGRIN->new;
@@ -592,7 +592,7 @@ sub IsRegulation
 				}
 			}
 		}
-		# ƒŒƒX‘‚«‚İ(“ñd“Še)
+		# ãƒ¬ã‚¹æ›¸ãè¾¼ã¿(äºŒé‡æŠ•ç¨¿)
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DOUBLEPOST, $bbs)) {
 			if ($this->{'SYS'}->Get('KAKIKO') == 1) {
 				my $Log = PEREGRIN->new;
@@ -607,7 +607,7 @@ sub IsRegulation
 		#$Log->Save($Sys);
 	}
 	
-	# ƒpƒX‚ğ•Û‘¶
+	# ãƒ‘ã‚¹ã‚’ä¿å­˜
 	$Sys->Set('DATPATH', $datPath);
 	
 	return $ZP::E_SUCCESS;
@@ -615,11 +615,11 @@ sub IsRegulation
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	–¼‘OEƒ[ƒ‹—“‚Ì³‹K‰»
+#	åå‰ãƒ»ãƒ¡ãƒ¼ãƒ«æ¬„ã®æ­£è¦åŒ–
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‹K§’Ê‰ß‚È‚ç0‚ğ•Ô‚·
-#			‹K§ƒ`ƒFƒbƒN‚É‚©‚©‚Á‚½‚çƒGƒ‰[ƒR[ƒh‚ğ•Ô‚·
+#	@param	ãªã—
+#	@return	è¦åˆ¶é€šéãªã‚‰0ã‚’è¿”ã™
+#			è¦åˆ¶ãƒã‚§ãƒƒã‚¯ã«ã‹ã‹ã£ãŸã‚‰ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’è¿”ã™
 #
 #------------------------------------------------------------------------------------------------------------
 sub NormalizationNameMail
@@ -637,7 +637,7 @@ sub NormalizationNameMail
 	my $bbs = $Form->Get('bbs');
 	my $host = $ENV{'REMOTE_HOST'};
 	
-	# ƒLƒƒƒbƒvî•ñæ“¾
+	# ã‚­ãƒ£ãƒƒãƒ—æƒ…å ±å–å¾—
 	my $capID = $Sys->Get('CAPID', '');
 	my $capName = '';
 	my $capColor = '';
@@ -647,17 +647,17 @@ sub NormalizationNameMail
 		$capColor = $Set->Get('BBS_CAP_COLOR', '') if ($capColor eq '');
 	}
 	
-	# ” -> #
+	# ï¼ƒ -> #
 	$this->{'CONV'}->ConvertCharacter0(\$name);
 	
-	# ƒgƒŠƒbƒv•ÏŠ·
+	# ãƒˆãƒªãƒƒãƒ—å¤‰æ›
 	my $trip = '';
 	if ($name =~ /\#(.*)$/x) {
 		my $key = $1;
 		$trip = $this->{'CONV'}->ConvertTrip(\$key, $Set->Get('BBS_TRIPCOLUMN'), $Sys->Get('TRIP12'));
 	}
 	
-	# “Áê•¶š•ÏŠ· ƒtƒH[ƒ€î•ñÄİ’è
+	# ç‰¹æ®Šæ–‡å­—å¤‰æ› ãƒ•ã‚©ãƒ¼ãƒ æƒ…å ±å†è¨­å®š
 	$this->{'CONV'}->ConvertCharacter1(\$name, 0);
 	$this->{'CONV'}->ConvertCharacter1(\$mail, 1);
 	$this->{'CONV'}->ConvertCharacter1(\$subject, 3);
@@ -666,7 +666,7 @@ sub NormalizationNameMail
 	$Form->Set('subject', $subject);
 	$Form->Set('TRIPKEY', $trip);
 	
-	# ƒvƒ‰ƒOƒCƒ“Às ƒtƒH[ƒ€î•ñÄæ“¾
+	# ãƒ—ãƒ©ã‚°ã‚¤ãƒ³å®Ÿè¡Œ ãƒ•ã‚©ãƒ¼ãƒ æƒ…å ±å†å–å¾—
 	$this->ExecutePlugin($Sys->Get('MODE'));
 	$name = $Form->Get('FROM', '');
 	$mail = $Form->Get('mail', '');
@@ -675,36 +675,36 @@ sub NormalizationNameMail
 	$host = $Form->Get('HOST');
 	$trip = $Form->Get('TRIPKEY', '???');
 	
-	# 2chŒİŠ·
+	# 2chäº’æ›
 	$name =~ s/^ //;
 	
-	# ‹Ö‘¥•¶š•ÏŠ·
+	# ç¦å‰‡æ–‡å­—å¤‰æ›
 	$this->{'CONV'}->ConvertCharacter2(\$name, 0);
 	$this->{'CONV'}->ConvertCharacter2(\$mail, 1);
 	$this->{'CONV'}->ConvertCharacter2(\$subject, 3);
 	
-	# ƒgƒŠƒbƒv‚Æ–¼‘O‚ğŒ‹‡‚·‚é
-	$name =~ s|\#.*$| </b>Ÿ$trip <b>|x if ($trip ne '');
+	# ãƒˆãƒªãƒƒãƒ—ã¨åå‰ã‚’çµåˆã™ã‚‹
+	$name =~ s|\#.*$| </b>â—†$trip <b>|x if ($trip ne '');
 	
-	# fusiana•ÏŠ· 2chŒİŠ·
+	# fusianaå¤‰æ› 2chäº’æ›
 	$this->{'CONV'}->ConvertFusianasan(\$name, $host);
 	
-	# ƒLƒƒƒbƒv–¼Œ‹‡
+	# ã‚­ãƒ£ãƒƒãƒ—åçµåˆ
 	if ($capName ne '') {
-		$name = ($name ne '' ? "$name—" : '');
+		$name = ($name ne '' ? "$nameï¼ " : '');
 		if ($capColor eq '') {
-			$name .= "$capName š";
+			$name .= "$capName â˜…";
 		}
 		else {
-			$name .= "<font color=\"$capColor\">$capName š</font>";
+			$name .= "<font color=\"$capColor\">$capName â˜…</font>";
 		}
 	}
 	
 	
-	# ƒXƒŒƒbƒhì¬
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆæ™‚
 	if ($Sys->Equal('MODE', 1)) {
 		return $ZP::E_FORM_NOSUBJECT if ($subject eq '');
-		# ƒTƒuƒWƒFƒNƒg—“‚Ì•¶š”Šm”F
+		# ã‚µãƒ–ã‚¸ã‚§ã‚¯ãƒˆæ¬„ã®æ–‡å­—æ•°ç¢ºèª
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGSUBJECT, $bbs)) {
 			if ($Set->Get('BBS_SUBJECT_COUNT') < length($subject)) {
 				return $ZP::E_FORM_LONGSUBJECT;
@@ -712,26 +712,26 @@ sub NormalizationNameMail
 		}
 	}
 	
-	# –¼‘O—“‚Ì•¶š”Šm”F
+	# åå‰æ¬„ã®æ–‡å­—æ•°ç¢ºèª
 	if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGNAME, $bbs)) {
 		if ($Set->Get('BBS_NAME_COUNT') < length($name)) {
 			return $ZP::E_FORM_LONGNAME;
 		}
 	}
-	# ƒ[ƒ‹—“‚Ì•¶š”Šm”F
+	# ãƒ¡ãƒ¼ãƒ«æ¬„ã®æ–‡å­—æ•°ç¢ºèª
 	if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGMAIL, $bbs)) {
 		if ($Set->Get('BBS_MAIL_COUNT') < length($mail)) {
 			return $ZP::E_FORM_LONGMAIL;
 		}
 	}
-	# –¼‘O—“‚Ì“ü—ÍŠm”F
+	# åå‰æ¬„ã®å…¥åŠ›ç¢ºèª
 	if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_NONAME, $bbs)) {
 		if ($Set->Equal('NANASHI_CHECK', 'checked') && $name eq '') {
 			return $ZP::E_FORM_NONAME;
 		}
 	}
 	
-	# ³‹K‰»‚µ‚½“à—e‚ğÄ“xİ’è
+	# æ­£è¦åŒ–ã—ãŸå†…å®¹ã‚’å†åº¦è¨­å®š
 	$Form->Set('FROM', $name);
 	$Form->Set('mail', $mail);
 	$Form->Set('subject', $subject);
@@ -741,11 +741,11 @@ sub NormalizationNameMail
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒeƒLƒXƒg—“‚Ì³‹K‰»
+#	ãƒ†ã‚­ã‚¹ãƒˆæ¬„ã®æ­£è¦åŒ–
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	‹K§’Ê‰ß‚È‚ç0‚ğ•Ô‚·
-#			‹K§ƒ`ƒFƒbƒN‚É‚©‚©‚Á‚½‚çƒGƒ‰[ƒR[ƒh‚ğ•Ô‚·
+#	@param	ãªã—
+#	@return	è¦åˆ¶é€šéãªã‚‰0ã‚’è¿”ã™
+#			è¦åˆ¶ãƒã‚§ãƒƒã‚¯ã«ã‹ã‹ã£ãŸã‚‰ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰ã‚’è¿”ã™
 #
 #------------------------------------------------------------------------------------------------------------
 sub NormalizationContents
@@ -763,44 +763,44 @@ sub NormalizationContents
 	my $host = $Form->Get('HOST');
 	my $capID = $this->{'SYS'}->Get('CAPID', '');
 	
-	# ‹Ö‘¥•¶š•ÏŠ·
+	# ç¦å‰‡æ–‡å­—å¤‰æ›
 	$Conv->ConvertCharacter2(\$text, 2);
 	
 	my ($ln, $cl) = $Conv->GetTextInfo(\$text);
 	
-	# –{•¶‚ª–³‚¢
+	# æœ¬æ–‡ãŒç„¡ã„
 	return $ZP::E_FORM_NOTEXT if ($text eq '');
 	
-	# –{•¶‚ª’·‚·‚¬
+	# æœ¬æ–‡ãŒé•·ã™ã
 	if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGTEXT, $bbs)) {
 		if ($Set->Get('BBS_MESSAGE_COUNT') < length($text)) {
 			return $ZP::E_FORM_LONGTEXT;
 		}
 	}
-	# ‰üs‚ª‘½‚·‚¬
+	# æ”¹è¡ŒãŒå¤šã™ã
 	if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_MANYLINE, $bbs)) {
 		if (($Set->Get('BBS_LINE_NUMBER') * 2) < $ln) {
 			return $ZP::E_FORM_MANYLINE;
 		}
 	}
-	# 1s‚ª’·‚·‚¬
+	# 1è¡ŒãŒé•·ã™ã
 	if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGLINE, $bbs)) {
 		if ($Set->Get('BBS_COLUMN_NUMBER') < $cl) {
 			return $ZP::E_FORM_LONGLINE;
 		}
 	}
-	# ƒAƒ“ƒJ[‚ª‘½‚·‚¬
+	# ã‚¢ãƒ³ã‚«ãƒ¼ãŒå¤šã™ã
 	if ($Sys->Get('ANKERS')) {
 		if ($Conv->IsAnker(\$text, $Sys->Get('ANKERS'))) {
 			return $ZP::E_FORM_MANYANCHOR;
 		}
 	}
 	
-	# –{•¶ƒzƒXƒg•\¦
+	# æœ¬æ–‡ãƒ›ã‚¹ãƒˆè¡¨ç¤º
 	#if (!$Sec->IsAuthority($capID, $ZP::CAP_DISP_NOHOST, $bbs)) {
 	#	if ($Set->Equal('BBS_RAWIP_CHECK', 'checked') && $Sys->Equal('MODE', 1)) {
 	#		$text .= ' <hr> <font color=tomato face=Arial><b>';
-	#		$text .= "$ENV{'REMOTE_ADDR'} , $host , </b></font><br>";
+	#		$text .= (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}) , $host , </b></font><br>";
 	#	}
 	#}
 	
@@ -811,10 +811,10 @@ sub NormalizationContents
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	1001‚ÌƒŒƒXƒf[ƒ^‚ğİ’è‚·‚é
+#	1001ã®ãƒ¬ã‚¹ãƒ‡ãƒ¼ã‚¿ã‚’è¨­å®šã™ã‚‹
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
-#	@param	$data	1001ƒŒƒXŠi”[ƒoƒbƒtƒ@
+#	@param	$data	1001ãƒ¬ã‚¹æ ¼ç´ãƒãƒƒãƒ•ã‚¡
 #
 #------------------------------------------------------------------------------------------------------------
 sub Get1001Data
@@ -824,7 +824,7 @@ sub Get1001Data
 	
 	my $endPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/1000.txt';
 	
-	# 1000.txt‚ª‘¶İ‚·‚ê‚Î‚»‚Ì“à—eA–³‚¯‚ê‚ÎƒfƒtƒHƒ‹ƒg‚Ì1001‚ğg—p‚·‚é
+	# 1000.txtãŒå­˜åœ¨ã™ã‚Œã°ãã®å†…å®¹ã€ç„¡ã‘ã‚Œã°ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã®1001ã‚’ä½¿ç”¨ã™ã‚‹
 	if (open(my $fh, '<', $endPath)) {
 		flock($fh, 2);
 		$$data = <$fh>;
@@ -835,20 +835,20 @@ sub Get1001Data
 		my $resmax1 = $resmax + 1;
 		my $resmaxz = $resmax;
 		my $resmaxz1 = $resmax1;
-		$resmaxz =~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # ‘SŠp”š
-		$resmaxz1 =~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # ‘SŠp”š
+		$resmaxz =~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # å…¨è§’æ•°å­—
+		$resmaxz1 =~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # å…¨è§’æ•°å­—
 		
-		$$data = "$resmaxz1<><>Over $resmax Thread<>‚±‚ÌƒXƒŒƒbƒh‚Í$resmaxz‚ğ’´‚¦‚Ü‚µ‚½B<br>";
-		$$data .= '‚à‚¤‘‚¯‚È‚¢‚Ì‚ÅAV‚µ‚¢ƒXƒŒƒbƒh‚ğ—§‚Ä‚Ä‚­‚¾‚³‚¢‚Å‚·BBB<>' . "\n";
+		$$data = "$resmaxz1<><>Over $resmax Thread<>ã“ã®ã‚¹ãƒ¬ãƒƒãƒ‰ã¯$resmaxzã‚’è¶…ãˆã¾ã—ãŸã€‚<br>";
+		$$data .= 'ã‚‚ã†æ›¸ã‘ãªã„ã®ã§ã€æ–°ã—ã„ã‚¹ãƒ¬ãƒƒãƒ‰ã‚’ç«‹ã¦ã¦ãã ã•ã„ã§ã™ã€‚ã€‚ã€‚<>' . "\n";
 	}
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒzƒXƒgƒƒO‚ğo—Í‚·‚é
+#	ãƒ›ã‚¹ãƒˆãƒ­ã‚°ã‚’å‡ºåŠ›ã™ã‚‹
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
-#	@param	$data	1001ƒŒƒXŠi”[ƒoƒbƒtƒ@
+#	@param	$data	1001ãƒ¬ã‚¹æ ¼ç´ãƒãƒƒãƒ•ã‚¡
 #
 #------------------------------------------------------------------------------------------------------------
 sub SaveHost
@@ -864,7 +864,7 @@ sub SaveHost
 	
 	if ($agent ne '0') {
 		if ($agent eq 'P') {
-			$host = "$host($koyuu)$ENV{'REMOTE_ADDR'}";
+			$host = "$host($koyuu)(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR})";
 		}
 		else {
 			$host = "$host($koyuu)";
