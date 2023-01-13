@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	Œf¦”ÂŠÇ— - Œf¦”Âİ’è ƒ‚ƒWƒ…[ƒ‹
+#	æ²ç¤ºæ¿ç®¡ç† - æ²ç¤ºæ¿è¨­å®š ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«
 #	bbs.setting.pl
 #	---------------------------------------------------------------------------
 #	2004.06.01 start
@@ -13,10 +13,10 @@ use strict;
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+#	ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 #	-------------------------------------------------------------------------------------
-#	@param	‚È‚µ
-#	@return	ƒ‚ƒWƒ…[ƒ‹ƒIƒuƒWƒFƒNƒg
+#	@param	ãªã—
+#	@return	ãƒ¢ã‚¸ãƒ¥ãƒ¼ãƒ«ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆ
 #
 #------------------------------------------------------------------------------------------------------------
 sub new
@@ -34,12 +34,12 @@ sub new
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	•\¦ƒƒ\ƒbƒh
+#	è¡¨ç¤ºãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoPrint
@@ -52,7 +52,7 @@ sub DoPrint
 	$BASE = SAURON->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
-	# Œf¦”Âî•ñ‚Ì“Ç‚İ‚İ‚ÆƒOƒ‹[ƒvİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã®èª­ã¿è¾¼ã¿ã¨ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®š
 	if (! defined $BBS) {
 		require './module/nazguls.pl';
 		$BBS = NAZGUL->new;
@@ -62,44 +62,44 @@ sub DoPrint
 		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	}
 	
-	# ŠÇ—ƒ}ƒXƒ^ƒIƒuƒWƒFƒNƒg‚Ì¶¬
+	# ç®¡ç†ãƒã‚¹ã‚¿ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ç”Ÿæˆ
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
-	# ƒƒjƒ…[‚Ìİ’è
+	# ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã®è¨­å®š
 	SetMenuList($BASE, $pSys, $Sys->Get('BBS'));
 	
-	if ($subMode eq 'SETINFO') {													# İ’èî•ñ‰æ–Ê
+	if ($subMode eq 'SETINFO') {													# è¨­å®šæƒ…å ±ç”»é¢
 		PrintSettingInfo($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'SETBASE') {													# Šî–{İ’è‰æ–Ê
+	elsif ($subMode eq 'SETBASE') {													# åŸºæœ¬è¨­å®šç”»é¢
 		PrintBaseSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'SETCOLOR') {												# ƒJƒ‰[İ’è‰æ–Ê
+	elsif ($subMode eq 'SETCOLOR') {												# ã‚«ãƒ©ãƒ¼è¨­å®šç”»é¢
 		PrintColorSetting($Page, $Sys, $Form, 0);
 	}
-	elsif ($subMode eq 'SETCOLORC') {												# ƒJƒ‰[İ’èŠm”F‰æ–Ê
+	elsif ($subMode eq 'SETCOLORC') {												# ã‚«ãƒ©ãƒ¼è¨­å®šç¢ºèªç”»é¢
 		PrintColorSetting($Page, $Sys, $Form, 1);
 	}
-	elsif ($subMode eq 'SETLIMIT') {												# §ŒÀİ’è‰æ–Ê
+	elsif ($subMode eq 'SETLIMIT') {												# åˆ¶é™è¨­å®šç”»é¢
 		PrintLimitSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'SETOTHER') {												# ‚»‚Ì‘¼İ’è‰æ–Ê
+	elsif ($subMode eq 'SETOTHER') {												# ãã®ä»–è¨­å®šç”»é¢
 		PrintOtherSetting($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'SETIMPORT') {												# ƒCƒ“ƒ|[ƒg‰æ–Ê
+	elsif ($subMode eq 'SETIMPORT') {												# ã‚¤ãƒ³ãƒãƒ¼ãƒˆç”»é¢
 		PrintSettingImport($Page, $Sys, $Form, $BBS);
 	}
-	elsif ($subMode eq 'COMPLETE') {												# İ’èŠ®—¹‰æ–Ê
+	elsif ($subMode eq 'COMPLETE') {												# è¨­å®šå®Œäº†ç”»é¢
 		$Sys->Set('_TITLE', 'Process Complete');
-		$BASE->PrintComplete('Œf¦”Âİ’èˆ—', $this->{'LOG'});
+		$BASE->PrintComplete('æ²ç¤ºæ¿è¨­å®šå‡¦ç†', $this->{'LOG'});
 	}
-	elsif ($subMode eq 'FALSE') {													# İ’è¸”s‰æ–Ê
+	elsif ($subMode eq 'FALSE') {													# è¨­å®šå¤±æ•—ç”»é¢
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
 	
-	# Œf¦”Âî•ñ‚ğİ’è
+	# æ²ç¤ºæ¿æƒ…å ±ã‚’è¨­å®š
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	
 	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
@@ -107,12 +107,12 @@ sub DoPrint
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‹@”\ƒƒ\ƒbƒh
+#	æ©Ÿèƒ½ãƒ¡ã‚½ãƒƒãƒ‰
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	MELKOR
 #	@param	$Form	SAMWISE
-#	@param	$pSys	ŠÇ—ƒVƒXƒeƒ€
-#	@return	‚È‚µ
+#	@param	$pSys	ç®¡ç†ã‚·ã‚¹ãƒ†ãƒ 
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub DoFunction
@@ -124,7 +124,7 @@ sub DoFunction
 	require './module/nazguls.pl';
 	$BBS = NAZGUL->new;
 	
-	# ŠÇ—î•ñ‚ğ“o˜^
+	# ç®¡ç†æƒ…å ±ã‚’ç™»éŒ²
 	$BBS->Load($Sys);
 	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$Sys->Set('ADMIN', $pSys);
@@ -133,26 +133,26 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 9999;
 	
-	if ($subMode eq 'SETBASE') {													# Šî–{İ’è
+	if ($subMode eq 'SETBASE') {													# åŸºæœ¬è¨­å®š
 		$err = FunctionBaseSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'SETCOLOR') {												# ƒJƒ‰[İ’è
+	elsif ($subMode eq 'SETCOLOR') {												# ã‚«ãƒ©ãƒ¼è¨­å®š
 		$err = FunctionColorSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'SETLIMIT') {												# §ŒÀİ’è
+	elsif ($subMode eq 'SETLIMIT') {												# åˆ¶é™è¨­å®š
 		$err = FunctionLimitSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'SETOTHER') {												# ‚»‚Ì‘¼İ’è
+	elsif ($subMode eq 'SETOTHER') {												# ãã®ä»–è¨­å®š
 		$err = FunctionOtherSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'SETORIGIN') {												# ƒIƒŠƒWƒiƒ‹İ’è
+	elsif ($subMode eq 'SETORIGIN') {												# ã‚ªãƒªã‚¸ãƒŠãƒ«è¨­å®š
 		$err = FunctionOriginalSetting($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'SETIMPORT') {												# ƒCƒ“ƒ|[ƒg
+	elsif ($subMode eq 'SETIMPORT') {												# ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 		$err = FunctionSettingImport($Sys, $Form, $this->{'LOG'}, $BBS);
 	}
 	
-	# ˆ—Œ‹‰Ê•\¦
+	# å‡¦ç†çµæœè¡¨ç¤º
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
@@ -168,40 +168,40 @@ sub DoFunction
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒƒjƒ…[ƒŠƒXƒgİ’è
+#	ãƒ¡ãƒ‹ãƒ¥ãƒ¼ãƒªã‚¹ãƒˆè¨­å®š
 #	-------------------------------------------------------------------------------------
 #	@param	$Base	SAURON
-#	@return	‚È‚µ
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
 	
-	$Base->SetMenu('İ’èî•ñ', "'bbs.setting','DISP','SETINFO'");
+	$Base->SetMenu('è¨­å®šæƒ…å ±', "'bbs.setting','DISP','SETINFO'");
 	
-	# ŠÇ—ƒOƒ‹[ƒvİ’èŒ ŒÀ‚Ì‚İ
+	# ç®¡ç†ã‚°ãƒ«ãƒ¼ãƒ—è¨­å®šæ¨©é™ã®ã¿
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_BBSSETTING, $bbs)){
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('Šî–{İ’è', "'bbs.setting','DISP','SETBASE'");
-		$Base->SetMenu('ƒJƒ‰[İ’è', "'bbs.setting','DISP','SETCOLOR'");
-		$Base->SetMenu('§ŒÀE‹K§İ’è', "'bbs.setting','DISP','SETLIMIT'");
-		$Base->SetMenu('‚»‚Ì‘¼İ’è', "'bbs.setting','DISP','SETOTHER'");
+		$Base->SetMenu('åŸºæœ¬è¨­å®š', "'bbs.setting','DISP','SETBASE'");
+		$Base->SetMenu('ã‚«ãƒ©ãƒ¼è¨­å®š', "'bbs.setting','DISP','SETCOLOR'");
+		$Base->SetMenu('åˆ¶é™ãƒ»è¦åˆ¶è¨­å®š', "'bbs.setting','DISP','SETLIMIT'");
+		$Base->SetMenu('ãã®ä»–è¨­å®š', "'bbs.setting','DISP','SETOTHER'");
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('İ’èƒCƒ“ƒ|[ƒg', "'bbs.setting','DISP','SETIMPORT'");
+		$Base->SetMenu('è¨­å®šã‚¤ãƒ³ãƒãƒ¼ãƒˆ', "'bbs.setting','DISP','SETIMPORT'");
 	}
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('ƒVƒXƒeƒ€ŠÇ—‚Ö–ß‚é', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('ã‚·ã‚¹ãƒ†ãƒ ç®¡ç†ã¸æˆ»ã‚‹', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	İ’èî•ñ‰æ–Ê‚Ì•\¦
+#	è¨­å®šæƒ…å ±ç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintSettingInfo
@@ -237,12 +237,12 @@ sub PrintSettingInfo
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Šî–{İ’è‰æ–Ê‚Ì•\¦
+#	åŸºæœ¬è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintBaseSetting
@@ -265,38 +265,38 @@ sub PrintBaseSetting
 	my $setRefCushion	= $Setting->Get('BBS_REFERER_CUSHION');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2>Šeİ’è’l‚ğ“ü—Í‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=2>å„è¨­å®šå€¤ã‚’å…¥åŠ›ã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒTƒuƒ^ƒCƒgƒ‹</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚µãƒ–ã‚¿ã‚¤ãƒˆãƒ«</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_SUBTITLE value=\"$setSubTitle\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexŠÅ”Â‰æ‘œ</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexçœ‹æ¿ç”»åƒ</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_TITLE_PICTURE value=\"$setKanban\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexŠÅ”ÂƒŠƒ“ƒN</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexçœ‹æ¿ãƒªãƒ³ã‚¯</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_TITLE_LINK value=\"$setKnabanLink\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">index”wŒi‰æ‘œ</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexèƒŒæ™¯ç”»åƒ</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_BG_PICTURE value=\"$setBackPict\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">–¼–³‚µ‚³‚ñ</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">åç„¡ã—ã•ã‚“</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_NONAME_NAME value=\"$setNoName\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">íœ•¶Œ¾</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">å‰Šé™¤æ–‡è¨€</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_DELETE_NAME value=\"$setAbone\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">cookie•Û‘¶ƒpƒX</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">cookieä¿å­˜ãƒ‘ã‚¹</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_COOKIEPATH value=\"$setCookiePath\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒŠƒtƒ@ƒ‰ƒNƒbƒVƒ‡ƒ“</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒªãƒ•ã‚¡ãƒ©ã‚¯ãƒƒã‚·ãƒ§ãƒ³</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_REFERER_CUSHION value=\"$setRefCushion\"></td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"@İ’è@\"");
+	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"ã€€è¨­å®šã€€\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETBASE');\"></td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒJƒ‰[İ’è‰æ–Ê‚Ì•\¦
+#	ã‚«ãƒ©ãƒ¼è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$flg	ƒ‚[ƒh(0:•\¦ 1:Šm”F)
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$flg	ãƒ¢ãƒ¼ãƒ‰(0:è¡¨ç¤º 1:ç¢ºèª)
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintColorSetting
@@ -308,18 +308,18 @@ sub PrintColorSetting
 	
 	$SYS->Set('_TITLE', 'BBS Color Setting');
 	
-	# SETTING.TXT‚©‚ç’l‚ğæ“¾
+	# SETTING.TXTã‹ã‚‰å€¤ã‚’å–å¾—
 	if ($flg == 0) {
 		require './module/isildur.pl';
 		$Setting = ISILDUR->new;
 		$Setting->Load($SYS);
 	}
-	# ƒtƒH[ƒ€î•ñ‚©‚ç’l‚ğæ“¾
+	# ãƒ•ã‚©ãƒ¼ãƒ æƒ…å ±ã‹ã‚‰å€¤ã‚’å–å¾—
 	else {
 		$Setting = $Form;
 	}
 	
-	# İ’è’l‚ğæ“¾
+	# è¨­å®šå€¤ã‚’å–å¾—
 	$setIndexTitle	= $Setting->Get('BBS_TITLE_COLOR');
 	$setThreadTitle	= $Setting->Get('BBS_SUBJECT_COLOR');
 	$setIndexBG		= $Setting->Get('BBS_BG_COLOR');
@@ -334,82 +334,82 @@ sub PrintColorSetting
 	$setCap			= $Setting->Get('BBS_CAP_COLOR');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
-	$Page->Print("<tr><td colspan=6>Šeİ’èF‚ğ“ü—Í‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=6>å„è¨­å®šè‰²ã‚’å…¥åŠ›ã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">index”wŒiF</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexèƒŒæ™¯è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_BG_COLOR value=\"$setIndexBG\">");
 	$Page->Print("</td><td bgcolor=$setIndexBG></td>");
-	$Page->Print("<td class=\"DetailTitle\">ƒeƒLƒXƒgF</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">ãƒ†ã‚­ã‚¹ãƒˆè‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_TEXT_COLOR value=\"$setText\">");
-	$Page->Print("</td><td><font color=$setText>ƒeƒLƒXƒg</font></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexƒƒjƒ…[”wŒiF</td><td>");
+	$Page->Print("</td><td><font color=$setText>ãƒ†ã‚­ã‚¹ãƒˆ</font></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexãƒ¡ãƒ‹ãƒ¥ãƒ¼èƒŒæ™¯è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_MENU_COLOR value=\"$setMenuBG\">");
 	$Page->Print("</td><td bgcolor=$setMenuBG></td>");
-	$Page->Print("<td class=\"DetailTitle\">–¼‘OF</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">åå‰è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_NAME_COLOR value=\"$setName\">");
-	$Page->Print("</td><td><font color=$setName>–¼‘O</font></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒXƒŒƒbƒhì¬”wŒiF</td><td>");
+	$Page->Print("</td><td><font color=$setName>åå‰</font></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆèƒŒæ™¯è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_MAKETHREAD_COLOR value=\"$setCreateBG\">");
 	$Page->Print("</td><td bgcolor=$setCreateBG></td>");
-	$Page->Print("<td class=\"DetailTitle\">ƒŠƒ“ƒNF</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">ãƒªãƒ³ã‚¯è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_LINK_COLOR value=\"$setLink\">");
-	$Page->Print("</td><td><font color=$setLink>ƒŠƒ“ƒN</font></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒXƒŒƒbƒh”wŒiF</td><td>");
+	$Page->Print("</td><td><font color=$setLink>ãƒªãƒ³ã‚¯</font></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚¹ãƒ¬ãƒƒãƒ‰èƒŒæ™¯è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_THREAD_COLOR value=\"$setThreadBG\">");
 	$Page->Print("</td><td bgcolor=$setThreadBG></td>");
-	$Page->Print("<td class=\"DetailTitle\">ƒŠƒ“ƒNF(ƒAƒ“ƒJ[)</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">ãƒªãƒ³ã‚¯è‰²(ã‚¢ãƒ³ã‚«ãƒ¼æ™‚)</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_ALINK_COLOR value=\"$setLinkA\">");
-	$Page->Print("</td><td><font color=$setLinkA>ƒŠƒ“ƒN(ƒAƒ“ƒJ[)</font></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexƒ^ƒCƒgƒ‹F</td><td>");
+	$Page->Print("</td><td><font color=$setLinkA>ãƒªãƒ³ã‚¯(ã‚¢ãƒ³ã‚«ãƒ¼)</font></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexã‚¿ã‚¤ãƒˆãƒ«è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_TITLE_COLOR value=\"$setIndexTitle\">");
-	$Page->Print("</td><td><font color=$setIndexTitle>indexƒ^ƒCƒgƒ‹</font></td>");
-	$Page->Print("<td class=\"DetailTitle\">ƒŠƒ“ƒNF(–K–âÏ‚İ)</td><td>");
+	$Page->Print("</td><td><font color=$setIndexTitle>indexã‚¿ã‚¤ãƒˆãƒ«</font></td>");
+	$Page->Print("<td class=\"DetailTitle\">ãƒªãƒ³ã‚¯è‰²(è¨ªå•æ¸ˆã¿)</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_VLINK_COLOR value=\"$setLinkV\">");
-	$Page->Print("</td><td><font color=$setLinkV>ƒŠƒ“ƒN(–K–âÏ‚İ)</font></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒXƒŒƒbƒhƒ^ƒCƒgƒ‹F</td><td>");
+	$Page->Print("</td><td><font color=$setLinkV>ãƒªãƒ³ã‚¯(è¨ªå•æ¸ˆã¿)</font></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚¹ãƒ¬ãƒƒãƒ‰ã‚¿ã‚¤ãƒˆãƒ«è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_SUBJECT_COLOR value=\"$setThreadTitle\">");
-	$Page->Print("</td><td><font color=$setThreadTitle>ƒXƒŒƒbƒhƒ^ƒCƒgƒ‹</font></td>");
-	$Page->Print("<td class=\"DetailTitle\">ƒLƒƒƒbƒvF</td><td>");
+	$Page->Print("</td><td><font color=$setThreadTitle>ã‚¹ãƒ¬ãƒƒãƒ‰ã‚¿ã‚¤ãƒˆãƒ«</font></td>");
+	$Page->Print("<td class=\"DetailTitle\">ã‚­ãƒ£ãƒƒãƒ—è‰²</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_CAP_COLOR value=\"$setCap\">");
-	$Page->Print("</td><td><font color=$setName><font color=$setCap>–¼‘O</font></font></td></tr>\n");
+	$Page->Print("</td><td><font color=$setName><font color=$setCap>åå‰</font></font></td></tr>\n");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	
-	# ƒXƒŒƒbƒhƒvƒŒƒrƒ…[‚Ì•\¦
+	# ã‚¹ãƒ¬ãƒƒãƒ‰ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ã®è¡¨ç¤º
 	if (1) {
-		$Page->Print("<tr><td class=\"DetailTitle\" colspan=3>indexƒvƒŒƒrƒ…[</td>");
-		$Page->Print("<td class=\"DetailTitle\" colspan=3>ƒXƒŒƒbƒhƒvƒŒƒrƒ…[</td></tr>");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=3>indexãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼</td>");
+		$Page->Print("<td class=\"DetailTitle\" colspan=3>ã‚¹ãƒ¬ãƒƒãƒ‰ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼</td></tr>");
 		$Page->Print("<tr><td colspan=3 bgcolor=$setIndexBG>");
-		$Page->Print("<center><font color=$setIndexTitle>indexƒ^ƒCƒgƒ‹</font><br>");
-		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setMenuBG border><td>ƒwƒbƒ_</td></table><br>");
-		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setMenuBG border><td>ƒƒjƒ…[</td></table><br>");
+		$Page->Print("<center><font color=$setIndexTitle>indexã‚¿ã‚¤ãƒˆãƒ«</font><br>");
+		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setMenuBG border><td>ãƒ˜ãƒƒãƒ€</td></table><br>");
+		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setMenuBG border><td>ãƒ¡ãƒ‹ãƒ¥ãƒ¼</td></table><br>");
 		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setThreadBG border><td>");
-		$Page->Print("<font color=$setThreadTitle>ƒXƒŒƒbƒhƒ^ƒCƒgƒ‹</font><br><br>");
-		$Page->Print("<font color=$setText>ƒeƒLƒXƒg</font><br></td></table><br>");
-		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setCreateBG border><td>ƒXƒŒƒbƒhì¬</td>");
+		$Page->Print("<font color=$setThreadTitle>ã‚¹ãƒ¬ãƒƒãƒ‰ã‚¿ã‚¤ãƒˆãƒ«</font><br><br>");
+		$Page->Print("<font color=$setText>ãƒ†ã‚­ã‚¹ãƒˆ</font><br></td></table><br>");
+		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setCreateBG border><td>ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆ</td>");
 		$Page->Print("</table><br></center></td>");
 		$Page->Print("<td colspan=3 bgcolor=$setThreadBG valign=top><font color=$setThreadTitle>");
-		$Page->Print("ƒXƒŒƒbƒhƒ^ƒCƒgƒ‹</font><br><br>1 <font color=$setName>–¼‘O—<font color=$setCap>ƒLƒƒƒbƒv š</font></font><br>");
-		$Page->Print("@<font color=$setLink><u>http://---</u></font><br>");
-		$Page->Print("@<font color=$setLinkV><u>http://---</u></font><br>");
+		$Page->Print("ã‚¹ãƒ¬ãƒƒãƒ‰ã‚¿ã‚¤ãƒˆãƒ«</font><br><br>1 <font color=$setName>åå‰ï¼ <font color=$setCap>ã‚­ãƒ£ãƒƒãƒ— â˜…</font></font><br>");
+		$Page->Print("ã€€<font color=$setLink><u>http://---</u></font><br>");
+		$Page->Print("ã€€<font color=$setLinkV><u>http://---</u></font><br>");
 		$Page->Print("</td></tr>");
 		$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	}
 	$Page->Print("<tr><td colspan=6 align=left>");
-	$Page->Print("<input type=button value=\"@İ’è@\" onclick=\"DoSubmit");
+	$Page->Print("<input type=button value=\"ã€€è¨­å®šã€€\" onclick=\"DoSubmit");
 	$Page->Print("('bbs.setting','FUNC','SETCOLOR');\"> ");
-	$Page->Print("<input type=button value=\"@Šm”F@\" onclick=\"DoSubmit");
+	$Page->Print("<input type=button value=\"ã€€ç¢ºèªã€€\" onclick=\"DoSubmit");
 	$Page->Print("('bbs.setting','DISP','SETCOLORC');\">");
 	$Page->Print("</td></tr></table><br>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	§ŒÀİ’è‰æ–Ê‚Ì•\¦
+#	åˆ¶é™è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintLimitSetting
@@ -422,10 +422,10 @@ sub PrintLimitSetting
 	my $Setting = ISILDUR->new;
 	$Setting->Load($Sys);
 	
-	# İ’è’l‚ğæ“¾
+	# è¨­å®šå€¤ã‚’å–å¾—
 	my $setResMax		= $Setting->Get('BBS_RES_MAX');
-	my $setSubMax		= $Setting->Get('BBS_SUBJECT_MAX');		# Å‘åƒXƒŒƒbƒh”
-	my $setSubjectMax	= $Setting->Get('BBS_SUBJECT_COUNT');	# ƒ^ƒCƒgƒ‹Å‘åƒoƒCƒg”
+	my $setSubMax		= $Setting->Get('BBS_SUBJECT_MAX');		# æœ€å¤§ã‚¹ãƒ¬ãƒƒãƒ‰æ•°
+	my $setSubjectMax	= $Setting->Get('BBS_SUBJECT_COUNT');	# ã‚¿ã‚¤ãƒˆãƒ«æœ€å¤§ãƒã‚¤ãƒˆæ•°
 	my $setNameMax		= $Setting->Get('BBS_NAME_COUNT');
 	my $setMailMax		= $Setting->Get('BBS_MAIL_COUNT');
 	my $setContMax		= $Setting->Get('BBS_MESSAGE_COUNT');
@@ -454,84 +454,84 @@ sub PrintLimitSetting
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
-	$Page->Print("<tr><td colspan=4>Šeİ’è’l‚ğ“ü—Í‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=4>å„è¨­å®šå€¤ã‚’å…¥åŠ›ã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒ^ƒCƒgƒ‹•¶š”</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚¿ã‚¤ãƒˆãƒ«æ–‡å­—æ•°</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_SUBJECT_COUNT value=\"$setSubjectMax\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">ƒ[ƒ‹•¶š”</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">ãƒ¡ãƒ¼ãƒ«æ–‡å­—æ•°</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_MAIL_COUNT value=\"$setMailMax\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">–¼‘O•¶š”</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">åå‰æ–‡å­—æ•°</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_NAME_COUNT value=\"$setNameMax\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">–{•¶•¶š”</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">æœ¬æ–‡æ–‡å­—æ•°</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_MESSAGE_COUNT value=\"$setContMax\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒŒƒX1sÅ‘å•¶š”</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒ¬ã‚¹1è¡Œæœ€å¤§æ–‡å­—æ•°</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_COLUMN_NUMBER value=\"$setLineLength\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">datƒtƒ@ƒCƒ‹Å‘åƒTƒCƒYiKBj</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">datãƒ•ã‚¡ã‚¤ãƒ«æœ€å¤§ã‚µã‚¤ã‚ºï¼ˆKBï¼‰</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_DATMAX value=\"$setDatMax\"></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">‘‚«‚İ‰Â”\\s”(‹ô”s)</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ›¸ãè¾¼ã¿å¯èƒ½\è¡Œæ•°(å¶æ•°è¡Œ)</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_LINE_NUMBER value=\"$setLineMax\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">Å‘åƒXƒŒƒbƒh”(–³‹L“ü=".$Sys->Get('SUBMAX').")</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">æœ€å¤§ã‚¹ãƒ¬ãƒƒãƒ‰æ•°(ç„¡è¨˜å…¥=".$Sys->Get('SUBMAX').")</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_SUBJECT_MAX value=\"$setSubMax\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">–¼–³‚µƒ`ƒFƒbƒN</td><td>");
-	$Page->Print("<input type=checkbox name=NANASHI_CHECK $setNoName value=on>—LŒø</td>");
-	$Page->Print("<td class=\"DetailTitle\">Å‘åƒŒƒX”(–³‹L“ü=".$Sys->Get('RESMAX').")</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">åç„¡ã—ãƒã‚§ãƒƒã‚¯</td><td>");
+	$Page->Print("<input type=checkbox name=NANASHI_CHECK $setNoName value=on>æœ‰åŠ¹</td>");
+	$Page->Print("<td class=\"DetailTitle\">æœ€å¤§ãƒ¬ã‚¹æ•°(ç„¡è¨˜å…¥=".$Sys->Get('RESMAX').")</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_RES_MAX value=\"$setResMax\"></td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">Œf¦”Â‘‚«‚İ§ŒÀ</td><td><select name=BBS_READONLY>");
-	$Page->Print("<option value=on $selROon>“Çæê—p");
-	$Page->Print("<option value=caps $selROcaps>ƒLƒƒƒbƒv‚Ì‚İ‰Â”\\");
-	$Page->Print("<option value=none $selROnone>‘‚«‚İ‰Â”\\");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ²ç¤ºæ¿æ›¸ãè¾¼ã¿åˆ¶é™</td><td><select name=BBS_READONLY>");
+	$Page->Print("<option value=on $selROon>èª­å–å°‚ç”¨");
+	$Page->Print("<option value=caps $selROcaps>ã‚­ãƒ£ãƒƒãƒ—ã®ã¿å¯èƒ½\");
+	$Page->Print("<option value=none $selROnone>æ›¸ãè¾¼ã¿å¯èƒ½\");
 	$Page->Print("</select></td>");
-	$Page->Print("<td class=\"DetailTitle\">DNSBLƒ`ƒFƒbƒN</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK $setProxy value=on>—LŒø</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒXƒŒƒbƒhì¬§ŒÀ(ƒLƒƒƒbƒv)</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_THREADCAPONLY $setCapOnly value=on>ƒLƒƒƒbƒv‚Ì‚İ‰Â”\\</td>");
-	$Page->Print("<td class=\"DetailTitle\">ŠCŠOƒzƒXƒg‹K§</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_JP_CHECK $setOverSea value=on>—LŒø</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒXƒŒƒbƒhì¬§ŒÀ(Œg‘Ñ)</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>Œg‘Ñ‚©‚ç‹–‰Â</td>");
+	$Page->Print("<td class=\"DetailTitle\">DNSBLãƒã‚§ãƒƒã‚¯</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK $setProxy value=on>æœ‰åŠ¹</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆåˆ¶é™(ã‚­ãƒ£ãƒƒãƒ—)</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_THREADCAPONLY $setCapOnly value=on>ã‚­ãƒ£ãƒƒãƒ—ã®ã¿å¯èƒ½\</td>");
+	$Page->Print("<td class=\"DetailTitle\">æµ·å¤–ãƒ›ã‚¹ãƒˆè¦åˆ¶</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_JP_CHECK $setOverSea value=on>æœ‰åŠ¹</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆåˆ¶é™(æºå¸¯)</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>æºå¸¯ã‹ã‚‰è¨±å¯</td>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>˜A‘±‘‚«‚İ‹K§</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>é€£ç¶šæ›¸ãè¾¼ã¿è¦åˆ¶</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
-	$Page->Print("’¼‹ß<input type=text size=5 name=timecount value=\"$setContinueMax\" style=\"text-align: right\">‘‚«‚İ‚Ì‚¤‚¿A");
-	$Page->Print("ˆêl‚ª<input type=text size=5 name=timeclose value=\"$setWriteMax\" style=\"text-align: right\">‰ñ‚Ü‚Å‘‚«‚İ‰Â");
+	$Page->Print("ç›´è¿‘<input type=text size=5 name=timecount value=\"$setContinueMax\" style=\"text-align: right\">æ›¸ãè¾¼ã¿ã®ã†ã¡ã€");
+	$Page->Print("ä¸€äººãŒ<input type=text size=5 name=timeclose value=\"$setWriteMax\" style=\"text-align: right\">å›ã¾ã§æ›¸ãè¾¼ã¿å¯");
 	$Page->Print("</td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>Samba‹K§</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>Sambaè¦åˆ¶</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
-	$Page->Print("ˆê“x‘‚«‚ñ‚¾l‚Í<input type=text size=5 name=BBS_SAMBATIME value=\"$setSambaTime\" style=\"text-align: right\">•b(0‚Å–³Œø)Œo‚½‚È‚¢‚Æ‘‚«‚ß‚Ü‚¹‚ñB(–³‹L“ü=".$Sys->Get('DEFSAMBA').")<br>");
-	$Page->Print("w’è•b”‚ğ‘Ò‚½‚¸‰½“x‚à‘‚«‚à‚¤‚Æ‚µ‚½ê‡‚Í<input type=text size=5 name=BBS_HOUSHITIME value=\"$setHoushiTime\" style=\"text-align: right\">•ªŠÔ‘‚«‚İ‚ğ‹Ö~‚µ‚Ü‚·B(–³‹L“ü=".$Sys->Get('DEFHOUSHI').")");
+	$Page->Print("ä¸€åº¦æ›¸ãè¾¼ã‚“ã äººã¯<input type=text size=5 name=BBS_SAMBATIME value=\"$setSambaTime\" style=\"text-align: right\">ç§’(0ã§ç„¡åŠ¹)çµŒãŸãªã„ã¨æ›¸ãè¾¼ã‚ã¾ã›ã‚“ã€‚(ç„¡è¨˜å…¥=".$Sys->Get('DEFSAMBA').")<br>");
+	$Page->Print("æŒ‡å®šç§’æ•°ã‚’å¾…ãŸãšä½•åº¦ã‚‚æ›¸ãè¾¼ã‚‚ã†ã¨ã—ãŸå ´åˆã¯<input type=text size=5 name=BBS_HOUSHITIME value=\"$setHoushiTime\" style=\"text-align: right\">åˆ†é–“æ›¸ãè¾¼ã¿ã‚’ç¦æ­¢ã—ã¾ã™ã€‚(ç„¡è¨˜å…¥=".$Sys->Get('DEFHOUSHI').")");
 	$Page->Print("</td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>ƒXƒŒƒbƒh—§‚Ä‚·‚¬‹K§ (ŠÔ”ñˆË‘¶)</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>ã‚¹ãƒ¬ãƒƒãƒ‰ç«‹ã¦ã™ãè¦åˆ¶ (æ™‚é–“éä¾å­˜)</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
-	$Page->Print("’¼‹ß<input type=text size=5 name=BBS_THREAD_TATESUGI value=\"$setTateClose\" style=\"text-align: right\">ƒXƒŒƒbƒh(0‚Å–³Œø)‚Ì‚¤‚¿A");
-	$Page->Print("ˆêl‚ª<input type=text size=5 name=BBS_TATESUGI_COUNT2 value=\"$setTateCount2\" style=\"text-align: right\">ƒXƒŒƒbƒh‚Ü‚Å—§‚Ä‚ç‚ê‚é");
+	$Page->Print("ç›´è¿‘<input type=text size=5 name=BBS_THREAD_TATESUGI value=\"$setTateClose\" style=\"text-align: right\">ã‚¹ãƒ¬ãƒƒãƒ‰(0ã§ç„¡åŠ¹)ã®ã†ã¡ã€");
+	$Page->Print("ä¸€äººãŒ<input type=text size=5 name=BBS_TATESUGI_COUNT2 value=\"$setTateCount2\" style=\"text-align: right\">ã‚¹ãƒ¬ãƒƒãƒ‰ã¾ã§ç«‹ã¦ã‚‰ã‚Œã‚‹");
 	$Page->Print("</td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>ƒXƒŒƒbƒh—§‚Ä‚·‚¬‹K§ (ŠÔˆË‘¶)</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>ã‚¹ãƒ¬ãƒƒãƒ‰ç«‹ã¦ã™ãè¦åˆ¶ (æ™‚é–“ä¾å­˜)</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
-	$Page->Print("<input type=text size=5 name=BBS_TATESUGI_HOUR value=\"$setTateHour\" style=\"text-align: right\">ŠÔ(0‚Å–³Œø)‚É");
-	$Page->Print("‘S‘Ì‚Å<input type=text size=5 name=BBS_TATESUGI_COUNT value=\"$setTateCount\" style=\"text-align: right\">ƒXƒŒƒbƒh‚Ü‚Å—§‚Ä‚ç‚ê‚é");
+	$Page->Print("<input type=text size=5 name=BBS_TATESUGI_HOUR value=\"$setTateHour\" style=\"text-align: right\">æ™‚é–“(0ã§ç„¡åŠ¹)ã«");
+	$Page->Print("å…¨ä½“ã§<input type=text size=5 name=BBS_TATESUGI_COUNT value=\"$setTateCount\" style=\"text-align: right\">ã‚¹ãƒ¬ãƒƒãƒ‰ã¾ã§ç«‹ã¦ã‚‰ã‚Œã‚‹");
 	$Page->Print("</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
-	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"@İ’è@\"");
+	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"ã€€è¨­å®šã€€\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETLIMIT');\"></td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‚»‚Ì‘¼İ’è‰æ–Ê‚Ì•\¦
+#	ãã®ä»–è¨­å®šç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintOtherSetting
@@ -574,60 +574,60 @@ sub PrintOtherSetting
 	$setConfirm			= ($setConfirm eq '1' ? 'checked' : '');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
-	$Page->Print("<tr><td colspan=4>Šeİ’è’l‚ğ“ü—Í‚µ‚Ä[İ’è]ƒ{ƒ^ƒ“‚ğ‰Ÿ‚µ‚Ä‚­‚¾‚³‚¢B</td></tr>");
+	$Page->Print("<tr><td colspan=4>å„è¨­å®šå€¤ã‚’å…¥åŠ›ã—ã¦[è¨­å®š]ãƒœã‚¿ãƒ³ã‚’æŠ¼ã—ã¦ãã ã•ã„ã€‚</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">ID•\\¦</td><td><select name=ID_DISP>");
-	$Page->Print("<option value=BBS_FORCE_ID $selIDforce>‹­§ID");
-	$Page->Print("<option value=BBS_ID_DISP $selIDdisp>”CˆÓID");
-	$Page->Print("<option value=BBS_NO_ID $selIDnone>ID•\\¦–³‚µ");
-	$Page->Print("<option value=BBS_DISP_IP1 $selIDhost>ƒzƒXƒg•\\¦");
-	$Page->Print("<option value=BBS_DISP_IP2 $selIDsakhalin>”­MŒ³•\\¦(sakhalin)");
-	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>”­MŒ³•\\¦(siberia)");
+	$Page->Print("<tr><td class=\"DetailTitle\">IDè¡¨\ç¤º</td><td><select name=ID_DISP>");
+	$Page->Print("<option value=BBS_FORCE_ID $selIDforce>å¼·åˆ¶ID");
+	$Page->Print("<option value=BBS_ID_DISP $selIDdisp>ä»»æ„ID");
+	$Page->Print("<option value=BBS_NO_ID $selIDnone>IDè¡¨\ç¤ºç„¡ã—");
+	$Page->Print("<option value=BBS_DISP_IP1 $selIDhost>ãƒ›ã‚¹ãƒˆè¡¨\ç¤º");
+	$Page->Print("<option value=BBS_DISP_IP2 $selIDsakhalin>ç™ºä¿¡å…ƒè¡¨\ç¤º(sakhalin)");
+	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>ç™ºä¿¡å…ƒè¡¨\ç¤º(siberia)");
 	$Page->Print("</select></td>");
-	$Page->Print("<td class=\"DetailTitle\">‹@í¯•Êq(ID––”ö)</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_SLIP $setIPSave value=on>•t‰Á‚·‚é</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">æ©Ÿç¨®è­˜åˆ¥å­(IDæœ«å°¾)</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_SLIP $setIPSave value=on>ä»˜åŠ ã™ã‚‹</td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">—j“ú•¶š</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">æ›œæ—¥æ–‡å­—</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
-	$Page->Print("<td class=\"DetailTitle\"><s>•¶šQÆ</s></td><td>");
-	$Page->Print("<input type=checkbox name=BBS_UNICODE $setUnicode value=on>g—p‰Â”\</td>");
+	$Page->Print("<td class=\"DetailTitle\"><s>æ–‡å­—å‚ç…§</s></td><td>");
+	$Page->Print("<input type=checkbox name=BBS_UNICODE $setUnicode value=on>ä½¿ç”¨å¯èƒ½\</td>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">ƒgƒŠƒbƒvŒ…”</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ãƒˆãƒªãƒƒãƒ—æ¡æ•°</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_TRIPCOLUMN value=\"$setTripColumn\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">cookieŠm”F</td><td>");
-	$Page->Print("<input type=checkbox name=SUBBBS_CGI_ON $setCookie value=on>Šm”F‚ ‚è</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexƒXƒŒƒbƒhƒvƒŒƒrƒ…[”</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">cookieç¢ºèª</td><td>");
+	$Page->Print("<input type=checkbox name=SUBBBS_CGI_ON $setCookie value=on>ç¢ºèªã‚ã‚Š</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexã‚¹ãƒ¬ãƒƒãƒ‰ãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼æ•°</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_THREAD_NUMBER value=\"$setThreadNum\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">@@–¼‘Ocookie•Û‘¶</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_NAMECOOKIE_CHECK $setNameCookie value=on>•Û‘¶</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexƒvƒŒƒrƒ…[ƒŒƒX”</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">ã€€ã€€åå‰cookieä¿å­˜</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_NAMECOOKIE_CHECK $setNameCookie value=on>ä¿å­˜</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexãƒ—ãƒ¬ãƒ“ãƒ¥ãƒ¼ãƒ¬ã‚¹æ•°</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_CONTENTS_NUMBER value=\"$setContentNum\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">@@ƒ[ƒ‹cookie•Û‘¶</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_MAILCOOKIE_CHECK $setMailCookie value=on>•Û‘¶</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexƒŒƒX“à—e•\\¦s”(’)</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">ã€€ã€€ãƒ¡ãƒ¼ãƒ«cookieä¿å­˜</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_MAILCOOKIE_CHECK $setMailCookie value=on>ä¿å­˜</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexãƒ¬ã‚¹å†…å®¹è¡¨\ç¤ºè¡Œæ•°(æ³¨)</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_INDEX_LINE_NUMBER value=\"$setContentLine\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">ƒXƒŒƒbƒhì¬‰æ–Ê</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_PASSWORD_CHECK $setNewThread value=on>•Ê‰æ–Ê</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexƒƒjƒ…[”</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆç”»é¢</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_PASSWORD_CHECK $setNewThread value=on>åˆ¥ç”»é¢</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexãƒ¡ãƒ‹ãƒ¥ãƒ¼æ•°</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_MAX_MENU_THREAD value=\"$setThreadMenu\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">ƒXƒŒƒbƒhì¬Šm”F‰æ–Ê</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>Šm”F‚ ‚è</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">ã‚¹ãƒ¬ãƒƒãƒ‰ä½œæˆç¢ºèªç”»é¢</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>ç¢ºèªã‚ã‚Š</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
-	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"@İ’è@\"");
+	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"ã€€è¨­å®šã€€\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETOTHER');\"></td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒCƒ“ƒ|[ƒg‰æ–Ê‚Ì•\¦
+#	ã‚¤ãƒ³ãƒãƒ¼ãƒˆç”»é¢ã®è¡¨ç¤º
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	ƒy[ƒWƒRƒ“ƒeƒLƒXƒg
-#	@param	$SYS	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$BBS	BBSî•ñ
-#	@return	‚È‚µ
+#	@param	$Page	ãƒšãƒ¼ã‚¸ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+#	@param	$SYS	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$BBS	BBSæƒ…å ±
+#	@return	ãªã—
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintSettingImport
@@ -637,16 +637,16 @@ sub PrintSettingImport
 	
 	$SYS->Set('_TITLE', 'BBS Setting Import');
 	
-	# Š‘®BBS‚ğæ“¾
+	# æ‰€å±BBSã‚’å–å¾—
 	$SYS->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($SYS->Get('ADMIN')->{'USER'}, $BBS, \@bbsSet);
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\"><input type=radio name=IMPORT_KIND value=FROM_BBS");
-	$Page->Print(" checked>Šù‘¶BBS‚©‚çƒCƒ“ƒ|[ƒg</td>");
-	$Page->Print("<td><select name=IMPORT_BBS><option value=\"\">--Œf¦”Â‚ğ‘I‘ğ--</option>");
+	$Page->Print(" checked>æ—¢å­˜BBSã‹ã‚‰ã‚¤ãƒ³ãƒãƒ¼ãƒˆ</td>");
+	$Page->Print("<td><select name=IMPORT_BBS><option value=\"\">--æ²ç¤ºæ¿ã‚’é¸æŠ--</option>");
 	
-	# Œf¦”Âˆê——‚Ìo—Í
+	# æ²ç¤ºæ¿ä¸€è¦§ã®å‡ºåŠ›
 	foreach $id (@bbsSet) {
 		$name = $BBS->Get('NAME', $id);
 		$Page->Print("<option value=$id>$name</option>\n");
@@ -654,21 +654,21 @@ sub PrintSettingImport
 	
 	$Page->Print("</select></td></tr>");
 	$Page->Print("<tr><td valign=top class=\"DetailTitle\">");
-	$Page->Print("<input type=radio name=IMPORT_KIND value=FROM_DIRECT>’¼ÚƒCƒ“ƒ|[ƒg</td>");
+	$Page->Print("<input type=radio name=IMPORT_KIND value=FROM_DIRECT>ç›´æ¥ã‚¤ãƒ³ãƒãƒ¼ãƒˆ</td>");
 	$Page->Print("<td><textarea rows=10 cols=60 wrap=off name=IMPORT_DIRECT></textarea></td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"ƒCƒ“ƒ|[ƒg\"");
+	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"ã‚¤ãƒ³ãƒãƒ¼ãƒˆ\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETIMPORT');\"></td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	Šî–{İ’è
+#	åŸºæœ¬è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionBaseSetting
@@ -676,7 +676,7 @@ sub FunctionBaseSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -685,14 +685,14 @@ sub FunctionBaseSetting
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = qw(BBS_SUBTITLE BBS_NONAME_NAME BBS_DELETE_NAME BBS_COOKIEPATH);
 		if (! $Form->IsInput(\@inList)) {
 			return 1001;
 		}
 		foreach (@inList) {
-			push @$pLog, "u$_v‚ğu" . $Form->Get($_) . 'v‚Éİ’è';
+			push @$pLog, "ã€Œ$_ã€ã‚’ã€Œ" . $Form->Get($_) . 'ã€ã«è¨­å®š';
 		}
 	}
 	require './module/isildur.pl';
@@ -715,12 +715,12 @@ sub FunctionBaseSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	ƒJƒ‰[İ’è
+#	ã‚«ãƒ©ãƒ¼è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionColorSetting
@@ -728,7 +728,7 @@ sub FunctionColorSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting, $capColor);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -737,7 +737,7 @@ sub FunctionColorSetting
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = ('BBS_TITLE_COLOR', 'BBS_SUBJECT_COLOR', 'BBS_BG_COLOR', 'BBS_THREAD_COLOR',
 						'BBS_MAKETHREAD_COLOR', 'BBS_MENU_COLOR', 'BBS_TEXT_COLOR', 'BBS_LINK_COLOR',
@@ -746,7 +746,7 @@ sub FunctionColorSetting
 			return 1001;
 		}
 		foreach (@inList, 'BBS_CAP_COLOR') {
-			push @$pLog, "u$_v‚ğu" . $Form->Get($_) . 'v‚Éİ’è';
+			push @$pLog, "ã€Œ$_ã€ã‚’ã€Œ" . $Form->Get($_) . 'ã€ã«è¨­å®š';
 		}
 	}
 	require './module/isildur.pl';
@@ -775,12 +775,12 @@ sub FunctionColorSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	§ŒÀİ’è
+#	åˆ¶é™è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionLimitSetting
@@ -788,7 +788,7 @@ sub FunctionLimitSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -797,7 +797,7 @@ sub FunctionLimitSetting
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my $bbsLN;
 		$bbsLN = $Form->Get('BBS_LINE_NUMBER') /2;
@@ -808,16 +808,16 @@ sub FunctionLimitSetting
 						BBS_LINE_NUMBER BBS_COLUMN_NUMBER BBS_DATMAX
 						timecount timeclose BBS_THREAD_TATESUGI BBS_TATESUGI_COUNT2
 						BBS_TATESUGI_HOUR BBS_TATESUGI_COUNT);
-		# “ü—Í—L–³
+		# å…¥åŠ›æœ‰ç„¡
 		if (! $Form->IsInput(\@inList)) {
 			return 1001;
 		}
-		# ‹K’èŠO•¶š
+		# è¦å®šå¤–æ–‡å­—
 		if (!$Form->IsNumber(\@inList)) {
 			return 1002;
 		}
 		foreach (@inList) {
-			push @$pLog, "u$_v‚ğu" . $Form->Get($_) . 'v‚Éİ’è';
+			push @$pLog, "ã€Œ$_ã€ã‚’ã€Œ" . $Form->Get($_) . 'ã€ã«è¨­å®š';
 		}
 	}
 	require './module/isildur.pl';
@@ -861,12 +861,12 @@ sub FunctionLimitSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	‚»‚Ì‘¼İ’è
+#	ãã®ä»–è¨­å®š
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionOtherSetting
@@ -874,7 +874,7 @@ sub FunctionOtherSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -883,14 +883,14 @@ sub FunctionOtherSetting
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = qw(BBS_THREAD_NUMBER BBS_CONTENTS_NUMBER BBS_INDEX_LINE_NUMBER BBS_MAX_MENU_THREAD BBS_TRIPCOLUMN);
 		if (! $Form->IsInput(\@inList)) {
 			return 1001;
 		}
 		foreach (@inList) {
-			push @$pLog, "u$_v‚ğu" . $Form->Get($_) . 'v‚Éİ’è';
+			push @$pLog, "ã€Œ$_ã€ã‚’ã€Œ" . $Form->Get($_) . 'ã€ã«è¨­å®š';
 		}
 	}
 	require './module/isildur.pl';
@@ -911,9 +911,9 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_TRIPCOLUMN', $Form->Get('BBS_TRIPCOLUMN'));
 	$Setting->Set('BBS_SLIP', ($Form->Equal('BBS_SLIP', 'on') ? 'checked' : ''));
 	
-	# ID•\¦İ’è
-	# “‚¢‚¯‚Çd•û‚È‚¢‚Ëc
-	# HOST•\¦
+	# IDè¡¨ç¤ºè¨­å®š
+	# é…·ã„ã‘ã©ä»•æ–¹ãªã„ã­â€¦
+	# HOSTè¡¨ç¤º
 	if ( $Form->Equal('ID_DISP', 'BBS_DISP_IP1') ) {
 		$Setting->Set('BBS_DISP_IP', 'checked');
 		$Setting->Set('BBS_FORCE_ID', '');
@@ -954,12 +954,12 @@ sub FunctionOtherSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	İ’èƒCƒ“ƒ|[ƒg
+#	è¨­å®šã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	ƒVƒXƒeƒ€•Ï”
-#	@param	$Form	ƒtƒH[ƒ€•Ï”
-#	@param	$pLog	ƒƒO—p
-#	@return	ƒGƒ‰[ƒR[ƒh
+#	@param	$Sys	ã‚·ã‚¹ãƒ†ãƒ å¤‰æ•°
+#	@param	$Form	ãƒ•ã‚©ãƒ¼ãƒ å¤‰æ•°
+#	@param	$pLog	ãƒ­ã‚°ç”¨
+#	@return	ã‚¨ãƒ©ãƒ¼ã‚³ãƒ¼ãƒ‰
 #
 #------------------------------------------------------------------------------------------------------------
 sub FunctionSettingImport
@@ -967,7 +967,7 @@ sub FunctionSettingImport
 	my ($Sys, $Form, $pLog, $BBS) = @_;
 	my ($Setting, @setKeys, @importKeys, $key);
 	
-	# Œ ŒÀƒ`ƒFƒbƒN
+	# æ¨©é™ãƒã‚§ãƒƒã‚¯
 	{
 		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
 		my $chkID = $Sys->Get('ADMIN')->{'USER'};
@@ -976,13 +976,13 @@ sub FunctionSettingImport
 			return 1000;
 		}
 	}
-	# “ü—Íƒ`ƒFƒbƒN
+	# å…¥åŠ›ãƒã‚§ãƒƒã‚¯
 	{
 		my @inList = ('IMPORT_BBS');
 		
-		# Šù‘¶Œf¦”Â‚©‚ç‚ÌƒCƒ“ƒ|[ƒg‚Ì‚İ
+		# æ—¢å­˜æ²ç¤ºæ¿ã‹ã‚‰ã®ã‚¤ãƒ³ãƒãƒ¼ãƒˆæ™‚ã®ã¿
 		if ($Form->Equal('IMPORT_KIND', 'FROM_BBS')) {
-			# “ü—Í—L–³
+			# å…¥åŠ›æœ‰ç„¡
 			if (! $Form->IsInput(\@inList)) {
 				return 1001;
 			}
@@ -992,7 +992,7 @@ sub FunctionSettingImport
 	$Setting = ISILDUR->new;
 	$Setting->Load($Sys);
 	
-	# import‚·‚éƒL[‚ğİ’è‚·‚é
+	# importã™ã‚‹ã‚­ãƒ¼ã‚’è¨­å®šã™ã‚‹
 	$Setting->GetKeySet(\@setKeys);
 	foreach (@setKeys) {
 		if ($_ ne 'BBS_TITLE' && $_ ne 'BBS_SUBTITLE') {
@@ -1000,47 +1000,47 @@ sub FunctionSettingImport
 		}
 	}
 	
-	# Šù‘¶BBS‚©‚çƒCƒ“ƒ|[ƒg
+	# æ—¢å­˜BBSã‹ã‚‰ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 	if ($Form->Equal('IMPORT_KIND', 'FROM_BBS')) {
 		my $bbs = $BBS->Get('DIR', $Form->Get('IMPORT_BBS'));
 		my $baseSetting = ISILDUR->new;
 		my $path = $Sys->Get('BBSPATH') . "/$bbs/SETTING.TXT";
 		
-		push @$pLog, "¡Œf¦”Âu$pathv‚©‚çİ’èî•ñ‚ğƒCƒ“ƒ|[ƒg‚µ‚Ü‚·B";
+		push @$pLog, "â– æ²ç¤ºæ¿ã€Œ$pathã€ã‹ã‚‰è¨­å®šæƒ…å ±ã‚’ã‚¤ãƒ³ãƒãƒ¼ãƒˆã—ã¾ã™ã€‚";
 		
-		# Šù‘¶BBS‚ÌSETTING.TXT‚ğ“Ç‚İ‚Ş
+		# æ—¢å­˜BBSã®SETTING.TXTã‚’èª­ã¿è¾¼ã‚€
 		if ($baseSetting->LoadFrom($path)) {
-			# İ’èî•ñ‚ğİ’è‚·‚é
+			# è¨­å®šæƒ…å ±ã‚’è¨­å®šã™ã‚‹
 			foreach $key (@importKeys) {
 				$Setting->Set($key, $baseSetting->Get($key));
-				push @$pLog, "@@u$keyv‚ğƒCƒ“ƒ|[ƒg‚µ‚Ü‚µ‚½B";
+				push @$pLog, "ã€€ã€€ã€Œ$keyã€ã‚’ã‚¤ãƒ³ãƒãƒ¼ãƒˆã—ã¾ã—ãŸã€‚";
 			}
 		}
 	}
-	# ’¼ÚƒCƒ“ƒ|[ƒg
+	# ç›´æ¥ã‚¤ãƒ³ãƒãƒ¼ãƒˆ
 	else {
 		my $data = $Form->Get('IMPORT_DIRECT');
 		my @datas = split(/\r\n|\r|\n/, $data);
 		my (%setTemp, $line, $inKey);
 		
-		push @$pLog, '¡“ü—Í“à—e‚ğƒCƒ“ƒ|[ƒg‚µ‚Ü‚·B';
+		push @$pLog, 'â– å…¥åŠ›å†…å®¹ã‚’ã‚¤ãƒ³ãƒãƒ¼ãƒˆã—ã¾ã™ã€‚';
 		
-		# ƒtƒH[ƒ€î•ñ‚©‚çİ’èî•ñƒnƒbƒVƒ…‚ğì¬‚·‚é
+		# ãƒ•ã‚©ãƒ¼ãƒ æƒ…å ±ã‹ã‚‰è¨­å®šæƒ…å ±ãƒãƒƒã‚·ãƒ¥ã‚’ä½œæˆã™ã‚‹
 		foreach $line (@datas){
 			($key, $data) = split(/=/, $line);
 			$setTemp{$key} = $data;
 		}
-		# İ’èî•ñ‚ğİ’è‚·‚é
+		# è¨­å®šæƒ…å ±ã‚’è¨­å®šã™ã‚‹
 		foreach $key (keys %setTemp) {
 			foreach $inKey (@importKeys) {
 				if ($key eq $inKey) {
 					$Setting->Set($key, $setTemp{$key});
-					push @$pLog, "@@u$keyv‚ğƒCƒ“ƒ|[ƒg‚µ‚Ü‚µ‚½B";
+					push @$pLog, "ã€€ã€€ã€Œ$keyã€ã‚’ã‚¤ãƒ³ãƒãƒ¼ãƒˆã—ã¾ã—ãŸã€‚";
 				}
 			}
 		}
 	}
-	# XVŒã•Û‘¶
+	# æ›´æ–°å¾Œä¿å­˜
 	$Setting->Save($Sys);
 	
 	return 0;
