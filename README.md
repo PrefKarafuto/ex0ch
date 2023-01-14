@@ -13,7 +13,9 @@ testフォルダの内容はVer0.7.5の物と同一です。心ある方々の�
 ・特定スレッド（e.g.管理スレ）にはられた掲示板上レスのリンクを読み込んで、直接リンク先の開示・削除・規制などを可能に
   
 最終目標  
-本スクリプトをPerlからPHPに書き換える。
+本スクリプトをPerlからPHPに書き換える。  
+Rewrite this script from Perl to PHP.  
+This is the biggest goal of our project and the one that needs the most help.  
   
 諸注意  
  + 本プロジェクトは、***あくまで一般ユーザ向け***として0ch+の開発引き継ぎ・機能向上等を図るものです。  
