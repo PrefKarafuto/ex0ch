@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,14 +48,14 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
 	# 掲示板情報の読み込みとグループ設定
 	if (! defined $BBS) {
-		require './module/nazguls.pl';
-		$BBS = NAZGUL->new;
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
 		
 		$BBS->Load($Sys);
 		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
@@ -103,8 +103,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -115,8 +115,8 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err, $BBS);
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
 	
 	# 管理情報を登録
 	$BBS->Load($Sys);
@@ -157,7 +157,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -193,8 +193,8 @@ sub PrintGroupList
 	
 	$Sys->Set('_TITLE', 'Group List');
 	
-	require './module/elves.pl';
-	$Group = GILDOR->new;
+	require './module/security.pl';
+	$Group = GROUP_INFO->new;
 	
 	# グループ情報の読み込み
 	$Group->Load($Sys);
@@ -262,9 +262,9 @@ sub PrintGroupSetting
 	$Sys->Set('_TITLE', 'Group Edit')	if ($mode == 1);
 	$Sys->Set('_TITLE', 'Group Create')	if ($mode == 0);
 	
-	require './module/elves.pl';
-	$User = GLORFINDEL->new;
-	$Group = GILDOR->new;
+	require './module/security.pl';
+	$User = USER_INFO->new;
+	$Group = GROUP_INFO->new;
 	
 	# ユーザ情報の読み込み
 	$User->Load($Sys);
@@ -376,8 +376,8 @@ sub PrintGroupDelete
 	
 	$SYS->Set('_TITLE', 'Group Delete Confirm');
 	
-	require './module/elves.pl';
-	$Group = GILDOR->new;
+	require './module/security.pl';
+	$Group = GROUP_INFO->new;
 	$Group->Load($SYS);
 	
 	# ユーザ情報を取得
@@ -483,9 +483,9 @@ sub FunctionGroupSetting
 			return 1001;
 		}
 	}
-	require './module/elves.pl';
-	$User = GLORFINDEL->new;
-	$Group = GILDOR->new;
+	require './module/security.pl';
+	$User = USER_INFO->new;
+	$Group = GROUP_INFO->new;
 	
 	# ユーザ情報の読み込み
 	$User->Load($Sys);
@@ -580,8 +580,8 @@ sub FunctionGroupDelete
 			return 1000;
 		}
 	}
-	require './module/elves.pl';
-	$Group = GILDOR->new;
+	require './module/security.pl';
+	$Group = GROUP_INFO->new;
 	
 	# ユーザ情報の読み込み
 	$Group->Load($Sys);
@@ -631,7 +631,7 @@ sub FunctionGroupImport
 			return 1000;
 		}
 	}
-	require './module/earendil.pl';
+	require './module/file_utils.pl';
 	
 	$src = $Sys->Get('BBSPATH') . '/' . $BBS->Get('DIR', $Form->Get('IMPORT_BBS', ''), '') . '/info/groups.cgi';
 	$dst = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/groups.cgi';
@@ -639,7 +639,7 @@ sub FunctionGroupImport
 	return 0 if ($src eq $dst);
 	
 	# グループ設定をコピー
-	EARENDIL::Copy($src, $dst);
+	FILE_UTILS::Copy($src, $dst);
 	
 	# ログの出力
 	my $name = $BBS->Get('NAME', $Form->Get('IMPORT_BBS'));

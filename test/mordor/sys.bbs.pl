@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,8 +48,8 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($BASE, $Page, $subMode);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	
 	# 管理情報を登録
 	$Sys->Set('ADMIN', $pSys);
@@ -98,8 +98,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -155,7 +155,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -191,9 +191,9 @@ sub PrintBBSList
 	
 	$SYS->Set('_TITLE', 'BBS List');
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
-	$Category = ANGMAR->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
 	$BBS->Load($SYS);
 	$Category->Load($SYS);
 	
@@ -285,9 +285,9 @@ sub PrintBBSCreate
 	
 	$SYS->Set('_TITLE', 'BBS Create');
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
-	$Category = ANGMAR->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
 	$BBS->Load($SYS);
 	$Category->Load($SYS);
 	
@@ -346,9 +346,9 @@ sub PrintBBSDelete
 	
 	$SYS->Set('_TITLE', 'BBS Delete Confirm');
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
-	$Category = ANGMAR->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
 	$BBS->Load($SYS);
 	$Category->Load($SYS);
 	
@@ -401,9 +401,9 @@ sub PrintBBScategoryChange
 	
 	$SYS->Set('_TITLE', 'Category Change');
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
-	$Category = ANGMAR->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
 	$BBS->Load($SYS);
 	$Category->Load($SYS);
 	
@@ -461,9 +461,9 @@ sub PrintCategoryList
 	
 	$SYS->Set('_TITLE', 'Category List');
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
-	$Category = ANGMAR->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
 	
 	$BBS->Load($SYS);
 	$Category->Load($SYS);
@@ -543,8 +543,8 @@ sub PrintCategoryDelete
 	
 	$SYS->Set('_TITLE', 'Category Delete Confirm');
 	
-	require './module/nazguls.pl';
-	$Category = ANGMAR->new;
+	require './module/bbs_info.pl';
+	$Category = CATEGORY_INFO->new;
 	$Category->Load($SYS);
 	
 	@catSet = $Form->GetAtArray('CATS');
@@ -611,7 +611,7 @@ sub FunctionBBSCreate
 			return 1002;
 		}
 	}
-	require './module/earendil.pl';
+	require './module/file_utils.pl';
 	
 	# POSTデータの取得
 	$bbsCategory	= $Form->Get('BBS_CATEGORY');
@@ -625,40 +625,40 @@ sub FunctionBBSCreate
 	$dataPath		= '.' . $Sys->Get('DATA');
 	
 	# 掲示板ディレクトリの作成に成功したら、その下のディレクトリを作成する
-	if (! (EARENDIL::CreateDirectory($createPath, $Sys->Get('PM-BDIR')))) {
+	if (! (FILE_UTILS::CreateDirectory($createPath, $Sys->Get('PM-BDIR')))) {
 		return 2000;
 	}
 	
 	# サブディレクトリ生成
-	EARENDIL::CreateDirectory("$createPath/i", $Sys->Get('PM-BDIR'));
-	EARENDIL::CreateDirectory("$createPath/dat", $Sys->Get('PM-BDIR'));
-	EARENDIL::CreateDirectory("$createPath/log", $Sys->Get('PM-LDIR'));
-	EARENDIL::CreateDirectory("$createPath/kako", $Sys->Get('PM-BDIR'));
-	EARENDIL::CreateDirectory("$createPath/pool", $Sys->Get('PM-ADIR'));
-	EARENDIL::CreateDirectory("$createPath/info", $Sys->Get('PM-ADIR'));
+	FILE_UTILS::CreateDirectory("$createPath/i", $Sys->Get('PM-BDIR'));
+	FILE_UTILS::CreateDirectory("$createPath/dat", $Sys->Get('PM-BDIR'));
+	FILE_UTILS::CreateDirectory("$createPath/log", $Sys->Get('PM-LDIR'));
+	FILE_UTILS::CreateDirectory("$createPath/kako", $Sys->Get('PM-BDIR'));
+	FILE_UTILS::CreateDirectory("$createPath/pool", $Sys->Get('PM-ADIR'));
+	FILE_UTILS::CreateDirectory("$createPath/info", $Sys->Get('PM-ADIR'));
 	
 	# デフォルトデータのコピー
-	EARENDIL::Copy("$dataPath/default_img.gif", "$createPath/kanban.gif");
-	EARENDIL::Copy("$dataPath/default_bac.gif", "$createPath/ba.gif");
-	EARENDIL::Copy("$dataPath/default_hed.txt", "$createPath/head.txt");
-	EARENDIL::Copy("$dataPath/default_fot.txt", "$createPath/foot.txt");
-	EARENDIL::Copy("$dataPath/index.html", "$createPath/log/index.html");
-	EARENDIL::Copy("$dataPath/index.html", "$createPath/pool/index.html");
-	EARENDIL::Copy("$dataPath/index.html", "$createPath/info/index.html");
+	FILE_UTILS::Copy("$dataPath/default_img.gif", "$createPath/kanban.gif");
+	FILE_UTILS::Copy("$dataPath/default_bac.gif", "$createPath/ba.gif");
+	FILE_UTILS::Copy("$dataPath/default_hed.txt", "$createPath/head.txt");
+	FILE_UTILS::Copy("$dataPath/default_fot.txt", "$createPath/foot.txt");
+	FILE_UTILS::Copy("$dataPath/index.html", "$createPath/log/index.html");
+	FILE_UTILS::Copy("$dataPath/index.html", "$createPath/pool/index.html");
+	FILE_UTILS::Copy("$dataPath/index.html", "$createPath/info/index.html");
 	
 	push @$pLog, "■掲示板ディレクトリ生成完了...[$createPath]";
 	
 	# 設定継承情報のコピー
 	if ($bbsInherit ne '') {
 		my ($BBS, $inheritPath);
-		require './module/nazguls.pl';
-		$BBS = NAZGUL->new;
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
 		$BBS->Load($Sys);
 		
 		$inheritPath = $Sys->Get('BBSPATH') . '/' . $BBS->Get('DIR', $bbsInherit);
-		EARENDIL::Copy("$inheritPath/SETTING.TXT", "$createPath/SETTING.TXT");
-		EARENDIL::Copy("$inheritPath/info/groups.cgi", "$createPath/info/groups.cgi");
-		EARENDIL::Copy("$inheritPath/info/capgroups.cgi", "$createPath/info/capgroups.cgi");
+		FILE_UTILS::Copy("$inheritPath/SETTING.TXT", "$createPath/SETTING.TXT");
+		FILE_UTILS::Copy("$inheritPath/info/groups.cgi", "$createPath/info/groups.cgi");
+		FILE_UTILS::Copy("$inheritPath/info/capgroups.cgi", "$createPath/info/capgroups.cgi");
 		
 		push @$pLog, "■設定継承完了...[$inheritPath]";
 	}
@@ -666,15 +666,15 @@ sub FunctionBBSCreate
 	my ($bbsSetting);
 	
 	# 掲示板設定情報生成
-	require './module/isildur.pl';
-	$bbsSetting = ISILDUR->new;
+	require './module/setting.pl';
+	$bbsSetting = SETTING->new;
 	
 	$Sys->Set('BBS', $bbsDir);
 	$bbsSetting->Load($Sys);
 	
 	require './module/galadriel.pl';
-	my $createPath2 = GALADRIEL::MakePath($Sys->Get('CGIPATH'), $createPath);
-	my $cookiePath = GALADRIEL::MakePath($Sys->Get('CGIPATH'), $Sys->Get('BBSPATH'));
+	my $createPath2 = DATA_UTILS::MakePath($Sys->Get('CGIPATH'), $createPath);
+	my $cookiePath = DATA_UTILS::MakePath($Sys->Get('CGIPATH'), $Sys->Get('BBSPATH'));
 	$cookiePath .= '/' if ($cookiePath ne '/');
 	$bbsSetting->Set('BBS_TITLE', $bbsName);
 	$bbsSetting->Set('BBS_SUBTITLE', $bbsExplanation);
@@ -688,8 +688,8 @@ sub FunctionBBSCreate
 	
 	# 掲示板構成要素生成
 	my ($BBSAid);
-	require './module/varda.pl';
-	$BBSAid = VARDA->new;
+	require './module/bbs_service.pl';
+	$BBSAid = BBS_SERVICE->new;
 	
 	$Sys->Set('MODE', 'CREATE');
 	$BBSAid->Init($Sys, $bbsSetting);
@@ -700,10 +700,10 @@ sub FunctionBBSCreate
 	push @$pLog, '■掲示板構\成要素生成完了...';
 	
 	# 過去ログインデクス生成
-	require './module/thorin.pl';
-	require './module/celeborn.pl';
-	my $PastLog = CELEBORN->new;
-	my $Page = THORIN->new;
+	require './module/buffer.pl';
+	require './module/archive.pl';
+	my $PastLog = ARCHIVE->new;
+	my $Page = BUFFER->new;
 	$PastLog->Load($Sys);
 	$PastLog->UpdateInfo($Sys);
 	$PastLog->UpdateIndex($Sys, $Page);
@@ -712,8 +712,8 @@ sub FunctionBBSCreate
 	push @$pLog, '■過去ログインデクス生成完了...';
 	
 	# 掲示板情報に追加
-	require './module/nazguls.pl';
-	my $BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	my $BBS = BBS_INFO->new;
 	$BBS->Load($Sys);
 	$BBS->Add($bbsName, $bbsDir, $bbsExplanation, $bbsCategory);
 	$BBS->Save($Sys);
@@ -743,10 +743,10 @@ sub FunctionBBSUpdate
 	my ($Sys, $Form, $pLog) = @_;
 	my ($BBSAid, $BBS, @bbsSet, $id, $bbs, $name);
 	
-	require './module/nazguls.pl';
-	require './module/varda.pl';
-	$BBS = NAZGUL->new;
-	$BBSAid = VARDA->new;
+	require './module/bbs_info.pl';
+	require './module/bbs_service.pl';
+	$BBS = BBS_INFO->new;
+	$BBSAid = BBS_SERVICE->new;
 	
 	$BBS->Load($Sys);
 	@bbsSet = $Form->GetAtArray('BBSS');
@@ -791,8 +791,8 @@ sub FunctionBBSInfoUpdate
 			return 1000;
 		}
 	}
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
 	
 	$BBS->Load($Sys);
 	$BBS->Update($Sys, '');
@@ -828,9 +828,9 @@ sub FunctionBBSDelete
 			return 1000;
 		}
 	}
-	require './module/nazguls.pl';
-	require './module/earendil.pl';
-	$BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	require './module/file_utils.pl';
+	$BBS = BBS_INFO->new;
 	$BBS->Load($Sys);
 	
 	@bbsSet = $Form->GetAtArray('BBSS');
@@ -842,7 +842,7 @@ sub FunctionBBSDelete
 		$path	= $Sys->Get('BBSPATH') . "/$dir";
 		
 		# 掲示板ディレクトリと掲示板情報の削除
-		EARENDIL::DeleteDirectory($path);
+		FILE_UTILS::DeleteDirectory($path);
 		$BBS->Delete($id);
 		
 		push @$pLog, "■掲示板「$name($dir)」を削除しました。<br>";
@@ -876,8 +876,8 @@ sub FunctionCategoryAdd
 			return 1000;
 		}
 	}
-	require './module/nazguls.pl';
-	$Category = ANGMAR->new;
+	require './module/bbs_info.pl';
+	$Category = CATEGORY_INFO->new;
 	
 	$Category->Load($Sys);
 	
@@ -922,9 +922,9 @@ sub FunctionCategoryDelete
 			return 1000;
 		}
 	}
-	require './module/nazguls.pl';
-	$BBS		= NAZGUL->new;
-	$Category	= ANGMAR->new;
+	require './module/bbs_info.pl';
+	$BBS		= BBS_INFO->new;
+	$Category	= CATEGORY_INFO->new;
 	
 	$BBS->Load($Sys);
 	$Category->Load($Sys);
@@ -973,9 +973,9 @@ sub FunctionCategoryChange
 			return 1000;
 		}
 	}
-	require './module/nazguls.pl';
-	$BBS		= NAZGUL->new;
-	$Category	= ANGMAR->new;
+	require './module/bbs_info.pl';
+	$BBS		= BBS_INFO->new;
+	$Category	= CATEGORY_INFO->new;
 	
 	$BBS->Load($Sys);
 	$Category->Load($Sys);

@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,14 +48,14 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
 	# 掲示板情報の読み込みとグループ設定
 	if (! defined $BBS){
-		require './module/nazguls.pl';
-		$BBS = NAZGUL->new;
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
 		
 		$BBS->Load($Sys);
 		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
@@ -100,8 +100,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -112,8 +112,8 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err, $BBS);
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
 	
 	# 管理情報を登録
 	$BBS->Load($Sys);
@@ -151,7 +151,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -206,7 +206,7 @@ sub PrintLogsInfo
 	for ($i = 0 ; $i < 3 ; $i++) {
 		$size = (stat $logFiles[$i])[7];
 		$date = (stat _)[9];
-		$date = GALADRIEL::GetDateFromSerial(undef, $date, 0);
+		$date = DATA_UTILS::GetDateFromSerial(undef, $date, 0);
 		
 		$Page->Print("<tr><td>$logKind[$i]</td>");
 		$Page->Print("<td>$logFiles[$i]</td>");
@@ -241,8 +241,8 @@ sub PrintLogs
 	$Sys->Set('_TITLE', 'Hosts Log')			if ($mode == 1);
 	$Sys->Set('_TITLE', 'Error Log')			if ($mode == 2);
 	
-	require './module/imrahil.pl';
-	$Logger = IMRAHIL->new;
+	require './module/log.pl';
+	$Logger = LOG->new;
 	
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/IP'	if ($mode == 0);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST'	if ($mode == 1);
@@ -288,8 +288,8 @@ sub PrintLogs
 	}
 	
 	require './module/galadriel.pl';
-	require './module/orald.pl';
-	my $Error = ORALD->new;
+	require './module/error_info.pl';
+	my $Error = ERROR_INFO->new;
 	$Error->Load($Sys);
 	
 	# ログ一覧を出力
@@ -297,7 +297,7 @@ sub PrintLogs
 		$data = $Logger->Get($listNum - $i - 1);
 		@elem = split(/<>/, $data);
 		if (1) {
-			$elem[0] = GALADRIEL::GetDateFromSerial(undef, $elem[0], 0);
+			$elem[0] = DATA_UTILS::GetDateFromSerial(undef, $elem[0], 0);
 			if ($mode == 2) {
 				$elem[1] .= ' (' . $Error->Get($elem[1], 'SUBJECT') . ')';
 			}
@@ -344,8 +344,8 @@ sub FunctionLogDelete
 			return 1000;
 		}
 	}
-	require './module/imrahil.pl';
-	$Logger = IMRAHIL->new;
+	require './module/log.pl';
+	$Logger = LOG->new;
 	
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/IP'	if ($mode == 0);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST'	if ($mode == 1);

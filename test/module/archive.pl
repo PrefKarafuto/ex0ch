@@ -3,7 +3,7 @@
 #	過去ログ管理モジュール
 #
 #============================================================================================================
-package	CELEBORN;
+package	ARCHIVE;
 
 use strict;
 #use warnings;
@@ -35,7 +35,7 @@ sub new
 #
 #	過去ログ情報ファイル読み込み
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
+#	@param	$Sys	SYSTEM
 #	@return	エラー番号
 #
 #------------------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ sub Load
 #
 #	過去ログ情報ファイル書き込み
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
+#	@param	$Sys	SYSTEM
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -244,7 +244,7 @@ sub Delete
 #
 #	過去ログ情報の更新
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
+#	@param	$Sys	SYSTEM
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -253,7 +253,7 @@ sub UpdateInfo
 	my $this = shift;
 	my ($Sys) = @_;
 	
-	require './module/earendil.pl';
+	require './module/file_utils.pl';
 	
 	$this->{'KEY'} = {};
 	$this->{'SUBJECT'} = {};
@@ -265,12 +265,12 @@ sub UpdateInfo
 	# ディレクトリ情報を取得
 	my $hierarchy = {};
 	my @dirList = ();
-	EARENDIL::GetFolderHierarchy($path, $hierarchy);
-	EARENDIL::GetFolderList($hierarchy, \@dirList, '');
+	FILE_UTILS::GetFolderHierarchy($path, $hierarchy);
+	FILE_UTILS::GetFolderList($hierarchy, \@dirList, '');
 	
 	foreach my $dir (@dirList) {
 		my @fileList = ();
-		EARENDIL::GetFileList("$path/$dir", \@fileList, '([0-9]+)\.html');
+		FILE_UTILS::GetFileList("$path/$dir", \@fileList, '([0-9]+)\.html');
 		$this->Add(0, 0, 0, $dir);
 		foreach my $file (sort @fileList) {
 			my @elem = split(/\./, $file);
@@ -286,7 +286,7 @@ sub UpdateInfo
 #
 #	過去ログindexの更新
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
+#	@param	$Sys	SYSTEM
 #	@param	$Page	
 #	@return	なし
 #
@@ -297,8 +297,8 @@ sub UpdateIndex
 	my ($Sys, $Page) = @_;
 	
 	# 告知情報読み込み
-	require './module/denethor.pl';
-	my $Banner = DENETHOR->new;
+	require './module/banner.pl';
+	my $Banner = BANNER->new;
 	$Banner->Load($Sys);
 	
 	my $basePath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
@@ -403,9 +403,9 @@ sub GetThreadSubject
 #
 #	過去ログindexを出力する
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Page	THORIN
-#	@param	$Banner	DENETHOR
+#	@param	$Sys	SYSTEM
+#	@param	$Page	BUFFER
+#	@param	$Banner	BANNER
 #	@param	$pInfo	出力情報配列
 #	@param	$base	掲示板トップパス
 #	@param	$path	index出力パス
@@ -420,8 +420,8 @@ sub OutputIndex
 	
 	my $cgipath	= $Sys->Get('CGIPATH');
 	
-	require './module/legolas.pl';
-	my $Caption = LEGOLAS->new;
+	require './module/header_footer_meta.pl';
+	my $Caption = HEADER_FOOTER_META->new;
 	$Caption->Load($Sys, 'META');
 	
 	my $version = $Sys->Get('VERSION');

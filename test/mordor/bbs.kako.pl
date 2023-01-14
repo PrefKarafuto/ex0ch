@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,14 +48,14 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
 	# 掲示板情報の読み込みとグループ設定
 	if (! defined $BBS){
-		require './module/nazguls.pl';
-		$BBS = NAZGUL->new;
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
 		
 		$BBS->Load($Sys);
 		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
@@ -91,8 +91,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -103,8 +103,8 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err, $BBS);
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
 	
 	# 管理情報を登録
 	$BBS->Load($Sys);
@@ -143,7 +143,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -176,8 +176,8 @@ sub PrintKakoLogList
 	$SYS->Set('_TITLE', 'LOG List');
 	
 	require './module/galadriel.pl';
-	require './module/celeborn.pl';
-	$Logs = CELEBORN->new;
+	require './module/archive.pl';
+	$Logs = ARCHIVE->new;
 	
 	$Logs->Load($SYS);
 	$Logs->GetKeySet('ALL', '', \@logSet);
@@ -216,7 +216,7 @@ sub PrintKakoLogList
 		$n		= $i + 1;
 		$key	= $Logs->Get('KEY', $logSet[$i]);
 		$subj	= $Logs->Get('SUBJECT', $logSet[$i]);
-		$date	= GALADRIEL::GetDateFromSerial(undef, $Logs->Get('DATE', $logSet[$i]), 0);
+		$date	= DATA_UTILS::GetDateFromSerial(undef, $Logs->Get('DATE', $logSet[$i]), 0);
 		
 		$Page->Print("<tr><td><input type=checkbox name=LOGS value=$logSet[$i]></td>");
 		$Page->Print("<td>$n: $subj</td><td align=center>$key</td>");
@@ -259,8 +259,8 @@ sub FunctionUpdateInfo
 			return 1000;
 		}
 	}
-	require './module/celeborn.pl';
-	$Logs = CELEBORN->new;
+	require './module/archive.pl';
+	$Logs = ARCHIVE->new;
 	
 	$Logs->Load($Sys);
 	$Logs->UpdateInfo($Sys);
@@ -299,10 +299,10 @@ sub FunctionUpdateIndex
 			return 1000;
 		}
 	}
-	require './module/thorin.pl';
-	require './module/celeborn.pl';
-	$Logs = CELEBORN->new;
-	$Page = THORIN->new;
+	require './module/buffer.pl';
+	require './module/archive.pl';
+	$Logs = ARCHIVE->new;
+	$Page = BUFFER->new;
 	
 	$Logs->Load($Sys);
 	$Logs->UpdateIndex($Sys, $Page);
@@ -340,9 +340,9 @@ sub FunctionLogDelete
 	@logSet = $Form->GetAtArray('LOGS');
 	$base = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/kako';
 	
-	require './module/earendil.pl';
-	require './module/celeborn.pl';
-	$Logs = CELEBORN->new;
+	require './module/file_utils.pl';
+	require './module/archive.pl';
+	$Logs = ARCHIVE->new;
 	$Logs->Load($Sys);
 	
 	foreach $id (@logSet) {
@@ -361,7 +361,7 @@ sub FunctionLogDelete
 		# グループ内のログがすべて削除された場合はディレクトリを削除する
 		if ($Logs->GetKeySet('PATH', $logPath, \@pathList) == 1) {
 			if ($Logs->Get('PATH', $pathList[0], '') eq '') {
-				EARENDIL::DeleteDirectory($removePath);
+				FILE_UTILS::DeleteDirectory($removePath);
 				$Logs->Delete($pathList[0]);
 			}
 		}
@@ -373,11 +373,11 @@ sub FunctionLogDelete
 			
 			%Dirs = ();
 			@DirList = ();
-			EARENDIL::GetFolderHierarchy($removePath2, \%Dirs);
-			EARENDIL::GetFolderList(\%Dirs, \@DirList, '');
+			FILE_UTILS::GetFolderHierarchy($removePath2, \%Dirs);
+			FILE_UTILS::GetFolderList(\%Dirs, \@DirList, '');
 			
 			if ($#DirList == -1) {
-				EARENDIL::DeleteDirectory($removePath2);
+				FILE_UTILS::DeleteDirectory($removePath2);
 				$Logs->Delete((grep { $Logs->{'PATH'}->{$_} eq $logPath2 } keys %{$Logs->{'PATH'}})[0]);
 			}
 			else {

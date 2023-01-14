@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,14 +48,14 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
 	# 掲示板情報の読み込みとグループ設定
 	if (! defined $BBS){
-		require './module/nazguls.pl';
-		$BBS = NAZGUL->new;
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
 		
 		$BBS->Load($Sys);
 		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
@@ -106,8 +106,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -118,8 +118,8 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err, $BBS);
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
 	
 	# 管理情報を登録
 	$BBS->Load($Sys);
@@ -168,7 +168,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -217,10 +217,10 @@ sub PrintHeaderEdit
 	
 	$SYS->Set('_TITLE', 'BBS Header Edit');
 	
-	require './module/isildur.pl';
-	require './module/legolas.pl';
-	$Head = LEGOLAS->new;
-	$Setting = ISILDUR->new;
+	require './module/setting.pl';
+	require './module/header_footer_meta.pl';
+	$Head = HEADER_FOOTER_META->new;
+	$Setting = SETTING->new;
 	$Head->Load($SYS, 'HEAD');
 	$Setting->Load($SYS);
 	
@@ -242,7 +242,7 @@ sub PrintHeaderEdit
 	}
 	
 	# プレビューデータの作成
-	my $PreviewPage = THORIN->new;
+	my $PreviewPage = BUFFER->new;
 	$Head->Print($PreviewPage, $Setting);
 	$PreviewPage->{'BUFF'} = CreatePreviewData($PreviewPage->{'BUFF'});
 	$Page->Merge($PreviewPage);
@@ -288,8 +288,8 @@ sub PrintFooterEdit
 	
 	$SYS->Set('_TITLE', 'BBS Footer Edit');
 	
-	require './module/legolas.pl';
-	$Foot = LEGOLAS->new;
+	require './module/header_footer_meta.pl';
+	$Foot = HEADER_FOOTER_META->new;
 	$Foot->Load($SYS, 'FOOT');
 	
 	# 権限取得
@@ -310,7 +310,7 @@ sub PrintFooterEdit
 	}
 	
 	# プレビューデータの作成
-	my $PreviewPage = THORIN->new;
+	my $PreviewPage = BUFFER->new;
 	$Foot->Print($PreviewPage, undef);
 	$PreviewPage->{'BUFF'} = CreatePreviewData($PreviewPage->{'BUFF'});
 	$Page->Merge($PreviewPage);
@@ -356,8 +356,8 @@ sub PrintMETAEdit
 	
 	$SYS->Set('_TITLE', 'BBS META Edit');
 	
-	require './module/legolas.pl';
-	$Meta = LEGOLAS->new;
+	require './module/header_footer_meta.pl';
+	$Meta = HEADER_FOOTER_META->new;
 	$Meta->Load($SYS, 'META');
 	
 	$pMeta = $Meta->Get();
@@ -407,8 +407,8 @@ sub PrintValidUserEdit
 	
 	$SYS->Set('_TITLE', 'BBS Valid User Edit');
 	
-	require './module/faramir.pl';
-	$vUsers = FARAMIR->new;
+	require './module/user.pl';
+	$vUsers = USER->new;
 	$vUsers->Load($SYS);
 	
 	# 権限取得
@@ -492,8 +492,8 @@ sub PrintNGWordsEdit
 	
 	$SYS->Set('_TITLE', 'BBS NG Words Edit');
 	
-	require './module/wormtongue.pl';
-	$Words = WORMTONGUE->new;
+	require './module/ng_word.pl';
+	$Words = NG_WORD->new;
 	$Words->Load($SYS);
 	
 	# 権限取得
@@ -568,8 +568,8 @@ sub PrintLastEdit
 	$SYS->Set('_TITLE', 'BBS 1001 Edit');
 	$Form->DecodeForm(1);
 	
-	require './module/isildur.pl';
-	my $Set = ISILDUR->new;
+	require './module/setting.pl';
+	my $Set = SETTING->new;
 	$Set->Load($SYS);
 	
 	$resmax		= $Set->Get('BBS_RES_MAX') || $SYS->Get('RESMAX');
@@ -742,8 +742,8 @@ sub FunctionTextEdit
 		push @$pLog, 'meta.txtを設定しました。';
 	}
 	
-	require './module/legolas.pl';
-	$Texts = LEGOLAS->new;
+	require './module/header_footer_meta.pl';
+	$Texts = HEADER_FOOTER_META->new;
 	$Texts->Load($Sys, $readKey);
 	
 	$value = $Form->Get($formKey);
@@ -779,8 +779,8 @@ sub FunctionValidUserEdit
 			return 1000;
 		}
 	}
-	require './module/faramir.pl';
-	$vUsers = FARAMIR->new;
+	require './module/user.pl';
+	$vUsers = USER->new;
 	$vUsers->Load($Sys);
 	
 	@validUsers = split(/\n/, $Form->Get('VALID_USERS'));
@@ -833,8 +833,8 @@ sub FunctionNGWordEdit
 			return 1000;
 		}
 	}
-	require './module/wormtongue.pl';
-	$Words = WORMTONGUE->new;
+	require './module/ng_word.pl';
+	$Words = NG_WORD->new;
 	$Words->Load($Sys);
 	
 	@ngWords = split(/\n/, $Form->Get('NG_WORDS'));

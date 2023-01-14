@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,8 +48,8 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	
 	# 管理マスタオブジェクトの生成
 	$Page		= $BASE->Create($Sys, $Form);
@@ -86,8 +86,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -128,7 +128,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -164,8 +164,8 @@ sub PrintCapList
 	
 	$Sys->Set('_TITLE', 'Caps List');
 	
-	require './module/ungoliants.pl';
-	$Cap = UNGOLIANT->new;
+	require './module/cap.pl';
+	$Cap = CAP->new;
 	
 	# キャップ情報の読み込み
 	$Cap->Load($Sys);
@@ -255,8 +255,8 @@ sub PrintCapSetting
 	$Sys->Set('_TITLE', 'Cap Edit')		if ($mode == 1);
 	$Sys->Set('_TITLE', 'Cap Create')	if ($mode == 0);
 	
-	require './module/ungoliants.pl';
-	$User = UNGOLIANT->new;
+	require './module/cap.pl';
+	$User = CAP->new;
 	
 	# キャップ情報の読み込み
 	$User->Load($Sys);
@@ -325,8 +325,8 @@ sub PrintCapDelete
 	
 	$SYS->Set('_TITLE', 'Cap Delete Confirm');
 	
-	require './module/ungoliants.pl';
-	$Cap = UNGOLIANT->new;
+	require './module/cap.pl';
+	$Cap = CAP->new;
 	
 	# キャップ情報を取得
 	$Cap->Load($SYS);
@@ -397,8 +397,8 @@ sub FuncCapSetting
 			return 1002;
 		}
 	}
-	require './module/ungoliants.pl';
-	$Cap = UNGOLIANT->new;
+	require './module/cap.pl';
+	$Cap = CAP->new;
 	
 	$Cap->Load($Sys);
 	
@@ -468,8 +468,8 @@ sub FuncCapDelete
 			return 1000;
 		}
 	}
-	require './module/ungoliants.pl';
-	$Cap = UNGOLIANT->new;
+	require './module/cap.pl';
+	$Cap = CAP->new;
 	
 	$Cap->Load($Sys);
 	@userSet = $Form->GetAtArray('CAPS');

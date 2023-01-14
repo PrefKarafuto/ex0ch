@@ -1,17 +1,17 @@
 #============================================================================================================
 #
 #	管理CGIベースモジュール
-#	sauron.pl
+#	admin_cgi_base.pl
 #	---------------------------------------------------------------------------
 #	2003.10.12 start
 #
 #============================================================================================================
-package	SAURON;
+package	ADMIN_CGI_BASE;
 
 use strict;
 #use warnings;
 
-require './module/thorin.pl';
+require './module/buffer.pl';
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -27,9 +27,9 @@ sub new
 	my ($obj, @MnuStr, @MnuUrl);
 	
 	$obj = {
-		'SYS'		=> undef,														# MELKOR保持
-		'FORM'		=> undef,														# SAMWISE保持
-		'INN'		=> undef,														# THORIN保持
+		'SYS'		=> undef,														# SYSTEM保持
+		'FORM'		=> undef,														# FORM保持
+		'INN'		=> undef,														# BUFFER保持
 		'MNUSTR'	=> \@MnuStr,													# 機能リスト文字列
 		'MNUURL'	=> \@MnuUrl,													# 機能リストURL
 		'MNUNUM'	=> 0															# 機能リスト数
@@ -43,9 +43,9 @@ sub new
 #
 #	オブジェクト生成 - Create
 #	-------------------------------------------------------------------------------------
-#	引　数：$M : MELKORモジュール
-#			$S : SAMWISEモジュール
-#	戻り値：THORINモジュール
+#	引　数：$M : SYSTEMモジュール
+#			$S : FORMモジュール
+#	戻り値：BUFFERモジュール
 #
 #------------------------------------------------------------------------------------------------------------
 sub Create
@@ -55,7 +55,7 @@ sub Create
 	
 	$this->{'SYS'}		= $Sys;
 	$this->{'FORM'}		= $Form;
-	$this->{'INN'}		= THORIN->new;
+	$this->{'INN'}		= BUFFER->new;
 	$this->{'MNUNUM'}	= 0;
 	
 	return $this->{'INN'};
@@ -95,7 +95,7 @@ sub Print
 	my ($ttl, $mode) = @_;
 	my ($Tad, $Tin, $TPlus);
 	
-	$Tad	= THORIN->new;
+	$Tad	= BUFFER->new;
 	$Tin	= $this->{'INN'};
 	
 	PrintHTML($Tad, $ttl);																# HTMLヘッダ出力
@@ -105,7 +105,7 @@ sub Print
 	PrintInner($Tad, $Tin, $ttl);														# 機能内容出力
 	PrintCommonInfo($Tad, $this->{'FORM'});
 	PrintFoot($Tad, $this->{'FORM'}->Get('UserName'), $this->{'SYS'}->Get('VERSION'),
-						$this->{'SYS'}->Get('ADMIN')->{'NEWRELEASE'}->Get('Update'));	# フッタ出力
+						$this->{'SYS'}->Get('ADMIN')->{'UPDATE_NOTICE'}->Get('Update'));	# フッタ出力
 	
 	$Tad->Flush(0, 0, '');																# 画面出力
 }
@@ -124,7 +124,7 @@ sub PrintNoList
 	my ($ttl, $mode) = @_;
 	my ($Tad, $Tin);
 	
-	$Tad = THORIN->new;
+	$Tad = BUFFER->new;
 	$Tin = $this->{'INN'};
 	
 	PrintHTML($Tad, $ttl);															# HTMLヘッダ出力
@@ -140,7 +140,7 @@ sub PrintNoList
 #
 #	HTMLヘッダ出力 - PrintHTML
 #	-------------------------------------------
-#	引　数：$T   : THORINモジュール
+#	引　数：$T   : BUFFERモジュール
 #			$ttl : ページタイトル
 #	戻り値：なし
 #
@@ -165,7 +165,7 @@ HTML
 #
 #	スタイルシート出力 - PrintCSS
 #	-------------------------------------------
-#	引　数：$Page   : THORINモジュール
+#	引　数：$Page   : BUFFERモジュール
 #	戻り値：なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ HTML
 #
 #	ページヘッダ出力 - PrintHead
 #	-------------------------------------------
-#	引　数：$Page   : THORINモジュール
+#	引　数：$Page   : BUFFERモジュール
 #			$ttl : ページタイトル
 #	戻り値：なし
 #
@@ -272,7 +272,7 @@ HTML
 #
 #	機能リスト出力 - PrintList
 #	-------------------------------------------
-#	引　数：$Page   : THORINモジュール
+#	引　数：$Page   : BUFFERモジュール
 #			$str : 機能タイトル配列
 #			$url : 機能URL配列
 #	戻り値：なし
@@ -318,8 +318,8 @@ HTML
 #
 #	機能内容出力 - PrintInner
 #	-------------------------------------------
-#	引　数：$Page1 : THORINモジュール(MAIN)
-#			$Page2 : THORINモジュール(内容)
+#	引　数：$Page1 : BUFFERモジュール(MAIN)
+#			$Page2 : BUFFERモジュール(内容)
 #	戻り値：なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -369,7 +369,7 @@ HTML
 #
 #	フッタ出力 - PrintFoot
 #	-------------------------------------------
-#	引　数：$Page   : THORINモジュール
+#	引　数：$Page   : BUFFERモジュール
 #	戻り値：なし
 #
 #------------------------------------------------------------------------------------------------------------

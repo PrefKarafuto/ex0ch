@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,15 +48,15 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $DAT, $Page,$Logger);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	$DAT = $pSys->{'AD_DAT'};
 	
 	# 掲示板情報の読み込みとグループ設定
 	if (! defined $pSys->{'AD_BBS'}) {
-		require './module/nazguls.pl';
-		$BBS = NAZGUL->new;
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
 		
 		$BBS->Load($Sys);
 		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
@@ -65,8 +65,8 @@ sub DoPrint
 	
 	# datの読み込み
 	if (! defined $pSys->{'AD_DAT'}) {
-		require './module/gondor.pl';
-		$DAT = ARAGORN->new;
+		require './module/dat.pl';
+		$DAT = DAT->new;
 		
 		$Sys->Set('KEY', $Form->Get('TARGET_THREAD'));
 		my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $Sys->Get('KEY') . '.dat';
@@ -74,8 +74,8 @@ sub DoPrint
 	}
 	
 	#logの読み込み
-	require './module/imrahil.pl';
-	$Logger = IMRAHIL->new;
+	require './module/log.pl';
+	$Logger = LOG->new;
 	my $logPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/' . $Sys->Get('KEY');
 	$Logger->Open($logPath, 0, 1 | 2);
 	
@@ -122,8 +122,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -134,10 +134,10 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err, $BBS, $DAT);
 	
-	require './module/gondor.pl';
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
-	$DAT = ARAGORN->new;
+	require './module/dat.pl';
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$DAT = DAT->new;
 	
 	# 掲示板情報の読み込みとグループ設定
 	$BBS->Load($Sys);
@@ -181,7 +181,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -573,14 +573,14 @@ sub FunctionResDelete
 	# あぼ〜ん時は削除名を取得
 	if ($mode) {
 		my $Setting;
-		require './module/isildur.pl';
-		$Setting = ISILDUR->new;
+		require './module/setting.pl';
+		$Setting = SETTING->new;
 		$Setting->Load($Sys);
 		$abone	= $Setting->Get('BBS_DELETE_NAME');
 	}
 	else {
-		require './module/peregrin.pl';
-		$LOG = PEREGRIN->new;
+		require './module/manager_log.pl';
+		$LOG = MANAGER_LOG->new;
 		$LOG->Load($Sys, 'WRT', $Sys->Get('KEY'));
 		$logsize = $LOG->Size();
 		$lastnum = $Dat->Size() - 1;
@@ -654,7 +654,7 @@ sub FunctionResDelete
 #	削除書式の解析
 #	-------------------------------------------------------------------------------------
 #	@param	$format	書式文字列
-#	@param	$Dat	ARAGORNオブジェクト
+#	@param	$Dat	DATオブジェクト
 #	@param	$pSet	結果格納配列の参照
 #	@return	なし
 #
@@ -688,7 +688,7 @@ sub AnalyzeDeleteFormat
 #	書式の解析
 #	-------------------------------------------------------------------------------------
 #	@param	$format	書式文字列
-#	@param	$Dat	ARAGORNオブジェクト
+#	@param	$Dat	DATオブジェクト
 #	@return	(開始番号, 終了番号)
 #
 #------------------------------------------------------------------------------------------------------------

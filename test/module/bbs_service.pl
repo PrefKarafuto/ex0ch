@@ -3,7 +3,7 @@
 #	bbs.cgi支援モジュール
 #
 #============================================================================================================
-package	VARDA;
+package	BBS_SERVICE;
 
 use strict;
 #use warnings;
@@ -37,8 +37,8 @@ sub new
 #
 #	初期化
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys		MELKOR
-#	@param	$Setting	ISILDUR
+#	@param	$Sys		SYSTEM
+#	@param	$Setting	SETTING
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -47,20 +47,20 @@ sub Init
 	my $this = shift;
 	my ($Sys, $Setting) = @_;
 	
-	require './module/baggins.pl';
+	require './module/thread.pl';
 	require './module/galadriel.pl';
-	require './module/denethor.pl';
+	require './module/banner.pl';
 	
 	# 使用モジュールを設定
 	$this->{'SYS'} = $Sys;
-	$this->{'THREADS'} = BILBO->new;
-	$this->{'CONV'} = GALADRIEL->new;
-	$this->{'BANNER'} = DENETHOR->new;
+	$this->{'THREADS'} = THREAD->new;
+	$this->{'CONV'} = DATA_UTILS->new;
+	$this->{'BANNER'} = BANNER->new;
 	$this->{'CODE'} = 'sjis';
 	
 	if (!defined $Setting) {
-		require './module/isildur.pl';
-		$this->{'SET'} = ISILDUR->new;
+		require './module/setting.pl';
+		$this->{'SET'} = SETTING->new;
 		$this->{'SET'}->Load($Sys);
 	}
 	else {
@@ -92,10 +92,10 @@ sub CreateIndex
 	if ($Sys->Equal('MODE', 'CREATE')
 		|| ($Threads->GetPosition($Sys->Get('KEY')) < $bbsSetting->Get('BBS_MAX_MENU_THREAD'))) {
 		
-		require './module/thorin.pl';
-		require './module/legolas.pl';
-		my $Index = THORIN->new;
-		my $Caption = LEGOLAS->new;
+		require './module/buffer.pl';
+		require './module/header_footer_meta.pl';
+		my $Index = BUFFER->new;
+		my $Caption = HEADER_FOOTER_META->new;
 		
 		PrintIndexHead($this, $Index, $Caption);
 		PrintIndexMenu($this, $Index);
@@ -122,8 +122,8 @@ sub CreateIIndex
 {
 	my $this = shift;
 	
-	require './module/thorin.pl';
-	my $Page = THORIN->new;
+	require './module/buffer.pl';
+	my $Page = BUFFER->new;
 	
 	# 前準備
 	my $Sys = $this->{'SYS'};
@@ -188,16 +188,16 @@ sub CreateSubback
 {
 	my $this = shift;
 	
-	require './module/thorin.pl';
-	my $Page = THORIN->new;
+	require './module/buffer.pl';
+	my $Page = BUFFER->new;
 	
 	my $Sys = $this->{'SYS'};
 	my $Threads = $this->{'THREADS'};
 	my $Set = $this->{'SET'};
 	my $Conv = $this->{'CONV'};
 	
-	require './module/legolas.pl';
-	my $Caption = LEGOLAS->new;
+	require './module/header_footer_meta.pl';
+	my $Caption = HEADER_FOOTER_META->new;
 	$Caption->Load($Sys, 'META');
 	
 	# HTMLヘッダの出力
@@ -306,8 +306,8 @@ HEAD
 	
 	# cookie用scriptの出力
 	if ($this->{'SET'}->Equal('SUBBBS_CGI_ON', 1)) {
-		require './module/radagast.pl';
-		RADAGAST::Print(undef, $Page);
+		require './module/cookie.pl';
+		COOKIE::Print(undef, $Page);
 	}
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
@@ -427,8 +427,8 @@ sub PrintIndexPreview
 	my ($Page) = @_;
 	
 	# 拡張機能ロード
-	require './module/athelas.pl';
-	my $Plugin = ATHELAS->new;
+	require './module/plugin.pl';
+	my $Plugin = PLUGIN->new;
 	$Plugin->Load($this->{'SYS'});
 	
 	# 有効な拡張機能一覧を取得
@@ -449,8 +449,8 @@ sub PrintIndexPreview
 		}
 	}
 	
-	require './module/gondor.pl';
-	my $Dat = ARAGORN->new;
+	require './module/dat.pl';
+	my $Dat = DAT->new;
 	
 	my @threadSet = ();
 	$this->{'THREADS'}->GetKeySet('ALL', '', \@threadSet);

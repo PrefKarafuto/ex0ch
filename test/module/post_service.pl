@@ -3,7 +3,7 @@
 #	掲示板書き込み支援モジュール
 #
 #============================================================================================================
-package	VARA;
+package	POST_SERVICE;
 
 use strict;
 #use warnings;
@@ -38,11 +38,11 @@ sub new
 #
 #	初期化
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR(必須)
-#	@param	$Form	SAMWISE(必須)
-#	@param	$Set	ISILDUR
-#	@param	$Thread	BILBO
-#	@param	$Conv	GALADRIEL
+#	@param	$Sys	SYSTEM(必須)
+#	@param	$Form	FORM(必須)
+#	@param	$Set	SETTING
+#	@param	$Thread	THREAD
+#	@param	$Conv	DATA_UTILS
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -59,29 +59,29 @@ sub Init
 	
 	# モジュールが用意されてない場合はここで生成する
 	if (!defined $Set) {
-		require './module/isildur.pl';
-		$this->{'SET'} = ISILDUR->new;
+		require './module/setting.pl';
+		$this->{'SET'} = SETTING->new;
 		$this->{'SET'}->Load($Sys);
 	}
 	if (!defined $Threads) {
-		require './module/baggins.pl';
-		$this->{'THREADS'} = BILBO->new;
+		require './module/thread.pl';
+		$this->{'THREADS'} = THREAD->new;
 		$this->{'THREADS'}->Load($Sys);
 	}
 	if (!defined $Conv) {
 		require './module/galadriel.pl';
-		$this->{'CONV'} = GALADRIEL->new;
+		$this->{'CONV'} = DATA_UTILS->new;
 	}
 	
 	# キャップ管理モジュールロード
-	require './module/ungoliants.pl';
+	require './module/cap.pl';
 	$this->{'SECURITY'} = SECURITY->new;
 	$this->{'SECURITY'}->Init($Sys);
 	$this->{'SECURITY'}->SetGroupInfo($Sys->Get('BBS'));
 	
 	# 拡張機能情報管理モジュールロード
-	require './module/athelas.pl';
-	$this->{'PLUGIN'} = ATHELAS->new;
+	require './module/plugin.pl';
+	$this->{'PLUGIN'} = PLUGIN->new;
 	$this->{'PLUGIN'}->Load($Sys);
 }
 
@@ -113,7 +113,7 @@ sub Write
 	
 	
 	# データの書き込み
-	require './module/gondor.pl';
+	require './module/dat.pl';
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
 	my $Form = $this->{'FORM'};
@@ -141,7 +141,7 @@ sub Write
 	$Sys->Set('updown', $updown);
 	
 	# 書き込み直前処理
-	$err = $this->ReadyBeforeWrite(ARAGORN::GetNumFromFile($Sys->Get('DATPATH')) + 1);
+	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1);
 	return $err if ($err != $ZP::E_SUCCESS);
 	
 	# レス要素の取得
@@ -165,8 +165,8 @@ sub Write
 	my $datPath = $Sys->Get('DATPATH');
 	
 	# ログ書き込み
-	require './module/peregrin.pl';
-	my $Log = PEREGRIN->new;
+	require './module/manager_log.pl';
+	my $Log = MANAGER_LOG->new;
 	$Log->Load($Sys, 'WRT', $threadid);
 	$Log->Set($Set, length($Form->Get('MESSAGE')), $Sys->Get('VERSION'), $Sys->Get('KOYUU'), $data, $Sys->Get('AGENT', 0));
 	$Log->Save($Sys);
@@ -176,14 +176,14 @@ sub Write
 	
 	# datファイルへ直接書き込み
 	my $resNum = 0;
-	my $err2 = ARAGORN::DirectAppend($Sys, $datPath, $line);
+	my $err2 = DAT::DirectAppend($Sys, $datPath, $line);
 	if ($err2 == 0) {
 		# レス数が最大数を超えたらover設定をする
-		$resNum = ARAGORN::GetNumFromFile($datPath);
+		$resNum = DAT::GetNumFromFile($datPath);
 		if ($resNum >= $Sys->Get('RESMAX')) {
 			# datにOVERスレッドレスを書き込む
 			Get1001Data($Sys, \$line);
-			ARAGORN::DirectAppend($Sys, $datPath, $line);
+			DAT::DirectAppend($Sys, $datPath, $line);
 			$resNum++;
 		}
 		$err = $ZP::E_SUCCESS;
@@ -200,9 +200,9 @@ sub Write
 		# subject.txtの更新
 		# スレッド作成モードなら新規に追加する
 		if ($Sys->Equal('MODE', 1)) {
-			require './module/earendil.pl';
+			require './module/file_utils.pl';
 			my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
-			my $Pools = FRODO->new;
+			my $Pools = POOL_THREAD->new;
 			$Pools->Load($Sys);
 			$Threads->Add($threadid, $subject, 1);
 			
@@ -218,7 +218,7 @@ sub Write
 				
 				$Pools->Add($lid, $Threads->Get('SUBJECT', $lid), $Threads->Get('RES', $lid));
 				$Threads->Delete($lid);
-				EARENDIL::Copy("$path/dat/$lid.dat", "$path/pool/$lid.cgi");
+				FILE_UTILS::Copy("$path/dat/$lid.dat", "$path/pool/$lid.cgi");
 				unlink "$path/dat/$lid.dat";
 			}
 			
@@ -308,8 +308,8 @@ sub ReadyBeforeWrite
 	{
 		# 規制ユーザ
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NGUSER, $bbs)) {
-			require './module/faramir.pl';
-			my $vUser = FARAMIR->new;
+			require './module/user.pl';
+			my $vUser = USER->new;
 			$vUser->Load($Sys);
 			
 			my $koyuu2 = ($client & $ZP::C_MOBILE_IDGET & ~$ZP::C_P2 ? $koyuu : undef);
@@ -325,8 +325,8 @@ sub ReadyBeforeWrite
 		
 		# NGワード
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NGWORD, $bbs)) {
-			require './module/wormtongue.pl';
-			my $ngWord = WORMTONGUE->new;
+			require './module/ng_word.pl';
+			my $ngWord = NG_WORD->new;
 			$ngWord->Load($Sys);
 			my @checkKey = ('FROM', 'mail', 'MESSAGE');
 			
@@ -431,13 +431,13 @@ sub IsRegulation
 	
 	# レス書き込みモード時のみ
 	if ($Sys->Equal('MODE', 2)) {
-		require './module/gondor.pl';
+		require './module/dat.pl';
 		
 		# 移転スレッド
-		return $ZP::E_LIMIT_MOVEDTHREAD if (ARAGORN::IsMoved($datPath));
+		return $ZP::E_LIMIT_MOVEDTHREAD if (DAT::IsMoved($datPath));
 		
 		# レス最大数
-		return $ZP::E_LIMIT_OVERMAXRES if ($Sys->Get('RESMAX') < ARAGORN::GetNumFromFile($datPath));
+		return $ZP::E_LIMIT_OVERMAXRES if ($Sys->Get('RESMAX') < DAT::GetNumFromFile($datPath));
 		
 		# datファイルサイズ制限
 		if ($Set->Get('BBS_DATMAX')) {
@@ -499,8 +499,8 @@ sub IsRegulation
 			}
 		}
 		# スレッド作成(スレッド立てすぎ)
-		require './module/peregrin.pl';
-		my $Log = PEREGRIN->new;
+		require './module/manager_log.pl';
+		my $Log = MANAGER_LOG->new;
 		$Log->Load($Sys, 'THR');
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_MANYTHREAD, $bbs)) {
 			my $tateHour = $Set->Get('BBS_TATESUGI_HOUR', '0') - 0;
@@ -519,7 +519,7 @@ sub IsRegulation
 		
 		# Sambaログ
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_SAMBA, $bbs) || !$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTIMEPOST, $bbs)) {
-			my $Logs = PEREGRIN->new;
+			my $Logs = MANAGER_LOG->new;
 			$Logs->Load($Sys, 'SMB');
 			$Logs->Set($Set, $Sys->Get('KEY'), $Sys->Get('VERSION'), $koyuu);
 			$Logs->Save($Sys);
@@ -527,13 +527,13 @@ sub IsRegulation
 	}
 	# レス書き込みモード
 	else {
-		require './module/peregrin.pl';
+		require './module/manager_log.pl';
 		
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_SAMBA, $bbs) || !$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTIMEPOST, $bbs)) {
-			my $Logs = PEREGRIN->new;
+			my $Logs = MANAGER_LOG->new;
 			$Logs->Load($Sys, 'SMB');
 			
-			my $Logh = PEREGRIN->new;
+			my $Logh = MANAGER_LOG->new;
 			$Logh->Load($Sys, 'SBH');
 			
 			my $n = 0;
@@ -584,7 +584,7 @@ sub IsRegulation
 		# レス書き込み(連続投稿)
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOBREAKPOST, $bbs)) {
 			if ($Set->Get('timeclose') && $Set->Get('timecount') ne '') {
-				my $Log = PEREGRIN->new;
+				my $Log = MANAGER_LOG->new;
 				$Log->Load($Sys, 'HST');
 				my $cnt = $Log->Search($koyuu, 2, $mode, $host, $Set->Get('timecount'));
 				if ($cnt >= $Set->Get('timeclose')) {
@@ -595,7 +595,7 @@ sub IsRegulation
 		# レス書き込み(二重投稿)
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DOUBLEPOST, $bbs)) {
 			if ($this->{'SYS'}->Get('KAKIKO') == 1) {
-				my $Log = PEREGRIN->new;
+				my $Log = MANAGER_LOG->new;
 				$Log->Load($Sys, 'WRT', $Sys->Get('KEY'));
 				if ($Log->Search($koyuu, 1) - 2 == length($this->{'FORM'}->Get('MESSAGE'))) {
 					return $ZP::E_REG_DOUBLEPOST;
@@ -813,7 +813,7 @@ sub NormalizationContents
 #
 #	1001のレスデータを設定する
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
+#	@param	$Sys	SYSTEM
 #	@param	$data	1001レス格納バッファ
 #
 #------------------------------------------------------------------------------------------------------------
@@ -847,7 +847,7 @@ sub Get1001Data
 #
 #	ホストログを出力する
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
+#	@param	$Sys	SYSTEM
 #	@param	$data	1001レス格納バッファ
 #
 #------------------------------------------------------------------------------------------------------------
@@ -871,8 +871,8 @@ sub SaveHost
 		}
 	}
 	
-	require './module/imrahil.pl';
-	my $Logger = IMRAHIL->new;
+	require './module/log.pl';
+	my $Logger = LOG->new;
 	
 	if ($Logger->Open("$bbs/log/HOST", $Sys->Get('HSTMAX'), 2 | 4) == 0) {
 		$Logger->Put($host, $Sys->Get('KEY'), $Sys->Get('MODE'));

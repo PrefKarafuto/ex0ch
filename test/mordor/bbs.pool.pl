@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,15 +48,15 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	require './module/nazguls.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	require './module/bbs_info.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
 	# 掲示板情報の読み込みとグループ設定
 	if (! defined $BBS){
-		require './module/nazguls.pl';
-		$BBS = NAZGUL->new;
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
 		
 		$BBS->Load($Sys);
 		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
@@ -101,8 +101,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -113,8 +113,8 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err, $BBS);
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
 	
 	# 管理情報を登録
 	$BBS->Load($Sys);
@@ -159,7 +159,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -191,8 +191,8 @@ sub PrintThreadList
 	
 	$SYS->Set('_TITLE', 'Pool Thread List');
 	
-	require './module/baggins.pl';
-	$Threads = FRODO->new;
+	require './module/thread.pl';
+	$Threads = POOL_THREAD->new;
 	
 	$Threads->Load($SYS);
 	$Threads->GetKeySet('ALL', '', \@threadSet);
@@ -278,8 +278,8 @@ sub PrintThreadRepare
 	
 	$SYS->Set('_TITLE', 'Pool Thread Repare');
 	
-	require './module/baggins.pl';
-	$Threads = FRODO->new;
+	require './module/thread.pl';
+	$Threads = POOL_THREAD->new;
 	
 	$Threads->Load($SYS);
 	@threadList = $Form->GetAtArray('THREADS');
@@ -326,8 +326,8 @@ sub PrintThreadCreate
 	
 	$SYS->Set('_TITLE', 'Pool Thread Create');
 	
-	require './module/baggins.pl';
-	$Threads = FRODO->new;
+	require './module/thread.pl';
+	$Threads = POOL_THREAD->new;
 	
 	$Threads->Load($SYS);
 	@threadList = $Form->GetAtArray('THREADS');
@@ -376,8 +376,8 @@ sub PrintThreadDelete
 	
 	$SYS->Set('_TITLE', 'Pool Thread Delete');
 	
-	require './module/baggins.pl';
-	$Threads = FRODO->new;
+	require './module/thread.pl';
+	$Threads = POOL_THREAD->new;
 	
 	$Threads->Load($SYS);
 	@threadList = $Form->GetAtArray('THREADS');
@@ -434,10 +434,10 @@ sub FunctionThreadRepare
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
-	require './module/earendil.pl';
-	$Threads = BILBO->new;
-	$Pools = FRODO->new;
+	require './module/thread.pl';
+	require './module/file_utils.pl';
+	$Threads = THREAD->new;
+	$Pools = POOL_THREAD->new;
 	
 	$Threads->Load($Sys);
 	$Pools->Load($Sys);
@@ -452,7 +452,7 @@ sub FunctionThreadRepare
 		$Threads->Add($id, $Pools->Get('SUBJECT', $id), $Pools->Get('RES', $id));
 		$Pools->Delete($id);
 		
-		EARENDIL::Move("$path/pool/$id.cgi", "$path/dat/$id.dat");
+		FILE_UTILS::Move("$path/pool/$id.cgi", "$path/dat/$id.dat");
 	}
 	$Threads->Save($Sys);
 	$Pools->Save($Sys);
@@ -484,8 +484,8 @@ sub FunctionThreadDelete
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
-	$Pools = FRODO->new;
+	require './module/thread.pl';
+	$Pools = POOL_THREAD->new;
 	
 	$Pools->Load($Sys);
 	
@@ -531,8 +531,8 @@ sub FunctionUpdateSubject
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
-	$Pools = FRODO->new;
+	require './module/thread.pl';
+	$Pools = POOL_THREAD->new;
 	
 	$Pools->Load($Sys);
 	$Pools->Update($Sys);
@@ -567,8 +567,8 @@ sub FunctionUpdateSubjectAll
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
-	$Pools = FRODO->new;
+	require './module/thread.pl';
+	$Pools = POOL_THREAD->new;
 	
 	$Pools->Load($Sys);
 	$Pools->UpdateAll($Sys);
@@ -608,18 +608,18 @@ sub FunctionCreateLogs
 	}
 	my @poolSet = $Form->GetAtArray('THREADS');
 	
-	require './module/gondor.pl';
-	require './module/thorin.pl';
-	require './module/isildur.pl';
+	require './module/dat.pl';
+	require './module/buffer.pl';
+	require './module/setting.pl';
 	require './module/galadriel.pl';
-	require './module/denethor.pl';
-	require './module/celeborn.pl';
-	my $Dat = ARAGORN->new;
-	my $Set = ISILDUR->new;
-	my $Banner = DENETHOR->new;
-	my $Conv = GALADRIEL->new;
-	my $Page = THORIN->new;
-	my $Logs = CELEBORN->new;
+	require './module/banner.pl';
+	require './module/archive.pl';
+	my $Dat = DAT->new;
+	my $Set = SETTING->new;
+	my $Banner = BANNER->new;
+	my $Conv = DATA_UTILS->new;
+	my $Page = BUFFER->new;
+	my $Logs = ARCHIVE->new;
 	
 	$Set->Load($Sys);
 	$Banner->Load($Sys);
@@ -630,8 +630,8 @@ sub FunctionCreateLogs
 	
 	my $Pools;
 	if ($isDelete) {
-		require './module/baggins.pl';
-		$Pools = FRODO->new;
+		require './module/thread.pl';
+		$Pools = POOL_THREAD->new;
 		$Pools->Load($Sys);
 	}
 	
@@ -694,8 +694,8 @@ sub CreateKAKOLog
 	
 	$cgipath	= $Sys->Get('CGIPATH');
 	
-	require './module/legolas.pl';
-	$Caption = LEGOLAS->new;
+	require './module/header_footer_meta.pl';
+	$Caption = HEADER_FOOTER_META->new;
 	$Caption->Load($Sys, 'META');
 	
 	# 過去ログ生成pooldatパスの生成
@@ -716,7 +716,7 @@ sub CreateKAKOLog
 	$color[4]	= $Set->Get('BBS_ALINK_COLOR');
 	$color[5]	= $Set->Get('BBS_VLINK_COLOR');
 	
-	require './module/earendil.pl';
+	require './module/file_utils.pl';
 	
 	$Page->Clear();
 	
@@ -786,8 +786,8 @@ HTML
 	$Dat->Close();
 	
 	# 過去ログの出力
-	EARENDIL::CreateFolderHierarchy($logDir, $Sys->Get('PM-KDIR'));
-	EARENDIL::Copy($datPath, "$logDir/$key.dat") or return 0;
+	FILE_UTILS::CreateFolderHierarchy($logDir, $Sys->Get('PM-KDIR'));
+	FILE_UTILS::Copy($datPath, "$logDir/$key.dat") or return 0;
 	$Page->Flush(1, $Sys->Get('PM-TXT'), $logPath);
 	
 	return 1;

@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,8 +48,8 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	
 	# 管理マスタオブジェクトの生成
 	$Page		= $BASE->Create($Sys, $Form);
@@ -86,8 +86,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -128,7 +128,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -161,8 +161,8 @@ sub PrintGroupList
 	
 	$Sys->Set('_TITLE', 'Common CAP Group List');
 	
-	require './module/ungoliants.pl';
-	$Group = SHELOB->new;
+	require './module/cap.pl';
+	$Group = CAP_GROUP->new;
 	
 	# グループ情報の読み込み
 	$Group->Load($Sys, 1);
@@ -233,9 +233,9 @@ sub PrintGroupSetting
 	$Sys->Set('_TITLE', 'Common CAP Group Edit')	if ($mode == 1);
 	$Sys->Set('_TITLE', 'Common CAP Group Create')	if ($mode == 0);
 	
-	require './module/ungoliants.pl';
-	$User = UNGOLIANT->new;
-	$Group = SHELOB->new;
+	require './module/cap.pl';
+	$User = CAP->new;
+	$Group = CAP_GROUP->new;
 	
 	# ユーザ情報の読み込み
 	$User->Load($Sys);
@@ -357,8 +357,8 @@ sub PrintGroupDelete
 	
 	$SYS->Set('_TITLE', 'Common CAP Group Delete Confirm');
 	
-	require './module/ungoliants.pl';
-	$Group = SHELOB->new;
+	require './module/cap.pl';
+	$Group = CAP_GROUP->new;
 	$Group->Load($SYS, 1);
 	
 	# ユーザ情報を取得
@@ -427,9 +427,9 @@ sub FunctionGroupSetting
 			return 1001;
 		}
 	}
-	require './module/ungoliants.pl';
-	$User = UNGOLIANT->new;
-	$Group = SHELOB->new;
+	require './module/cap.pl';
+	$User = CAP->new;
+	$Group = CAP_GROUP->new;
 	
 	# ユーザ情報の読み込み
 	$User->Load($Sys);
@@ -538,8 +538,8 @@ sub FunctionGroupDelete
 			return 1000;
 		}
 	}
-	require './module/ungoliants.pl';
-	$Group = SHELOB->new;
+	require './module/cap.pl';
+	$Group = CAP_GROUP->new;
 	
 	# ユーザ情報の読み込み
 	$Group->Load($Sys, 1);

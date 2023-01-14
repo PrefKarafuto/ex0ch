@@ -39,8 +39,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -51,8 +51,8 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	
 	# 管理情報を登録
 	$Sys->Set('ADMIN', $pSys);
@@ -112,8 +112,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -180,7 +180,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -691,8 +691,8 @@ sub PrintPluginSetting
 	$SYS->Set('_TITLE', 'System Plugin Setting');
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC'";
 	
-	require './module/athelas.pl';
-	$Plugin = ATHELAS->new;
+	require './module/plugin.pl';
+	$Plugin = PLUGIN->new;
 	$Plugin->Load($SYS);
 	$num = $Plugin->GetKeySet('ALL', '', \@pluginSet);
 	
@@ -764,8 +764,8 @@ sub PrintPluginOptionSetting
 	
 	$id = $Form->Get('PLGID');
 	
-	require './module/athelas.pl';
-	$Plugin = ATHELAS->new;
+	require './module/plugin.pl';
+	$Plugin = PLUGIN->new;
 	$Plugin->Load($SYS);
 	$Config = PLUGINCONF->new($Plugin, $id);
 	
@@ -853,8 +853,8 @@ sub FunctionPluginOptionSetting
 	
 	$id = $Form->Get('PLGID');
 	
-	require './module/athelas.pl';
-	$Plugin = ATHELAS->new;
+	require './module/plugin.pl';
+	$Plugin = PLUGIN->new;
 	$Plugin->Load($Sys);
 	$Config = PLUGINCONF->new($Plugin, $id);
 	
@@ -911,8 +911,8 @@ sub FunctionBasicSetting
 			return 1001;
 		}
 	}
-	require './module/melkor.pl';
-	$SYSTEM = MELKOR->new;
+	require './module/system.pl';
+	$SYSTEM = SYSTEM->new;
 	$SYSTEM->Init();
 	
 	$SYSTEM->Set('SERVER', $Form->Get('SERVER'));
@@ -959,8 +959,8 @@ sub FunctionPermissionSetting
 			return 1000;
 		}
 	}
-	require './module/melkor.pl';
-	$SYSTEM = MELKOR->new;
+	require './module/system.pl';
+	$SYSTEM = SYSTEM->new;
 	$SYSTEM->Init();
 	
 	$SYSTEM->Set('PM-DAT', oct($Form->Get('PERM_DAT')));
@@ -1015,8 +1015,8 @@ sub FunctionLimitterSetting
 			return 1000;
 		}
 	}
-	require './module/melkor.pl';
-	$SYSTEM = MELKOR->new;
+	require './module/system.pl';
+	$SYSTEM = SYSTEM->new;
 	$SYSTEM->Init();
 	
 	$SYSTEM->Set('RESMAX', $Form->Get('RESMAX'));
@@ -1065,8 +1065,8 @@ sub FunctionOtherSetting
 			return 1000;
 		}
 	}
-	require './module/melkor.pl';
-	$SYSTEM = MELKOR->new;
+	require './module/system.pl';
+	$SYSTEM = SYSTEM->new;
 	$SYSTEM->Init();
 	
 	$SYSTEM->Set('HEADTEXT', $Form->Get('HEADTEXT'));
@@ -1124,8 +1124,8 @@ sub FunctionPlusViewSetting
 			return 1000;
 		}
 	}
-	require './module/melkor.pl';
-	$SYSTEM = MELKOR->new;
+	require './module/system.pl';
+	$SYSTEM = SYSTEM->new;
 	$SYSTEM->Init();
 	
 	$SYSTEM->Set('COUNTER', $Form->Get('COUNTER'));
@@ -1175,8 +1175,8 @@ sub FunctionPlusSecSetting
 			return 1000;
 		}
 	}
-	require './module/melkor.pl';
-	$SYSTEM = MELKOR->new;
+	require './module/system.pl';
+	$SYSTEM = SYSTEM->new;
 	$SYSTEM->Init();
 	
 	$SYSTEM->Set('KAKIKO', ($Form->Equal('KAKIKO', 'on') ? 1 : 0));
@@ -1225,8 +1225,8 @@ sub FunctionPluginSetting
 			return 1000;
 		}
 	}
-	require './module/athelas.pl';
-	$Plugin = ATHELAS->new;
+	require './module/plugin.pl';
+	$Plugin = PLUGIN->new;
 	$Plugin->Load($Sys);
 	
 	my (@pluginSet, @validSet, %order);
@@ -1283,8 +1283,8 @@ sub FunctionPluginUpdate
 			return 1000;
 		}
 	}
-	require './module/athelas.pl';
-	$Plugin = ATHELAS->new;
+	require './module/plugin.pl';
+	$Plugin = PLUGIN->new;
 	
 	# 情報の更新と保存
 	$Plugin->Load($Sys);

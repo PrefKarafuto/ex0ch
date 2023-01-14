@@ -1,9 +1,9 @@
 #============================================================================================================
 #
-#	検索モジュール(BALROGS)
+#	検索モジュール(SEARCH)
 #
 #============================================================================================================
-package	BALROGS;
+package	SEARCH;
 
 use strict;
 #use warnings;
@@ -36,7 +36,7 @@ sub new
 #
 #	検索設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
+#	@param	$Sys	SYSTEM
 #	@param	$mode	0:全検索,1:BBS内検索,2:スレッド内検索
 #	@param	$type	0:全検索,1:名前検索,2:本文検索
 #					4:ID(日付)検索
@@ -59,9 +59,9 @@ sub Create
 	
 	# 鯖内全検索
 	if ($mode == 0) {
-		require './module/baggins.pl';
-		require './module/nazguls.pl';
-		my $BBSs = NAZGUL->new;
+		require './module/thread.pl';
+		require './module/bbs_info.pl';
+		my $BBSs = BBS_INFO->new;
 		
 		$BBSs->Load($Sys);
 		my @bbsSet = ();
@@ -76,7 +76,7 @@ sub Create
 			next if (-e "$BBSpath/$dir/.0ch_hidden");
 			
 			$Sys->Set('BBS', $dir);
-			my $Threads = BILBO->new;
+			my $Threads = THREAD->new;
 			$Threads->Load($Sys);
 			my @threadSet = ();
 			$Threads->GetKeySet('ALL', '', \@threadSet);
@@ -89,8 +89,8 @@ sub Create
 	}
 	# 掲示板内全検索
 	elsif ($mode == 1) {
-		require './module/baggins.pl';
-		my $Threads = BILBO->new;
+		require './module/thread.pl';
+		my $Threads = THREAD->new;
 		
 		$Sys->Set('BBS', $bbs);
 		$Threads->Load($Sys);
@@ -113,9 +113,9 @@ sub Create
 	}
 	
 	# datモジュール読み込み
-	if (! defined $this->{'ARAGORN'}) {
-		require './module/gondor.pl';
-		$this->{'ARAGORN'} = ARAGORN->new;
+	if (! defined $this->{'DAT'}) {
+		require './module/dat.pl';
+		$this->{'DAT'} = DAT->new;
 	}
 }
 
@@ -176,18 +176,18 @@ sub Search
 	my $bbs = $this->{'SYS'}->Get('BBS');
 	my $key = $this->{'SYS'}->Get('KEY');
 	my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
-	my $ARAGORN = $this->{'ARAGORN'};
+	my $DAT = $this->{'DAT'};
 	
 	my $word = decode('cp932', $word);
 	
-	if ($ARAGORN->Load($this->{'SYS'}, $Path, 1)) {
+	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
 		my $pResultSet = $this->{'RESULTSET'};
 		my $type = $this->{'TYPE'} || 0x7;
 		
 		# すべてのレス数でループ
-		for (my $i = 0 ; $i < $ARAGORN->Size() ; $i++) {
+		for (my $i = 0 ; $i < $DAT->Size() ; $i++) {
 			my $bFind = 0;
-			my $pDat = $ARAGORN->Get($i);
+			my $pDat = $DAT->Get($i);
 			my $data = decode('cp932', $$pDat);
 			my @elem = split(/<>/, $data, -1);
 			
@@ -217,7 +217,7 @@ sub Search
 			}
 		}
 	}
-	$ARAGORN->Close();
+	$DAT->Close();
 }
 
 #============================================================================================================

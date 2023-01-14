@@ -4,7 +4,7 @@
 #
 #============================================================================================================
 
-package ZP_NEWRELEASE;
+package ZP_UPDATE_NOTICE;
 
 use strict;
 #use warnings;
@@ -24,7 +24,7 @@ sub new
 	my $class = shift;
 	
 	my $obj = {
-		'NEWRELEASE'	=> undef,
+		'UPDATE_NOTICE'	=> undef,
 	};
 	
 	bless $obj, $class;
@@ -36,7 +36,7 @@ sub new
 #
 #	初期化 - Init
 #	-------------------------------------------------------------------------------------
-#	引　数：$Sys : MELKOR
+#	引　数：$Sys : SYSTEM
 #	戻り値：0
 #
 #------------------------------------------------------------------------------------------------------------
@@ -45,7 +45,7 @@ sub Init
 	my $this = shift;
 	my ($Sys) = @_;
 	
-	$this->{'NEWRELEASE'} = {
+	$this->{'UPDATE_NOTICE'} = {
 		'CheckURL'	=> 'http://zerochplus.sourceforge.jp/Release.txt',
 		'Interval'	=> 60 * 60 * 24, # 24時間
 		'RawVer'	=> $Sys->Get('VERSION'),
@@ -69,7 +69,7 @@ sub Check
 {
 	my $this = shift;
 	
-	my $hash = $this->{'NEWRELEASE'};
+	my $hash = $this->{'UPDATE_NOTICE'};
 	
 	my $url = $hash->{'CheckURL'};
 	my $interval = $hash->{'Interval'};
@@ -98,9 +98,9 @@ sub Check
 		# 同時接続防止みたいな
 		utime ( undef, undef, $path );
 		
-		require('./module/httpservice.pl');
+		require('./module/http_service.pl');
 		
-		my $proxy = HTTPSERVICE->new;
+		my $proxy = HTTP_SERVICE->new;
 		# URLを指定
 		$proxy->setURI($url);
 		# UserAgentを設定
@@ -133,7 +133,7 @@ sub Check
 		flock($fh, 2);
 		while ( <$fh> ) {
 			# $l =~ s/\x0d?\x0a?$//;
-			# samwiseと同等のサニタイジングを行います
+			# formと同等のサニタイジングを行います
 			$_ =~ s/[\x0d\x0a\0]//g;
 			$_ =~ s/"/&quot;/g;
 			$_ =~ s/</&lt;/g;
@@ -153,14 +153,14 @@ sub Check
 	my $newdate = join '', (split /\./, $release[2], 3);
 	
 	my $i = 0;
-	my $newrelease = 0;
+	my $update_notice = 0;
 	# バージョン比較
 	# とりあえず自verがdevなら無視(下の日付で確認)
 	if ( $ver[0] ne 'dev' ) {
 		foreach my $nv ( @newver ) {
 			my $vv = shift @ver;
 			if ( $vv < $nv ) {
-				$newrelease = 1;
+				$update_notice = 1;
 			} elsif ( $vv > $nv ) {
 				# なぜかインストール済みの方があたらしい
 				last;
@@ -168,21 +168,21 @@ sub Check
 		}
 	}
 	# よくわかんなかったらあらためて日付で確認する
-	unless ( $newrelease ) {
+	unless ( $update_notice ) {
 		if ( $date < $newdate ) {
-			$newrelease = 1;
+			$update_notice = 1;
 		}
 	}
 	
 	
-	$this->{'NEWRELEASE'}->{'Update'}	= $newrelease;
-	$this->{'NEWRELEASE'}->{'Ver'}		= shift @release;
-	$this->{'NEWRELEASE'}->{'URL'}		= 'http://sourceforge.jp/projects/zerochplus/releases/' . shift @release;
-	$this->{'NEWRELEASE'}->{'Date'}		= shift @release;
+	$this->{'UPDATE_NOTICE'}->{'Update'}	= $update_notice;
+	$this->{'UPDATE_NOTICE'}->{'Ver'}		= shift @release;
+	$this->{'UPDATE_NOTICE'}->{'URL'}		= 'http://sourceforge.jp/projects/zerochplus/releases/' . shift @release;
+	$this->{'UPDATE_NOTICE'}->{'Date'}		= shift @release;
 	
 	shift @release; # 4行目(空行)を消す
 	# 残りはリリースノートとかそういうのが残る
-	$this->{'NEWRELEASE'}->{'Detail'}	= \@release;
+	$this->{'UPDATE_NOTICE'}->{'Detail'}	= \@release;
 	
 	return 0;
 
@@ -202,7 +202,7 @@ sub Get
 	my $this = shift;
 	my ($key, $default) = @_;
 	
-	my $val = $this->{'NEWRELEASE'}->{$key};
+	my $val = $this->{'UPDATE_NOTICE'}->{$key};
 	
 	return (defined $val ? $val : (defined $default ? $default : undef));
 }
@@ -221,7 +221,7 @@ sub Set
 	my $this = shift;
 	my ($key, $data) = @_;
 	
-	$this->{'NEWRELEASE'}->{$key} = $data;
+	$this->{'UPDATE_NOTICE'}->{$key} = $data;
 }
 
 1;

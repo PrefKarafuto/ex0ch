@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,8 +48,8 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	
 	# 管理情報を登録
 	$Sys->Set('ADMIN', $pSys);
@@ -86,8 +86,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -131,7 +131,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -161,8 +161,8 @@ sub PrintBannerForPCEdit
 	
 	$SYS->Set('_TITLE', 'PC Banner Edit');
 	
-	require './module/denethor.pl';
-	$Banner = DENETHOR->new;
+	require './module/banner.pl';
+	$Banner = BANNER->new;
 	$Banner->Load($SYS);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
@@ -182,7 +182,7 @@ sub PrintBannerForPCEdit
 	}
 	
 	# プレビューデータの作成
-	my $BannerPage = THORIN->new;
+	my $BannerPage = BUFFER->new;
 	$Banner->Print($BannerPage, 100, 0, 0);
 	$BannerPage->{'BUFF'} = CreatePreviewData($BannerPage->{'BUFF'});
 	$Page->Merge($BannerPage);
@@ -219,8 +219,8 @@ sub PrintBannerForMobileEdit
 	
 	$SYS->Set('_TITLE', 'Mobile Banner Edit');
 	
-	require './module/denethor.pl';
-	$Banner = DENETHOR->new;
+	require './module/banner.pl';
+	$Banner = BANNER->new;
 	$Banner->Load($SYS);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
@@ -240,7 +240,7 @@ sub PrintBannerForMobileEdit
 	}
 	
 	# プレビューデータの作成
-	my $BannerPage = THORIN->new;
+	my $BannerPage = BUFFER->new;
 	$Banner->Print($BannerPage, 100, 0, 1);
 	$BannerPage->{'BUFF'} = CreatePreviewData($BannerPage->{'BUFF'});
 	$Page->Merge($BannerPage);
@@ -276,8 +276,8 @@ sub PrintBannerForSubEdit
 	
 	$SYS->Set('_TITLE', 'Sub Banner Edit');
 	
-	require './module/denethor.pl';
-	$Banner = DENETHOR->new;
+	require './module/banner.pl';
+	$Banner = BANNER->new;
 	$Banner->Load($SYS);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
@@ -294,7 +294,7 @@ sub PrintBannerForSubEdit
 	}
 	
 	# プレビューデータの作成
-	my $BannerPage = THORIN->new;
+	my $BannerPage = BUFFER->new;
 	$Banner->PrintSub($BannerPage);
 	$BannerPage->{'BUFF'} = CreatePreviewData($BannerPage->{'BUFF'});
 	$Page->Merge($BannerPage);
@@ -346,8 +346,8 @@ sub FunctionBannerEdit
 			return 1001;
 		}
 	}
-	require './module/denethor.pl';
-	$Banner = DENETHOR->new;
+	require './module/banner.pl';
+	$Banner = BANNER->new;
 	$Banner->Load($Sys);
 	
 	if ($mode == 1) {

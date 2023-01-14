@@ -78,8 +78,8 @@ sub getType
 #
 #	拡張機能実行インタフェイス
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@return	正常終了の場合は0
 #
 #------------------------------------------------------------------------------------------------------------
@@ -131,9 +131,9 @@ sub execute
 		}
 		else {
 			require './module/galadriel.pl';
-			$Conv = GALADRIEL->new;
-			require './module/isildur.pl';
-			$Set = ISILDUR->new;
+			$Conv = DATA_UTILS->new;
+			require './module/setting.pl';
+			$Set = SETTING->new;
 			$Set->Load($Sys);
 			$column = $Set->Get('BBS_TRIPCOLUMN');
 			$key = "#$key";
@@ -239,9 +239,9 @@ sub BeGet
 	
 	my ( $url ) = @_;
 	
-	require('./module/httpservice.pl');
+	require('./module/http_service.pl');
 	
-	my $proxy = HTTPSERVICE->new;
+	my $proxy = HTTP_SERVICE->new;
 	$proxy->setURI($url);
 	$proxy->setAgent('Mozilla/5.0 Plugin for 0ch+; 0ch_BE_HS.pl http://zerochplus.sourceforge.jp/');
 	$proxy->setTimeout(3);
@@ -352,8 +352,8 @@ sub BASE2ID
 #
 #	なんちゃってbbs.cgiエラーページ表示
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$err	エラー番号
 #	@return	なし
 #	exit	エラー番号
@@ -364,20 +364,20 @@ sub PrintBBSError
 	my ($Sys,$Form,$err) = @_;
 	my $CGI;
 	
-	require('./module/radagast.pl');
-	require('./module/isildur.pl');
-	require('./module/thorin.pl');
+	require('./module/cookie.pl');
+	require('./module/setting.pl');
+	require('./module/buffer.pl');
 	
 	$CGI->{'SYS'}		= $Sys;
 	$CGI->{'FORM'}		= $Form;
-	$CGI->{'COOKIE'}	= RADAGAST->new;
+	$CGI->{'COOKIE'}	= COOKIE->new;
 	$CGI->{'COOKIE'}->Init();
-	$CGI->{'SET'}		= ISILDUR->new;
+	$CGI->{'SET'}		= SETTING->new;
 	$CGI->{'SET'}->Load($Sys);
-	my $Page = THORIN->new;
+	my $Page = BUFFER->new;
 	
-	require('./module/orald.pl');
-	$ERROR = ORALD->new;
+	require('./module/error_info.pl');
+	$ERROR = ERROR_INFO->new;
 	$ERROR->Load($Sys);
 	
 	$ERROR->Print($CGI,$Page,$err,$Sys->Get('AGENT'));

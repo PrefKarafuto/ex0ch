@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,8 +48,8 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($BASE, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	
 	$Page = $BASE->Create($Sys, $Form);
 	
@@ -62,8 +62,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -75,7 +75,7 @@ sub DoFunction
 	my ($host, $Security, $Mod);
 	
 	require './module/galadriel.pl';
-	$host = GALADRIEL::GetRemoteHost();
+	$host = DATA_UTILS::GetRemoteHost();
 	
 	# ログイン情報を確認
 	if ($pSys->{'USER'}) {
@@ -98,7 +98,7 @@ sub DoFunction
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	THORIN
+#	@param	$Page	BUFFER
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------

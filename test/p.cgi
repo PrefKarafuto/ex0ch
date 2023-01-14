@@ -32,19 +32,19 @@ sub PCGI
 	my (%pPath, @tList);
 	my ($base, $max, $err);
 	
-	require './module/baggins.pl';
-	require './module/isildur.pl';
+	require './module/thread.pl';
+	require './module/setting.pl';
 	require './module/galadriel.pl';
-	require './module/melkor.pl';
-	require './module/samwise.pl';
-	require './module/thorin.pl';
+	require './module/system.pl';
+	require './module/form.pl';
+	require './module/buffer.pl';
 	
-	$Threads	= new BILBO;
-	$Conv		= new GALADRIEL;
-	$Set		= new ISILDUR;
-	$Sys		= new MELKOR;
-	$Form		= SAMWISE->new(0);
-	$Page		= new THORIN;
+	$Threads	= new THREAD;
+	$Conv		= new DATA_UTILS;
+	$Set		= new SETTING;
+	$Sys		= new SYSTEM;
+	$Form		= FORM->new(0);
+	$Page		= new BUFFER;
 	
 	$max = 0;
 	$err = 1;
@@ -85,8 +85,8 @@ sub PCGI
 #
 #	ヘッダ部分出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	THORIN
-#	@param	$Sys	MELKOR
+#	@param	$Page	BUFFER
+#	@param	$Sys	SYSTEM
 #	@param	$num	表示数
 #	@param	$last	最終数
 #	@return	なし
@@ -126,9 +126,9 @@ sub PrintHead
 #
 #	スレッドリストの表示
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	THORIN
-#	@param	$Sys	MELKOR
-#	@param	$Conv	GALADRIEL
+#	@param	$Page	BUFFER
+#	@param	$Sys	SYSTEM
+#	@param	$Conv	DATA_UTILS
 #	@param	$pList	リスト格納バッファ
 #	@param	$base	ベースパス
 #	@return	なし
@@ -150,8 +150,8 @@ sub PrintThreadList
 #
 #	フッタ部分出力 - PrintHead
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	THORIN
-#	@param	$Sys	MELKOR
+#	@param	$Page	BUFFER
+#	@param	$Sys	SYSTEM
 #	@param	$num	表示数
 #	@param	$last	最終数
 #	@return	なし
@@ -217,8 +217,8 @@ sub GetPathData
 #
 #	スレッドリストの生成
 #	-------------------------------------------------------------------------------------
-#	@param	$Threads	BILBO
-#	@param	$Set		ISILDUR
+#	@param	$Threads	THREAD
+#	@param	$Set		SETTING
 #	@param	$pList		結果格納用配列
 #	@param	$pHash		情報ハッシュ
 #	@param	$keyWord	検索ワード

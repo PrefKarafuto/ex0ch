@@ -37,8 +37,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -49,8 +49,8 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	
 	# 管理マスタオブジェクトの生成
 	$Page		= $BASE->Create($Sys, $Form);
@@ -85,8 +85,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -127,8 +127,8 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
-#	@param	$Sys	MELKOR
+#	@param	$Base	ADMIN_CGI_BASE
+#	@param	$Sys	SYSTEM
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -166,9 +166,9 @@ sub PrintNoticeList
 	
 	$Sys->Set('_TITLE', 'User Notice List');
 	
-	require './module/gandalf.pl';
+	require './module/NOTICE.pl';
 	require './module/galadriel.pl';
-	$Notices = GANDALF->new;
+	$Notices = NOTICE->new;
 	
 	# 通知情報の読み込み
 	$Notices->Load($Sys);
@@ -225,7 +225,7 @@ HTML
 			}
 			$subj = $Notices->Get('SUBJECT', $id);
 			$text = $Notices->Get('TEXT', $id);
-			$date = GALADRIEL::GetDateFromSerial(undef, $Notices->Get('DATE', $id), 0);
+			$date = DATA_UTILS::GetDateFromSerial(undef, $Notices->Get('DATE', $id), 0);
 			
 $Page->Print(<<HTML);
    <tr>
@@ -406,8 +406,8 @@ HTML
 		$data = $Logger->Get($listNum - $i - 1);
 		@elem = split(/<>/, $data);
 		if (1) {
-			$elem[0] = GALADRIEL::GetDateFromSerial(undef, $elem[0], 0);
-			GALADRIEL::ConvertCharacter1(undef, \$elem[1], 0);
+			$elem[0] = DATA_UTILS::GetDateFromSerial(undef, $elem[0], 0);
+			DATA_UTILS::ConvertCharacter1(undef, \$elem[1], 0);
 			$Page->Print("   <tr><td>$elem[0]</td><td>$elem[1]</td><td>$elem[2]</td><td>$elem[3]</td></tr>\n");
 		}
 		else {
@@ -471,8 +471,8 @@ sub FunctionNoticeCreate
 			return 1001;
 		}
 	}
-	require './module/gandalf.pl';
-	$Notice = GANDALF->new;
+	require './module/NOTICE.pl';
+	$Notice = NOTICE->new;
 	$Notice->Load($Sys);
 	
 	$date = time;
@@ -480,8 +480,8 @@ sub FunctionNoticeCreate
 	$content = $Form->Get('NOTICE_CONTENT');
 	
 	require './module/galadriel.pl';
-	GALADRIEL::ConvertCharacter1(undef, \$subject, 0);
-	GALADRIEL::ConvertCharacter1(undef, \$content, 2);
+	DATA_UTILS::ConvertCharacter1(undef, \$subject, 0);
+	DATA_UTILS::ConvertCharacter1(undef, \$content, 2);
 	
 	if ($Form->Equal('NOTICE_KIND', 'ALL')) {
 		$users = '*';
@@ -526,8 +526,8 @@ sub FunctionNoticeDelete
 			return 1000;
 		}
 	}
-	require './module/gandalf.pl';
-	$Notice = GANDALF->new;
+	require './module/NOTICE.pl';
+	$Notice = NOTICE->new;
 	$Notice->Load($Sys);
 	
 	@noticeSet = $Form->GetAtArray('NOTICES');
@@ -592,15 +592,15 @@ sub CheckVersionUpdate
 {
 	my ($Sys) = @_;
 	
-	my $nr = $Sys->Get('ADMIN')->{'NEWRELEASE'};
+	my $nr = $Sys->Get('ADMIN')->{'UPDATE_NOTICE'};
 	
 	if ( $nr->Get('Update') eq 1) {
 		my $newver = $nr->Get('Ver');
 		my $reldate = $nr->Get('Date');
 		
 		# ユーザ通知 準備
-		require './module/gandalf.pl';
-		my $Notice = GANDALF->new;
+		require './module/NOTICE.pl';
+		my $Notice = NOTICE->new;
 		$Notice->Load($Sys);
 		my $nid = 'verupnotif';
 		
@@ -619,8 +619,8 @@ sub CheckVersionUpdate
 		my $from = '0000000000';
 		
 		# 通知先 管理者権限を持つユーザ
-		require './module/elves.pl';
-		my $User = GLORFINDEL->new;
+		require './module/security.pl';
+		my $User = USER_INFO->new;
 		$User->Load($Sys);
 		my @toSet = ();
 		$User->GetKeySet('SYSAD', 1, \@toSet);

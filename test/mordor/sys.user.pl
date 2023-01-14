@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,8 +48,8 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	
 	# 管理マスタオブジェクトの生成
 	$Page		= $BASE->Create($Sys, $Form);
@@ -86,8 +86,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -128,10 +128,10 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
-#	@param	$Sys	MELKOR
+#	@param	$Base	ADMIN_CGI_BASE
+#	@param	$Sys	SYSTEM
 #	@param	$pSys	管理システム
-#	@param	$Form	SAMWISE
+#	@param	$Form	FORM
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -166,8 +166,8 @@ sub PrintUserList
 	
 	$Sys->Set('_TITLE', 'Users List');
 	
-	require './module/elves.pl';
-	$User = GLORFINDEL->new;
+	require './module/security.pl';
+	$User = USER_INFO->new;
 	
 	# ユーザ情報の読み込み
 	$User->Load($Sys);
@@ -255,8 +255,8 @@ sub PrintUserSetting
 	$Sys->Set('_TITLE', 'User Edit')	if ($mode == 1);
 	$Sys->Set('_TITLE', 'User Create')	if ($mode == 0);
 	
-	require './module/elves.pl';
-	$User = GLORFINDEL->new;
+	require './module/security.pl';
+	$User = USER_INFO->new;
 	
 	# ユーザ情報の読み込み
 	$User->Load($Sys);
@@ -322,8 +322,8 @@ sub PrintUserDelete
 	
 	$SYS->Set('_TITLE', 'User Delete Confirm');
 	
-	require './module/elves.pl';
-	$User = GLORFINDEL->new;
+	require './module/security.pl';
+	$User = USER_INFO->new;
 	
 	
 	# ユーザ情報を取得
@@ -396,8 +396,8 @@ sub FuncUserSetting
 			return 1002;
 		}
 	}
-	require './module/elves.pl';
-	$User = GLORFINDEL->new;
+	require './module/security.pl';
+	$User = USER_INFO->new;
 	
 	$User->Load($Sys);
 	
@@ -465,9 +465,9 @@ sub FuncUserDelete
 			return 1000;
 		}
 	}
-	require './module/elves.pl';
-	$User = GLORFINDEL->new;
-	$Sec = ARWEN->new;
+	require './module/security.pl';
+	$User = USER_INFO->new;
+	$Sec = SECURITY->new;
 	
 	$User->Load($Sys);
 	$Sec->Init($Sys);

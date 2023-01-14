@@ -36,8 +36,8 @@ sub new
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -48,15 +48,15 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/sauron.pl';
-	require './module/nazguls.pl';
-	$BASE = SAURON->new;
+	require './mordor/admin_cgi_base.pl';
+	require './module/bbs_info.pl';
+	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
 	# 掲示板情報の読み込みとグループ設定
 	if (! defined $BBS) {
-		require './module/nazguls.pl';
-		$BBS = NAZGUL->new;
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
 		
 		$BBS->Load($Sys);
 		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
@@ -113,8 +113,8 @@ sub DoPrint
 #
 #	機能メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Sys	MELKOR
-#	@param	$Form	SAMWISE
+#	@param	$Sys	SYSTEM
+#	@param	$Form	FORM
 #	@param	$pSys	管理システム
 #	@return	なし
 #
@@ -125,8 +125,8 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $err, $BBS);
 	
-	require './module/nazguls.pl';
-	$BBS = NAZGUL->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
 	
 	# 管理情報を登録
 	$BBS->Load($Sys);
@@ -183,7 +183,7 @@ sub DoFunction
 #
 #	メニューリスト設定
 #	-------------------------------------------------------------------------------------
-#	@param	$Base	SAURON
+#	@param	$Base	ADMIN_CGI_BASE
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -220,9 +220,9 @@ sub PrintThreadList
 	
 	$SYS->Set('_TITLE', 'Thread List');
 	
-	require './module/baggins.pl';
-	require './module/gondor.pl';
-	$Threads = BILBO->new;
+	require './module/thread.pl';
+	require './module/dat.pl';
+	$Threads = THREAD->new;
 	
 	$Threads->Load($SYS);
 	$Threads->GetKeySet('ALL', '', \@threadSet);
@@ -261,8 +261,8 @@ sub PrintThreadList
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Res</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">Attribute</td></tr>\n");
 	
-	require './module/isildur.pl';
-	my $Set = ISILDUR->new;
+	require './module/setting.pl';
+	my $Set = SETTING->new;
 	$Set->Load($SYS);
 	my $resmax = $Set->Get('BBS_RES_MAX') || $SYS->Get('RESMAX');
 	
@@ -272,7 +272,7 @@ sub PrintThreadList
 		$subj	= $Threads->Get('SUBJECT', $id);
 		$res	= $Threads->Get('RES', $id);
 		
-		my $permt = ARAGORN::GetPermission("$base/$id.dat");
+		my $permt = DAT::GetPermission("$base/$id.dat");
 		my $perms = $SYS->Get('PM-STOP');
 		my $isstop = $permt == $perms;
 		
@@ -280,7 +280,7 @@ sub PrintThreadList
 		#if ($Threads->GetAttr($id, 'stop')) { # use from 0.8.x
 		if ($isstop) {								$bgColor = '#ffcfff'; }	# 停止スレッド
 		elsif ($res > $resmax) {					$bgColor = '#cfffff'; }	# 最大数スレッド
-		elsif (ARAGORN::IsMoved("$base/$id.dat")) {	$bgColor = '#ffffcf'; }	# 移転スレッド
+		elsif (DAT::IsMoved("$base/$id.dat")) {	$bgColor = '#ffffcf'; }	# 移転スレッド
 		else {										$bgColor = '#ffffff'; }	# 通常スレッド
 		
 		$common = "\"javascript:SetOption('TARGET_THREAD','$id');";
@@ -355,8 +355,8 @@ sub PrintThreadStop
 	$SYS->Set('_TITLE', ($mode ? 'Thread Stop' : 'Thread Restart'));
 	$text = ($mode ? '停止' : '再開');
 	
-	require './module/baggins.pl';
-	$Threads = BILBO->new;
+	require './module/thread.pl';
+	$Threads = THREAD->new;
 	
 	$Threads->Load($SYS);
 	@threadList = $Form->GetAtArray('THREADS');
@@ -414,8 +414,8 @@ sub PrintThreadAttr
 	$name = $alist{$attr} if (defined $alist{$name});
 	my $text = "[$name]属性" .($mode?'付加':'解除');
 	
-	require './module/baggins.pl';
-	my $Threads = BILBO->new;
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
 	$Threads->Load($Sys);
 	
 	my @threadList = $Form->GetAtArray('THREADS');
@@ -464,8 +464,8 @@ sub PrintThreadPooling
 	
 	$SYS->Set('_TITLE', 'Thread Pooling');
 	
-	require './module/baggins.pl';
-	$Threads = BILBO->new;
+	require './module/thread.pl';
+	$Threads = THREAD->new;
 	
 	$Threads->Load($SYS);
 	@threadList = $Form->GetAtArray('THREADS');
@@ -515,8 +515,8 @@ sub PrintThreadDelete
 	
 	$SYS->Set('_TITLE', 'Thread Remove');
 	
-	require './module/baggins.pl';
-	$Threads = BILBO->new;
+	require './module/thread.pl';
+	$Threads = THREAD->new;
 	
 	$Threads->Load($SYS);
 	@threadList = $Form->GetAtArray('THREADS');
@@ -620,11 +620,11 @@ sub FunctionThreadStop
 			return 1000;
 		}
 	}
-	require './module/gondor.pl';
-	require './module/baggins.pl'; # use from 0.8.x
+	require './module/dat.pl';
+	require './module/thread.pl'; # use from 0.8.x
 	
-	$Thread		= ARAGORN->new;
-	my $Threads	= BILBO->new; # use from 0.8.x
+	$Thread		= DAT->new;
+	my $Threads	= THREAD->new; # use from 0.8.x
 	@threadList	= $Form->GetAtArray('THREADS');
 	$base		= $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat';
 	$Threads->LoadAttr($Sys);
@@ -692,9 +692,9 @@ sub FunctionThreadAttr
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
+	require './module/thread.pl';
 	
-	my $Threads	= BILBO->new;
+	my $Threads	= THREAD->new;
 	$Threads->Load($Sys);
 	my @threadList = $Form->GetAtArray('THREADS');
 	
@@ -735,10 +735,10 @@ sub FunctionThreadPooling
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
-	require './module/earendil.pl';
-	$Threads = BILBO->new;
-	$Pools = FRODO->new;
+	require './module/thread.pl';
+	require './module/file_utils.pl';
+	$Threads = THREAD->new;
+	$Pools = POOL_THREAD->new;
 	
 	$Threads->Load($Sys);
 	$Pools->Load($Sys);
@@ -753,7 +753,7 @@ sub FunctionThreadPooling
 		$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 		$Threads->Delete($id);
 		
-		EARENDIL::Copy("$path/dat/$id.dat","$path/pool/$id.cgi");
+		FILE_UTILS::Copy("$path/dat/$id.dat","$path/pool/$id.cgi");
 		unlink "$path/dat/$id.dat";
 	}
 	$Threads->Save($Sys);
@@ -786,8 +786,8 @@ sub FunctionThreadDelete
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
-	$Threads = BILBO->new;
+	require './module/thread.pl';
+	$Threads = THREAD->new;
 	
 	$Threads->Load($Sys);
 	
@@ -833,8 +833,8 @@ sub FunctionUpdateSubject
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
-	$Threads = BILBO->new;
+	require './module/thread.pl';
+	$Threads = THREAD->new;
 	
 	$Threads->Load($Sys);
 	$Threads->Update($Sys);
@@ -869,8 +869,8 @@ sub FunctionUpdateSubjectAll
 			return 1000;
 		}
 	}
-	require './module/baggins.pl';
-	$Threads = BILBO->new;
+	require './module/thread.pl';
+	$Threads = THREAD->new;
 	
 	$Threads->Load($Sys);
 	$Threads->UpdateAll($Sys);
@@ -905,11 +905,11 @@ sub FunctionThreadAutoPooling
 			return 1000;
 		}
 	}
-	require './module/gondor.pl';
-	require './module/baggins.pl';
-	require './module/earendil.pl';
-	$Threads = BILBO->new;
-	$Pools = FRODO->new;
+	require './module/dat.pl';
+	require './module/thread.pl';
+	require './module/file_utils.pl';
+	$Threads = THREAD->new;
+	$Pools = POOL_THREAD->new;
 	
 	$Threads->Load($Sys);
 	$Pools->Load($Sys);
@@ -954,9 +954,9 @@ sub FunctionThreadAutoPooling
 		# 停止・移動スレッド
 		if ($Form->Equal('CONDITION_BYSTOP', 'on') && $bPool == 0) {
 			my ($permt, $perms);
-			$permt = ARAGORN::GetPermission("$base/dat/$id.dat");
+			$permt = DAT::GetPermission("$base/dat/$id.dat");
 			$perms = $Sys->Get('PM-STOP');
-			if (($permt eq $perms) || (ARAGORN::IsMoved("$base/dat/$id.dat"))) {
+			if (($permt eq $perms) || (DAT::IsMoved("$base/dat/$id.dat"))) {
 				$bPool = 1;
 			}
 		}
@@ -967,7 +967,7 @@ sub FunctionThreadAutoPooling
 			$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 			$Threads->Delete($id);
 			
-			EARENDIL::Copy("$base/dat/$id.dat", "$base/pool/$id.cgi");
+			FILE_UTILS::Copy("$base/dat/$id.dat", "$base/pool/$id.cgi");
 			unlink "$base/dat/$id.dat";
 		}
 	}

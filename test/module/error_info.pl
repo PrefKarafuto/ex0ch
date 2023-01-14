@@ -3,7 +3,7 @@
 #	エラー情報管理モジュール
 #
 #============================================================================================================
-package	ORALD;
+package	ERROR_INFO;
 
 use strict;
 #use warnings;
@@ -34,7 +34,7 @@ sub new
 #
 #	エラー情報読み込み - Load
 #	-------------------------------------------
-#	引　数：$Sys : MELKOR
+#	引　数：$Sys : SYSTEM
 #	戻り値：なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -93,7 +93,7 @@ sub Get
 #	エラーページ出力 - PrintBBS
 #	-------------------------------------------
 #	引　数：$CGI  : 
-#			$Page : THORIN
+#			$Page : BUFFER
 #			$err  : エラー番号
 #			$mode : エージェント
 #	戻り値：なし
@@ -126,8 +126,8 @@ sub Print
 	$mode = 'O' if ($Form->Equal('mb', 'on'));
 	
 	# エラーログを保存
-	require './module/peregrin.pl';
-	my $Log = PEREGRIN->new;
+	require './module/manager_log.pl';
+	my $Log = MANAGER_LOG->new;
 	$Log->Load($Sys, 'ERR', '');
 	$Log->Set('', $err, $version, $koyuu, $mode);
 	$Log->Save($Sys);

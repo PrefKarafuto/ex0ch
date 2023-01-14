@@ -32,14 +32,14 @@ sub SearchCGI
 {
 	my ($Sys, $Page, $Form, $BBS);
 	
-	require './module/melkor.pl';
-	require './module/thorin.pl';
-	require './module/samwise.pl';
-	require './module/nazguls.pl';
-	$Sys	= new MELKOR;
-	$Page	= new THORIN;
-	$Form	= SAMWISE->new(1);
-	$BBS	= new NAZGUL;
+	require './module/system.pl';
+	require './module/buffer.pl';
+	require './module/form.pl';
+	require './module/bbs_info.pl';
+	$Sys	= new SYSTEM;
+	$Page	= new BUFFER;
+	$Form	= FORM->new(1);
+	$BBS	= new BBS_INFO;
 	
 	$Form->DecodeForm(1);
 	$Sys->Init();
@@ -91,8 +91,8 @@ sub PrintHead
 	$BBSpath = $Sys->Get('BBSPATH');
 	
 	# バナーの読み込み
-	require './module/denethor.pl';
-	$Banner = new DENETHOR;
+	require './module/banner.pl';
+	$Banner = new BANNER;
 	$Banner->Load($Sys);
 
 	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
@@ -254,8 +254,8 @@ sub Search
 	my ($Search, $Mode, $Result, @elem, $n, $base, $word);
 	my (@types, $Type);
 	
-	require './module/balrogs.pl';
-	$Search = new BALROGS;
+	require './module/search.pl';
+	$Search = new SEARCH;
 	
 	$Mode = 0 if ($Form->Equal('MODE', 'ALL'));
 	$Mode = 1 if ($Form->Equal('MODE', 'BBS'));
@@ -292,7 +292,7 @@ sub Search
 	# 検索ヒットが1件以上あり
 	if ($n > 0) {
 		require './module/galadriel.pl';
-		my $Conv = new GALADRIEL;
+		my $Conv = new DATA_UTILS;
 		$n = 1;
 		foreach (@$Result) {
 			@elem = split(/<>/);
@@ -338,7 +338,7 @@ HTML
 #
 #	検索結果内容出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	THORIN
+#	@param	$Page	BUFFER
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -381,7 +381,7 @@ HTML
 #
 #	検索結果フッタ出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	THORIN
+#	@param	$Page	BUFFER
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -396,7 +396,7 @@ sub PrintResultFoot
 #
 #	NoHit出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	THORIN
+#	@param	$Page	BUFFER
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -421,7 +421,7 @@ HTML
 #
 #	システムエラー出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	THORIN
+#	@param	$Page	BUFFER
 #	@param	$msg	エラーメッセージ
 #	@return	なし
 #
