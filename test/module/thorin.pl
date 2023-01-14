@@ -41,7 +41,7 @@ sub Print
 {
 	my $this = shift;
 	my ($line) = @_;
-	$line = Encode::is_utf8($line) ? $line : decode_utf8($line);
+	
 	push @{$this->{'BUFF'}}, $line;
 }
 
