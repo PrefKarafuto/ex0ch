@@ -1,6 +1,6 @@
 # 各モジュールファイルの機能  
   
-athelas        : プラグイン管理  
+athelas     : プラグイン管理  
 baggins     : スレッド情報管理  
 balrogs     : 検索  
 celeborn    : 過去ログ管理  
