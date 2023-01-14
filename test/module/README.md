@@ -1,11 +1,12 @@
 # 各モジュールファイルの機能  
-  
-athelas     : プラグイン管理  
-baggins     : スレッド情報管理  
-balrogs     : 検索  
-celeborn    : 過去ログ管理  
-cidr_list   : 携帯IPのCIDRチェック  
-constant    : 定数の定義情報  
+ファイル名|機能  
+---|---  
+athelas     | プラグイン管理  
+baggins     | スレッド情報管理  
+balrogs     | 検索  
+celeborn    | 過去ログ管理  
+cidr_list   | 携帯IPのCIDRチェック  
+constant    | 定数の定義情報  
 denethor    : バナー管理  
 earendil    : ファイル操作ユーティリティ  
 elves       : 管理セキュリティの管理  
