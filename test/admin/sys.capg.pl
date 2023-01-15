@@ -1,12 +1,9 @@
 #============================================================================================================
 #
-#	掲示板管理 - キャップグループ モジュール
-#	bbs.cap.pl
+#	システム管理 - 共通キャップグループ モジュール
+#	sys.capg.pl
 #	---------------------------------------------------------------------------
-#	2004.07.17 start
-#
-#	ぜろちゃんねるプラス
-#	2010.08.12 キャップ権限追加
+#	2011.02.12 start ぜろちゃんねるプラス
 #
 #============================================================================================================
 package	MODULE;
@@ -51,26 +48,15 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($subMode, $BASE, $BBS, $Page);
 	
-	require './mordor/admin_cgi_base.pl';
+	require './admin/admin_cgi_base.pl';
 	$BASE = ADMIN_CGI_BASE->new;
-	$BBS = $pSys->{'AD_BBS'};
-	
-	# 掲示板情報の読み込みとグループ設定
-	if (! defined $BBS){
-		require './module/bbs_info.pl';
-		$BBS = BBS_INFO->new;
-		
-		$BBS->Load($Sys);
-		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
-		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
-	}
 	
 	# 管理マスタオブジェクトの生成
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
 	# メニューの設定
-	SetMenuList($BASE, $pSys, $Sys->Get('BBS'));
+	SetMenuList($BASE, $pSys);
 	
 	if ($subMode eq 'LIST') {													# グループ一覧画面
 		PrintGroupList($Page, $Sys, $Form);
@@ -84,9 +70,6 @@ sub DoPrint
 	elsif ($subMode eq 'DELETE') {													# グループ削除確認画面
 		PrintGroupDelete($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'IMPORT') {													# グループインポート画面
-		PrintGroupImport($Page, $Sys, $Form, $BBS);
-	}
 	elsif ($subMode eq 'COMPLETE') {												# グループ設定完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
 		$BASE->PrintComplete('キャップグループ処理', $this->{'LOG'});
@@ -96,10 +79,7 @@ sub DoPrint
 		$BASE->PrintError($this->{'LOG'});
 	}
 	
-	# 掲示板情報を設定
-	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
-	
-	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
+	$BASE->Print($Sys->Get('_TITLE'), 1);
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -116,20 +96,12 @@ sub DoFunction
 {
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
-	my ($subMode, $err, $BBS);
-	
-	require './module/bbs_info.pl';
-	$BBS = BBS_INFO->new;
-	
-	# 管理情報を登録
-	$BBS->Load($Sys);
-	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
-	$pSys->{'SECINFO'}->SetGroupInfo($Sys->Get('BBS'));
+	my ($subMode, $err);
 	
 	$subMode	= $Form->Get('MODE_SUB');
-	$err		= 9999;
+	$err		= 0;
 	
-	if ($subMode eq 'CREATE') {													# グループ作成
+	if ($subMode eq 'CREATE') {														# グループ作成
 		$err = FunctionGroupSetting($Sys, $Form, 0, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'EDIT') {													# グループ編集
@@ -138,21 +110,17 @@ sub DoFunction
 	elsif ($subMode eq 'DELETE') {													# グループ削除
 		$err = FunctionGroupDelete($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'IMPORT') {													# グループインポート
-		$err = FunctionGroupImport($Sys, $Form, $this->{'LOG'}, $BBS);
-	}
 	
 	# 処理結果表示
 	if ($err) {
-		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "CAP_GROUP($subMode)", "ERROR:$err");
+		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "SYSCAP_GROUP($subMode)", "ERROR:$err");
 		push @{$this->{'LOG'}}, $err;
 		$Form->Set('MODE_SUB', 'FALSE');
 	}
 	else {
-		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "CAP_GROUP($subMode)", 'COMPLETE');
+		$pSys->{'LOGGER'}->Put($Form->Get('UserName'), "SYSCAP_GROUP($subMode)", 'COMPLETE');
 		$Form->Set('MODE_SUB', 'COMPLETE');
 	}
-	$pSys->{'AD_BBS'} = $BBS;
 	$this->DoPrint($Sys, $Form, $pSys);
 }
 
@@ -166,17 +134,14 @@ sub DoFunction
 #------------------------------------------------------------------------------------------------------------
 sub SetMenuList
 {
-	my ($Base, $pSys, $bbs) = @_;
+	my ($Base, $pSys) = @_;
 	
-	$Base->SetMenu('グループ一覧', "'bbs.cap','DISP','LIST'");
+	$Base->SetMenu('グループ一覧', "'sys.capg','DISP','LIST'");
 	
 	# 管理グループ設定権限のみ
-	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_CAPGROUP, $bbs)) {
-		$Base->SetMenu('グループ登録', "'bbs.cap','DISP','CREATE'");
-		$Base->SetMenu('グループインポート', "'bbs.cap','DISP','IMPORT'");
+	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_SYSADMIN, '*')) {
+		$Base->SetMenu('グループ登録', "'sys.capg','DISP','CREATE'");
 	}
-	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -192,16 +157,16 @@ sub SetMenuList
 sub PrintGroupList
 {
 	my ($Page, $Sys, $Form) = @_;
-	my ($Group, $BBS, @groupSet, @user, $name, $expl, $color, $id, $common, $isAuth, $n);
+	my ($Group, @groupSet, @user, $name, $expl, $color, $id, $common, $isAuth, $n);
 	
-	$Sys->Set('_TITLE', 'CAP Group List');
+	$Sys->Set('_TITLE', 'Common CAP Group List');
 	
 	require './module/cap.pl';
 	$Group = CAP_GROUP->new;
 	
 	# グループ情報の読み込み
-	$Group->Load($Sys);
-	$Group->GetKeySet(\@groupSet);
+	$Group->Load($Sys, 1);
+	$Group->GetKeySet(\@groupSet, 1);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
@@ -223,7 +188,7 @@ sub PrintGroupList
 		$n = @user;
 		
 		$common = "\"javascript:SetOption('SELECT_CAPGROUP', '$id');";
-		$common .= "DoSubmit('bbs.cap', 'DISP', 'EDIT')\"";
+		$common .= "DoSubmit('sys.capg', 'DISP', 'EDIT')\"";
 		
 		# 権限によって表示を抑制
 		$Page->Print("<tr><td><input type=checkbox name=CAP_GROUPS value=$id></td>");
@@ -234,7 +199,7 @@ sub PrintGroupList
 			$Page->Print("<td>$name</td><td>$expl</td><td>$color</td><td>$n</td></tr>\n");
 		}
 	}
-	$common = "onclick=\"DoSubmit('bbs.cap', 'DISP'";
+	$common = "onclick=\"DoSubmit('sys.capg', 'DISP'";
 	
 	$Page->HTMLInput('hidden', 'SELECT_CAPGROUP', '');
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
@@ -265,8 +230,8 @@ sub PrintGroupSetting
 	my ($Group, $User, @userSet, @authNum, $i, $num, $id);
 	my ($name, $expl, $color, @auth, @user, $common);
 	
-	$Sys->Set('_TITLE', 'CAP Group Edit')	if ($mode == 1);
-	$Sys->Set('_TITLE', 'CAP Group Create')	if ($mode == 0);
+	$Sys->Set('_TITLE', 'Common CAP Group Edit')	if ($mode == 1);
+	$Sys->Set('_TITLE', 'Common CAP Group Create')	if ($mode == 0);
 	
 	require './module/cap.pl';
 	$User = CAP->new;
@@ -274,7 +239,7 @@ sub PrintGroupSetting
 	
 	# ユーザ情報の読み込み
 	$User->Load($Sys);
-	$Group->Load($Sys);
+	$Group->Load($Sys, 1);
 	$User->GetKeySet('ALL', '', \@userSet);
 	
 	# 編集モードならユーザ情報を取得する
@@ -350,7 +315,7 @@ sub PrintGroupSetting
 		my $groupid = $Group->GetBelong($id);
 		# システム共通キャップ、他のグループに所属しているキャップは非表示
 		if (0 == $User->Get('SYSAD', $id) &&
-			($groupid eq '' || $groupid eq $Form->Get('SELECT_CAPGROUP') || $Group->Get('ISCOMMON', $groupid, ''))) {
+			( $groupid eq '' || $groupid eq $Form->Get('SELECT_CAPGROUP') )) {
 			my $userName = $User->Get('NAME', $id);
 			my $fullName = $User->Get('FULL', $id);
 			my $check = '';
@@ -359,16 +324,13 @@ sub PrintGroupSetting
 					$check = 'checked'
 				}
 			}
-			if ($Group->Get('ISCOMMON', $groupid, '') eq 1) {
-				$check = 'disabled'
-			}
 			$Page->Print("<input type=checkbox name=BELONGUSER_CAP value=$id $check>$userName($fullName)<br>");
 		}
 	}
 	
 	# submit設定
 	$common = "'" . $Form->Get('MODE_SUB') . "'";
-	$common = "onclick=\"DoSubmit('bbs.cap', 'FUNC', $common)\"";
+	$common = "onclick=\"DoSubmit('sys.capg', 'FUNC', $common)\"";
 	
 	$Page->HTMLInput('hidden', 'SELECT_CAPGROUP', $Form->Get('SELECT_CAPGROUP'));
 	$Page->Print("</td></tr>");
@@ -393,11 +355,11 @@ sub PrintGroupDelete
 	my ($Page, $SYS, $Form) = @_;
 	my ($Group, $BBS, @groupSet, $name, $expl, $rang, $id, $common);
 	
-	$SYS->Set('_TITLE', 'CAP Group Delete Confirm');
+	$SYS->Set('_TITLE', 'Common CAP Group Delete Confirm');
 	
 	require './module/cap.pl';
 	$Group = CAP_GROUP->new;
-	$Group->Load($SYS);
+	$Group->Load($SYS, 1);
 	
 	# ユーザ情報を取得
 	@groupSet = $Form->GetAtArray('CAP_GROUPS');
@@ -415,8 +377,7 @@ sub PrintGroupDelete
 		$name = $Group->Get('NAME', $id);
 		$expl = $Group->Get('EXPL', $id);
 		
-		$Page->Print("<tr><td>$name</a></td>");
-		$Page->Print("<td>$expl</td></tr>\n");
+		$Page->Print("<tr><td>$name</td><td>$expl</td></tr>\n");
 		$Page->HTMLInput('hidden', 'CAP_GROUPS', $id);
 	}
 	
@@ -426,47 +387,8 @@ sub PrintGroupDelete
 	$Page->Print("※注：削除するグループに所属しているキャップはすべて未所属状態になります。</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"　削除　\" ");
-	$Page->Print("onclick=\"DoSubmit('bbs.cap','FUNC','DELETE')\" class=\"delete\"></td></tr>");
+	$Page->Print("onclick=\"DoSubmit('sys.capg','FUNC','DELETE')\" class=\"delete\"></td></tr>");
 	$Page->Print("</table>");
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
-#	インポート画面の表示
-#	-------------------------------------------------------------------------------------
-#	@param	$Page	ページコンテキスト
-#	@param	$SYS	システム変数
-#	@param	$Form	フォーム変数
-#	@param	$BBS	BBS情報
-#	@return	なし
-#
-#------------------------------------------------------------------------------------------------------------
-sub PrintGroupImport
-{
-	my ($Page, $SYS, $Form, $BBS) = @_;
-	my (@bbsSet, $id, $name);
-	
-	$SYS->Set('_TITLE', 'CAP Group Import');
-	
-	# 所属BBSを取得
-	$SYS->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($SYS->Get('ADMIN')->{'USER'}, $BBS, \@bbsSet);
-#	$BBS->GetKeySet('ALL', '', \@bbsSet);
-	
-	$Page->Print("<br><center><table cellspcing=2>");
-	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">既存BBSからインポート</td>");
-	$Page->Print("<td><select name=IMPORT_BBS><option value=\"\">--掲示板を選択--</option>");
-	
-	# 掲示板一覧の出力
-	foreach $id (@bbsSet) {
-		$name = $BBS->Get('NAME', $id);
-		$Page->Print("<option value=$id>$name</option>\n");
-	}
-	
-	$Page->Print("</select></td></tr>");
-	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"インポート\"");
-	$Page->Print("onclick=\"DoSubmit('bbs.cap','FUNC','IMPORT');\"></td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -511,7 +433,7 @@ sub FunctionGroupSetting
 	
 	# ユーザ情報の読み込み
 	$User->Load($Sys);
-	$Group->Load($Sys);
+	$Group->Load($Sys, 1);
 	
 	# 基本情報の設定
 	$name = $Form->Get('GROUPNAME_CAP');
@@ -520,38 +442,39 @@ sub FunctionGroupSetting
 	$color =~ s/[^\w\d\#]//ig;
 	
 	# 権限情報の生成
-	$auth = '';
-	$authNum[0]		= $Form->Equal('C_SUBJECT', 'on') ? 1 : 0;
-	$authNum[1]		= $Form->Equal('C_NAME', 'on') ? 1 : 0;
-	$authNum[2]		= $Form->Equal('C_MAIL', 'on') ? 1 : 0;
-	$authNum[3]		= $Form->Equal('C_CONTENTS', 'on') ? 1 : 0;
-	$authNum[4]		= $Form->Equal('C_CONTLINE', 'on') ? 1 : 0;
-	$authNum[5]		= $Form->Equal('C_LINECOUNT', 'on') ? 1 : 0;
-	$authNum[6]		= $Form->Equal('C_NONAME', 'on') ? 1 : 0;
-	$authNum[7]		= $Form->Equal('C_THREAD', 'on') ? 1 : 0;
-	$authNum[8]		= $Form->Equal('C_THREADCAP', 'on') ? 1 : 0;
-	$authNum[9]		= $Form->Equal('C_CONTINUAS', 'on') ? 1 : 0;
-	$authNum[10]	= $Form->Equal('C_DUPLICATE', 'on') ? 1 : 0;
-	$authNum[11]	= $Form->Equal('C_SHORTWRITE', 'on') ? 1 : 0;
-	$authNum[12]	= $Form->Equal('C_READONLY', 'on') ? 1 : 0;
-	$authNum[13]	= $Form->Equal('C_IDDISP', 'on') ? 1 : 0;
-	$authNum[14]	= $Form->Equal('C_HOSTDISP', 'on') ? 1 : 0;
-	$authNum[15]	= $Form->Equal('C_MOBILETHREAD', 'on') ? 1 : 0;
-	$authNum[16]	= $Form->Equal('C_FIXHANLDLE', 'on') ? 1 : 0;
-	$authNum[17]	= $Form->Equal('C_SAMBA', 'on') ? 1 : 0;
-	$authNum[18]	= $Form->Equal('C_PROXY', 'on') ? 1 : 0;
-	$authNum[19]	= $Form->Equal('C_JPHOST', 'on') ? 1 : 0;
-	$authNum[20]	= $Form->Equal('C_NGUSER', 'on') ? 1 : 0;
-	$authNum[21]	= $Form->Equal('C_NGWORD', 'on') ? 1 : 0;
-	$authNum[22]	= $Form->Equal('C_NOSLIP', 'on') ? 1 : 0;
-	$authNum[23]	= $Form->Equal('C_CUSTOMID', 'on') ? 1 : 0;
-	
-	for ($i = 0 ; $i < $ZP::CAP_MAXNUM ; $i++) {
-		if ($authNum[$i]){
-			$auth .= ''.($i+1).',';
+	my %field2auth = (
+		'C_SUBJECT'			=> $ZP::CAP_FORM_LONGSUBJECT,
+		'C_NAME'			=> $ZP::CAP_FORM_LONGNAME,
+		'C_MAIL'			=> $ZP::CAP_FORM_LONGMAIL,
+		'C_CONTENTS'		=> $ZP::CAP_FORM_LONGTEXT,
+		'C_CONTLINE'		=> $ZP::CAP_FORM_MANYLINE,
+		'C_LINECOUNT'		=> $ZP::CAP_FORM_LONGLINE,
+		'C_NONAME'			=> $ZP::CAP_FORM_NONAME,
+		'C_THREAD'			=> $ZP::CAP_REG_MANYTHREAD,
+		'C_THREADCAP'		=> $ZP::CAP_LIMIT_THREADCAPONLY,
+		'C_CONTINUAS'		=> $ZP::CAP_REG_NOBREAKPOST,
+		'C_DUPLICATE'		=> $ZP::CAP_REG_DOUBLEPOST,
+		'C_SHORTWRITE'		=> $ZP::CAP_REG_NOTIMEPOST,
+		'C_READONLY'		=> $ZP::CAP_LIMIT_READONLY,
+		'C_CUSTOMID'		=> $ZP::CAP_DISP_CUSTOMID,
+		'C_IDDISP'			=> $ZP::CAP_DISP_NOID,
+		'C_NOSLIP'			=> $ZP::CAP_DISP_NOSLIP,
+		'C_HOSTDISP'		=> $ZP::CAP_DISP_NOHOST,
+		'C_MOBILETHREAD'	=> $ZP::CAP_LIMIT_MOBILETHREAD,
+		'C_FIXHANLDLE'		=> $ZP::CAP_DISP_HANLDLE,
+		'C_SAMBA'			=> $ZP::CAP_REG_SAMBA,
+		'C_PROXY'			=> $ZP::CAP_REG_DNSBL,
+		'C_JPHOST'			=> $ZP::CAP_REG_NOTJPHOST,
+		'C_NGUSER'			=> $ZP::CAP_REG_NGUSER,
+		'C_NGWORD'			=> $ZP::CAP_REG_NGWORD,
+	);
+	my @auths = ();
+	foreach (keys %field2auth) {
+		if ($Form->Equal($_, 'on')) {
+			push @auths, $field2auth{$_};
 		}
 	}
-	$auth = substr($auth, 0, length($auth) - 1);
+	$auth = join(',', @auths);
 	
 	# 所属ユーザ情報の生成
 	@belongUser = $Form->GetAtArray('BELONGUSER_CAP');
@@ -565,13 +488,14 @@ sub FunctionGroupSetting
 		$Group->Set($groupID, 'COLOR', $color);
 		$Group->Set($groupID, 'AUTH', $auth);
 		$Group->Set($groupID, 'CAPS', $user);
+		$Group->Set($groupID, 'ISCOMMON', 1);
 	}
 	else {
-		$Group->Add($name, $expl, $color, $auth, $user);
+		$Group->Add($name, $expl, $color, $auth, $user, 1);
 	}
 	
 	# 設定を保存
-	$Group->Save($Sys);
+	$Group->Save($Sys, 1);
 	
 	# 処理ログ
 	{
@@ -618,7 +542,7 @@ sub FunctionGroupDelete
 	$Group = CAP_GROUP->new;
 	
 	# ユーザ情報の読み込み
-	$Group->Load($Sys);
+	$Group->Load($Sys, 1);
 	
 	push @$pLog, '■以下のグループを削除しました。';
 	@groupSet = $Form->GetAtArray('CAP_GROUPS');
@@ -630,46 +554,8 @@ sub FunctionGroupDelete
 	}
 	
 	# 設定の保存
-	$Group->Save($Sys);
+	$Group->Save($Sys, 1);
 	
-	return 0;
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
-#	グループインポート
-#	-------------------------------------------------------------------------------------
-#	@param	$Sys	システム変数
-#	@param	$Form	フォーム変数
-#	@param	$pLog	ログ用
-#	@return	エラーコード
-#
-#------------------------------------------------------------------------------------------------------------
-sub FunctionGroupImport
-{
-	my ($Sys, $Form, $pLog, $BBS) = @_;
-	my ($src, $dst);
-	
-	# 権限チェック
-	{
-		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
-		my $chkID = $Sys->Get('ADMIN')->{'USER'};
-		
-		if (($SEC->IsAuthority($chkID, $ZP::AUTH_CAPGROUP, $Sys->Get('BBS'))) == 0) {
-			return 1000;
-		}
-	}
-	require './module/file_utils.pl';
-	
-	$src = $Sys->Get('BBSPATH') . '/' . $BBS->Get('DIR', $Form->Get('IMPORT_BBS')) . '/info/capgroups.cgi';
-	$dst = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/capgroups.cgi';
-	
-	# グループ設定をコピー
-	FILE_UTILS::Copy($src, $dst);
-	
-	# ログの出力
-	my $name = $BBS->Get('NAME', $Form->Get('IMPORT_BBS'));
-	push @$pLog, "「$name」のキャップグループ設定をインポートしました。";
 	return 0;
 }
 

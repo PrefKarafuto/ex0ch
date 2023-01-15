@@ -48,7 +48,7 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($BASE, $Page);
 	
-	require './mordor/admin_cgi_base.pl';
+	require './admin/admin_cgi_base.pl';
 	$BASE = ADMIN_CGI_BASE->new;
 	
 	$Page = $BASE->Create($Sys, $Form);
@@ -79,7 +79,7 @@ sub DoFunction
 	
 	# ログイン情報を確認
 	if ($pSys->{'USER'}) {
-		require './mordor/sys.top.pl';
+		require './admin/sys.top.pl';
 		$Mod = MODULE->new;
 		$Form->Set('MODE_SUB', 'NOTICE');
 		

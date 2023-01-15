@@ -48,7 +48,7 @@ sub DoPrint
 	my ($Sys, $Form, $pSys) = @_;
 	my ($BASE, $Page, $subMode);
 	
-	require './mordor/admin_cgi_base.pl';
+	require './admin/admin_cgi_base.pl';
 	$BASE = ADMIN_CGI_BASE->new;
 	
 	# 管理情報を登録

@@ -71,7 +71,7 @@ sub AdminCGI
 	# 処理モジュールオブジェクトの生成
 	my $modName = $Form->Get('MODULE', 'login');
 	$modName = 'login' if (!$userID);
-	require "./mordor/$modName.pl";
+	require "./admin/$modName.pl";
 	my $oModule = MODULE->new;
 	
 	# 表示モード
