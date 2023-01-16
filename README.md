@@ -22,29 +22,6 @@ This is the biggest goal of our project and the one that needs the most help.
  + 一般的な2ch-likeBBSスクリプトとしての機能開発に障る行為や、***違法・悪質な又は趣旨より著しく逸脱するコードの埋め込みは、これを固く禁じます。***  
 2023/1/14 PrefKarafuto  
 <br><br>
-
-------------
-## testフォルダのディレクトリ構成
- + test/                      - ぜろちゃんねるプラス動作ディレクトリ  
-    + *.cgi                   - 基本動作用CGI  
-    + datas/                  - 初期データ・固定データ格納用  
-    |  + 1000.txt  
-    |  + 2000000000.dat  
-    |  :  
-    + info/  
-    |  + category.cgi         - 掲示板カテゴリの初期定義ファイル  
-    |  + errmes.cgi           - エラーメッセージ定義ファイル  
-    |  + users.cgi            - 初期ユーザ(Administrator)定義ファイル  
-    + module/  
-    |  + *.pl                 - ぜろちゃんねるモジュール  
-    + mordor/  
-    |  + *.pl                 - 管理CGI用モジュール  
-    + plugin/  
-    |  + 0ch_*.pl             - プラグインスクリプト  
-    + perllib/  
-       \+ \*                    - ぜろちゃんねるプラスに必要なパッケージ  
-         
-------------
 ## Special Thanks  
 精神衰弱 ◆kwSzvOHE氏  
 windyakin ◆windyaking氏
