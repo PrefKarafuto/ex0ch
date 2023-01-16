@@ -48,7 +48,7 @@ sub Init
 	my ($Sys, $Setting) = @_;
 	
 	require './module/thread.pl';
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	require './module/banner.pl';
 	
 	# 使用モジュールを設定
@@ -92,9 +92,9 @@ sub CreateIndex
 	if ($Sys->Equal('MODE', 'CREATE')
 		|| ($Threads->GetPosition($Sys->Get('KEY')) < $bbsSetting->Get('BBS_MAX_MENU_THREAD'))) {
 		
-		require './module/buffer.pl';
+		require './module/buffer_output.pl';
 		require './module/header_footer_meta.pl';
-		my $Index = BUFFER->new;
+		my $Index = BUFFER_OUTPUT->new;
 		my $Caption = HEADER_FOOTER_META->new;
 		
 		PrintIndexHead($this, $Index, $Caption);
@@ -122,8 +122,8 @@ sub CreateIIndex
 {
 	my $this = shift;
 	
-	require './module/buffer.pl';
-	my $Page = BUFFER->new;
+	require './module/buffer_output.pl';
+	my $Page = BUFFER_OUTPUT->new;
 	
 	# 前準備
 	my $Sys = $this->{'SYS'};
@@ -188,8 +188,8 @@ sub CreateSubback
 {
 	my $this = shift;
 	
-	require './module/buffer.pl';
-	my $Page = BUFFER->new;
+	require './module/buffer_output.pl';
+	my $Page = BUFFER_OUTPUT->new;
 	
 	my $Sys = $this->{'SYS'};
 	my $Threads = $this->{'THREADS'};

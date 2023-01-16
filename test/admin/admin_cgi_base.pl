@@ -11,7 +11,7 @@ package	ADMIN_CGI_BASE;
 use strict;
 #use warnings;
 
-require './module/buffer.pl';
+require './module/buffer_output.pl';
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -29,7 +29,7 @@ sub new
 	$obj = {
 		'SYS'		=> undef,														# SYSTEM保持
 		'FORM'		=> undef,														# FORM保持
-		'INN'		=> undef,														# BUFFER保持
+		'INN'		=> undef,														# BUFFER_OUTPUT保持
 		'MNUSTR'	=> \@MnuStr,													# 機能リスト文字列
 		'MNUURL'	=> \@MnuUrl,													# 機能リストURL
 		'MNUNUM'	=> 0															# 機能リスト数
@@ -45,7 +45,7 @@ sub new
 #	-------------------------------------------------------------------------------------
 #	引　数：$M : SYSTEMモジュール
 #			$S : FORMモジュール
-#	戻り値：BUFFERモジュール
+#	戻り値：BUFFER_OUTPUTモジュール
 #
 #------------------------------------------------------------------------------------------------------------
 sub Create
@@ -55,7 +55,7 @@ sub Create
 	
 	$this->{'SYS'}		= $Sys;
 	$this->{'FORM'}		= $Form;
-	$this->{'INN'}		= BUFFER->new;
+	$this->{'INN'}		= BUFFER_OUTPUT->new;
 	$this->{'MNUNUM'}	= 0;
 	
 	return $this->{'INN'};
@@ -95,7 +95,7 @@ sub Print
 	my ($ttl, $mode) = @_;
 	my ($Tad, $Tin, $TPlus);
 	
-	$Tad	= BUFFER->new;
+	$Tad	= BUFFER_OUTPUT->new;
 	$Tin	= $this->{'INN'};
 	
 	PrintHTML($Tad, $ttl);																# HTMLヘッダ出力
@@ -124,7 +124,7 @@ sub PrintNoList
 	my ($ttl, $mode) = @_;
 	my ($Tad, $Tin);
 	
-	$Tad = BUFFER->new;
+	$Tad = BUFFER_OUTPUT->new;
 	$Tin = $this->{'INN'};
 	
 	PrintHTML($Tad, $ttl);															# HTMLヘッダ出力
@@ -140,7 +140,7 @@ sub PrintNoList
 #
 #	HTMLヘッダ出力 - PrintHTML
 #	-------------------------------------------
-#	引　数：$T   : BUFFERモジュール
+#	引　数：$T   : BUFFER_OUTPUTモジュール
 #			$ttl : ページタイトル
 #	戻り値：なし
 #
@@ -165,7 +165,7 @@ HTML
 #
 #	スタイルシート出力 - PrintCSS
 #	-------------------------------------------
-#	引　数：$Page   : BUFFERモジュール
+#	引　数：$Page   : BUFFER_OUTPUTモジュール
 #	戻り値：なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ HTML
 #
 #	ページヘッダ出力 - PrintHead
 #	-------------------------------------------
-#	引　数：$Page   : BUFFERモジュール
+#	引　数：$Page   : BUFFER_OUTPUTモジュール
 #			$ttl : ページタイトル
 #	戻り値：なし
 #
@@ -272,7 +272,7 @@ HTML
 #
 #	機能リスト出力 - PrintList
 #	-------------------------------------------
-#	引　数：$Page   : BUFFERモジュール
+#	引　数：$Page   : BUFFER_OUTPUTモジュール
 #			$str : 機能タイトル配列
 #			$url : 機能URL配列
 #	戻り値：なし
@@ -318,8 +318,8 @@ HTML
 #
 #	機能内容出力 - PrintInner
 #	-------------------------------------------
-#	引　数：$Page1 : BUFFERモジュール(MAIN)
-#			$Page2 : BUFFERモジュール(内容)
+#	引　数：$Page1 : BUFFER_OUTPUTモジュール(MAIN)
+#			$Page2 : BUFFER_OUTPUTモジュール(内容)
 #	戻り値：なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -369,7 +369,7 @@ HTML
 #
 #	フッタ出力 - PrintFoot
 #	-------------------------------------------
-#	引　数：$Page   : BUFFERモジュール
+#	引　数：$Page   : BUFFER_OUTPUTモジュール
 #	戻り値：なし
 #
 #------------------------------------------------------------------------------------------------------------

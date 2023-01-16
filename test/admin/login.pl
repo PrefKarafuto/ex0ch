@@ -74,7 +74,7 @@ sub DoFunction
 	my ($Sys, $Form, $pSys) = @_;
 	my ($host, $Security, $Mod);
 	
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	$host = DATA_UTILS::GetRemoteHost();
 	
 	# ログイン情報を確認
@@ -98,7 +98,7 @@ sub DoFunction
 #
 #	表示メソッド
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------

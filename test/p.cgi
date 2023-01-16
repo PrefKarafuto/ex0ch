@@ -34,17 +34,17 @@ sub PCGI
 	
 	require './module/thread.pl';
 	require './module/setting.pl';
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	require './module/system.pl';
 	require './module/form.pl';
-	require './module/buffer.pl';
+	require './module/buffer_output.pl';
 	
 	$Threads	= new THREAD;
 	$Conv		= new DATA_UTILS;
 	$Set		= new SETTING;
 	$Sys		= new SYSTEM;
 	$Form		= FORM->new(0);
-	$Page		= new BUFFER;
+	$Page		= new BUFFER_OUTPUT;
 	
 	$max = 0;
 	$err = 1;
@@ -85,7 +85,7 @@ sub PCGI
 #
 #	ヘッダ部分出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@param	$Sys	SYSTEM
 #	@param	$num	表示数
 #	@param	$last	最終数
@@ -126,7 +126,7 @@ sub PrintHead
 #
 #	スレッドリストの表示
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@param	$Sys	SYSTEM
 #	@param	$Conv	DATA_UTILS
 #	@param	$pList	リスト格納バッファ
@@ -150,7 +150,7 @@ sub PrintThreadList
 #
 #	フッタ部分出力 - PrintHead
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@param	$Sys	SYSTEM
 #	@param	$num	表示数
 #	@param	$last	最終数

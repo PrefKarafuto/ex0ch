@@ -672,7 +672,7 @@ sub FunctionBBSCreate
 	$Sys->Set('BBS', $bbsDir);
 	$bbsSetting->Load($Sys);
 	
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	my $createPath2 = DATA_UTILS::MakePath($Sys->Get('CGIPATH'), $createPath);
 	my $cookiePath = DATA_UTILS::MakePath($Sys->Get('CGIPATH'), $Sys->Get('BBSPATH'));
 	$cookiePath .= '/' if ($cookiePath ne '/');
@@ -700,10 +700,10 @@ sub FunctionBBSCreate
 	push @$pLog, '■掲示板構\成要素生成完了...';
 	
 	# 過去ログインデクス生成
-	require './module/buffer.pl';
+	require './module/buffer_output.pl';
 	require './module/archive.pl';
 	my $PastLog = ARCHIVE->new;
-	my $Page = BUFFER->new;
+	my $Page = BUFFER_OUTPUT->new;
 	$PastLog->Load($Sys);
 	$PastLog->UpdateInfo($Sys);
 	$PastLog->UpdateIndex($Sys, $Page);

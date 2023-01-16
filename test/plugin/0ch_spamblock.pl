@@ -134,7 +134,7 @@ sub PrintBBSError
 	
 	require('./module/cookie.pl');
 	require('./module/setting.pl');
-	require('./module/buffer.pl');
+	require('./module/buffer_output.pl');
 	
 	$SYS->{'SYS'}		= $sys;
 	$SYS->{'FORM'}		= $form;
@@ -142,7 +142,7 @@ sub PrintBBSError
 	$SYS->{'COOKIE'}->Init();
 	$SYS->{'SET'}		= new SETTING;
 	$SYS->{'SET'}->Load($sys);
-	my $Page = new BUFFER;
+	my $Page = new BUFFER_OUTPUT;
 	
 	require('./module/error_info.pl');
 	$ERROR = new ERROR_INFO;

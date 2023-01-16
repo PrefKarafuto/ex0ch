@@ -69,7 +69,7 @@ sub Init
 		$this->{'THREADS'}->Load($Sys);
 	}
 	if (!defined $Conv) {
-		require './module/galadriel.pl';
+		require './module/data_utils.pl';
 		$this->{'CONV'} = DATA_UTILS->new;
 	}
 	

@@ -175,7 +175,7 @@ sub PrintKakoLogList
 	
 	$SYS->Set('_TITLE', 'LOG List');
 	
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	require './module/archive.pl';
 	$Logs = ARCHIVE->new;
 	
@@ -299,10 +299,10 @@ sub FunctionUpdateIndex
 			return 1000;
 		}
 	}
-	require './module/buffer.pl';
+	require './module/buffer_output.pl';
 	require './module/archive.pl';
 	$Logs = ARCHIVE->new;
-	$Page = BUFFER->new;
+	$Page = BUFFER_OUTPUT->new;
 	
 	$Logs->Load($Sys);
 	$Logs->UpdateIndex($Sys, $Page);

@@ -130,7 +130,7 @@ sub execute
 			$trip = $Conv->ConvertTrip(\$key, $column, $Sys->Get('TRIP12'));
 		}
 		else {
-			require './module/galadriel.pl';
+			require './module/data_utils.pl';
 			$Conv = DATA_UTILS->new;
 			require './module/setting.pl';
 			$Set = SETTING->new;
@@ -366,7 +366,7 @@ sub PrintBBSError
 	
 	require('./module/cookie.pl');
 	require('./module/setting.pl');
-	require('./module/buffer.pl');
+	require('./module/buffer_output.pl');
 	
 	$CGI->{'SYS'}		= $Sys;
 	$CGI->{'FORM'}		= $Form;
@@ -374,7 +374,7 @@ sub PrintBBSError
 	$CGI->{'COOKIE'}->Init();
 	$CGI->{'SET'}		= SETTING->new;
 	$CGI->{'SET'}->Load($Sys);
-	my $Page = BUFFER->new;
+	my $Page = BUFFER_OUTPUT->new;
 	
 	require('./module/error_info.pl');
 	$ERROR = ERROR_INFO->new;

@@ -609,16 +609,16 @@ sub FunctionCreateLogs
 	my @poolSet = $Form->GetAtArray('THREADS');
 	
 	require './module/dat.pl';
-	require './module/buffer.pl';
+	require './module/buffer_output.pl';
 	require './module/setting.pl';
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	require './module/banner.pl';
 	require './module/archive.pl';
 	my $Dat = DAT->new;
 	my $Set = SETTING->new;
 	my $Banner = BANNER->new;
 	my $Conv = DATA_UTILS->new;
-	my $Page = BUFFER->new;
+	my $Page = BUFFER_OUTPUT->new;
 	my $Logs = ARCHIVE->new;
 	
 	$Set->Load($Sys);

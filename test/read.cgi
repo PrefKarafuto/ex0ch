@@ -28,8 +28,8 @@ sub ReadCGI
 {
 	require './module/constant.pl';
 	
-	require './module/buffer.pl';
-	my $Page = BUFFER->new;
+	require './module/buffer_output.pl';
+	my $Page = BUFFER_OUTPUT->new;
 	
 	my $CGI = {};
 	my $err = Initialize($CGI, $Page);
@@ -83,7 +83,7 @@ sub Initialize
 	require './module/system.pl';
 	require './module/setting.pl';
 	require './module/dat.pl';
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	
 	my $Sys = SYSTEM->new;
 	my $Conv = DATA_UTILS->new;

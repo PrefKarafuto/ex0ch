@@ -33,11 +33,11 @@ sub SearchCGI
 	my ($Sys, $Page, $Form, $BBS);
 	
 	require './module/system.pl';
-	require './module/buffer.pl';
+	require './module/buffer_output.pl';
 	require './module/form.pl';
 	require './module/bbs_info.pl';
 	$Sys	= new SYSTEM;
-	$Page	= new BUFFER;
+	$Page	= new BUFFER_OUTPUT;
 	$Form	= FORM->new(1);
 	$BBS	= new BBS_INFO;
 	
@@ -291,7 +291,7 @@ sub Search
 	
 	# 検索ヒットが1件以上あり
 	if ($n > 0) {
-		require './module/galadriel.pl';
+		require './module/data_utils.pl';
 		my $Conv = new DATA_UTILS;
 		$n = 1;
 		foreach (@$Result) {
@@ -338,7 +338,7 @@ HTML
 #
 #	検索結果内容出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -381,7 +381,7 @@ HTML
 #
 #	検索結果フッタ出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -396,7 +396,7 @@ sub PrintResultFoot
 #
 #	NoHit出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -421,7 +421,7 @@ HTML
 #
 #	システムエラー出力
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@param	$msg	エラーメッセージ
 #	@return	なし
 #

@@ -242,7 +242,7 @@ sub PrintHeaderEdit
 	}
 	
 	# プレビューデータの作成
-	my $PreviewPage = BUFFER->new;
+	my $PreviewPage = BUFFER_OUTPUT->new;
 	$Head->Print($PreviewPage, $Setting);
 	$PreviewPage->{'BUFF'} = CreatePreviewData($PreviewPage->{'BUFF'});
 	$Page->Merge($PreviewPage);
@@ -310,7 +310,7 @@ sub PrintFooterEdit
 	}
 	
 	# プレビューデータの作成
-	my $PreviewPage = BUFFER->new;
+	my $PreviewPage = BUFFER_OUTPUT->new;
 	$Foot->Print($PreviewPage, undef);
 	$PreviewPage->{'BUFF'} = CreatePreviewData($PreviewPage->{'BUFF'});
 	$Page->Merge($PreviewPage);

@@ -31,8 +31,8 @@ sub REMAKECGI
 	
 	require './module/constant.pl';
 	
-	require './module/buffer.pl';
-	$Page = new BUFFER;
+	require './module/buffer_output.pl';
+	$Page = new BUFFER_OUTPUT;
 	
 	# 初期化に成功したら更新処理を開始
 	if (($err = Initialize(\%SYS, $Page)) == 0) {
@@ -82,7 +82,7 @@ sub Initialize
 	require './module/system.pl';
 	require './module/setting.pl';
 	require './module/cookie.pl';
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	require './module/form.pl';
 	
 	%$Sys = (

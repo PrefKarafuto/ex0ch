@@ -11,7 +11,7 @@ banner    |バナー管理
 file_utils    |ファイル操作ユーティリティ  
 security       |管理セキュリティの管理  
 user     |アクセスユーザ管理  
-galadriel   |汎用データ変換・取得  
+data_utils   |汎用データ変換・取得  
 NOTICE     |ユーザ通知管理  
 dat      |datファイル管理  
 http_service |httpサービス  

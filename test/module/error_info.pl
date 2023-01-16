@@ -93,7 +93,7 @@ sub Get
 #	エラーページ出力 - PrintBBS
 #	-------------------------------------------
 #	引　数：$CGI  : 
-#			$Page : BUFFER
+#			$Page : BUFFER_OUTPUT
 #			$err  : エラー番号
 #			$mode : エージェント
 #	戻り値：なし

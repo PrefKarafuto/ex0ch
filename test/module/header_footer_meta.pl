@@ -137,7 +137,7 @@ sub Get
 #
 #	内容の表示
 #	-------------------------------------------------------------------------------------
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@param	$Set	SETTING
 #	@return	なし
 #

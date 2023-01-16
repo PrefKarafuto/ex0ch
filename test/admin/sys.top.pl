@@ -166,8 +166,8 @@ sub PrintNoticeList
 	
 	$Sys->Set('_TITLE', 'User Notice List');
 	
-	require './module/NOTICE.pl';
-	require './module/galadriel.pl';
+	require './module/notice.pl';
+	require './module/data_utils.pl';
 	$Notices = NOTICE->new;
 	
 	# 通知情報の読み込み
@@ -399,7 +399,7 @@ $Page->Print(<<HTML);
    </tr>
 HTML
 	
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	
 	# ログ一覧を出力
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
@@ -471,7 +471,7 @@ sub FunctionNoticeCreate
 			return 1001;
 		}
 	}
-	require './module/NOTICE.pl';
+	require './module/notice.pl';
 	$Notice = NOTICE->new;
 	$Notice->Load($Sys);
 	
@@ -479,7 +479,7 @@ sub FunctionNoticeCreate
 	$subject = $Form->Get('NOTICE_TITLE');
 	$content = $Form->Get('NOTICE_CONTENT');
 	
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	DATA_UTILS::ConvertCharacter1(undef, \$subject, 0);
 	DATA_UTILS::ConvertCharacter1(undef, \$content, 2);
 	
@@ -526,7 +526,7 @@ sub FunctionNoticeDelete
 			return 1000;
 		}
 	}
-	require './module/NOTICE.pl';
+	require './module/notice.pl';
 	$Notice = NOTICE->new;
 	$Notice->Load($Sys);
 	
@@ -599,7 +599,7 @@ sub CheckVersionUpdate
 		my $reldate = $nr->Get('Date');
 		
 		# ユーザ通知 準備
-		require './module/NOTICE.pl';
+		require './module/notice.pl';
 		my $Notice = NOTICE->new;
 		$Notice->Load($Sys);
 		my $nid = 'verupnotif';

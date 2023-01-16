@@ -200,7 +200,7 @@ sub PrintLogsInfo
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:200\">File Size</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Last Update</td></tr>\n");
 	
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	my @logKind = ('スレッド作成ログ', 'ホストログ', 'エラーログ');
 	
 	for ($i = 0 ; $i < 3 ; $i++) {
@@ -287,7 +287,7 @@ sub PrintLogs
 		$Page->Print("<td class=\"DetailTitle\">HOST</td></tr>\n");
 	}
 	
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	require './module/error_info.pl';
 	my $Error = ERROR_INFO->new;
 	$Error->Load($Sys);

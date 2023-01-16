@@ -32,8 +32,8 @@ sub MADAKANA
 	
 	my ( %SYS, $Page, $err );
 	
-	require './module/buffer.pl';
-	$Page = new BUFFER;
+	require './module/buffer_output.pl';
+	$Page = new BUFFER_OUTPUT;
 	
 	# 初期化に成功したら内容を表示
 	if (($err = Initialize(\%SYS, $Page)) == 0) {
@@ -73,7 +73,7 @@ sub Initialize
 	my ($oSYS, $oCONV);
 	
 	require './module/system.pl';
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	require './module/form.pl';
 	
 	$oSYS	= new SYSTEM;

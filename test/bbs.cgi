@@ -28,8 +28,8 @@ sub BBSCGI
 {
 	require './module/constant.pl';
 	
-	require './module/buffer.pl';
-	my $Page = BUFFER->new;
+	require './module/buffer_output.pl';
+	my $Page = BUFFER_OUTPUT->new;
 	
 	my $CGI = {};
 	my $err = $ZP::E_SUCCESS;
@@ -110,7 +110,7 @@ sub Initialize
 	require './module/system.pl';
 	require './module/setting.pl';
 	require './module/cookie.pl';
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	require './module/form.pl';
 	require './module/thread.pl';
 	
@@ -343,7 +343,7 @@ HTML
 #	bbs.cgiスレッド作成ページ(携帯)表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI	
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -385,7 +385,7 @@ sub PrintBBSMobileThreadCreate
 #	bbs.cgiクッキー確認ページ表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI	
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------

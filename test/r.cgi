@@ -33,8 +33,8 @@ sub ReadCGI
 	
 	require './module/constant.pl';
 	
-	require './module/buffer.pl';
-	$Page = new BUFFER;
+	require './module/buffer_output.pl';
+	$Page = new BUFFER_OUTPUT;
 	
 	# 初期化・準備に成功したら内容表示
 	if (($err = Initialize(\%SYS, $Page)) == $ZP::E_SUCCESS) {
@@ -86,7 +86,7 @@ sub Initialize
 	require './module/system.pl';
 	require './module/setting.pl';
 	require './module/dat.pl';
-	require './module/galadriel.pl';
+	require './module/data_utils.pl';
 	
 	$oSYS	= new SYSTEM;
 	$oSET	= new SETTING;

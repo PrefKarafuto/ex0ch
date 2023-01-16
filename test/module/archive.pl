@@ -404,7 +404,7 @@ sub GetThreadSubject
 #	過去ログindexを出力する
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
-#	@param	$Page	BUFFER
+#	@param	$Page	BUFFER_OUTPUT
 #	@param	$Banner	BANNER
 #	@param	$pInfo	出力情報配列
 #	@param	$base	掲示板トップパス
