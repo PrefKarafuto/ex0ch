@@ -9,6 +9,7 @@
 package	MODULE;
 
 use strict;
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -480,8 +481,8 @@ sub PrintLimitSetting
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板書き込み制限</td><td><select name=BBS_READONLY>");
 	$Page->Print("<option value=on $selROon>読取専用");
-	$Page->Print("<option value=caps $selROcaps>キャップのみ可能\");
-	$Page->Print("<option value=none $selROnone>書き込み可能\");
+	$Page->Print("<option value=caps $selROcaps>キャップのみ可能");
+	$Page->Print("<option value=none $selROnone>書き込み可能");
 	$Page->Print("</select></td>");
 	$Page->Print("<td class=\"DetailTitle\">DNSBLチェック</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK $setProxy value=on>有効</td></tr>");
