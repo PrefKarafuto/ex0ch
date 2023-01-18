@@ -126,7 +126,7 @@ sub PrintMadaHead
 	
 	$code	= $Sys->{'CODE'};
 	$HOST	= $Sys->{'FORM'}->Get('HOST');
-	$ADDR	= $ENV{'REMOTE_ADDR'};
+	$ADDR	= ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
@@ -186,7 +186,7 @@ sub PrintMadaCont
 	$vUser = USER->new;
 	
 	$HOST	= $Sys->{'FORM'}->Get('HOST');
-	$ADDR	= $ENV{'REMOTE_ADDR'};
+	$ADDR	= ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	$BBSpath	= $Sys->{'SYS'}->Get('BBSPATH');
 	
 	#$sys->Set('HITS', $line);
