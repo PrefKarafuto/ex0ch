@@ -89,8 +89,8 @@ sub getType
 #
 #	拡張機能実行インタフェイス
 #	-------------------------------------------------------------------------------------
-#	@param	$sys	MELKOR
-#	@param	$form	SAMWISE
+#	@param	$sys	SYSTEM
+#	@param	$form	FORM
 #	@param	$mode	拡張機能タイプ
 #	@return	正常終了の場合は0
 #

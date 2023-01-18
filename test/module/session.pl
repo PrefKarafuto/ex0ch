@@ -58,8 +58,8 @@ sub getSession
 	}
 	else {
 		if (!-e './info/session' || !-d './info/session') {
-			require './module/earendil.pl';
-			EARENDIL::CreateDirectory('./info/session', 0770);
+			require './module/file_utils.pl';
+			FILE_UTILS::CreateDirectory('./info/session', 0770);
 		}
 		open(my $fh, '>', $filePath);
 		close($fh);

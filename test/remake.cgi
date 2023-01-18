@@ -31,15 +31,15 @@ sub REMAKECGI
 	
 	require './module/constant.pl';
 	
-	require './module/thorin.pl';
-	$Page = new THORIN;
+	require './module/buffer_output.pl';
+	$Page = new BUFFER_OUTPUT;
 	
 	# 初期化に成功したら更新処理を開始
 	if (($err = Initialize(\%SYS, $Page)) == 0) {
-		#require './module/baggins.pl';
-		require './module/varda.pl';
-		#my $Threads = BILBO->new;
-		my $BBSAid = new VARDA;
+		#require './module/thread.pl';
+		require './module/bbs_service.pl';
+		#my $Threads = THREAD->new;
+		my $BBSAid = new BBS_SERVICE;
 		my $Sys = $SYS{'SYS'};
 		
 		# subject.txt
@@ -79,18 +79,18 @@ sub Initialize
 	my ($bbs);
 	
 	# 使用モジュールの初期化
-	require './module/melkor.pl';
-	require './module/isildur.pl';
-	require './module/radagast.pl';
-	require './module/galadriel.pl';
-	require './module/samwise.pl';
+	require './module/system.pl';
+	require './module/setting.pl';
+	require './module/cookie.pl';
+	require './module/data_utils.pl';
+	require './module/form.pl';
 	
 	%$Sys = (
-		'SYS'		=> new MELKOR,
-		'SET'		=> new ISILDUR,
-		'COOKIE'	=> new RADAGAST,
-		'CONV'		=> new GALADRIEL,
-		'FORM'		=> SAMWISE->new(1),
+		'SYS'		=> new SYSTEM,
+		'SET'		=> new SETTING,
+		'COOKIE'	=> new COOKIE,
+		'CONV'		=> new DATA_UTILS,
+		'FORM'		=> FORM->new(1),
 		'PAGE'		=> $Page,
 	);
 	
@@ -166,8 +166,8 @@ sub PrintBBSJump
 	}
 	# 告知欄表示(表示させたくない場合はコメントアウトか条件を0に)
 	if (0) {
-		require './module/denethor.pl';
-		my $BANNER = new DENETHOR;
+		require './module/banner.pl';
+		my $BANNER = new BANNER;
 		$BANNER->Load($SYS);
 		$BANNER->Print($Page, 100, 0, $SYS->Get('AGENT'));
 	}
@@ -187,8 +187,8 @@ sub PrintBBSError
 	my ($Sys, $Page, $err) = @_;
 	my ($ERROR);
 	
-	require './module/orald.pl';
-	$ERROR = new ORALD;
+	require './module/error_info.pl';
+	$ERROR = new ERROR_INFO;
 	$ERROR->Load($Sys->{'SYS'});
 	
 	$ERROR->Print($Sys, $Page, $err, $Sys->{'SYS'}->Get('AGENT'));

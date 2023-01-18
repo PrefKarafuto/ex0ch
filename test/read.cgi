@@ -28,8 +28,8 @@ sub ReadCGI
 {
 	require './module/constant.pl';
 	
-	require './module/thorin.pl';
-	my $Page = THORIN->new;
+	require './module/buffer_output.pl';
+	my $Page = BUFFER_OUTPUT->new;
 	
 	my $CGI = {};
 	my $err = Initialize($CGI, $Page);
@@ -80,15 +80,15 @@ sub Initialize
 	my ($CGI, $Page) = @_;
 	
 	# 各使用モジュールの生成と初期化
-	require './module/melkor.pl';
-	require './module/isildur.pl';
-	require './module/gondor.pl';
-	require './module/galadriel.pl';
+	require './module/system.pl';
+	require './module/setting.pl';
+	require './module/dat.pl';
+	require './module/data_utils.pl';
 	
-	my $Sys = MELKOR->new;
-	my $Conv = GALADRIEL->new;
-	my $Set = ISILDUR->new;
-	my $Dat = ARAGORN->new;
+	my $Sys = SYSTEM->new;
+	my $Conv = DATA_UTILS->new;
+	my $Set = SETTING->new;
+	my $Dat = DAT->new;
 	
 	%$CGI = (
 		'SYS'		=> $Sys,
@@ -172,10 +172,10 @@ sub PrintReadHead
 	my $Set = $CGI->{'SET'};
 	my $Dat = $CGI->{'DAT'};
 	
-	require './module/legolas.pl';
-	require './module/denethor.pl';
-	my $Caption = LEGOLAS->new;
-	my $Banner = DENETHOR->new;
+	require './module/header_footer_meta.pl';
+	require './module/banner.pl';
+	my $Caption = HEADER_FOOTER_META->new;
+	my $Banner = BANNER->new;
 	
 	$Caption->Load($Sys, 'META');
 	$Banner->Load($Sys);
@@ -331,8 +331,8 @@ sub PrintReadContents
 	my $Sys = $CGI->{'SYS'};
 	
 	# 拡張機能ロード
-	require './module/athelas.pl';
-	my $Plugin = ATHELAS->new;
+	require './module/plugin.pl';
+	my $Plugin = PLUGIN->new;
 	$Plugin->Load($Sys);
 	
 	# 有効な拡張機能一覧を取得
@@ -447,8 +447,8 @@ sub PrintReadFoot
 		
 		# cookie設定ON時はcookieを取得する
 		if (($Sys->Get('CLIENT') & $ZP::C_PC) && $Set->Equal('SUBBBS_CGI_ON', 1)) {
-			require './module/radagast.pl';
-			my $Cookie = RADAGAST->new;
+			require './module/cookie.pl';
+			my $Cookie = COOKIE->new;
 			$Cookie->Init();
 			my $sanitize = sub {
 				$_ = shift;
