@@ -33,7 +33,7 @@ https://github.com/PrefKarafuto/New_0ch_Plus/discussions/10#discussioncomment-46
 todo: 上記をここに書き写す(モジュール名変更を反映すること)
   
 ## フォーク元からの変更概要
-・Cloudflareに対応しました
-[詳細](https://github.com/PrefKarafuto/New_0ch_Plus/issues/1)
-・一部モジュール名を変更しました
-[詳細](https://github.com/PrefKarafuto/New_0ch_Plus/issues/4)
+・Cloudflareに対応しました  
+[詳細](https://github.com/PrefKarafuto/New_0ch_Plus/issues/1)  
+・一部モジュール名を変更しました  
+[詳細](https://github.com/PrefKarafuto/New_0ch_Plus/issues/4)  
