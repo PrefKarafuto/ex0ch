@@ -25,11 +25,11 @@
 
 ## 開発者ガイド
 ### モジュールについて
-https://github.com/PrefKarafuto/New_0ch_Plus/discussions/10#discussioncomment-4699277 
+https://github.com/PrefKarafuto/New_0ch_Plus/discussions/10#discussioncomment-4699277  
 todo: での更新ぶんも含めて上記をここに書き写す(モジュール名変更を反映すること)
   
 ### 画面とUIの対応付けについて
-https://github.com/PrefKarafuto/New_0ch_Plus/discussions/10#discussioncomment-4698789 
+https://github.com/PrefKarafuto/New_0ch_Plus/discussions/10#discussioncomment-4698789  
 todo: 上記をここに書き写す(モジュール名変更を反映すること)
   
 ## フォーク元からの変更概要
