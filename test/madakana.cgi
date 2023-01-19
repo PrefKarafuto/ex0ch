@@ -32,8 +32,8 @@ sub MADAKANA
 	
 	my ( %SYS, $Page, $err );
 	
-	require './module/thorin.pl';
-	$Page = new THORIN;
+	require './module/buffer_output.pl';
+	$Page = new BUFFER_OUTPUT;
 	
 	# 初期化に成功したら内容を表示
 	if (($err = Initialize(\%SYS, $Page)) == 0) {
@@ -72,12 +72,12 @@ sub Initialize
 	my (@elem, @regs, $path);
 	my ($oSYS, $oCONV);
 	
-	require './module/melkor.pl';
-	require './module/galadriel.pl';
-	require './module/samwise.pl';
+	require './module/system.pl';
+	require './module/data_utils.pl';
+	require './module/form.pl';
 	
-	$oSYS	= new MELKOR;
-	$oCONV	= new GALADRIEL;
+	$oSYS	= new SYSTEM;
+	$oCONV	= new DATA_UTILS;
 	
 	%$pSYS = (
 		'SYS'	=> $oSYS,
@@ -86,7 +86,7 @@ sub Initialize
 		'CODE'	=> 'Shift_JIS',
 	);
 	
-	$pSYS->{'FORM'} = SAMWISE->new($oSYS->Get('BBSGET')),
+	$pSYS->{'FORM'} = FORM->new($oSYS->Get('BBSGET')),
 	
 	# システム初期化
 	$oSYS->Init();
@@ -116,17 +116,17 @@ sub PrintMadaHead
 	my ($Sys, $Page) = @_;
 	my ($Caption, $Banner, $code, $HOST, $ADDR);
 	
-	require './module/legolas.pl';
-	require './module/denethor.pl';
-	$Caption = new LEGOLAS;
-	$Banner = new DENETHOR;
+	require './module/header_footer_meta.pl';
+	require './module/banner.pl';
+	$Caption = new HEADER_FOOTER_META;
+	$Banner = new BANNER;
 	
 	$Caption->Load($Sys->{'SYS'}, 'META');
 	$Banner->Load($Sys->{'SYS'});
 	
 	$code	= $Sys->{'CODE'};
 	$HOST	= $Sys->{'FORM'}->Get('HOST');
-	$ADDR	= $ENV{'REMOTE_ADDR'};
+	$ADDR	= ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
@@ -178,15 +178,15 @@ sub PrintMadaCont
 	my ($Sys, $Page) = @_;
 	my ($BBS, $vUser, $HOST, $ADDR, $BBSpath, @BBSkey, %BBSs, $path, $check, $line, $color );
 	
-	require './module/nazguls.pl';
-	$BBS	= new NAZGUL;
+	require './module/bbs_info.pl';
+	$BBS	= new BBS_INFO;
 	$BBS->Load($Sys->{'SYS'});
 	
-	require './module/faramir.pl';
-	$vUser = FARAMIR->new;
+	require './module/user.pl';
+	$vUser = USER->new;
 	
 	$HOST	= $Sys->{'FORM'}->Get('HOST');
-	$ADDR	= $ENV{'REMOTE_ADDR'};
+	$ADDR	= ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	$BBSpath	= $Sys->{'SYS'}->Get('BBSPATH');
 	
 	#$sys->Set('HITS', $line);

@@ -33,8 +33,8 @@ sub AdminCGI
 	SystemSetting($CGI);
 	
 	# 0chシステム情報を取得
-	require "./module/melkor.pl";
-	my $Sys = MELKOR->new;
+	require "./module/system.pl";
+	my $Sys = SYSTEM->new;
 	$Sys->Init();
 	$Sys->Set('BBS', '');
 	$CGI->{'LOGGER'}->Open('.'.$Sys->Get('INFO').'/AdminLog', 100, 2 | 4);
@@ -45,8 +45,8 @@ sub AdminCGI
 	$Sys->Set('MainCGI', $CGI);
 	
 	# フォーム情報を取得
-	require "./module/samwise.pl";
-	my $Form = SAMWISE->new(0);
+	require "./module/form.pl";
+	my $Form = FORM->new(0);
 	$Form->DecodeForm(0);
 	$Form->Set('FALSE', 0);
 	
@@ -62,16 +62,16 @@ sub AdminCGI
 	
 	# バージョンチェック
 	my $upcheck = $Sys->Get('UPCHECK', 1) - 0;
-	$CGI->{'NEWRELEASE'}->Init($Sys);
+	$CGI->{'UPDATE_NOTICE'}->Init($Sys);
 	if ($upcheck) {
-		$CGI->{'NEWRELEASE'}->Set('Interval', 24*60*60*$upcheck);
-		$CGI->{'NEWRELEASE'}->Check;
+		$CGI->{'UPDATE_NOTICE'}->Set('Interval', 24*60*60*$upcheck);
+		$CGI->{'UPDATE_NOTICE'}->Check;
 	}
 	
 	# 処理モジュールオブジェクトの生成
 	my $modName = $Form->Get('MODULE', 'login');
 	$modName = 'login' if (!$userID);
-	require "./mordor/$modName.pl";
+	require "./admin/$modName.pl";
 	my $oModule = MODULE->new;
 	
 	# 表示モード
@@ -111,15 +111,15 @@ sub SystemSetting
 		'AD_BBS'	=> undef,		# BBS情報オブジェクト
 		'AD_DAT'	=> undef,		# dat情報オブジェクト
 		'USER'		=> undef,		# ログインユーザID
-		'NEWRELEASE'=> undef,		# バージョンチェック
+		'UPDATE_NOTICE'=> undef,		# バージョンチェック
 	);
 	
-	require './module/elves.pl';
-	require './module/imrahil.pl';
-	require './module/newrelease.pl';
+	require './module/security.pl';
+	require './module/log.pl';
+	require './module/update_notice.pl';
 	
-	$CGI->{'SECINFO'} = ARWEN->new;
-	$CGI->{'LOGGER'} = IMRAHIL->new;
-	$CGI->{'NEWRELEASE'} = ZP_NEWRELEASE->new;
+	$CGI->{'SECINFO'} = SECURITY->new;
+	$CGI->{'LOGGER'} = LOG->new;
+	$CGI->{'UPDATE_NOTICE'} = ZP_UPDATE_NOTICE->new;
 }
 
