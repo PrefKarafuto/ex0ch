@@ -1,6 +1,6 @@
 # New_0ch_Plus
 これは更新停止した[ぜろちゃんねるプラス](https://zerochplus.osdn.jp/)の再開発を目的としたプロジェクトです。  
-testフォルダの内容はVer0.7.5の物と同一です。心ある方々の協力を切に望む。  
+testフォルダの内容はVer0.7.5の物をベースとしています。心ある方々の協力を切に望む。  
   
 ## 最終目標  
 本スクリプトをPerlからPHPに書き換える。  
@@ -15,9 +15,8 @@ This is the biggest goal of our project and the one that needs the most help.
 
 ## プロジェクトについての資料リンク
 [今後の開発予定機能（案）](https://github.com/PrefKarafuto/New_0ch_Plus/discussions/14)  
-[プロジェクトに参加したい・意見などがあるときのガイド](README.md)  
-  
-  
+[プロジェクトに参加したい・意見などがあるときのガイド](./CONTRIBUTING.md)  
+[本スクリプトの詳細な資料](./docs/README.md)  
   
 ## Special Thanks  
 精神衰弱 ◆kwSzvOHE氏  
