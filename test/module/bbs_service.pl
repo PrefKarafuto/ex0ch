@@ -210,7 +210,7 @@ sub CreateSubback
 <html lang="ja">
 <head>
 
- <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
+ <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 
 HTML
 	
@@ -297,7 +297,7 @@ sub PrintIndexHead
 <html lang="ja">
 <head>
  
- <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
+ <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
  
 HEAD

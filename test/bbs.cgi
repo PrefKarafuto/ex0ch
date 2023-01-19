@@ -152,7 +152,7 @@ sub Initialize
 	
 	my $client = $Conv->GetClient();
 	
-	$Sys->Set('ENCODE', 'Shift_JIS');
+	$Sys->Set('ENCODE', 'UTF-8');
 	$Sys->Set('BBS', $Form->Get('bbs', ''));
 	$Sys->Set('KEY', $Form->Get('key', ''));
 	$Sys->Set('CLIENT', $client);
@@ -260,7 +260,7 @@ sub PrintBBSThreadCreate
 	$Page->Print("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n");
 	$Page->Print("<html lang=\"ja\">\n");
 	$Page->Print("<head>\n");
-	$Page->Print(' <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">'."\n\n");
+	$Page->Print(' <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">'."\n\n");
 	$Caption->Print($Page, undef);
 	$Page->Print(" <title>$title</title>\n\n");
 	$Page->Print("</head>\n<!--nobanner-->\n");
@@ -429,7 +429,7 @@ sub PrintBBSCookieConfirm
 <!-- 2ch_X:cookie -->
 <head>
 
- <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+ <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
  <title>■ 書き込み確認 ■</title>
 
@@ -546,7 +546,7 @@ sub PrintBBSJump
 <html>
 <head>
 	<title>書きこみました。</title>
-<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Refresh" content="5;URL=$bbsPath/">
 </head>
 <!--nobanner-->

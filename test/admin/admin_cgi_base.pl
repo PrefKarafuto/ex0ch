@@ -179,7 +179,7 @@ sub PrintCSS
 	$data = $Sys->Get('DATA');
 	
 $Page->Print(<<HTML);
- <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
+ <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
  
  <meta http-equiv="Content-Script-Type" content="text/javascript">
  <meta http-equiv="Content-Style-Type" content="text/css">
