@@ -9,6 +9,8 @@
 package	MODULE;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 #use warnings;
 

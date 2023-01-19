@@ -6,6 +6,8 @@
 package	SEARCH;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 use Encode qw(encode decode);
 

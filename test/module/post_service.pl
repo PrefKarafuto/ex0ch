@@ -6,6 +6,8 @@
 package	POST_SERVICE;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------

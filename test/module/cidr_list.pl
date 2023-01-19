@@ -10,6 +10,8 @@
 package ZP_CIDR;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 ##use warnings;
 
 our $cidr = ();

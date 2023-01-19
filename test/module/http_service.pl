@@ -6,6 +6,8 @@
 package HTTP_SERVICE;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 use Socket;

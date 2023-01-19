@@ -10,6 +10,8 @@
 #============================================================================================================
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
