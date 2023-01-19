@@ -81,7 +81,7 @@ sub setSession
 	
 	my ($session) = @_;
 	
-	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};);
+	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	my $filePath = "./info/session/$id";
 	
 	if (open(my $fh, '+<', $filePath)) {
@@ -112,7 +112,7 @@ sub setSession
 sub removeSession
 {
 	
-	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};);
+	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	my $filePath = "./info/session/$id";
 	
 	unlink $filePath;
