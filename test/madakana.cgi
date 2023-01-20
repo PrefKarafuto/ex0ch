@@ -10,6 +10,8 @@
 #============================================================================================================
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
@@ -83,7 +85,7 @@ sub Initialize
 		'SYS'	=> $oSYS,
 		'CONV'	=> $oCONV,
 		'PAGE'	=> $Page,
-		'CODE'	=> 'Shift_JIS',
+		'CODE'	=> 'UTF-8',
 	);
 	
 	$pSYS->{'FORM'} = FORM->new($oSYS->Get('BBSGET')),
@@ -294,7 +296,7 @@ sub PrintMadaError
 	my ($Sys, $Page, $err) = @_;
 	my ($code);
 	
-	$code = 'Shift_JIS';
+	$code = 'UTF-8';
 	
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");

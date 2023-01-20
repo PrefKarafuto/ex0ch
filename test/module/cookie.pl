@@ -6,6 +6,8 @@
 package COOKIE;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 use Encode;
 

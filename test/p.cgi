@@ -9,6 +9,8 @@
 #============================================================================================================
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
@@ -101,7 +103,7 @@ sub PrintHead
 	$bbs	= $Sys->Get('BBS');
 	$start	= $start - $Set->Get('BBS_MAX_MENU_THREAD');
 	$st		= $start < 1 ? 1 : $start;
-	$code	= 'Shift_JIS';
+	$code	= 'UTF-8';
 	
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");

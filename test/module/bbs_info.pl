@@ -18,6 +18,8 @@
 package	BBS_INFO;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -379,6 +381,8 @@ sub CreateContents
 package	CATEGORY_INFO;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------

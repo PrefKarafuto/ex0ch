@@ -19,6 +19,8 @@
 package	USER_INFO;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -292,6 +294,8 @@ sub GetStrictPass
 package	GROUP_INFO;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -563,6 +567,8 @@ sub GetBelong
 package SECURITY;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 use CGI::Session;
