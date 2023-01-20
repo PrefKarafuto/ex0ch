@@ -11,6 +11,7 @@ use strict;
 #use warnings;
 no warnings 'once';
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
 # CGIの実行結果を終了コードとする
@@ -259,8 +260,10 @@ sub PrintBBSThreadCreate
 	$Page->Print("<html lang=\"ja\">\n");
 	$Page->Print("<head>\n");
 	$Page->Print(' <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">'."\n\n");
+	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>'."\n");
 	$Caption->Print($Page, undef);
 	$Page->Print(" <title>$title</title>\n\n");
+	$Page->Print("<script src='https://js.hcaptcha.com/1/api.js' async defer></script>\n");
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
 	# <body>タグ出力
@@ -319,6 +322,14 @@ sub PrintBBSThreadCreate
     タイトル：<input type="text" name="subject" size="25">　<input type="submit" value="新規スレッド作成"><br>
     名前：<input type="text" name="FROM" size="19" value="$name">
     E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
+HTML
+
+
+	# hCaptchaなしの場合
+	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
+	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
+		$Page->Print(<<HTML);
     <textarea rows="5" cols="64" name="MESSAGE"></textarea>
     </td>
    </tr>
@@ -333,6 +344,27 @@ sub PrintBBSThreadCreate
 $ver
 </p>
 HTML
+	}else{
+  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
+		$Page->Print(<<HTML);
+    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+    </td>
+   </tr>
+  </table>
+  </form>
+  </center>
+  </td>
+ </tr>
+</table>
+
+<p>
+$ver
+</p>
+HTML
+}
+
+
+
 	}
 
 	$Page->Print("\n</body>\n</html>\n");

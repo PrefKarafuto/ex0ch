@@ -6,6 +6,9 @@
 package	POST_SERVICE;
 
 use strict;
+use LWP::UserAgent;
+use JSON::Parse 'parse_json';
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -111,7 +114,10 @@ sub Write
 	# 規制チェック
 	return $err if (($err = $this->IsRegulation()) != $ZP::E_SUCCESS);
 	
-	
+	# 改造版で追加
+	# hCaptcha認証
+	return $err if (($err = $this->Certification_hCaptcha()) != $ZP::E_SUCCESS);
+
 	# データの書き込み
 	require './module/dat.pl';
 	my $Sys = $this->{'SYS'};
@@ -737,6 +743,63 @@ sub NormalizationNameMail
 	$Form->Set('subject', $subject);
 	
 	return $ZP::E_SUCCESS;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	改造版で追加
+#	hCaptchaの認証
+#	-------------------------------------------------------------------------------------
+#	@param	なし
+#	@return	規制通過なら0を返す
+#			規制チェックにかかったらエラーコードを返す
+#
+#------------------------------------------------------------------------------------------------------------
+sub Certification_hCaptcha
+{
+	my	$this = shift;
+	# 変数の大文字と小文字には気を付けて
+	# 宣言しないといけないのに長い時間を要した
+	my $Form = $this->{'FORM'};
+	my $Set = $this->{'SET'};
+
+	# hCaptcha「あり」の場合
+	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+
+	if ($secretkey ne '') {
+	#シークレットキー
+	my $url = 'https://hcaptcha.com/siteverify';
+
+	my $ua = LWP::UserAgent->new();
+	my $recaptcha_response = $Form->Get('g-recaptcha-response');
+	my $remote_ip = $ENV{REMOTE_ADDR};
+	my $response = $ua->post(
+	    $url,
+	    {
+	        remoteip => $remote_ip,
+	        response => $recaptcha_response,
+	        secret => $secretkey,
+	    },
+	);
+		if ( $response->is_success() ) {
+		    my $json = $response->decoded_content();
+		    my $out = parse_json($json);
+		    if ( $out->{success} ) {
+
+			#print "Content-Type: text/html; charset=Shift_JIS\n\n";
+			#print "認証ができています\n"
+
+			}else{
+			#print "Content-Type: text/html; charset=Shift_JIS\n\n";
+			#print("認証ができていません！");
+
+			return $ZP::E_FORM_NOCAPTCHA;
+			}
+		}
+
+	}
+
+			return $ZP::E_SUCCESS;
 }
 
 #------------------------------------------------------------------------------------------------------------
