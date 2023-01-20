@@ -37,7 +37,7 @@ This is the biggest goal of our project and the one that needs the most help.
     |  + users.cgi            - 初期ユーザ(Administrator)定義ファイル  
     + module/  
     |  + *.pl                 - ぜろちゃんねるモジュール  
-    + mordor/  
+    + admin/  
     |  + *.pl                 - 管理CGI用モジュール  
     + plugin/  
     |  + 0ch_*.pl             - プラグインスクリプト  
