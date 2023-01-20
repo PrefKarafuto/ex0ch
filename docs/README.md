@@ -45,4 +45,8 @@ todo: 上記をここに書き写す(モジュール名変更を反映するこ�
 ## PHPへの移植について
 PHP移植はリソースの都合上すぐには着手できません。  
 Perlで機能を作り終えてかつ機能をリクエストが1ヶ月来なくなった時点で開始します。  
-[詳細](https://github.com/PrefKarafuto/New_0ch_Plus/issues/5)  
+[詳細](https://github.com/PrefKarafuto/New_0ch_Plus/issues/5)
+
+### リリースについて
+重要な機能を1つ実装したらその都度リリースを行う予定です。  
+これは価値の提供とフィードバックのループを速めるためです。  
