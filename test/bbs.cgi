@@ -11,6 +11,7 @@ use strict;
 #use warnings;
 no warnings 'once';
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
 # CGIの実行結果を終了コードとする
@@ -28,8 +29,8 @@ sub BBSCGI
 {
 	require './module/constant.pl';
 	
-	require './module/thorin.pl';
-	my $Page = THORIN->new;
+	require './module/buffer_output.pl';
+	my $Page = BUFFER_OUTPUT->new;
 	
 	my $CGI = {};
 	my $err = $ZP::E_SUCCESS;
@@ -43,16 +44,16 @@ sub BBSCGI
 		my $Conv = $CGI->{'CONV'};
 		my $Threads = $CGI->{'THREADS'};
 		
-		require './module/vara.pl';
-		my $WriteAid = VARA->new;
+		require './module/post_service.pl';
+		my $WriteAid = POST_SERVICE->new;
 		$WriteAid->Init($Sys, $Form, $Set, $Threads, $Conv);
 		
 		$err = $WriteAid->Write();
 		# 書き込みに成功したら掲示板構成要素を更新する
 		if ($err == $ZP::E_SUCCESS) {
 			if (!$Sys->Equal('FASTMODE', 1)) {
-				require './module/varda.pl';
-				my $BBSAid = VARDA->new;
+				require './module/bbs_service.pl';
+				my $BBSAid = BBS_SERVICE->new;
 				
 				$BBSAid->Init($Sys, $Set);
 				$BBSAid->CreateIndex();
@@ -107,23 +108,23 @@ sub Initialize
 	my ($CGI, $Page) = @_;
 	
 	# 使用モジュールの初期化
-	require './module/melkor.pl';
-	require './module/isildur.pl';
-	require './module/radagast.pl';
-	require './module/galadriel.pl';
-	require './module/samwise.pl';
-	require './module/baggins.pl';
+	require './module/system.pl';
+	require './module/setting.pl';
+	require './module/cookie.pl';
+	require './module/data_utils.pl';
+	require './module/form.pl';
+	require './module/thread.pl';
 	
-	my $Sys = MELKOR->new;
-	my $Conv = GALADRIEL->new;
-	my $Set = ISILDUR->new;
-	my $Cookie = RADAGAST->new;
-	my $Threads = BILBO->new;
+	my $Sys = SYSTEM->new;
+	my $Conv = DATA_UTILS->new;
+	my $Set = SETTING->new;
+	my $Cookie = COOKIE->new;
+	my $Threads = THREAD->new;
 	
 	# システム情報設定
 	return $ZP::E_SYSTEM_ERROR if ($Sys->Init());
 	
-	my $Form = SAMWISE->new($Sys->Get('BBSGET'));
+	my $Form = FORM->new($Sys->Get('BBSGET'));
 	
 	%$CGI = (
 		'SYS'		=> $Sys,
@@ -243,8 +244,8 @@ sub PrintBBSThreadCreate
 	my $Form = $CGI->{'FORM'};
 	my $Cookie = $CGI->{'COOKIE'};
 	
-	require './module/legolas.pl';
-	my $Caption = LEGOLAS->new;
+	require './module/header_footer_meta.pl';
+	my $Caption = HEADER_FOOTER_META->new;
 	$Caption->Load($Sys, 'META');
 	
 	my $title = $Set->Get('BBS_TITLE');
@@ -259,8 +260,10 @@ sub PrintBBSThreadCreate
 	$Page->Print("<html lang=\"ja\">\n");
 	$Page->Print("<head>\n");
 	$Page->Print(' <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">'."\n\n");
+	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>'."\n");
 	$Caption->Print($Page, undef);
 	$Page->Print(" <title>$title</title>\n\n");
+	$Page->Print("<script src='https://js.hcaptcha.com/1/api.js' async defer></script>\n");
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
 	# <body>タグ出力
@@ -319,6 +322,14 @@ sub PrintBBSThreadCreate
     タイトル：<input type="text" name="subject" size="25">　<input type="submit" value="新規スレッド作成"><br>
     名前：<input type="text" name="FROM" size="19" value="$name">
     E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
+HTML
+
+
+	# hCaptchaなしの場合
+	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
+	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
+		$Page->Print(<<HTML);
     <textarea rows="5" cols="64" name="MESSAGE"></textarea>
     </td>
    </tr>
@@ -333,6 +344,27 @@ sub PrintBBSThreadCreate
 $ver
 </p>
 HTML
+	}else{
+  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
+		$Page->Print(<<HTML);
+    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+    </td>
+   </tr>
+  </table>
+  </form>
+  </center>
+  </td>
+ </tr>
+</table>
+
+<p>
+$ver
+</p>
+HTML
+}
+
+
+
 	}
 
 	$Page->Print("\n</body>\n</html>\n");
@@ -343,7 +375,7 @@ HTML
 #	bbs.cgiスレッド作成ページ(携帯)表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI	
-#	@param	$Page	THORIN
+#	@param	$Page	BUFFER_OUTPUT
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -354,8 +386,8 @@ sub PrintBBSMobileThreadCreate
 	my $Sys = $CGI->{'SYS'};
 	my $Set = $CGI->{'SET'};
 	
-	require './module/denethor.pl';
-	my $Banner = DENETHOR->new;
+	require './module/banner.pl';
+	my $Banner = BANNER->new;
 	$Banner->Load($Sys);
 	
 	my $title = $Set->Get('BBS_TITLE');
@@ -385,7 +417,7 @@ sub PrintBBSMobileThreadCreate
 #	bbs.cgiクッキー確認ページ表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI	
-#	@param	$Page	THORIN
+#	@param	$Page	BUFFER_OUTPUT
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
@@ -562,8 +594,8 @@ HTML
 	}
 	# 告知欄表示(表示させたくない場合はコメントアウトか条件を0に)
 	if (0) {
-		require './module/denethor.pl';
-		my $Banner = DENETHOR->new;
+		require './module/banner.pl';
+		my $Banner = BANNER->new;
 		$Banner->Load($Sys);
 		$Banner->Print($Page, 100, 0, $Sys->Get('AGENT'));
 	}
@@ -584,8 +616,8 @@ sub PrintBBSError
 {
 	my ($CGI, $Page, $err) = @_;
 	
-	require './module/orald.pl';
-	my $Error = ORALD->new;
+	require './module/error_info.pl';
+	my $Error = ERROR_INFO->new;
 	$Error->Load($CGI->{'SYS'});
 	
 	$Error->Print($CGI, $Page, $err, $CGI->{'SYS'}->Get('AGENT'));

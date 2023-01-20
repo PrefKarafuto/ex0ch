@@ -92,8 +92,8 @@ sub getConfig
 #------------------------------------------------------------------------------------------------------------
 #	拡張機能実行インタフェイス
 #	-------------------------------------------------------------------------------------
-#	@param	$sys	MELKOR
-#	@param	$form	SAMWISE
+#	@param	$sys	SYSTEM
+#	@param	$form	FORM
 #	@param	$type	実行タイプ
 #	@return	正常終了の場合は0
 #------------------------------------------------------------------------------------------------------------
@@ -266,20 +266,20 @@ sub PrintBBSError
 	my ($sys, $form, $err) = @_;
 	my $SYS;
 	
-	require './module/radagast.pl';
-	require './module/isildur.pl';
-	require './module/thorin.pl';
+	require './module/cookie.pl';
+	require './module/setting.pl';
+	require './module/buffer_output.pl';
 	
 	$SYS->{'SYS'} = $sys;
 	$SYS->{'FORM'} = $form;
-	$SYS->{'COOKIE'} = RADAGAST->new;
+	$SYS->{'COOKIE'} = COOKIE->new;
 	$SYS->{'COOKIE'}->Init;
-	$SYS->{'SET'} = ISILDUR->new;
+	$SYS->{'SET'} = SETTING->new;
 	$SYS->{'SET'}->Load($sys);
-	my $Page = THORIN->new;
+	my $Page = BUFFER_OUTPUT->new;
 	
-	require('./module/orald.pl');
-	$ERROR = ORALD->new;
+	require('./module/error_info.pl');
+	$ERROR = ERROR_INFO->new;
 	$ERROR->Load($sys);
 	
 	$ERROR->Print($SYS, $Page, $err, $sys->Get('AGENT'));

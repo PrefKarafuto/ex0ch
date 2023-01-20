@@ -76,8 +76,8 @@ sub getType
 #
 #	拡張機能実行インタフェイス
 #	-------------------------------------------------------------------------------------
-#	@param	$sys	MELKOR
-#	@param	$form	SAMWISE
+#	@param	$sys	SYSTEM
+#	@param	$form	FORM
 #	@return	正常終了の場合は0
 #
 #------------------------------------------------------------------------------------------------------------
@@ -120,8 +120,8 @@ sub execute
 #
 #	なんちゃってbbs.cgiエラーページ表示
 #	-------------------------------------------------------------------------------------
-#	@param	$sys	MELKOR
-#	@param	$form	SAMWISE
+#	@param	$sys	SYSTEM
+#	@param	$form	FORM
 #	@param	$err	エラー番号
 #	@return	なし
 #	exit	エラー番号
@@ -132,20 +132,20 @@ sub PrintBBSError
 	my ($sys,$form,$err) = @_;
 	my $SYS;
 	
-	require('./module/radagast.pl');
-	require('./module/isildur.pl');
-	require('./module/thorin.pl');
+	require('./module/cookie.pl');
+	require('./module/setting.pl');
+	require('./module/buffer_output.pl');
 	
 	$SYS->{'SYS'}		= $sys;
 	$SYS->{'FORM'}		= $form;
-	$SYS->{'COOKIE'}	= new RADAGAST;
+	$SYS->{'COOKIE'}	= new COOKIE;
 	$SYS->{'COOKIE'}->Init();
-	$SYS->{'SET'}		= new ISILDUR;
+	$SYS->{'SET'}		= new SETTING;
 	$SYS->{'SET'}->Load($sys);
-	my $Page = new THORIN;
+	my $Page = new BUFFER_OUTPUT;
 	
-	require('./module/orald.pl');
-	$ERROR = new ORALD;
+	require('./module/error_info.pl');
+	$ERROR = new ERROR_INFO;
 	$ERROR->Load($sys);
 	
 	$ERROR->Print($SYS,$Page,$err,$sys->Get('AGENT'));

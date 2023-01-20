@@ -14,6 +14,7 @@ use strict;
 #use warnings;
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
 # CGIの実行結果を終了コードとする
@@ -33,8 +34,8 @@ sub ReadCGI
 	
 	require './module/constant.pl';
 	
-	require './module/thorin.pl';
-	$Page = new THORIN;
+	require './module/buffer_output.pl';
+	$Page = new BUFFER_OUTPUT;
 	
 	# 初期化・準備に成功したら内容表示
 	if (($err = Initialize(\%SYS, $Page)) == $ZP::E_SUCCESS) {
@@ -83,15 +84,15 @@ sub Initialize
 	my ($oSYS, $oSET, $oCONV, $oDAT);
 	
 	# 各使用モジュールの生成と初期化
-	require './module/melkor.pl';
-	require './module/isildur.pl';
-	require './module/gondor.pl';
-	require './module/galadriel.pl';
+	require './module/system.pl';
+	require './module/setting.pl';
+	require './module/dat.pl';
+	require './module/data_utils.pl';
 	
-	$oSYS	= new MELKOR;
-	$oSET	= new ISILDUR;
-	$oCONV	= new GALADRIEL;
-	$oDAT	= new ARAGORN;
+	$oSYS	= new SYSTEM;
+	$oSET	= new SETTING;
+	$oCONV	= new DATA_UTILS;
+	$oDAT	= new DAT;
 	
 	%$pSYS = (
 		'SYS'	=> $oSYS,
@@ -170,12 +171,12 @@ sub PrintReadHead
 	my ($Sys, $Page) = @_;
 	my ($Caption, $Banner, $code, $title);
 	
-	require './module/denethor.pl';
-	$Banner = new DENETHOR;
+	require './module/banner.pl';
+	$Banner = new BANNER;
 	$Banner->Load($Sys->{'SYS'});
 	
-	require './module/legolas.pl';
-	$Caption = new LEGOLAS;
+	require './module/header_footer_meta.pl';
+	$Caption = new HEADER_FOOTER_META;
 	$Caption->Load($Sys->{'SYS'}, 'META');
 	
 	$code	= $Sys->{'CODE'};
@@ -189,6 +190,9 @@ $Page->Print(<<HTML);
 <head>
 <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
 <meta http-equiv="Cache-Control" content="no-cache">
+
+<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 HTML
 	
 	$Caption->Print($Page, undef);
@@ -323,6 +327,7 @@ sub PrintReadFoot
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
 	if ($rmax > $Sys->{'DAT'}->Size()) {
+
 $Page->Print(<<HTML);
 <hr>
 <a name=res></a>
@@ -333,8 +338,25 @@ $Page->Print(<<HTML);
 名前<br><input type="text" name="FROM"><br>
 E-mail<br><input type="text" name="mail"><br>
 <textarea rows="3" wrap="off" name="MESSAGE"></textarea>
+HTML
+
+
+	# hCaptchaなしの場合
+	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
+	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
+$Page->Print(<<HTML);
 <br><input type="submit" value="書き込む"><br>
 HTML
+	}else{
+$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
+$Page->Print(<<HTML);
+<br><input type="submit" value="書き込む"><br>
+HTML
+}
+
+
+
 	}
 	$Page->Print("<small>$ver</small></form></body></html>\n");
 }

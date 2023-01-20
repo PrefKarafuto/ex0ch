@@ -58,8 +58,8 @@ sub getSession
 	}
 	else {
 		if (!-e './info/session' || !-d './info/session') {
-			require './module/earendil.pl';
-			EARENDIL::CreateDirectory('./info/session', 0770);
+			require './module/file_utils.pl';
+			FILE_UTILS::CreateDirectory('./info/session', 0770);
 		}
 		open(my $fh, '>', $filePath);
 		close($fh);
@@ -81,7 +81,7 @@ sub setSession
 	
 	my ($session) = @_;
 	
-	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};);
+	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	my $filePath = "./info/session/$id";
 	
 	if (open(my $fh, '+<', $filePath)) {
@@ -112,7 +112,7 @@ sub setSession
 sub removeSession
 {
 	
-	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};);
+	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	my $filePath = "./info/session/$id";
 	
 	unlink $filePath;
