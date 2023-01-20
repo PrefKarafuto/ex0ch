@@ -98,6 +98,7 @@ sub Save
 		BBS_SLIP				BBS_DISP_IP				BBS_FORCE_ID			BBS_BE_ID
 		BBS_BE_TYPE2			BBS_NO_ID				BBS_JP_CHECK			BBS_VIP931
 		BBS_4WORLD				BBS_YMD_WEEKS			BBS_NINJA				
+		BBS_HCAPTCHA_SITEKEY	BBS_HCAPTCHA_SECRETKEY
 	);
 	
 	my %orz = %{$this->{'SETTING'}};
@@ -350,6 +351,10 @@ sub InitSettingData
 		'BBS_TATESUGI_COUNT'	=> '5',
 		'BBS_TATESUGI_COUNT2'	=> '1',
 		'BBS_INDEX_LINE_NUMBER'		=> 12,
+
+		# 改造版で追加部分
+		'BBS_HCAPTCHA_SITEKEY'	=> '',
+		'BBS_HCAPTCHA_SECRETKEY'=> '',
 	);
 	
 	while (my ($key, $val) = each(%set)) {

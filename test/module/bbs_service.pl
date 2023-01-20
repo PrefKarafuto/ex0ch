@@ -8,6 +8,10 @@ package	BBS_SERVICE;
 use strict;
 use utf8;
 binmode(STDOUT,":utf8");
+use LWP::UserAgent;
+use JSON::Parse 'parse_json';
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -299,6 +303,10 @@ sub PrintIndexHead
  
  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
+
+<!-- hCaptcha -->
+<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
  
 HEAD
 	
@@ -572,14 +580,23 @@ FORM
   <td nowrap>
   タイトル：<input type="text" name="subject" size="40"><input type="submit" value="新規スレッド作成"><br>
   名前：<input type="text" name="FROM" size="19"> E-mail：<input type="text" name="mail" size="19"><br>
-  内容：<textarea rows="5" cols="60" name="MESSAGE"></textarea>
-  <input type="hidden" name="bbs" value="$bbs">
-  <input type="hidden" name="time" value="$tm">
-  </td>
- </tr>
-</table>
-</form>
 FORM
+	# hCaptchaなしの場合
+	my $sitekey = $this->{'SET'}->Get('BBS_HCAPTCHA_SITEKEY');
+	my $secretkey = $this->{'SET'}->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
+		$Page->Print(<<FORM);
+   <blockquote style="margin-top:0px;">
+    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+FORM
+	}else{
+  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
+	$Page->Print(<<FORM);
+   <blockquote style="margin-top:0px;">
+    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+FORM
+	}
+
 	}
 	
 	# footの表示
@@ -643,13 +660,27 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
-   <input type="submit" value="書き込む" name="submit"> 
+   <input type="submit" value="書き込む" name="submit">
    名前：<input type="text" name="FROM" size="19">
    E-mail：<input type="text" name="mail" size="19"><br>
+KAKIKO
+
+	# hCaptchaなしの場合
+	my $sitekey = $this->{'SET'}->Get('BBS_HCAPTCHA_SITEKEY');
+	my $secretkey = $this->{'SET'}->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
+	$Page->Print(<<KAKIKO);
    <blockquote style="margin-top:0px;">
     <textarea rows="5" cols="64" name="MESSAGE"></textarea>
 KAKIKO
-	
+	}else{
+  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
+	$Page->Print(<<KAKIKO);
+   <blockquote style="margin-top:0px;">
+    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+KAKIKO
+	}
+
 }
 
 #------------------------------------------------------------------------------------------------------------

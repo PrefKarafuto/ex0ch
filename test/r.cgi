@@ -16,6 +16,7 @@ binmode(STDOUT,":utf8");
 #use warnings;
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
 # CGIの実行結果を終了コードとする
@@ -191,6 +192,9 @@ $Page->Print(<<HTML);
 <head>
 <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
 <meta http-equiv="Cache-Control" content="no-cache">
+
+<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 HTML
 	
 	$Caption->Print($Page, undef);
@@ -325,6 +329,7 @@ sub PrintReadFoot
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
 	if ($rmax > $Sys->{'DAT'}->Size()) {
+
 $Page->Print(<<HTML);
 <hr>
 <a name=res></a>
@@ -335,8 +340,25 @@ $Page->Print(<<HTML);
 名前<br><input type="text" name="FROM"><br>
 E-mail<br><input type="text" name="mail"><br>
 <textarea rows="3" wrap="off" name="MESSAGE"></textarea>
+HTML
+
+
+	# hCaptchaなしの場合
+	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
+	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
+$Page->Print(<<HTML);
 <br><input type="submit" value="書き込む"><br>
 HTML
+	}else{
+$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
+$Page->Print(<<HTML);
+<br><input type="submit" value="書き込む"><br>
+HTML
+}
+
+
+
 	}
 	$Page->Print("<small>$ver</small></form></body></html>\n");
 }

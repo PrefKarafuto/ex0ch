@@ -13,6 +13,7 @@ binmode(STDOUT,":utf8");
 #use warnings;
 no warnings 'once';
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
 # CGIの実行結果を終了コードとする
@@ -196,6 +197,9 @@ sub PrintReadHead
  <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Style-Type" content="text/css">
 
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
 HTML
 
 	$Caption->Print($Page, undef);
@@ -470,11 +474,31 @@ sub PrintReadFoot
 <input type="submit" value="書き込む">
 名前：<input type="text" name="FROM" value="$cookName" size="19">
 E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="$cookMail" size="19"><br>
+HTML
+
+
+
+
+	# hCaptchaなしの場合
+	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
+	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
+$Page->Print(<<HTML);
 <textarea rows="5" cols="70" name="MESSAGE"></textarea>
 </form>
 HTML
+	}else{
+$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
+$Page->Print(<<HTML);
+<textarea rows="5" cols="70" name="MESSAGE"></textarea>
+</form>
+HTML
+}
+
+
+
+
 	}
-	
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
