@@ -37,3 +37,7 @@ todo: 上記をここに書き写す(モジュール名変更を反映するこ�
 [詳細](https://github.com/PrefKarafuto/New_0ch_Plus/issues/1)  
 ・一部モジュール名を変更しました  
 [詳細](https://github.com/PrefKarafuto/New_0ch_Plus/issues/4)  
+
+## ソースコード中の日本語表記に係る"\"について
+このスラッシュはファイルの文字コードがShift-JISの場合に文字化け防止用に必要なものであるので、UTF-8に変えた今では不要です。  
+抜いてしまって問題ありません。  
