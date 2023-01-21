@@ -419,7 +419,7 @@ $Page->Print(<<HTML);
     <td>
     
     <div class="oExcuted">
-     $processName\を正常に完了しました。
+     $processNameを正常に完了しました。
     </div>
    
     <div class="LogExport">処理ログ</div>
