@@ -451,11 +451,8 @@ sub PrintLimitSetting
 	my $setTateCount2	= $Setting->Get('BBS_TATESUGI_COUNT2');
 	my $setTateHour		= $Setting->Get('BBS_TATESUGI_HOUR');
 	my $setTateCount	= $Setting->Get('BBS_TATESUGI_COUNT');
-
-	# 改造版で追加
-	my $hCaptcha_onoff		= $Setting->Get('BBS_HCAPTCHA_ONOFF');
-	my $hCaptcha_sitekey 	= $Setting->Get('BBS_HCAPTCHA_SITEKEY');
-	my $hCaptcha_secretkey  = $Setting->Get('BBS_HCAPTCHA_SECRETKEY');
+	my $hCaptcha_sitekey = $Setting->Get('BBS_HCAPTCHA_SITEKEY');
+	my $hCaptcha_secretkey = $Setting->Get('BBS_HCAPTCHA_SECRETKEY');
 	
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
@@ -530,9 +527,8 @@ sub PrintLimitSetting
 	# Captcha認証、改造版で追加
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>hCaptcha設定</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
-	$Page->Print("hCaptchaそのものを<input type=checkbox name=BBS_HCAPTCHA_ONOFF $hCaptcha_onoff value=on>有効にする<br>");
-	$Page->Print("サイトキー<input type=text size=36 name=BBS_HCAPTCHA_SITEKEY value=\"$hCaptcha_sitekey\" style=\"text-align: left\"><br>");
-	$Page->Print("シークレットキー<input type=text size=45 name=BBS_HCAPTCHA_SECRETKEY value=\"$hCaptcha_secretkey\" style=\"text-align: left\">");
+	$Page->Print("サイトキー<input type=text size=36 name=BBS_HCAPTCHA_SITEKEY value=\"$hCaptcha_sitekey\" style=\"text-align: left\">(無記入でオフ)<br>");
+	$Page->Print("シークレットキー<input type=text size=45 name=BBS_HCAPTCHA_SECRETKEY value=\"$hCaptcha_secretkey\" style=\"text-align: left\">(無記入でオフ)");
 	$Page->Print("</td></tr>");
 
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -871,7 +867,6 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_TATESUGI_COUNT2', $Form->Get('BBS_TATESUGI_COUNT2'));
 
 	# 改造版で追加
-	$Setting->Set('BBS_HCAPTCHA_ONOFF', ($Form->Equal('BBS_HCAPTCHA_ONOFF', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_HCAPTCHA_SITEKEY', $Form->Get('BBS_HCAPTCHA_SITEKEY'));
 	$Setting->Set('BBS_HCAPTCHA_SECRETKEY', $Form->Get('BBS_HCAPTCHA_SECRETKEY'));
 	

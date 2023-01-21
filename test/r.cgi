@@ -344,9 +344,9 @@ HTML
 
 
 	# hCaptchaなしの場合
-	my $hCaptcha_check = $Set->Get('BBS_HCAPTCHA_ONOFF');
 	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
+	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
 $Page->Print(<<HTML);
 <br><input type="submit" value="書き込む"><br>
 HTML

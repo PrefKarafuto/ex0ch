@@ -5,12 +5,12 @@
 #============================================================================================================
 package	POST_SERVICE;
 
-use strict;
 use utf8;
 binmode(STDOUT,":utf8");
 use LWP::UserAgent;
 use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
