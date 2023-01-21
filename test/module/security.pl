@@ -70,7 +70,7 @@ sub Load
 	
 	my $path = '.' . $Sys->Get('INFO') . '/users.cgi';
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(utf8)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -111,7 +111,7 @@ sub Save
 	my $path = '.' . $Sys->Get('INFO') . '/users.cgi';
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
 		flock($fh, 2);
 		binmode($fh);
 		seek($fh, 0, 0);
@@ -343,7 +343,7 @@ sub Load
 	
 	my $path = $Sys->Get('BBSPATH') . '/' .  $Sys->Get('BBS') . '/info/groups.cgi';
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(utf8)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -384,7 +384,7 @@ sub Save
 	my $path = $Sys->Get('BBSPATH') . '/' .  $Sys->Get('BBS') . '/info/groups.cgi';
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
