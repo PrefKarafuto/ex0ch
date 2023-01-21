@@ -8,6 +8,8 @@
 use lib './perllib';
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 no warnings 'once';
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
@@ -97,7 +99,7 @@ sub Initialize
 		'CONV'		=> $Conv,
 		'DAT'		=> $Dat,
 		'PAGE'		=> $Page,
-		'CODE'		=> 'Shift_JIS',
+		'CODE'		=> 'UTF-8',
 	);
 	
 	# システム初期化
@@ -192,7 +194,7 @@ sub PrintReadHead
 <html lang="ja">
 <head>
 
- <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
+ <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Style-Type" content="text/css">
 
 
@@ -478,9 +480,9 @@ HTML
 
 
 	# hCaptchaなしの場合
-	my $hCaptcha_check = $Set->Get('BBS_HCAPTCHA_ONOFF');
 	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
+	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
 $Page->Print(<<HTML);
 <textarea rows="5" cols="70" name="MESSAGE"></textarea>
 </form>

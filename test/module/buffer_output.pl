@@ -6,6 +6,8 @@
 package	BUFFER_OUTPUT;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 use Encode;
 #use warnings;
 

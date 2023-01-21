@@ -6,9 +6,12 @@
 package	BBS_SERVICE;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 use LWP::UserAgent;
 use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -211,7 +214,7 @@ sub CreateSubback
 <html lang="ja">
 <head>
 
- <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
+ <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 
 HTML
 	
@@ -298,7 +301,7 @@ sub PrintIndexHead
 <html lang="ja">
 <head>
  
- <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
+ <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
 
 <!-- hCaptcha -->
@@ -579,9 +582,9 @@ FORM
   名前：<input type="text" name="FROM" size="19"> E-mail：<input type="text" name="mail" size="19"><br>
 FORM
 	# hCaptchaなしの場合
-	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA_ONOFF');
 	my $sitekey = $this->{'SET'}->Get('BBS_HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
+	my $secretkey = $this->{'SET'}->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
 		$Page->Print(<<FORM);
    <blockquote style="margin-top:0px;">
     <textarea rows="5" cols="64" name="MESSAGE"></textarea>
@@ -663,9 +666,9 @@ sub PrintThreadPreviewOne
 KAKIKO
 
 	# hCaptchaなしの場合
-	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA_ONOFF');
 	my $sitekey = $this->{'SET'}->Get('BBS_HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
+	my $secretkey = $this->{'SET'}->Get('BBS_HCAPTCHA_SECRETKEY');
+	if ($sitekey eq '' && $secretkey eq '') {
 	$Page->Print(<<KAKIKO);
    <blockquote style="margin-top:0px;">
     <textarea rows="5" cols="64" name="MESSAGE"></textarea>

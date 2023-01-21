@@ -9,6 +9,8 @@
 package	MODULE;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -421,7 +423,7 @@ sub PrintThreadAttr
 	my @threadList = $Form->GetAtArray('THREADS');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>以下のスレッドを$textします。</td></tr>");
+	$Page->Print("<tr><td colspan=3>以下のスレッドを$text\します。</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");

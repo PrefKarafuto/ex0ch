@@ -6,6 +6,8 @@
 package	HEADER_FOOTER_META;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------

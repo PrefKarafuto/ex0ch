@@ -9,6 +9,8 @@
 package	MODULE;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -725,7 +727,7 @@ sub CreateKAKOLog
 <html lang="ja">
 <head>
 
- <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
+ <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 
 HTML
 	

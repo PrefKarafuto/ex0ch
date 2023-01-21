@@ -6,6 +6,8 @@
 package	DATA_UTILS;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 no warnings qw(once);
 

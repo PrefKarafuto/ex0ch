@@ -7,6 +7,8 @@
 package ZP_UPDATE_NOTICE;
 
 use strict;
+use utf8;
+binmode(STDOUT,":utf8");
 #use warnings;
 
 use Encode;
