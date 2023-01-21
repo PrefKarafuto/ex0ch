@@ -328,9 +328,9 @@ HTML
 
 
 	# hCaptchaなしの場合
+	my $hCaptcha_check = $Set->Get('BBS_HCAPTCHA_ONOFF');
 	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
-	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
-	if ($sitekey eq '' && $secretkey eq '') {
+	if ($hCaptcha_check eq '') {
 		$Page->Print(<<HTML);
     <textarea rows="5" cols="64" name="MESSAGE"></textarea>
     </td>
