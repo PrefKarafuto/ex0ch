@@ -115,7 +115,7 @@ sub Check
 		
 		# とれた
 		if ( $proxy->getStatus() eq 200 ) {
-			if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+			if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
 				flock($fh, 2);
 				seek($fh, 0, 0);
 				binmode($fh);
@@ -131,7 +131,7 @@ sub Check
 	# 比較部
 	my @release = ();
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(utf8)', $path)) {
 		flock($fh, 2);
 		while ( <$fh> ) {
 			# $l =~ s/\x0d?\x0a?$//;

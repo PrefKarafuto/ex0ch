@@ -33,7 +33,7 @@ sub getSession
 	my $check = 1;
 	
 	# セッション情報ファイルが存在する場合はそれを読み込む
-	if (open(my $fh, '<', $filePath)) {
+	if (open(my $fh, '<:encoding(utf8)', $filePath)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -86,7 +86,7 @@ sub setSession
 	my $id = createSessionID(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	my $filePath = "./info/session/$id";
 	
-	if (open(my $fh, '+<', $filePath)) {
+	if (open(my $fh, '+<:encoding(utf8)', $filePath)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
