@@ -218,7 +218,7 @@ sub PrintMadaCont
 		
 		$path = "$BBSpath/$dir/info/access.cgi";
 		
-		if ( -e $path && open(SEC, '<', $path) ) {
+		if ( -e $path && open(SEC, '<:encoding(utf8)', $path) ) {
 			flock(FILE, 1);
 			
 			$line = <SEC>;
