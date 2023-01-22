@@ -890,7 +890,7 @@ sub Get1001Data
 	my $endPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/1000.txt';
 	
 	# 1000.txtが存在すればその内容、無ければデフォルトの1001を使用する
-	if (open(my $fh, '<', $endPath)) {
+	if (open(my $fh, '<:encoding(utf8)', $endPath)) {
 		flock($fh, 2);
 		$$data = <$fh>;
 		close($fh);

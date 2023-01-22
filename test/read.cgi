@@ -296,17 +296,17 @@ sub PrintReadMenu
 		
 		if ($resNum >= $rmax) {
 			$Page->Print("<div style=\"background-color:red;color:white;line-height:3em;margin:1px;padding:1px;\">\n");
-			$Page->Print("レス数が$rmaxを超えています。残念ながら全部は表\示しません。\n");
+			$Page->Print("レス数が$rmax\を超えています。残念ながら全部は表示しません。\n");
 			$Page->Print("</div>\n\n");
 		}
 		elsif ($resNum >= $rmax - int($rmax / 20)) {
 			$Page->Print("<div style=\"background-color:red;color:white;margin:1px;padding:1px;\">\n");
-			$Page->Print("レス数が".($rmax-int($rmax/20))."を超えています。$rmaxを超えると表\示できなくなるよ。\n");
+			$Page->Print("レス数が".($rmax-int($rmax/20))."を超えています。$rmax\を超えると表示できなくなるよ。\n");
 			$Page->Print("</div>\n\n");
 		}
 		elsif ($resNum >= $rmax - int($rmax / 10)) {
 			$Page->Print("<div style=\"background-color:yellow;margin:1px;padding:1px;\">\n");
-			$Page->Print("レス数が".($rmax-int($rmax/10))."を超えています。$rmaxを超えると表\示できなくなるよ。\n");
+			$Page->Print("レス数が".($rmax-int($rmax/10))."を超えています。$rmax\を超えると表示できなくなるよ。\n");
 			$Page->Print("</div>\n\n");
 		}
 	}
@@ -422,7 +422,7 @@ sub PrintReadFoot
 		
 		# 新着の表示
 		if ($rmax > $Dat->Size()) {
-			my $dispStr = ($Dat->Size() == $elem[2] ? '新着レスの表\示' : '続きを読む');
+			my $dispStr = ($Dat->Size() == $elem[2] ? '新着レスの表示' : '続きを読む');
 			my $pathNew = $Conv->CreatePath($Sys, 0, $bbs, $key, "$elem[2]-");
 			$Page->Print("<center><a href=\"$pathNew\">$dispStr</a></center>\n");
 			$Page->Print("<hr>\n\n");

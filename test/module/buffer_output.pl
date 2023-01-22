@@ -85,7 +85,7 @@ sub Flush
 	# ファイルへ出力
 	if ($flag) {
 		chmod($perm, $path);
-		if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+		if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
 			flock($fh, 2);
 			seek($fh, 0, 0);
 			print $fh @{$this->{'BUFF'}};

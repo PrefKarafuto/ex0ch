@@ -62,7 +62,7 @@ sub Load
 	
 	my $head = $this->{'HEAD'} = [];
 	
-	if (open(my $fh, '<', "$path/$file")) {
+	if (open(my $fh, '<:encoding(utf8)', "$path/$file")) {
 		flock($fh, 2);
 		@$head = <$fh>;
 		close($fh);
@@ -88,7 +88,7 @@ sub Save
 	my $path = "$this->{'PATH'}/$this->{'FILE'}";
 	
 	chmod($Sys->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		print $fh @{$this->{'HEAD'}};
@@ -114,7 +114,7 @@ sub Set
 	my $this = shift;
 	my ($head) = @_;
 	
-	open(my $fh, '<', $head);
+	open(my $fh, '<:encoding(utf8)', $head);
 	my @lines = <$fh>;
 	close $fh;
 	$this->{'HEAD'} = \@lines;

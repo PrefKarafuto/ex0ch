@@ -51,7 +51,7 @@ sub Load
 	
 	my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/SETTING.TXT';
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(utf8)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -104,7 +104,7 @@ sub Save
 	my %orz = %{$this->{'SETTING'}};
 	
 	chmod($Sys->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
 		flock($fh, 2);
 		binmode($fh);
 		seek($fh, 0, 0);
@@ -145,7 +145,7 @@ sub LoadFrom
 	
 	my $set = $this->{'SETTING'} = {};
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(utf8)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -180,7 +180,7 @@ sub SaveAs
 	my ($path) = @_;
 	
 	chmod($this->{'SYS'}->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
