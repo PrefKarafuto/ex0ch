@@ -11,6 +11,7 @@ package	MODULE;
 use strict;
 use utf8;
 binmode(STDOUT,":utf8");
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -699,7 +700,7 @@ sub FunctionBBSCreate
 	$BBSAid->CreateIIndex();
 	$BBSAid->CreateSubback();
 	
-	push @$pLog, '■掲示板構\成要素生成完了...';
+	push @$pLog, '■掲示板構成要素生成完了...';
 	
 	# 過去ログインデクス生成
 	require './module/buffer_output.pl';

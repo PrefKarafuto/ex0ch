@@ -56,7 +56,7 @@ sub Load
 	my $path = '.' . $Sys->Get('INFO');
 	
 	# PC用読み込み
-	if (open(my $fh, '<', "$path/bannerpc.cgi")) {
+	if (open(my $fh, '<:encoding(utf8)', "$path/bannerpc.cgi")) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -67,7 +67,7 @@ sub Load
 	}
 	
 	# サブバナー読み込み
-	if (open(my $fh, '<', "$path/bannersub.cgi")) {
+	if (open(my $fh, '<:encoding(utf8)', "$path/bannersub.cgi")) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -75,7 +75,7 @@ sub Load
 	}
 	
 	# 携帯用読み込み
-	if (open(my $fh, '<', "$path/bannermb.cgi")) {
+	if (open(my $fh, '<:encoding(utf8)', "$path/bannermb.cgi")) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -106,7 +106,7 @@ sub Save
 	
 	# PC用書き込み
 	chmod($Sys->Get('PM-ADM'), $file[0]);
-	if (open(my $fh, (-f $file[0] ? '+<' : '>'), $file[0])) {
+	if (open(my $fh, (-f $file[0] ? '+<:encoding(utf8)' : '>'), $file[0])) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
@@ -119,7 +119,7 @@ sub Save
 	
 	# サブバナー書き込み
 	chmod($Sys->Get('PM-ADM'), $file[2]);
-	if (open(my $fh, (-f $file[2] ? '+<' : '>'), $file[2])) {
+	if (open(my $fh, (-f $file[2] ? '+<:encoding(utf8)' : '>'), $file[2])) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
@@ -131,7 +131,7 @@ sub Save
 	
 	# 携帯用書き込み
 	chmod($Sys->Get('PM-ADM'), $file[1]);
-	if (open(my $fh, (-f $file[1] ? '+<' : '>'), $file[1])) {
+	if (open(my $fh, (-f $file[1] ? '+<:encoding(utf8)' : '>'), $file[1])) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);

@@ -49,7 +49,7 @@ sub Load
 	
 	my $path = '.' . $Sys->Get('INFO') . '/errmsg.cgi';
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(utf8)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);

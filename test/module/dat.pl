@@ -85,7 +85,7 @@ sub Load
 		$this->{'MODE'} = $readOnly;
 		
 		chmod($Sys->Get('PM-DAT'), $szPath);
-		if (open(my $fh, ($readOnly ? '<' : '+<'), $szPath)) {
+		if (open(my $fh, ($readOnly ? '<:encoding(utf8)' : '+<:encoding(utf8)'), $szPath)) {
 			flock($fh, 2);
 			binmode($fh);
 			my @lines = <$fh>;
@@ -395,7 +395,7 @@ sub GetNumFromFile
 	my ($path) = @_;
 	
 	my $cnt = 0;
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(utf8)', $path)) {
 		flock($fh, 2);
 		$cnt++ while (<$fh>);
 		close($fh);
@@ -430,7 +430,7 @@ sub IsMoved
 {
 	my ($path) = @_;
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(utf8)', $path)) {
 		flock($fh, 2);
 		my $line = <$fh>;
 		close($fh);

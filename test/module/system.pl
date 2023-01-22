@@ -67,7 +67,7 @@ sub Load
 	my $sysFile = $this->{'SYS'}->{'SYSFILE'};
 	
 	# 設定ファイルから読み込む
-	if (open(my $fh, '<', $sysFile)) {
+	if (open(my $fh, '<:encoding(utf8)', $sysFile)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -114,7 +114,7 @@ sub Save
 	my $path = $this->{'SYS'}->{'SYSFILE'};
 	
 	chmod($this->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
