@@ -19,7 +19,8 @@ package	THREAD;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use Encode;
+#binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -88,7 +89,7 @@ sub Open
 	}
 	else {
 		chmod($Sys->Get('PM-TXT'), $path);
-		if (open($fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+		if (open($fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 			flock($fh, 2);
 			binmode($fh);
 			seek($fh, 0, 0);
@@ -140,6 +141,13 @@ sub Load
 	
 	my $fh = $this->Open($Sys) or return;
 	my @lines = <$fh>;
+        
+        my $count = 0;
+        foreach my $line(@lines){
+                $lines[$count] = Encode::decode("Shift_JIS",$line);
+                $count++;
+        }
+        
 	map { s/[\r\n]+\z// } @lines;
 	
 	my $num = 0;
@@ -182,7 +190,7 @@ sub Save
 	
 	foreach (@{$this->{'SORT'}}) {
 		next if (!defined $subject->{$_});
-		print $fh "$_.dat<>$subject->{$_} ($this->{'RES'}->{$_})\n";
+		print $fh Encode::encode("Shift_JIS","$_.dat<>$subject->{$_} ($this->{'RES'}->{$_})\n");
 	}
 	
 	truncate($fh, tell($fh));
@@ -406,10 +414,16 @@ sub LoadAttr
 	
 	my $path = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info/attr.cgi';
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<:encoding(cp932)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
+                my $count = 0;
+                foreach my $line(@lines){
+                        $lines[$count] = Encode::decode("Shift_JIS",$line);
+                        $count++;
+                }
+                
 		map { s/[\r\n]+\z// } @lines;
 		
 		foreach (@lines) {
@@ -456,7 +470,7 @@ sub SaveAttr
 	my $path = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info/attr.cgi';
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 		flock($fh, 2);
 		binmode($fh);
 		seek($fh, 0, 0);
@@ -711,7 +725,7 @@ sub Update
 	$this->CustomizeOrder();
 	
 	foreach my $id (@{$this->{'SORT'}}) {
-		if (open(my $fh, '<:encoding(utf8)', "$base/$id.dat")) {
+		if (open(my $fh, '<:encoding(cp932)', "$base/$id.dat")) {
 			flock($fh, 2);
 			my $n = 0;
 			$n++ while (<$fh>);
@@ -758,7 +772,7 @@ sub UpdateAll
 	}
 	
 	foreach my $el (@dirSet) {
-		if ($el =~ /^(.*)\.dat$/ && open(my $fh, '<:encoding(utf8)', "$base/$el")) {
+		if ($el =~ /^(.*)\.dat$/ && open(my $fh, '<:encoding(cp932)', "$base/$el")) {
 			flock($fh, 2);
 			my $id = $1;
 			my $n = 1;
@@ -822,7 +836,7 @@ package	POOL_THREAD;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+#binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -868,7 +882,7 @@ sub Load
 	
 	my $path = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/pool/subject.cgi';
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<:encoding(cp932)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -911,7 +925,7 @@ sub Save
 	my $path = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/pool/subject.cgi';
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
@@ -1115,7 +1129,7 @@ sub Update
 	$base = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/pool';
 	
 	foreach my $id (@{$this->{'SORT'}}) {
-		if (open(my $fh, '<:encoding(utf8)', "$base/$id.cgi")) {
+		if (open(my $fh, '<:encoding(cp932)', "$base/$id.cgi")) {
 			flock($fh, 2);
 			my $n = 0;
 			$n++ while (<$fh>);
@@ -1160,7 +1174,7 @@ sub UpdateAll
 	}
 	
 	foreach my $el (@dirSet) {
-		if ($el =~ /^(.*)\.cgi$/ && open(my $fh, '<:encoding(utf8)', "$base/$el")) {
+		if ($el =~ /^(.*)\.cgi$/ && open(my $fh, '<:encoding(cp932)', "$base/$el")) {
 			flock($fh, 2);
 			my $id = $1;
 			my $n = 1;
