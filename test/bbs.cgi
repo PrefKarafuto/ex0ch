@@ -262,9 +262,11 @@ sub PrintBBSThreadCreate
 	$Page->Print("<html lang=\"ja\">\n");
 	$Page->Print("<head>\n");
 	$Page->Print(' <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">'."\n\n");
+	$Page->Print("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"."\n");
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>'."\n");
 	$Caption->Print($Page, undef);
 	$Page->Print(" <title>$title</title>\n\n");
+	$Page->Print("<link rel=\"stylesheet\" type=\"text/css\" href=\"design.css\">\n");
 	$Page->Print("<script src='https://js.hcaptcha.com/1/api.js' async defer></script>\n");
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
@@ -321,8 +323,11 @@ sub PrintBBSThreadCreate
   <table border="0">
    <tr>
     <td align="left">
-    タイトル：<input type="text" name="subject" size="25">　<input type="submit" value="新規スレッド作成"><br>
-    名前：<input type="text" name="FROM" size="19" value="$name">
+    <div class ="reverse_order">
+    <span class = "order2">タイトル：<input type="text" name="subject" size="25"></span>
+    <span class = "order1"><input type="submit" value="新規スレッド作成"></span>
+    </div>
+    名前：<input type="text" name="FROM" size="19" value="$name"><br class="smartphone">
     E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
 HTML
 
@@ -332,7 +337,7 @@ HTML
 	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
 	if ($hCaptcha_check eq '') {
 		$Page->Print(<<HTML);
-    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
     </td>
    </tr>
   </table>
@@ -349,7 +354,7 @@ HTML
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 		$Page->Print(<<HTML);
-    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
     </td>
    </tr>
   </table>
@@ -368,6 +373,23 @@ HTML
 
 
 	}
+
+
+# CSS
+$Page->Print(<<HTML);
+<style>
+/* スマホ用レイアウト */
+img {
+    max-width: 100%;
+    height:auto;
+}
+
+textarea {
+width:95%;
+margin:0;
+}
+</style>
+HTML
 
 	$Page->Print("\n</body>\n</html>\n");
 }
@@ -462,6 +484,7 @@ sub PrintBBSCookieConfirm
 <head>
 
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
  <title>■ 書き込み確認 ■</title>
 
@@ -580,6 +603,7 @@ sub PrintBBSJump
 	<title>書きこみました。</title>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta http-equiv="Refresh" content="5;URL=$bbsPath/">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 </head>
 <!--nobanner-->
 <body>

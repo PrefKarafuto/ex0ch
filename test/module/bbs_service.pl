@@ -141,6 +141,7 @@ sub CreateIIndex
 	my $title = $Set->Get('BBS_TITLE');
 	my $code = $this->{'CODE'};
 	$Page->Print("<html><!--nobanner--><head><title>$title</title>");
+	$Page->Print("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">");
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print("</head><body><center>$title</center>");
 	
@@ -265,6 +266,21 @@ HTML
 $version
 </div>
 
+
+<style>
+/* スマホ用レイアウト */
+img {
+    max-width: 100%;
+    height:auto;
+}
+
+textarea {
+width:95%;
+margin:0;
+}
+</style>
+
+
 </body>
 </html>
 HTML
@@ -302,6 +318,7 @@ sub PrintIndexHead
  
  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
+ <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <!-- hCaptcha -->
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
@@ -586,13 +603,13 @@ FORM
 	if ($hCaptcha_check eq '') {
 		$Page->Print(<<FORM);
    <blockquote style="margin-top:0px;">
-    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 FORM
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 	$Page->Print(<<FORM);
    <blockquote style="margin-top:0px;">
-    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 FORM
 	}
 
@@ -670,13 +687,13 @@ KAKIKO
 	if ($hCaptcha_check eq '') {
 	$Page->Print(<<KAKIKO);
    <blockquote style="margin-top:0px;">
-    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 KAKIKO
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 	$Page->Print(<<KAKIKO);
    <blockquote style="margin-top:0px;">
-    <textarea rows="5" cols="64" name="MESSAGE"></textarea>
+    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 KAKIKO
 	}
 
