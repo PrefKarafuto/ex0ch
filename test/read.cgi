@@ -197,7 +197,8 @@ sub PrintReadHead
  <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Style-Type" content="text/css">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
- <link rel="stylesheet" type="text/css" href="design.css">
+ <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
+ <link rel="stylesheet" type="text/css" href="../../../design.css">
 
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
