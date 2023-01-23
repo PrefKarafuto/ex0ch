@@ -581,7 +581,7 @@ sub PrintLastEdit
 	$resmaxz	=~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # 全角数字
 	$resmaxz1	=~ s/([0-9])/"\x82".chr(0x4f+$1)/eg; # 全角数字
 	
-	$data = "$resmaxz1<><>Over $resmax Thread<>このスレッドは$resmaxzを超えました。<br>";
+	$data = "$resmaxz1\<><>Over $resmax Thread<>このスレッドは$resmaxz\を超えました。<br>";
 	$data .= 'もう書けないので、新しいスレッドを立ててくださいです。。。<>';
 	if (! $Form->IsExist('LAST_FROM')) {
 		# 1000.txtの読み込み
