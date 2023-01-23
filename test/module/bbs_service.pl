@@ -61,7 +61,7 @@ sub Init
 	$this->{'THREADS'} = THREAD->new;
 	$this->{'CONV'} = DATA_UTILS->new;
 	$this->{'BANNER'} = BANNER->new;
-	$this->{'CODE'} = 'sjis';
+	$this->{'CODE'} = 'utf8';
 	
 	if (!defined $Setting) {
 		require './module/setting.pl';
