@@ -7,7 +7,6 @@ package	DAT;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -85,10 +84,15 @@ sub Load
 		$this->{'MODE'} = $readOnly;
 		
 		chmod($Sys->Get('PM-DAT'), $szPath);
-		if (open(my $fh, ($readOnly ? '<:encoding(utf8)' : '+<:encoding(utf8)'), $szPath)) {
+		if (open(my $fh, ($readOnly ? '<:encoding(cp932)' : '+<:encoding(cp932)'), $szPath)) {
 			flock($fh, 2);
 			binmode($fh);
 			my @lines = <$fh>;
+            my $num = 0;
+			foreach my $line(@lines){
+				$lines[$num] = Encode::decode("Shift_JIS",$line);
+				$num++;
+			}
 			
 			push @{$this->{'LINE'}}, @lines;
 			
@@ -146,6 +150,7 @@ sub Save
 	if ($this->{'STAT'} && $fh) {
 		if (! $this->{'MODE'}) {
 			seek($fh, 0, 0);
+            binmode(STDOUT,":encoding(cp932)");
 			print $fh @{$this->{'LINE'}};
 			truncate($fh, tell($fh));
 			close($fh);
@@ -366,9 +371,10 @@ sub DirectAppend
 	my ($Sys, $path, $data) = @_;
 	
 	if (GetPermission($path) != $Sys->Get('PM-STOP')) {
-		if (open(my $fh, '>>', $path)) {
+		if (open(my $fh, '>>:encoding(cp932)', $path)) {
 			flock($fh, 2);
 			binmode($fh);
+            $data = Encode::encode("Shift_JIS",$data);
 			print $fh "$data";
 			close($fh);
 			chmod($Sys->Get('PM-DAT'), $path);
