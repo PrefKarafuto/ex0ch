@@ -196,7 +196,8 @@ sub PrintReadHead
 
  <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Style-Type" content="text/css">
-
+ <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ <link rel="stylesheet" type="text/css" href="design.css">
 
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
@@ -471,8 +472,8 @@ sub PrintReadFoot
 		$Page->Print(<<HTML);
 <form method="POST" action="$cgipath/bbs.cgi?guid=ON">
 <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
-<input type="submit" value="書き込む">
-名前：<input type="text" name="FROM" value="$cookName" size="19">
+<input type="submit" value="書き込む"><br class="smartphone">
+名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">
 E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="$cookMail" size="19"><br>
 HTML
 
@@ -484,13 +485,13 @@ HTML
 	my $sitekey = $Set->Get('BBS_HCAPTCHA_SITEKEY');
 	if ($hCaptcha_check eq '') {
 $Page->Print(<<HTML);
-<textarea rows="5" cols="70" name="MESSAGE"></textarea>
+<textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
 	}else{
 $Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 $Page->Print(<<HTML);
-<textarea rows="5" cols="70" name="MESSAGE"></textarea>
+<textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
 }
@@ -504,6 +505,16 @@ HTML
 READ.CGI - $ver<br>
 <a href="http://zerochplus.sourceforge.jp/">ぜろちゃんねるプラス</a>
 </div>
+
+
+<style>
+/* スマホ用レイアウト */
+textarea {
+width:95%;
+margin:0;
+}
+</style>
+
 
 </body>
 </html>
@@ -655,7 +666,8 @@ sub PrintReadError
 	
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
-	$Page->Print('<html><head><title>ＥＲＲＯＲ！！</title>');
+	$Page->Print("<html><head><title>ＥＲＲＯＲ！！</title>\n");
+	$Page->Print("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">");
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print('</head><!--nobanner-->');
 	$Page->Print('<html><body>');
