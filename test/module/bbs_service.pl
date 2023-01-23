@@ -215,6 +215,7 @@ sub CreateSubback
 <head>
 
  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+ <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 HTML
 	
@@ -319,6 +320,7 @@ sub PrintIndexHead
  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ <link rel="stylesheet" type="text/css" href="../test/design.css">
 
 <!-- hCaptcha -->
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
@@ -593,8 +595,9 @@ FORM
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>&lrm;</td>
-  <td nowrap>
-  タイトル：<input type="text" name="subject" size="40"><input type="submit" value="新規スレッド作成"><br>
+  <td nowrap><div class ="reverse_order">
+  <span class = "order2">タイトル：<input type="text" name="subject" size="40"></span>
+  <span class = "order1"><input type="submit" value="新規スレッド作成"></span></div>
   名前：<input type="text" name="FROM" size="19"> E-mail：<input type="text" name="mail" size="19"><br>
 FORM
 	# hCaptchaなしの場合
@@ -676,8 +679,8 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
-   <input type="submit" value="書き込む" name="submit">
-   名前：<input type="text" name="FROM" size="19">
+   <input type="submit" value="書き込む" name="submit"><br class="smartphone">
+   名前：<input type="text" name="FROM" size="19"><br class="smartphone">
    E-mail：<input type="text" name="mail" size="19"><br>
 KAKIKO
 
