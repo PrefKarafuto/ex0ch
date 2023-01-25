@@ -528,11 +528,11 @@ THREAD
     <div style="font-weight:bold;">
      <a href="$allPath">全部読む</a>
      <a href="$lastPath">最新50</a>
-     <a href="$numPath">1-100</a>
+     <a href="$numPath">1-100</a><br class="smartphone">
      <a href="#top">板のトップ</a>
      <a href="./">リロード</a>
     </div>
-    </blockquote>
+    </span>
    </blockquote>
   </form>
   </td>
@@ -605,13 +605,13 @@ FORM
 	my $sitekey = $this->{'SET'}->Get('BBS_HCAPTCHA_SITEKEY');
 	if ($hCaptcha_check eq '') {
 		$Page->Print(<<FORM);
-   <blockquote style="margin-top:0px;">
+   <span style="margin-top:0px;">
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 FORM
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 	$Page->Print(<<FORM);
-   <blockquote style="margin-top:0px;">
+   <span style="margin-top:0px;">
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 FORM
 	}
@@ -631,6 +631,18 @@ BBS.CGI - $ver (Perl)
 +Samba24=$samba<br>
 ページのおしまいだよ。。と</div>
 
+<style>
+/* スマホ用レイアウト */
+img {
+    max-width: 100%;
+    height:auto;
+}
+
+textarea {
+max-width:95%;
+margin:0;
+}
+</style>
 FOOT
 	
 	$Page->Print("</body>\n</html>\n");
@@ -689,13 +701,13 @@ KAKIKO
 	my $sitekey = $this->{'SET'}->Get('BBS_HCAPTCHA_SITEKEY');
 	if ($hCaptcha_check eq '') {
 	$Page->Print(<<KAKIKO);
-   <blockquote style="margin-top:0px;">
+	<div class ="bbs_service_textarea">
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
+    </div>
 KAKIKO
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 	$Page->Print(<<KAKIKO);
-   <blockquote style="margin-top:0px;">
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 KAKIKO
 	}
