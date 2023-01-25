@@ -708,6 +708,7 @@ KAKIKO
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 	$Page->Print(<<KAKIKO);
+	<div class ="bbs_service_textarea">
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 KAKIKO
 	}
