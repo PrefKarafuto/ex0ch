@@ -3,6 +3,15 @@
 最終的には全てのstyle記述をここに移行してみたい。
 */
 
+@media screen and (max-width:768px) {
+    .bbs_service_textarea textarea {
+    resize: vertical;
+    height:200px;
+    width:95%;
+    margin:0;
+    }
+}
+
 /*PCでは無効（改行しない）*/
 .smartphone{
     display: none;
@@ -16,10 +25,10 @@
 
 /* bbs.cgiでスレッド作成のボタンをスマホだと一番上にする */
 @media screen and (max-width:768px) {
-.reverse_order{
- display: flex;
- flex-direction: column;
-}
+    .reverse_order{
+     display: flex;
+     flex-direction: column;
+    }
 }
 .order1 {
     order: 1;
