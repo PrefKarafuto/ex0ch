@@ -113,13 +113,13 @@ sub Save
 		# 順番に出力
 		foreach my $key (@ch2setting) {
 			my $val = $this->Get($key, '');
-			$val = endode("Shift_JIS",$val);
+			$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 			delete $orz{$key};
 		}
 		foreach my $key (sort keys %orz) {
 			my $val = $this->Get($key, '');
-			$val = endode("Shift_JIS",$val);
+			$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 			delete $orz{$key};
 		}
@@ -190,7 +190,7 @@ sub SaveAs
 		
 		foreach my $key (keys %{$this->{'SETTING'}}) {
 			my $val = $this->{'SETTING'}->{$key};
-			$val = endode("Shift_JIS",$val);
+			$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 		}
 		
