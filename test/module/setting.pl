@@ -8,6 +8,7 @@ package	SETTING;
 use strict;
 use utf8;
 binmode(STDOUT,":utf8");
+use Encode;
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -51,7 +52,7 @@ sub Load
 	
 	my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/SETTING.TXT';
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<:encoding(cp932)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -59,7 +60,7 @@ sub Load
 		
 		foreach (@lines) {
 			if ($_ =~ /^(.+?)=(.*)$/) {
-				$set->{$1} = $2;
+				$set->{$1} = Encode::decode("Shift_JIS",$2);
 			}
 		}
 		
@@ -104,7 +105,7 @@ sub Save
 	my %orz = %{$this->{'SETTING'}};
 	
 	chmod($Sys->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 		flock($fh, 2);
 		binmode($fh);
 		seek($fh, 0, 0);
@@ -112,11 +113,13 @@ sub Save
 		# 順番に出力
 		foreach my $key (@ch2setting) {
 			my $val = $this->Get($key, '');
+			$val = endode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 			delete $orz{$key};
 		}
 		foreach my $key (sort keys %orz) {
 			my $val = $this->Get($key, '');
+			$val = endode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 			delete $orz{$key};
 		}
@@ -145,7 +148,7 @@ sub LoadFrom
 	
 	my $set = $this->{'SETTING'} = {};
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<:encoding(cp932)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -153,7 +156,7 @@ sub LoadFrom
 		
 		foreach (@lines) {
 			if ($_ =~ /^(.+?)=(.*)$/) {
-				$set->{$1} = $2;
+				$set->{$1} = Encode::decode("Shift_JIS",$2);
 			}
 		}
 		
@@ -180,13 +183,14 @@ sub SaveAs
 	my ($path) = @_;
 	
 	chmod($this->{'SYS'}->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
 		
 		foreach my $key (keys %{$this->{'SETTING'}}) {
 			my $val = $this->{'SETTING'}->{$key};
+			$val = endode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 		}
 		
