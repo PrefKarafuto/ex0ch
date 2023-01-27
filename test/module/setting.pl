@@ -60,7 +60,8 @@ sub Load
 		
 		foreach (@lines) {
 			if ($_ =~ /^(.+?)=(.*)$/) {
-				$set->{$1} = Encode::decode("Shift_JIS",$2);
+				$set->{$1} = $2;
+				#$set->{$1} = Encode::decode("Shift_JIS",$2);
 			}
 		}
 		
