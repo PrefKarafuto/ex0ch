@@ -288,7 +288,7 @@ sub PrintReadMenu
 	else {
 		$Page->Print(" &nbsp;\n");
 	}
-	$Page->Print(" </span>&nbsp;\n");
+	$Page->Print(" </span><br class=\"smartphone\">&nbsp;\n");
 	$Page->Print("</div>\n");
 	$Page->Print("</div>\n\n");
 	
