@@ -246,7 +246,7 @@ sub InitSystemValue
 		'DATA'		=> '/datas',								# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS 0.7.5 20220323',					# CGIバージョン
+		'VERSION'	=> '0ch+ BBS dev-0.8.x-2023.02.02',					# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -278,7 +278,7 @@ sub InitSystemValue
 		'KAKIKO'	=> 1,										# 2重かきこですか？？
 		'COUNTER'	=> '',										# ofuda.cc アカウント
 		'PRTEXT'	=> 'ぜろちゃんねるプラス',					# PR欄の表示文字列
-		'PRLINK'	=> 'http://zerochplus.sourceforge.jp/',		# PR欄のリンクURL
+		'PRLINK'	=> 'https://github.com/PrefKarafuto/New_0ch_Plus',		# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
 		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
