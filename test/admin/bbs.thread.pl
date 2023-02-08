@@ -52,7 +52,7 @@ sub DoPrint
 	
 	require './admin/admin_cgi_base.pl';
 	require './module/bbs_info.pl';
-	require './module/bbs.autodel.pl';
+	require './admin/bbs.autodel.pl';
 	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
