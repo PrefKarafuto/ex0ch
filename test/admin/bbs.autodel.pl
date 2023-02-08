@@ -39,7 +39,7 @@ sub PrintResAutoDelete
     };
    
     $sMODE  = "BBS";#&$sanitize($Form->Get('SMODE', ''));
-    #$sBBS = &$sanitize($Form->Get('SBBS', ''));
+    $sBBS = &$sanitize($Form->Get('SBBS', ''));
     $sKEY   = &$sanitize($Form->Get('KEY', ''));
     $sWORD  = &$sanitize($Form->Get('WORD'));
     @sTYPE  = $Form->GetAtArray('TYPE', 0);
@@ -58,6 +58,7 @@ sub PrintResAutoDelete
     $Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
     $Page->Print("    <td class=\"DetailTitle\">条件設定値</td></tr>\n");
     $Page->Print("</select></td></tr>\n");
+    $Page->Print("<input type=hidden name=SBBS value=$id>");
     $Page->Print(<<HTML);
   <!--<tr>
     <td>指定スレッドキー</td>
@@ -165,7 +166,7 @@ sub Search
     # 検索ヒットが1件以上あり
     if ($n > 0) {
         require './module/data_utils.pl';
-        my $Conv = GALADRIEL->new;
+        my $Conv = DATA_UTILS->new;
         $n = 1;
         # スレッドごとにソート
         @resList = ();
@@ -273,8 +274,8 @@ sub PrintThreadHeader
     my ($Page, $SYS, $BBS, $Conv, $n, $base, $pResult) = @_;
     my ($Threads, $dir, $subj);
    
-    require './module/threads.pl';
-    $Threads = BILBO->new;
+    require './module/thread.pl';
+    $Threads = THREAD->new;
     $dir = $BBS->Get('DIR', $$pResult[0]);
     $SYS->Set('BBS', $dir);
     $Threads->Load($SYS);
@@ -408,7 +409,7 @@ sub PrintResLumpDelete
     my ($bbsID, $threadKey, $bbsResNum, @keyAndResSet, $keyAndRes, %wholeSet);
     my ($Threads, $DAT);
    
-    require './module/threads.pl'; # read Threads
+    require './module/thread.pl'; # read Threads
    
     $Sys->Set('_TITLE', 'Res Delete Confirm');
    
@@ -565,7 +566,7 @@ sub FunctionResLumpDelete
            
             if (!$mode) {
                 require './module/manager_log.pl';
-                $LOG = PEREGRIN->new;
+                $LOG = MANAGER_LOG->new;
                 $LOG->Load($Sys, 'WRT', $Sys->Get('KEY'));
                 $logsize = $LOG->Size();
                 $lastnum = $Dat->Size() - 1;
