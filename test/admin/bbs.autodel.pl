@@ -558,7 +558,7 @@ sub FunctionResLumpDelete
            
             # datの読み込み
             require './module/dat.pl';
-            $Dat = ARAGORN->new;
+            $Dat = DAT->new;
            
             $Sys->Set('KEY', $threadID);
             my $datPath = $Sys->Get('BBSPATH') . '/' . $bbsDir . '/dat/' . $threadID . '.dat';
@@ -590,7 +590,7 @@ sub FunctionResLumpDelete
            
             # 削除と同時に削除ログへ削除した内容を保存する
             chmod($Sys->Get('PM-LOG'), $path);
-            if (open(my $f_dellog, '>>', $path)) {
+            if (open(my $f_dellog, '>>:encoding(utf8)', $path)) {
                 flock($f_dellog, 2);
                 binmode($f_dellog);
                 # レス番号が0から始まるようにする
