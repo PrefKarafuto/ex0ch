@@ -246,7 +246,7 @@ sub InitSystemValue
 		'DATA'		=> '/datas',								# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS dev-0.8.x-2023.02.02',					# CGIバージョン
+		'VERSION'	=> '0ch+ BBS dev-0.8.x-2023.02.08',					# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -266,7 +266,7 @@ sub InitSystemValue
 		'LINKST'	=> 23,										# リンク禁止開始時間
 		'LINKED'	=> 2,										# リンク禁止終了時間
 		'PATHKIND'	=> 0,										# 生成パスの種類
-		'HEADTEXT'	=> '<small>■<b>掲示板一覧</b>■</small>',	# ヘッダ下部の表示文字列
+		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',	# ヘッダ下部の表示文字列
 		'HEADURL'	=> '../',									# ヘッダ下部のURL
 		'FASTMODE'	=> 0,										# 高速モード
 		
