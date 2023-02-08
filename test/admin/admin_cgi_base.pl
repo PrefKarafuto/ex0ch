@@ -229,7 +229,7 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('sys.cap','DISP','LIST');">キャップ</a> |
  <a href="javascript:DoSubmit('sys.capg','DISP','LIST');">共通キャップグループ</a> |
  <a href="javascript:DoSubmit('sys.setting','DISP','INFO');">システム設定</a> |
- <a href="javascript:DoSubmit('sys.edit','DISP','BANNER_PC');">各種編集</a> |
+ <a href="javascript:DoSubmit('sys.edit','DISP','BANNER_PC');">共通告知欄の編集</a> |
 HTML
 		
 	}
