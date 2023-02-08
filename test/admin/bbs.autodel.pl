@@ -52,7 +52,7 @@ sub PrintResAutoDelete
     $SYS->Set('_TITLE', 'Res Auto Delete');
    
     $Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
-    $Page->Print("  <tr><td colspan=2>以下の各条件に当てはまるレスを削除します。</td></tr>\n");
+    $Page->Print("  <tr><td colspan=2>以下の各条件に当てはまるレスを削除します。（注意：スレッドの>>1のレスはここでは削除できません。削除したい場合はメニューのスレッド一覧からスレッドごと削除してください。）</td></tr>\n");
     $Page->Print("  <tr><td colspan=2><hr></td></tr>\n");
     $Page->Print("  <tr>\n");
     $Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
@@ -311,14 +311,15 @@ sub PrintResult
     $bbsDir = $BBS->Get('DIR', $bbsID);
     $bbsName = $BBS->Get('NAME', $bbsID);
     
-    $Page->Print("<tr>");
+    $Page->Print("<tr><td class=Response valign=top>");
     if ($bbsID) {
     #$name = $BBS->Get('NAME', $bbsSet[0]);
     $value = "$bbsID/$$pResult[1]/$$pResult[2]";
-        if($isAbone){
-        	$Page->Print("<td class=Response valign=top><input type=checkbox name=RESS value=\"$value\" checked=checked></td>");
+        if($isAbone && $$pResult[2]!=1){
+        	$Page->Print("<input type=checkbox name=RESS value=\"$value\" checked=checked>");
         }
     $Page->Print(<<HTML);
+    </td>
     <td class=Response >
     <dt>
     <a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
