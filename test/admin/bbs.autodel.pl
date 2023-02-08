@@ -196,8 +196,12 @@ sub Search
         $Page->Print("</table>\n");
         return;
     }
-   
-    PrintResultFoot($Page);
+    if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
+        PrintResultFoot($Page);
+    }
+    else{
+        $Page->Print("</table>\n");
+    }
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -301,8 +305,9 @@ HTML
 sub PrintResult
 {
     my ($Page, $BBS, $Conv, $n, $base, $pResult) = @_;
-    my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value);
-   
+    my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
+    $isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
+    $checkbox = $isAbone ? '<td class=Response valign=top>\n<input type=checkbox name=RESS value="$value" checked=checked>\n</td>' : '';
     $bbsID = $$pResult[0];
     $bbsDir = $BBS->Get('DIR', $bbsID);
     $bbsName = $BBS->Get('NAME', $bbsID);
@@ -313,9 +318,7 @@ sub PrintResult
        
         $Page->Print(<<HTML);
   <tr>
-    <td class=Response valign=top>
-      <input type=checkbox name=RESS value="$value" checked=checked>
-    </td>
+      $checkbox
     <td class=Response >
     <dt>
     <a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
