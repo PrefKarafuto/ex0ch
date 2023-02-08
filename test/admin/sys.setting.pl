@@ -521,8 +521,8 @@ sub PrintOtherSetting
 	$Page->Print("<td><input type=radio name=PATHKIND value=\"0\" $pathInfo>PATHINFO　");
 	$Page->Print("<input type=radio name=PATHKIND value=\"1\" $pathQuery>QUERYSTRING</td></tr>\n");
 	
-	$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
-	$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
+	#$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
+	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgiのGETメソ\ッド</td></tr>\n");
 	$Page->Print("<tr><td>bbs.cgiでGETメソ\ッドを使用する</td>");
