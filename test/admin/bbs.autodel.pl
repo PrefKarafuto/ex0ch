@@ -441,7 +441,7 @@ sub PrintResLumpDelete
         $Sys->Set('BBS', $bbsDir);
         $Page->Print("<tr><td><div class=\"FuncTitle\">$bbsName</div></td></tr>\n");
         foreach my $threadID (keys %{$wholeSet{$bbsID}}){
-            $Threads = BILBO->new;
+            $Threads = THREAD->new;
             $Threads->Load($Sys);
             my $threadSubj = $Threads->Get('SUBJECT', $threadID);
             if (! ($threadSubj =~ /[^\s　]/) || $threadSubj eq '') {
@@ -450,7 +450,7 @@ sub PrintResLumpDelete
            
             # datの読み込み
             require './module/gondor.pl';
-            $DAT = ARAGORN->new;
+            $DAT = DAT->new;
            
             $Sys->Set('KEY', $threadID);
             my $datPath = $Sys->Get('BBSPATH') . '/' . $bbsDir . '/dat/' . $threadID . '.dat';
