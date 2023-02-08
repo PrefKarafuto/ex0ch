@@ -123,7 +123,7 @@ sub Search
     my (@resList, %bbsCount, %threadCount);
    
     require './module/admin_search.pl';
-    $Search = BALROGS2->new;
+    $Search = ADMIN_SEARCH->new;
    
     #$Mode = 0 if ($Form->Equal('SMODE', 'ALL'));
     #$Mode = 1 if ($Form->Equal('SMODE', 'BBS'));
@@ -186,7 +186,7 @@ sub Search
             }
             #PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem) if !$bbsCount{$elem[0]}++;
             PrintThreadHeader($Page, $Sys, $BBS, $Conv, $n, $base, \@elem) if !$threadCount{$elem[1]}++;
-            PrintResult($Page, $BBS, $Conv, $n, $base, \@elem);
+            PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
             $n++;
         }
     }
@@ -304,7 +304,7 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResult
 {
-    my ($Page, $BBS, $Conv, $n, $base, $pResult) = @_;
+    my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
     my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
     $isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
     $checkbox = $isAbone ? '<td class=Response valign=top>\n<input type=checkbox name=RESS value="$value" checked=checked>\n</td>' : '';
