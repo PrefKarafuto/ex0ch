@@ -449,7 +449,7 @@ sub PrintResLumpDelete
             }
            
             # datの読み込み
-            require './module/gondor.pl';
+            require './module/dat.pl';
             $DAT = DAT->new;
            
             $Sys->Set('KEY', $threadID);
@@ -507,7 +507,7 @@ sub FunctionResLumpDelete
     $numResInLine = 20;
     push @$pLog, '以下のレスを' . ($mode ? 'あぼ〜ん' : '削除') . 'しました。';
    
-    require './module/threads.pl'; # read Threads
+    require './module/thread.pl'; # read Threads
    
     %wholeSet = ();
     @valueSet = $Form->GetAtArray('RESS');
@@ -547,7 +547,7 @@ sub FunctionResLumpDelete
        
         foreach my $threadID (keys %{$wholeSet{$bbsID}}){
             $Sys->Set('KEY', $threadID);
-            $Threads = BILBO->new;
+            $Threads = THREAD->new;
             $Threads->Load($Sys);
             my $threadSubj = $Threads->Get('SUBJECT', $threadID);
             if (! ($threadSubj =~ /[^\s　]/) || $threadSubj eq '') {
