@@ -308,18 +308,17 @@ sub PrintResult
     my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
     my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
     $isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
-    $checkbox = $isAbone ? "<td class=Response valign=top><input type=checkbox name=RESS value=$value checked=checked></td>" : '';
-    $bbsID = $$pResult[0];
     $bbsDir = $BBS->Get('DIR', $bbsID);
     $bbsName = $BBS->Get('NAME', $bbsID);
-   
+    
+    $Page->Print("<tr>");
     if ($bbsID) {
-        #$name = $BBS->Get('NAME', $bbsSet[0]);
-        $value = "$bbsID/$$pResult[1]/$$pResult[2]";
-       
-        $Page->Print(<<HTML);
-  <tr>
-      $checkbox
+    #$name = $BBS->Get('NAME', $bbsSet[0]);
+    $value = "$bbsID/$$pResult[1]/$$pResult[2]";
+        if($isAbone){
+        	$Page->Print("<td class=Response valign=top><input type=checkbox name=RESS value=\"$value\" checked=checked></td>");
+        }
+    $Page->Print(<<HTML);
     <td class=Response >
     <dt>
     <a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
