@@ -135,7 +135,6 @@ sub Run
 {
     my $this = shift;
     my ($word, $f) = @_;
-    $word = Encode::decode('Shift_JIS',$word);
     my $pSearchSet = $this->{'SEARCHSET'};
     $this->{'RESULTSET'} = [] if ($f);
    
@@ -200,7 +199,6 @@ sub Search
         for (my $i = 0 ; $i < $DAT->Size() ; $i++) {
             my $bFind = 0;
             my $pDat = $DAT->Get($i);
-            $$pDat = Encode::decode('Shift_JIS',$$pDat);
             my @elem = split(/<>/, $$pDat, -1);
            
             # 名前検索
@@ -224,7 +222,6 @@ sub Search
             if ($bFind) {
                 my $SetStr = "$bbsID<>$key<>" . ($i + 1) . '<>';
                 $SetStr .= join('<>', @elem);
-                $SetStr=encode('UTF-8',$SetStr);
                 push @$pResultSet, $SetStr;
             }
         }
@@ -236,6 +233,3 @@ sub Search
 #   Module END
 #============================================================================================================
 1;
-
-
-
