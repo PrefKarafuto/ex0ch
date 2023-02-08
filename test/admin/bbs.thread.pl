@@ -52,6 +52,7 @@ sub DoPrint
 	
 	require './admin/admin_cgi_base.pl';
 	require './module/bbs_info.pl';
+	require './module/bbs.autodel.pl';
 	$BASE = ADMIN_CGI_BASE->new;
 	$BBS = $pSys->{'AD_BBS'};
 	
@@ -104,6 +105,15 @@ sub DoPrint
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
+	elsif ($subMode eq 'AUTORESDEL') {                                             # レス一括削除設定画面
+            PrintResAutoDelete($Page, $Sys, $Form, $BBS);
+        }
+        elsif ($subMode eq 'ABONELUMPRES') {                                        # レス一括あぼーん確認画面
+            PrintResLumpDelete($Page, $Sys, $Form, $BBS, 1);
+        }
+        elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除確認画面
+            PrintResLumpDelete($Page, $Sys, $Form, $BBS, 0);
+        }
 	
 	# 掲示板情報を設定
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
@@ -128,6 +138,7 @@ sub DoFunction
 	my ($subMode, $err, $BBS);
 	
 	require './module/bbs_info.pl';
+	require './admin/bbs.autodel.pl';
 	$BBS = BBS_INFO->new;
 	
 	# 管理情報を登録
@@ -166,7 +177,12 @@ sub DoFunction
 	elsif ($subMode eq 'AUTOPOOL') {												# 一括dat落ち
 		$err = FunctionThreadAutoPooling($Sys, $Form, $this->{'LOG'});
 	}
-	
+	elsif ($subMode eq 'ABONELUMPRES') {                                           # レス一括あぼ～ん
+            $err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 1);
+        }
+        elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除
+            $err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 0);
+        }
 	# 処理結果表示
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", "ERROR:$err");
@@ -194,7 +210,7 @@ sub SetMenuList
 	my ($Base, $pSys, $bbs) = @_;
 	
 	$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
-	
+	$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
 	# スレッドdat落ち権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {
 		$Base->SetMenu('一括DAT落ち', "'bbs.thread','DISP','AUTOPOOL'");
