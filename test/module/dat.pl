@@ -7,6 +7,7 @@ package	DAT;
 
 use strict;
 use utf8;
+
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -88,7 +89,7 @@ sub Load
 			flock($fh, 2);
 			binmode($fh);
 			my @lines = <$fh>;
-            my $num = 0;
+            		my $num = 0;
 			foreach my $line(@lines){
 				$lines[$num] = Encode::decode("Shift_JIS",$line);
 				$num++;
@@ -144,14 +145,18 @@ sub Save
 {
 	my $this = shift;
 	my ($Sys) = @_;
-	
+	my $num=0;
 	# ファイルオープン状態なら書き込みを実行する
 	my $fh = $this->{'HANDLE'};
 	if ($this->{'STAT'} && $fh) {
 		if (! $this->{'MODE'}) {
 			seek($fh, 0, 0);
-            binmode(STDOUT,":encoding(cp932)");
-			print $fh @{$this->{'LINE'}};
+            		my @getline = @{$this->{'LINE'}};
+            foreach my $line(@getline){
+            	$getline[$num] = Encode::encode("Shift_JIS",$line);
+            	$num++;
+            }
+			print $fh @getline;
 			truncate($fh, tell($fh));
 			close($fh);
 			
@@ -374,7 +379,7 @@ sub DirectAppend
 		if (open(my $fh, '>>:encoding(cp932)', $path)) {
 			flock($fh, 2);
 			binmode($fh);
-            $data = Encode::encode("Shift_JIS",$data);
+            		$data = Encode::encode("Shift_JIS",$data);
 			print $fh "$data";
 			close($fh);
 			chmod($Sys->Get('PM-DAT'), $path);
