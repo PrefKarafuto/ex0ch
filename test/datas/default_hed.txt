@@ -1,10 +1,10 @@
 <div align="center" style="margin: 1.2em 0;">
-<font color="red">クリックで救える命が…ないです(｀・ω・´)シャキーン</font>
+<font color="red">�N���b�N�ŋ~���閽���c�Ȃ��ł�(�M�E�ցE�L)�V���L�[��</font>
 </div>
 
-<b>掲示板使用上の注意</b>
+<b>�f���g�p��̒���</b>
 <blockquote style="margin-top:0;font-weight:bold;">
-・転んでも泣かない<br>
-・出されたものは残さず食べる<br>
-・Perl使いを尊重する<br>
+�E�]��ł������Ȃ�<br>
+�E�o���ꂽ���͎̂c�����H�ׂ�<br>
+�EPerl�g���𑸏d����<br>
 </blockquote>

@@ -11,7 +11,7 @@
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 ##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
@@ -218,7 +218,7 @@ sub PrintMadaCont
 		
 		$path = "$BBSpath/$dir/info/access.cgi";
 		
-		if ( -e $path && open(SEC, '<:encoding(utf8)', $path) ) {
+		if ( -e $path && open(SEC, '<', $path) ) {
 			flock(FILE, 1);
 			
 			$line = <SEC>;

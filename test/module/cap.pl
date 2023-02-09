@@ -20,7 +20,7 @@ package	CAP;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ sub Load
 	
 	my $path = '.' . $Sys->Get('INFO') . '/caps.cgi';
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -114,7 +114,7 @@ sub Save
 	my $path = '.' . $Sys->Get('INFO') . '/caps.cgi';
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
@@ -300,7 +300,7 @@ package	CAP_GROUP;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -351,7 +351,7 @@ sub Load
 	$this->{'ISCOMMON'} = {};
 	
 	my $path = '.' . $Sys->Get('INFO') . '/capgroups.cgi';
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -380,7 +380,7 @@ sub Load
 	
 	if (!$sysgroup) {
 		$path = $Sys->Get('BBSPATH') . '/' .  $Sys->Get('BBS') . '/info/capgroups.cgi';
-		if (open(my $fh, '<:encoding(utf8)', $path)) {
+		if (open(my $fh, '<', $path)) {
 			flock($fh, 2);
 			my @lines = <$fh>;
 			close($fh);
@@ -435,7 +435,7 @@ sub Save
 	
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
@@ -637,7 +637,7 @@ package SECURITY;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------

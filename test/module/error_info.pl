@@ -7,7 +7,7 @@ package	ERROR_INFO;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ sub Load
 	
 	my $path = '.' . $Sys->Get('INFO') . '/errmsg.cgi';
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);

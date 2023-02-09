@@ -7,7 +7,7 @@ package	BBS_SERVICE;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
 use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);

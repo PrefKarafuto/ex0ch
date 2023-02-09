@@ -7,7 +7,7 @@ package	SYSTEM;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 no warnings 'redefine';
 
@@ -67,7 +67,7 @@ sub Load
 	my $sysFile = $this->{'SYS'}->{'SYSFILE'};
 	
 	# 設定ファイルから読み込む
-	if (open(my $fh, '<:encoding(utf8)', $sysFile)) {
+	if (open(my $fh, '<', $sysFile)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -114,7 +114,7 @@ sub Save
 	my $path = $this->{'SYS'}->{'SYSFILE'};
 	
 	chmod($this->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
@@ -246,7 +246,7 @@ sub InitSystemValue
 		'DATA'		=> '/datas',								# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS dev-r081 20230208',					# CGIバージョン
+		'VERSION'	=> '0ch+ BBS dev-r082 20230209',					# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション

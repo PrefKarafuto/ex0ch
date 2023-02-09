@@ -10,7 +10,7 @@ package MODULE;
  
 use strict;
 use utf8;
-binmode(STDOUT,":encoding(utf8)");
+use open IO => ':encoding(cp932)';
 #use warnings;
 #------------------------------------------------------------------------------------------------------------
 #
@@ -590,7 +590,7 @@ sub FunctionResLumpDelete
            
             # 削除と同時に削除ログへ削除した内容を保存する
             chmod($Sys->Get('PM-LOG'), $path);
-            if (open(my $f_dellog, '>>:encoding(utf8)', $path)) {
+            if (open(my $f_dellog, '>>', $path)) {
                 flock($f_dellog, 2);
                 binmode($f_dellog);
                 # レス番号が0から始まるようにする

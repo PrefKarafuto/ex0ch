@@ -7,7 +7,7 @@ package	DAT;
 
 use strict;
 use utf8;
-
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -85,16 +85,10 @@ sub Load
 		$this->{'MODE'} = $readOnly;
 		
 		chmod($Sys->Get('PM-DAT'), $szPath);
-		if (open(my $fh, ($readOnly ? '<:encoding(cp932)' : '+<:encoding(cp932)'), $szPath)) {
+		if (open(my $fh, ($readOnly ? '<' : '+<'), $szPath)) {
 			flock($fh, 2);
 			binmode($fh);
 			my @lines = <$fh>;
-            		my $num = 0;
-			foreach my $line(@lines){
-				$lines[$num] = Encode::decode("Shift_JIS",$line);
-				$num++;
-			}
-			
 			push @{$this->{'LINE'}}, @lines;
 			
 			# 書き込みモードの場合
@@ -151,11 +145,7 @@ sub Save
 	if ($this->{'STAT'} && $fh) {
 		if (! $this->{'MODE'}) {
 			seek($fh, 0, 0);
-            		my @getline = @{$this->{'LINE'}};
-            foreach my $line(@getline){
-            	$getline[$num] = Encode::encode("Shift_JIS",$line);
-            	$num++;
-            }
+            my @getline = @{$this->{'LINE'}};
 			print $fh @getline;
 			truncate($fh, tell($fh));
 			close($fh);
@@ -376,10 +366,9 @@ sub DirectAppend
 	my ($Sys, $path, $data) = @_;
 	
 	if (GetPermission($path) != $Sys->Get('PM-STOP')) {
-		if (open(my $fh, '>>:encoding(cp932)', $path)) {
+		if (open(my $fh, '>>', $path)) {
 			flock($fh, 2);
 			binmode($fh);
-            		$data = Encode::encode("Shift_JIS",$data);
 			print $fh "$data";
 			close($fh);
 			chmod($Sys->Get('PM-DAT'), $path);
@@ -406,7 +395,7 @@ sub GetNumFromFile
 	my ($path) = @_;
 	
 	my $cnt = 0;
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		$cnt++ while (<$fh>);
 		close($fh);
@@ -441,7 +430,7 @@ sub IsMoved
 {
 	my ($path) = @_;
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my $line = <$fh>;
 		close($fh);

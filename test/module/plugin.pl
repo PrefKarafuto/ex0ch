@@ -7,7 +7,7 @@ package	PLUGIN;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -66,7 +66,7 @@ sub Load
 	
 	my $path = '.' . $Sys->Get('INFO') . '/plugins.cgi';
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -126,7 +126,7 @@ sub LoadConfig
 		return;
 	}
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -171,7 +171,7 @@ sub SaveConfig
 	
 	if (scalar(keys %$config) > 0) {
 		chmod($this->{'SYS'}->Get('PM-ADM'), $path);
-		if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+		if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 			flock($fh, 2);
 			seek($fh, 0, 0);
 			
@@ -267,7 +267,7 @@ sub Save
 	my $path = '.' . $Sys->Get('INFO') . '/plugins.cgi';
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);

@@ -7,7 +7,7 @@ package	BUFFER_OUTPUT;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 use Encode;
 #use warnings;
 
@@ -43,7 +43,7 @@ sub Print
 {
 	my $this = shift;
 	my ($line) = @_;
-	
+
 	push @{$this->{'BUFF'}}, $line;
 }
 
@@ -85,7 +85,7 @@ sub Flush
 	# ファイルへ出力
 	if ($flag) {
 		chmod($perm, $path);
-		if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+		if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 			flock($fh, 2);
 			seek($fh, 0, 0);
 			print $fh @{$this->{'BUFF'}};

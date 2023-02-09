@@ -20,7 +20,7 @@ package	USER_INFO;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -70,7 +70,7 @@ sub Load
 	
 	my $path = '.' . $Sys->Get('INFO') . '/users.cgi';
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -111,7 +111,7 @@ sub Save
 	my $path = '.' . $Sys->Get('INFO') . '/users.cgi';
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		binmode($fh);
 		seek($fh, 0, 0);
@@ -295,7 +295,7 @@ package	GROUP_INFO;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -343,7 +343,7 @@ sub Load
 	
 	my $path = $Sys->Get('BBSPATH') . '/' .  $Sys->Get('BBS') . '/info/groups.cgi';
 	
-	if (open(my $fh, '<:encoding(utf8)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -384,7 +384,7 @@ sub Save
 	my $path = $Sys->Get('BBSPATH') . '/' .  $Sys->Get('BBS') . '/info/groups.cgi';
 	
 	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(utf8)' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
@@ -568,7 +568,7 @@ package SECURITY;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 #use warnings;
 
 use CGI::Session;

@@ -8,7 +8,7 @@ package ADMIN_SEARCH;
 use strict;
 use Encode;
 use utf8;
-binmode(STDOUT,":encoding(utf8)");
+use open IO => ':encoding(cp932)';
 #use warnings;
  
 #------------------------------------------------------------------------------------------------------------

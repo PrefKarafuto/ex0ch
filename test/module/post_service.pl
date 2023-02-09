@@ -7,7 +7,7 @@ package	POST_SERVICE;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
 use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
@@ -890,7 +890,7 @@ sub Get1001Data
 	my $endPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/1000.txt';
 	
 	# 1000.txtが存在すればその内容、無ければデフォルトの1001を使用する
-	if (open(my $fh, '<:encoding(utf8)', $endPath)) {
+	if (open(my $fh, '<', $endPath)) {
 		flock($fh, 2);
 		$$data = <$fh>;
 		close($fh);

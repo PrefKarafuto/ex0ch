@@ -11,7 +11,7 @@ package ZP_CIDR;
 
 use strict;
 use utf8;
-binmode(STDOUT,":utf8");
+use open IO => ':encoding(cp932)';
 ##use warnings;
 
 our $cidr = ();
