@@ -7,6 +7,8 @@ package	FILE_UTILS;
 
 use strict;
 use utf8;
+binmode(STDIN,':encoding(cp932)');
+binmode(STDOUT,':encoding(cp932)');
 use open IO => ':encoding(cp932)';
 #use warnings;
 
