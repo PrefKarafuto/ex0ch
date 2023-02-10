@@ -157,7 +157,8 @@ sub LoadFrom
 		
 		foreach (@lines) {
 			if ($_ =~ /^(.+?)=(.*)$/) {
-				$set->{$1} = Encode::decode("Shift_JIS",$2);
+				$set->{$1} = $2;
+				#$set->{$1} = Encode::decode("Shift_JIS",$2);
 			}
 		}
 		
@@ -191,7 +192,7 @@ sub SaveAs
 		
 		foreach my $key (keys %{$this->{'SETTING'}}) {
 			my $val = $this->{'SETTING'}->{$key};
-			$val = encode("Shift_JIS",$val);
+			#$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 		}
 		
