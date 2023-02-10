@@ -61,7 +61,7 @@ sub Init
 	$this->{'THREADS'} = THREAD->new;
 	$this->{'CONV'} = DATA_UTILS->new;
 	$this->{'BANNER'} = BANNER->new;
-	$this->{'CODE'} = 'utf8';
+	$this->{'CODE'} = 'sjis';
 	
 	if (!defined $Setting) {
 		require './module/setting.pl';
@@ -214,7 +214,7 @@ sub CreateSubback
 <html lang="ja">
 <head>
 
- <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+ <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 HTML
@@ -317,7 +317,7 @@ sub PrintIndexHead
 <html lang="ja">
 <head>
  
- <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+ <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <link rel="stylesheet" type="text/css" href="../test/design.css">

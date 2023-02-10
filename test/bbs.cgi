@@ -153,7 +153,7 @@ sub Initialize
 	
 	my $client = $Conv->GetClient();
 	
-	$Sys->Set('ENCODE', 'UTF-8');
+	$Sys->Set('ENCODE', 'Shift_JIS');
 	$Sys->Set('BBS', $Form->Get('bbs', ''));
 	$Sys->Set('KEY', $Form->Get('key', ''));
 	$Sys->Set('CLIENT', $client);
@@ -261,7 +261,7 @@ sub PrintBBSThreadCreate
 	$Page->Print("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n");
 	$Page->Print("<html lang=\"ja\">\n");
 	$Page->Print("<head>\n");
-	$Page->Print(' <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">'."\n\n");
+	$Page->Print(' <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">'."\n\n");
 	$Page->Print("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"."\n");
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>'."\n");
 	$Caption->Print($Page, undef);
@@ -483,7 +483,7 @@ sub PrintBBSCookieConfirm
 <!-- 2ch_X:cookie -->
 <head>
 
- <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
  <title>■ 書き込み確認 ■</title>
@@ -601,7 +601,7 @@ sub PrintBBSJump
 <html>
 <head>
 	<title>書きこみました。</title>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
 <meta http-equiv="Refresh" content="5;URL=$bbsPath/">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 </head>

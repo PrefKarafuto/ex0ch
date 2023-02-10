@@ -170,7 +170,7 @@ sub Print
 <html lang="ja">
 <head>
  
- <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+ <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  
  <title>ＥＲＲＯＲ！</title>
@@ -213,7 +213,7 @@ HTML
 <html lang="ja">
 <head>
 
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
 
 	<title>ＥＲＲＯＲ！</title>
 

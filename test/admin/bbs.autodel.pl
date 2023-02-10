@@ -68,7 +68,7 @@ sub PrintResAutoDelete
     <td>検索ワード(正規表\現)</td>
     <td>
 HTML
-    $Page->Print("<input type=text size=60 name=WORD onkeydown=\"go(event.keyCode);\" value=\"$sWORD\" accept-charset=\"UTF-8\">");
+    $Page->Print("<input type=text size=60 name=WORD onkeydown=\"go(event.keyCode);\" value=\"$sWORD\" accept-charset=\"Shift_JIS\">");
    
     $common = "DoSubmit('bbs.thread','DISP','AUTORESDEL')";
    

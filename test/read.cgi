@@ -99,7 +99,7 @@ sub Initialize
 		'CONV'		=> $Conv,
 		'DAT'		=> $Dat,
 		'PAGE'		=> $Page,
-		'CODE'		=> 'UTF-8',
+		'CODE'		=> 'Shift_JIS',
 	);
 	
 	# システム初期化
@@ -194,7 +194,7 @@ sub PrintReadHead
 <html lang="ja">
 <head>
 
- <meta http-equiv=Content-Type content="text/html;charset=UTF-8">
+ <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Style-Type" content="text/css">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->

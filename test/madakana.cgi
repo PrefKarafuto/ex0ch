@@ -85,7 +85,7 @@ sub Initialize
 		'SYS'	=> $oSYS,
 		'CONV'	=> $oCONV,
 		'PAGE'	=> $Page,
-		'CODE'	=> 'UTF-8',
+		'CODE'	=> 'Shift_JIS',
 	);
 	
 	$pSYS->{'FORM'} = FORM->new($oSYS->Get('BBSGET')),
@@ -296,7 +296,7 @@ sub PrintMadaError
 	my ($Sys, $Page, $err) = @_;
 	my ($code);
 	
-	$code = 'UTF-8';
+	$code = 'Shift_JIS';
 	
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
