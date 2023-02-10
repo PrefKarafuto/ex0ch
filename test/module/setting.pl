@@ -7,8 +7,6 @@ package	SETTING;
 
 use strict;
 use utf8;
-binmode(STDIN,':encoding(cp932)');
-binmode(STDOUT,':encoding(cp932)');
 use open IO => ':encoding(cp932)';
 use Encode;
 #use warnings;
@@ -54,7 +52,7 @@ sub Load
 	
 	my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/SETTING.TXT';
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(cp932)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -108,7 +106,7 @@ sub Save
 	my %orz = %{$this->{'SETTING'}};
 	
 	chmod($Sys->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 		flock($fh, 2);
 		binmode($fh);
 		seek($fh, 0, 0);
@@ -116,11 +114,13 @@ sub Save
 		# 順番に出力
 		foreach my $key (@ch2setting) {
 			my $val = $this->Get($key, '');
+			$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 			delete $orz{$key};
 		}
 		foreach my $key (sort keys %orz) {
 			my $val = $this->Get($key, '');
+			$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 			delete $orz{$key};
 		}
@@ -149,7 +149,7 @@ sub LoadFrom
 	
 	my $set = $this->{'SETTING'} = {};
 	
-	if (open(my $fh, '<', $path)) {
+	if (open(my $fh, '<:encoding(cp932)', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -185,7 +185,7 @@ sub SaveAs
 	my ($path) = @_;
 	
 	chmod($this->{'SYS'}->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
+	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		binmode($fh);
