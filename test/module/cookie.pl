@@ -51,7 +51,7 @@ sub Init
 			my ($name, $value) = split(/=/, $_, 2);
 			$value =~ s/^"|"$//g;
 			$value =~ s/%([0-9A-Fa-f][0-9A-Fa-f])/pack('H2', $1)/eg;
-			$val = Encode::decode("Shift_JIS",$val);
+			$value = Encode::decode("Shift_JIS",$value);
 			$this->{'COOKIE'}->{$name} = $value;
 		}
 		return 1;
