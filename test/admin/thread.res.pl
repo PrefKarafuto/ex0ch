@@ -157,7 +157,7 @@ sub DoFunction
 	if ($subMode eq 'EDIT') {													# レス編集
 		$err = FunctionResEdit($Sys, $Form, $DAT, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'ABONE') {												# レスあぼ〜ん
+	elsif ($subMode eq 'ABONE') {												# レスあぼ～ん
 		$err = FunctionResDelete($Sys, $Form, $DAT, $this->{'LOG'}, 1);
 	}
 	elsif ($subMode eq 'DELETE') {												# レス削除
@@ -311,8 +311,8 @@ sub PrintResList
 	if ($isAbone) {
 		$common = "onclick=\"DoSubmit('thread.res','DISP'";
 		$Page->Print("<tr><td colspan=2 align=right>");
-		$Page->Print("<input type=button value=\"あぼ〜ん\" $common,'ABONE')\"> ");
-		$Page->Print("<input type=button value=\"透明あぼ〜ん\" $common,'DELETE')\">");
+		$Page->Print("<input type=button value=\"あぼ～ん\" $common,'ABONE')\"> ");
+		$Page->Print("<input type=button value=\"透明あぼ～ん\" $common,'DELETE')\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
@@ -399,7 +399,7 @@ sub PrintResDelete
 	$isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
 	
 	$Page->Print("<center><dl><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td>以下のレスを" . ($mode ? 'あぼ〜ん' : '削除') . "します。</td></tr>\n");
+	$Page->Print("<tr><td>以下のレスを" . ($mode ? 'あぼ～ん' : '削除') . "します。</td></tr>\n");
 	$Page->Print("<tr><td><hr></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Contents</td></tr>\n");
 	
@@ -482,8 +482,8 @@ sub PrintResLumpDelete
 		$common = "onclick=\"DoSubmit('thread.res'";
 		$Page->Print("<tr><td align=right colspan=2>");
 		$Page->Print("<input type=button value=\"　確認　\" $common,'DISP','DELLUMP')\" style=\"float: left;\"> ");
-		$Page->Print("<input type=button value=\"あぼ〜ん\" $common,'FUNC','ABONE')\"> ");
-		$Page->Print("<input type=button value=\"透明あぼ〜ん\" $common,'FUNC','DELETE')\"> ");
+		$Page->Print("<input type=button value=\"あぼ～ん\" $common,'FUNC','ABONE')\"> ");
+		$Page->Print("<input type=button value=\"透明あぼ～ん\" $common,'FUNC','DELETE')\"> ");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
@@ -572,7 +572,7 @@ sub FunctionResDelete
 		}
 	}
 	
-	# あぼ〜ん時は削除名を取得
+	# あぼ～ん時は削除名を取得
 	if ($mode) {
 		my $Setting;
 		require './module/setting.pl';
@@ -633,7 +633,7 @@ sub FunctionResDelete
 	# ログの設定
 	$delCnt = 0;
 	$abone	= '';
-	push @$pLog, '以下のレスを' . ($mode ? 'あぼ〜ん' : '削除') . 'しました。';
+	push @$pLog, '以下のレスを' . ($mode ? 'あぼ～ん' : '削除') . 'しました。';
 	foreach (@resSet) {
 		next if ($_ == 0);
 		if ($delCnt > 5) {
@@ -710,7 +710,7 @@ sub AnalyzeFormat
 		$end	= $max;
 		$start	= ($max - $1 + 1) > 0 ? ($max - $1 + 1) : 1;
 	}
-	# n〜m
+	# n～m
 	elsif ($format =~ /(\d+)-(\d+)/) {
 		$start	= $1 > $max ? $max : $1;
 		$end	= $2 > $max ? $max : $2;

@@ -513,7 +513,7 @@ sub PrintOtherSetting
 	$Page->Print("本文中URLへの自動リンク</td>");
 	$Page->Print("<tr><td colspan=2><b>以下自動リンクOFF時のみ有効</b></td></tr>\n");
 	$Page->Print("<tr><td>　　リンク禁止時間帯</td>");
-	$Page->Print("<td><input type=text size=2 name=LINKST value=\"$linkSt\" >時 〜 ");
+	$Page->Print("<td><input type=text size=2 name=LINKST value=\"$linkSt\" >時 ～ ");
 	$Page->Print("<input type=text size=2 name=LINKED value=\"$linkEd\" >時</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">動作モード(read.cgi)</td></tr>\n");

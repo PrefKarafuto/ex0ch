@@ -450,7 +450,7 @@ sub AnalyzeFormat
 		$end	= $max;
 		$start	= ($max - $1 + 1) > 0 ? ($max - $1 + 1) : 1;
 	}
-	# n〜m
+	# n～m
 	elsif ($format =~ /(\d+)-(\d+)/) {
 		$start	= $1 > $max ? $max : $1;
 		$end	= $2 > $max ? $max : $2;

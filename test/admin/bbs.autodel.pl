@@ -362,8 +362,8 @@ sub PrintResultFoot
     $Page->Print(<<HTML);
   <tr>
     <td colspan=2 align=right>
-      <input type=button value="　あぼ〜ん　" $common,'ABONELUMPRES')">
-     <input type=button value="　透明あぼ〜ん　" $common,'DELLUMPRES')">
+      <input type=button value="　あぼ～ん　" $common,'ABONELUMPRES')">
+     <input type=button value="　透明あぼ～ん　" $common,'DELLUMPRES')">
     </td>
   </tr>
 HTML
@@ -432,7 +432,7 @@ sub PrintResLumpDelete
     $isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
    
     $Page->Print("<center><dl><table border=0 cellspacing=2 width=100%>");
-    $Page->Print("<tr><td>以下のレスを" . ($mode ? 'あぼ〜ん' : '削除') . "します。</td></tr>\n");
+    $Page->Print("<tr><td>以下のレスを" . ($mode ? 'あぼ～ん' : '削除') . "します。</td></tr>\n");
     $Page->Print("<tr><td><hr></td></tr>\n");
     $Page->Print("<tr><td class=\"DetailTitle\">Contents</td></tr>\n");
    
@@ -506,7 +506,7 @@ sub FunctionResLumpDelete
     my ($Threads, $Dat, $logMessage);
     my ($numResInLine); # ログで1行に表示するレスの数
     $numResInLine = 20;
-    push @$pLog, '以下のレスを' . ($mode ? 'あぼ〜ん' : '削除') . 'しました。';
+    push @$pLog, '以下のレスを' . ($mode ? 'あぼ～ん' : '削除') . 'しました。';
    
     require './module/thread.pl'; # read Threads
    
@@ -537,7 +537,7 @@ sub FunctionResLumpDelete
             }
         }
        
-        # あぼ〜ん時は削除名を取得
+        # あぼ～ん時は削除名を取得
         if ($mode) {
             my $Setting;
             require './module/setting.pl';
