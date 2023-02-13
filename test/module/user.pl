@@ -86,7 +86,7 @@ sub Save
 	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		
 		print $fh "$this->{'TYPE'}<>$this->{'METHOD'}\n";
 		foreach (@{$this->{'USER'}}) {

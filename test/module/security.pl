@@ -113,7 +113,7 @@ sub Save
 	chmod($Sys->Get('PM-ADM'), $path);
 	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
-		binmode($fh);
+		#binmode($fh);
 		seek($fh, 0, 0);
 		
 		foreach (keys %{$this->{'NAME'}}) {
@@ -387,7 +387,7 @@ sub Save
 	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		
 		foreach (keys %{$this->{'NAME'}}) {
 			my $data = join('<>',

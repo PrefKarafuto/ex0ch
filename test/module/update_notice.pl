@@ -118,7 +118,7 @@ sub Check
 			if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 				flock($fh, 2);
 				seek($fh, 0, 0);
-				binmode($fh);
+				#binmode($fh);
 				print $fh $proxy->getContent();
 				truncate($fh, tell($fh));
 				close($fh);

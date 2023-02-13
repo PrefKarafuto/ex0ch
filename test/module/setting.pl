@@ -108,7 +108,7 @@ sub Save
 	chmod($Sys->Get('PM-TXT'), $path);
 	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 		flock($fh, 2);
-		binmode($fh);
+		#binmode($fh);
 		seek($fh, 0, 0);
 		
 		# 順番に出力
@@ -188,7 +188,7 @@ sub SaveAs
 	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		
 		foreach my $key (keys %{$this->{'SETTING'}}) {
 			my $val = $this->{'SETTING'}->{$key};

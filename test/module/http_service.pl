@@ -89,7 +89,7 @@ sub request
 		$| = 1;
 		select(STDOUT);
 		connect(SOCKET, $sockaddr);
-		binmode(SOCKET);
+		#binmode(SOCKET);
 		#autoflush SOCKET (1);
 		
 		# リクエスト送信

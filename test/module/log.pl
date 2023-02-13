@@ -94,7 +94,7 @@ sub Open
 		if (open(my $fh, (-f $file ? '+<' : '>'), $file)) {
 			flock($fh, 2);
 			seek($fh, 0, 2);
-			binmode($fh);
+			#binmode($fh);
 			
 			$this->{'HANDLE'} = $fh;
 			$this->{'STAT'} = 1;
@@ -224,7 +224,7 @@ sub Put
 		my $logName = "$this->{'PATH'}_old.cgi";
 		if (open(my $fh, '>>', $logName)) {
 			flock($fh, 2);
-			binmode($fh);
+			#binmode($fh);
 			while ($this->{'SIZE'} > $this->{'LIMIT'}) {
 				my $old = shift @{$this->{'LOGS'}};
 				$this->{'SIZE'}--;
@@ -266,7 +266,7 @@ sub MoveToOld
 	my $logName = "$this->{'PATH'}_old.cgi";
 	if (open(my $fh, '>>', $logName)) {
 		flock($fh, 2);
-		binmode($fh);
+		#binmode($fh);
 		for(my $i = 0 ; $i < $this->{'SIZE'} ; $i++) {
 			print $fh "$this->{'LOGS'}->[$i]\n";
 		}

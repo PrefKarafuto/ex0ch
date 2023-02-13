@@ -90,7 +90,7 @@ sub Open
 		chmod($Sys->Get('PM-TXT'), $path);
 		if (open($fh, (-f $path ? '+<' : '>'), $path)) {
 			flock($fh, 2);
-			binmode($fh);
+			#binmode($fh);
 			seek($fh, 0, 0);
 			$this->{'HANDLE'} = $fh;
 		}
@@ -458,7 +458,7 @@ sub SaveAttr
 	chmod($Sys->Get('PM-ADM'), $path);
 	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
-		binmode($fh);
+		#binmode($fh);
 		seek($fh, 0, 0);
 		
 		my $Attr = $this->{'ATTR'};
@@ -914,7 +914,7 @@ sub Save
 	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		
 		my $subject = $this->{'SUBJECT'};
 		foreach (@{$this->{'SORT'}}) {

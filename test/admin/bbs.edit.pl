@@ -947,7 +947,7 @@ sub FunctionLastEdit
 		if (open(my $f_last, (-f $lastPath ? '+<' : '>'), $lastPath)) {
 			flock($f_last, 2);
 			seek($f_last, 0, 0);
-			binmode($f_last);
+			#binmode($f_last);
 			print $f_last "$name<>$mail<>$date<> $cont <>\n";
 			truncate($f_last, tell($f_last));
 			close($f_last);

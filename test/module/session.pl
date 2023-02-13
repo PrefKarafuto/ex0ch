@@ -89,7 +89,7 @@ sub setSession
 	if (open(my $fh, '+<', $filePath)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		
 		print $fh $session->getId() . "\n";
 		foreach my $key (keys %{$session->{'ATTRIBUTE'}}) {

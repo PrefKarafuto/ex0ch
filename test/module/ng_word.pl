@@ -93,7 +93,7 @@ sub Save
 	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		
 		print $fh "$this->{'METHOD'}<>$this->{'SUBSTITUTE'}\n";
 		foreach my $i (0 .. $#{$this->{'NGWORD'}}) {

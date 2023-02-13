@@ -87,7 +87,7 @@ sub Load
 		chmod($Sys->Get('PM-DAT'), $szPath);
 		if (open(my $fh, ($readOnly ? '<' : '+<'), $szPath)) {
 			flock($fh, 2);
-			binmode($fh);
+			#binmode($fh);
 			my @lines = <$fh>;
 			push @{$this->{'LINE'}}, @lines;
 			
@@ -368,7 +368,7 @@ sub DirectAppend
 	if (GetPermission($path) != $Sys->Get('PM-STOP')) {
 		if (open(my $fh, '>>', $path)) {
 			flock($fh, 2);
-			binmode($fh);
+			#binmode($fh);
 			print $fh "$data";
 			close($fh);
 			chmod($Sys->Get('PM-DAT'), $path);

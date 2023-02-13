@@ -156,6 +156,7 @@ sub Out
 	# 設定されているcookieを全て出力する
 	foreach my $key (keys %{$this->{'COOKIE'}}) {
 		my $value = $this->{'COOKIE'}->{$key};
+        utf8::encode($value);
 		$value =~ s/([^\w])/'%'.unpack('H2', $1)/eg;
 		$Page->Print("Set-Cookie: $key=\"$value\"; expires=$date; path=$path\n");
 	}

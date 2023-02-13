@@ -109,7 +109,7 @@ sub Save
 	if (open(my $fh, (-f $file[0] ? '+<' : '>'), $file[0])) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		print $fh $this->{'COLPC'} . "\n";
 		print $fh $this->{'TEXTPC'};
 		truncate($fh, tell($fh));
@@ -122,7 +122,7 @@ sub Save
 	if (open(my $fh, (-f $file[2] ? '+<' : '>'), $file[2])) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		print $fh $this->{'TEXTSB'};
 		truncate($fh, tell($fh));
 		close($fh);
@@ -134,7 +134,7 @@ sub Save
 	if (open(my $fh, (-f $file[1] ? '+<' : '>'), $file[1])) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		print $fh $this->{'COLMB'} . "\n";
 		print $fh $this->{'TEXTMB'};
 		truncate($fh, tell($fh));

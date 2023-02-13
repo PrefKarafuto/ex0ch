@@ -112,7 +112,7 @@ sub Save
 	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		
 		foreach (keys %{$this->{'NAME'}}) {
 			my $data = join('<>',
@@ -466,7 +466,7 @@ sub Save
 	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
-		binmode($fh);
+		#binmode($fh);
 		
 		foreach (keys %{$this->{'NAME'}}) {
 			my $data = join('<>',

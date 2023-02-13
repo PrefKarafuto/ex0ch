@@ -27,8 +27,8 @@ sub Copy
 		flock($fh_s, 2);
 		flock($fh_d, 2);
 		seek($fh_d, 0, 0);
-		binmode($fh_s);
-		binmode($fh_d);
+		#binmode($fh_s);
+		#binmode($fh_d);
 		print $fh_d (<$fh_s>);
 		truncate($fh_d, tell($fh_d));
 		close($fh_s);

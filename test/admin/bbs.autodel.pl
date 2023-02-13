@@ -592,7 +592,7 @@ sub FunctionResLumpDelete
             chmod($Sys->Get('PM-LOG'), $path);
             if (open(my $f_dellog, '>>', $path)) {
                 flock($f_dellog, 2);
-                binmode($f_dellog);
+                #binmode($f_dellog);
                 # レス番号が0から始まるようにする
                 @resSet = map {$_ - 1} @resSet;
                 foreach $num (sort {$b <=> $a} @resSet) {

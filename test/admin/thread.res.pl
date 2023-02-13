@@ -604,7 +604,7 @@ sub FunctionResDelete
 	chmod($Sys->Get('PM-LOG'), $path);
 	if (open(my $f_dellog, '>>', $path)) {
 		flock($f_dellog, 2);
-		binmode($f_dellog);
+		#binmode($f_dellog);
 		foreach $num (sort {$b <=> $a} @resSet) {
 			next if ($num == 0);
 			$pRes = $Dat->Get($num);
