@@ -61,7 +61,6 @@ sub Load
 		foreach (@lines) {
 			if ($_ =~ /^(.+?)=(.*)$/) {
 				$set->{$1} = $2;
-				#$set->{$1} = Encode::decode("Shift_JIS",$2);
 			}
 		}
 		
@@ -114,13 +113,11 @@ sub Save
 		# 順番に出力
 		foreach my $key (@ch2setting) {
 			my $val = $this->Get($key, '');
-			$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 			delete $orz{$key};
 		}
 		foreach my $key (sort keys %orz) {
 			my $val = $this->Get($key, '');
-			$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 			delete $orz{$key};
 		}
@@ -158,7 +155,6 @@ sub LoadFrom
 		foreach (@lines) {
 			if ($_ =~ /^(.+?)=(.*)$/) {
 				$set->{$1} = $2;
-				#$set->{$1} = Encode::decode("Shift_JIS",$2);
 			}
 		}
 		
@@ -192,7 +188,6 @@ sub SaveAs
 		
 		foreach my $key (keys %{$this->{'SETTING'}}) {
 			my $val = $this->{'SETTING'}->{$key};
-			#$val = encode("Shift_JIS",$val);
 			print $fh "$key=$val\n";
 		}
 		
