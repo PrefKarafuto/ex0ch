@@ -308,6 +308,7 @@ sub PrintResult
     my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
     my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
     $isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
+    $bbsID = $$pResult[0];
     $bbsDir = $BBS->Get('DIR', $bbsID);
     $bbsName = $BBS->Get('NAME', $bbsID);
     
