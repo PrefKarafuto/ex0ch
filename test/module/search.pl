@@ -180,8 +180,6 @@ sub Search
 	my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
 	my $DAT = $this->{'DAT'};
 	
-	my $word = decode('cp932', $word);
-	
 	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
 		my $pResultSet = $this->{'RESULTSET'};
 		my $type = $this->{'TYPE'} || 0x7;
@@ -190,7 +188,7 @@ sub Search
 		for (my $i = 0 ; $i < $DAT->Size() ; $i++) {
 			my $bFind = 0;
 			my $pDat = $DAT->Get($i);
-			my $data = decode('cp932', $$pDat);
+			my $data = $$pDat;
 			my @elem = split(/<>/, $data, -1);
 			
 			# 名前検索
@@ -214,7 +212,6 @@ sub Search
 			if ($bFind) {
 				my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
 				$SetStr .= join('<>', @elem);
-				$SetStr = encode('cp932', $SetStr);
 				push @$pResultSet, $SetStr;
 			}
 		}
