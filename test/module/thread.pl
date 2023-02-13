@@ -182,7 +182,7 @@ sub Save
 	
 	foreach (@{$this->{'SORT'}}) {
 		next if (!defined $subject->{$_});
-		print $fh "Shift_JIS","$_.dat<>$subject->{$_} ($this->{'RES'}->{$_})\n";
+		print $fh "$_.dat<>$subject->{$_} ($this->{'RES'}->{$_})\n";
 	}
 	
 	truncate($fh, tell($fh));
