@@ -630,13 +630,13 @@ sub PrintPlusSecSetting
 	$Trip12		= $SYS->Get('TRIP12');
 	$SPAMHAUS	= $SYS->Get('SPAMHAUS');
 	$SPAMCOP	= $SYS->Get('SPAMCOP');
-    $SPAMLOOKUP	= $SYS->Get('SPAMLOOKUP');
+    	$BARRACUDA	= $SYS->Get('BARRACUDA');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
 	$shaus		= ($SPAMHAUS == 1 ? 'checked' : '');
 	$scop		= ($SPAMCOP == 1 ? 'checked' : '');
-    $bc	        = ($BARRACUDA == 1 ? 'checked' : '');
+    	$bc	        = ($BARRACUDA == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -668,9 +668,9 @@ sub PrintPlusSecSetting
 	$Page->Print("<input type=checkbox name=SPAMHAUS $shaus value=on>");
 	$Page->Print("<a href=\"https://www.spamhaus.org/organization/dnsblusage/\" target=\"_blank\">Spamhaus</a>\n");
 	$Page->Print("<input type=checkbox name=SPAMCOP $scop value=on>\n");
-    $Page->Print("<a href=\"https://www.spamcop.net/fom-serve/cache/291.html\" target=\"_blank\">SpamCop</a>\n");
-    $Page->Print("<input type=checkbox name=BarracudaCentral $bc value=on>\n");
-    $Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">SpamLookup</a>\n");
+    	$Page->Print("<a href=\"https://www.spamcop.net/fom-serve/cache/291.html\" target=\"_blank\">SpamCop</a>\n");
+    	$Page->Print("<input type=checkbox name=BarracudaCentral $bc value=on>\n");
+    	$Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">BarracudaCentral</a>\n");
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
