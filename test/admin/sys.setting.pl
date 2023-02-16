@@ -617,8 +617,8 @@ sub PrintPlusSecSetting
 {
 	
 	my ($Page, $SYS, $Form) = @_;
-	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $BBQ, $BBX);
-	my ($kakiko, $trip12, $bbq, $bbx);
+	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $SPAMHAUS, $SPAMCOP, $BARRACUDA);
+	my ($kakiko, $trip12, $shaus, $scop ,$bc);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Regulation Setting');
@@ -628,13 +628,15 @@ sub PrintPlusSecSetting
 	$DefSamba	= $SYS->Get('DEFSAMBA');
 	$DefHoushi	= $SYS->Get('DEFHOUSHI');
 	$Trip12		= $SYS->Get('TRIP12');
-	$BBQ		= $SYS->Get('BBQ');
-	$BBX		= $SYS->Get('BBX');
+	$SPAMHAUS	= $SYS->Get('SPAMHAUS');
+	$SPAMCOP	= $SYS->Get('SPAMCOP');
+    $SPAMLOOKUP	= $SYS->Get('SPAMLOOKUP');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
-	$bbq		= ($BBQ == 1 ? 'checked' : '');
-	$bbx		= ($BBX == 1 ? 'checked' : '');
+	$shaus		= ($SPAMHAUS == 1 ? 'checked' : '');
+	$scop		= ($SPAMCOP == 1 ? 'checked' : '');
+    $bc	        = ($BARRACUDA == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -663,9 +665,12 @@ sub PrintPlusSecSetting
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">DNSBL設定</td></tr>\n");
 	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください<br>\n");
-	$Page->Print("<input type=checkbox name=BBQ $bbq value=on>");
-	$Page->Print("<a href=\"http://bbq.uso800.net/\" target=\"_blank\">BBQ</a>\n");
-	$Page->Print("<input type=checkbox name=BBX $bbx value=on>BBX\n");
+	$Page->Print("<input type=checkbox name=SPAMHAUS $shaus value=on>");
+	$Page->Print("<a href=\"https://www.spamhaus.org/organization/dnsblusage/\" target=\"_blank\">Spamhaus</a>\n");
+	$Page->Print("<input type=checkbox name=SPAMCOP $scop value=on>\n");
+    $Page->Print("<a href=\"https://www.spamcop.net/fom-serve/cache/291.html\" target=\"_blank\">SpamCop</a>\n");
+    $Page->Print("<input type=checkbox name=BarracudaCentral $bc value=on>\n");
+    $Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">SpamLookup</a>\n");
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
@@ -1197,8 +1202,9 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 Samba待機秒数：' . $SYSTEM->Get('DEFSAMBA');
 		push @$pLog, '　　　 Samba奉仕時間：' . $SYSTEM->Get('DEFHOUSHI');
 		push @$pLog, '　　　 12桁トリップ：' . $SYSTEM->Get('TRIP12');
-		push @$pLog, '　　　 BBQ：' . $SYSTEM->Get('BBQ');
-		push @$pLog, '　　　 BBX：' . $SYSTEM->Get('BBX');
+		push @$pLog, '　　　 Spamhaus：' . $SYSTEM->Get('SPAMHAUS');
+		push @$pLog, '　　　 Spamcop：' . $SYSTEM->Get('SPAMCOP');
+        push @$pLog, '　　　 Spamlookup：' . $SYSTEM->Get('SPAMLOOKUP');
 	}
 	return 0;
 }

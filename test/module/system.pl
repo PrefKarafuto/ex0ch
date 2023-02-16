@@ -286,8 +286,9 @@ sub InitSystemValue
 		'UPCHECK'	=> 1,										# 更新チェック間隔(日)
 		
 		# DNSBL設定
-		'BBQ'		=> 1,										# BBQ(niku.2ch.net)
-		'BBX'		=> 0,										# BBX(bbx.2ch.net)
+		'SPAMHAUS'		=> 0,										# zen.spamhaus.org
+		'SPAMCOP'		=> 0,										# bl.spamcop.net
+        'BARRACUDA'	    => 0,										# b.barracudacentral.org
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,

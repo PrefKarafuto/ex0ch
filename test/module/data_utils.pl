@@ -1215,8 +1215,9 @@ sub IsProxy
 	return 0 if ($mode eq 'O' || $mode eq 'i');
 	
 	my @dnsbls = ();
-	push(@dnsbls, 'niku.2ch.net') if($Sys->Get('BBQ'));
-	push(@dnsbls, 'bbx.2ch.net') if($Sys->Get('BBX'));
+	push(@dnsbls, 'zen.spamhaus.org') if($Sys->Get('SPAMHAUS'));
+	push(@dnsbls, 'bl.spamcop.net') if($Sys->Get('SPAMCOP'));
+    push(@dnsbls, 'b.barracudacentral.org') if($Sys->Get('BARRACUDA'));
 	
 	# DNSBL問い合わせ
 	my $addr = join('.', reverse( split(/\./, (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}))));

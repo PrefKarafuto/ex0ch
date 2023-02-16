@@ -157,7 +157,9 @@ sub Write
 	my $name = $Form->Get('FROM', '');
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
-	
+
+	#STRESS($text);
+
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
 	$bepart = $Form->Get('BEID', '');
@@ -944,7 +946,28 @@ sub SaveHost
 		$Logger->Write();
 	}
 }
-
+sub STRESS
+{
+	my	($text) = @_;
+	
+	$$text = '<br>' . $$text . '<br>';
+	
+	# ＞引用変換
+	while($$text =~ /<br>＞(.*?)<br>/){
+		$$text =~ s/<br>＞(.*?)<br>/<br><font color=gray>＞$1<\/font><br>/;
+	}
+	# ＃引用変換
+	while($$text =~ /<br>＃(.*?)<br>/){
+		$$text =~ s/<br>＃(.*?)<br>/<br><font color=green>＃$1<\/font><br>/;
+	}
+	# #引用変換
+	while($$text =~ /<br>#(.*?)<br>/){
+		$$text =~ s/<br>#(.*?)<br>/<br><font color=green>#$1<\/font><br>/;
+	}
+	
+	# 最初につけた<br>を取り外す
+	$$text = substr($$text,4,length($$text) - 8);
+}
 #============================================================================================================
 #	Module END
 #============================================================================================================
