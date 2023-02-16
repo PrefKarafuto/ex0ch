@@ -12,7 +12,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
-##use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
 
 BEGIN { use lib './perllib'; }
