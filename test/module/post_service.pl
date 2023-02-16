@@ -11,7 +11,7 @@ use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
 use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #

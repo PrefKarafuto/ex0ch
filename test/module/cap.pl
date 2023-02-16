@@ -21,7 +21,7 @@ package	CAP;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -301,7 +301,7 @@ package	CAP_GROUP;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -638,7 +638,7 @@ package SECURITY;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #

@@ -12,7 +12,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #

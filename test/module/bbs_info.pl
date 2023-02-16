@@ -20,7 +20,7 @@ package	BBS_INFO;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -383,7 +383,7 @@ package	CATEGORY_INFO;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #

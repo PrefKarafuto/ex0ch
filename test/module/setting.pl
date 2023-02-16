@@ -9,7 +9,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use Encode;
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #

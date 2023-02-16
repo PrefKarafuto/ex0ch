@@ -14,7 +14,7 @@ package SessionManager;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -148,7 +148,7 @@ package Session;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #

@@ -11,7 +11,7 @@ package	ADMIN_CGI_BASE;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 require './module/buffer_output.pl';
 

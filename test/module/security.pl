@@ -21,7 +21,7 @@ package	USER_INFO;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -296,7 +296,7 @@ package	GROUP_INFO;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -569,7 +569,7 @@ package SECURITY;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
-#use warnings;
+use warnings;
 
 use CGI::Session;
 
