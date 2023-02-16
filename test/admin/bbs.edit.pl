@@ -578,8 +578,8 @@ sub PrintLastEdit
 	$resmax1	= $resmax + 1;
 	$resmaxz	= $resmax;
 	$resmaxz1	= $resmax1;
-	$resmaxz	=~ s/([0-9])/"\xef\xbc".chr(0x90+$1)/eg; # 全角数字
-	$resmaxz1	=~ s/([0-9])/"\xef\xbc".chr(0x90+$1)/eg; # 全角数字
+	$resmaxz	=~ tr/([0-9])/([０-９])/; # 全角数字
+	$resmaxz1	=~ tr/([0-9])/([０-９])/; # 全角数字
 	
 	$data = "$resmaxz1\<><>Over $resmax Thread<>このスレッドは$resmaxz\を超えました。<br>";
 	$data .= 'もう書けないので、新しいスレッドを立ててくださいです。。。<>';
