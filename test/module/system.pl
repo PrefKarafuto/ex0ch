@@ -277,7 +277,7 @@ sub InitSystemValue
 		'BANNER'	=> 1,										# read.cgi他の告知欄の表示
 		'KAKIKO'	=> 1,										# 2重かきこですか？？
 		'COUNTER'	=> '',										# ofuda.cc アカウント
-		'PRTEXT'	=> 'ぜろちゃんねるプラス',					# PR欄の表示文字列
+		'PRTEXT'	=> 'ぜろちゃんねるプラス再開発プロジェクト',					# PR欄の表示文字列
 		'PRLINK'	=> 'https://github.com/PrefKarafuto/New_0ch_Plus',		# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
