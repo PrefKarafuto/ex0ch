@@ -624,12 +624,13 @@ FORM
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
-<a href="http://zerochplus.sourceforge.jp/">ぜろちゃんねるプラス</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
 BBS.CGI - $ver (Perl)
-@{[ $Sys->Get('BBQ') ? '+<a href="http://bbq.uso800.net/" target="_blank">BBQ</a>' : '' ]}
-@{[ $Sys->Get('BBX') ? '+BBX' : '' ]}
+@{[ $Sys->Get('SPAMHAUS') ? '+Spamhaus' : '' ]}
+@{[ $Sys->Get('SPAMCOP') ? '+SpamCop' : '' ]}
+@{[ $Sys->Get('BARRACUDA') ? '+BarracudaCentral' : '' ]}
 +Samba24=$samba<br>
-ページのおしまいだよ。。と</div>
+</div>
 
 <style>
 /* スマホ用レイアウト */
