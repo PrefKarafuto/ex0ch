@@ -307,7 +307,7 @@ sub PrintColorSetting
 	my ($Page, $SYS, $Form, $flg) = @_;
 	my ($Setting);
 	my ($setIndexTitle, $setThreadTitle, $setIndexBG, $setThreadBG, $setCreateBG);
-	my ($setMenuBG, $setText, $setLink, $setLinkA, $setLinkV, $setName, $setCap, $setPost, $setType, $selectType);
+	my ($setMenuBG, $setText, $setLink, $setLinkA, $setLinkV, $setName, $setCap, $setPost, $setType, $selectType;
 	my ($selOri,$sel5ch);
 	$SYS->Set('_TITLE', 'BBS Color Setting');
 	
@@ -340,7 +340,7 @@ sub PrintColorSetting
 	
 	$selOri			= ($setType eq 'original' ? 'selected' : '');
 	$sel5ch			= ($setType eq '5ch' ? 'selected' : '');
-	$selectType     ="color";	#"text"でRGB値入力式に
+	$selectType     ="text";	#"color"でカラーピッカに
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=6>各設定色を入力して[設定]ボタンを押してください。</td></tr>");
