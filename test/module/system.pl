@@ -283,7 +283,7 @@ sub InitSystemValue
 		'MSEC'		=> 0,										# msecまで表示するか
 		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
 		'CONFVER'	=> '',										# システム設定ファイルのバージョン
-		'UPCHECK'	=> ,										# 更新チェック間隔(日)
+		'UPCHECK'	=> 0,										# 更新チェック間隔(日)
 		
 		# DNSBL設定
 		'SPAMHAUS'		=> 0,									# zen.spamhaus.org
