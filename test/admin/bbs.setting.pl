@@ -561,14 +561,6 @@ sub PrintLimitSetting
 	$Page->Print("<input type=text size=5 name=BBS_TATESUGI_HOUR value=\"$setTateHour\" style=\"text-align: right\">時間(0で無効)に");
 	$Page->Print("全体で<input type=text size=5 name=BBS_TATESUGI_COUNT value=\"$setTateCount\" style=\"text-align: right\">スレッドまで立てられる");
 	$Page->Print("</td></tr>");
-	
-	# Captcha認証、改造版で追加
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>hCaptcha設定</td></tr>");
-	$Page->Print("<tr><td colspan=4>");
-	$Page->Print("hCaptchaそのものを<input type=checkbox name=BBS_HCAPTCHA_ONOFF $hCaptcha_onoff value=on>有効にする<br>");
-	$Page->Print("サイトキー<input type=text size=36 name=BBS_HCAPTCHA_SITEKEY value=\"$hCaptcha_sitekey\" style=\"text-align: left\"><br>");
-	$Page->Print("シークレットキー<input type=text size=45 name=BBS_HCAPTCHA_SECRETKEY value=\"$hCaptcha_secretkey\" style=\"text-align: left\">");
-	$Page->Print("</td></tr>");
 
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
