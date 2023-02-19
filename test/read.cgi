@@ -568,7 +568,18 @@ sub PrintResponse
 	foreach my $command (@$commands) {
 		$command->execute($Sys, undef, 4);
 	}
-	
+	if($Sys->Get('IMGTAG')){
+		if($Sys->Get('LIMTIME')){
+			$elem[3] =~ s/(http:\/\/.*?\.jpg)/<img src="$1" width=100 height=100\/>/g;
+			$elem[3] =~ s/(http:\/\/.*?\.gif)/<img src="$1" width=100 height=100\/>/g;
+			$elem[3] =~ s/(http:\/\/.*?\.bmp)/<img src="$1" width=100 height=100\/>/g;
+		}
+		else{
+			$elem[3] =~ s/<a.*?>(.*?\.jpg)<\/a>/<img src="$1" width=100 height=100\/>/g;
+			$elem[3] =~ s/<a.*?>(.*?\.gif)<\/a>/<img src="$1" width=100 height=100\/>/g;
+			$elem[3] =~ s/<a.*?>(.*?\.bmp)<\/a>/<img src="$1" width=100 height=100\/>/g;
+		}
+	}
 	if($type eq "5ch"){
 	$Page->Print(<<HTML);
 <div id="$n" class="post" data-id="$n" style="background-color:$color">
