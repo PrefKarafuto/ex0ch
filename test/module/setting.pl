@@ -355,7 +355,7 @@ sub InitSettingData
 		# 改造版で追加部分
 		'BBS_HCAPTCHA'			=> '',
 		'BBS_READTYPE'			=> '5ch',
-		'BBS_POSTCOLOR'			=> '#EFEFEF'
+		'BBS_POSTCOLOR'			=> '#FFFFFF'
 	);
 	
 	while (my ($key, $val) = each(%set)) {
