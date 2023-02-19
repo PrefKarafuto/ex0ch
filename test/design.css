@@ -55,3 +55,9 @@
  padding:10px 0;
  overflow-wrap:break-word
 }
+.backmascot {
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position-x: calc(100% - 250px);
+    background-position-y: bottom;
+}
