@@ -487,8 +487,8 @@ sub PrintLimitSetting
 	my $setTateCount	= $Setting->Get('BBS_TATESUGI_COUNT');
 
 	# 改造版で追加
-	my $hCaptcha		= $Setting->Get('BBS_HCAPTCHA');
-	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY')==0||$Sys->Get('HCAPTCHA_SECRETKEY')==0) ? 'hCaptchaが設定されていません' : '有効');
+	my $hCaptcha		= ($Setting->Get('BBS_HCAPTCHA') eq 'on'?'checked':'');
+	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY') eq undef || $Sys->Get('HCAPTCHA_SECRETKEY') eq undef) ? 'hCaptchaが設定されていません':'有効');
 	my $setCap		= ($setCapInfo eq '有効' ? '' : 'disabled');
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
@@ -904,7 +904,7 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_TATESUGI_COUNT2', $Form->Get('BBS_TATESUGI_COUNT2'));
 
 	# 改造版で追加
-	if(($Sys->Get('HCAPTCHA_SITEKEY')!=0 && $Sys->Get('HCAPTCHA_SECRETKEY')!=0)){
+	if($Sys->Get('HCAPTCHA_SITEKEY') ne undef && $Sys->Get('HCAPTCHA_SECRETKEY') ne undef){
 	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
 	}
 	$Setting->Save($Sys);
