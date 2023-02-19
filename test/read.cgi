@@ -13,7 +13,6 @@ use open IO => ':encoding(cp932)';
 use warnings;
 no warnings 'once';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
-use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
 # CGIの実行結果を終了コードとする
@@ -546,30 +545,37 @@ sub PrintResponse
 	my $pDat = $Dat->Get($n - 1);
 	my @elem = split(/<>/, $$pDat);
 	my $nameCol	= $Set->Get('BBS_NAME_COLOR');
-	
+	my $Mail;
 	# URLと引用個所の適応
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3]);
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
-	
+	# メール欄有り
+	if ($elem[1] eq '') {
+		$Mail = "<font color=\"$nameCol\"><b>$elem[0]</b></font>";
+	}
+	# メール欄無し
+	else {
+		$Mail = "<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>";
+	}
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
 	$Sys->Set('_NUM_', $n);
 	foreach my $command (@$commands) {
 		$command->execute($Sys, undef, 4);
 	}
-	
-	$Page->Print(" <dt>$n ：");
-	
-	# メール欄有り
-	if ($elem[1] eq '') {
-		$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
-	}
-	# メール欄無し
-	else {
-		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
-	}
-	$Page->Print("：$elem[2]</dt>\n");
-	$Page->Print("  <dd>$elem[3]<br><br></dd>\n");
+	$Page->Print(<<HTML);
+<div id="$n" class="post" data-id="$n">
+	<div class="meta">
+		<span class="number">$n</span>
+		<span class="name">$Mail</span>
+		<span class="dateid">$elem[2]</span>
+	</div>
+	<div class="message">
+		$elem[3]
+	</div>
+</div>
+<br>
+HTML
 }
 
 #------------------------------------------------------------------------------------------------------------
