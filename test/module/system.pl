@@ -276,14 +276,14 @@ sub InitSystemValue
 		'DEFHOUSHI'	=> 60,										# Samba奉仕時間(分)デフォルト値
 		'BANNER'	=> 1,										# read.cgi他の告知欄の表示
 		'KAKIKO'	=> 1,										# 2重かきこですか？？
-		'COUNTER'	=> '',										# ofuda.cc アカウント
+		'COUNTER'	=> '',										# 機能削除済につき未使用
 		'PRTEXT'	=> 'ぜろちゃんねるプラス再開発プロジェクト',					# PR欄の表示文字列
 		'PRLINK'	=> 'https://github.com/PrefKarafuto/New_0ch_Plus',		# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
 		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
 		'CONFVER'	=> '',										# システム設定ファイルのバージョン
-		'UPCHECK'	=> 1,										# 更新チェック間隔(日)
+		'UPCHECK'	=> ,										# 更新チェック間隔(日)
 		
 		# DNSBL設定
 		'SPAMHAUS'		=> 0,										# zen.spamhaus.org
