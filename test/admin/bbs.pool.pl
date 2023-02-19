@@ -747,7 +747,6 @@ HTML
 	
 	$Page->Print(<<HTML);
 <div style="margin:0px;">
- <a href="http://ofuda.cc/"><img width="400" height="15" border="0" src="http://e.ofuda.cc/disp/$account/00813400.gif" alt="無料アクセスカウンターofuda.cc「全世界カウント計画」"></a>
  <div style="margin-top:1em;">
   <a href="$board/">■掲示板に戻る■</a>
   <a href="$board/kako/">■過去ログ倉庫へ戻る■</a>
