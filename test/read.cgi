@@ -749,7 +749,7 @@ sub PrintDiscovery
 
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="http://zerochplus.sourceforge.jp/">ぜろちゃんねるプラス</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
 </div>
 
 </body>
