@@ -203,7 +203,7 @@ sub SetMenuList
 		$Base->SetMenu('表示設定', "'sys.setting','DISP','VIEW'");
 		$Base->SetMenu('規制設定', "'sys.setting','DISP','SEC'");
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('拡張機能\設定', "'sys.setting','DISP','PLUGIN'");
+		$Base->SetMenu('拡張機能設定', "'sys.setting','DISP','PLUGIN'");
 	}
 }
 
