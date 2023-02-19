@@ -755,6 +755,7 @@ sub FunctionTextEdit
 	$Texts->Load($Sys, $readKey);
 	
 	$value = $Form->Get($formKey);
+	$value = Encode::encode("Shift_JIS",$value);
 	$Texts->Set(\$value);
 	
 	# 設定の保存
