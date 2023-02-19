@@ -118,7 +118,7 @@ sub LoadConfig
 	my $file = $this->{'FILE'}->{$id};
 	my $path = undef;
 	
-	if ($file =~ /^(0ch_.*)\.pl$/) {
+	if ($file =~ /^(0ch_.*)_utf8\.pl$/) {
 		$path = "./plugin_conf/$1.cgi";
 	}
 	else {
@@ -161,7 +161,7 @@ sub SaveConfig
 	my $file = $this->{'FILE'}->{$id};
 	my $path = undef;
 	
-	if ($file =~ /^(0ch_.*)\.pl$/) {
+	if ($file =~ /^(0ch_.*)_utf8\.pl$/) {
 		$path = "./plugin_conf/$1.cgi";
 	}
 	else {
@@ -232,7 +232,7 @@ sub SetDefaultConfig
 	my $file = $this->{'FILE'}->{$id};
 	my $className = undef;
 	
-	if ($file =~ /^0ch_(.*)\.pl$/) {
+	if ($file =~ /^0ch_(.*)_utf8\.pl$/) {
 		$className = "ZPL_$1";
 	}
 	else {
@@ -386,7 +386,7 @@ sub Add
 	}
 	
 	my $className = undef;
-	if ($file =~ /0ch_(.*)\.pl/) {
+	if ($file =~ /0ch_(.*)_utf8\.pl/) {
 		$className = "ZPL_$1";
 	}
 	else {
@@ -480,7 +480,7 @@ sub Update
 	
 	# プラグイン追加・更新フェイズ
 	foreach my $file (@files) {
-		if ($file =~ /^0ch_(.*)\.pl/) {
+		if ($file =~ /^0ch_(.*)_utf8\.pl/) {
 			my $className = "ZPL_$1";
 			my @keySet = ();
 			if (scalar $this->GetKeySet('FILE', $file, \@keySet) > 0) {
