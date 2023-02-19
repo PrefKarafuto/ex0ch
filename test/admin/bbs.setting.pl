@@ -454,7 +454,11 @@ sub PrintLimitSetting
 	require './module/setting.pl';
 	my $Setting = SETTING->new;
 	$Setting->Load($Sys);
-	
+	my $DNSBL = $Sys->Get('SPAMHAUS');
+	$DNSBL += $Sys->Get('SPAMCOP');
+	$DNSBL += $Sys->Get('BARRACUDA');
+	my $setDNSBL = ($DNSBL?'':'disabled');
+	my $setInfo = ($DNSBL == 0 ? 'システム設定でDNSBLが選択されていません' : '有効');
 	# 設定値を取得
 	my $setResMax		= $Setting->Get('BBS_RES_MAX');
 	my $setSubMax		= $Setting->Get('BBS_SUBJECT_MAX');		# 最大スレッド数
@@ -512,7 +516,7 @@ sub PrintLimitSetting
 	$Page->Print("<td class=\"DetailTitle\">最大スレッド数(無記入=".$Sys->Get('SUBMAX').")</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_SUBJECT_MAX value=\"$setSubMax\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名無しチェック</td><td>");
-	$Page->Print("<input type=checkbox name=NANASHI_CHECK $setNoName value=on>有効</td>");
+	$Page->Print("<input type=checkbox name=NANASHI_CHECK $setNoName value=on　$setDNSBL>$setInfo</td>");
 	$Page->Print("<td class=\"DetailTitle\">最大レス数(無記入=".$Sys->Get('RESMAX').")</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_RES_MAX value=\"$setResMax\"></td></tr>");
 	
@@ -835,7 +839,9 @@ sub FunctionLimitSetting
 {
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting);
-	
+	my $DNSBL = $Sys->Get('SPAMHAUS');
+	$DNSBL += $Sys->Get('SPAMCOP');
+	$DNSBL += $Sys->Get('BARRACUDA');
 	# 権限チェック
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
@@ -887,7 +893,9 @@ sub FunctionLimitSetting
 	$Setting->Set('timecount', $Form->Get('timecount'));
 	$Setting->Set('timeclose', $Form->Get('timeclose'));
 	$Setting->Set('NANASHI_CHECK', ($Form->Equal('NANASHI_CHECK', 'on') ? 'checked' : ''));
+	if($DNSBL != 0){
 	$Setting->Set('BBS_PROXY_CHECK', ($Form->Equal('BBS_PROXY_CHECK', 'on') ? 'checked' : ''));
+	}
 	$Setting->Set('BBS_JP_CHECK', ($Form->Equal('BBS_JP_CHECK', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_RAWIP_CHECK', ($Form->Equal('BBS_RAWIP_CHECK', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_DATMAX', $Form->Get('BBS_DATMAX'));
