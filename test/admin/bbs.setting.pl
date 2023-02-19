@@ -489,7 +489,7 @@ sub PrintLimitSetting
 	# 改造版で追加
 	my $hCaptcha		= $Setting->Get('BBS_HCAPTCHA');
 	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY')==0||$Sys->Get('HCAPTCHA_SECRETKEY')==0) ? 'hCaptchaが設定されていません' : '有効');
-	my $setCap		= ($setCapInfo eq '有効' ? '' : '');
+	my $setCap		= ($setCapInfo eq '有効' ? '' : 'disabled');
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
