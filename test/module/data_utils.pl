@@ -230,7 +230,7 @@ sub ConvertQuotation
 	
 	if ($Sys->Get('PATHKIND')) {
 		# URLベースを生成
-		my $buf = '<a href="';
+		my $buf = '<a class=reply_link href="';
 		$buf .= $pathCGI . ($mode ? '/r.cgi' : '/read.cgi');
 		$buf .= '?bbs=' . $Sys->Get('BBS') . '&key=' . $Sys->Get('KEY');
 		$buf .= '&nofirst=true';
@@ -246,7 +246,7 @@ sub ConvertQuotation
 	}
 	else{
 		# URLベースを生成
-		my $buf = '<a href="';
+		my $buf = "<a class=reply_link href=\"";
 		$buf .= $pathCGI . ($mode eq 'O' ? '/r.cgi/' : '/read.cgi/');
 		$buf .= $Sys->Get('BBS') . '/' . $Sys->Get('KEY');
 		

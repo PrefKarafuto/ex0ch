@@ -534,7 +534,7 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResponse
 {
-	my ($CGI, $Page, $commands, $n) = @_;
+    my ($CGI, $Page, $commands, $n) = @_;
 	
 	# 前準備
 	my $Sys = $CGI->{'SYS'};
@@ -542,10 +542,14 @@ sub PrintResponse
 	my $Conv = $CGI->{'CONV'};
 	my $Dat = $CGI->{'DAT'};
 	
+	my $Mail;
+	my $type =1;
 	my $pDat = $Dat->Get($n - 1);
 	my @elem = split(/<>/, $$pDat);
 	my $nameCol	= $Set->Get('BBS_NAME_COLOR');
-	my $Mail;
+	my $type = $Set->Get('BBS_READTYPE');
+	my $color = $Set->Get('BBS_POSTCOLOR');
+	
 	# URLと引用個所の適応
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3]);
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
@@ -563,8 +567,10 @@ sub PrintResponse
 	foreach my $command (@$commands) {
 		$command->execute($Sys, undef, 4);
 	}
+	
+	if($type eq "5ch"){
 	$Page->Print(<<HTML);
-<div id="$n" class="post" data-id="$n">
+<div id="$n" class="post" data-id="$n" style="background-color:$color">
 	<div class="meta">
 		<span class="number">$n</span>
 		<span class="name">$Mail</span>
@@ -576,6 +582,95 @@ sub PrintResponse
 </div>
 <br>
 HTML
+}
+	else{
+	$Page->Print(" <dt>$n ：");
+	    if ($elem[1] eq '') {
+		    $Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
+	    }
+	    else {
+		    $Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
+	    }
+	$Page->Print("：$elem[2]</dt>\n");
+	$Page->Print("  <dd>$elem[3]<br><br></dd>\n");
+	}
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	read.cgi探索画面表示
+#	-------------------------------------------------------------------------------------
+#	@param	$CGI
+#	@param	$Page
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintReadSearch
+{
+	my ($CGI, $Page) = @_;
+	
+	return if (PrintDiscovery($CGI, $Page));
+	
+	my $Sys = $CGI->{'SYS'};
+	my $Set = $CGI->{'SET'};
+	my $Conv = $CGI->{'CONV'};
+	my $Dat = $CGI->{'DAT'};
+	
+	my $nameCol = $Set->Get('BBS_NAME_COLOR');
+	my $var = $Sys->Get('VERSION');
+	my $cgipath = $Sys->Get('CGIPATH');
+	my $bbs = $Sys->Get('BBS_ABS') . '/';
+	my $server = $Sys->Get('SERVER');
+	
+	# エラー用datの読み込み
+	$Dat->Load($Sys, $Conv->MakePath('.'.$Sys->Get('DATA').'/2000000000.dat'), 1);
+	my $size = $Dat->Size();
+	
+	# 存在しないので404を返す。
+	$Page->Print("Status: 404 Not Found\n");
+	
+	PrintReadHead($CGI, $Page);
+	
+	$Page->Print("\n<div style=\"margin-top:1em;\">\n");
+	$Page->Print(" <a href=\"$bbs\">■掲示板に戻る■</a>\n");
+	$Page->Print("</div>\n");
+	
+	$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
+	$Page->Print("<h1 style=\"color:red;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">指定されたスレッドは存在しません</h1>\n\n");
+	
+	$Page->Print("\n<dl class=\"thread\">\n");
+	
+	for my $i (0 .. $size - 1) {
+		my $pDat = $Dat->Get($i);
+		my @elem = split(/<>/, $$pDat);
+		$Page->Print(' <dt>' . ($i + 1) . ' ：');
+		
+		# メール欄有り
+		if ($elem[1] eq '') {
+			$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
+		}
+		# メール欄無し
+		else {
+			$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
+		}
+		$Page->Print("：$elem[2]</dt>\n  <dd>$elem[3]<br><br></dd>\n");
+	}
+	$Page->Print("</dl>\n\n");
+	
+	$Dat->Close();
+	
+	$Page->Print("<hr>\n\n");
+	
+	$Page->Print(<<HTML);
+<div style="margin-top:4em;">
+READ.CGI - $var<br>
+<a href="http://zerochplus.sourceforge.jp/">ぜろちゃんねるプラス</a>
+</div>
+
+</body>
+</html>
+HTML
+	
 }
 
 #------------------------------------------------------------------------------------------------------------

@@ -307,8 +307,8 @@ sub PrintColorSetting
 	my ($Page, $SYS, $Form, $flg) = @_;
 	my ($Setting);
 	my ($setIndexTitle, $setThreadTitle, $setIndexBG, $setThreadBG, $setCreateBG);
-	my ($setMenuBG, $setText, $setLink, $setLinkA, $setLinkV, $setName, $setCap);
-	
+	my ($setMenuBG, $setText, $setLink, $setLinkA, $setLinkV, $setName, $setCap, $setPost, $setType);
+	my ($selOri,$sel5ch);
 	$SYS->Set('_TITLE', 'BBS Color Setting');
 	
 	# SETTING.TXTから値を取得
@@ -335,50 +335,61 @@ sub PrintColorSetting
 	$setLinkV		= $Setting->Get('BBS_VLINK_COLOR');
 	$setName		= $Setting->Get('BBS_NAME_COLOR');
 	$setCap			= $Setting->Get('BBS_CAP_COLOR');
+	$setPost		= $Setting->Get('BBS_POSTCOLOR');
+	$setType		= $Setting->Get('BBS_READTYPE');
+	
+	$selOri			= ($setType eq 'original' ? 'selected' : '');
+	$sel5ch			= ($setType eq '5ch' ? 'selected' : '');
+    $selectType     ="text";
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=6>各設定色を入力して[設定]ボタンを押してください。</td></tr>");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">index背景色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_BG_COLOR value=\"$setIndexBG\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_BG_COLOR value=\"$setIndexBG\">");
 	$Page->Print("</td><td bgcolor=$setIndexBG></td>");
 	$Page->Print("<td class=\"DetailTitle\">テキスト色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_TEXT_COLOR value=\"$setText\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_TEXT_COLOR value=\"$setText\">");
 	$Page->Print("</td><td><font color=$setText>テキスト</font></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">indexメニュー背景色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_MENU_COLOR value=\"$setMenuBG\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_MENU_COLOR value=\"$setMenuBG\">");
 	$Page->Print("</td><td bgcolor=$setMenuBG></td>");
 	$Page->Print("<td class=\"DetailTitle\">名前色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_NAME_COLOR value=\"$setName\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_NAME_COLOR value=\"$setName\">");
 	$Page->Print("</td><td><font color=$setName>名前</font></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成背景色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_MAKETHREAD_COLOR value=\"$setCreateBG\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_MAKETHREAD_COLOR value=\"$setCreateBG\">");
 	$Page->Print("</td><td bgcolor=$setCreateBG></td>");
 	$Page->Print("<td class=\"DetailTitle\">リンク色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_LINK_COLOR value=\"$setLink\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_LINK_COLOR value=\"$setLink\">");
 	$Page->Print("</td><td><font color=$setLink>リンク</font></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド背景色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_THREAD_COLOR value=\"$setThreadBG\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_THREAD_COLOR value=\"$setThreadBG\">");
 	$Page->Print("</td><td bgcolor=$setThreadBG></td>");
 	$Page->Print("<td class=\"DetailTitle\">リンク色(アンカー時)</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_ALINK_COLOR value=\"$setLinkA\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_ALINK_COLOR value=\"$setLinkA\">");
 	$Page->Print("</td><td><font color=$setLinkA>リンク(アンカー)</font></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">indexタイトル色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_TITLE_COLOR value=\"$setIndexTitle\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_TITLE_COLOR value=\"$setIndexTitle\">");
 	$Page->Print("</td><td><font color=$setIndexTitle>indexタイトル</font></td>");
 	$Page->Print("<td class=\"DetailTitle\">リンク色(訪問済み)</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_VLINK_COLOR value=\"$setLinkV\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_VLINK_COLOR value=\"$setLinkV\">");
 	$Page->Print("</td><td><font color=$setLinkV>リンク(訪問済み)</font></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッドタイトル色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_SUBJECT_COLOR value=\"$setThreadTitle\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_SUBJECT_COLOR value=\"$setThreadTitle\">");
 	$Page->Print("</td><td><font color=$setThreadTitle>スレッドタイトル</font></td>");
 	$Page->Print("<td class=\"DetailTitle\">キャップ色</td><td>");
-	$Page->Print("<input type=text size=10 name=BBS_CAP_COLOR value=\"$setCap\">");
+	$Page->Print("<input type=$selectType size=10 name=BBS_CAP_COLOR value=\"$setCap\">");
 	$Page->Print("</td><td><font color=$setName><font color=$setCap>名前</font></font></td></tr>\n");
+	$Page->Print("<tr><td colspan=6><hr></td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">レスの表示形式</td><td>");
+	$Page->Print("<select name=\"BBS_READTYPE\"><option value=\"original\" $selOri>オリジナル</option><option value=\"5ch\" $sel5ch>5ch風</option></select>");
+	$Page->Print("<td class=\"DetailTitle\">レス背景色</td><td>");
+	$Page->Print("<input type=$selectType size=10 name=BBS_POSTCOLOR value=\"$setPost\">");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	
 	# スレッドプレビューの表示
-	if (1) {
+	if ($setType eq "original") {
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=3>indexプレビュー</td>");
 		$Page->Print("<td class=\"DetailTitle\" colspan=3>スレッドプレビュー</td></tr>");
 		$Page->Print("<tr><td colspan=3 bgcolor=$setIndexBG>");
@@ -394,6 +405,25 @@ sub PrintColorSetting
 		$Page->Print("スレッドタイトル</font><br><br>1 <font color=$setName>名前＠<font color=$setCap>キャップ ★</font></font><br>");
 		$Page->Print("　<font color=$setLink><u>http://---</u></font><br>");
 		$Page->Print("　<font color=$setLinkV><u>http://---</u></font><br>");
+		$Page->Print("</td></tr>");
+		$Page->Print("<tr><td colspan=6><hr></td></tr>");
+	}
+	else{
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=3>indexプレビュー</td>");
+		$Page->Print("<td class=\"DetailTitle\" colspan=3>スレッドプレビュー</td></tr>");
+		$Page->Print("<tr><td colspan=3 bgcolor=$setIndexBG>");
+		$Page->Print("<center><font color=$setIndexTitle>indexタイトル</font><br>");
+		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setMenuBG border><td>ヘッダ</td></table><br>");
+		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setMenuBG border><td>メニュー</td></table><br>");
+		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setThreadBG border><td>");
+		$Page->Print("<font color=$setThreadTitle>スレッドタイトル</font><br><br>");
+		$Page->Print("<font color=$setText>テキスト</font><br></td></table><br>");
+		$Page->Print("<table width=100% cellspacing=7 bgcolor=$setCreateBG border><td>スレッド作成</td>");
+		$Page->Print("</table><br></center></td>");
+		$Page->Print("<td colspan=3 bgcolor=$setThreadBG valign=top><font color=$setThreadTitle>");
+		$Page->Print("スレッドタイトル</font><br><br><div class=\"post\" style=\"background-color:$setPost;border-width: 1px;display: inline-block; padding: 8px;border-style: none solid solid none;border-color:#ddd;margin-bottom: 8px;\">1 <font color=$setName>名前＠<font color=$setCap>キャップ ★</font></font><br>");
+		$Page->Print("　<font color=$setLink><u>http://---</u></font><br>");
+		$Page->Print("　<font color=$setLinkV><u>http://---</u></font></div><br>");
 		$Page->Print("</td></tr>");
 		$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	}
