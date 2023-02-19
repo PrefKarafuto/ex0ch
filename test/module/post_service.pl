@@ -158,8 +158,6 @@ sub Write
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
 
-	#STRESS($text);
-
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
 	$bepart = $Form->Get('BEID', '');
@@ -338,7 +336,7 @@ sub ReadyBeforeWrite
 			require './module/ng_word.pl';
 			my $ngWord = NG_WORD->new;
 			$ngWord->Load($Sys);
-			my @checkKey = ('FROM', 'mail', 'MESSAGE');
+			my @checkKey = ('FROM', 'mail', 'MESSAGE','subject');
 			
 			my $check = $ngWord->Check($this->{'FORM'}, \@checkKey);
 			if ($check == 3) {
@@ -362,6 +360,7 @@ sub ReadyBeforeWrite
 	$this->ExecutePlugin(16);
 	
 	my $text = $Form->Get('MESSAGE');
+	#$text = STRESS($text,$quote,$hashtag,$bullet);		#強調表示する
 	$text =~ s/<br>/ <br> /g;
 	$Form->Set('MESSAGE', " $text ");
 	
@@ -946,27 +945,33 @@ sub SaveHost
 		$Logger->Write();
 	}
 }
+#強調表示
 sub STRESS
 {
-	my	($text) = @_;
+	my	($text,$quote,$hashtag,$bullet) = @_;
 	
-	$$text = '<br>' . $$text . '<br>';
+	$text = '<br>' . $text . '<br>';
 	
 	# ＞引用変換
-	while($$text =~ /<br>＞(.*?)<br>/){
-		$$text =~ s/<br>＞(.*?)<br>/<br><font color=gray>＞$1<\/font><br>/;
+	while($text =~ /<br>＞(.*?)<br>/){
+		$text =~ s/<br>＞(.*?)<br>/<br><font color=$quote>＞$1<\/font><br>/;
 	}
 	# ＃引用変換
-	while($$text =~ /<br>＃(.*?)<br>/){
-		$$text =~ s/<br>＃(.*?)<br>/<br><font color=green>＃$1<\/font><br>/;
+	while($text =~ /<br>＃(.*?)<br>/){
+		$text =~ s/<br>＃(.*?)<br>/<br><font color=$hashtag>＃$1<\/font><br>/;
 	}
 	# #引用変換
-	while($$text =~ /<br>#(.*?)<br>/){
-		$$text =~ s/<br>#(.*?)<br>/<br><font color=green>#$1<\/font><br>/;
+	while($text =~ /<br>#(.*?)<br>/){
+		$text =~ s/<br>#(.*?)<br>/<br><font color=$hashtag>#$1<\/font><br>/;
 	}
-	
+	# ・中黒変換
+	while($text =~ /<br>・(.*?)<br>/){
+		$text =~ s/<br>・(.*?)<br>/<br><font color=$bullet>・$1<\/font><br>/;
+	}
 	# 最初につけた<br>を取り外す
-	$$text = substr($$text,4,length($$text) - 8);
+	$text = substr($text,4,length($text) - 8);
+	
+	return $text;
 }
 #============================================================================================================
 #	Module END
