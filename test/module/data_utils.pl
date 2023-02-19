@@ -1001,8 +1001,8 @@ sub GetIDPart
 		return "発信元:$str";
 	}
 	
-	# IP表示 Ver.Sakhalin
-	elsif ($Set->Equal('BBS_DISP_IP', 'sakhalin')) {
+	# IP表示 Ver.Karafuto
+	elsif ($Set->Equal('BBS_DISP_IP', 'karafuto')) {
 		my $str = '???';
 		if ($noid) {
 			$str = '???';
