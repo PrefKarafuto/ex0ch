@@ -629,6 +629,9 @@ sub PrintPlusSecSetting
 	$SPAMHAUS	= $SYS->Get('SPAMHAUS');
 	$SPAMCOP	= $SYS->Get('SPAMCOP');
     	$BARRACUDA	= $SYS->Get('BARRACUDA');
+	
+	my $hCaptcha_sitekey 	= $SYS->Get('HCAPTCHA_SITEKEY');
+	my $hCaptcha_secretkey  = $SYS->Get('HCAPTCHA_SECRETKEY');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
@@ -670,6 +673,12 @@ sub PrintPlusSecSetting
     	$Page->Print("<input type=checkbox name=BARRACUDA $bc value=on>\n");
     	$Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">BarracudaCentral</a>\n");
 	$Page->Print("</td></tr>\n");
+	
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">hCaptcha設定</td></tr>\n");
+	$Page->Print("<tr><td>サイトキーを入力<br>");
+	$Page->Print("<td><input type=text size=60  name=HCAPTCHA_SITEKEY value=\"$hCaptcha_sitekey\"></td></tr>\n");
+	$Page->Print("<tr><td>シークレットキーを入力</td>");
+	$Page->Print("<td><input type=text size=60 name=HCAPTCHA_SECRETKEY value=\"$hCaptcha_secretkey\"></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -1192,7 +1201,8 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('SPAMHAUS', ($Form->Equal('SPAMHAUS', 'on') ? 1 : 0));
 	$SYSTEM->Set('SPAMCOP', ($Form->Equal('SPAMCOP', 'on') ? 1 : 0));
 	$SYSTEM->Set('BARRACUDA', ($Form->Equal('BARRACUDA', 'on') ? 1 : 0));
-	
+	$SYSTEM->Set('HCAPTCHA_SITEKEY', $Form->Get('HCAPTCHA_SITEKEY'));
+	$SYSTEM->Set('HCAPTCHA_SECRETKEY', $Form->Get('HCAPTCHA_SECRETKEY'));
 	$SYSTEM->Save();
 	
 	{
@@ -1204,6 +1214,8 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 Spamhaus：' . $SYSTEM->Get('SPAMHAUS');
 		push @$pLog, '　　　 SpamCop：' . $SYSTEM->Get('SPAMCOP');
 		push @$pLog, '　　　 Barracuda：' . $SYSTEM->Get('BARRACUDA');
+		push @$pLog, '　　　 hCaptchaサイトキー：' . $SYSTEM->Get('HCAPTCHA_SITEKEY');
+		push @$pLog, '　　　 hCaptchaシークレットキー：' . $SYSTEM->Get('HCAPTCHA_SECRETKEY');
 	}
 	return 0;
 }
