@@ -667,7 +667,7 @@ sub PrintPlusSecSetting
 	$Page->Print("<a href=\"https://www.spamhaus.org/organization/dnsblusage/\" target=\"_blank\">Spamhaus</a>\n");
 	$Page->Print("<input type=checkbox name=SPAMCOP $scop value=on>\n");
     	$Page->Print("<a href=\"https://www.spamcop.net/fom-serve/cache/291.html\" target=\"_blank\">SpamCop</a>\n");
-    	$Page->Print("<input type=checkbox name=BarracudaCentral $bc value=on>\n");
+    	$Page->Print("<input type=checkbox name=BARRACUDA $bc value=on>\n");
     	$Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">BarracudaCentral</a>\n");
 	$Page->Print("</td></tr>\n");
 	
@@ -1189,8 +1189,9 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('DEFSAMBA', $Form->Get('DEFSAMBA'));
 	$SYSTEM->Set('DEFHOUSHI', $Form->Get('DEFHOUSHI'));
 	$SYSTEM->Set('TRIP12', ($Form->Equal('TRIP12', 'on') ? 1 : 0));
-	$SYSTEM->Set('BBQ', ($Form->Equal('BBQ', 'on') ? 1 : 0));
-	$SYSTEM->Set('BBX', ($Form->Equal('BBX', 'on') ? 1 : 0));
+	$SYSTEM->Set('SPAMHAUS', ($Form->Equal('SPAMHAUS', 'on') ? 1 : 0));
+	$SYSTEM->Set('SPAMCOP', ($Form->Equal('SPAMCOP', 'on') ? 1 : 0));
+	$SYSTEM->Set('BARRACUDA', ($Form->Equal('BARRACUDA', 'on') ? 1 : 0));
 	
 	$SYSTEM->Save();
 	
@@ -1201,8 +1202,8 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 Samba奉仕時間：' . $SYSTEM->Get('DEFHOUSHI');
 		push @$pLog, '　　　 12桁トリップ：' . $SYSTEM->Get('TRIP12');
 		push @$pLog, '　　　 Spamhaus：' . $SYSTEM->Get('SPAMHAUS');
-		push @$pLog, '　　　 Spamcop：' . $SYSTEM->Get('SPAMCOP');
-        push @$pLog, '　　　 Spamlookup：' . $SYSTEM->Get('SPAMLOOKUP');
+		push @$pLog, '　　　 SpamCop：' . $SYSTEM->Get('SPAMCOP');
+		push @$pLog, '　　　 Barracuda：' . $SYSTEM->Get('BARRACUDA');
 	}
 	return 0;
 }
