@@ -320,18 +320,18 @@ sub InitSettingData
 		'timecount'				=> 7,
 		'timeclose'				=> 5,
 		'BBS_PROXY_CHECK'		=> '',
-		'BBS_OVERSEA_THREAD'	=> '',
+		'BBS_OVERSEA_THREAD'		=> '',
 		'BBS_OVERSEA_PROXY'		=> '',
 		'BBS_RAWIP_CHECK'		=> '',
-		'BBS_SLIP'				=> '',
+		'BBS_SLIP'			=> '',
 		'BBS_DISP_IP'			=> '',
 		'BBS_FORCE_ID'			=> 'checked',
-		'BBS_BE_ID'				=> '',
+		'BBS_BE_ID'			=> '',
 		'BBS_BE_TYPE2'			=> '',
-		'BBS_NO_ID'				=> '',
+		'BBS_NO_ID'			=> '',
 		'BBS_JP_CHECK'			=> '',
 		'BBS_YMD_WEEKS'			=> '日/月/火/水/木/金/土',
-		'BBS_NINJA'				=> '',
+		'BBS_NINJA'			=> '',
 		
 		# 以下0chオリジナル設定項目
 		'BBS_DATMAX'			=> 512,
@@ -339,7 +339,7 @@ sub InitSettingData
 		'BBS_RES_MAX'			=> '',
 		'BBS_COOKIEPATH'		=> '/',
 		'BBS_READONLY'			=> 'caps',
-		'BBS_REFERER_CUSHION'	=> 'jump.x0.to/',
+		'BBS_REFERER_CUSHION'		=> 'jump.x0.to/',
 		'BBS_THREADCAPONLY'		=> '',
 		'BBS_THREADMOBILE'		=> '',
 		'BBS_TRIPCOLUMN'		=> 10,
@@ -349,14 +349,13 @@ sub InitSettingData
 		'BBS_HOUSHITIME'		=> '',
 		'BBS_CAP_COLOR'			=> '',
 		'BBS_TATESUGI_HOUR'		=> '0',
-		'BBS_TATESUGI_COUNT'	=> '5',
-		'BBS_TATESUGI_COUNT2'	=> '1',
+		'BBS_TATESUGI_COUNT'		=> '5',
+		'BBS_TATESUGI_COUNT2'		=> '1',
 		'BBS_INDEX_LINE_NUMBER'		=> 12,
 
 		# 改造版で追加部分
-		'BBS_HCAPTCHA_SITEKEY'	=> '',
-		'BBS_HCAPTCHA_SECRETKEY'=> '',
-        'BBS_READTYPE'			=> '5ch',
+		'BBS_HCAPTCHA'			=> 0,
+		'BBS_READTYPE'			=> '5ch',
 		'BBS_POSTCOLOR'			=> '#EFEFEF'
 	);
 	
