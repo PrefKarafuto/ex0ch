@@ -787,7 +787,7 @@ sub FunctionColorSetting
 	{
 		my @inList = ('BBS_TITLE_COLOR', 'BBS_SUBJECT_COLOR', 'BBS_BG_COLOR', 'BBS_THREAD_COLOR',
 						'BBS_MAKETHREAD_COLOR', 'BBS_MENU_COLOR', 'BBS_TEXT_COLOR', 'BBS_LINK_COLOR',
-						'BBS_ALINK_COLOR', 'BBS_VLINK_COLOR', 'BBS_NAME_COLOR');
+						'BBS_ALINK_COLOR', 'BBS_VLINK_COLOR', 'BBS_NAME_COLOR''BBS_READTYPE','BBS_POSTCOLOR');
 		if (! $Form->IsInput(\@inList)) {
 			return 1001;
 		}
@@ -813,6 +813,8 @@ sub FunctionColorSetting
 	$capColor = $Form->Get('BBS_CAP_COLOR');
 	$capColor =~ s/[^\w\d\#]//ig;
 	$Setting->Set('BBS_CAP_COLOR', $capColor);
+	$Setting->Set('BBS_READTYPE', $Form->Get('BBS_READTYPE'));
+	$Setting->Set('BBS_POSTCOLOR', $Form->Get('BBS_POSTCOLOR'));
 	
 	$Setting->Save($Sys);
 	
