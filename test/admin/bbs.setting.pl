@@ -487,10 +487,8 @@ sub PrintLimitSetting
 	my $setTateCount	= $Setting->Get('BBS_TATESUGI_COUNT');
 
 	# 改造版で追加
-	my $hCaptcha_onoff		= $Setting->Get('BBS_HCAPTCHA_ONOFF');
-	my $hCaptcha_sitekey 	= $Setting->Get('BBS_HCAPTCHA_SITEKEY');
-	my $hCaptcha_secretkey  = $Setting->Get('BBS_HCAPTCHA_SECRETKEY');
-	
+	my $hCaptcha		= $Setting->Get('BBS_HCAPTCHA');
+	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY')==0||$Sys->Get('HCAPTCHA_SECRETKEY')==0) ? 'hCaptchaが設定されていません' : '有効');
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
@@ -516,7 +514,7 @@ sub PrintLimitSetting
 	$Page->Print("<td class=\"DetailTitle\">最大スレッド数(無記入=".$Sys->Get('SUBMAX').")</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_SUBJECT_MAX value=\"$setSubMax\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名無しチェック</td><td>");
-	$Page->Print("<input type=checkbox name=NANASHI_CHECK $setNoName value=on　$setDNSBL>$setInfo</td>");
+	$Page->Print("<input type=checkbox name=NANASHI_CHECK $setNoName value=on>有効</td>");
 	$Page->Print("<td class=\"DetailTitle\">最大レス数(無記入=".$Sys->Get('RESMAX').")</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_RES_MAX value=\"$setResMax\"></td></tr>");
 	
@@ -526,13 +524,15 @@ sub PrintLimitSetting
 	$Page->Print("<option value=none $selROnone>書き込み可能");
 	$Page->Print("</select></td>");
 	$Page->Print("<td class=\"DetailTitle\">DNSBLチェック</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK $setProxy value=on>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK $setProxy value=on $setDNSBL>$setInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(キャップ)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADCAPONLY $setCapOnly value=on>キャップのみ可能\</td>");
 	$Page->Print("<td class=\"DetailTitle\">海外ホスト規制</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_JP_CHECK $setOverSea value=on>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(携帯)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>携帯から許可</td>");
+	$Page->Print("<td class=\"DetailTitle\">hCaptcha</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_HCAPTCHA $hCaptcha value=on>$setCapInfo</td></tr>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -911,9 +911,7 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_TATESUGI_COUNT2', $Form->Get('BBS_TATESUGI_COUNT2'));
 
 	# 改造版で追加
-	$Setting->Set('BBS_HCAPTCHA_ONOFF', ($Form->Equal('BBS_HCAPTCHA_ONOFF', 'on') ? 'checked' : ''));
-	$Setting->Set('BBS_HCAPTCHA_SITEKEY', $Form->Get('BBS_HCAPTCHA_SITEKEY'));
-	$Setting->Set('BBS_HCAPTCHA_SECRETKEY', $Form->Get('BBS_HCAPTCHA_SECRETKEY'));
+	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
 	
 	$Setting->Save($Sys);
 	
