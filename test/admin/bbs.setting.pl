@@ -262,7 +262,7 @@ sub PrintBaseSetting
 	my $setKanban		= $Setting->Get('BBS_TITLE_PICTURE');
 	my $setKnabanLink	= $Setting->Get('BBS_TITLE_LINK');
 	my $setBackPict		= $Setting->Get('BBS_BG_PICTURE');
-	my $setBacMascot	= $Setting->Get('BBS_MASCOT');
+	my $setBackMascot	= $Setting->Get('BBS_MASCOT');
 	my $setNoName		= $Setting->Get('BBS_NONAME_NAME');
 	my $setAbone		= $Setting->Get('BBS_DELETE_NAME');
 	my $setCookiePath	= $Setting->Get('BBS_COOKIEPATH');
