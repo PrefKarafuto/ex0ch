@@ -668,10 +668,10 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください<br>\n");
 	$Page->Print("<input type=checkbox name=SPAMHAUS $shaus value=on>");
 	$Page->Print("<a href=\"https://www.spamhaus.org/organization/dnsblusage/\" target=\"_blank\">Spamhaus</a>\n");
-	$Page->Print("<input type=checkbox name=SPAMCOP $scop value=on>\n");
-    	$Page->Print("<a href=\"https://www.spamcop.net/fom-serve/cache/291.html\" target=\"_blank\">SpamCop</a>\n");
-    	$Page->Print("<input type=checkbox name=BARRACUDA $bc value=on>\n");
-    	$Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">BarracudaCentral</a>\n");
+	$Page->Print("<input type=checkbox name=SPAMCOP $scop value=on>");
+	$Page->Print("<a href=\"https://www.spamcop.net/fom-serve/cache/291.html\" target=\"_blank\">SpamCop</a>\n");
+	$Page->Print("<input type=checkbox name=BARRACUDA $bc value=on>");
+	$Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">BarracudaCentral</a>\n");
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">hCaptcha設定</td></tr>\n");
