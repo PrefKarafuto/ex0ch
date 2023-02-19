@@ -353,7 +353,7 @@ sub InitSettingData
 		'BBS_INDEX_LINE_NUMBER'		=> 12,
 
 		# 改造版で追加部分
-		'BBS_HCAPTCHA'			=> 0,
+		'BBS_HCAPTCHA'			=> '',
 		'BBS_READTYPE'			=> '5ch',
 		'BBS_POSTCOLOR'			=> '#EFEFEF'
 	);
