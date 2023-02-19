@@ -474,13 +474,14 @@ sub PrintLimitterSetting
 sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
-	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget);
+	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
 	
 	$urlLink	= $SYS->Get('URLLINK');
+	$imageTag	= $SYS->Get('IMGTAG');
 	$linkSt		= $SYS->Get('LINKST');
 	$linkEd		= $SYS->Get('LINKED');
 	$pathKind	= $SYS->Get('PATHKIND');
@@ -492,6 +493,7 @@ sub PrintOtherSetting
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
+	$imgtag		= ($imageTag == 1 ? 'checked' : '');
 	$pathInfo	= ($pathKind == 0 ? 'checked' : '');
 	$pathQuery	= ($pathKind == 1 ? 'checked' : '');
 	$bbsget		= ($BBSGET == 1 ? 'checked' : '');
@@ -509,6 +511,8 @@ sub PrintOtherSetting
 	$Page->Print("<td><input type=text size=60 name=HEADURL value=\"$headUrl\" ></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
+	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
+	$Page->Print("画像リンクをIMGタグに変換</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=URLLINK $linkChk value=on>");
 	$Page->Print("本文中URLへの自動リンク</td>");
 	$Page->Print("<tr><td colspan=2><b>以下自動リンクOFF時のみ有効</b></td></tr>\n");
@@ -1089,6 +1093,7 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('LINKST', $Form->Get('LINKST'));
 	$SYSTEM->Set('LINKED', $Form->Get('LINKED'));
 	$SYSTEM->Set('PATHKIND', $Form->Get('PATHKIND'));
+	$SYSTEM->Set('IMGTAG', ($Form->Equal('IMGTAG', 'on') ? 1 : 0));
 	$SYSTEM->Set('FASTMODE', ($Form->Equal('FASTMODE', 'on') ? 1 : 0));
 	$SYSTEM->Set('BBSGET', ($Form->Equal('BBSGET', 'on') ? 1 : 0));
 	$SYSTEM->Set('UPCHECK', $Form->Get('UPCHECK'));
@@ -1100,12 +1105,13 @@ sub FunctionOtherSetting
 		push @$pLog, '■ その他設定';
 		push @$pLog, '　　　 ヘッダテキスト：' . $SYSTEM->Get('HEADTEXT');
 		push @$pLog, '　　　 ヘッダURL：' . $SYSTEM->Get('HEADURL');
+		push @$pLog, '　　　 IMGタグ変換：' . $SYSTEM->Get('IMGTAG');
 		push @$pLog, '　　　 URL自動リンク：' . $SYSTEM->Get('URLLINK');
 		push @$pLog, '　　　 　開始時間：' . $SYSTEM->Get('LINKST');
 		push @$pLog, '　　　 　終了時間：' . $SYSTEM->Get('LINKED');
 		push @$pLog, '　　　 PATH種別：' . $SYSTEM->Get('PATHKIND');
 		push @$pLog, '　　　 index.htmlを更新しない：' . $SYSTEM->Get('FASTMODE');
-		push @$pLog, '　　　 bbs.cgiのGETメソ\ッド：' . $SYSTEM->Get('BBSGET');
+		push @$pLog, '　　　 bbs.cgiのGETメソッド：' . $SYSTEM->Get('BBSGET');
 		push @$pLog, '　　　 更新チェック間隔：' . $SYSTEM->Get('UPCHECK');
 	}
 	return 0;
