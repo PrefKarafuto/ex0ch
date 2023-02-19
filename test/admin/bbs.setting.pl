@@ -599,7 +599,7 @@ sub PrintOtherSetting
 	my $selIDnone		= ($setIDNone eq 'checked' ? 'selected' : '');
 	my $selIDdisp		= ($setIDDisp eq 'checked' ? 'selected' : '');
 	my $selIDhost		= ($setIDHost eq 'checked' ? 'selected' : '');
-	my $selIDsakhalin	= ($setIDHost eq 'sakhalin' ? 'selected' : '');
+	my $selIDkarafuto	= ($setIDHost eq 'karafuto' ? 'selected' : '');
 	my $selIDsiberia	= ($setIDHost eq 'siberia' ? 'selected' : '');
 	
 	my $setThreadNum	= $Setting->Get('BBS_THREAD_NUMBER');
@@ -623,13 +623,13 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">ID表\示</td><td><select name=ID_DISP>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ID表示</td><td><select name=ID_DISP>");
 	$Page->Print("<option value=BBS_FORCE_ID $selIDforce>強制ID");
 	$Page->Print("<option value=BBS_ID_DISP $selIDdisp>任意ID");
-	$Page->Print("<option value=BBS_NO_ID $selIDnone>ID表\示無し");
+	$Page->Print("<option value=BBS_NO_ID $selIDnone>ID表示無し");
 	$Page->Print("<option value=BBS_DISP_IP1 $selIDhost>ホスト表\示");
-	$Page->Print("<option value=BBS_DISP_IP2 $selIDsakhalin>発信元表\示(sakhalin)");
-	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>発信元表\示(siberia)");
+	$Page->Print("<option value=BBS_DISP_IP2 $selIDkarafuto>発信元表示(樺太)");
+	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>発信元表示(シベリア)");
 	$Page->Print("</select></td>");
 	$Page->Print("<td class=\"DetailTitle\">機種識別子(ID末尾)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_SLIP $setIPSave value=on>付加する</td></tr>");
@@ -976,9 +976,9 @@ sub FunctionOtherSetting
 		$Setting->Set('BBS_FORCE_ID', '');
 		$Setting->Set('BBS_NO_ID', '');
 	}
-	# sakhalin
+	# karafuto
 	elsif ( $Form->Equal('ID_DISP', 'BBS_DISP_IP2') ) {
-		$Setting->Set('BBS_DISP_IP', 'sakhalin');
+		$Setting->Set('BBS_DISP_IP', 'karafuto');
 		$Setting->Set('BBS_FORCE_ID', '');
 		$Setting->Set('BBS_NO_ID', '');
 	}
