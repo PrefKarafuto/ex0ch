@@ -12,6 +12,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use Encode;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -236,7 +237,9 @@ sub PrintHeaderEdit
 	$data = $Form->Get('HEAD_TEXT', '');
 	# ヘッダプレビュー表示
 	if ($data ne '') {
+		$data = Encode::encode("Shift_JIS",$data);
 		$Head->Set(\$data);
+		$data = Encode::decode("Shift_JIS",$data);
 	}
 	else {
 		$pHead = $Head->Get();
@@ -304,7 +307,9 @@ sub PrintFooterEdit
 	$data = $Form->Get('FOOT_TEXT', '');
 	# フッタプレビュー表示
 	if ($data ne '') {
+		$data = Encode::encode("Shift_JIS",$data);
 		$Foot->Set(\$data);
+		$data = Encode::decode("Shift_JIS",$data);
 	}
 	else {
 		$pFoot = $Foot->Get();
@@ -648,9 +653,10 @@ sub PrintLastEdit
 		$elem[3] =~ s/<>/&lt;&gt;/g;
 	}
 	for (0 .. 4) {
+		$elem[$_] = Encode::encode("Shift_JIS",$elem[$_]);
 		$elem[$_] = '' if (! defined $elem[$_]);
+		$elem[$_] = Encode::decode("Shift_JIS",$elem[$_]);
 	}
-	
 	# 権限取得
 	$isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BBSEDIT, $SYS->Get('BBS'));
 	
