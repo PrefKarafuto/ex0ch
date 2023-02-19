@@ -529,8 +529,8 @@ sub PrintOtherSetting
 	$Page->Print("<td><input type=checkbox name=BBSGET $bbsget value=on></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック関連</td></tr>\n");
-	$Page->Print("<tr><td>更新チェックの間隔</td>");
-	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\">日(0でチェック無効)</td></tr>\n");
+	$Page->Print("<tr><td>更新チェックの間隔　※開発移行につき無効</td>");
+	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\" disabled>日(0でチェック無効)</td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
