@@ -292,6 +292,7 @@ sub InitSystemValue
 		
 		'HCAPTCHA_SITEKEY'	=>'',									#hCaptchaサイトキー
 		'HCAPTCHA_SECRETKEY'	=>'',									#hCaptchaシークレットキー
+		'IMGTAG'		=> 0,									#画像リンクをIMGタグに変換
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,
