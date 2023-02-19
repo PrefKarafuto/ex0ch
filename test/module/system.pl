@@ -286,9 +286,12 @@ sub InitSystemValue
 		'UPCHECK'	=> ,										# 更新チェック間隔(日)
 		
 		# DNSBL設定
-		'SPAMHAUS'		=> 0,										# zen.spamhaus.org
-		'SPAMCOP'		=> 0,										# bl.spamcop.net
-        'BARRACUDA'	    => 0,										# b.barracudacentral.org
+		'SPAMHAUS'		=> 0,									# zen.spamhaus.org
+		'SPAMCOP'		=> 0,									# bl.spamcop.net
+		'BARRACUDA'	    	=> 0,									# b.barracudacentral.org
+		
+		'HCAPTCHA_SITEKEY'	=>'',									#hCaptchaサイトキー
+		'HCAPTCHA_SECRETKEY'	=>'',									#hCaptchaシークレットキー
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,
