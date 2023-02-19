@@ -576,8 +576,6 @@ sub PrintPlusViewSetting
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Read.cgi関連</td></tr>\n");
-	$Page->Print("<tr><td>ofuda.ccのアカウント名を入力 <small>(未入力でカウンター非表\示)</small></td>");
-	$Page->Print("<td><input type=text size=60 name=COUNTER value=\"$Counter\"></td></tr>\n");
 	$Page->Print("<tr><td>PR欄の表\示文字列 <small>(未入力でPR欄非表\示)</small></td>");
 	$Page->Print("<td><input type=text size=60 name=PRTEXT value=\"$Prtext\"></td></tr>\n");
 	$Page->Print("<tr><td>PR欄のリンクURL</td>");
