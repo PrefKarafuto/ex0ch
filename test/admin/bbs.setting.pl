@@ -307,7 +307,7 @@ sub PrintColorSetting
 	my ($Page, $SYS, $Form, $flg) = @_;
 	my ($Setting);
 	my ($setIndexTitle, $setThreadTitle, $setIndexBG, $setThreadBG, $setCreateBG);
-	my ($setMenuBG, $setText, $setLink, $setLinkA, $setLinkV, $setName, $setCap, $setPost, $setType, $selectType;
+	my ($setMenuBG, $setText, $setLink, $setLinkA, $setLinkV, $setName, $setCap, $setPost, $setType, $selectType);
 	my ($selOri,$sel5ch);
 	$SYS->Set('_TITLE', 'BBS Color Setting');
 	
@@ -792,7 +792,7 @@ sub FunctionColorSetting
 	{
 		my @inList = ('BBS_TITLE_COLOR', 'BBS_SUBJECT_COLOR', 'BBS_BG_COLOR', 'BBS_THREAD_COLOR',
 						'BBS_MAKETHREAD_COLOR', 'BBS_MENU_COLOR', 'BBS_TEXT_COLOR', 'BBS_LINK_COLOR',
-						'BBS_ALINK_COLOR', 'BBS_VLINK_COLOR', 'BBS_NAME_COLOR''BBS_READTYPE','BBS_POSTCOLOR');
+						'BBS_ALINK_COLOR', 'BBS_VLINK_COLOR', 'BBS_NAME_COLOR','BBS_READTYPE','BBS_POSTCOLOR');
 		if (! $Form->IsInput(\@inList)) {
 			return 1001;
 		}
