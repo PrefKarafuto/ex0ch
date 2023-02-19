@@ -792,7 +792,7 @@ sub PrintPluginOptionSetting
 	
 	$file = $Plugin->Get('FILE', $id);
 	require "./plugin/$file";
-	$file =~ /^0ch_(.*)\.pl$/;
+	$file =~ /^0ch_(.*)_utf8\.pl$/;
 	$className = "ZPL_$1";
 	if ($className->can('getConfig')) {
 		my $plugin = $className->new;
@@ -878,7 +878,7 @@ sub FunctionPluginOptionSetting
 	
 	$file = $Plugin->Get('FILE', $id);
 	require "./plugin/$file";
-	$file =~ /^0ch_(.*)\.pl$/;
+	$file =~ /^0ch_(.*)_utf8\.pl$/;
 	$className = "ZPL_$1";
 	$plugin = new $className;
 	if ($className->can('getConfig')) {
