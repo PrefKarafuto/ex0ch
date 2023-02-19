@@ -601,8 +601,8 @@ FORM
   名前：<input type="text" name="FROM" size="19"> E-mail：<input type="text" name="mail" size="19"><br>
 FORM
 	# hCaptchaなしの場合
-	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA_ONOFF');
-	my $sitekey = $this->{'SET'}->Get('BBS_HCAPTCHA_SITEKEY');
+	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA');
+	my $sitekey = $this->{'SYS'}->Get('HCAPTCHA_SITEKEY');
 	if ($hCaptcha_check eq '') {
 		$Page->Print(<<FORM);
    <span style="margin-top:0px;">
@@ -698,8 +698,8 @@ sub PrintThreadPreviewOne
 KAKIKO
 
 	# hCaptchaなしの場合
-	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA_ONOFF');
-	my $sitekey = $this->{'SET'}->Get('BBS_HCAPTCHA_SITEKEY');
+	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA');
+	my $sitekey = $this->{'SYS'}->Get('HCAPTCHA_SITEKEY');
 	if ($hCaptcha_check eq '') {
 	$Page->Print(<<KAKIKO);
 	<div class ="bbs_service_textarea">
