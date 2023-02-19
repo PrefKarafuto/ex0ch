@@ -185,6 +185,7 @@ sub PrintReadHead
 	my $code = $CGI->{'CODE'};
 	$title = $Dat->GetSubject() if(!defined $title);
 	$title = '' if(!defined $title);
+	my $mascot = $Set->Get('BBS_MASCOT');
 	
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
@@ -219,6 +220,7 @@ HTML
 		
 		$Page->Print("<body bgcolor=\"$work[0]\" text=\"$work[1]\" link=\"$work[2]\" ");
 		$Page->Print("alink=\"$work[3]\" vlink=\"$work[4]\">\n\n");
+		$Page->Print("<div class=\"backmascot\" style=\"background-image: url('$mascot');\">");
 	}
 	
 	# バナー出力
@@ -505,7 +507,7 @@ HTML
 READ.CGI - $ver<br>
 <a href="http://zerochplus.sourceforge.jp/">ぜろちゃんねるプラス</a>
 </div>
-
+</div>
 
 <style>
 /* スマホ用レイアウト */
