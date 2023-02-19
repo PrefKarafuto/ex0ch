@@ -489,6 +489,7 @@ sub PrintLimitSetting
 	# 改造版で追加
 	my $hCaptcha		= $Setting->Get('BBS_HCAPTCHA');
 	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY')==0||$Sys->Get('HCAPTCHA_SECRETKEY')==0) ? 'hCaptchaが設定されていません' : '有効');
+	my $setCap		= ($setCapInfo eq '有効' ? '' : '');
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
@@ -532,7 +533,7 @@ sub PrintLimitSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(携帯)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>携帯から許可</td>");
 	$Page->Print("<td class=\"DetailTitle\">hCaptcha</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_HCAPTCHA $hCaptcha value=on>$setCapInfo</td></tr>");
+	$Page->Print("<input type=checkbox name=BBS_HCAPTCHA $hCaptcha value=on $setCap>$setCapInfo</td></tr>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -911,8 +912,9 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_TATESUGI_COUNT2', $Form->Get('BBS_TATESUGI_COUNT2'));
 
 	# 改造版で追加
+	if(($Sys->Get('HCAPTCHA_SITEKEY')!=0 && $Sys->Get('HCAPTCHA_SECRETKEY')!=0)){
 	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
-	
+	}
 	$Setting->Save($Sys);
 	
 	return 0;
