@@ -768,7 +768,7 @@ sub Certification_hCaptcha
 	my $Set = $this->{'SET'};
 
 	# hCaptcha「あり」の場合
-	my $secretkey = $Set->Get('BBS_HCAPTCHA_SECRETKEY');
+	my $secretkey = $Set->Get('HCAPTCHA_SECRETKEY');
 
 	if ($secretkey ne '') {
 	#シークレットキー
