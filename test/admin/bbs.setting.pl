@@ -262,6 +262,7 @@ sub PrintBaseSetting
 	my $setKanban		= $Setting->Get('BBS_TITLE_PICTURE');
 	my $setKnabanLink	= $Setting->Get('BBS_TITLE_LINK');
 	my $setBackPict		= $Setting->Get('BBS_BG_PICTURE');
+	my $setBacMascot	= $Setting->Get('BBS_MASCOT');
 	my $setNoName		= $Setting->Get('BBS_NONAME_NAME');
 	my $setAbone		= $Setting->Get('BBS_DELETE_NAME');
 	my $setCookiePath	= $Setting->Get('BBS_COOKIEPATH');
@@ -278,6 +279,8 @@ sub PrintBaseSetting
 	$Page->Print("<input type=text size=80 name=BBS_TITLE_LINK value=\"$setKnabanLink\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">index背景画像</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_BG_PICTURE value=\"$setBackPict\"></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">read.cgi背景マスコット</td><td>");
+	$Page->Print("<input type=text size=80 name=BBS_MASCOT value=\"$setBackMascot\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名無しさん</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_NONAME_NAME value=\"$setNoName\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">削除文言</td><td>");
@@ -746,6 +749,7 @@ sub FunctionBaseSetting
 	$Setting->Set('BBS_TITLE_PICTURE', $Form->Get('BBS_TITLE_PICTURE'));
 	$Setting->Set('BBS_TITLE_LINK', $Form->Get('BBS_TITLE_LINK'));
 	$Setting->Set('BBS_BG_PICTURE', $Form->Get('BBS_BG_PICTURE'));
+	$Setting->Set('BBS_MASCOT', $Form->Get('BBS_MASCOT'));
 	$Setting->Set('BBS_NONAME_NAME', $Form->Get('BBS_NONAME_NAME'));
 	$Setting->Set('BBS_DELETE_NAME', $Form->Get('BBS_DELETE_NAME'));
 	$Setting->Set('BBS_COOKIEPATH', $Form->Get('BBS_COOKIEPATH'));
