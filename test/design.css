@@ -36,3 +36,22 @@
 .order2 {
     order: 2;
 }
+.post {
+  border-width: 1px;
+  display: inline-block;
+  border-style: none solid solid none;
+  border-color: #ddd;
+  background-color: #efefef;
+  margin-bottom: 8px;
+  padding: 8px;
+}
+.meta {
+  font-size: 14px;
+  color: #333;
+}
+.message {
+ font-size:17px;
+ color:#333;
+ padding:10px 0;
+ overflow-wrap:break-word
+}
