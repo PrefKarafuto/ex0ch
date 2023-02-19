@@ -282,14 +282,14 @@ sub InitSettingData
 	
 	my %set = (
 		# ２ちゃんねる互換設定項目
-		'BBS_TITLE'				=> '掲示板＠ぜろちゃんねるプラス',
+		'BBS_TITLE'			=> '掲示板＠ぜろちゃんねるプラス',
 		'BBS_TITLE_PICTURE'		=> 'kanban.gif',
 		'BBS_TITLE_COLOR'		=> '#000000',
 		'BBS_TITLE_LINK'		=> 'http://zerochplus.sourceforge.jp/',
 		'BBS_BG_COLOR'			=> '#FFFFFF',
 		'BBS_BG_PICTURE'		=> 'ba.gif',
 		'BBS_NONAME_NAME'		=> '名無しさん＠ぜろちゃんねるプラス',
-		'BBS_MAKETHREAD_COLOR'	=> '#CCFFCC',
+		'BBS_MAKETHREAD_COLOR'		=> '#CCFFCC',
 		'BBS_MENU_COLOR'		=> '#CCFFCC',
 		'BBS_THREAD_COLOR'		=> '#EFEFEF',
 		'BBS_TEXT_COLOR'		=> '#000000',
@@ -298,26 +298,26 @@ sub InitSettingData
 		'BBS_ALINK_COLOR'		=> '#FF0000',
 		'BBS_VLINK_COLOR'		=> '#AA0088',
 		'BBS_THREAD_NUMBER'		=> 10,
-		'BBS_CONTENTS_NUMBER'	=> 10,
+		'BBS_CONTENTS_NUMBER'		=> 10,
 		'BBS_LINE_NUMBER'		=> 12,
-		'BBS_MAX_MENU_THREAD'	=> 30,
+		'BBS_MAX_MENU_THREAD'		=> 30,
 		'BBS_SUBJECT_COLOR'		=> '#FF0000',
-		'BBS_PASSWORD_CHECK'	=> 'checked',
+		'BBS_PASSWORD_CHECK'		=> 'checked',
 		'BBS_UNICODE'			=> 'pass',
 		'BBS_DELETE_NAME'		=> 'あぼーん',
-		'BBS_NAMECOOKIE_CHECK'	=> 'checked',
-		'BBS_MAILCOOKIE_CHECK'	=> 'checked',
+		'BBS_NAMECOOKIE_CHECK'		=> 'checked',
+		'BBS_MAILCOOKIE_CHECK'		=> 'checked',
 		'BBS_SUBJECT_COUNT'		=> 48,
 		'BBS_NAME_COUNT'		=> 128,
 		'BBS_MAIL_COUNT'		=> 64,
 		'BBS_MESSAGE_COUNT'		=> 2048,
 		'BBS_NEWSUBJECT'		=> 1,
-		'BBS_THREAD_TATESUGI'	=> 5,
-		'BBS_AD2'				=> '',
+		'BBS_THREAD_TATESUGI'		=> 5,
+		'BBS_AD2'			=> '',
 		'SUBBBS_CGI_ON'			=> 1,
 		'NANASHI_CHECK'			=> '',
-		'timecount'				=> 7,
-		'timeclose'				=> 5,
+		'timecount'			=> 7,
+		'timeclose'			=> 5,
 		'BBS_PROXY_CHECK'		=> '',
 		'BBS_OVERSEA_THREAD'		=> '',
 		'BBS_OVERSEA_PROXY'		=> '',
@@ -355,7 +355,8 @@ sub InitSettingData
 		# 改造版で追加部分
 		'BBS_HCAPTCHA'			=> '',
 		'BBS_READTYPE'			=> '5ch',
-		'BBS_POSTCOLOR'			=> '#FFFFFF'
+		'BBS_POSTCOLOR'			=> '#FFFFFF',
+		'BBS_MASCOT'			=> ''	
 	);
 	
 	while (my ($key, $val) = each(%set)) {
