@@ -31,19 +31,19 @@ sub main
 		return 0;
 	}
 	print "<body style=\"border:0px solid #333; position:fixed; left:0em; top:0em; bottom:auto; width:10em; height:100%; z-index:1; margin:0; padding:0; color:#F33; background: #FFF; overflow-y: scroll;font-size:0.81em;\"><font size=\"2\">";
-	print "<a href=\"$url\">TOP</a><br>";
-	print "<a href=\"./search.cgi\">レス検索</a><br><br>";
+	print "<a href=\"$url\" target=\"_top\">TOP</a><br>";
+	print "<a href=\"./search.cgi\" target=\"_top\">レス検索</a><br><br>";
 	foreach my $category (@$bbsmenu) {
 		print "<b>$category->{name}</b><br>\n";
 		
 		foreach my $bbs (@{$category->{list}}) {
-			print "<a href=\"$bbs->{url}\">$bbs->{name}</a><br>>><a href=\"$bbs->{url}/kako\">（過去ログ）</a><br>\n";
+			print "<a href=\"$bbs->{url}\" target=\"_main\">$bbs->{name}</a><br>>><a href=\"$bbs->{url}/kako\ target=\"_main\"">（過去ログ）</a><br>\n";
 		}
 		
 		print "<br>\n";
 	}
 	print "<b>他のサイト</b><br>";
-	print "<a href=\"https://github.com/PrefKarafuto/New_0ch_Plus\">ぜろちゃんねるプラス</a><br><br>";
+	print "<a href=\"https://github.com/PrefKarafuto/New_0ch_Plus\" target=\"_top\">ぜろちゃんねるプラス</a><br><br>";
 	print "<br>更新日<br>$time[5]/$time[4]/$time[3]";
 	print "</font></body>";
 	return 0;
