@@ -354,6 +354,63 @@ sub ConvertSpecialQuotation
 	
 	return $text;
 }
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	スレタイ変換 - ConvertThreadTitle
+#	--------------------------------------------
+#	引　数：$Sys : SYSTEMモジュール
+#			$text : 変換テキスト(リファレンス)
+#	戻り値：変換後のメッセージ
+#
+#------------------------------------------------------------------------------------------------------------
+sub ConvertThreadTitle
+{
+	my $this = shift;
+	my ($Sys, $text) =@_;
+	my $cache = {};
+	my @bbsname;
+	# サーバー名を取得 「http://example.jp」
+	my $server = $Sys->Get('SERVER');
+	# CGIのパス部分を取得 「/test」
+	my $cgipath = $Sys->Get('CGIPATH');
+	
+	require './module/bbs_info.pl';
+	my $info = BBS_INFO->new;
+	$info->Load($Sys);
+	
+	$$text =~ s{(?<=\>)\Q$server$cgipath\E/read\.cgi/([0-9a-zA-Z_\-]+)/([0-9]+)(?:/[^/<]*)?}{
+		my $title = $info->Get('ALL',$info->Get('NAME',$1,\@bbsname))."：".GetThreadTitle($Sys, $cache, $1, $2);
+		(defined $title ? $title : $&)
+	}ge;
+	
+	return $text;
+	
+}
+sub GetThreadTitle
+{
+	my ($Sys, $cache, $bbs, $thread) = @_;
+	
+	my $Threads = $cache->{$bbs};
+	
+	if (!defined $cache->{$bbs}) {
+		my $oldbbs = $Sys->Get('BBS');
+		$Sys->Set('BBS', $bbs);
+		
+		require './module/thread.pl';
+		$Threads = THREAD->new;
+		$Threads->Load($Sys);
+		$Threads->Close();
+		$cache->{$bbs} = $Threads;
+		
+		$Sys->Set('BBS', $oldbbs);
+	}
+	
+	my $title = $Threads->Get('SUBJECT', $thread);
+	
+	return $title;
+}
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	画像タグ変換
