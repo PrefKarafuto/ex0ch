@@ -9,6 +9,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
+use Digest::MD5;
 use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
@@ -358,6 +359,8 @@ sub ReadyBeforeWrite
 	$Sys->Set('_SET_', $this->{'SET'});
 	
 	$this->ExecutePlugin(16);
+	$this->OMIKUJI($Sys, $Form);
+	$this->tasukeruyo($Sys, $Form);
 	
 	my $text = $Form->Get('MESSAGE');
 	$text =~ s/<br>/ <br> /g;
@@ -676,7 +679,7 @@ sub NormalizationNameMail
 	
 	# プラグイン実行 フォーム情報再取得
 	$this->ExecutePlugin($Sys->Get('MODE'));
-    return $ZP::E_REG_NOTJPHOST if($this->SpamBlock($Set,$Form));
+	return $ZP::E_REG_NOTJPHOST if($this->SpamBlock($Set,$Form));
     
 	$name = $Form->Get('FROM', '');
 	$mail = $Form->Get('mail', '');
@@ -1028,6 +1031,69 @@ sub SpamBlock
 	
 	if ($point >= $threshold_point) {
 		return 1;
+	}
+	
+	return 0;
+}
+#UA開示
+sub tasukeruyo
+{
+	my	$this = shift;
+	my	($sys, $form) = @_;
+	
+	my	($from, $koyuu, $agent, $tasuke, $mes, $ua, $addr);
+	$from	= $form->Get('FROM');
+	$koyuu	= $sys->Get('KOYUU');
+	$koyuu	= $sys->Get('HOST') if (! defined $koyuu);
+	$agent	= $sys->Get('AGENT');
+	$mes	= $form->Get('MESSAGE');
+	$ua		= $ENV{'HTTP_USER_AGENT'};
+	$addr	= (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
+	
+	if ( $from =~ /^.*tasukeruyo/ ) {
+		if ( $agent eq 'O' || $agent eq 'P' || $agent eq 'i' ) {
+			$tasuke = "$ENV{'REMOTE_HOST'}($koyuu)";
+		}
+		else {
+			$tasuke = "$ENV{'REMOTE_HOST'}($addr)";
+		}
+		
+		$from =~ s#^.*tasukeruyo#$1</b>$tasuke<b>#g;
+		$form->Set('FROM', $from);
+		
+		$ua =~ s/</&lt;/g;
+		$ua =~ s/>/&gt;/g;
+		$form->Set('MESSAGE',"$mes<br> <hr> <font color=\"blue\">$ua</font>");
+	}
+
+return 0;
+}
+#おみくじ
+sub OMIKUJI
+{
+	my $this = shift;
+	my ($Sys, $Form) = @_;
+	
+	my $name = $Form->Get('FROM');
+	
+	if ($name =~ /!omikuji/) {
+		
+		my $board = $Sys->Get('BBS');
+		my $today = sprintf('%d-%d-%d', (localtime)[3,4,5]);
+		my $koyuu = $Sys->Get('KOYUU');
+		
+		my $ctx = Digest::MD5->new;
+		$ctx->add('omikuji');
+		$ctx->add($board);
+		$ctx->add($today);
+		$ctx->add($koyuu);
+		my $rnd = hex(substr($ctx->hexdigest, 0, 8));
+
+		my @kuji = qw(大吉 中吉 小吉 吉 末吉 凶 大凶);
+		my $result = $kuji[$rnd%@kuji];
+		
+		$name =~ s|!omikuji|</b>【$result】<b>|g;
+		$Form->Set('FROM', $name);
 	}
 	
 	return 0;
