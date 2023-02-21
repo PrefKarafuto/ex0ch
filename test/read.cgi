@@ -555,8 +555,9 @@ sub PrintResponse
 	# URLと引用個所の適応
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
-	$Conv->ConvertSpecialQuotation(\$elem[3]);
+	$Conv->ConvertSpecialQuotation($Sys, \$elem[3]);
 	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
+    $Conv->ConvertThreadTitle($Sys,\$elem[3]);
 	# メール欄有り
 	if ($elem[1] eq '') {
 		$Mail = "<font color=\"$nameCol\"><b>$elem[0]</b></font>";

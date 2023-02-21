@@ -745,10 +745,10 @@ sub PrintResponse
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
 	
 	# URLと引用個所の適応
-	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'), \$elem[3])if($Sys->Get('IMGTAG'));
 	$Conv->ConvertURL($Sys, $this->{'SET'}, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
-	$Conv->ConvertSpecialQuotation(\$elem[3]);
+	$Conv->ConvertSpecialQuotation($Sys, \$elem[3]);
+    $Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'), \$elem[3])if($Sys->Get('IMGTAG'));
 	
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);

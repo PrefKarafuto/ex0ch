@@ -380,7 +380,7 @@ sub ConvertThreadTitle
 	$info->Load($Sys);
 	
 	$$text =~ s{(?<=\>)\Q$server$cgipath\E/read\.cgi/([0-9a-zA-Z_\-]+)/([0-9]+)(?:/[^/<]*)?}{
-		my $title = $info->Get('ALL',$info->Get('NAME',$1,\@bbsname))."：".GetThreadTitle($Sys, $cache, $1, $2);
+		my $title = GetThreadTitle($Sys, $cache, $1, $2);
 		(defined $title ? $title : $&)
 	}ge;
 	
