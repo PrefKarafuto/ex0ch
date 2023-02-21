@@ -80,7 +80,7 @@ sub Init
 	
 	# キャップ管理モジュールロード
 	require './module/cap.pl';
-	$this->{'SECURITY'} = SECURITY->new;
+	$this->{'SECURITY'} = CAP_SECURITY->new;
 	$this->{'SECURITY'}->Init($Sys);
 	$this->{'SECURITY'}->SetGroupInfo($Sys->Get('BBS'));
 	
