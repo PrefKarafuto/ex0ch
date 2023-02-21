@@ -158,8 +158,8 @@ sub ConvertURL
 	
 	my $server = $Sys->Get('SERVER');
 	my $cushion = $Set->Get('BBS_REFERER_CUSHION');
-	my $reg1 = q{(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
-	my $reg2 = q{<(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
+	my $reg1 = q{(?<!href="?)(?<!src="?)(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
+	my $reg2 = q{<(?<!href="?)(?<!src="?)(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
 	
 	# 携帯から
 	if ($mode eq 'O') {
@@ -206,6 +206,34 @@ sub ConvertURL
 		}
 	}
 	return $text;
+}
+#Tweet埋め込み
+sub ConvertTweet
+{
+	my $this = shift;
+	my ($text) = @_ ;
+	
+	my $reg = '(https://twitter.com/[A-Za-z0-9]+/status/[0-9]+(([-\w.!~*\'();/?:\@=+\$,%#]|&(?![lg]t;))+))';	 # TwitterURL検索
+	
+	$$text =~ s|$reg|<blockquote class="twitter-tweet"><a href="$1">Tweet読み込み中...</a></blockquote>|;
+	
+	return $text;
+	
+}
+#つべニコ動埋め込み
+sub ConvertMovie
+{
+	my $this = shift;
+	my ($text) = @_ ;
+	
+	my $reg1 = '((https://youtu\.be/([A-Za-z0-9_])+)|(https://(www\.)?youtube\.com/watch(([-\w.!~*\'();/?:\@=+\$,%#]|&(?![lg]t;))+)))';	 # YoutubeURL検索
+	my $reg2 = '((https://nico\.ms/sm([0-9])+)|(https://(www\.)?nicovideo\.jp/watch/sm([0-9]+)))';	 # ニコ動URL検索
+	
+	$$text =~ s|$reg1|<div class="responsive"><iframe src="$1" allowfullscreen data-ruffle-polyfilled= width="560" height="315" frameborder="0"></iframe></div>|;
+	$$text =~ s|$reg2|<div class="responsive"><iframe src="$1" allowfullscreen="" data-ruffle-polyfilled="" width="560" height="315" frameborder="0"></iframe></div>|;
+	
+	return $text;
+	
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -413,7 +441,7 @@ sub GetThreadTitle
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	画像タグ変換
+#	汎用画像タグ変換
 #	-------------------------------------------------------------------------------------
 #	引数    	$Sys	SYSTEM
 #	    	$limit	リンク時間制限

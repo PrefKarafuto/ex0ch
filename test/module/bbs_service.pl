@@ -321,7 +321,7 @@ sub PrintIndexHead
  <meta http-equiv="Content-Script-Type" content="text/javascript">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <link rel="stylesheet" type="text/css" href="../test/design.css">
-
+<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <!-- hCaptcha -->
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
@@ -745,6 +745,8 @@ sub PrintResponse
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
 	
 	# URLと引用個所の適応
+    #$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_YOUNICO'));
+	#$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWEET'));
 	$Conv->ConvertURL($Sys, $this->{'SET'}, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3]);
