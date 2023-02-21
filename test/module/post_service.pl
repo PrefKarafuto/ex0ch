@@ -360,7 +360,6 @@ sub ReadyBeforeWrite
 	$this->ExecutePlugin(16);
 	
 	my $text = $Form->Get('MESSAGE');
-	#$text = STRESS($text,$quote,$hashtag,$bullet);		#強調表示する
 	$text =~ s/<br>/ <br> /g;
 	$Form->Set('MESSAGE', " $text ");
 	
@@ -677,6 +676,8 @@ sub NormalizationNameMail
 	
 	# プラグイン実行 フォーム情報再取得
 	$this->ExecutePlugin($Sys->Get('MODE'));
+    return $ZP::E_REG_NOTJPHOST if($this->SpamBlock($Set,$Form));
+    
 	$name = $Form->Get('FROM', '');
 	$mail = $Form->Get('mail', '');
 	$subject = $Form->Get('subject', '');
@@ -945,34 +946,93 @@ sub SaveHost
 		$Logger->Write();
 	}
 }
-#強調表示
-sub STRESS
+
+#SPAMBLOCK
+sub SpamBlock
 {
-	my	($text,$quote,$hashtag,$bullet) = @_;
+	my	$this = shift;
+	my	($Setting, $form) = @_;
 	
-	$text = '<br>' . $text . '<br>';
+	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASKII');
+	my $mail_atsign_point	= $Setting->Get('BBS_SPAMKILLI_MAIL');
+	my $nohost_point	= $Setting->Get('BBS_SPAMKILLI_HOST');
+	my $text_url_point		= $Setting->Get('BBS_SPAMKILLI_URL');
+	my $text_ascii_point	= $Setting->Get('BBS_SPAMKILLI_MESSAGE');
+	my $text_ahref_point		= $Setting->Get('BBS_SPAMKILLI_LINK');
+	my $text_ascii_ratio		= $Setting->Get('BBS_SPAMKILLI_MESPOINT');
+	my $tldomain_setting	= $Setting->Get('BBS_SPAMKILLI_DOMAIN');
+	my $threshold_point	= $Setting->Get('BBS_SPAMKILLI_POINT');
 	
-	# ＞引用変換
-	while($text =~ /<br>＞(.*?)<br>/){
-		$text =~ s/<br>＞(.*?)<br>/<br><font color=$quote>＞$1<\/font><br>/;
-	}
-	# ＃引用変換
-	while($text =~ /<br>＃(.*?)<br>/){
-		$text =~ s/<br>＃(.*?)<br>/<br><font color=$hashtag>＃$1<\/font><br>/;
-	}
-	# #引用変換
-	while($text =~ /<br>#(.*?)<br>/){
-		$text =~ s/<br>#(.*?)<br>/<br><font color=$hashtag>#$1<\/font><br>/;
-	}
-	# ・中黒変換
-	while($text =~ /<br>・(.*?)<br>/){
-		$text =~ s/<br>・(.*?)<br>/<br><font color=$bullet>・$1<\/font><br>/;
-	}
-	# 最初につけた<br>を取り外す
-	$text = substr($text,4,length($text) - 8);
+	my $name = $form->Get('FROM');
+	my $mail = $form->Get('mail');
+	my $text = $form->Get('MESSAGE');
 	
-	return $text;
+	my $point = 0;
+	
+	if ($ENV{'REMOTE_HOST'} eq (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR})) {
+		$point += $nohost_point;
+	}
+	if ($name ne '' && $name !~ /[^\x09\x0a\x0d\x20-\x7e]/) {
+		$point += $name_ascii_point;
+	}
+	if ($mail =~ /@/) {
+		$point += $mail_atsign_point;
+	}
+	if ($text =~ /&lt;a href=|\[url=/i) {
+		$point += $text_ahref_point;
+	}
+	if ($text =~ m|http://|) {
+		$point += $text_url_point;
+	}
+	
+	if ('ASCII text') {
+		$text =~ s/<br>//gi;
+		$text =~ s/[\x00-\x1f\x7f\s]//g;
+		my $c_asc = @_ = $text =~ /[\x20-\x7e]/g;
+		my $c_nasc = @_ = $text =~ /[^\x20-\x7e]/g;
+		if ($c_asc * 100 >= ($c_asc + $c_nasc) * $text_ascii_ratio) {
+			$point += $text_ascii_point;
+		}
+	}
+	
+	if ('TLD of links' && $text_url_point == 0) {
+		my %tld2pt = ('*' => 0);
+		my $r_num = '^-?[0-9]+$';
+		my $r_tld = '^[a-z](?:[a-z0-9\-](?:[a-z0-9])?)?$|^\*$';
+		
+		# 設定文を解釈し点数マップを作成
+		foreach (split(/[^0-9a-zA-Z\-=,\*]/, $tldomain_setting)) {
+			my @buf = split(/[=,]/, $_);
+			my @num = grep { /$r_num/ } @buf;
+			if (scalar(@num) == 1) {
+				map { $tld2pt{$_} = $num[0] } grep { /$r_tld/i } @buf;
+			} elsif (scalar(@num) > 1) {
+				foreach (split(/,/, $_)) {
+					my @buf2 = split(/=/, $_);
+					next if (!defined (my $p = pop @{[grep { /$r_num/ } @buf2]}));
+					map { $tld2pt{$_} = $p } grep { /$r_tld/i } @buf2;
+				}
+			}
+		}
+		
+		# 本文リンクからTLDを抽出し重複排除
+		my @tldlist = keys %{ {map { pop(@{[split(/\./, $_)]}), 1 }
+						($text =~ m|http://([a-z0-9\-\.]+)|gi)} };
+		
+		# TLDの種類ごとに加点
+		foreach my $tld (@tldlist) {
+			$tld = '*' if (!defined $tld2pt{$tld});
+			$point += $tld2pt{$tld};
+		}
+	}
+	
+	if ($point >= $threshold_point) {
+		return 1;
+	}
+	
+	return 0;
 }
+
 #============================================================================================================
 #	Module END
 #============================================================================================================

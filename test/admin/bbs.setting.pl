@@ -489,6 +489,16 @@ sub PrintLimitSetting
 	my $setTateHour		= $Setting->Get('BBS_TATESUGI_HOUR');
 	my $setTateCount	= $Setting->Get('BBS_TATESUGI_COUNT');
 
+    my $setAskiiPoint	= $Setting->Get('BBS_SPAMKILLI_ASKII');
+	my $setMailPoint	= $Setting->Get('BBS_SPAMKILLI_MAIL');
+	my $setHostPoint	= $Setting->Get('BBS_SPAMKILLI_HOST');
+	my $setURLPoint		= $Setting->Get('BBS_SPAMKILLI_URL');
+	my $setAskiiMessage	= $Setting->Get('BBS_SPAMKILLI_MESSAGE');
+	my $setSpamLink		= $Setting->Get('BBS_SPAMKILLI_LINK');
+	my $setMesPoint		= $Setting->Get('BBS_SPAMKILLI_MESPOINT');
+	my $setDomain		= $Setting->Get('BBS_SPAMKILLI_DOMAIN');
+	my $setSpamPoint	= $Setting->Get('BBS_SPAMKILLI_POINT');
+
 	# 改造版で追加
 	my $hCaptcha		= ($Setting->Get('BBS_HCAPTCHA') eq 'on'?'checked':'');
 	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY') eq undef || $Sys->Get('HCAPTCHA_SECRETKEY') eq undef) ? 'hCaptchaが設定されていません':'有効');
@@ -564,7 +574,20 @@ sub PrintLimitSetting
 	$Page->Print("<input type=text size=5 name=BBS_TATESUGI_HOUR value=\"$setTateHour\" style=\"text-align: right\">時間(0で無効)に");
 	$Page->Print("全体で<input type=text size=5 name=BBS_TATESUGI_COUNT value=\"$setTateCount\" style=\"text-align: right\">スレッドまで立てられる");
 	$Page->Print("</td></tr>");
-
+    
+    $Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
+	$Page->Print("<tr><td colspan=4>");
+	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASKII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("本文のASCIIの割合が<input type=text size=3 name=BBS_SPAMKILL_MESSAGE value=\"$setAskiiMessage\" style=\"text-align: right\" maxlength=\"3\">％以上で");
+	$Page->Print("<input type=text size=3 name=BBS_SPAMKILL_MESPOINT value=\"$setMesPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("メール欄に半角\@を含むと<input type=text size=3 name=BBS_SPAMKILL_MAIL value=\"$setMailPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("ホスト名が逆引き不可だと&#009;<input type=text size=3 name=BBS_SPAMKILL_HOST value=\"$setHostPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("本文に<;a href=か[url=を含むと<input type=text size=3 name=BBS_SPAMKILL_URL value=\"$setURLPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("本文にリンクを含むと<input type=text size=3 name=BBS_SPAMKILL_LINK value=\"$setSpamLink\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("（↑が0の時のみ）本文中リンクのTLドメインの種類<input type=text size=30 name=BBS_SPAMKILL_DOMAIN value=\"$setDomain\" style=\"text-align: right\">でポイント加点<br>");
+	$Page->Print("合計<input type=text size=3 name=BBS_SPAMKILL_POINT value=\"$setSpamPoint\" style=\"text-align: right\" maxlength=\"2\">ポイントでスパムと判定");
+	$Page->Print("</td></tr>");
+    
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETLIMIT');\"></td></tr></table>");
@@ -858,7 +881,9 @@ sub FunctionLimitSetting
 		my @inList = qw(BBS_SUBJECT_COUNT BBS_NAME_COUNT BBS_MAIL_COUNT BBS_MESSAGE_COUNT
 						BBS_LINE_NUMBER BBS_COLUMN_NUMBER BBS_DATMAX
 						timecount timeclose BBS_THREAD_TATESUGI BBS_TATESUGI_COUNT2
-						BBS_TATESUGI_HOUR BBS_TATESUGI_COUNT);
+						BBS_TATESUGI_HOUR BBS_TATESUGI_COUNT BBS_SPAMKILL_ASKII BBS_SPAMKILL_MAIL
+						BBS_SPAMKILL_HOST BBS_SPAMKILL_URL BBS_SPAMKILL_MESSAGE BBS_SPAMKILL_LINK
+						BBS_SPAMKILL_MESPOINT BBS_SPAMKILL_POINT);
 		# 入力有無
 		if (! $Form->IsInput(\@inList)) {
 			return 1001;
@@ -906,6 +931,16 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_TATESUGI_HOUR', $Form->Get('BBS_TATESUGI_HOUR'));
 	$Setting->Set('BBS_TATESUGI_COUNT', $Form->Get('BBS_TATESUGI_COUNT'));
 	$Setting->Set('BBS_TATESUGI_COUNT2', $Form->Get('BBS_TATESUGI_COUNT2'));
+
+	$Setting->Set('BBS_SPAMKILLI_ASKII', $Form->Get('BBS_SPAMKILL_ASKII'));
+	$Setting->Set('BBS_SPAMKILLI_MAIL', $Form->Get('BBS_SPAMKILL_MAIL'));
+	$Setting->Set('BBS_SPAMKILLI_HOST', $Form->Get('BBS_SPAMKILL_HOST'));
+	$Setting->Set('BBS_SPAMKILLI_URL', $Form->Get('BBS_SPAMKILL_URL'));
+	$Setting->Set('BBS_SPAMKILLI_MESSAGE', $Form->Get('BBS_SPAMKILL_MESSAGE'));
+	$Setting->Set('BBS_SPAMKILLI_LINK', $Form->Get('BBS_SPAMKILL_LINK'));
+	$Setting->Set('BBS_SPAMKILLI_MESPOINT', $Form->Get('BBS_SPAMKILL_MESPOINT'));
+	$Setting->Set('BBS_SPAMKILLI_DOMAIN', $Form->Get('BBS_SPAMKILL_DOMAIN'));
+	$Setting->Set('BBS_SPAMKILLI_POINT', $Form->Get('BBS_SPAMKILL_POINT'));
 
 	# 改造版で追加
 	if($Sys->Get('HCAPTCHA_SITEKEY') ne undef && $Sys->Get('HCAPTCHA_SECRETKEY') ne undef){

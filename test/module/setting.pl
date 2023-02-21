@@ -352,6 +352,16 @@ sub InitSettingData
 		'BBS_TATESUGI_COUNT2'		=> '1',
 		'BBS_INDEX_LINE_NUMBER'		=> 12,
 
+        'BBS_SPAMKILLI_ASKII'	=> 2,
+		'BBS_SPAMKILLI_MAIL'	=> 5,
+		'BBS_SPAMKILLI_HOST'	=> 7,
+		'BBS_SPAMKILLI_URL'		=> 5,
+		'BBS_SPAMKILLI_MESSAGE'	=> 95,
+		'BBS_SPAMKILLI_LINK'	=> 3,
+		'BBS_SPAMKILLI_MESPOINT'=> 2,
+		'BBS_SPAMKILLI_DOMAIN'	=> 'jp,com,net,org=2;*=3',,
+		'BBS_SPAMKILLI_POINT'	=> 10
+
 		# 改造版で追加部分
 		'BBS_HCAPTCHA'			=> '',
 		'BBS_READTYPE'			=> '5ch',
