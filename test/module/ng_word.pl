@@ -124,8 +124,10 @@ sub Add
 	my ($word, $repl) = @_;
 	
 	return if (!defined $word || $word eq '');
-	$word =~ s/</&lt;/g;
-	$word =~ s/>/&gt;/g;
+    if($word !~ /^!reg:/){
+	    $word =~ s/</&lt;/g;
+	    $word =~ s/>/&gt;/g;
+    }
 	push @{$this->{'NGWORD'}}, $word;
 	if (defined $repl) {
 		$repl =~ s/</&lt;/g;
@@ -200,11 +202,16 @@ sub Check
 {
 	my $this = shift;
 	my ($Form, $pList) = @_;
-	
+	my $regexWord;
 	foreach my $word (@{$this->{'NGWORD'}}) {
 		next if ($word eq '');
 		foreach my $key (@$pList) {
 			my $work = $Form->Get($key);
+            if($word =~ /^(!reg:)/&& $word !~ /\Q(?{\E/ && $word !~ /\Q(??{\E/){
+                $regexWord = substr($word,5);
+                if ($work =~ /$regexWord/){return 3;}
+            }
+            else{
 			if ($work =~ /\Q$word\E/) {
 				if ($this->{'METHOD'} eq 'host') {
 					return 2;
@@ -216,6 +223,7 @@ sub Check
 					return 1;
 				}
 			}
+            }
 		}
 	}
 	return 0;

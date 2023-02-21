@@ -517,7 +517,7 @@ sub PrintNGWordsEdit
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">NGワード一覧");
-	$Page->Print("<br><br>NGワード<br>NGワード&lt;&gt;置換文字列</td><td>");
+	$Page->Print("<br><br>NGワード<br>NGワード&lt;&gt;置換文字列<br>!reg:正規表現によるNGワード</td><td>");
 	$Page->Print("<textarea name=NG_WORDS rows=10 cols=70 wrap=off>");
 	
 	my $sanitize = sub {
