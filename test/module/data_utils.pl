@@ -266,7 +266,7 @@ sub ConvertQuotation
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	特殊引用変換 - ConvertSpecialQuotation
+#	引用変換 - ConvertQuotation
 #	--------------------------------------------
 #	引　数：$Sys : SYSTEMオブジェクト
 #			$text : 変換テキスト
@@ -274,22 +274,115 @@ sub ConvertQuotation
 #	戻り値：変換後のメッセージ
 #
 #------------------------------------------------------------------------------------------------------------
-sub ConvertSpecialQuotation
+sub ConvertQuotation
 {
 	my $this = shift;
 	my ($Sys, $text, $mode) = @_;
 	
-	if ($mode ne 'O') {
-		my @lines = split(/<br>/, $text, -1);
-		map {
-			$_ = "<font color=gray>$_</font>" if (/^＞/);
-			$_ = "<font color=green>$_</font>" if (/^#/);
-		} @lines;
-		return join('<br>', @lines);
+	# 時間による制限有り
+	return $text if ($Sys->Get('LIMTIME'));
+	
+	my $pathCGI = $Sys->Get('SERVER') . $Sys->Get('CGIPATH');
+	
+	if ($Sys->Get('PATHKIND')) {
+		# URLベースを生成
+		my $buf = '<a class=reply_link rel="noopener noreferrer" href="';
+		$buf .= $pathCGI . ($mode ? '/r.cgi' : '/read.cgi');
+		$buf .= '?bbs=' . $Sys->Get('BBS') . '&key=' . $Sys->Get('KEY');
+		$buf .= '&nofirst=true';
+		
+		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
+					{$buf&st=$1&to=$2" target="_blank">>>$1-$2</a>}g;
+		$$text =~ s{&gt;&gt;([1-9][0-9]*)-(?!0)}
+					{$buf&st=$1&to=-1" target="_blank">>>$1-</a>}g;
+		$$text =~ s{&gt;&gt;-([1-9][0-9]*)}
+					{$buf&st=1&to=$1" target="_blank">>>$1-</a>}g;
+		$$text =~ s{&gt;&gt;([1-9][0-9]*)}
+					{$buf&st=$1&to=$1" target="_blank">>>$1</a>}g;
 	}
+	else{
+		# URLベースを生成
+		my $buf = '<a class=reply_link rel="noopener noreferrer" href="';
+		$buf .= $pathCGI . ($mode eq 'O' ? '/r.cgi/' : '/read.cgi/');
+		$buf .= $Sys->Get('BBS') . '/' . $Sys->Get('KEY');
+		
+		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
+					{$buf/$1-$2n" target="_blank">>>$1-$2</a>}g;
+		$$text =~ s{&gt;&gt;([1-9][0-9]*)-(?!0)}
+					{$buf/$1-" target="_blank">>>$1-</a>}g;
+		$$text =~ s{&gt;&gt;-([1-9][0-9]*)}
+					{$buf/-$1" target="_blank">>>-$1</a>}g;
+		$$text =~ s{&gt;&gt;([1-9][0-9]*)}
+					{$buf/$1" target="_blank">>>$1</a>}g;
+	}
+	$$text	=~ s{>>(?=[1-9])}{&gt;&gt;}g;
+	
 	return $text;
 }
 
+#------------------------------------------------------------------------------------------------------------
+#
+#	特殊引用変換 - ConvertSpecialQuotation
+#	--------------------------------------------
+#	引　数：$Sys	SYSTEM
+#           $text : 変換テキスト
+#	戻り値：変換後のメッセージ
+#
+#------------------------------------------------------------------------------------------------------------
+sub ConvertSpecialQuotation
+{
+	my $this = shift;
+	my	($Sys, $text) = @_;
+	
+	$$text = '<br>' . $$text . '<br>';
+	
+	# ＞引用変換
+	while($$text =~ /<br> ＞(.*?)<br>/){
+		$$text =~ s/<br> ＞(.*?)<br>/<br><font color=gray>＞$1<\/font><br>/;
+	}
+	# ＃引用変換
+	while($$text =~ /<br> ＃(.*?)<br>/){
+		$$text =~ s/<br> ＃(.*?)<br>/<br><font color=green>＃$1<\/font><br>/;
+	}
+	# #引用変換
+	while($$text =~ /<br> #(.*?)<br>/){
+		$$text =~ s/<br> #(.*?)<br>/<br><font color=green>#$1<\/font><br>/;
+	}
+	
+	# 最初につけた<br>を取り外す
+	$$text = substr($$text,4,length($$text) - 8);
+	
+	return $text;
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	画像タグ変換
+#	-------------------------------------------------------------------------------------
+#	引数    	$Sys	SYSTEM
+#	    	$limit	リンク時間制限
+#	    	$text	対象文字列
+#	戻り値	変換後のメッセージ
+#
+#------------------------------------------------------------------------------------------------------------
+sub ConvertImageTag
+{
+	my $this = shift;
+	my ($Sys,$limit, $text) = @_;
+	
+	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
+		$$text =~ s/(https?:\/\/.*?\.jpe?g)/<img src="$1" width=100 height=100\/>/g;
+		$$text =~ s/(https?:\/\/.*?\.gif)/<img src="$1" width=100 height=100\/>/g;
+		$$text =~ s/(https?:\/\/.*?\.bmp)/<img src="$1" width=100 height=100\/>/g;
+		$$text =~ s/(https?:\/\/.*?\.png)/<img src="$1" width=100 height=100\/>/g;
+	}
+	else{
+		$$text =~ s/<a.*?>(.*?\.jpe?g)<\/a>/<img src="$1" width=100 height=100\/>/g;
+		$$text =~ s/<a.*?>(.*?\.gif)<\/a>/<img src="$1" width=100 height=100\/>/g;
+		$$text =~ s/<a.*?>(.*?\.bmp)<\/a>/<img src="$1" width=100 height=100\/>/g;
+		$$text =~ s/<a.*?>(.*?\.png)<\/a>/<img src="$1" width=100 height=100\/>/g;
+	}
+	return $text;
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	テキスト削除 - DeleteText

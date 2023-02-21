@@ -550,10 +550,13 @@ sub PrintResponse
 	my $nameCol	= $Set->Get('BBS_NAME_COLOR');
 	my $type = $Set->Get('BBS_READTYPE');
 	my $color = $Set->Get('BBS_POSTCOLOR');
+    my $limit =$Sys->Get('LIMTIME');
 	
 	# URLと引用個所の適応
-	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3]);
+	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
+	$Conv->ConvertSpecialQuotation(\$elem[3]);
+	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
 	# メール欄有り
 	if ($elem[1] eq '') {
 		$Mail = "<font color=\"$nameCol\"><b>$elem[0]</b></font>";
@@ -568,18 +571,7 @@ sub PrintResponse
 	foreach my $command (@$commands) {
 		$command->execute($Sys, undef, 4);
 	}
-	if($Sys->Get('IMGTAG')){
-		if($Sys->Get('LIMTIME')){
-			$elem[3] =~ s/(http:\/\/.*?\.jpg)/<img src="$1" width=100 height=100\/>/g;
-			$elem[3] =~ s/(http:\/\/.*?\.gif)/<img src="$1" width=100 height=100\/>/g;
-			$elem[3] =~ s/(http:\/\/.*?\.bmp)/<img src="$1" width=100 height=100\/>/g;
-		}
-		else{
-			$elem[3] =~ s/<a.*?>(.*?\.jpg)<\/a>/<img src="$1" width=100 height=100\/>/g;
-			$elem[3] =~ s/<a.*?>(.*?\.gif)<\/a>/<img src="$1" width=100 height=100\/>/g;
-			$elem[3] =~ s/<a.*?>(.*?\.bmp)<\/a>/<img src="$1" width=100 height=100\/>/g;
-		}
-	}
+
 	if($type eq "5ch"){
 	$Page->Print(<<HTML);
 <div id="$n" class="post" data-id="$n" style="background-color:$color">
