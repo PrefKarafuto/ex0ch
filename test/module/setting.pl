@@ -359,8 +359,8 @@ sub InitSettingData
 		'BBS_SPAMKILLI_MESSAGE'	=> 95,
 		'BBS_SPAMKILLI_LINK'	=> 3,
 		'BBS_SPAMKILLI_MESPOINT'=> 2,
-		'BBS_SPAMKILLI_DOMAIN'	=> 'jp,com,net,org=2;*=3',,
-		'BBS_SPAMKILLI_POINT'	=> 10
+		'BBS_SPAMKILLI_DOMAIN'	=> 'jp,com,net,org=2;*=3',
+		'BBS_SPAMKILLI_POINT'	=> 10,
 
 		# 改造版で追加部分
 		'BBS_HCAPTCHA'			=> '',
