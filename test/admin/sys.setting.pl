@@ -454,6 +454,8 @@ sub PrintLimitterSetting
 	$Page->Print("<td><input type=text size=10 name=HSTMAX value=\"$vSYS[4]\" ></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">管理操作ログ最大保持数</td>");
 	$Page->Print("<td><input type=text size=10 name=ADMMAX value=\"$vSYS[5]\" ></td></tr>\n");
+    $Page->Print("<tr style=\"opacity:0.5\"><td class=\"DetailTitle\">ユーザー書き込み失敗ログ最大保持数</td>");
+	$Page->Print("<td><input type=text size=10 name=MISSMAX disabled></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");

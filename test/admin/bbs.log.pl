@@ -83,6 +83,9 @@ sub DoPrint
 	elsif ($subMode eq 'ERRORLOG') {												# エラーログ画面
 		PrintLogs($Page, $Sys, $Form, 2);
 	}
+    elsif ($subMode eq 'MISSLOG') {												    # 書き込み失敗ログ画面
+		PrintLogs($Page, $Sys, $Form, 3);
+	}
 	elsif ($subMode eq 'COMPLETE') {												# 完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
 		$BASE->PrintComplete('ログ操作処理', $this->{'LOG'});
@@ -163,7 +166,8 @@ sub SetMenuList
 	
 	$Base->SetMenu('ログ情報', "'bbs.log','DISP','INFO'");
 	$Base->SetMenu('<hr>', '');
-	
+	$Base->SetMenu('<span style="opacity:0.5">書き込み失敗ログ</span>', "'bbs.log','DISP','MISSLOG'");
+	$Base->SetMenu('<hr>', '');
 	# ログ閲覧権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $bbs)) {
 		$Base->SetMenu('スレッド作成ログ', "'bbs.log','DISP','THREADLOG'");
@@ -192,6 +196,7 @@ sub PrintLogsInfo
 	$logFiles[0] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/IP.cgi';
 	$logFiles[1] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST.cgi';
 	$logFiles[2] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/errs.cgi';
+    $logFiles[3] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/miss.cgi';
 	
 	$Sys->Set('_TITLE', 'Log Information');
 	
@@ -203,9 +208,9 @@ sub PrintLogsInfo
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Last Update</td></tr>\n");
 	
 	require './module/data_utils.pl';
-	my @logKind = ('スレッド作成ログ', 'ホストログ', 'エラーログ');
+	my @logKind = ('スレッド作成ログ', 'ホストログ', 'エラーログ', '書き込み失敗ログ');
 	
-	for ($i = 0 ; $i < 3 ; $i++) {
+	for ($i = 0 ; $i < 4 ; $i++) {
 		$size = (stat $logFiles[$i])[7];
 		$date = (stat _)[9];
 		$date = DATA_UTILS::GetDateFromSerial(undef, $date, 0);
@@ -249,6 +254,7 @@ sub PrintLogs
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/IP'	if ($mode == 0);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST'	if ($mode == 1);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/errs'	if ($mode == 2);
+    $logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/miss'	if ($mode == 3);
 	$Logger->Open($logFile, 0, 1 | 2);
 	
 	$keyNum = 'DISPNUM_' . $Form->Get('MODE_SUB');
@@ -286,6 +292,11 @@ sub PrintLogs
 	elsif ($mode == 2) {
 		$Page->Print("<td class=\"DetailTitle\">Error Code</td>");
 		$Page->Print("<td class=\"DetailTitle\">Script ver.</td>");
+		$Page->Print("<td class=\"DetailTitle\">HOST</td></tr>\n");
+	}
+    elsif ($mode == 3) {
+		$Page->Print("<td class=\"DetailTitle\">Error Code</td>");
+		$Page->Print("<td class=\"DetailTitle\">Regulated Message</td>");
 		$Page->Print("<td class=\"DetailTitle\">HOST</td></tr>\n");
 	}
 	
