@@ -734,6 +734,7 @@ sub PrintResponse
 	
 	my $Sys = $this->{'SYS'};
 	my $Conv = $this->{'CONV'};
+    my $Sys = $this->{'SET'};
 	
 	my $pdat = $Dat->Get($n - 1);
 	return if (!defined $pdat);
@@ -745,12 +746,13 @@ sub PrintResponse
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
 	
 	# URLと引用個所の適応
-    #$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_YOUNICO'));
-	#$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWEET'));
-	$Conv->ConvertURL($Sys, $this->{'SET'}, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
+    $Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
+    $Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
+	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
+	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
-	$Conv->ConvertSpecialQuotation($Sys, \$elem[3]);
-    $Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'), \$elem[3])if($Sys->Get('IMGTAG'));
+	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');;
+	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
 	
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);

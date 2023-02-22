@@ -649,10 +649,16 @@ sub PrintOtherSetting
 	my $setConfirm		= $Setting->Get('BBS_NEWSUBJECT');
 	my $setWeek			= $Setting->Get('BBS_YMD_WEEKS');
 	my $setTripColumn	= $Setting->Get('BBS_TRIPCOLUMN');
+	my $setImgur    	= $Setting->Get('BBS_IMGUR');
+	my $setTwitter    	= $Setting->Get('BBS_TWITTER');
+	my $setMovie    	= $Setting->Get('BBS_MOVIE');
+	my $setURLtoTitle   = $Setting->Get('BBS_URL_TITLE');
+	my $setImage    	= $Sys->Get('BBS_IMAGE');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
 	$setConfirm			= ($setConfirm eq '1' ? 'checked' : '');
+    $setImage			= ($setImage eq '1' ? 'checked' : '');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -698,19 +704,19 @@ sub PrintOtherSetting
     $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("</td>");
 	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
-	$Page->Print("<!--<input type=checkbox name=BBS_IMGTAG value=on disabled>-->システム設定に依存</tr>");
+	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">Imgur 埋め込み表示</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on disabled>有効</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">Imgur 埋め込み表示</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on $setImgur>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">Twitter 埋め込み表示</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on disabled>有効</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">Twitter 埋め込み表示</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setTwitter>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">Youtube/niconico 埋め込み表示</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_MOVIE value=on disabled>有効</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">Youtube/niconico 埋め込み表示</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_MOVIE value=on $setMovie>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">本文中スレURLをスレタイに変換</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on disabled>有効</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">本文中スレURLをスレタイに変換</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setURLtoTitle>有効</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
@@ -1031,6 +1037,12 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_YMD_WEEKS', $Form->Get('BBS_YMD_WEEKS'));
 	$Setting->Set('BBS_TRIPCOLUMN', $Form->Get('BBS_TRIPCOLUMN'));
 	$Setting->Set('BBS_SLIP', ($Form->Equal('BBS_SLIP', 'on') ? 'checked' : ''));
+
+    $Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
+    #$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	
 	# ID表示設定
 	# 酷いけど仕方ないね…

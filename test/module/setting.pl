@@ -352,6 +352,7 @@ sub InitSettingData
 		'BBS_TATESUGI_COUNT2'		=> '1',
 		'BBS_INDEX_LINE_NUMBER'		=> 12,
 
+		# 改造版で追加部分
         'BBS_SPAMKILLI_ASKII'	=> 2,
 		'BBS_SPAMKILLI_MAIL'	=> 5,
 		'BBS_SPAMKILLI_HOST'	=> 7,
@@ -362,7 +363,16 @@ sub InitSettingData
 		'BBS_SPAMKILLI_DOMAIN'	=> 'jp,com,net,org=2;*=3',
 		'BBS_SPAMKILLI_POINT'	=> 10,
 
-		# 改造版で追加部分
+        'BBS_IMGTAG'            => '',
+        'BBS_IMGUR'             => '',
+        'BBS_TWITTER'           => '',
+        'BBS_MOVIE'             => '',
+        'BBS_URL_TITLE'         => '',
+        'BBS_HIGHLIGHT'         => 'checked',
+
+        'BBS_TASUKERUYO'        => '',
+        'BBS_OMIKUJI'           => '',
+
 		'BBS_HCAPTCHA'			=> '',
 		'BBS_READTYPE'			=> '5ch',
 		'BBS_POSTCOLOR'			=> '#FFFFFF',
