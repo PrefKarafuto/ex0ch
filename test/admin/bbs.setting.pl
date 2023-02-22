@@ -653,12 +653,12 @@ sub PrintOtherSetting
 	my $setTwitter    	= $Setting->Get('BBS_TWITTER');
 	my $setMovie    	= $Setting->Get('BBS_MOVIE');
 	my $setURLtoTitle   = $Setting->Get('BBS_URL_TITLE');
-	my $setImage    	= $Sys->Get('BBS_IMAGE');
+	my $setImage    	= $Sys->Get('IMGTAG');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
 	$setConfirm			= ($setConfirm eq '1' ? 'checked' : '');
-    $setImage			= ($setImage eq '1' ? 'checked' : '');
+	$setImage			= ($setImage eq '1' ? 'checked' : '');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
