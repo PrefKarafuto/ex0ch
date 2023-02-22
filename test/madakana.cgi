@@ -273,7 +273,7 @@ sub PrintMadaFoot
 <hr>
 
 <div>
-<a href="http://zerochplus.sourceforge.jp/">ぜろちゃんねるプラス</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
 MADAKANA.CGI - $ver
 </div>
 
