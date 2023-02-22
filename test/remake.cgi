@@ -52,7 +52,6 @@ sub REMAKECGI
 		# index.html
 		$BBSAid->Init($Sys, $SYS{'SET'});
 		$BBSAid->CreateIndex();
-		$BBSAid->CreateIIndex();
 		$BBSAid->CreateSubback();
 		
 		PrintBBSJump(\%SYS, $Page);
@@ -146,26 +145,16 @@ sub PrintBBSJump
 	$SYS		= $Sys->{'SYS'};
 	$bbsPath	= $SYS->Get('BBS_REL');
 	
-	# 携帯用表示
-	if ($SYS->Get('CLIENT') & $ZP::C_MOBILEBROWSER) {
-		$Page->Print("Content-type: text/html\n\n");
-		$Page->Print('<!--nobanner--><html><body>indexを更新しました。<br>');
-		$Page->Print("<a href=\"$bbsPath/i/\">こちら</a>");
-		$Page->Print("から掲示板へ戻ってください。\n");
-	}
-	# PC用表示
-	else {
-		my $oSET = $Sys->{'SET'};
-		
-		$Page->Print("Content-type: text/html\n\n<html><head><title>");
-		$Page->Print('indexを更新しました。</title><!--nobanner-->');
-		$Page->Print('<meta http-equiv="Content-Type" content="text/html; ');
-		$Page->Print("charset=Shift_JIS\"><meta content=0;URL=$bbsPath/ ");
-		$Page->Print('http-equiv=refresh></head><body>indexを更新しました。');
-		$Page->Print('<br><br>画面を切り替えるまでしばらくお待ち下さい。');
-		$Page->Print('<br><br><br><br><br><hr>');
-		
-	}
+	my $oSET = $Sys->{'SET'};
+	
+	$Page->Print("Content-type: text/html\n\n<html><head><title>");
+	$Page->Print('indexを更新しました。</title><!--nobanner-->');
+	$Page->Print('<meta http-equiv="Content-Type" content="text/html; ');
+	$Page->Print("charset=Shift_JIS\"><meta content=0;URL=$bbsPath/ ");
+	$Page->Print('http-equiv=refresh></head><body>indexを更新しました。');
+	$Page->Print('<br><br>画面を切り替えるまでしばらくお待ち下さい。');
+	$Page->Print('<br><br><br><br><br><hr>');
+
 	# 告知欄表示(表示させたくない場合はコメントアウトか条件を0に)
 	if (0) {
 		require './module/banner.pl';

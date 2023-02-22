@@ -633,7 +633,6 @@ sub FunctionBBSCreate
 	}
 	
 	# サブディレクトリ生成
-	FILE_UTILS::CreateDirectory("$createPath/i", $Sys->Get('PM-BDIR'));
 	FILE_UTILS::CreateDirectory("$createPath/dat", $Sys->Get('PM-BDIR'));
 	FILE_UTILS::CreateDirectory("$createPath/log", $Sys->Get('PM-LDIR'));
 	FILE_UTILS::CreateDirectory("$createPath/kako", $Sys->Get('PM-BDIR'));
@@ -697,7 +696,6 @@ sub FunctionBBSCreate
 	$Sys->Set('MODE', 'CREATE');
 	$BBSAid->Init($Sys, $bbsSetting);
 	$BBSAid->CreateIndex();
-	$BBSAid->CreateIIndex();
 	$BBSAid->CreateSubback();
 	
 	push @$pLog, '■掲示板構成要素生成完了...';
@@ -762,7 +760,6 @@ sub FunctionBBSUpdate
 		$Sys->Set('MODE', 'CREATE');
 		$BBSAid->Init($Sys, undef);
 		$BBSAid->CreateIndex();
-		$BBSAid->CreateIIndex();
 		$BBSAid->CreateSubback();
 		
 		push @$pLog, "■掲示板「$name」を更新しました。";

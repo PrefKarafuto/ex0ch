@@ -58,7 +58,6 @@ sub BBSCGI
 				
 				$BBSAid->Init($Sys, $Set);
 				$BBSAid->CreateIndex();
-				$BBSAid->CreateIIndex();
 				$BBSAid->CreateSubback();
 			}
 			PrintBBSJump($CGI, $Page);
@@ -76,11 +75,6 @@ sub BBSCGI
 		# cookie確認画面表示
 		elsif ($err == $ZP::E_PAGE_COOKIE) {
 			PrintBBSCookieConfirm($CGI, $Page);
-			$err = $ZP::E_SUCCESS;
-		}
-		# 携帯からのスレッド作成画面表示
-		elsif ($err == $ZP::E_PAGE_THREADMOBILE) {
-			PrintBBSMobileThreadCreate($CGI, $Page);
 			$err = $ZP::E_SUCCESS;
 		}
 		# エラー画面表示
@@ -176,12 +170,6 @@ sub Initialize
 	# SETTING.TXTの読み込み
 	if (!$Set->Load($Sys)) {
 		return $ZP::E_POST_NOTEXISTBBS;
-	}
-	
-	# 携帯からのスレッド作成フォーム表示
-	# $S->Equal('AGENT', 'O') && 
-	if ($Form->Equal('mb', 'on') && $Form->Equal('thread', 'on')) {
-		return $ZP::E_PAGE_THREADMOBILE;
 	}
 	
 	my $submax = $Set->Get('BBS_SUBJECT_MAX') || $Sys->Get('SUBMAX');
@@ -395,48 +383,6 @@ HTML
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	bbs.cgiスレッド作成ページ(携帯)表示
-#	-------------------------------------------------------------------------------------
-#	@param	$CGI	
-#	@param	$Page	BUFFER_OUTPUT
-#	@return	なし
-#
-#------------------------------------------------------------------------------------------------------------
-sub PrintBBSMobileThreadCreate
-{
-	my ($CGI, $Page) = @_;
-	
-	my $Sys = $CGI->{'SYS'};
-	my $Set = $CGI->{'SET'};
-	
-	require './module/banner.pl';
-	my $Banner = BANNER->new;
-	$Banner->Load($Sys);
-	
-	my $title = $Set->Get('BBS_TITLE');
-	my $bbs = $Sys->Get('BBS');
-	my $tm = int(time);
-	
-	$Page->Print("Content-type: text/html\n\n");
-	$Page->Print("<html><head><title>$title</title></head><!--nobanner-->");
-	$Page->Print("\n<body><form action=\"./bbs.cgi?guid=ON\" method=\"POST\"><center>$title<hr>");
-	
-	$Banner->Print($Page, 100, 2, 1);
-	
-	$Page->Print("</center>\n");
-	$Page->Print("タイトル<br><input type=text name=subject><br>");
-	$Page->Print("名前<br><input type=text name=FROM><br>");
-	$Page->Print("メール<br><input type=text name=mail><br>");
-	$Page->Print("<textarea name=MESSAGE></textarea><br>");
-	$Page->Print("<input type=hidden name=bbs value=$bbs>");
-	$Page->Print("<input type=hidden name=time value=$tm>");
-	$Page->Print("<input type=hidden name=mb value=on>");
-	$Page->Print("<input type=submit value=\"スレッド作成\">");
-	$Page->Print("</form></body></html>");
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
 #	bbs.cgiクッキー確認ページ表示
 #	-------------------------------------------------------------------------------------
 #	@param	$CGI	
@@ -577,26 +523,16 @@ sub PrintBBSJump
 	my $Conv = $CGI->{'CONV'};
 	my $Cookie = $CGI->{'COOKIE'};
 	
-	# 携帯用表示
-	if ($Form->Equal('mb', 'on') || ($Sys->Get('CLIENT') & $ZP::C_MOBILEBROWSER) ) {
-		my $bbsPath = $Conv->MakePath($Sys->Get('CGIPATH').'/r.cgi/'.$Form->Get('bbs').'/'.$Form->Get('key').'/l10');
-		$Page->Print("Content-type: text/html\n\n");
-		$Page->Print('<!--nobanner--><html><body>書き込み完了です<br>');
-		$Page->Print("<a href=\"$bbsPath\">こちら</a>");
-		$Page->Print("から掲示板へ戻ってください。\n");
-	}
-	# PC用表示
-	else {
-		my $bbsPath = $Conv->MakePath($Sys->Get('BBS_REL'));
-		my $name = $Form->Get('NAME', '');
-		my $mail = $Form->Get('MAIL', '');
+	my $bbsPath = $Conv->MakePath($Sys->Get('BBS_REL'));
+	my $name = $Form->Get('NAME', '');
+	my $mail = $Form->Get('MAIL', '');
 		
-		$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
-		$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
-		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * 30);
+	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
+	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
+	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * 30);
 		
-		$Page->Print("Content-type: text/html\n\n");
-		$Page->Print(<<HTML);
+	$Page->Print("Content-type: text/html\n\n");
+	$Page->Print(<<HTML);
 <html>
 <head>
 	<title>書きこみました。</title>
@@ -616,7 +552,7 @@ sub PrintBBSJump
 <hr>
 HTML
 	
-	}
+
 	# 告知欄表示(表示させたくない場合はコメントアウトか条件を0に)
 	if (0) {
 		require './module/banner.pl';
