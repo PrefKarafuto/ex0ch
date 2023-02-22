@@ -721,7 +721,8 @@ sub PrintPluginSetting
 		my ($id, $file, $class, $name, $expl, $valid);
 		
 		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-		$Page->Print("<tr><td colspan=5>有効にする機能\にチェックを入れてください。</td></tr>\n");
+		$Page->Print("<tr><td colspan=5>有効にする機能\にチェックを入れてください。<br>");
+		$Page->Print("<br>※0.7.5以前のプラグイン及び旧ぜろちゃんねる用プラグインは使用できません。詳細はリリースノートを参照してください。</td></tr>\n");
 		$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 		$Page->Print("<tr>");
 		$Page->Print("<td class=\"DetailTitle\">Order</td>");
