@@ -605,7 +605,7 @@ sub PrintLimitSetting
 	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASKII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文のASCIIの割合が<input type=text size=3 name=BBS_SPAMKILL_MESSAGE value=\"$setAskiiMessage\" style=\"text-align: right\" maxlength=\"3\">％以上で");
 	$Page->Print("<input type=text size=3 name=BBS_SPAMKILL_MESPOINT value=\"$setMesPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
-	$Page->Print("メール欄に半角\@を含むと<input type=text size=3 name=BBS_SPAMKILL_MAIL value=\"$setMailPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("メール欄に半角＠を含むと<input type=text size=3 name=BBS_SPAMKILL_MAIL value=\"$setMailPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("ホスト名が逆引き不可だと&#009;<input type=text size=3 name=BBS_SPAMKILL_HOST value=\"$setHostPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文に<;a href=か[url=を含むと<input type=text size=3 name=BBS_SPAMKILL_URL value=\"$setURLPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文にリンクを含むと<input type=text size=3 name=BBS_SPAMKILL_LINK value=\"$setSpamLink\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
