@@ -359,8 +359,8 @@ sub ReadyBeforeWrite
 	$Sys->Set('_SET_', $this->{'SET'});
 	
 	$this->ExecutePlugin(16);
-	$this->OMIKUJI($Sys, $Form);
-	$this->tasukeruyo($Sys, $Form);
+	#$this->OMIKUJI($Sys, $Form);
+	#$this->tasukeruyo($Sys, $Form);
 	
 	my $text = $Form->Get('MESSAGE');
 	$text =~ s/<br>/ <br> /g;

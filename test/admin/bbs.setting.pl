@@ -389,6 +389,8 @@ sub PrintColorSetting
 	$Page->Print("<select name=\"BBS_READTYPE\"><option value=\"original\" $selOri>オリジナル</option><option value=\"5ch\" $sel5ch>5ch風</option></select>");
 	$Page->Print("<td class=\"DetailTitle\">レス背景色</td><td>");
 	$Page->Print("<input type=$selectType size=10 name=BBS_POSTCOLOR value=\"$setPost\">");
+    $Page->Print("<td class=\"DetailTitle\">#と＞を強調</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_HIGHLIGHT value=on disabled checked>有効</td>");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	
 	# スレッドプレビューの表示
@@ -406,8 +408,11 @@ sub PrintColorSetting
 		$Page->Print("</table><br></center></td>");
 		$Page->Print("<td colspan=3 bgcolor=$setThreadBG valign=top><font color=$setThreadTitle>");
 		$Page->Print("スレッドタイトル</font><br><br>1 <font color=$setName>名前＠<font color=$setCap>キャップ ★</font></font><br>");
+		$Page->Print("　<font color=$setText>本文テキスト</font><br>");
 		$Page->Print("　<font color=$setLink><u>http://---</u></font><br>");
-		$Page->Print("　<font color=$setLinkV><u>http://---</u></font><br>");
+		$Page->Print("　<font color=$setLinkV><u>http://---</u></font><br><br>");
+		$Page->Print("　<font color=green>#ハッシュタグ</font><br>");
+		$Page->Print("　<font color=gray>＞引用</font><br>");
 		$Page->Print("</td></tr>");
 		$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	}
@@ -425,8 +430,11 @@ sub PrintColorSetting
 		$Page->Print("</table><br></center></td>");
 		$Page->Print("<td colspan=3 bgcolor=$setThreadBG valign=top><font color=$setThreadTitle>");
 		$Page->Print("スレッドタイトル</font><br><br><div class=\"post\" style=\"background-color:$setPost;border-width: 1px;display: inline-block; padding: 8px;border-style: none solid solid none;border-color:#ddd;margin-bottom: 8px;\">1 <font color=$setName>名前＠<font color=$setCap>キャップ ★</font></font><br>");
+		$Page->Print("　<font color=$setText>本文テキスト</font><br>");
 		$Page->Print("　<font color=$setLink><u>http://---</u></font><br>");
-		$Page->Print("　<font color=$setLinkV><u>http://---</u></font></div><br>");
+		$Page->Print("　<font color=$setLinkV><u>http://---</u></font><br><br>");
+		$Page->Print("　<font color=green>#ハッシュタグ</font><br>");
+		$Page->Print("　<font color=gray>＞引用</font><br>");
 		$Page->Print("</td></tr>");
 		$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	}
@@ -547,6 +555,10 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>携帯から許可</td>");
 	$Page->Print("<td class=\"DetailTitle\">hCaptcha</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_HCAPTCHA $hCaptcha value=on $setCap>$setCapInfo</td></tr>");
+    $Page->Print("<tr><td class=\"DetailTitle\" style=\"opacity:0.5\">同一スレッド乱立禁止</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on disabled></td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">マルチポスト制限</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_MULTIPOST value=on disabled></td></tr>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -682,6 +694,23 @@ sub PrintOtherSetting
 	$Page->Print("<input type=text size=8 name=BBS_MAX_MENU_THREAD value=\"$setThreadMenu\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
+    
+    $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
+	$Page->Print("</td>");
+	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
+	$Page->Print("<!--<input type=checkbox name=BBS_IMGTAG value=on disabled>-->システム設定に依存</tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">Imgur 埋め込み表示</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on disabled>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">Twitter 埋め込み表示</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on disabled>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">Youtube/niconico 埋め込み表示</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_MOVIE value=on disabled>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">本文中スレURLをスレタイに変換</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on disabled>有効</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
