@@ -310,7 +310,7 @@ sub PrintColorSetting
 	my ($Page, $SYS, $Form, $flg) = @_;
 	my ($Setting);
 	my ($setIndexTitle, $setThreadTitle, $setIndexBG, $setThreadBG, $setCreateBG);
-	my ($setMenuBG, $setText, $setLink, $setLinkA, $setLinkV, $setName, $setCap, $setPost, $setType, $selectType);
+	my ($setMenuBG, $setText, $setLink, $setLinkA, $setLinkV, $setName, $setCap, $setPost, $setType, $selectType,$setHighlight);
 	my ($selOri,$sel5ch);
 	$SYS->Set('_TITLE', 'BBS Color Setting');
 	
@@ -340,6 +340,7 @@ sub PrintColorSetting
 	$setCap			= $Setting->Get('BBS_CAP_COLOR');
 	$setPost		= $Setting->Get('BBS_POSTCOLOR');
 	$setType		= $Setting->Get('BBS_READTYPE');
+    $setHighlight   = $Setting->Get('BBS_HIGHLIGHT');
 	
 	$selOri			= ($setType eq 'original' ? 'selected' : '');
 	$sel5ch			= ($setType eq '5ch' ? 'selected' : '');
@@ -390,7 +391,7 @@ sub PrintColorSetting
 	$Page->Print("<td class=\"DetailTitle\">レス背景色</td><td>");
 	$Page->Print("<input type=$selectType size=10 name=BBS_POSTCOLOR value=\"$setPost\">");
     $Page->Print("<td class=\"DetailTitle\">#と＞を強調</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_HIGHLIGHT value=on disabled checked>有効</td>");
+	$Page->Print("<input type=checkbox name=BBS_HIGHLIGHT value=on $setHighlight>有効</td>");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	
 	# スレッドプレビューの表示
@@ -411,8 +412,14 @@ sub PrintColorSetting
 		$Page->Print("　<font color=$setText>本文テキスト</font><br>");
 		$Page->Print("　<font color=$setLink><u>http://---</u></font><br>");
 		$Page->Print("　<font color=$setLinkV><u>http://---</u></font><br><br>");
-		$Page->Print("　<font color=green>#ハッシュタグ</font><br>");
-		$Page->Print("　<font color=gray>＞引用</font><br>");
+        if($setHighlight eq 'checked'){
+		    $Page->Print("　<font color=green>#ハッシュタグ</font><br>");
+		    $Page->Print("　<font color=gray>＞引用</font><br>");
+        }
+        else{
+            $Page->Print("  <font color=$setText>#ハッシュタグ</font><br>");
+            $Page->Print("  <font color=$setText>＞引用</font><br>");
+        }
 		$Page->Print("</td></tr>");
 		$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	}
@@ -433,8 +440,14 @@ sub PrintColorSetting
 		$Page->Print("　<font color=$setText>本文テキスト</font><br>");
 		$Page->Print("　<font color=$setLink><u>http://---</u></font><br>");
 		$Page->Print("　<font color=$setLinkV><u>http://---</u></font><br><br>");
-		$Page->Print("　<font color=green>#ハッシュタグ</font><br>");
-		$Page->Print("　<font color=gray>＞引用</font><br>");
+		if($setHighlight eq 'checked'){
+		    $Page->Print("　<font color=green>#ハッシュタグ</font><br>");
+		    $Page->Print("　<font color=gray>＞引用</font><br>");
+        }
+        else{
+            $Page->Print("  <font color=$setText>#ハッシュタグ</font><br>");
+            $Page->Print("  <font color=$setText>＞引用</font><br>");
+        }
 		$Page->Print("</td></tr>");
 		$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	}
@@ -874,6 +887,7 @@ sub FunctionColorSetting
 	$Setting->Set('BBS_CAP_COLOR', $capColor);
 	$Setting->Set('BBS_READTYPE', $Form->Get('BBS_READTYPE'));
 	$Setting->Set('BBS_POSTCOLOR', $Form->Get('BBS_POSTCOLOR'));
+    $Setting->Set('BBS_HIGHLIGHT', ($Form->Equal('BBS_HIGHLIGHT', 'on') ? 'checked' : ''));
 	
 	$Setting->Save($Sys);
 	
