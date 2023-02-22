@@ -83,6 +83,7 @@ our $E_REG_SAMBA_2CH2		= 599; # 2ch errnum
 our $E_REG_SAMBA_2CH3		= 594; # 2ch errnum
 our $E_REG_NGWORD			= 600;
 our $E_REG_NGUSER			= 601;
+our $E_REG_SPAMKILL			= 602;
 our $E_REG_NOTJPHOST		= 207;
 our $E_REG_DNSBL			= 997;
 #  BEに関するエラー

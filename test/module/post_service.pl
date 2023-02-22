@@ -679,7 +679,7 @@ sub NormalizationNameMail
 	
 	# プラグイン実行 フォーム情報再取得
 	$this->ExecutePlugin($Sys->Get('MODE'));
-	return $ZP::E_REG_NOTJPHOST if($this->SpamBlock($Set,$Form));
+	return $ZP::E_REG_SPAMKILL if($this->SpamBlock($Set,$Form));
     
 	$name = $Form->Get('FROM', '');
 	$mail = $Form->Get('mail', '');
@@ -956,15 +956,15 @@ sub SpamBlock
 	my	$this = shift;
 	my	($Setting, $form) = @_;
 	
-	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASKII');
-	my $mail_atsign_point	= $Setting->Get('BBS_SPAMKILLI_MAIL');
-	my $nohost_point	= $Setting->Get('BBS_SPAMKILLI_HOST');
-	my $text_url_point		= $Setting->Get('BBS_SPAMKILLI_URL');
-	my $text_ascii_point	= $Setting->Get('BBS_SPAMKILLI_MESSAGE');
-	my $text_ahref_point		= $Setting->Get('BBS_SPAMKILLI_LINK');
-	my $text_ascii_ratio		= $Setting->Get('BBS_SPAMKILLI_MESPOINT');
-	my $tldomain_setting	= $Setting->Get('BBS_SPAMKILLI_DOMAIN');
-	my $threshold_point	= $Setting->Get('BBS_SPAMKILLI_POINT');
+	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASKII');		#名前欄がASCIIのみ
+	my $mail_atsign_point	= $Setting->Get('BBS_SPAMKILLI_MAIL');		#メール欄に半角\@を含む
+	my $nohost_point		= $Setting->Get('BBS_SPAMKILLI_HOST');		#ホスト名が逆引き不可
+	my $text_ahref_point	= $Setting->Get('BBS_SPAMKILLI_URL');		#本文に<;a href=か[url=を含む
+	my $text_ascii_ratio	= $Setting->Get('BBS_SPAMKILLI_MESSAGE');	#本文のASCIIの割合
+	my $text_url_point		= $Setting->Get('BBS_SPAMKILLI_LINK');		#本文にリンクを含む
+	my $text_ascii_point	= $Setting->Get('BBS_SPAMKILLI_MESPOINT');	#本文のASCIIの割合加点
+	my $tldomain_setting	= $Setting->Get('BBS_SPAMKILLI_DOMAIN');	#本文中リンクのTLドメインの種類
+	my $threshold_point		= $Setting->Get('BBS_SPAMKILLI_POINT');		#閾値
 	
 	my $name = $form->Get('FROM');
 	my $mail = $form->Get('mail');
@@ -972,7 +972,7 @@ sub SpamBlock
 	
 	my $point = 0;
 	
-	if ($ENV{'REMOTE_HOST'} eq (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR})) {
+	if ($ENV{'REMOTE_HOST'} eq (($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'})) {
 		$point += $nohost_point;
 	}
 	if ($name ne '' && $name !~ /[^\x09\x0a\x0d\x20-\x7e]/) {

@@ -259,7 +259,7 @@ sub ConvertQuotation
 	if ($Sys->Get('PATHKIND')) {
 		# URLベースを生成
 		my $buf = '<a class=reply_link href="';
-		$buf .= $pathCGI . ($mode ? '/r.cgi' : '/read.cgi');
+		$buf .= $pathCGI .  '/read.cgi';
 		$buf .= '?bbs=' . $Sys->Get('BBS') . '&key=' . $Sys->Get('KEY');
 		$buf .= '&nofirst=true';
 		
@@ -275,7 +275,7 @@ sub ConvertQuotation
 	else{
 		# URLベースを生成
 		my $buf = "<a class=reply_link href=\"";
-		$buf .= $pathCGI . ($mode eq 'O' ? '/r.cgi/' : '/read.cgi/');
+		$buf .= $pathCGI . '/read.cgi/';
 		$buf .= $Sys->Get('BBS') . '/' . $Sys->Get('KEY');
 		
 		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
@@ -315,7 +315,7 @@ sub ConvertQuotation
 	if ($Sys->Get('PATHKIND')) {
 		# URLベースを生成
 		my $buf = '<a class=reply_link rel="noopener noreferrer" href="';
-		$buf .= $pathCGI . ($mode ? '/r.cgi' : '/read.cgi');
+		$buf .= $pathCGI . '/read.cgi';
 		$buf .= '?bbs=' . $Sys->Get('BBS') . '&key=' . $Sys->Get('KEY');
 		$buf .= '&nofirst=true';
 		
@@ -331,7 +331,7 @@ sub ConvertQuotation
 	else{
 		# URLベースを生成
 		my $buf = '<a class=reply_link rel="noopener noreferrer" href="';
-		$buf .= $pathCGI . ($mode eq 'O' ? '/r.cgi/' : '/read.cgi/');
+		$buf .= $pathCGI .  '/read.cgi/';
 		$buf .= $Sys->Get('BBS') . '/' . $Sys->Get('KEY');
 		
 		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
@@ -402,13 +402,13 @@ sub ConvertThreadTitle
 	my $server = $Sys->Get('SERVER');
 	# CGIのパス部分を取得 「/test」
 	my $cgipath = $Sys->Get('CGIPATH');
-	
+	my $oldbbs = $Sys->Get('BBS');
 	require './module/bbs_info.pl';
 	my $info = BBS_INFO->new;
 	$info->Load($Sys);
 	
-	$$text =~ s{(?<=\>)\Q$server$cgipath\E/read\.cgi/([0-9a-zA-Z_\-]+)/([0-9]+)(?:/[^/<]*)?}{
-		my $title = GetThreadTitle($Sys, $cache, $1, $2);
+	$$text =~ s{(?<=\>)\Q$server$cgipath\E/read\.cgi/([0-9a-zA-Z_\-]+)/([0-9]+)/?([0-9\-]+)?/?}{
+		my $title = (($oldbbs eq $1)?'':($1.'/')).GetThreadTitle($Sys, $cache, $1, $2).($3?" >>$3":'');
 		(defined $title ? $title : $&)
 	}ge;
 	
@@ -1020,7 +1020,7 @@ sub CreatePath
 	my $this = shift;
 	my ($Sys, $mode, $bbs, $key, $opt) = @_;
 	
-	my $path = $Sys->Get('SERVER') . $Sys->Get('CGIPATH') . ($mode eq 0 ? '/read.cgi' : '/r.cgi');
+	my $path = $Sys->Get('SERVER') . $Sys->Get('CGIPATH') . '/read.cgi';
 	
 	# QUERY_STRINGパス生成
 	if ($Sys->Get('PATHKIND')) {
