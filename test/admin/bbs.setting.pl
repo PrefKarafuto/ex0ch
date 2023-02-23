@@ -521,8 +521,8 @@ sub PrintLimitSetting
 	my $setSpamPoint	= $Setting->Get('BBS_SPAMKILLI_POINT');
 
 	# 改造版で追加
-	my $hCaptcha		= ($Setting->Get('BBS_HCAPTCHA') eq 'on'?'checked':'');
-	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY') eq undef || $Sys->Get('HCAPTCHA_SECRETKEY') eq undef) ? 'hCaptchaが設定されていません':'有効');
+	my $hCaptcha		= $Setting->Get('BBS_HCAPTCHA');
+	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY') eq undef || $Sys->Get('HCAPTCHA_SECRETKEY') eq undef) ? 'hCaptchaのキーが設定されていません':'有効');
 	my $setCap		= ($setCapInfo eq '有効' ? '' : 'disabled');
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
