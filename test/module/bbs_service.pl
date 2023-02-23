@@ -253,7 +253,7 @@ sub PrintIndexHead
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
- <link rel="stylesheet" type="text/css" href="../test/design.css">
+ <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <!-- hCaptcha -->
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>

@@ -253,7 +253,7 @@ sub PrintBBSThreadCreate
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>'."\n");
 	$Caption->Print($Page, undef);
 	$Page->Print(" <title>$title</title>\n\n");
-	$Page->Print("<link rel=\"stylesheet\" type=\"text/css\" href=\"design.css\">\n");
+	$Page->Print("<link rel=\"stylesheet\" type=\"text/css\" href=\"./datas/design.css\">\n");
 	$Page->Print("<script src='https://js.hcaptcha.com/1/api.js' async defer></script>\n");
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
