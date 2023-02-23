@@ -547,8 +547,6 @@ FORM
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 FORM
 	}
-    
-	}
     $Page->Print(<<HTML);
 	<input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
@@ -557,6 +555,7 @@ FORM
 </table>
 </form>
 HTML
+	}
 	
 	# footの表示
 	$Caption->Load($Sys, 'FOOT');
