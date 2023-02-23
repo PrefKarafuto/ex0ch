@@ -527,7 +527,6 @@ FORM
 <form method="POST" action="$cgipath/bbs.cgi?guid=ON">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
-  <td>&lrm;</td>
   <td nowrap><div class ="reverse_order">
   <span class = "order2">タイトル：<input type="text" name="subject" size="40"></span>
   <span class = "order1"><input type="submit" value="新規スレッド作成"></span></div>
@@ -548,8 +547,16 @@ FORM
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 FORM
 	}
-
+    
 	}
+    $Page->Print(<<HTML);
+	<input type="hidden" name="bbs" value="$bbs">
+  <input type="hidden" name="time" value="$tm">
+</td>
+ </tr>
+</table>
+</form>
+HTML
 	
 	# footの表示
 	$Caption->Load($Sys, 'FOOT');
