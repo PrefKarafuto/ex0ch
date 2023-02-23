@@ -52,7 +52,7 @@ sub BBSCGI
 		$err = $WriteAid->Write();
 		# 書き込みに成功したら掲示板構成要素を更新する
 		if ($err == $ZP::E_SUCCESS) {
-			if (!$Sys->Equal('FASTMODE', 1)) {
+			if (1){		#(!$Sys->Equal('FASTMODE', 1)) {
 				require './module/bbs_service.pl';
 				my $BBSAid = BBS_SERVICE->new;
 				
