@@ -196,7 +196,7 @@ sub PrintLogsInfo
 	$logFiles[0] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/IP.cgi';
 	$logFiles[1] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST.cgi';
 	$logFiles[2] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/errs.cgi';
-    $logFiles[3] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/miss.cgi';
+	$logFiles[3] = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/failure.cgi';
 	
 	$Sys->Set('_TITLE', 'Log Information');
 	
@@ -254,7 +254,7 @@ sub PrintLogs
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/IP'	if ($mode == 0);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST'	if ($mode == 1);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/errs'	if ($mode == 2);
-    $logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/miss'	if ($mode == 3);
+	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/failure'	if ($mode == 3);
 	$Logger->Open($logFile, 0, 1 | 2);
 	
 	$keyNum = 'DISPNUM_' . $Form->Get('MODE_SUB');
