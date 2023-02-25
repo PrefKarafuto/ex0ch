@@ -213,9 +213,9 @@ sub ConvertImgur
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src="?)(https://i\.imgur\.com/[A-Za-z0-9]+.(bmp|png|jpe?g))';	 # TwitterURL検索
+	my $reg = '(?<!src="?)(https://i\.imgur\.com/[A-Za-z0-9]+\.(bmp|png|jpe?g))';	 # TwitterURL検索
 	
-	$$text =~ s|$reg|<a href="$1"><img src="$1" width=100 height=100\/></a>|;
+	$$text =~ s|$reg|<a href="$1"><img src="$1" width=100 height=100\/></a>|g;
 	
 	return $text;
 	
@@ -226,7 +226,7 @@ sub ConvertVideo
 	my $this = shift;
 	my ($text) = @_;
 	my $reg = q{(?<!src="?)(https?:\/\/.*?\.mp4)};
-	$$text =~ s||<video src="$1" width=100 height=100 controls preload="metadata">|;
+	$$text =~ s||<video src="$1" width=100 height=100 controls preload="metadata">|g;
 	
 	return $text;
 }
@@ -239,7 +239,7 @@ sub ConvertTweet
 	
 	my $reg = '(?<!src="?)(https://twitter\.com/[A-Za-z0-9]+/status/[0-9]+(([-\w.!~*\'();/?:\@=+\$,%#]|&(?![lg]t;))+))';	 # TwitterURL検索
 	
-	$$text =~ s|$reg|<blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|;
+	$$text =~ s|$reg|<blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
 	
 	return $text;
 	
@@ -255,10 +255,10 @@ sub ConvertMovie
 	my $reg3 = '(https://(www\.)?youtube\.com/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';  # YoutubeURL検索
 	my $reg4 = '(https://(www\.)?nicovideo\.jp/([a-z]+)/([a-z]+)([0-9])+/?)';	            # ニコ動URL検索
 	
-	$$text =~ s|$reg1|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|;
-	$$text =~ s|$reg2|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|;
-	$$text =~ s|$reg3|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|;
-	$$text =~ s|$reg4|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|;
+	$$text =~ s|$reg1|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
+	$$text =~ s|$reg2|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
+	$$text =~ s|$reg3|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
+	$$text =~ s|$reg4|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
 	
 	return $text;
 	
@@ -482,14 +482,14 @@ sub ConvertImageTag
 	my $this = shift;
 	my ($Sys,$limit, $text) = @_;
 	
-	my $reg1 = q{(?<!src="?)https?://.*?.(jpe?g|gif|bmp|png)};
-	my $reg2 = q{<a.*?>(.*?.(jpe?g|gif|bmp|png))};
+	my $reg1 = q{(?<!src="?)https?://.*?\.(jpe?g|gif|bmp|png)};
+	my $reg2 = q{<a.*?>(.*?\.(jpe?g|gif|bmp|png))};
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
-		$$text =~ s|$reg1|<img src=\"$1\" width=100 height=100/>|;
+		$$text =~ s|$reg1|<img src=\"$1\" width=100 height=100/>|g;
 	}
 	else{
-		$$text =~ s|$reg2|<img src=\"$1\" width=100 height=100/>|;
+		$$text =~ s|$reg2|<img src=\"$1\" width=100 height=100/>|g;
 	}
 	return $text;
 }
