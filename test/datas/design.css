@@ -44,6 +44,7 @@
   background-color: #efefef;
   margin-bottom: 8px;
   padding: 8px;
+  word-break: break-all;
 }
 .meta {
   font-size: 14px;
@@ -53,11 +54,36 @@
  font-size:17px;
  color:#333;
  padding:10px 0;
- overflow-wrap:break-word
+ overflow-wrap:break-word;
 }
 .backmascot {
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-position-x: calc(100% - 250px);
     background-position-y: bottom;
+}
+
+/*
+埋め込み画像や動画のレスポンシブ化
+https://akros-ac.jp/8277/
+*/
+/* https://web-de-asobo.net/2022/10/06/html-dl-dt-dd/ */
+@media screen and (max-width:768px) {
+    dd {
+    margin-inline-start: 0;
+    }
+}
+
+.responsive{
+position:relative;
+width:95%;
+height:0;
+padding-top:75%;
+}
+.responsive iframe{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
 }
