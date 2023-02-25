@@ -213,7 +213,7 @@ sub ConvertImgur
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src="?)(https://i\.imgur\.com/[A-Za-z0-9]+\.(bmp|png|jpe?g))';	 # TwitterURL検索
+	my $reg = '(?<!src="?)(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # TwitterURL検索
 	
 	$$text =~ s|$reg|<a href="$1"><img src="$1" width=100 height=100\/></a>|g;
 	
@@ -237,7 +237,7 @@ sub ConvertTweet
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src="?)(https://twitter\.com/[A-Za-z0-9]+/status/[0-9]+(([-\w.!~*\'();/?:\@=+\$,%#]|&(?![lg]t;))+))';	 # TwitterURL検索
+	my $reg = '(?<!src="?)(https://twitter\.com/[A-Za-z0-9_]+/status/[0-9]+(([-\w.!~*\'();/?:\@=+\$,%#]|&(?![lg]t;))+))';	 # TwitterURL検索
 	
 	$$text =~ s|$reg|<blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
 	
