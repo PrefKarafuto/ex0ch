@@ -215,7 +215,7 @@ sub ConvertImgur
 	
 	my $reg = '(?<!src="?)(https://i\.imgur\.com/[A-Za-z0-9]+.(bmp|png|jpe?g))';	 # TwitterURL検索
 	
-	$$text =~ s|$reg|<img src="$1" width=100 height=100\/>|;
+	$$text =~ s|$reg|<a href="$1"><img src="$1" width=100 height=100\/></a>|;
 	
 	return $text;
 	
@@ -250,10 +250,10 @@ sub ConvertMovie
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg1 = '(https://youtu\.be/([^\p{Hiragana}\p{Katakana}\p{Han}]+)/?)';	    # YoutubeURL検索
-	my $reg2 = '(https://nico\.ms/sm([0-9])+/?)';	                                # ニコ動URL検索
-	my $reg3 = '(https://(www\.)?youtube\.com/watch\?v=([^\p{Hiragana}\p{Katakana}\p{Han}]+)/?)';	 # YoutubeURL検索
-	my $reg4 = '(https://(www\.)?nicovideo\.jp/watch/sm([0-9])+/?)';	            # ニコ動URL検索
+	my $reg1 = '(https://youtu\.be/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';             # YoutubeURL検索
+	my $reg2 = '(https://nico\.ms/([a-z]+)([0-9])+)';	                                    # ニコ動URL検索
+	my $reg3 = '(https://(www\.)?youtube\.com/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';  # YoutubeURL検索
+	my $reg4 = '(https://(www\.)?nicovideo\.jp/([a-z]+)/([a-z]+)([0-9])+/?)';	            # ニコ動URL検索
 	
 	$$text =~ s|$reg1|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|;
 	$$text =~ s|$reg2|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|;

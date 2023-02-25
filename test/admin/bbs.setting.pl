@@ -992,9 +992,8 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_SPAMKILLI_POINT', $Form->Get('BBS_SPAMKILL_POINT'));
 
 	# 改造版で追加
-	if($Sys->Get('HCAPTCHA_SITEKEY') ne undef && $Sys->Get('HCAPTCHA_SECRETKEY') ne undef){
 	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
-	}
+
 	$Setting->Save($Sys);
 	
 	return 0;
