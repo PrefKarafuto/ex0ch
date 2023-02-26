@@ -616,7 +616,6 @@ sub PrintThreadPreviewOne
 	my $bbs = $Sys->Get('BBS');
 	my $key = $Sys->Get('KEY');
 	my $tm = time;
-	my $i;
 	
 	# 表示数の正規化
 	my ($start, $end) = $this->{'CONV'}->RegularDispNum($Sys, $Dat, 1, $contNum, $contNum);
@@ -625,14 +624,10 @@ sub PrintThreadPreviewOne
 	# 1の表示
 	PrintResponse($this, $Page, $Dat, $commands, 1);
 	# 残りの表示
-	for ($i = $start; $i <= $end; $i++) {
+	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-	if($i == $resMax || $this->{'SET'}->Get('BBS_READONLY') eq 'on'){
-	$Page->Print("<hr>");
-	$Page->Print("<font size=4>READ ONLY</font><br><br>");
-	}
-	else{
+	if($resMax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on'){
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>
@@ -662,6 +657,10 @@ KAKIKO
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 KAKIKO
 	}
+	}
+	else{
+	$Page->Print("<hr>");
+	$Page->Print("<font size=4>READ ONLY</font><br><br>");
 	}
 }
 
