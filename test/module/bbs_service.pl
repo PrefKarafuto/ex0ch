@@ -504,7 +504,7 @@ sub PrintIndexFoot
 	my $samba = int ($Set->Get('BBS_SAMBATIME', '') eq ''
 					? $Sys->Get('DEFSAMBA') : $Set->Get('BBS_SAMBATIME'));
 	my $tm = time;
-	
+	if ($Set->Get('BBS_READONLY') ne 'on'){
 	# スレッド作成画面を別画面で表示
 	if ($Set->Equal('BBS_PASSWORD_CHECK', 'checked')) {
 		$Page->Print(<<FORM);
@@ -555,6 +555,11 @@ FORM
 </table>
 </form>
 HTML
+	}
+}
+	else{
+		$Page->Print('<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">');
+		$Page->Print("<tr><td>READ ONLY</td></tr></table>");
 	}
 	
 	# footの表示
@@ -611,6 +616,7 @@ sub PrintThreadPreviewOne
 	my $bbs = $Sys->Get('BBS');
 	my $key = $Sys->Get('KEY');
 	my $tm = time;
+	my $i;
 	
 	# 表示数の正規化
 	my ($start, $end) = $this->{'CONV'}->RegularDispNum($Sys, $Dat, 1, $contNum, $contNum);
@@ -619,10 +625,14 @@ sub PrintThreadPreviewOne
 	# 1の表示
 	PrintResponse($this, $Page, $Dat, $commands, 1);
 	# 残りの表示
-	for (my $i = $start; $i <= $end; $i++) {
+	for ($i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-	
+	if($i == $resMax || $this->{'SET'}->Get('BBS_READONLY') eq 'on'){
+	$Page->Print("<hr>");
+	$Page->Print("<font size=4>READ ONLY</font><br><br>");
+	}
+	else{
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>
@@ -652,7 +662,7 @@ KAKIKO
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 KAKIKO
 	}
-
+	}
 }
 
 #------------------------------------------------------------------------------------------------------------
