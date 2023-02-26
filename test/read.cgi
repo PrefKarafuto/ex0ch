@@ -449,7 +449,7 @@ sub PrintReadFoot
 	
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
-	if ($rmax > $Dat->Size()) {
+	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on') {
 		my $cookName = '';
 		my $cookMail = '';
 		my $tm = int(time);
@@ -501,6 +501,10 @@ HTML
 
 
 
+	}
+	else{
+	$Page->Print("<hr>");
+	$Page->Print("<font size=5>READ ONLY</font><br><br>");
 	}
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
