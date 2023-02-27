@@ -242,8 +242,8 @@ sub PrintLogsInfo
 sub PrintLogs
 {
 	my ($Page, $Sys, $Form, $mode) = @_;
-	my ($Logger, $common, $logFile, $keyNum, $keySt);
-	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isSysad, $data, @elem);
+	my ($Logger, $common, $logFile, $keyNum, $keySt, $Threads);
+	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isSysad, $data, $title, @elem);
 	
 	$Sys->Set('_TITLE', 'Thread Create Log')	if ($mode == 0);
 	$Sys->Set('_TITLE', 'Hosts Log')			if ($mode == 1);
@@ -308,7 +308,7 @@ sub PrintLogs
 	my $Error = ERROR_INFO->new;
     my $col = '';
 	$Error->Load($Sys);
-    #$Threads->Load($Sys);
+    $Threads->Load($Sys);
 	
 	# ログ一覧を出力
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
@@ -323,10 +323,13 @@ sub PrintLogs
 				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>$elem[2]</td><td>$elem[3]</td></tr>\n");
 			}
 			else{
-                if($elem[2] !~ /^(New)/){
-                    #$elem[2] = $Threads->Get('SUBJECT',$elem[2]);
-                }
-				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>Title:$elem[2]<br>Name:$elem[3]<br>Mail:$elem[4]<br><hr size=1>$elem[5]</td><td>$elem[6]</td></tr>\n<td colspan=4><hr size=1></td>");
+                if($elem[2] !~ /^\(New\)/){
+					$title = "<font color=red>".$Threads->Get('SUBJECT',$elem[2])."</font>";
+				}
+				else{
+					$title = "<font color=orange>".$elem[2]."</font>";
+				}
+				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>Title:$title<br>Name:$elem[3]<br>Mail:$elem[4]<br><hr size=1>$elem[5]</td><td>$elem[6]</td></tr>\n<td colspan=4><hr size=1></td>");
 			}
 		}
 		else {
@@ -337,9 +340,7 @@ sub PrintLogs
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=4 align=left>");
-    if($mode != 3 || ($mode == 3 && $pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $bbs))){
 	$Page->Print("<input type=button value=\"　削除　\" $common,'REMOVE_" . $Form->Get('MODE_SUB') . "')\" class=\"delete\"> ");
-    }
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	$Page->HTMLInput('hidden', $keySt, '');

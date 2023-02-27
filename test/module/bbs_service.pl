@@ -627,7 +627,7 @@ sub PrintThreadPreviewOne
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-	if($resMax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on'){
+	if($Sys->Get('RESMAX') > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on'){
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>
