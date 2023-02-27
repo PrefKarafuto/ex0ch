@@ -437,6 +437,7 @@ sub PrintLimitterSetting
 	$vSYS[3] = $SYS->Get('ERRMAX');
 	$vSYS[4] = $SYS->Get('HSTMAX');
 	$vSYS[5] = $SYS->Get('ADMMAX');
+    $vSYS[6] = $SYS->Get('FLRMAX');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2>各項目を設定して[設定]ボタンを押してください。</td></tr>");
@@ -454,8 +455,8 @@ sub PrintLimitterSetting
 	$Page->Print("<td><input type=text size=10 name=HSTMAX value=\"$vSYS[4]\" ></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">管理操作ログ最大保持数</td>");
 	$Page->Print("<td><input type=text size=10 name=ADMMAX value=\"$vSYS[5]\" ></td></tr>\n");
-    $Page->Print("<tr style=\"opacity:0.5\"><td class=\"DetailTitle\">ユーザー書き込み失敗ログ最大保持数</td>");
-	$Page->Print("<td><input type=text size=10 name=MISSMAX disabled></td></tr>\n");
+    $Page->Print("<tr><td class=\"DetailTitle\">ユーザー書き込み失敗ログ最大保持数</td>");
+	$Page->Print("<td><input type=text size=10 name=FLRMAX value=\"$vSYS[6]\" ></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -1046,6 +1047,7 @@ sub FunctionLimitterSetting
 	$SYSTEM->Set('ERRMAX', $Form->Get('ERRMAX'));
 	$SYSTEM->Set('HSTMAX', $Form->Get('HSTMAX'));
 	$SYSTEM->Set('ADMMAX', $Form->Get('ADMMAX'));
+    $SYSTEM->Set('FLRMAX', $Form->Get('FLRMAX'));
 	
 	$SYSTEM->Save();
 	
@@ -1058,6 +1060,7 @@ sub FunctionLimitterSetting
 		push @$pLog, '　　　 エラーログ最大数：' . $Form->Get('ERRMAX');
 		push @$pLog, '　　　 ホストログ最大数：' . $Form->Get('HSTMAX');
 		push @$pLog, '　　　 管理操作ログ最大数：' . $Form->Get('ADMMAX');
+        push @$pLog, '　　　 ユーザ書き込み失敗ログ最大数：' . $Form->Get('FLRMAX');
 	}
 	return 0;
 }
