@@ -174,8 +174,8 @@ sub SetMenuList
 		$Base->SetMenu('スレッド作成ログ', "'bbs.log','DISP','THREADLOG'");
 		$Base->SetMenu('ホストログ', "'bbs.log','DISP','HOSTLOG'");
 		$Base->SetMenu('エラーログ', "'bbs.log','DISP','ERRORLOG'");
-		$Base->SetMenu('<hr>', '');
 	}
+    $Base->SetMenu('<hr>', '');
 	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 }
 
@@ -248,6 +248,7 @@ sub PrintLogs
 	$Sys->Set('_TITLE', 'Thread Create Log')	if ($mode == 0);
 	$Sys->Set('_TITLE', 'Hosts Log')			if ($mode == 1);
 	$Sys->Set('_TITLE', 'Error Log')			if ($mode == 2);
+    $Sys->Set('_TITLE', 'Write Failure Log')	if ($mode == 3);
 	
 	require './module/log.pl';
     require './module/thread.pl';
