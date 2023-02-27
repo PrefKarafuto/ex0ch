@@ -528,9 +528,9 @@ FORM
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td nowrap><div class ="reverse_order">
-  <span class = "order2">タイトル：<input type="text" name="subject" size="40"></span>
-  <span class = "order1"><input type="submit" value="新規スレッド作成"></span></div>
-  名前：<input type="text" name="FROM" size="19"> E-mail：<input type="text" name="mail" size="19"><br>
+  <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
+  <span class = "order1"><input type="submit" value="新規スレッド作成"><br class="smartphone"></span></div>
+  名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
 FORM
 	# hCaptchaなしの場合
 	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA');
@@ -538,13 +538,13 @@ FORM
 	if ($hCaptcha_check eq '') {
 		$Page->Print(<<FORM);
    <span style="margin-top:0px;">
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
+   <span class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></span>
 FORM
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 	$Page->Print(<<FORM);
    <span style="margin-top:0px;">
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
+   <span class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></span>
 FORM
 	}
     $Page->Print(<<HTML);
