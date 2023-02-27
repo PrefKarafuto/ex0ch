@@ -178,7 +178,7 @@ sub SetMenuList
 		$Base->SetMenu('ホストログ', "'bbs.log','DISP','HOSTLOG'");
 		$Base->SetMenu('エラーログ', "'bbs.log','DISP','ERRORLOG'");
 	}
-    
+	$Base->SetMenu('<hr>', '');
 	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 }
 
