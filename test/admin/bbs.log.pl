@@ -83,7 +83,7 @@ sub DoPrint
 	elsif ($subMode eq 'ERRORLOG') {												# エラーログ画面
 		PrintLogs($Page, $Sys, $Form, 2);
 	}
-    elsif ($subMode eq 'FLRLOG') {												    # 書き込み失敗ログ画面
+    elsif ($subMode eq 'FAILURELOG') {												# 書き込み失敗ログ画面
 		PrintLogs($Page, $Sys, $Form, 3);
 	}
 	elsif ($subMode eq 'COMPLETE') {												# 完了画面
@@ -137,6 +137,9 @@ sub DoFunction
 	elsif ($subMode eq 'REMOVE_ERRORLOG') {										# ログ削除
 		$err = FunctionLogDelete($Sys, $Form, 2, $this->{'LOG'});
 	}
+    elsif ($subMode eq 'REMOVE_FAILURELOG') {										# ログ削除
+		$err = FunctionLogDelete($Sys, $Form, 3, $this->{'LOG'});
+	}
 	
 	# 処理結果表示
 	if ($err) {
@@ -166,7 +169,7 @@ sub SetMenuList
 	
 	$Base->SetMenu('ログ情報', "'bbs.log','DISP','INFO'");
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('書き込み失敗ログ', "'bbs.log','DISP','FLRLOG'");
+	$Base->SetMenu('書き込み失敗ログ', "'bbs.log','DISP','FAILURELOG'");
 	
 	# ログ閲覧権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $bbs)) {
@@ -175,7 +178,7 @@ sub SetMenuList
 		$Base->SetMenu('ホストログ', "'bbs.log','DISP','HOSTLOG'");
 		$Base->SetMenu('エラーログ', "'bbs.log','DISP','ERRORLOG'");
 	}
-    $Base->SetMenu('<hr>', '');
+    
 	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 }
 
@@ -290,7 +293,7 @@ sub PrintLogs
 	}
 	elsif ($mode == 1) {
 		$Page->Print("<td class=\"DetailTitle\">HOST</td>");
-		$Page->Print("<td class=\"DetailTitle\">Thread KEY</td>");
+		$Page->Print("<td class=\"DetailTitle\">Thread KEY (Title)</td>");
 		$Page->Print("<td class=\"DetailTitle\">Operation</td></tr>\n");
 	}
 	elsif ($mode == 2) {
@@ -318,7 +321,7 @@ sub PrintLogs
 		if (1) {
 			$elem[0] = DATA_UTILS::GetDateFromSerial(undef, $elem[0], 0);
 			if ($mode == 2|3) {
-				$elem[1] .= ' (' . $Error->Get($elem[1], 'SUBJECT') . ')';
+				$elem[1] .= ' (' . $Threads->Get('SUBJECT',$elem[1]) . ')';
 			}
             if($mode != 3){
 				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>$elem[2]</td><td>$elem[3]</td></tr>\n");
