@@ -443,7 +443,7 @@ sub PrintIndexPreview
   <a name="$cnt"></a>
   <div align="right"><a href="#menu">■</a><a href="#$prevT">▲</a><a href="#$nextT">▼</a></div>
   <div style="font-weight:bold;margin-bottom:0.2em;">【$cnt:$res】<font size="+2" color="$ttlCol">$subject</font></div>
-  <dl class="post" style="margin-top:0px;">
+  <dl class="post" style="margin-top:0px; border-style:none none none none;">
 THREAD
 		
 		# プレビューの表示
@@ -504,7 +504,7 @@ sub PrintIndexFoot
 	my $samba = int ($Set->Get('BBS_SAMBATIME', '') eq ''
 					? $Sys->Get('DEFSAMBA') : $Set->Get('BBS_SAMBATIME'));
 	my $tm = time;
-	
+	if ($Set->Get('BBS_READONLY') ne 'on'){
 	# スレッド作成画面を別画面で表示
 	if ($Set->Equal('BBS_PASSWORD_CHECK', 'checked')) {
 		$Page->Print(<<FORM);
@@ -528,9 +528,9 @@ FORM
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td nowrap><div class ="reverse_order">
-  <span class = "order2">タイトル：<input type="text" name="subject" size="40"></span>
-  <span class = "order1"><input type="submit" value="新規スレッド作成"></span></div>
-  名前：<input type="text" name="FROM" size="19"> E-mail：<input type="text" name="mail" size="19"><br>
+  <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
+  <span class = "order1"><input type="submit" value="新規スレッド作成"><br class="smartphone"></span></div>
+  名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
 FORM
 	# hCaptchaなしの場合
 	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA');
@@ -538,13 +538,13 @@ FORM
 	if ($hCaptcha_check eq '') {
 		$Page->Print(<<FORM);
    <span style="margin-top:0px;">
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
+   <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
 FORM
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 	$Page->Print(<<FORM);
    <span style="margin-top:0px;">
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
+   <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
 FORM
 	}
     $Page->Print(<<HTML);
@@ -555,6 +555,11 @@ FORM
 </table>
 </form>
 HTML
+	}
+}
+	else{
+		$Page->Print('<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">');
+		$Page->Print("<tr><td>READ ONLY</td></tr></table>");
 	}
 	
 	# footの表示
@@ -577,7 +582,6 @@ img {
     max-width: 100%;
     height:auto;
 }
-
 textarea {
 max-width:95%;
 margin:0;
@@ -622,7 +626,7 @@ sub PrintThreadPreviewOne
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-	
+	if($Sys->Get('RESMAX') > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on'){
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>
@@ -652,7 +656,11 @@ KAKIKO
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 KAKIKO
 	}
-
+	}
+	else{
+	$Page->Print("<hr>");
+	$Page->Print("<font size=4>READ ONLY</font><br><br>");
+	}
 }
 
 #------------------------------------------------------------------------------------------------------------

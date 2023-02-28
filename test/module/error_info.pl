@@ -133,6 +133,17 @@ sub Print
 	$Log->Load($Sys, 'ERR', '');
 	$Log->Set('', $err, $version, $koyuu, $mode);
 	$Log->Save($Sys);
+    
+    my $name = &$sanitize($Form->Get('NAME'));
+	my $mail = &$sanitize($Form->Get('MAIL'));
+    my $key = $Form->Get('key');
+    my $t = &$sanitize($Form->Get('subject',''));
+    my $title = $t?"(New)$t":"$key";
+	my $msg = $Form->Get('MESSAGE');
+	
+	$Log->Load($Sys, 'FLR', '');
+	$Log->Set('', $err,"$title<>$name<>$mail<>$msg", $koyuu, $mode);
+	$Log->Save($Sys);
 	
 	#$Page->Print("Status: 412 Precondition Failed\n");
 	

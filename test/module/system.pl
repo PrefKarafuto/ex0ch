@@ -246,7 +246,7 @@ sub InitSystemValue
 		'DATA'		=> '/datas',								# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS 0.8.0 20230224',					# CGIバージョン
+		'VERSION'	=> '0ch+ BBS 0.8.1 20230301',					# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -261,6 +261,7 @@ sub InitSystemValue
 		'RESMAX'	=> 1000,									# レス最大書き込み数
 		'ADMMAX'	=> 500,										# 管理操作ログ最大保持数
 		'HSTMAX'	=> 500,										# ホストログ最大保持数
+        'FLRMAX'	=> 100,										# 書き込み失敗ログ最大保持数
 		'ANKERS'	=> 10,										# 最大アンカー数
 		'URLLINK'	=> 'TRUE',									# URLへの自動リンク
 		'LINKST'	=> 23,										# リンク禁止開始時間

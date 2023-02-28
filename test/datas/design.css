@@ -87,3 +87,12 @@ left:0;
 width:100%;
 height:100%;
 }
+
+@media screen and (max-width:768px) {
+    blockquote{
+        margin-block-start: 0em;
+        margin-block-end: 0em;
+        margin-inline-start: 0px;
+        margin-inline-end: 0px;
+    }
+}

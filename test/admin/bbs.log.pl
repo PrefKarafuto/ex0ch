@@ -83,7 +83,7 @@ sub DoPrint
 	elsif ($subMode eq 'ERRORLOG') {												# エラーログ画面
 		PrintLogs($Page, $Sys, $Form, 2);
 	}
-    elsif ($subMode eq 'MISSLOG') {												    # 書き込み失敗ログ画面
+	elsif ($subMode eq 'FAILURELOG') {												# 書き込み失敗ログ画面
 		PrintLogs($Page, $Sys, $Form, 3);
 	}
 	elsif ($subMode eq 'COMPLETE') {												# 完了画面
@@ -137,6 +137,9 @@ sub DoFunction
 	elsif ($subMode eq 'REMOVE_ERRORLOG') {										# ログ削除
 		$err = FunctionLogDelete($Sys, $Form, 2, $this->{'LOG'});
 	}
+	elsif ($subMode eq 'REMOVE_FAILURELOG') {										# ログ削除
+		$err = FunctionLogDelete($Sys, $Form, 3, $this->{'LOG'});
+	}
 	
 	# 処理結果表示
 	if ($err) {
@@ -166,15 +169,16 @@ sub SetMenuList
 	
 	$Base->SetMenu('ログ情報', "'bbs.log','DISP','INFO'");
 	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('<span style="opacity:0.5">書き込み失敗ログ</span>', "'bbs.log','DISP','MISSLOG'");
-	$Base->SetMenu('<hr>', '');
+	$Base->SetMenu('書き込み失敗ログ', "'bbs.log','DISP','FAILURELOG'");
+	
 	# ログ閲覧権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $bbs)) {
+        $Base->SetMenu('<hr>', '');
 		$Base->SetMenu('スレッド作成ログ', "'bbs.log','DISP','THREADLOG'");
 		$Base->SetMenu('ホストログ', "'bbs.log','DISP','HOSTLOG'");
 		$Base->SetMenu('エラーログ', "'bbs.log','DISP','ERRORLOG'");
-		$Base->SetMenu('<hr>', '');
 	}
+	$Base->SetMenu('<hr>', '');
 	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 }
 
@@ -241,15 +245,18 @@ sub PrintLogsInfo
 sub PrintLogs
 {
 	my ($Page, $Sys, $Form, $mode) = @_;
-	my ($Logger, $common, $logFile, $keyNum, $keySt);
-	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isSysad, $data, @elem);
+	my ($Logger, $common, $logFile, $keyNum, $keySt, $Threads);
+	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isSysad, $data, $title, @elem);
 	
 	$Sys->Set('_TITLE', 'Thread Create Log')	if ($mode == 0);
 	$Sys->Set('_TITLE', 'Hosts Log')			if ($mode == 1);
 	$Sys->Set('_TITLE', 'Error Log')			if ($mode == 2);
+	$Sys->Set('_TITLE', 'Write Failure Log')	if ($mode == 3);
 	
 	require './module/log.pl';
+	require './module/thread.pl';
 	$Logger = LOG->new;
+	$Threads = THREAD->new;
 	
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/IP'	if ($mode == 0);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST'	if ($mode == 1);
@@ -280,13 +287,13 @@ sub PrintLogs
 	# カラムヘッダの表示
 	$Page->Print("<tr><td class=\"DetailTitle\">Date</td>");
 	if ($mode == 0) {
-		$Page->Print("<td class=\"DetailTitle\">Thread KEY</td>");
+		$Page->Print("<td class=\"DetailTitle\">Thread KEY (Title)</td>");
 		$Page->Print("<td class=\"DetailTitle\">Script ver.</td>");
 		$Page->Print("<td class=\"DetailTitle\">Create HOST</td></tr>\n");
 	}
 	elsif ($mode == 1) {
 		$Page->Print("<td class=\"DetailTitle\">HOST</td>");
-		$Page->Print("<td class=\"DetailTitle\">Thread KEY</td>");
+		$Page->Print("<td class=\"DetailTitle\">Thread KEY (Title)</td>");
 		$Page->Print("<td class=\"DetailTitle\">Operation</td></tr>\n");
 	}
 	elsif ($mode == 2) {
@@ -294,7 +301,7 @@ sub PrintLogs
 		$Page->Print("<td class=\"DetailTitle\">Script ver.</td>");
 		$Page->Print("<td class=\"DetailTitle\">HOST</td></tr>\n");
 	}
-    elsif ($mode == 3) {
+	elsif ($mode == 3) {
 		$Page->Print("<td class=\"DetailTitle\">Error Code</td>");
 		$Page->Print("<td class=\"DetailTitle\">Regulated Message</td>");
 		$Page->Print("<td class=\"DetailTitle\">HOST</td></tr>\n");
@@ -304,17 +311,37 @@ sub PrintLogs
 	require './module/error_info.pl';
 	my $Error = ERROR_INFO->new;
 	$Error->Load($Sys);
+	$Threads->Load($Sys);
 	
 	# ログ一覧を出力
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$data = $Logger->Get($listNum - $i - 1);
 		@elem = split(/<>/, $data);
-		if (1) {
+		if(1){
 			$elem[0] = DATA_UTILS::GetDateFromSerial(undef, $elem[0], 0);
-			if ($mode == 2) {
-				$elem[1] .= ' (' . $Error->Get($elem[1], 'SUBJECT') . ')';
+			if ($mode == 0){
+				$elem[1] .= ' (' . $Threads->Get('SUBJECT',$elem[1]) . ')';
+				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>$elem[2]</td><td>$elem[3]</td></tr>\n");
 			}
-			$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>$elem[2]</td><td>$elem[3]</td></tr>\n");
+			elsif ($mode == 1){
+				$elem[2] .= ' (' . $Threads->Get('SUBJECT',$elem[2]) . ')';
+				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>$elem[2]</td><td>$elem[3]</td></tr>\n");
+			}
+			elsif ($mode == 2){
+				$elem[1] .= ' (' . $Error->Get($elem[1], 'SUBJECT') . ')';
+				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>$elem[2]</td><td>$elem[3]</td></tr>\n");
+			}
+			elsif ($mode == 3){
+				$elem[1] .= ' (' . $Error->Get($elem[1], 'SUBJECT') . ')';
+				if($elem[2] !~ /^\(New\)/){
+					$title = "<font color=red>".$Threads->Get('SUBJECT',$elem[2])."</font>";
+				}
+				else{
+					$title = "<font color=orange>".$elem[2]."</font>";
+				}
+				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>Title:$title<br>Name:$elem[3]<br>Mail:$elem[4]<br><hr size=1>$elem[5]</td><td>$elem[6]</td></tr>\n<td colspan=4><hr size=1></td>");
+			}
+			
 		}
 		else {
 			$dispEd++ if ($dispEd + 1 < $listNum);
@@ -324,9 +351,7 @@ sub PrintLogs
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=4 align=left>");
-	if($mode != 3){
 	$Page->Print("<input type=button value=\"　削除　\" $common,'REMOVE_" . $Form->Get('MODE_SUB') . "')\" class=\"delete\"> ");
-	}
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	$Page->HTMLInput('hidden', $keySt, '');
@@ -365,6 +390,7 @@ sub FunctionLogDelete
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/IP'	if ($mode == 0);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/HOST'	if ($mode == 1);
 	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/errs'	if ($mode == 2);
+	$logFile = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/failure'	if ($mode == 3);
 	
 	# ログ情報の削除
 	$Logger->Open($logFile, 0, 2 | 4);

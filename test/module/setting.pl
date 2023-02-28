@@ -353,7 +353,7 @@ sub InitSettingData
 		'BBS_INDEX_LINE_NUMBER'		=> 12,
 
 		# 改造版で追加部分
-        'BBS_SPAMKILLI_ASKII'	=> 2,
+		'BBS_SPAMKILLI_ASKII'	=> 2,
 		'BBS_SPAMKILLI_MAIL'	=> 5,
 		'BBS_SPAMKILLI_HOST'	=> 7,
 		'BBS_SPAMKILLI_URL'		=> 5,
@@ -372,6 +372,7 @@ sub InitSettingData
 
         'BBS_TASUKERUYO'        => '',
         'BBS_OMIKUJI'           => '',
+	'BBS_'           => '',
 
 		'BBS_HCAPTCHA'			=> '',
 		'BBS_READTYPE'			=> '5ch',
