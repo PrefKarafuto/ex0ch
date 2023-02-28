@@ -717,6 +717,7 @@ sub NormalizationNameMail
 	# スレッド作成時
 	if ($Sys->Equal('MODE', 1)) {
 		return $ZP::E_FORM_NOSUBJECT if ($subject eq '');
+		return $ZP::E_REG_SAMETITLE if ($this->SameTitleCheck($subject) && $Set->Get('BBS_SAMETHREAD') eq 'checked');
 		# サブジェクト欄の文字数確認
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGSUBJECT, $bbs)) {
 			if ($Set->Get('BBS_SUBJECT_COUNT') < length($subject)) {
@@ -1096,6 +1097,19 @@ sub OMIKUJI
 		$Form->Set('FROM', $name);
 	}
 	
+	return 0;
+}
+#スレッド乱立防止
+sub SameTitleCheck
+{
+	my $this = shift;
+	my ($subject) = @_;
+	my @threadSet = ();
+	$this->{'THREADS'}->GetKeySet('ALL', '', \@threadSet);
+	foreach my $key (@threadSet) {
+		my $name = $this->{'THREADS'}->Get('SUBJECT', $key);
+		return 1 if ($subject eq $name);
+		}
 	return 0;
 }
 
