@@ -538,13 +538,13 @@ FORM
 	if ($hCaptcha_check eq '') {
 		$Page->Print(<<FORM);
    <span style="margin-top:0px;">
-   <span class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></span>
+   <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
 FORM
 	}else{
   	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
 	$Page->Print(<<FORM);
    <span style="margin-top:0px;">
-   <span class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></span>
+   <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
 FORM
 	}
     $Page->Print(<<HTML);
