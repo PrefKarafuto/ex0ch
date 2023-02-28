@@ -769,10 +769,10 @@ sub Certification_hCaptcha
 	# 変数の大文字と小文字には気を付けて
 	# 宣言しないといけないのに長い時間を要した
 	my $Form = $this->{'FORM'};
-	my $Set = $this->{'SET'};
+	my $Sys = $this->{'SYS'};
 
 	# hCaptcha「あり」の場合
-	my $secretkey = $Set->Get('HCAPTCHA_SECRETKEY');
+	my $secretkey = $Sys->Get('HCAPTCHA_SECRETKEY');
 
 	if ($secretkey ne '') {
 	#シークレットキー
