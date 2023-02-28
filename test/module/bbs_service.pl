@@ -582,7 +582,12 @@ img {
     max-width: 100%;
     height:auto;
 }
-
+a {
+ word-break: break-all;
+}
+.post {
+ word-break: break-all;
+}
 textarea {
 max-width:95%;
 margin:0;
