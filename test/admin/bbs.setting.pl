@@ -509,8 +509,8 @@ sub PrintLimitSetting
 	my $setTateCount2	= $Setting->Get('BBS_TATESUGI_COUNT2');
 	my $setTateHour		= $Setting->Get('BBS_TATESUGI_HOUR');
 	my $setTateCount	= $Setting->Get('BBS_TATESUGI_COUNT');
-
-    my $setAskiiPoint	= $Setting->Get('BBS_SPAMKILLI_ASKII');
+	
+	my $setAskiiPoint	= $Setting->Get('BBS_SPAMKILLI_ASKII');
 	my $setMailPoint	= $Setting->Get('BBS_SPAMKILLI_MAIL');
 	my $setHostPoint	= $Setting->Get('BBS_SPAMKILLI_HOST');
 	my $setURLPoint		= $Setting->Get('BBS_SPAMKILLI_URL');
@@ -527,6 +527,7 @@ sub PrintLimitSetting
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
+	my $setSameTitle	= $Setting->Get('BBS_SAMETHREAD');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -568,8 +569,8 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>携帯から許可</td>");
 	$Page->Print("<td class=\"DetailTitle\">hCaptcha</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_HCAPTCHA $hCaptcha value=on $setCap>$setCapInfo</td></tr>");
-    $Page->Print("<tr><td class=\"DetailTitle\" style=\"opacity:0.5\">同一スレッド乱立禁止</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on disabled></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">マルチポスト制限</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_MULTIPOST value=on disabled></td></tr>");
 	$Page->Print("</tr>");
@@ -993,6 +994,7 @@ sub FunctionLimitSetting
 
 	# 改造版で追加
 	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
 
 	$Setting->Save($Sys);
 	
