@@ -168,6 +168,8 @@ HTML
 	# 全スレッドを取得
 	my @threadSet = ();
 	$Threads->GetKeySet('ALL', '', \@threadSet);
+	my $threadsNum = @threadSet;
+	$Page->Print("<h><font size=3 color=red>スレッド一覧</font></h><br><p>全部で$threadsNum\のスレッドがあります</p><br>");
 	
 	# スレッド分だけループをまわす
 	my $bbs = $Sys->Get('BBS');
@@ -180,7 +182,7 @@ HTML
 		my $res = $Threads->Get('RES', $key);
 		my $path = $Conv->CreatePath($Sys, 0, $bbs, $key, 'l50');
 		
-		$Page->Print("<a href=\"$path\" target=\"_blank\">$i: $name($res)</a>&nbsp;&nbsp;\n");
+		$Page->Print("&nbsp;&nbsp;$i: <a href=\"$path\" target=\"_blank\">$name($res)</a><br>\n");
 	}
 	
 	# フッタ部分の出力
@@ -189,9 +191,9 @@ HTML
 	$Page->Print(<<HTML);
 </small>
 </div>
-
+<hr>
 <div align="right" style="margin-top:1em;">
-<small><a href="./kako/" target="_blank"><b>過去ログ倉庫はこちら</b></a></small>
+<small><a href="./"><b>掲示板に戻る</b></a>／<a href="./kako/" target="_blank"><b>過去ログ倉庫はこちら</b></a></small>
 </div>
 
 <hr>
@@ -352,16 +354,20 @@ MENU
 		
 		# プレビュースレッドの場合はプレビューへのリンクを貼る
 		if ($i <= $prevNum) {
+                        $Page->Print("<font size=3>");
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i:</a> ");
-			$Page->Print("<a href=\"#$i\">$name($res)</a>　\n");
+			$Page->Print("<a href=\"#$i\">$name($res)</a>　</font>\n");
+                        $Page->Print("<hr>") if $i == $prevNum;
 		}
 		else {
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i: $name($res)</a>　\n");
 		}
 	}
+        my $threadNum = @threadSet;
+        $Page->Print("（全部で$threadNum\のスレッドがあります）");
 	$Page->Print(<<MENU);
   </small>
-  <div align="right"><small><b><a href="./subback.html">スレッド一覧はこちら</a></b></small></div>
+  <br><br><div align="left"><font size=3><b><a href="./kako">過去ログ倉庫</a>／<a href="./subback.html">スレッド一覧はこちら</a>／<a href="./">リロード</a></b></font></div>
   </td>
  </tr>
 </table>
