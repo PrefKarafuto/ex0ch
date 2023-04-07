@@ -537,22 +537,9 @@ FORM
   <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
   <span class = "order1"><input type="submit" value="新規スレッド作成"><br class="smartphone"></span></div>
   名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
-FORM
-	# hCaptchaなしの場合
-	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA');
-	my $sitekey = $this->{'SYS'}->Get('HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
-		$Page->Print(<<FORM);
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
 FORM
-	}else{
-  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
-	$Page->Print(<<FORM);
-   <span style="margin-top:0px;">
-   <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
-FORM
-	}
     $Page->Print(<<HTML);
 	<input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
@@ -644,24 +631,10 @@ sub PrintThreadPreviewOne
    <input type="submit" value="書き込む" name="submit"><br class="smartphone">
    名前：<input type="text" name="FROM" size="19"><br class="smartphone">
    E-mail：<input type="text" name="mail" size="19"><br>
-KAKIKO
-
-	# hCaptchaなしの場合
-	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA');
-	my $sitekey = $this->{'SYS'}->Get('HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
-	$Page->Print(<<KAKIKO);
 	<div class ="bbs_service_textarea">
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
     </div>
 KAKIKO
-	}else{
-  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
-	$Page->Print(<<KAKIKO);
-	<div class ="bbs_service_textarea">
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
-KAKIKO
-	}
 	}
 	else{
 	$Page->Print("<hr>");
