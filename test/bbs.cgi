@@ -525,7 +525,7 @@ HTML
 	
 
 	# 告知欄表示(表示させたくない場合はコメントアウトか条件を0に)
-	if (0) {
+	if ($Sys->Get('BANNER')) {
 		require './module/banner.pl';
 		my $Banner = BANNER->new;
 		$Banner->Load($Sys);
