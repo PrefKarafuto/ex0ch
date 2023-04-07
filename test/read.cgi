@@ -477,26 +477,9 @@ sub PrintReadFoot
 <input type="submit" value="書き込む"><br class="smartphone">
 名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">
 E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="$cookMail" size="19"><br>
-HTML
-
-
-
-
-	# hCaptchaなしの場合
-	my $hCaptcha_check = $Set->Get('BBS_HCAPTCHA');
-	my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
-$Page->Print(<<HTML);
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
-	}else{
-$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
-$Page->Print(<<HTML);
-<textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
-</form>
-HTML
-}
 
 
 
