@@ -957,7 +957,7 @@ sub SpamBlock
 	my	$this = shift;
 	my	($Setting, $form) = @_;
 	
-	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASKII');		#名前欄がASCIIのみ
+	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASCII');		#名前欄がASCIIのみ
 	my $mail_atsign_point	= $Setting->Get('BBS_SPAMKILLI_MAIL');		#メール欄に半角\@を含む
 	my $nohost_point		= $Setting->Get('BBS_SPAMKILLI_HOST');		#ホスト名が逆引き不可
 	my $text_ahref_point	= $Setting->Get('BBS_SPAMKILLI_URL');		#本文に<;a href=か[url=を含む
