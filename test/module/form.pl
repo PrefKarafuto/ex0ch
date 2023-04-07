@@ -65,8 +65,8 @@ sub DecodeForm
 		$val =~ s/%([0-9a-fA-F][0-9a-fA-F])/pack('C', hex($1))/eg;
 		$val =~ s/\r\n|\r|\n/\n/g;
 		$val =~ s/\0//g;
-		$val = Encode::decode("Shift_JIS",$val);
-		$val =~ s|〜|～|;
+		$val = Encode::decode("cp932",$val);
+		$val =~ s|〜|～|g;
 		$this->{'FORM'}->{$var} = $val;
 		$this->{'FORM'}->{"Raw_$var"} = $val;
 	}
@@ -101,8 +101,8 @@ sub GetAtArray
 				$val =~ s/>/&gt;/g;
 				$val =~ s/\r\n|\r|\n/<br>/g;
 			}
-			$val = Encode::decode("Shift_JIS",$val);
-			$val =~ s|〜|～|;
+			$val = Encode::decode("cp932",$val);
+			$val =~ s|〜|～|g;
 			push @ret, $val;
 		}
 	}

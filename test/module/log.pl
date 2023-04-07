@@ -216,12 +216,15 @@ sub Put
 	
 	my $tm = time;
 	my $logData = join('<>', $tm, @datas);
-	
+	my (undef, undef, undef, undef, $mon, $year)  = localtime;
+	$year += $year+1900;
+	$mon += $mon+1;
 	push @{$this->{'LOGS'}}, $logData;
 	$this->{'SIZE'}++;
 	
 	if ($this->{'SIZE'} + 10 > $this->{'LIMIT'}) {
-		my $logName = "$this->{'PATH'}_old.cgi";
+		mkdir ($this->{'PATH'},600);
+		my $logName = "$this->{'PATH'}/$year\_$mon.cgi";
 		if (open(my $fh, '>>', $logName)) {
 			flock($fh, 2);
 			#binmode($fh);
@@ -262,8 +265,11 @@ sub Size
 sub MoveToOld
 {
 	my $this = shift;
-	
-	my $logName = "$this->{'PATH'}_old.cgi";
+	my (undef, undef, undef, undef, $mon, $year)  = localtime;
+	$year += $year+1900;
+	$mon += $mon+1;
+	my $logName = "$this->{'PATH'}/$year\_$mon.cgi";
+	mkdir ($this->{'PATH'},600);
 	if (open(my $fh, '>>', $logName)) {
 		flock($fh, 2);
 		#binmode($fh);

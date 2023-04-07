@@ -239,14 +239,14 @@ sub InitSystemValue
 	my ($pSys, $pKey) = @_;
 	
 	my %sys = (
-		'SYSFILE'	=> './info/system.cgi',						# システム設定ファイル
+		'SYSFILE'	=> './info/system.cgi',								# システム設定ファイル
 		'SERVER'	=> '',										# 設置サーバパス
 		'CGIPATH'	=> '/test',									# CGI設置パス
 		'INFO'		=> '/info',									# 管理データ設置パス
-		'DATA'		=> '/datas',								# 初期データ設置パス
+		'DATA'		=> '/datas',									# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS 0.8.1 20230301',					# CGIバージョン
+		'VERSION'	=> '0ch+ BBS 0.8.2 20230408',						# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -261,14 +261,14 @@ sub InitSystemValue
 		'RESMAX'	=> 1000,									# レス最大書き込み数
 		'ADMMAX'	=> 500,										# 管理操作ログ最大保持数
 		'HSTMAX'	=> 500,										# ホストログ最大保持数
-        'FLRMAX'	=> 100,										# 書き込み失敗ログ最大保持数
+		'FLRMAX'	=> 100,										# 書き込み失敗ログ最大保持数
 		'ANKERS'	=> 10,										# 最大アンカー数
 		'URLLINK'	=> 'TRUE',									# URLへの自動リンク
 		'LINKST'	=> 23,										# リンク禁止開始時間
 		'LINKED'	=> 2,										# リンク禁止終了時間
 		'PATHKIND'	=> 0,										# 生成パスの種類
-		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',	# ヘッダ下部の表示文字列
-		'HEADURL'	=> '../test/search.cgi',									# ヘッダ下部のURL
+		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',					# ヘッダ下部の表示文字列
+		'HEADURL'	=> '../test/search.cgi',							# ヘッダ下部のURL
 		'FASTMODE'	=> 0,										# 高速モード
 		
 		# ここからぜろプラオリジナル
@@ -279,7 +279,7 @@ sub InitSystemValue
 		'KAKIKO'	=> 1,										# 2重かきこですか？？
 		'COUNTER'	=> '',										# 機能削除済につき未使用
 		'PRTEXT'	=> 'ぜろちゃんねるプラス再開発プロジェクト',					# PR欄の表示文字列
-		'PRLINK'	=> 'https://github.com/PrefKarafuto/New_0ch_Plus',		# PR欄のリンクURL
+		'PRLINK'	=> 'https://github.com/PrefKarafuto/New_0ch_Plus',				# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
 		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
@@ -297,8 +297,8 @@ sub InitSystemValue
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,
-		'PERM_CONTENT'	=> 0644,
-		'PERM_SYSDIR'	=> 0700,
+		'PERM_CONTENT'		=> 0644,
+		'PERM_SYSDIR'		=> 0700,
 		'PERM_DIR'		=> 0711,
 	);
 	

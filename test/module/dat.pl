@@ -55,7 +55,7 @@ sub DESTROY
 		if ($fh) {
 			#truncate($fh, tell($fh));
 			close($fh);
-			chmod $this->{'PERM'}, $this->{'PATH'};
+			chmod $this->{'PERM'}, $this->{'PATH'} unless ($this->{'MODE'});
 		}
 	}
 }
@@ -84,7 +84,7 @@ sub Load
 		$this->{'PERM'} = GetPermission($szPath);
 		$this->{'MODE'} = $readOnly;
 		
-		chmod($Sys->Get('PM-DAT'), $szPath);
+		chmod($Sys->Get('PM-DAT'), $szPath) unless ($this->{'MODE'});
 		if (open(my $fh, ($readOnly ? '<' : '+<'), $szPath)) {
 			flock($fh, 2);
 			#binmode($fh);
@@ -178,7 +178,7 @@ sub Close
 		#truncate($handle, tell($handle));
 		close($fh);
 		
-		chmod($this->{'PERM'}, $this->{'PATH'});
+		chmod($this->{'PERM'}, $this->{'PATH'}) unless ($this->{'MODE'});
 		$this->{'STAT'} = 0;
 		$this->{'HANDLE'} = undef;
 	}

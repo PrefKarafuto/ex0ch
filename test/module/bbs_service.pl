@@ -9,7 +9,6 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
-use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
 
@@ -168,6 +167,8 @@ HTML
 	# 全スレッドを取得
 	my @threadSet = ();
 	$Threads->GetKeySet('ALL', '', \@threadSet);
+	my $threadsNum = @threadSet;
+	$Page->Print("<h><font size=3 color=red>スレッド一覧</font></h><br><p>全部で$threadsNum\のスレッドがあります</p><br>");
 	
 	# スレッド分だけループをまわす
 	my $bbs = $Sys->Get('BBS');
@@ -180,7 +181,7 @@ HTML
 		my $res = $Threads->Get('RES', $key);
 		my $path = $Conv->CreatePath($Sys, 0, $bbs, $key, 'l50');
 		
-		$Page->Print("<a href=\"$path\" target=\"_blank\">$i: $name($res)</a>&nbsp;&nbsp;\n");
+		$Page->Print("&nbsp;&nbsp;$i: <a href=\"$path\" target=\"_blank\">$name($res)</a><br>\n");
 	}
 	
 	# フッタ部分の出力
@@ -189,9 +190,9 @@ HTML
 	$Page->Print(<<HTML);
 </small>
 </div>
-
+<hr>
 <div align="right" style="margin-top:1em;">
-<small><a href="./kako/" target="_blank"><b>過去ログ倉庫はこちら</b></a></small>
+<small><a href="./"><b>掲示板に戻る</b></a>／<a href="./kako/" target="_blank"><b>過去ログ倉庫はこちら</b></a></small>
 </div>
 
 <hr>
@@ -255,8 +256,6 @@ sub PrintIndexHead
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-<!-- hCaptcha -->
-<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
  
 HEAD
@@ -352,16 +351,20 @@ MENU
 		
 		# プレビュースレッドの場合はプレビューへのリンクを貼る
 		if ($i <= $prevNum) {
+                        $Page->Print("<font size=3>");
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i:</a> ");
-			$Page->Print("<a href=\"#$i\">$name($res)</a>　\n");
+			$Page->Print("<a href=\"#$i\">$name($res)</a>　</font>\n");
+                        $Page->Print("<hr>") if $i == $prevNum;
 		}
 		else {
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i: $name($res)</a>　\n");
 		}
 	}
+        my $threadNum = @threadSet;
+        $Page->Print("（全部で$threadNum\のスレッドがあります）");
 	$Page->Print(<<MENU);
   </small>
-  <div align="right"><small><b><a href="./subback.html">スレッド一覧はこちら</a></b></small></div>
+  <br><br><div align="left"><font size=3><b><a href="./kako">過去ログ倉庫</a>／<a href="./subback.html">スレッド一覧はこちら</a>／<a href="./">リロード</a></b></font></div>
   </td>
  </tr>
 </table>
@@ -531,22 +534,9 @@ FORM
   <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
   <span class = "order1"><input type="submit" value="新規スレッド作成"><br class="smartphone"></span></div>
   名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
-FORM
-	# hCaptchaなしの場合
-	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA');
-	my $sitekey = $this->{'SYS'}->Get('HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
-		$Page->Print(<<FORM);
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
 FORM
-	}else{
-  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
-	$Page->Print(<<FORM);
-   <span style="margin-top:0px;">
-   <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
-FORM
-	}
     $Page->Print(<<HTML);
 	<input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
@@ -638,24 +628,10 @@ sub PrintThreadPreviewOne
    <input type="submit" value="書き込む" name="submit"><br class="smartphone">
    名前：<input type="text" name="FROM" size="19"><br class="smartphone">
    E-mail：<input type="text" name="mail" size="19"><br>
-KAKIKO
-
-	# hCaptchaなしの場合
-	my $hCaptcha_check = $this->{'SET'}->Get('BBS_HCAPTCHA');
-	my $sitekey = $this->{'SYS'}->Get('HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
-	$Page->Print(<<KAKIKO);
 	<div class ="bbs_service_textarea">
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
     </div>
 KAKIKO
-	}else{
-  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
-	$Page->Print(<<KAKIKO);
-	<div class ="bbs_service_textarea">
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
-KAKIKO
-	}
 	}
 	else{
 	$Page->Print("<hr>");

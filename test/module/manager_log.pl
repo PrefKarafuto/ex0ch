@@ -30,7 +30,7 @@ sub new
 		'MAXA'	=> undef,
 		'MAXH'	=> undef,
 		'MAXS'	=> undef,
-        'MAXF'  => undef,
+		'MAXF'  => undef,
 		'KIND'	=> undef,
 		'NUM'	=> undef,
 	};
@@ -62,7 +62,7 @@ sub Load
 	$this->{'MAXA'}	= $Sys->Get('ADMMAX');
 	$this->{'MAXH'}	= $Sys->Get('HSTMAX');
 	$this->{'MAXS'}	= $Sys->Get('SUBMAX');
-    $this->{'MAXF'}	= $Sys->Get('FLRMAX');
+	$this->{'MAXF'}	= $Sys->Get('FLRMAX');
 	$this->{'NUM'}	= 0;
 	
 	my $file = '';
@@ -70,7 +70,7 @@ sub Load
 	if ($log eq 'ERR') { $file = 'errs.cgi';	$kind = 1; }	# エラーログ
 	if ($log eq 'THR') { $file = 'IP.cgi';		$kind = 2; }	# スレッド作成ログ
 	if ($log eq 'WRT') { $file = "$key.cgi";	$kind = 3; }	# 書き込みログ
-    if ($log eq 'FLR') { $file = "failure.cgi";	$kind = 4; }	# 書き込み失敗ログ
+	if ($log eq 'FLR') { $file = "failure.cgi";	$kind = 4; }	# 書き込み失敗ログ
 	if ($log eq 'HST') { $file = "HOST.cgi";	$kind = 5; }	# ホストログ
 	if ($log eq 'SMB') { $file = "samba.cgi";	$kind = 6; }	# Sambaログ
 	if ($log eq 'SBH') { $file = "houshi.cgi";	$kind = 7; }	# Samba規制ログ
@@ -189,7 +189,7 @@ sub Set
 		if ($kind == 1) { $bf = $nm - $this->{'MAX'}; }			# エラーログ
 		if ($kind == 2) { $bf = $nm - $this->{'MAXS'}; }		# スレッドログ
 	#	if ($kind == 3) { $bf = $nm - $I->Get('timecount'); }	# 書き込みログ
-        if ($kind == 4) { $bf = $nm - $this->{'MAXF'}; }	    # 書き込み失敗ログ
+		if ($kind == 4) { $bf = $nm - $this->{'MAXF'}; }	    # 書き込み失敗ログ
 		if ($kind == 5) { $bf = $nm - $this->{'MAXH'}; }		# ホストログ
 		if ($kind == 6) { $bf = $nm - $this->{'MAX'}; }			# samba
 		if ($kind == 7) { $bf = $nm - $this->{'MAX'}; }			# houshi

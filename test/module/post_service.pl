@@ -10,7 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
 use Digest::MD5;
-use JSON::Parse 'parse_json';
+#use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
 
@@ -752,7 +752,7 @@ sub NormalizationNameMail
 	
 	return $ZP::E_SUCCESS;
 }
-
+=pod
 #------------------------------------------------------------------------------------------------------------
 #
 #	改造版で追加
@@ -809,7 +809,7 @@ sub Certification_hCaptcha
 
 			return $ZP::E_SUCCESS;
 }
-
+=cut
 #------------------------------------------------------------------------------------------------------------
 #
 #	テキスト欄の正規化
@@ -957,7 +957,7 @@ sub SpamBlock
 	my	$this = shift;
 	my	($Setting, $form) = @_;
 	
-	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASKII');		#名前欄がASCIIのみ
+	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASCII');		#名前欄がASCIIのみ
 	my $mail_atsign_point	= $Setting->Get('BBS_SPAMKILLI_MAIL');		#メール欄に半角\@を含む
 	my $nohost_point		= $Setting->Get('BBS_SPAMKILLI_HOST');		#ホスト名が逆引き不可
 	my $text_ahref_point	= $Setting->Get('BBS_SPAMKILLI_URL');		#本文に<;a href=か[url=を含む
