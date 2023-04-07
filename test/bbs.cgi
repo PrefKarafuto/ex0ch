@@ -316,14 +316,6 @@ sub PrintBBSThreadCreate
     </div>
     名前：<input type="text" name="FROM" size="19" value="$name"><br class="smartphone">
     E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
-HTML
-
-
-	# hCaptchaなしの場合
-	my $hCaptcha_check = $Set->Get('BBS_HCAPTCHA');
-	my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
-	if ($hCaptcha_check eq '') {
-		$Page->Print(<<HTML);
     <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
     </td>
    </tr>
@@ -338,27 +330,6 @@ HTML
 $ver
 </p>
 HTML
-	}else{
-  	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>　\n");
-		$Page->Print(<<HTML);
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
-    </td>
-   </tr>
-  </table>
-  </form>
-  </center>
-  </td>
- </tr>
-</table>
-
-<p>
-$ver
-</p>
-HTML
-}
-
-
-
 	}
 
 
@@ -561,6 +532,104 @@ HTML
 		$Banner->Print($Page, 100, 0, $Sys->Get('AGENT'));
 	}
 	$Page->Print("\n</body>\n</html>\n");
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	bbs.cgi hCaptcha確認ページ表示
+#	-------------------------------------------------------------------------------------
+#	@param	$CGI	
+#	@param	$Page	BUFFER_OUTPUT
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintBBShCaptcha
+{
+	my ($CGI, $Page) = @_;
+	
+	my $Sys = $CGI->{'SYS'};
+	my $Form = $CGI->{'FORM'};
+	my $Set = $CGI->{'SET'};
+	
+	my $sanitize = sub {
+		$_ = shift;
+		s/&/&amp;/g;
+		s/</&lt;/g;
+		s/>/&gt;/g;
+		s/"/&#34;/g;
+		return $_;
+	};
+	my $code = $Sys->Get('ENCODE');
+	my $bbs = &$sanitize($Form->Get('bbs'));
+	my $tm = int(time);
+	my $name = &$sanitize($Form->Get('FROM'));
+	my $mail = &$sanitize($Form->Get('mail'));
+	my $msg = &$sanitize($Form->Get('MESSAGE'));
+	my $subject = &$sanitize($Form->Get('subject'));
+	my $key = &$sanitize($Form->Get('key'));
+	my $hCap = $Form->Get('g-recaptcha-response');
+	$Page->Print("Content-type: text/html\n\n");
+	$Page->Print(<<HTML);
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 2ch_X:cookie -->
+<head>
+
+ <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+ <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
+  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+ <title>■ hCaptcha確認 ■</title>
+
+</head>
+<!--nobanner-->
+HTML
+	
+	# <body>タグ出力
+	{
+		my @work;
+		$work[0] = $Set->Get('BBS_THREAD_COLOR');
+		$work[1] = $Set->Get('BBS_TEXT_COLOR');
+		$work[2] = $Set->Get('BBS_LINK_COLOR');
+		$work[3] = $Set->Get('BBS_ALINK_COLOR');
+		$work[4] = $Set->Get('BBS_VLINK_COLOR');
+		
+		$Page->Print("<body bgcolor=\"$work[0]\" text=\"$work[1]\" link=\"$work[2]\" ");
+		$Page->Print("alink=\"$work[3]\" vlink=\"$work[4]\">\n");
+	}
+	
+	$Page->Print(<<HTML);
+<font size="4" color="#FF0000"><b>hCaptcha確認</b></font>
+HTML
+	my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
+	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>\n");
+	$Page->Print("<form method=\"POST\" action=\"./bbs.cgi?guid=ON\">");
+	
+	$msg =~ s/<br>/\n/g;
+	
+	$Page->HTMLInput('hidden', 'subject', $subject);
+	$Page->HTMLInput('hidden', 'FROM', $name);
+	$Page->HTMLInput('hidden', 'mail', $mail);
+	$Page->HTMLInput('hidden', 'MESSAGE', $msg);
+	$Page->HTMLInput('hidden', 'bbs', $bbs);
+	$Page->HTMLInput('hidden', 'time', $tm);
+	
+	# レス書き込みモードの場合はkeyを設定する
+	if ($Sys->Equal('MODE', 2)) {
+		$Page->HTMLInput('hidden', 'key', $key);
+	}
+	
+	$Page->Print(<<HTML);
+<input type="submit" value="送信"><br>
+</form>
+
+<p>
+現在、荒らし対策でhCaptcha認証しないと書きこみできないようにしています。<br>
+</p>
+
+</body>
+</html>
+HTML
 }
 
 #------------------------------------------------------------------------------------------------------------
