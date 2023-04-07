@@ -510,7 +510,7 @@ sub PrintLimitSetting
 	my $setTateHour		= $Setting->Get('BBS_TATESUGI_HOUR');
 	my $setTateCount	= $Setting->Get('BBS_TATESUGI_COUNT');
 	
-	my $setAskiiPoint	= $Setting->Get('BBS_SPAMKILLI_ASKII');
+	my $setAskiiPoint	= $Setting->Get('BBS_SPAMKILLI_ASCII');
 	my $setMailPoint	= $Setting->Get('BBS_SPAMKILLI_MAIL');
 	my $setHostPoint	= $Setting->Get('BBS_SPAMKILLI_HOST');
 	my $setURLPoint		= $Setting->Get('BBS_SPAMKILLI_URL');
@@ -603,7 +603,7 @@ sub PrintLimitSetting
     
     $Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
-	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASKII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASCII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文のASCIIの割合が<input type=text size=3 name=BBS_SPAMKILL_MESSAGE value=\"$setAskiiMessage\" style=\"text-align: right\" maxlength=\"3\">％以上で");
 	$Page->Print("<input type=text size=3 name=BBS_SPAMKILL_MESPOINT value=\"$setMesPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("メール欄に半角＠を含むと<input type=text size=3 name=BBS_SPAMKILL_MAIL value=\"$setMailPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
@@ -611,7 +611,7 @@ sub PrintLimitSetting
 	$Page->Print("本文に<;a href=か[url=を含むと<input type=text size=3 name=BBS_SPAMKILL_URL value=\"$setURLPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文にリンクを含むと<input type=text size=3 name=BBS_SPAMKILL_LINK value=\"$setSpamLink\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("（↑が0の時のみ）本文中リンクのTLドメインの種類<input type=text size=30 name=BBS_SPAMKILL_DOMAIN value=\"$setDomain\" style=\"text-align: right\">でポイント加点<br>");
-	$Page->Print("合計<input type=text size=3 name=BBS_SPAMKILL_POINT value=\"$setSpamPoint\" style=\"text-align: right\" maxlength=\"2\">ポイントでスパムと判定");
+	$Page->Print("合計<input type=text size=3 name=BBS_SPAMKILL_POINT value=\"$setSpamPoint\" style=\"text-align: right\" maxlength=\"3\">ポイントでスパムと判定");
 	$Page->Print("</td></tr>");
     
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -931,7 +931,7 @@ sub FunctionLimitSetting
 		my @inList = qw(BBS_SUBJECT_COUNT BBS_NAME_COUNT BBS_MAIL_COUNT BBS_MESSAGE_COUNT
 						BBS_LINE_NUMBER BBS_COLUMN_NUMBER BBS_DATMAX
 						timecount timeclose BBS_THREAD_TATESUGI BBS_TATESUGI_COUNT2
-						BBS_TATESUGI_HOUR BBS_TATESUGI_COUNT BBS_SPAMKILL_ASKII BBS_SPAMKILL_MAIL
+						BBS_TATESUGI_HOUR BBS_TATESUGI_COUNT BBS_SPAMKILL_ASCII BBS_SPAMKILL_MAIL
 						BBS_SPAMKILL_HOST BBS_SPAMKILL_URL BBS_SPAMKILL_MESSAGE BBS_SPAMKILL_LINK
 						BBS_SPAMKILL_MESPOINT BBS_SPAMKILL_POINT);
 		# 入力有無
@@ -982,7 +982,7 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_TATESUGI_COUNT', $Form->Get('BBS_TATESUGI_COUNT'));
 	$Setting->Set('BBS_TATESUGI_COUNT2', $Form->Get('BBS_TATESUGI_COUNT2'));
 
-	$Setting->Set('BBS_SPAMKILLI_ASKII', $Form->Get('BBS_SPAMKILL_ASKII'));
+	$Setting->Set('BBS_SPAMKILLI_ASKII', $Form->Get('BBS_SPAMKILL_ASCII'));
 	$Setting->Set('BBS_SPAMKILLI_MAIL', $Form->Get('BBS_SPAMKILL_MAIL'));
 	$Setting->Set('BBS_SPAMKILLI_HOST', $Form->Get('BBS_SPAMKILL_HOST'));
 	$Setting->Set('BBS_SPAMKILLI_URL', $Form->Get('BBS_SPAMKILL_URL'));
@@ -1053,11 +1053,11 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_TRIPCOLUMN', $Form->Get('BBS_TRIPCOLUMN'));
 	$Setting->Set('BBS_SLIP', ($Form->Equal('BBS_SLIP', 'on') ? 'checked' : ''));
 
-    $Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
-    $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
-    $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
-    $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
-    #$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
+    	$Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
+    	$Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
+    	$Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
+    	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
+    	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	
 	# ID表示設定
 	# 酷いけど仕方ないね…
