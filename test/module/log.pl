@@ -223,7 +223,7 @@ sub Put
 	$this->{'SIZE'}++;
 	
 	if ($this->{'SIZE'} + 10 > $this->{'LIMIT'}) {
-		mkdir ($this->{'PATH'},600);
+		mkdir ($this->{'PATH'},0600);
 		my $logName = "$this->{'PATH'}/$year\_$mon.cgi";
 		if (open(my $fh, '>>', $logName)) {
 			flock($fh, 2);
@@ -269,7 +269,7 @@ sub MoveToOld
 	$year += $year+1900;
 	$mon += $mon+1;
 	my $logName = "$this->{'PATH'}/$year\_$mon.cgi";
-	mkdir ($this->{'PATH'},600);
+	mkdir ($this->{'PATH'},0600);
 	if (open(my $fh, '>>', $logName)) {
 		flock($fh, 2);
 		#binmode($fh);
