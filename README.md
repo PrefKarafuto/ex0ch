@@ -30,7 +30,7 @@ This is the biggest goal of our project and the one that needs the most help.
  + 一般的な2ch-likeBBSスクリプトとしての機能開発に障る行為や、***違法・悪質な又は趣旨より著しく逸脱するコードの埋め込みは、これを固く禁じます。***  
 2023/1/14 PrefKarafuto  
 <br><br>
-
+<small>Prologは使われてませんです……^^;</small>
 ------------
 ## testフォルダのディレクトリ構成
  + test/                      - ぜろちゃんねるプラス動作ディレクトリ  
