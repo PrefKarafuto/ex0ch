@@ -9,6 +9,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use Encode;
 no warnings qw(once);
 
 #------------------------------------------------------------------------------------------------------------
@@ -889,7 +890,7 @@ sub ConvertTrip
 	
 	my $trip = '';
 	$$key = '' if (!defined $$key);
-	
+	$$key = Encode::encode("cp932",$$key);
 	if (length($$key) >= 12) {
 		# 先頭1文字の取得
 		my $mark = substr($$key, 0, 1);
