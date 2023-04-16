@@ -663,7 +663,7 @@ sub NormalizationNameMail
 	
 	# トリップ変換
 	my $trip = '';
-	if ($name =~ /\#(.*)$/x) {
+	if ($name =~ /(?<!&)\#(.*)$/x) {
 		my $key = $1;
 		$trip = $this->{'CONV'}->ConvertTrip(\$key, $Set->Get('BBS_TRIPCOLUMN'), $Sys->Get('TRIP12'));
 	}
