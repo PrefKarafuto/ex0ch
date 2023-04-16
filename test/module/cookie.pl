@@ -51,7 +51,7 @@ sub Init
 			my ($name, $value) = split(/=/, $_, 2);
 			$value =~ s/^"|"$//g;
 			$value =~ s/%([0-9A-Fa-f][0-9A-Fa-f])/pack('H2', $1)/eg;
-			$value = Encode::decode("Shift_JIS",$value);
+			$value = Encode::decode("utf8",$value);
 			$this->{'COOKIE'}->{$name} = $value;
 		}
 		return 1;
@@ -72,7 +72,6 @@ sub Set
 	my $this = shift;
 	my ($key, $val, $enc) = @_;
 	
-	#Encode::from_to($val, 'sjis', $enc) if (defined $enc);
 	$this->{'COOKIE'}->{$key} = $val;
 }
 
@@ -91,7 +90,6 @@ sub Get
 	my ($key, $default, $enc) = @_;
 	
 	my $val = $this->{'COOKIE'}->{$key};
-	#Encode::from_to($val, $enc, 'sjis') if (defined $val && defined $enc);
 	
 	return (defined $val ? $val : (defined $default ? $default : undef));
 }

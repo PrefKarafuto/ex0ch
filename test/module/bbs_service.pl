@@ -9,6 +9,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
+use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
 
@@ -191,7 +192,7 @@ HTML
 </small>
 </div>
 <hr>
-<div align="right" style="margin-top:1em;">
+<div align="left" style="margin-top:1em;">
 <small><a href="./"><b>掲示板に戻る</b></a>／<a href="./kako/" target="_blank"><b>過去ログ倉庫はこちら</b></a></small>
 </div>
 
@@ -256,6 +257,8 @@ sub PrintIndexHead
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<!-- hCaptcha -->
+<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
  
 HEAD
@@ -605,6 +608,11 @@ sub PrintThreadPreviewOne
 	my $bbs = $Sys->Get('BBS');
 	my $key = $Sys->Get('KEY');
 	my $tm = time;
+    my $bbsPath = $Sys->Get('BBSPATH');
+	
+	my $permt = DAT::GetPermission("$bbsPath/$bbs/dat/$key.dat");
+	my $perms = $Sys->Get('PM-STOP');
+	my $isstop = $permt == $perms;
 	
 	# 表示数の正規化
 	my ($start, $end) = $this->{'CONV'}->RegularDispNum($Sys, $Dat, 1, $contNum, $contNum);
@@ -616,7 +624,7 @@ sub PrintThreadPreviewOne
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-	if($Sys->Get('RESMAX') > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on'){
+	if($Sys->Get('RESMAX') > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop){
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>

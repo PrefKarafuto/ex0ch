@@ -446,10 +446,12 @@ sub PrintReadFoot
 		$Page->Print("<a href=\"$pathLast\">最新50</a>\n");
 		$Page->Print("</div>\n");
 	}
-	
+	my $permt = DAT::GetPermission($datPath);
+	my $perms = $Sys->Get('PM-STOP');
+	my $isstop = $permt == $perms;
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
-	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on') {
+	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop) {
 		my $cookName = '';
 		my $cookMail = '';
 		my $tm = int(time);
