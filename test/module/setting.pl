@@ -372,7 +372,7 @@ sub InitSettingData
 
         'BBS_TASUKERUYO'        => '',
         'BBS_OMIKUJI'           => '',
-	'BBS_'           => '',
+		'BBS_OGP'           => '',
 
 		'BBS_HCAPTCHA'			=> '',
 		'BBS_READTYPE'			=> '5ch',

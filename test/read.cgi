@@ -186,12 +186,17 @@ sub PrintReadHead
 	$title = $Dat->GetSubject() if(!defined $title);
 	$title = '' if(!defined $title);
 	my $mascot = $Set->Get('BBS_MASCOT');
+	my $url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Sys->Get('KEY').'/';
+	my $ogpimage = $Set->Get('BBS_OGP');
+	my $bbsname = $Set->Get('BBS_TITLE');
+	my $datone = $Dat->Get(0);
+	my @threadTop = split(/<>/,$$datone);
 	
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja">
+<html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
 
  <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
@@ -202,6 +207,13 @@ sub PrintReadHead
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
+<meta property="og:url" content="$url">
+<meta property="og:title" content="$title">
+<meta property="og:description" content="$threadTop[3]">
+<meta property="og:type" content="article">
+<meta property="og:image" content="$ogpimage">
+<meta property="og:site_name" content="$bbsname">
+<meta name="twitter:card" content="summary">
 HTML
 
 	$Caption->Print($Page, undef);

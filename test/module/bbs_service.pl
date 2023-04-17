@@ -245,11 +245,15 @@ sub PrintIndexHead
 	my $link = $this->{'SET'}->Get('BBS_TITLE_LINK');
 	my $image = $this->{'SET'}->Get('BBS_TITLE_PICTURE');
 #	my $code = $this->{'CODE'};
-	
+
+	my $url = $this->{'SYS'}->Get('SERVER').$this->{'SYS'}->Get('BBS').'/';
+	my $ogpimage = $this->{'SET'}->Get('BBS_OGP');
+	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
+
 	# HTMLヘッダの出力
 	$Page->Print(<<HEAD);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja">
+<html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
  
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
@@ -260,7 +264,13 @@ sub PrintIndexHead
 <!-- hCaptcha -->
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
- 
+<meta property="og:url" content="$url">
+<meta property="og:title" content="$title">
+<meta property="og:description" content="$bbsinfo">
+<meta property="og:type" content="website">
+<meta property="og:image" content="$ogpimage">
+<meta property="og:site_name" content="ぜろちゃんねるプラス">
+<meta name="twitter:card" content="summary_large_image">
 HEAD
 	
 	$Caption->Print($Page, undef);
