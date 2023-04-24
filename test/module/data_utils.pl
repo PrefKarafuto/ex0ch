@@ -240,7 +240,7 @@ sub ConvertTweet
 	
 	my $reg = '(?<!src="?)(https://twitter\.com/[A-Za-z0-9]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
 	
-	$$text =~ s|$reg|<blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
+	$$text =~ s|$reg|<a href="$1">$1</a><br><blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
 	
 	return $text;
 	
