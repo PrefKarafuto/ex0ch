@@ -245,7 +245,7 @@ sub PrintIndexHead
 	my $image = $this->{'SET'}->Get('BBS_TITLE_PICTURE');
 #	my $code = $this->{'CODE'};
 
-	my $url = $this->{'SYS'}->Get('SERVER').$this->{'SYS'}->Get('BBS').'/';
+	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
 	my $ogpimage = $this->{'SET'}->Get('BBS_OGP');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
 
