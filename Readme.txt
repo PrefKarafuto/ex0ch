@@ -1,5 +1,5 @@
 
-ぜろちゃんねるプラス Ver0.8.0
+ぜろちゃんねるプラス Ver0.8.x
 https://github.com/PrefKarafuto/New_0ch_Plus/
 
 ■はじめに
@@ -9,7 +9,7 @@ https://github.com/PrefKarafuto/New_0ch_Plus/
 　このファイルは本家ぜろちゃんねるの/readme/readme.txtを元に編集された0ch+の/Readme/Readme.txtから作成しており、一部原文
   ままの部分があります。
   
-■ぜろちゃんねるプラス(v0.8.0)とは
+■ぜろちゃんねるプラス(v0.8.x)とは
   スレッドフロート型掲示板を動作させるPerlスクリプトとして製作されたぜろちゃんねるの機能改善版「ぜろちゃんねるプラス」の有志再開発版です。
   これまでのぜろちゃんねるプラスと同じく５ちゃんねる専用ブラウザでも書き込みと閲覧、またv0.7.4(v0.7.5)からのアップデートが可能です。
   
@@ -19,12 +19,12 @@ https://github.com/PrefKarafuto/New_0ch_Plus/
       ストリビューション系ソフトウェアが動作するOS
     ・5MB以上のディスクスペース 
   ★推奨環境
-    ・suEXECでCGI動作が可能なApache HTTP Serverが入っており，Perl 5.8以上(Perl 6は含まな
+    ・suEXECでCGI動作が可能なApache HTTP Serverが入っており，Perl 5.22以上(Perl 6/Rakuは含まな
       い)が動作するUNIX系もしくはLinux系のOS
     ・10MB以上のディスクスペース
     
 ■配布ファイル構成
-zerochplus_0.8.0/
+zerochplus_0.8.x/
  + test/                      - ぜろちゃんねるプラス動作ディレクトリ
     + *.cgi                   - 基本動作用CGI
     + datas/                  - 初期データ・固定データ格納用
@@ -123,6 +123,7 @@ zerochplus_0.8.0/
 
 ■バージョンアップについて
   旧v0.7.x系列からのアップデートの際は、必ず事前にバックアップをとってください。
+  testフォルダ内を新しいファイルで上書きしてください。(infoフォルダ内のファイルはerrmsg.cgiのみ上書きすること)
 
 ■ヘルプ・サポート
 　基本的なことは変わっておりませんので、以下のページを参考にしてください。
