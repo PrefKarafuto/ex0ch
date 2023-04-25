@@ -159,8 +159,8 @@ sub ConvertURL
 	
 	my $server = $Sys->Get('SERVER');
 	my $cushion = $Set->Get('BBS_REFERER_CUSHION');
-	my $reg1 = q{(?<!href="?)(?<!src="?)(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
-	my $reg2 = q{<(?<!href="?)(?<!src="?)(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
+	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
+	my $reg2 = q{<(?<!a href=")(?<!src=")(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
 	
 	# 携帯から
 	if ($mode eq 'O') {
@@ -214,7 +214,7 @@ sub ConvertImgur
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src="?)(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
+	my $reg = '(?<!src=")(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
 	
 	$$text =~ s|$reg|<a href="$1"><img src="$1" width=100 height=100\/></a>|g;
 	
@@ -226,7 +226,7 @@ sub ConvertVideo
 {
 	my $this = shift;
 	my ($text) = @_;
-	my $reg = q{(?<!src="?)(https?:\/\/.*?\.mp4)};
+	my $reg = q{(?<!src=")(?<!a href=")(https?:\/\/.*?\.mp4)};
 	$$text =~ s||<video src="$1" width=100 height=100 controls preload="metadata">|g;
 	
 	return $text;
@@ -238,7 +238,7 @@ sub ConvertTweet
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src="?)(https://twitter\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
+	my $reg = '(?<!src=")(?<!a href=")(https://twitter\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
 	
 	$$text =~ s|$reg|<a href="$1">$1</a><br><blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
 	
