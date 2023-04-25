@@ -15,7 +15,7 @@ https://github.com/PrefKarafuto/New_0ch_Plus/
   
 ■動作環境
   ★必須環境
-    ・CGIの動作が可能なHTTPDが入っており，Perl 5.8以上(Perl 6は含まない)もしくはそのディ
+    ・CGIの動作が可能なHTTPDが入っており，Perl 5.22以上(Perl 6/Rakuは含まない)もしくはそのディ
       ストリビューション系ソフトウェアが動作するOS
     ・5MB以上のディスクスペース 
   ★推奨環境
