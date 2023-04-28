@@ -295,7 +295,7 @@ sub PrintReadMenu
 	}
 	$Page->Print(" <a href=\"$pathLast\">最新50</a>\n");
 	$Page->Print(" </span>\n");
-	$Page->Print(" <span style=\"float:right;\">\n");
+	$Page->Print(" <br><span style=\"float:right;\">\n");
 	if ($PRtext ne '') {
 		$Page->Print(" [PR]<a href=\"$PRlink\" target=\"_blank\">$PRtext</a>[PR]\n");
 	}
