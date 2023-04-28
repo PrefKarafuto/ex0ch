@@ -280,7 +280,7 @@ sub PrintBaseSetting
 	$Page->Print("<input type=text size=80 name=BBS_TITLE_LINK value=\"$setKnabanLink\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">index背景画像</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_BG_PICTURE value=\"$setBackPict\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">OGP画像(絶対パス)</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">OGP/ファビコン画像(絶対パス)</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_OGP value=\"$setOGP\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">read.cgi背景マスコット</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_MASCOT value=\"$setBackMascot\"></td></tr>");
