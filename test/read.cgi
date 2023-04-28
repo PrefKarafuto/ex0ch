@@ -202,18 +202,19 @@ sub PrintReadHead
  <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Style-Type" content="text/css">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ <meta property="og:url" content="$url">
+ <meta property="og:title" content="$title">
+ <meta property="og:description" content="$threadTop[3]">
+ <meta property="og:type" content="article">
+ <meta property="og:image" content="$ogpimage">
+ <meta property="og:site_name" content="$bbsname">
+ <meta name="twitter:card" content="summary">
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
+ <link rel="icon" href="$ogpimage">
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
-<meta property="og:url" content="$url">
-<meta property="og:title" content="$title">
-<meta property="og:description" content="$threadTop[3]">
-<meta property="og:type" content="article">
-<meta property="og:image" content="$ogpimage">
-<meta property="og:site_name" content="$bbsname">
-<meta name="twitter:card" content="summary">
 HTML
 
 	$Caption->Print($Page, undef);
