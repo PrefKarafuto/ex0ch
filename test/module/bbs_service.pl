@@ -254,22 +254,22 @@ sub PrintIndexHead
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
- 
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ <meta property="og:url" content="$url">
+ <meta property="og:title" content="$title">
+ <meta property="og:description" content="$bbsinfo">
+ <meta property="og:type" content="website">
+ <meta property="og:image" content="$ogpimage">
+ <meta property="og:site_name" content="ぜろちゃんねるプラス">
+ <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-<!-- hCaptcha -->
-<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<meta property="og:url" content="$url">
-<meta property="og:title" content="$title">
-<meta property="og:description" content="$bbsinfo">
-<meta property="og:type" content="website">
-<meta property="og:image" content="$ogpimage">
-<meta property="og:site_name" content="ぜろちゃんねるプラス">
-<meta name="twitter:card" content="summary_large_image">
+ <link rel="icon" href="$ogpimage">
+ <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+ <!-- hCaptcha -->
+ <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
+ <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 HEAD
 	
 	$Caption->Print($Page, undef);
@@ -312,7 +312,7 @@ HEAD
 		}
 		$Page->Print("</div>\n");
 	}
-	
+	$Page->Print("<br><center><div style=\"padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;\">$title</div></center><br>\n");
 	# ヘッダテーブルの表示
 	$Caption->Load($this->{'SYS'}, 'HEAD');
 	$Caption->Print($Page, $this->{'SET'});
