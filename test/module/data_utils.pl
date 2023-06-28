@@ -481,16 +481,26 @@ sub GetThreadTitle
 sub ConvertImageTag
 {
 	my $this = shift;
-	my ($Sys,$limit, $text) = @_;
-	
-	my $reg1 = q{(?<!src="?)(?<!href=")https?://.*?\.(jpe?g|gif|bmp|png)};
+	my ($Sys,$limit, $text,$index) = @_;
+
+	my $reg1 = q{(?<!src="?)https?://.*?\.(jpe?g|gif|bmp|png)};
 	my $reg2 = q{<a.*?>(.*?\.(jpe?g|gif|bmp|png))};
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
-		$$text =~ s|$reg1|<img src="$1" style="max-width:100%;height:auto;">|g;
+		if ($index){
+			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
+		}
+		else{
+			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
+		}
 	}
 	else{
-		$$text =~ s|$reg2|<img src="$1" style="max-width:100%;height:auto;">|g;
+		if ($index){
+			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
+		}
+		else{
+			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
+		}
 	}
 	return $text;
 }
