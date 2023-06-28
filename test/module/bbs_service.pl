@@ -618,7 +618,7 @@ sub PrintThreadPreviewOne
 	my $bbs = $Sys->Get('BBS');
 	my $key = $Sys->Get('KEY');
 	my $tm = time;
-    my $bbsPath = $Sys->Get('BBSPATH');
+ 	my $bbsPath = $Sys->Get('BBSPATH');
 	
 	my $permt = DAT::GetPermission("$bbsPath/$bbs/dat/$key.dat");
 	my $perms = $Sys->Get('PM-STOP');
@@ -712,7 +712,7 @@ sub PrintResponse
 	else {
 		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	}
-	if($elem[1] =~ /!FONT_AA/){
+	if($elem[1] =~ /!aafont/){
 		$aa = 'style="font-family:MS PGothic; font-size: 16px; line-height:1;"';
 	}
 	# 表示行数内ならすべて表示する
