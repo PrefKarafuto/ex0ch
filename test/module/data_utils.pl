@@ -216,7 +216,7 @@ sub ConvertImgur
 	
 	my $reg = '(?<!src=")(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
 	
-	$$text =~ s|$reg|<a href="$1"><img src="$1" width=100 height=100\/></a>|g;
+	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1"></a></blockquote>|g;
 	
 	return $text;
 	
@@ -487,10 +487,10 @@ sub ConvertImageTag
 	my $reg2 = q{<a.*?>(.*?\.(jpe?g|gif|bmp|png))};
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
-		$$text =~ s|$reg1|<img src=\"$1\" width=100 height=100/>|g;
+		$$text =~ s|$reg1|<img src="$1" style="max-width:100%;height:auto;">|g;
 	}
 	else{
-		$$text =~ s|$reg2|<img src=\"$1\" width=100 height=100/>|g;
+		$$text =~ s|$reg2|<img src="$1" style="max-width:100%;height:auto;">|g;
 	}
 	return $text;
 }
