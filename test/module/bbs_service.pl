@@ -685,7 +685,7 @@ sub PrintResponse
 	my $contLine = $Conv->GetTextLine(\$elem[3]);
 	my $nameCol = $this->{'SET'}->Get('BBS_NAME_COLOR');
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
-	
+	my $aa='';
 	# URLと引用個所の適応
 	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
@@ -712,21 +712,23 @@ sub PrintResponse
 	else {
 		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	}
-	
+	if($elem[1] =~ /!FONT_AA/){
+		$aa = 'style="font-family:MS PGothic; font-size: 16px; line-height:1;"';
+	}
 	# 表示行数内ならすべて表示する
 	if ($contLine <= $dispLine || $n == 1) {
-		$Page->Print("：$elem[2]</dt>\n    <dd>$elem[3]<br><br></dd>\n");
+		$Page->Print("：$elem[2]</dt>\n    <dd $aa>$elem[3]<br><br></dd>\n");
 	}
 	# 表示行数を超えたら省略表示を付加する
 	else {
 		my @dispBuff = split(/<br>/i, $elem[3]);
 		my $path = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), "${n}n");
 		
-		$Page->Print("：$elem[2]</dt>\n    <dd>");
+		$Page->Print("：$elem[2]</dt>\n    <div $aa><dd>");
 		for (my $k = 0; $k < $dispLine; $k++) {
 			$Page->Print("$dispBuff[$k]<br>");
 		}
-		$Page->Print("<font color=\"green\">（省略されました・・全てを読むには");
+		$Page->Print("</div><font color=\"green\">（省略されました・・全てを読むには");
 		$Page->Print("<a href=\"$path\" target=\"_blank\">ここ</a>");
 		$Page->Print("を押してください）</font><br><br></dd>\n");
 	}
