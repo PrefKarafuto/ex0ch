@@ -483,7 +483,7 @@ sub ConvertImageTag
 	my $this = shift;
 	my ($Sys,$limit, $text) = @_;
 	
-	my $reg1 = q{(?<!src="?)https?://.*?\.(jpe?g|gif|bmp|png)};
+	my $reg1 = q{(?<!src="?)(?<!href=")https?://.*?\.(jpe?g|gif|bmp|png)};
 	my $reg2 = q{<a.*?>(.*?\.(jpe?g|gif|bmp|png))};
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
