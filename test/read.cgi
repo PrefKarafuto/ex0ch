@@ -496,10 +496,6 @@ E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" val
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
-
-
-
-
 	}
 	else{
 	$Page->Print("<hr>");
@@ -553,17 +549,18 @@ sub PrintResponse
 	my $nameCol	= $Set->Get('BBS_NAME_COLOR');
 	my $type = $Set->Get('BBS_READTYPE');
 	my $color = $Set->Get('BBS_POSTCOLOR');
-    my $limit =$Sys->Get('LIMTIME');
+    	my $limit =$Sys->Get('LIMTIME');
+	my $aa='';
 	
 	# URLと引用個所の適応
-    $Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
-    $Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
+    	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
+    	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
 	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
-    $Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
+    	$Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
 	# メール欄有り
 	if ($elem[1] eq '') {
 		$Mail = "<font color=\"$nameCol\"><b>$elem[0]</b></font>";
@@ -571,6 +568,9 @@ sub PrintResponse
 	# メール欄無し
 	else {
 		$Mail = "<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>";
+	}
+	if ($elem[1] =~ /!FONT_AA/){
+		$aa = 'style="font-family:MS PGothic; font-size: 16px; line-height:1;"'
 	}
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
@@ -587,7 +587,7 @@ sub PrintResponse
 		<span class="name">$Mail</span>
 		<span class="dateid">$elem[2]</span>
 	</div>
-	<div class="message">
+	<div class="message" $aa>
 		$elem[3]
 	</div>
 </div>
@@ -603,7 +603,7 @@ HTML
 		    $Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	    }
 	$Page->Print("：$elem[2]</dt>\n");
-	$Page->Print("  <dd>$elem[3]<br><br></dd>\n");
+	$Page->Print("  <dd $aa>$elem[3]<br><br></dd>\n");
 	}
 }
 
