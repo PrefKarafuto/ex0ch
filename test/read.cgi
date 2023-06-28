@@ -569,8 +569,8 @@ sub PrintResponse
 	else {
 		$Mail = "<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>";
 	}
-	if ($elem[1] =~ /!FONT_AA/){
-		$aa = 'style="font-family:MS PGothic; font-size: 16px; line-height:1;"'
+	if ($elem[1] =~ /!aafont/){
+		$aa = 'style="font-family:MS PGothic; font-size: 16px; line-height:1;"';
 	}
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
