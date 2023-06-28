@@ -212,6 +212,7 @@ sub PrintReadHead
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
  <link rel="icon" href="$ogpimage">
+<script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
