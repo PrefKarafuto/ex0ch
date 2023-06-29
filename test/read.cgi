@@ -570,7 +570,7 @@ sub PrintResponse
 		$Mail = "<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>";
 	}
 	if ($elem[1] =~ /!aafont/){
-		$aa = 'style="font-family:MS PGothic; font-size: 16px; line-height:1;"';
+		$aa = 'aaview';
 	}
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
@@ -587,7 +587,7 @@ sub PrintResponse
 		<span class="name">$Mail</span>
 		<span class="dateid">$elem[2]</span>
 	</div>
-	<div class="message" $aa>
+	<div class="message $aa">
 		$elem[3]
 	</div>
 </div>
