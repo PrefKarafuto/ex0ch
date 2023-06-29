@@ -713,7 +713,7 @@ sub PrintResponse
 		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	}
 	if($elem[1] =~ /!aafont/){
-		$aa = 'style="font-family:MS PGothic; font-size: 16px; line-height:1;"';
+		$aa = 'class="aaview"';
 	}
 	# 表示行数内ならすべて表示する
 	if ($contLine <= $dispLine || $n == 1) {
