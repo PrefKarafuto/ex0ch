@@ -266,8 +266,8 @@ sub PrintIndexHead
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
  <link rel="icon" href="$ogpimage">
- <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
- <script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
+ <script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+ <script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
  <!-- hCaptcha -->
  <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
  <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
