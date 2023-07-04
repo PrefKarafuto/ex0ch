@@ -267,21 +267,21 @@ sub PrintBaseSetting
 	my $setAbone		= $Setting->Get('BBS_DELETE_NAME');
 	my $setCookiePath	= $Setting->Get('BBS_COOKIEPATH');
 	my $setRefCushion	= $Setting->Get('BBS_REFERER_CUSHION');
-	my $setOGP	= $Setting->Get('BBS_OGP');
+	my $setFavicon  	= $Setting->Get('BBS_FAVICON');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">サブタイトル</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_SUBTITLE value=\"$setSubTitle\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">index看板画像</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">index看板画像(フルパス推奨)</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_TITLE_PICTURE value=\"$setKanban\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">index看板リンク</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_TITLE_LINK value=\"$setKnabanLink\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">index背景画像</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_BG_PICTURE value=\"$setBackPict\"></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">OGP/ファビコン画像(絶対パス)</td><td>");
-	$Page->Print("<input type=text size=80 name=BBS_OGP value=\"$setOGP\"></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ファビコン画像</td><td>");
+	$Page->Print("<input type=text size=80 name=BBS_FAVICON value=\"$setFavicon\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">read.cgi背景マスコット</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_MASCOT value=\"$setBackMascot\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名無しさん</td><td>");
@@ -824,7 +824,7 @@ sub FunctionBaseSetting
 	$Setting->Set('BBS_TITLE_PICTURE', $Form->Get('BBS_TITLE_PICTURE'));
 	$Setting->Set('BBS_TITLE_LINK', $Form->Get('BBS_TITLE_LINK'));
 	$Setting->Set('BBS_BG_PICTURE', $Form->Get('BBS_BG_PICTURE'));
-	$Setting->Set('BBS_OGP', $Form->Get('BBS_OGP'));
+	$Setting->Set('BBS_FAVICON', $Form->Get('BBS_FAVICON'));
 	$Setting->Set('BBS_MASCOT', $Form->Get('BBS_MASCOT'));
 	$Setting->Set('BBS_NONAME_NAME', $Form->Get('BBS_NONAME_NAME'));
 	$Setting->Set('BBS_DELETE_NAME', $Form->Get('BBS_DELETE_NAME'));

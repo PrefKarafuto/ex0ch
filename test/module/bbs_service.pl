@@ -246,8 +246,12 @@ sub PrintIndexHead
 #	my $code = $this->{'CODE'};
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
-	my $ogpimage = $this->{'SET'}->Get('BBS_OGP');
+	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
+
+    if($image !~ /^https?:\/\//){
+        $image = $url.$image;
+    }
 
 	# HTMLヘッダの出力
 	$Page->Print(<<HEAD);
@@ -261,11 +265,11 @@ sub PrintIndexHead
  <meta property="og:title" content="$title">
  <meta property="og:description" content="$bbsinfo">
  <meta property="og:type" content="website">
- <meta property="og:image" content="$ogpimage">
+ <meta property="og:image" content="$image">
  <meta property="og:site_name" content="ぜろちゃんねるプラス">
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
- <link rel="icon" href="$ogpimage">
+ <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));

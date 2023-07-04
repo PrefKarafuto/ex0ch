@@ -187,11 +187,16 @@ sub PrintReadHead
 	$title = '' if(!defined $title);
 	my $mascot = $Set->Get('BBS_MASCOT');
 	my $url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Sys->Get('KEY').'/';
-	my $ogpimage = $Set->Get('BBS_OGP');
+	my $favicon = $Set->Get('BBS_FAVICON');
+    my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $datone = $Dat->Get(0);
 	my @threadTop = split(/<>/,$$datone);
 	
+    if($image !~ /^https?:\/\//){
+        $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
+    }
+    
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
@@ -206,12 +211,12 @@ sub PrintReadHead
  <meta property="og:title" content="$title">
  <meta property="og:description" content="$threadTop[3]">
  <meta property="og:type" content="article">
- <meta property="og:image" content="$ogpimage">
+ <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
  <meta name="twitter:card" content="summary">
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
- <link rel="icon" href="$ogpimage">
+ <link rel="icon" href="$favicon">
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
