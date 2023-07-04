@@ -266,12 +266,11 @@ sub PrintIndexHead
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
  <link rel="icon" href="$ogpimage">
- <script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
- <script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
- <!-- hCaptcha -->
- <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
- <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 HEAD
+	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
+	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));
+	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
+	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
 	
 	$Caption->Print($Page, undef);
 	
@@ -313,7 +312,17 @@ HEAD
 		}
 		$Page->Print("</div>\n");
 	}
-	$Page->Print("<br><center><div style=\"padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;\">$title</div></center><br>\n");
+	my $cgipath = $this->{'SYS'}->Get('CGIPATH');
+	
+	$Page->Print(<<HTML);
+<br>
+ <center>
+  <a href="$cgipath/bbsmenu.cgi" style="color:inherit;text-decoration: none;">
+   <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;">$title</div>
+  </a>
+ </center>
+<br>
+HTML
 	# ヘッダテーブルの表示
 	$Caption->Load($this->{'SYS'}, 'HEAD');
 	$Caption->Print($Page, $this->{'SET'});
