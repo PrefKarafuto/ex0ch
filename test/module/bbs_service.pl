@@ -175,7 +175,7 @@ HTML
 	my $max = $Sys->Get('SUBMAX');
 	my $i = 0;
 	foreach my $key (@threadSet) {
-		last if (++$i > $max);
+		last if ((++$i > $max)&&$Set->Get('BBS_READONLY') ne 'on');
 		
 		my $name = $Threads->Get('SUBJECT', $key);
 		my $res = $Threads->Get('RES', $key);
