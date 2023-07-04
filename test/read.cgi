@@ -212,11 +212,11 @@ sub PrintReadHead
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
  <link rel="icon" href="$ogpimage">
-<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
-<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
 HTML
+	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
+	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
+	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Set->Get('BBS_HCAPTCHA'));
+	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($Set->Get('BBS_HCAPTCHA'));
 
 	$Caption->Print($Page, undef);
 	
