@@ -6,7 +6,6 @@
 @media screen and (max-width:768px) {
     .bbs_service_textarea textarea {
     resize: vertical;
-    height:200px;
     width:95%;
     margin:0;
     }
