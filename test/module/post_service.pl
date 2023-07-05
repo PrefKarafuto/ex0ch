@@ -697,7 +697,7 @@ sub NormalizationNameMail
 	$this->{'CONV'}->ConvertCharacter2(\$subject, 3);
 	
 	# トリップと名前を結合する
-	$name =~ s|\#.*$| </b>◆$trip <b>|x if ($trip ne '');
+	$name =~ s|(?<!&)\#.*$| </b>◆$trip <b>|x if ($trip ne '');
 	
 	# fusiana変換 2ch互換
 	$this->{'CONV'}->ConvertFusianasan(\$name, $host);
