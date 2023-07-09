@@ -642,6 +642,7 @@ sub FunctionBBSCreate
 	# デフォルトデータのコピー
 	FILE_UTILS::Copy("$dataPath/default_img.gif", "$createPath/kanban.gif");
 	FILE_UTILS::Copy("$dataPath/default_bac.gif", "$createPath/ba.gif");
+    FILE_UTILS::Copy("$dataPath/default_icon.png", "$createPath/icon.png");
 	FILE_UTILS::Copy("$dataPath/default_hed.txt", "$createPath/head.txt");
 	FILE_UTILS::Copy("$dataPath/default_fot.txt", "$createPath/foot.txt");
 	FILE_UTILS::Copy("$dataPath/index.html", "$createPath/log/index.html");

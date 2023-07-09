@@ -186,23 +186,42 @@ sub PrintReadHead
 	$title = $Dat->GetSubject() if(!defined $title);
 	$title = '' if(!defined $title);
 	my $mascot = $Set->Get('BBS_MASCOT');
+	my $url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Sys->Get('KEY').'/';
+	my $favicon = $Set->Get('BBS_FAVICON');
+    my $image = $Set->Get('BBS_TITLE_PICTURE');
+	my $bbsname = $Set->Get('BBS_TITLE');
+	my $datone = $Dat->Get(0);
+	my @threadTop = split(/<>/,$$datone);
 	
+    if($image !~ /^https?:\/\//){
+        $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
+    }
+    
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja">
+<html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
 
  <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Style-Type" content="text/css">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ <meta property="og:url" content="$url">
+ <meta property="og:title" content="$title">
+ <meta property="og:description" content="$threadTop[3]">
+ <meta property="og:type" content="article">
+ <meta property="og:image" content="$image">
+ <meta property="og:site_name" content="$bbsname">
+ <meta name="twitter:card" content="summary">
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
+ <link rel="icon" href="$favicon">
 HTML
+	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
+	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
+	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Set->Get('BBS_HCAPTCHA'));
+	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($Set->Get('BBS_HCAPTCHA'));
 
 	$Caption->Print($Page, undef);
 	
@@ -282,7 +301,7 @@ sub PrintReadMenu
 	}
 	$Page->Print(" <a href=\"$pathLast\">最新50</a>\n");
 	$Page->Print(" </span>\n");
-	$Page->Print(" <span style=\"float:right;\">\n");
+	$Page->Print(" <br><span style=\"float:right;\">\n");
 	if ($PRtext ne '') {
 		$Page->Print(" [PR]<a href=\"$PRlink\" target=\"_blank\">$PRtext</a>[PR]\n");
 	}
@@ -482,10 +501,6 @@ E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" val
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
-
-
-
-
 	}
 	else{
 	$Page->Print("<hr>");
@@ -539,17 +554,18 @@ sub PrintResponse
 	my $nameCol	= $Set->Get('BBS_NAME_COLOR');
 	my $type = $Set->Get('BBS_READTYPE');
 	my $color = $Set->Get('BBS_POSTCOLOR');
-    my $limit =$Sys->Get('LIMTIME');
+    	my $limit =$Sys->Get('LIMTIME');
+	my $aa='';
 	
 	# URLと引用個所の適応
-    $Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
-    $Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
+    	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
+    	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
 	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
-    $Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
+    	$Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
 	# メール欄有り
 	if ($elem[1] eq '') {
 		$Mail = "<font color=\"$nameCol\"><b>$elem[0]</b></font>";
@@ -557,6 +573,9 @@ sub PrintResponse
 	# メール欄無し
 	else {
 		$Mail = "<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>";
+	}
+	if ($elem[1] =~ /!aafont/){
+		$aa = 'aaview';
 	}
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
@@ -573,7 +592,7 @@ sub PrintResponse
 		<span class="name">$Mail</span>
 		<span class="dateid">$elem[2]</span>
 	</div>
-	<div class="message">
+	<div class="message $aa">
 		$elem[3]
 	</div>
 </div>
@@ -589,7 +608,7 @@ HTML
 		    $Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	    }
 	$Page->Print("：$elem[2]</dt>\n");
-	$Page->Print("  <dd>$elem[3]<br><br></dd>\n");
+	$Page->Print("  <dd $aa>$elem[3]<br><br></dd>\n");
 	}
 }
 

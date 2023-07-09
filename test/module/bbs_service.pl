@@ -9,7 +9,6 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
-use JSON::Parse 'parse_json';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
 
@@ -176,7 +175,7 @@ HTML
 	my $max = $Sys->Get('SUBMAX');
 	my $i = 0;
 	foreach my $key (@threadSet) {
-		last if (++$i > $max);
+		last if ((++$i > $max)&&$Set->Get('BBS_READONLY') ne 'on');
 		
 		my $name = $Threads->Get('SUBJECT', $key);
 		my $res = $Threads->Get('RES', $key);
@@ -245,23 +244,37 @@ sub PrintIndexHead
 	my $link = $this->{'SET'}->Get('BBS_TITLE_LINK');
 	my $image = $this->{'SET'}->Get('BBS_TITLE_PICTURE');
 #	my $code = $this->{'CODE'};
-	
+
+	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
+	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
+	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
+
+    if($image !~ /^https?:\/\//){
+        $image = $url.$image;
+    }
+
 	# HTMLヘッダの出力
 	$Page->Print(<<HEAD);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja">
+<html lang="ja" prefix="og: http://ogp.me/ns#">
 <head>
- 
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Script-Type" content="text/javascript">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ <meta property="og:url" content="$url">
+ <meta property="og:title" content="$title">
+ <meta property="og:description" content="$bbsinfo">
+ <meta property="og:type" content="website">
+ <meta property="og:image" content="$image">
+ <meta property="og:site_name" content="ぜろちゃんねるプラス">
+ <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
-<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-<!-- hCaptcha -->
-<script src='https://js.hcaptcha.com/1/api.js' async defer></script>
-<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
- 
+ <link rel="icon" href="$favicon">
 HEAD
+	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
+	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));
+	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
+	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
 	
 	$Caption->Print($Page, undef);
 	
@@ -303,7 +316,17 @@ HEAD
 		}
 		$Page->Print("</div>\n");
 	}
+	my $cgipath = $this->{'SYS'}->Get('CGIPATH');
 	
+	$Page->Print(<<HTML);
+<br>
+ <center>
+  <a href="$cgipath/bbsmenu.cgi" style="color:inherit;text-decoration: none;">
+   <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;">$title</div>
+  </a>
+ </center>
+<br>
+HTML
 	# ヘッダテーブルの表示
 	$Caption->Load($this->{'SYS'}, 'HEAD');
 	$Caption->Print($Page, $this->{'SET'});
@@ -608,7 +631,7 @@ sub PrintThreadPreviewOne
 	my $bbs = $Sys->Get('BBS');
 	my $key = $Sys->Get('KEY');
 	my $tm = time;
-    my $bbsPath = $Sys->Get('BBSPATH');
+ 	my $bbsPath = $Sys->Get('BBSPATH');
 	
 	my $permt = DAT::GetPermission("$bbsPath/$bbs/dat/$key.dat");
 	my $perms = $Sys->Get('PM-STOP');
@@ -675,7 +698,7 @@ sub PrintResponse
 	my $contLine = $Conv->GetTextLine(\$elem[3]);
 	my $nameCol = $this->{'SET'}->Get('BBS_NAME_COLOR');
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
-	
+	my $aa='';
 	# URLと引用個所の適応
 	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
@@ -683,7 +706,7 @@ sub PrintResponse
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
-	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'),\$elem[3])if($Sys->Get('IMGTAG'));
+	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'),\$elem[3],1)if($Sys->Get('IMGTAG'));
 	
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
@@ -702,21 +725,23 @@ sub PrintResponse
 	else {
 		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	}
-	
+	if($elem[1] =~ /!aafont/){
+		$aa = 'class="aaview"';
+	}
 	# 表示行数内ならすべて表示する
 	if ($contLine <= $dispLine || $n == 1) {
-		$Page->Print("：$elem[2]</dt>\n    <dd>$elem[3]<br><br></dd>\n");
+		$Page->Print("：$elem[2]</dt>\n    <dd $aa>$elem[3]<br><br></dd>\n");
 	}
 	# 表示行数を超えたら省略表示を付加する
 	else {
 		my @dispBuff = split(/<br>/i, $elem[3]);
 		my $path = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), "${n}n");
 		
-		$Page->Print("：$elem[2]</dt>\n    <dd>");
+		$Page->Print("：$elem[2]</dt>\n    <div $aa><dd>");
 		for (my $k = 0; $k < $dispLine; $k++) {
 			$Page->Print("$dispBuff[$k]<br>");
 		}
-		$Page->Print("<font color=\"green\">（省略されました・・全てを読むには");
+		$Page->Print("</div><font color=\"green\">（省略されました・・全てを読むには");
 		$Page->Print("<a href=\"$path\" target=\"_blank\">ここ</a>");
 		$Page->Print("を押してください）</font><br><br></dd>\n");
 	}

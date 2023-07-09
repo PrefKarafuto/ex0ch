@@ -6,7 +6,6 @@
 @media screen and (max-width:768px) {
     .bbs_service_textarea textarea {
     resize: vertical;
-    height:200px;
     width:95%;
     margin:0;
     }
@@ -62,7 +61,13 @@
     background-position-x: calc(100% - 250px);
     background-position-y: bottom;
 }
-
+.aaview{
+    font-family:MS PGothic;
+    font-size: 16px;
+    line-height:1;
+    font-size:2vmin;
+    white-space:nowrap;
+}
 /*
 埋め込み画像や動画のレスポンシブ化
 https://akros-ac.jp/8277/

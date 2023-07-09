@@ -10,7 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
 use Digest::MD5;
-use JSON::Parse 'parse_json';
+#use JSON;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
 
@@ -119,7 +119,7 @@ sub Write
 	
 	# 改造版で追加
 	# hCaptcha認証
-	return $err if (($err = $this->Certification_hCaptcha()) != $ZP::E_SUCCESS);
+	#return $err if (($err = $this->Certification_hCaptcha()) != $ZP::E_SUCCESS);
 
 	# データの書き込み
 	require './module/dat.pl';
@@ -697,7 +697,7 @@ sub NormalizationNameMail
 	$this->{'CONV'}->ConvertCharacter2(\$subject, 3);
 	
 	# トリップと名前を結合する
-	$name =~ s|\#.*$| </b>◆$trip <b>|x if ($trip ne '');
+	$name =~ s|(?<!&)\#.*$| </b>◆$trip <b>|x if ($trip ne '');
 	
 	# fusiana変換 2ch互換
 	$this->{'CONV'}->ConvertFusianasan(\$name, $host);
@@ -752,7 +752,7 @@ sub NormalizationNameMail
 	
 	return $ZP::E_SUCCESS;
 }
-
+=pod
 #------------------------------------------------------------------------------------------------------------
 #
 #	改造版で追加
@@ -809,7 +809,7 @@ sub Certification_hCaptcha
 
 			return $ZP::E_SUCCESS;
 }
-
+=cut
 #------------------------------------------------------------------------------------------------------------
 #
 #	テキスト欄の正規化

@@ -159,8 +159,8 @@ sub ConvertURL
 	
 	my $server = $Sys->Get('SERVER');
 	my $cushion = $Set->Get('BBS_REFERER_CUSHION');
-	my $reg1 = q{(?<!href="?)(?<!src="?)(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
-	my $reg2 = q{<(?<!href="?)(?<!src="?)(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
+	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
+	my $reg2 = q{<(?<!a href=")(?<!src=")(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
 	
 	# 携帯から
 	if ($mode eq 'O') {
@@ -214,9 +214,9 @@ sub ConvertImgur
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src="?)(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
+	my $reg = '(?<!src=")(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
 	
-	$$text =~ s|$reg|<a href="$1"><img src="$1" width=100 height=100\/></a>|g;
+	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1"></a></blockquote>|g;
 	
 	return $text;
 	
@@ -226,7 +226,7 @@ sub ConvertVideo
 {
 	my $this = shift;
 	my ($text) = @_;
-	my $reg = q{(?<!src="?)(https?:\/\/.*?\.mp4)};
+	my $reg = q{(?<!src=")(?<!a href=")(https?:\/\/.*?\.mp4)};
 	$$text =~ s||<video src="$1" width=100 height=100 controls preload="metadata">|g;
 	
 	return $text;
@@ -238,9 +238,9 @@ sub ConvertTweet
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src="?)(https://twitter\.com/[A-Za-z0-9]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
+	my $reg = '(?<!src=")(?<!a href=")(https://twitter\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
 	
-	$$text =~ s|$reg|<blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
+	$$text =~ s|$reg|<a href="$1">$1</a><br><blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
 	
 	return $text;
 	
@@ -481,16 +481,26 @@ sub GetThreadTitle
 sub ConvertImageTag
 {
 	my $this = shift;
-	my ($Sys,$limit, $text) = @_;
-	
+	my ($Sys,$limit, $text,$index) = @_;
+
 	my $reg1 = q{(?<!src="?)https?://.*?\.(jpe?g|gif|bmp|png)};
 	my $reg2 = q{<a.*?>(.*?\.(jpe?g|gif|bmp|png))};
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
-		$$text =~ s|$reg1|<img src=\"$1\" width=100 height=100/>|g;
+		if ($index){
+			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
+		}
+		else{
+			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
+		}
 	}
 	else{
-		$$text =~ s|$reg2|<img src=\"$1\" width=100 height=100/>|g;
+		if ($index){
+			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
+		}
+		else{
+			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
+		}
 	}
 	return $text;
 }
