@@ -249,10 +249,6 @@ sub PrintIndexHead
 	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
 
-    if($image !~ /^https?:\/\//){
-        $image = $url.$image;
-    }
-
 	# HTMLヘッダの出力
 	$Page->Print(<<HEAD);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
