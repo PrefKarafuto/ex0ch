@@ -726,7 +726,7 @@ sub PrintOtherSetting
 	$Page->Print("<td class=\"DetailTitle\">Imgur 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on $setImgur>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">Twitter 埋め込み表示</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">X(旧Twitter) 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setTwitter>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">Youtube/niconico 埋め込み表示</td><td>");
