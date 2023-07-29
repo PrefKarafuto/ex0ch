@@ -170,53 +170,62 @@ sub GetResultSet
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
-sub Search
-{
-	my $this = shift;
-	my ($word) = @_;
-	
-	my $bbs = $this->{'SYS'}->Get('BBS');
-	my $key = $this->{'SYS'}->Get('KEY');
-	my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
-	my $DAT = $this->{'DAT'};
-	
-	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
-		my $pResultSet = $this->{'RESULTSET'};
-		my $type = $this->{'TYPE'} || 0x7;
-		
-		# すべてのレス数でループ
-		for (my $i = 0 ; $i < $DAT->Size() ; $i++) {
-			my $bFind = 0;
-			my $pDat = $DAT->Get($i);
-			my $data = $$pDat;
-			my @elem = split(/<>/, $data, -1);
-			
-			# 名前検索
-			if ($type & 0x1) {
-				if ($elem[0] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
-					$bFind = 1;
-				}
-			}
-			# 本文検索
-			if ($type & 0x2) {
-				if ($elem[3] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
-					$bFind = 1;
-				}
-			}
-			# ID or 日付検索
-			if ($type & 0x4) {
-				if ($elem[2] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
-					$bFind = 1;
-				}
-			}
-			if ($bFind) {
-				my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
-				$SetStr .= join('<>', @elem);
-				push @$pResultSet, $SetStr;
-			}
-		}
-	}
-	$DAT->Close();
+sub Search {
+    my $this = shift;
+    my ($word) = @_;
+
+    my $bbs = $this->{'SYS'}->Get('BBS');
+    my $key = $this->{'SYS'}->Get('KEY');
+    my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
+    my $DAT = $this->{'DAT'};
+
+    if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
+        my $pResultSet = $this->{'RESULTSET'};
+        my $type = $this->{'TYPE'} || 0x7;
+
+        # 検索パターンをループの外でコンパイルする
+        my @patterns;
+        if ($type & 0x1) { push @patterns, quotemeta($word); }
+        if ($type & 0x2) { push @patterns, quotemeta($word); }
+        if ($type & 0x4) { push @patterns, quotemeta($word); }
+        my $pattern = join('|', @patterns);
+        my $re = qr/$pattern/;
+
+        # すべてのレス数でループ
+        for (my $i = 0; $i < $DAT->Size(); $i++) {
+            my $bFind = 0;
+            my $pDat = $DAT->Get($i);
+            my $data = $$pDat;
+            my @elem = split(/<>/, $data, -1);
+
+            # 正規表現を使用せずに検索を実行する
+            if ($type & 0x1) {
+                if (index($elem[0], $word) != -1) {
+                    $elem[0] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
+                    $bFind = 1;
+                }
+            }
+            if ($type & 0x2) {
+                if (index($elem[3], $word) != -1) {
+                    $elem[3] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
+                    $bFind = 1;
+                }
+            }
+            if ($type & 0x4) {
+                if (index($elem[2], $word) != -1) {
+                    $elem[2] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
+                    $bFind = 1;
+                }
+            }
+
+            if ($bFind) {
+                my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
+                $SetStr .= join('<>', @elem);
+                push @$pResultSet, $SetStr;
+            }
+        }
+    }
+    $DAT->Close();
 }
 
 #============================================================================================================
