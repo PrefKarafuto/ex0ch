@@ -188,7 +188,7 @@ sub PrintReadHead
 	my $mascot = $Set->Get('BBS_MASCOT');
 	my $url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Sys->Get('KEY').'/';
 	my $favicon = $Set->Get('BBS_FAVICON');
-    my $image = $Set->Get('BBS_TITLE_PICTURE');
+	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $datone = $Dat->Get(0);
 	my @threadTop = split(/<>/,$$datone);
@@ -196,7 +196,13 @@ sub PrintReadHead
     if($image !~ /^https?:\/\//){
         $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
     }
-    
+	$threadTop[3] =~ s/<br>/\n/g; 			#brタグをOGP用に改行コードに変換
+	my @topMessage = split(/</,$threadTop[3]);	#それ以外のHTMLタグが混入していた場合に直前で切る
+
+	$topMessage[0] =~ s/&/&amp;/g;			#一応サニタイズ
+	$topMessage[0] =~ s/>/&gt;/g;
+	$topMessage[0] =~ s/"/&quot;/g;
+
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
@@ -209,7 +215,7 @@ sub PrintReadHead
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <meta property="og:url" content="$url">
  <meta property="og:title" content="$title">
- <meta property="og:description" content="$threadTop[3]">
+ <meta property="og:description" content="$topMessage[0]">
  <meta property="og:type" content="article">
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
