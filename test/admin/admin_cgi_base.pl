@@ -384,7 +384,7 @@ $Page->Print(<<HTML);
 </table>
 
 <div class="MainFoot">
- Copyright 2002 - 2023 0ch+ BBS : Loggin User - <b>$user</b><br>
+ Copyright 2001 - 2023 0ch+ BBS : Loggin User - <b>$user</b><br>
  Build Version:<b>$ver</b>@{[$nverflag ? " (New Version is Available.)" : '']}
 </div>
 
