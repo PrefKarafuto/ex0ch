@@ -379,7 +379,7 @@ sub ReadyBeforeWrite
 		}
 		#最大レス数変更
 		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]+)/) {
-			if ($2 && $2 >= 4 && $2 <= 2000) {
+			if ($2 && $2 >= 100 && $2 <= 2000) {
 				$Threads->SetAttr($threadid, 'maxres', int $2);
 				my $maxres = $Threads->GetAttr($threadid, 'maxres');
 				$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※最大'.$2.'レス</font>');
