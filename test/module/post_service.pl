@@ -191,9 +191,9 @@ sub Write
 		# レス数が最大数を超えたらover設定をする
 		$resNum = DAT::GetNumFromFile($datPath);
 		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
-		if (!$resNum >= $MAXRES) {
+		if ($resNum >= $MAXRES) {
 			# datにOVERスレッドレスを書き込む
-			Get1001Data($Sys, \$line);
+			Get1001Data($Sys, \$line,$MAXRES);
 			DAT::DirectAppend($Sys, $datPath, $line);
 			$resNum++;
 		}
@@ -1031,7 +1031,7 @@ sub NormalizationContents
 sub Get1001Data
 {
 	
-	my ($Sys, $data) = @_;
+	my ($Sys, $data, $resmax) = @_;
 	my $this = shift;
 	my $endPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/1000.txt';
 	
@@ -1042,10 +1042,6 @@ sub Get1001Data
 		close($fh);
 	}
 	else {
-		$this->{'THREADS'}->LoadAttr($Sys);
-		my $threadid = $Sys->Get('KEY');
-		my $AttrResMax = $this->{'THREADS'}->GetAttr($threadid,'maxres');
-		my $resmax = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 		my $resmax1 = $resmax + 1;
 		my $resmaxz = $resmax;
 		my $resmaxz1 = $resmax1;
