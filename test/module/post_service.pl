@@ -186,10 +186,12 @@ sub Write
 	# datファイルへ直接書き込み
 	my $resNum = 0;
 	my $err2 = DAT::DirectAppend($Sys, $datPath, $line);
+	my $AttrResMax = $Threads->GetAttr($threadid,'maxres');
 	if ($err2 == 0) {
 		# レス数が最大数を超えたらover設定をする
 		$resNum = DAT::GetNumFromFile($datPath);
-		if ($resNum >= $Sys->Get('RESMAX')) {
+		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
+		if (!$resNum >= $MAXRES) {
 			# datにOVERスレッドレスを書き込む
 			Get1001Data($Sys, \$line);
 			DAT::DirectAppend($Sys, $datPath, $line);
@@ -312,6 +314,7 @@ sub ReadyBeforeWrite
 	my $client = $Sys->Get('CLIENT');
 	my $host = $ENV{'REMOTE_HOST'};
 	my $addr = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+	my $Threads = $this->{'THREADS'};
 	
 	# 規制ユーザ・NGワードチェック
 	{
@@ -359,8 +362,49 @@ sub ReadyBeforeWrite
 	$Sys->Set('_SET_', $this->{'SET'});
 	
 	$this->ExecutePlugin(16);
-	#$this->OMIKUJI($Sys, $Form);
-	#$this->tasukeruyo($Sys, $Form);
+
+	$this->OMIKUJI($Sys, $Form);	#おみくじ
+	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
+	
+	#スレ立て時用コマンド
+	$Threads->LoadAttr($Sys);
+	my $threadid = $Sys->Get('KEY');
+	
+	if($Sys->Equal('MODE', 1)){
+		#強制sage
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!sage/){
+			$Threads->SetAttr($threadid, 'sagemode',1);
+			$Threads->SaveAttr($Sys);
+			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制sage</font>');
+		}
+		#最大レス数変更
+		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]+)/) {
+			if ($2 && $2 >= 100 && $2 <= 2000) {
+				$Threads->SetAttr($threadid, 'maxres', int $2);
+				my $maxres = $Threads->GetAttr($threadid, 'maxres');
+				$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※最大'.$2.'レス</font>');
+			}
+			$Threads->SaveAttr($Sys);
+		}
+		#名無し強制
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!force774/){
+			$Threads->SetAttr($threadid, 'force774',1);
+			$Threads->SaveAttr($Sys);
+			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制名無し</font>');
+			$Form->Set('FROM','');
+		}
+		#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!noid/){
+			$Threads->SetAttr($threadid, 'noid',1);
+			$Threads->SaveAttr($Sys);
+			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※ID無し</font>');
+		}
+		if(!$Threads->GetAttr($threadid, 'noid')&&$Form->Get('MESSAGE') =~ /(^|<br>)!changeid/){
+			$Threads->SetAttr($threadid, 'changeid',1);
+			$Threads->SaveAttr($Sys);
+			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※ID変更</font>');
+		}
+	}
 	
 	my $text = $Form->Get('MESSAGE');
 	$text =~ s/<br>/ <br> /g;
@@ -368,7 +412,7 @@ sub ReadyBeforeWrite
 	
 	# 名無し設定
 	$from = $Form->Get('FROM', '');
-	if ($from eq '') {
+	if ($from eq ''||$Threads->GetAttr($threadid,'force774')) {
 		$from = $this->{'SET'}->Get('BBS_NONAME_NAME');
 		$Form->Set('FROM', $from);
 	}
@@ -426,6 +470,7 @@ sub IsRegulation
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
 	my $Sec = $this->{'SECURITY'};
+	my $Threads = $this->{'THREADS'};
 	
 	my $bbs = $this->{'FORM'}->Get('bbs');
 	my $from = $this->{'FORM'}->Get('FROM');
@@ -443,12 +488,15 @@ sub IsRegulation
 	# レス書き込みモード時のみ
 	if ($Sys->Equal('MODE', 2)) {
 		require './module/dat.pl';
-		
+		$Threads->LoadAttr($Sys);
+		my $threadid = $Sys->Get('KEY');
+		my $AttrResMax = $Threads->GetAttr($threadid,'maxres');
+		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 		# 移転スレッド
 		return $ZP::E_LIMIT_MOVEDTHREAD if (DAT::IsMoved($datPath));
 		
 		# レス最大数
-		return $ZP::E_LIMIT_OVERMAXRES if ($Sys->Get('RESMAX') < DAT::GetNumFromFile($datPath));
+		return $ZP::E_LIMIT_OVERMAXRES if ($MAXRES < DAT::GetNumFromFile($datPath));
 		
 		# datファイルサイズ制限
 		if ($Set->Get('BBS_DATMAX')) {
@@ -892,7 +940,7 @@ sub Get1001Data
 {
 	
 	my ($Sys, $data) = @_;
-	
+	my $this = shift;
 	my $endPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/1000.txt';
 	
 	# 1000.txtが存在すればその内容、無ければデフォルトの1001を使用する
@@ -902,7 +950,10 @@ sub Get1001Data
 		close($fh);
 	}
 	else {
-		my $resmax = $Sys->Get('RESMAX');
+		$this->{'THREADS'}->LoadAttr($Sys);
+		my $threadid = $Sys->Get('KEY');
+		my $AttrResMax = $this->{'THREADS'}->GetAttr($threadid,'maxres');
+		my $resmax = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 		my $resmax1 = $resmax + 1;
 		my $resmaxz = $resmax;
 		my $resmaxz1 = $resmax1;

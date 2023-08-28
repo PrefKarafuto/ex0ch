@@ -864,7 +864,12 @@ sub MakeIDnew
 {
 	my $this = shift;
 	my ($Sys, $column) = @_;
-	
+ 	
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+	$Threads->LoadAttr($Sys);
+	return '' if ($Threads->GetAttr($Sys->Get('KEY'),'noid'));
+
 	require Digest::SHA::PurePerl;
 	my $ctx = Digest::SHA::PurePerl->new;
 	$ctx->add('0ch+ ID Generation');
@@ -872,11 +877,11 @@ sub MakeIDnew
 	$ctx->add(':', $Sys->Get('BBS'));
 	$ctx->add(':', $Sys->Get('KOYUU'));
 	$ctx->add(':', join('-', (localtime)[3,4,5]));
-	#$ctx->add(':', $Sys->Get('KEY'));
+	$ctx->add(':', $Sys->Get('KEY')) if ($Threads->GetAttr($Sys->Get('KEY'),'changeid'));
 	
 	my $id = $ctx->b64digest;
 	$id = substr($id, 0, $column);
-	
+
 	return $id;
 }
 
