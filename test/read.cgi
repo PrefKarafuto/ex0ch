@@ -197,12 +197,12 @@ sub PrintReadHead
         $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
     }
 	$threadTop[3] =~ s/<br>/\n/g; 			#brタグをOGP用に改行コードに変換
-	my @topMessage = split(/</,$threadTop[3]);	#それ以外のHTMLタグが混入していた場合に直前で切る
+	my @topMessage = split(/(<|&lt;)/,$threadTop[3]);	#それ以外のHTMLタグが混入していた場合に直前で切る
 
 	$topMessage[0] =~ s/&/&amp;/g;			#一応サニタイズ
 	$topMessage[0] =~ s/>/&gt;/g;
 	$topMessage[0] =~ s/"/&quot;/g;
-
+	
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
