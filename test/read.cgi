@@ -429,7 +429,14 @@ sub PrintReadFoot
 	my $datPath = $Conv->MakePath($Sys->Get('BBS_REL')."/dat/$key.dat");
 	my $datSize = int((stat $datPath)[7] / 1024);
 	my $cgipath = $Sys->Get('CGIPATH');
-	
+
+	require "./module/thread.pl";
+	my $Threads = THREAD->new;
+
+	$Threads->LoadAttr($Sys);
+	my $AttrMax = $Threads->GetAttr($key,'maxres');
+	my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
+
 	# datファイルのサイズ表示
 	$Page->Print("</dl>\n\n<font color=\"red\" face=\"Arial\"><b>${datSize}KB</b></font>\n\n");
 	
