@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  bbs-php:
+    build:
+      context: .
+      dockerfile: ./docker/php/Dockerfile
+    ports:
+      - "8080:80"

@@ -1,0 +1,9 @@
+version: '3'
+
+services:
+  bbs-perl:
+    build:
+      context: .
+      dockerfile: ./docker/perl/Dockerfile
+    ports:
+      - "8080:80"
