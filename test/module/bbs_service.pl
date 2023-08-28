@@ -632,7 +632,13 @@ sub PrintThreadPreviewOne
 	my $permt = DAT::GetPermission("$bbsPath/$bbs/dat/$key.dat");
 	my $perms = $Sys->Get('PM-STOP');
 	my $isstop = $permt == $perms;
-	
+ 
+	require "./module/thread.pl";
+	my $Threads = THREAD->new;
+
+	$Threads->LoadAttr($Sys);
+	my $AttrMax = $Threads->GetAttr($key,'maxres');
+	my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 	# 表示数の正規化
 	my ($start, $end) = $this->{'CONV'}->RegularDispNum($Sys, $Dat, 1, $contNum, $contNum);
 	$start++ if ($start == 1);
@@ -643,7 +649,7 @@ sub PrintThreadPreviewOne
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-	if($Sys->Get('RESMAX') > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop){
+	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop){
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>
