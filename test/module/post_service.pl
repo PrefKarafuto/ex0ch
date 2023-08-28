@@ -360,8 +360,6 @@ sub ReadyBeforeWrite
 	$Sys->Set('_NUM_', $res);
 	$Sys->Set('_THREAD_', $this->{'THREADS'});
 	$Sys->Set('_SET_', $this->{'SET'});
-	
-	$this->ExecutePlugin(16);
 
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
@@ -394,9 +392,6 @@ sub ReadyBeforeWrite
 	my $text = $Form->Get('MESSAGE');
 	$text =~ s/<br>/ <br> /g;
 	$Form->Set('MESSAGE', " $text ");
-
-	$this->OMIKUJI($Sys, $Form);	#おみくじ
-	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
 	
 	# 名無し設定
 	$from = $Form->Get('FROM', '');
@@ -409,7 +404,9 @@ sub ReadyBeforeWrite
 		}
 		$Form->Set('FROM', $from);
 	}
-	
+	$this->ExecutePlugin(16);
+	$this->OMIKUJI($Sys, $Form);	#おみくじ
+	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
 	return 0;
 }
 #ユーザーコマンド
