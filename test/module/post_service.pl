@@ -394,7 +394,7 @@ sub ReadyBeforeWrite
 			$Form->Set('FROM','');
 		}
   		#名無し変更
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*)<br>/){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/){
 			my $new774 = $2;
 			if($new774){
 				$new774 =~ s/"/&quot;/g;
