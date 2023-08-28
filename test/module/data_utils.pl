@@ -868,7 +868,7 @@ sub MakeIDnew
 	require './module/thread.pl';
 	my $Threads = THREAD->new;
 	$Threads->LoadAttr($Sys);
-	return '' if ($Threads->GetAttr($Sys->Get('KEY'),'noid'));
+	return 'none' if ($Threads->GetAttr($Sys->Get('KEY'),'noid'));
 
 	require Digest::SHA::PurePerl;
 	my $ctx = Digest::SHA::PurePerl->new;
