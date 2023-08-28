@@ -1,9 +1,9 @@
 version: '3'
 
 services:
-  bbs-perl:
+  bbs-php:
     build:
       context: .
-      dockerfile: ./docker/perl/Dockerfile
+      dockerfile: ./docker/php/Dockerfile
     ports:
       - "8080:80"
