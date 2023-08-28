@@ -393,6 +393,21 @@ sub ReadyBeforeWrite
 			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制名無し</font>');
 			$Form->Set('FROM','');
 		}
+  		#名無し変更
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*)<br>/){
+			my $new774 = $2;
+			if($new774){
+				$new774 =~ s/"/&quot;/g;
+				$new774 =~ s/&/&amp;/g;
+				$new774 =~ s/</&lt;/g;
+				$new774 =~ s/>/&gt;/g;
+				$new774 =~ s/(\r\n|\r|\n)//g;
+			}
+			$Threads->SetAttr($threadid, 'change774',$new774);
+			$Threads->SaveAttr($Sys);
+			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※名無し：'.$new774.'</font>');
+			$Form->Set('FROM','');
+		}
 		#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!noid/){
 			$Threads->SetAttr($threadid, 'noid',1);
@@ -413,7 +428,12 @@ sub ReadyBeforeWrite
 	# 名無し設定
 	$from = $Form->Get('FROM', '');
 	if ($from eq ''||$Threads->GetAttr($threadid,'force774')) {
-		$from = $this->{'SET'}->Get('BBS_NONAME_NAME');
+		if($Threads->GetAttr($threadid,'change774')){
+			$from = $Threads->GetAttr($threadid,'change774');
+		}
+		else{
+			$from = $this->{'SET'}->Get('BBS_NONAME_NAME');
+		}
 		$Form->Set('FROM', $from);
 	}
 	
