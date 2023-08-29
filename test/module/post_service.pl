@@ -417,21 +417,32 @@ sub Command
 	my $threadid = $Sys->Get('KEY');
 
 	#スレ主用パス(メール欄)/スレ立て時専用処理
-	if($mode && ($Form->Get('mail') =~ /!pass:(.){1,30}/)){
-		#passを暗号化
-		require Digest::SHA::PurePerl;
-		my $ctx = Digest::SHA::PurePerl->new;
-		$ctx->add(':', $Sys->Get('SERVER'));
-		$ctx->add(':', $threadid);
-		$ctx->add(':', $1);
-		my $pass = $ctx->b64digest;
+	if($mode){
+		#passを取得・設定
+		if($Form->Get('mail') =~ /!pass:(.){1,30}/){
+			require Digest::SHA::PurePerl;
+			my $ctx = Digest::SHA::PurePerl->new;
+			$ctx->add(':', $Sys->Get('SERVER'));
+			$ctx->add(':', $threadid);
+			$ctx->add(':', $1);
+			my $pass = $ctx->b64digest;
 
-		$Threads->SetAttr($threadid, 'pass',$pass);
-		$Threads->SaveAttr($Sys);
+			$Threads->SetAttr($threadid, 'pass',$pass);
+			$Threads->SaveAttr($Sys);
 
-		my $mail = $Form->Get('mail');
-		$mail =~ s/!pass:(.){1,30}//;
-		$Form->Set('mail',$mail);
+			my $mail = $Form->Get('mail');
+			$mail =~ s/!pass:(.){1,30}//;
+			$Form->Set('mail',$mail);
+		}
+		#最大レス数変更
+		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]+)/) {
+			if ($2 && $2 >= 100 && $2 <= 2000) {
+				$Threads->SetAttr($threadid, 'maxres', int $2);
+				my $maxres = $Threads->GetAttr($threadid, 'maxres');
+				$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※最大'.$2.'レス</font>');
+			}
+			$Threads->SaveAttr($Sys);
+		}
 	}
 
 	##スレ中パスワード保持者のみ
