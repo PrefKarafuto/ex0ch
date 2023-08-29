@@ -159,8 +159,8 @@ sub ConvertURL
 	
 	my $server = $Sys->Get('SERVER');
 	my $cushion = $Set->Get('BBS_REFERER_CUSHION');
-	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
-	my $reg2 = q{<(?<!a href=")(?<!src=")(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
+	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*';/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
+	my $reg2 = q{<(?<!a href=")(?<!src=")(https?|ftp)::(([-\w.!~*';/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
 	
 	# 携帯から
 	if ($mode eq 'O') {
