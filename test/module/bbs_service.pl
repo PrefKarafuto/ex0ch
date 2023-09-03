@@ -702,15 +702,16 @@ sub PrintResponse
 	my $nameCol = $this->{'SET'}->Get('BBS_NAME_COLOR');
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
 	my $aa='';
+ 
 	# URLと引用個所の適応
 	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
-	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
 	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'),\$elem[3],1)if($Sys->Get('IMGTAG'));
-	
+	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
+ 
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
 	$Sys->Set('_NUM_', $n);
