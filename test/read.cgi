@@ -435,6 +435,7 @@ sub PrintReadFoot
 
 	$Threads->LoadAttr($Sys);
 	my $AttrMax = $Threads->GetAttr($key,'maxres');
+	my $threadStop = $Threads->GetAttr($key,'stop');
 	my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 
 	# datファイルのサイズ表示
@@ -483,7 +484,7 @@ sub PrintReadFoot
 	my $isstop = $permt == $perms;
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
-	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop) {
+	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop &&!$threadStop) {
 		my $cookName = '';
 		my $cookMail = '';
 		my $tm = int(time);
