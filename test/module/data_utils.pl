@@ -488,18 +488,18 @@ sub ConvertImageTag
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
 		if ($index){
-			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
+			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"100px\" height=\"auto\">|g;
 		}
 		else{
-			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
+			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
 		}
 	}
 	else{
 		if ($index){
-			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
+			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"100px\" height=\"auto\">|g;
 		}
 		else{
-			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
+			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
 		}
 	}
 	return $text;
