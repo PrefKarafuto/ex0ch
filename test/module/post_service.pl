@@ -132,6 +132,7 @@ sub Write
 	
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
+ 	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
 	
 	# 情報欄
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
