@@ -480,15 +480,6 @@ sub Command
 #		$Threads->SaveAttr($Sys);
 #		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制age</font>');
 #	}
-	#最大レス数変更
-	if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]+)/) {
-		if ($2 && $2 >= 100 && $2 <= 2000) {
-			$Threads->SetAttr($threadid, 'maxres', int $2);
-			my $maxres = $Threads->GetAttr($threadid, 'maxres');
-			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※最大'.$2.'レス</font>');
-		}
-		$Threads->SaveAttr($Sys);
-	}
 	#名無し強制
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774/){
 		$Threads->SetAttr($threadid, 'force774',1);
