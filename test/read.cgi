@@ -191,17 +191,22 @@ sub PrintReadHead
 	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $datone = $Dat->Get(0);
-	my @threadTop = split(/<>/,$$datone);
+	my $description = 'ERROR:スレッドが存在しません。';
 	
-    if($image !~ /^https?:\/\//){
-        $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
-    }
-	$threadTop[3] =~ s/<br>/\n/g; 			#brタグをOGP用に改行コードに変換
-	my @topMessage = split(/(<|&lt;)/,$threadTop[3]);	#それ以外のHTMLタグが混入していた場合に直前で切る
+	if (defined $datone && ref($datone) eq 'SCALAR') {
+    	my @threadTop = split(/<>/, $$datone);
+		$threadTop[3] =~ s/<br>/\n/g; 			#brタグをOGP用に改行コードに変換
+		my @topMessage = split(/(<|&lt;)/,$threadTop[3]);	#それ以外のHTMLタグが混入していた場合に直前で切る
 
-	$topMessage[0] =~ s/&/&amp;/g;			#一応サニタイズ
-	$topMessage[0] =~ s/>/&gt;/g;
-	$topMessage[0] =~ s/"/&quot;/g;
+		$topMessage[0] =~ s/&/&amp;/g;			#一応サニタイズ
+		$topMessage[0] =~ s/>/&gt;/g;
+		$topMessage[0] =~ s/"/&quot;/g;
+		$description = $topMessage[0];
+	}
+	
+    	if($image !~ /^https?:\/\//){
+        	$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
+    	}
 	
 	# HTMLヘッダの出力
 	$Page->Print("Content-type: text/html\n\n");
@@ -215,7 +220,7 @@ sub PrintReadHead
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <meta property="og:url" content="$url">
  <meta property="og:title" content="$title">
- <meta property="og:description" content="$topMessage[0]">
+ <meta property="og:description" content="$description">
  <meta property="og:type" content="article">
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
