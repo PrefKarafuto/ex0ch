@@ -58,7 +58,8 @@ sub getbbsmenu
 	my $SYS = new SYSTEM;
 	return undef if ($SYS->Init() ne 0);
 	
-	my $basedir = $SYS->Get('SERVER', '') . DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', ''));
+	my $basedir = $SYS->Get('SERVER', '').$SYS->Get('CGIPATH', '');
+	$basedir =~ s/\/test$//;
 	
 	my $BBS = BBS_INFO->new;
 	$BBS->Load($SYS);
