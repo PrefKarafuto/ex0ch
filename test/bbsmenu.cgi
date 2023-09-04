@@ -37,7 +37,7 @@ sub main
 		print "<b>$category->{name}</b><br>\n";
 		
 		foreach my $bbs (@{$category->{list}}) {
-			print "<a href=\"$bbs->{url}\" target=\"_main\">$bbs->{name}</a><br>\n";
+			print "<a href=\"$bbs->{url}\" target=\"_top\">$bbs->{name}</a><br>\n";
 		}
 		
 		print "<br>\n";
