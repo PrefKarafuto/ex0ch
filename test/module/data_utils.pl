@@ -1303,6 +1303,8 @@ sub ConvertCharacter1
 	# all
 	$$data =~ s/</&lt;/g;
 	$$data =~ s/>/&gt;/g;
+	$$data =~ s/&#10;//g;
+	$$data =~ s/&#13;//g;
 	
 	# mail
 	if ($mode == 1) {
