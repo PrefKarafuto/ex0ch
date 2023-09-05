@@ -296,10 +296,11 @@ sub PrintThreadList
 		
 		# 表示背景色設定
 		#if ($Threads->GetAttr($id, 'stop')) { # use from 0.8.x
-		if ($isstop) {								$bgColor = '#ffcfff'; }	# 停止スレッド
-		elsif ($res > $resmax) {					$bgColor = '#cfffff'; }	# 最大数スレッド
+		if ($isstop) {				$bgColor = '#ffcfff'; }	# 停止スレッド
+		elsif ($res > $resmax) {		$bgColor = '#cfffff'; }	# 最大数スレッド
+		elsif ($Threads->GetAttr($id, 'pass')) {$bgColor = '#cfcfff'; }	# パス設定スレッド
 		elsif (DAT::IsMoved("$base/$id.dat")) {	$bgColor = '#ffffcf'; }	# 移転スレッド
-		else {										$bgColor = '#ffffff'; }	# 通常スレッド
+		else {					$bgColor = '#ffffff'; }	# 通常スレッド
 		
 		$common = "\"javascript:SetOption('TARGET_THREAD','$id');";
 		$common .= "DoSubmit('thread.res','DISP','LIST')\"";
@@ -318,9 +319,15 @@ sub PrintThreadList
 		$Page->Print("<td align=center>$id</td><td align=center>$res</td>");
 		my @attrstr = ();
 		push @attrstr, '停止' if ($isstop);
+		push @attrstr, '停止コマンド' if ($Threads->GetAttr($id, 'stop'));
 		push @attrstr, '浮上' if ($Threads->GetAttr($id, 'float'));
 		push @attrstr, '不落' if ($Threads->GetAttr($id, 'nopool'));
 		push @attrstr, 'sage進行' if ($Threads->GetAttr($id, 'sagemode'));
+		push @attrstr, '最大レス数変更' if ($Threads->GetAttr($id, 'maxres'));
+		push @attrstr, 'ID無し' if ($Threads->GetAttr($id, 'noid'));
+		push @attrstr, 'ID変更' if ($Threads->GetAttr($id, 'changeid'));
+		push @attrstr, '強制名無し' if ($Threads->GetAttr($id, 'force774'));
+		push @attrstr, '名無し変更' if ($Threads->GetAttr($id, 'change774'));
 		$Page->Print("<td>@attrstr</td></tr>\n");
 	}
 	$common		= "onclick=\"DoSubmit('bbs.thread','DISP'";
@@ -341,6 +348,9 @@ sub PrintThreadList
 		$Page->Print("<option value=float>浮上");
 		$Page->Print("<option value=nopool>不落");
 		$Page->Print("<option value=sagemode>sage進行");
+		$Page->Print("<option value=noid>ID無し");
+		$Page->Print("<option value=changeid>ID変更");
+		$Page->Print("<option value=force774>名無し強制");
 		$Page->Print("</select> ");
 		$Page->Print("<input type=button value=\"付加\" $common,'ATTR')\"> ");
 		$Page->Print("<input type=button value=\"解除\" $common,'DEATTR')\"> ");
