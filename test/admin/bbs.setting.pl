@@ -648,15 +648,17 @@ sub PrintCommandSetting
 	my $Setting = SETTING->new;
 	$Setting->Load($Sys);
 	
-	my $setsage;
-	my $setstop;
-	my $setpass;
-	my $setmaxres;
-	my $setnoid;
-	my $setchangeid;
-	my $setchange774;
-	my $setforce774;
-	my $setdelcmd;
+	my $setBitMask = $Setting->Get('BBS_COMMAND');
+	
+	my $setpass = $setBitMask & 1 ? 'checked' : '';
+	my $setmaxres = $setBitMask & 2 ? 'checked' : '';
+	my $setsage = $setBitMask & 4 ? 'checked' : '';
+	my $setstop = $setBitMask & 8 ? 'checked' : '';
+	my $setnoid = $setBitMask & 16 ? 'checked' : '';
+	my $setchangeid = $setBitMask & 32 ? 'checked' : '';
+	my $setforce774 = $setBitMask & 64 ? 'checked' : '';
+	my $setchange774 = $setBitMask & 128 ? 'checked' : '';
+	my $setdelcmd = $setBitMask & 256 ? 'checked' : '';
 	
 	my $isEnabled = $setpass ? '' : 'disabled';
 	my $isEnabledInfo = $setpass ? '有効' : '';
@@ -667,38 +669,38 @@ sub PrintCommandSetting
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	
 	$Page->Print("<td class=\"DetailTitle\">スレッドパスワード（メール欄!pass:[password]）</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setpass>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=PASS value=1 $setpass>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド最大レス（!maxres:[100-2000]）</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_MOVIE value=on $setmaxres>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=MAXRES value=2 $setmaxres>有効</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	
 	$Page->Print("<tr><td colspan=4>スレ立て時に本文中に記述。スレッドパスワード設定時のみスレッド中で使用可。</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">強制sage（!sage）</td><td>");
-	$Page->Print("<input type=checkbox name=IMGTAG value=on $setsage>有効</tr>");
+	$Page->Print("<input type=checkbox name=SAGE value=4 $setsage>有効</tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">スレッドストップ（!stop）</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on $setstop>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=STOP value=8 $setstop>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">ID無し（!noid）</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setnoid>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=NOID value=16 $setnoid>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">ID変更（!changeid）</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setchangeid>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=CHID value=32 $setchangeid>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">名無し強制（!force774）</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setforce774>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=FC774 value=64 $setforce774>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">名無し変更（!change774:[名無し]）</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setchange774>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=CH774E value=128 $setchange774>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=$setView>コマンド取り消し※スレッド中のみ（!delcmd:[command]）</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setdelcmd $isEnabled>$isEnabledInfo</td></tr>");
+	$Page->Print("<input type=checkbox name=CELCMD value=256 $setdelcmd $isEnabled>$isEnabledInfo</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
-	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\" disabled ");
-	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETOTHER');\">まだ使えません</td></tr></table>");
+	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
+	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETCOMMAND');\"></td></tr></table>");
 }
 #------------------------------------------------------------------------------------------------------------
 #
@@ -796,7 +798,7 @@ sub PrintOtherSetting
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
     
-    $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
+    	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("</td>");
 	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
@@ -970,7 +972,7 @@ sub FunctionColorSetting
 	$Setting->Set('BBS_CAP_COLOR', $capColor);
 	$Setting->Set('BBS_READTYPE', $Form->Get('BBS_READTYPE'));
 	$Setting->Set('BBS_POSTCOLOR', $Form->Get('BBS_POSTCOLOR'));
-    $Setting->Set('BBS_HIGHLIGHT', ($Form->Equal('BBS_HIGHLIGHT', 'on') ? 'checked' : ''));
+    	$Setting->Set('BBS_HIGHLIGHT', ($Form->Equal('BBS_HIGHLIGHT', 'on') ? 'checked' : ''));
 	
 	$Setting->Save($Sys);
 	
@@ -1078,6 +1080,58 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
 
+	$Setting->Save($Sys);
+	
+	return 0;
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	コマンド設定
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionCommandSetting
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my ($Setting);
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_BBSSETTING, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	# 入力チェック
+	{
+		my @inList = qw(PASS MAXRES SAGE STOP NOID CHID FC774 CH774 DELCMD);
+		foreach (@inList) {
+			push @$pLog, "「$_」を「" . $Form->Get($_) . '」に設定';
+		}
+	}
+	require './module/setting.pl';
+	$Setting = SETTING->new;
+	$Setting->Load($Sys);
+	
+	my $commandSet = 0;
+	$commandSet |= $Form->Get('PASS');
+	$commandSet |= $Form->Get('MAXRES');
+	$commandSet |= $Form->Get('SAGE');
+	$commandSet |= $Form->Get('STOP');
+	$commandSet |= $Form->Get('NOID');
+	$commandSet |= $Form->Get('CHID');
+	$commandSet |= $Form->Get('FC774');
+	$commandSet |= $Form->Get('CH774');
+	$commandSet |= $Form->Get('DELCMD');
+	
+	$Setting->Set('BBS_COMMAND', $commandSet);
+	
 	$Setting->Save($Sys);
 	
 	return 0;
