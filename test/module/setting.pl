@@ -377,7 +377,8 @@ sub InitSettingData
 		'BBS_HCAPTCHA'			=> '',
 		'BBS_READTYPE'			=> '5ch',
 		'BBS_POSTCOLOR'			=> '#FFFFFF',
-		'BBS_MASCOT'			=> ''	
+		'BBS_MASCOT'			=> '',
+  		'BBS_COMMAND'			=> 0
 	);
 	
 	while (my ($key, $val) = each(%set)) {
