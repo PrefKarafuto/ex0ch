@@ -87,6 +87,9 @@ sub DoPrint
 	elsif ($subMode eq 'SETLIMIT') {												# 制限設定画面
 		PrintLimitSetting($Page, $Sys, $Form);
 	}
+ 	elsif ($subMode eq 'SETCOMMAND') {												# ユーザーコマンド設定画面
+		PrintCommandSetting($Page, $Sys, $Form);
+	}
 	elsif ($subMode eq 'SETOTHER') {												# その他設定画面
 		PrintOtherSetting($Page, $Sys, $Form);
 	}
@@ -145,6 +148,9 @@ sub DoFunction
 	elsif ($subMode eq 'SETLIMIT') {												# 制限設定
 		$err = FunctionLimitSetting($Sys, $Form, $this->{'LOG'});
 	}
+ 	elsif ($subMode eq 'SETCOMMAND') {												# ユーザーコマンド設定
+		$err = FunctionCommandSetting($Sys, $Form, $this->{'LOG'});
+	}
 	elsif ($subMode eq 'SETOTHER') {												# その他設定
 		$err = FunctionOtherSetting($Sys, $Form, $this->{'LOG'});
 	}
@@ -189,6 +195,7 @@ sub SetMenuList
 		$Base->SetMenu('基本設定', "'bbs.setting','DISP','SETBASE'");
 		$Base->SetMenu('カラー設定', "'bbs.setting','DISP','SETCOLOR'");
 		$Base->SetMenu('制限・規制設定', "'bbs.setting','DISP','SETLIMIT'");
+  		$Base->SetMenu('ユーザーコマンド設定', "'bbs.setting','DISP','SETCOMMAND'");
 		$Base->SetMenu('その他設定', "'bbs.setting','DISP','SETOTHER'");
 		$Base->SetMenu('<hr>', '');
 		$Base->SetMenu('設定インポート', "'bbs.setting','DISP','SETIMPORT'");
@@ -343,7 +350,7 @@ sub PrintColorSetting
 	$setCap			= $Setting->Get('BBS_CAP_COLOR');
 	$setPost		= $Setting->Get('BBS_POSTCOLOR');
 	$setType		= $Setting->Get('BBS_READTYPE');
-    $setHighlight   = $Setting->Get('BBS_HIGHLIGHT');
+ 	$setHighlight   = $Setting->Get('BBS_HIGHLIGHT');
 	
 	$selOri			= ($setType eq 'original' ? 'selected' : '');
 	$sel5ch			= ($setType eq '5ch' ? 'selected' : '');
@@ -393,7 +400,7 @@ sub PrintColorSetting
 	$Page->Print("<select name=\"BBS_READTYPE\"><option value=\"original\" $selOri>オリジナル</option><option value=\"5ch\" $sel5ch>5ch風</option></select>");
 	$Page->Print("<td class=\"DetailTitle\">レス背景色</td><td>");
 	$Page->Print("<input type=$selectType size=10 name=BBS_POSTCOLOR value=\"$setPost\">");
-    $Page->Print("<td class=\"DetailTitle\">#と＞を強調</td><td>");
+    	$Page->Print("<td class=\"DetailTitle\">#と＞を強調</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_HIGHLIGHT value=on $setHighlight>有効</td>");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	
@@ -604,7 +611,7 @@ sub PrintLimitSetting
 	$Page->Print("全体で<input type=text size=5 name=BBS_TATESUGI_COUNT value=\"$setTateCount\" style=\"text-align: right\">スレッドまで立てられる");
 	$Page->Print("</td></tr>");
     
-    $Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
+    	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
 	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASCII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文のASCIIの割合が<input type=text size=3 name=BBS_SPAMKILL_MESSAGE value=\"$setAskiiMessage\" style=\"text-align: right\" maxlength=\"3\">％以上で");
@@ -621,7 +628,78 @@ sub PrintLimitSetting
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETLIMIT');\"></td></tr></table>");
 }
-
+#------------------------------------------------------------------------------------------------------------
+#
+#	コマンド設定画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintCommandSetting
+{
+	my ($Page, $Sys, $Form) = @_;
+	
+	$Sys->Set('_TITLE', 'BBS User Command Setting');
+	
+	require './module/setting.pl';
+	my $Setting = SETTING->new;
+	$Setting->Load($Sys);
+	
+	my $setsage;
+	my $setstop;
+	my $setpass;
+	my $setmaxres;
+	my $setnoid;
+	my $setchangeid;
+	my $setchange774;
+	my $setforce774;
+	my $setdelcmd;
+	
+	my $isEnabled = $setpass ? '' : 'disabled';
+	my $isEnabledInfo = $setpass ? '有効' : '';
+	my $setView = $setpass ? '' : '"opacity: 0.5;"';
+	
+	$Page->Print("<center><table cellspcing=2 width=100%>");
+	$Page->Print("<tr><td colspan=4>有効にしたいコマンドにチェックを入れ、[設定]ボタンを押してください。</td></tr>");
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	
+	$Page->Print("<td class=\"DetailTitle\">スレッドパスワード（メール欄!pass:[password]）</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setpass>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレッド最大レス（!maxres:[100-2000]）</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_MOVIE value=on $setmaxres>有効</td></tr>");
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	
+	$Page->Print("<tr><td colspan=4>スレ立て時に本文中に記述。スレッドパスワード設定時のみスレッド中で使用可。</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">強制sage（!sage）</td><td>");
+	$Page->Print("<input type=checkbox name=IMGTAG value=on $setsage>有効</tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレッドストップ（!stop）</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on $setstop>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">ID無し（!noid）</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setnoid>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">ID変更（!changeid）</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setchangeid>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">名無し強制（!force774）</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setforce774>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">名無し変更（!change774:[名無し]）</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setchange774>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=$setView>コマンド取り消し※スレッド中のみ（!delcmd:[command]）</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setdelcmd $isEnabled>$isEnabledInfo</td></tr>");
+	
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\" disabled ");
+	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETOTHER');\">まだ使えません</td></tr></table>");
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	その他設定画面の表示
