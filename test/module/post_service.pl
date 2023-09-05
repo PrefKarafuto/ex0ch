@@ -306,6 +306,7 @@ sub ReadyBeforeWrite
 	my ($res) = @_;
 	
 	my $Sys = $this->{'SYS'};
+	my $Set = $this->{'SET'};
 	my $Form = $this->{'FORM'};
 	my $Sec = $this->{'SECURITY'};
 	my $capID = $Sys->Get('CAPID', '');
@@ -361,12 +362,14 @@ sub ReadyBeforeWrite
 	$Sys->Set('_NUM_', $res);
 	$Sys->Set('_THREAD_', $this->{'THREADS'});
 	$Sys->Set('_SET_', $this->{'SET'});
+	
+	my $CommandSet = $Set->Get('BBS_COMMAND');
 
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
 	#スレ立て時用コマンド
 	if($Sys->Equal('MODE', 1)){
-		Command($Sys,$Form,$Threads,1);
+		Command($Sys,$Form,$Threads,$CommandSet,1);
 	}
 	else{
 		if($Form->Get('mail') =~ /!pass:(.){1,30}/){
@@ -385,7 +388,7 @@ sub ReadyBeforeWrite
 			$Form->Set('mail',$mail);
 			
 			if($inputPass eq $threadPass){
-				Command($Sys,$Form,$Threads,0);
+				Command($Sys,$Form,$Threads,$CommandSet,0);
 			}
 		}
 	}
@@ -413,14 +416,14 @@ sub ReadyBeforeWrite
 #ユーザーコマンド
 sub Command
 {
-	my ($Sys,$Form,$Threads,$mode) = @_;
+	my ($Sys,$Form,$Threads,$setBitMask,$mode) = @_;
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
 
 	#スレ主用パス(メール欄)/スレ立て時専用処理
 	if($mode){
 		#passを取得・設定
-		if($Form->Get('mail') =~ /!pass:(.){1,30}/){
+		if($Form->Get('mail') =~ /!pass:(.){1,30}/ && ($setBitMask & 1)){
 			require Digest::SHA::PurePerl;
 			my $ctx = Digest::SHA::PurePerl->new;
 			$ctx->add(':', $Sys->Get('SERVER'));
@@ -436,7 +439,7 @@ sub Command
 			$Form->Set('mail',$mail);
 		}
 		#最大レス数変更
-		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]+)/) {
+		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]+)/ && ($setBitMask & 2)) {
 			if ($2 && $2 >= 100 && $2 <= 2000) {
 				$Threads->SetAttr($threadid, 'maxres', int $2);
 				my $maxres = $Threads->GetAttr($threadid, 'maxres');
@@ -449,7 +452,7 @@ sub Command
 	##スレ中パスワード保持者のみ
 	if(!$mode){
 		#コマンド取り消し
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:(.*?)(<br>|$)/){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:(.*?)(<br>|$)/ && ($setBitMask & 256)){
 			$Threads->SetAttr($threadid, $2,'');
 			$Threads->SaveAttr($Sys);
 			if(!$Threads->GetAttr($threadid, $2)){
@@ -460,7 +463,7 @@ sub Command
 			}
 		}
 		#スレスト
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop/){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop/ && ($setBitMask & 8)){
 			$Threads->SetAttr($threadid, 'stop',1);
 			$Threads->SaveAttr($Sys);
 			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※スレスト</font>');
@@ -469,26 +472,26 @@ sub Command
 	}
 	##スレ立て時＆スレ中パスワード保持者のみ
 	#強制sage
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage/){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage/ && ($setBitMask & 4)){
 		$Threads->SetAttr($threadid, 'sagemode',1);
 		$Threads->SaveAttr($Sys);
 		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制sage</font>');
 	}
 	#強制age
-#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float/){
+#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float/ && ($setBitMask & 512)){
 #		$Threads->SetAttr($threadid, 'float',1);
 #		$Threads->SaveAttr($Sys);
 #		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制age</font>');
 #	}
 	#名無し強制
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774/){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774/ && ($setBitMask & 64)){
 		$Threads->SetAttr($threadid, 'force774',1);
 		$Threads->SaveAttr($Sys);
 		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制名無し</font>');
 		$Form->Set('FROM','');
 	}
 	#名無し変更
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/ && ($setBitMask & 128)){
 		my $new774 = $2;
 		if($new774){
 			$new774 =~ s/"/&quot;/g;
@@ -503,18 +506,17 @@ sub Command
 		$Form->Set('FROM','');
 	}
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid/){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid/ && ($setBitMask & 16)){
 		$Threads->SetAttr($threadid, 'noid',1);
 		$Threads->SaveAttr($Sys);
 		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※ID無し</font>');
 	}
-	if(!$Threads->GetAttr($threadid, 'noid')&&$Form->Get('MESSAGE') =~ /(^|<br>)!changeid/){
+	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid/ && ($setBitMask & 32)){
 		$Threads->SetAttr($threadid, 'changeid',1);
 		$Threads->SaveAttr($Sys);
 		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※ID変更</font>');
 	}
 }
-
 #------------------------------------------------------------------------------------------------------------
 #
 #	プラグイン処理
