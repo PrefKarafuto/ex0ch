@@ -135,9 +135,12 @@ sub Write
  	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
 	
 	# 情報欄
+ 	my $idpart = 'ID:none';
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
-	my $id = $Conv->MakeIDnew($Sys, 8);
-	my $idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
+	if (!$idSet){
+		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $Conv->MakeIDnew($Sys, 8), $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
+	}
+	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
 	my $bepart = '';
 	my $extrapart = '';
 	$Form->Set('datepart', $datepart);
