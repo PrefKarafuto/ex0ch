@@ -614,12 +614,26 @@ sub FunctionResLumpDelete
                     }
                     else {
                         $Dat->Delete($num);
-                        $_ = $logsize - 1 + $num - $lastnum;
-                        if ($_ >= 0) {
-                            $LOG->Delete($_);
+                        for my $i ($num + 1 .. $Dat->Size() - 1) {
+                            my $pHigherRes = $Dat->Get($i);
+                            my @higherElem = split(/<>/, $$pHigherRes);
+
+                            # 削除されたレスに向けられたアンカーを削除する
+                            my $delNum = $num + 1;
+                            $higherElem[3] =~ s|&gt;&gt;${delNum}(-\d+)?|&gt;&gt;DeletedRes|g;	
+                            # アンカーが存在する場合にその数字を修正
+                            $higherElem[3] =~ s|&gt;&gt;([1-9][0-9]*)|'&gt;&gt;' . ($1 > $num ? $1 - 1 : $1)|ge;
+                            $higherElem[3] =~ s|&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)|'&gt;&gt;' . ($1 > $num ? $1 - 1 : $1) . '-' . ($2 > $num ? $2 - 1 : $2)|ge;
+                            
+                            $$pHigherRes = join("<>", @higherElem);
+                            $Dat->Set($i, $$pHigherRes);
+                        }
+                        my $log_index = $logsize - 1 + $num - $lastnum;
+                        if ($log_index >= 0) {
+                            $LOG->Delete($log_index);
                             $logsize --;
                         }
-                        $lastnum --;
+                    $lastnum --;
                     }
                 }
                 push @$pLog, $logMessage;
