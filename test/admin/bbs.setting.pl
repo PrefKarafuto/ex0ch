@@ -680,9 +680,6 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">強制sage（!sage）</td><td>");
 	$Page->Print("<input type=checkbox name=SAGE value=4 $setsage>有効</tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">スレッドストップ（!stop）</td><td>");
-	$Page->Print("<input type=checkbox name=STOP value=8 $setstop>有効</td></tr>");
-	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">ID無し（!noid）</td><td>");
 	$Page->Print("<input type=checkbox name=NOID value=16 $setnoid>有効</td></tr>");
 	$Page->Print("<tr>");
@@ -695,7 +692,10 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">名無し変更（!change774:[名無し]）</td><td>");
 	$Page->Print("<input type=checkbox name=CH774E value=128 $setchange774>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=$setView>コマンド取り消し※スレッド中のみ（!delcmd:[command]）</td><td>");
+	$Page->Print("<td class=\"DetailTitle\" style=$setView>スレッドストップ ※スレッド中のみ（!stop）</td><td>");
+	$Page->Print("<input type=checkbox name=STOP value=8 $setstop $isEnabled>$isEnabledInfo</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=$setView>コマンド取り消し ※スレッド中のみ（!delcmd:[command]）</td><td>");
 	$Page->Print("<input type=checkbox name=CELCMD value=256 $setdelcmd $isEnabled>$isEnabledInfo</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
