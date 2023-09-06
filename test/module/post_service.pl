@@ -132,6 +132,7 @@ sub Write
 	
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
+ 	my $idSet = $Threads->GetAttr($threadid,'noid');
  	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
 	
 	# 情報欄
