@@ -653,11 +653,11 @@ sub PrintCommandSetting
 	my $setpass = $setBitMask & 1 ? 'checked' : '';
 	my $setmaxres = $setBitMask & 2 ? 'checked' : '';
 	my $setsage = $setBitMask & 4 ? 'checked' : '';
-	my $setstop = $setBitMask & 8 ? 'checked' : '';
-	my $setnoid = $setBitMask & 16 ? 'checked' : '';
-	my $setchangeid = $setBitMask & 32 ? 'checked' : '';
-	my $setforce774 = $setBitMask & 64 ? 'checked' : '';
-	my $setchange774 = $setBitMask & 128 ? 'checked' : '';
+	my $setnoid = $setBitMask & 8 ? 'checked' : '';
+	my $setchangeid = $setBitMask & 16 ? 'checked' : '';
+	my $setforce774 = $setBitMask & 32 ? 'checked' : '';
+	my $setchange774 = $setBitMask & 64 ? 'checked' : '';
+	my $setstop = $setBitMask & 128 ? 'checked' : '';
 	my $setdelcmd = $setBitMask & 256 ? 'checked' : '';
 	
 	my $isEnabled = $setpass ? '' : 'disabled';
@@ -681,26 +681,26 @@ sub PrintCommandSetting
 	$Page->Print("<input type=checkbox name=SAGE value=4 $setsage>有効</tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">ID無し（!noid）</td><td>");
-	$Page->Print("<input type=checkbox name=NOID value=16 $setnoid>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=NOID value=8 $setnoid>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">ID変更（!changeid）</td><td>");
-	$Page->Print("<input type=checkbox name=CHID value=32 $setchangeid>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=CHID value=16 $setchangeid>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">名無し強制（!force774）</td><td>");
-	$Page->Print("<input type=checkbox name=FC774 value=64 $setforce774>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=FC774 value=32 $setforce774>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">名無し変更（!change774:[名無し]）</td><td>");
-	$Page->Print("<input type=checkbox name=CH774E value=128 $setchange774>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=CH774 value=64 $setchange774>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=$setView>スレッドストップ ※スレッド中のみ（!stop）</td><td>");
-	$Page->Print("<input type=checkbox name=STOP value=8 $setstop $isEnabled>$isEnabledInfo</td></tr>");
+	$Page->Print("<input type=checkbox name=STOP value=128 $setstop $isEnabled>$isEnabledInfo</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=$setView>コマンド取り消し ※スレッド中のみ（!delcmd:[command]）</td><td>");
-	$Page->Print("<input type=checkbox name=CELCMD value=256 $setdelcmd $isEnabled>$isEnabledInfo</td></tr>");
+	$Page->Print("<input type=checkbox name=DELCMD value=256 $setdelcmd $isEnabled>$isEnabledInfo</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
-	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETCOMMAND');\"></td></tr></table>");
+	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETCOMMAND');\">準備</td></tr></table>");
 }
 #------------------------------------------------------------------------------------------------------------
 #
@@ -1110,7 +1110,7 @@ sub FunctionCommandSetting
 	}
 	# 入力チェック
 	{
-		my @inList = qw(PASS MAXRES SAGE STOP NOID CHID FC774 CH774 DELCMD);
+		my @inList = qw(PASS MAXRES SAGE NOID CHID FC774 CH774 STOP DELCMD);
 		foreach (@inList) {
 			push @$pLog, "「$_」を「" . $Form->Get($_) . '」に設定';
 		}
@@ -1123,11 +1123,11 @@ sub FunctionCommandSetting
 	$commandSet |= $Form->Get('PASS');
 	$commandSet |= $Form->Get('MAXRES');
 	$commandSet |= $Form->Get('SAGE');
-	$commandSet |= $Form->Get('STOP');
 	$commandSet |= $Form->Get('NOID');
 	$commandSet |= $Form->Get('CHID');
 	$commandSet |= $Form->Get('FC774');
 	$commandSet |= $Form->Get('CH774');
+	$commandSet |= $Form->Get('STOP');
 	$commandSet |= $Form->Get('DELCMD');
 	
 	$Setting->Set('BBS_COMMAND', $commandSet);
@@ -1136,7 +1136,6 @@ sub FunctionCommandSetting
 	
 	return 0;
 }
-
 #------------------------------------------------------------------------------------------------------------
 #
 #	その他設定
