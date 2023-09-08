@@ -423,6 +423,7 @@ sub Command
 	my ($Sys,$Form,$Threads,$setBitMask,$mode) = @_;
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
+	my $Command = '';
 
 	#スレ主用パス(メール欄)/スレ立て時専用処理
 	if($mode){
@@ -443,11 +444,11 @@ sub Command
 			$Form->Set('mail',$mail);
 		}
 		#最大レス数変更
-		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]+)/ && ($setBitMask & 2)) {
+		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]{3,4})/ && ($setBitMask & 2)) {
 			if ($2 && $2 >= 100 && $2 <= 2000) {
 				$Threads->SetAttr($threadid, 'maxres', int $2);
 				my $maxres = $Threads->GetAttr($threadid, 'maxres');
-				$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※最大'.$2.'レス</font>');
+				$Command .= '※最大'.$2.'レス<br>';
 			}
 			$Threads->SaveAttr($Sys);
 		}
@@ -456,21 +457,25 @@ sub Command
 	##スレ中パスワード保持者のみ
 	if(!$mode){
 		#コマンド取り消し
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:(.*?)(<br>|$)/ && ($setBitMask & 256)){
-			$Threads->SetAttr($threadid, $2,'');
-			$Threads->SaveAttr($Sys);
-			if(!$Threads->GetAttr($threadid, $2)){
-				$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※'.$2.'取り消し</font>');
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z]{4,10})(<br>|$)/ && ($setBitMask & 256)){
+			my $delCommand = $2;
+			$delCommand =~ s/^sage$/sagemode/;
+			if($Threads->GetAttr($threadid, $delCommand)){
+				$Threads->SetAttr($threadid, $delCommand,'');
+				$Threads->SaveAttr($Sys);
+				$delCommand =~ s/^sagemode$/sage/;
+				$Command .= '※'.$delCommand.'取り消し<br>';
 			}
 			else{
-				$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※'.$2.'の取り消しに失敗しました</font>');
+				$delCommand =~ s/^sagemode$/sage/;
+				$Command .= '※'.$delCommand.'の取り消しに失敗しました<br>';
 			}
 		}
 		#スレスト
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop/ && ($setBitMask & 8)){
 			$Threads->SetAttr($threadid, 'stop',1);
 			$Threads->SaveAttr($Sys);
-			$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※スレスト</font>');
+			$Command .= '※スレスト<br>';
 		}
 		#スレタイ変更
 	}
@@ -479,19 +484,19 @@ sub Command
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage/ && ($setBitMask & 4)){
 		$Threads->SetAttr($threadid, 'sagemode',1);
 		$Threads->SaveAttr($Sys);
-		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制sage</font>');
+		$Command .= '※強制sage<br>';
 	}
 	#強制age
 #	if($Form->Get('MESSAGE') =~ /(^|<br>)!float/ && ($setBitMask & 512)){
 #		$Threads->SetAttr($threadid, 'float',1);
 #		$Threads->SaveAttr($Sys);
-#		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制age</font>');
+#		$Command .= '※強制age<br>';
 #	}
 	#名無し強制
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774/ && ($setBitMask & 64)){
 		$Threads->SetAttr($threadid, 'force774',1);
 		$Threads->SaveAttr($Sys);
-		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※強制名無し</font>');
+		$Command .= '※強制名無し<br>';
 		$Form->Set('FROM','');
 	}
 	#名無し変更
@@ -506,21 +511,27 @@ sub Command
 		}
 		$Threads->SetAttr($threadid, 'change774',$new774);
 		$Threads->SaveAttr($Sys);
-		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※名無し：'.$new774.'</font>');
+		$Command .= '※名無し：'.$new774.'<br>';
 		$Form->Set('FROM','');
 	}
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid/ && ($setBitMask & 16)){
 		$Threads->SetAttr($threadid, 'noid',1);
 		$Threads->SaveAttr($Sys);
-		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※ID無し</font>');
+		$Command .= '※ID無し<br>';
 	}
 	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid/ && ($setBitMask & 32)){
 		$Threads->SetAttr($threadid, 'changeid',1);
 		$Threads->SaveAttr($Sys);
-		$Form->Set('MESSAGE',$Form->Get('MESSAGE').'<br><font color="red">※ID変更</font>');
+		$Command .= '※ID変更<br>';
+	}
+	
+	if($Command){
+		$Command =~ s/<br>$//;
+		$Form->Set('MESSAGE',$Form->Get('MESSAGE')."<hr><font color=\"red\">$Command</font>");
 	}
 }
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	プラグイン処理
