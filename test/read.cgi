@@ -512,7 +512,7 @@ sub PrintReadFoot
 		}
 		
 		$Page->Print(<<HTML);
-<form method="POST" action="$cgipath/bbs.cgi?guid=ON">
+<form method="POST" action="$cgipath/bbs.cgi">
 <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
 <input type="submit" value="書き込む"><br class="smartphone">
 名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">

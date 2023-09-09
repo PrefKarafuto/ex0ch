@@ -305,7 +305,7 @@ sub PrintBBSThreadCreate
   <td>
   <b>スレッド新規作成</b><br>
   <center>
-  <form method="POST" action="./bbs.cgi?guid=ON">
+  <form method="POST" action="./bbs.cgi">
   <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="time" value="$tm">
   <table border="0">
    <tr>
@@ -439,7 +439,7 @@ HTML
 ・投稿者は、掲示板運営者が指定する第三者に対して、著作物の利用許諾を一切しないことを承諾します。<br>
 </div>
 
-<form method="POST" action="./bbs.cgi?guid=ON">
+<form method="POST" action="./bbs.cgi">
 HTML
 	
 	$msg =~ s/<br>/\n/g;
@@ -603,7 +603,7 @@ HTML
 HTML
 	my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
 	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>\n");
-	$Page->Print("<form method=\"POST\" action=\"./bbs.cgi?guid=ON\">");
+	$Page->Print("<form method=\"POST\" action=\"./bbs.cgi\">");
 	
 	$msg =~ s/<br>/\n/g;
 	
