@@ -536,7 +536,7 @@ sub PrintIndexFoot
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
   <td>
-  <form method="POST" action="$cgipath/bbs.cgi?guid=ON" style="margin:1.2em 0;">
+  <form method="POST" action="$cgipath/bbs.cgi" style="margin:1.2em 0;">
   <input type="submit" value="新規スレッド作成画面へ"><br>
   <input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
@@ -549,7 +549,7 @@ FORM
 	# スレッド作成フォームはindexと同じ画面に表示
 	else {
 		$Page->Print(<<FORM);
-<form method="POST" action="$cgipath/bbs.cgi?guid=ON">
+<form method="POST" action="$cgipath/bbs.cgi">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td nowrap><div class ="reverse_order">
@@ -654,7 +654,7 @@ sub PrintThreadPreviewOne
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>
-  <form method="POST" action="$cgiPath/bbs.cgi?guid=ON">
+  <form method="POST" action="$cgiPath/bbs.cgi">
    <blockquote>
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
