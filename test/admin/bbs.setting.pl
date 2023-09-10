@@ -400,7 +400,7 @@ sub PrintColorSetting
 	$Page->Print("<select name=\"BBS_READTYPE\"><option value=\"original\" $selOri>オリジナル</option><option value=\"5ch\" $sel5ch>5ch風</option></select>");
 	$Page->Print("<td class=\"DetailTitle\">レス背景色</td><td>");
 	$Page->Print("<input type=$selectType size=10 name=BBS_POSTCOLOR value=\"$setPost\">");
-    	$Page->Print("<td class=\"DetailTitle\">#と＞を強調</td><td>");
+    $Page->Print("<td class=\"DetailTitle\">#と＞を強調</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_HIGHLIGHT value=on $setHighlight>有効</td>");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	
@@ -659,8 +659,9 @@ sub PrintCommandSetting
 	my $setchange774 = $setBitMask & 64 ? 'checked' : '';
 	my $setstop = $setBitMask & 128 ? 'checked' : '';
 	my $setdelcmd = $setBitMask & 256 ? 'checked' : '';
+	my $setpool = $setBitMask & 512 ? 'checked' : '';
+	my $setlive = $setBitMask & 1024 ? 'checked' : '';
 	
-	my $isEnabled = $setpass ? '' : 'disabled';
 	my $isEnabledInfo = $setpass ? '有効' : '';
 	my $setView = $setpass ? '' : '"opacity: 0.5;"';
 	
@@ -692,15 +693,21 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">名無し変更（!change774:[名無し]）</td><td>");
 	$Page->Print("<input type=checkbox name=CH774 value=64 $setchange774>有効</td></tr>");
 	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">書き込みが一時間なければ過去ログ送り（!live）</td><td>");
+	$Page->Print("<input type=checkbox name=LIVE value=1024 $setlive>有効</td></tr>");
+	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=$setView>スレッドストップ ※スレッド中のみ（!stop）</td><td>");
-	$Page->Print("<input type=checkbox name=STOP value=128 $setstop $isEnabled>$isEnabledInfo</td></tr>");
+	$Page->Print("<input type=checkbox name=STOP value=128 $setstop>$isEnabledInfo</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=$setView>過去ログ送り ※スレッド中のみ（!pool）</td><td>");
+	$Page->Print("<input type=checkbox name=POOL value=512 $setpool>$isEnabledInfo</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\" style=$setView>コマンド取り消し ※スレッド中のみ（!delcmd:[command]）</td><td>");
-	$Page->Print("<input type=checkbox name=DELCMD value=256 $setdelcmd $isEnabled>$isEnabledInfo</td></tr>");
+	$Page->Print("<input type=checkbox name=DELCMD value=256 $setdelcmd>$isEnabledInfo</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
-	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETCOMMAND');\">準備</td></tr></table>");
+	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETCOMMAND');\"></td></tr></table>");
 }
 #------------------------------------------------------------------------------------------------------------
 #
@@ -1110,9 +1117,10 @@ sub FunctionCommandSetting
 	}
 	# 入力チェック
 	{
-		my @inList = qw(PASS MAXRES SAGE NOID CHID FC774 CH774 STOP DELCMD);
+		my @inList = qw(PASS MAXRES SAGE NOID CHID FC774 CH774 LIVE STOP POOL DELCMD);
 		foreach (@inList) {
-			push @$pLog, "「$_」を「" . $Form->Get($_) . '」に設定';
+			my $status = $Form->Get($_) ?  '有効' : '無効';
+			push @$pLog, "「$_」を「" . $status. '」に設定';
 		}
 	}
 	require './module/setting.pl';
@@ -1127,7 +1135,9 @@ sub FunctionCommandSetting
 	$commandSet |= $Form->Get('CHID');
 	$commandSet |= $Form->Get('FC774');
 	$commandSet |= $Form->Get('CH774');
+	$commandSet |= $Form->Get('LIVE');
 	$commandSet |= $Form->Get('STOP');
+	$commandSet |= $Form->Get('POOL');
 	$commandSet |= $Form->Get('DELCMD');
 	
 	$Setting->Set('BBS_COMMAND', $commandSet);

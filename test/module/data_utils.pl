@@ -323,62 +323,6 @@ sub ConvertQuotation
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	引用変換 - ConvertQuotation
-#	--------------------------------------------
-#	引　数：$Sys : SYSTEMオブジェクト
-#			$text : 変換テキスト
-#			$mode : エージェント
-#	戻り値：変換後のメッセージ
-#
-#------------------------------------------------------------------------------------------------------------
-sub ConvertQuotation
-{
-	my $this = shift;
-	my ($Sys, $text, $mode) = @_;
-	
-	# 時間による制限有り
-	return $text if ($Sys->Get('LIMTIME'));
-	
-	my $pathCGI = $Sys->Get('SERVER') . $Sys->Get('CGIPATH');
-	
-	if ($Sys->Get('PATHKIND')) {
-		# URLベースを生成
-		my $buf = '<a class=reply_link rel="noopener noreferrer" href="';
-		$buf .= $pathCGI . '/read.cgi';
-		$buf .= '?bbs=' . $Sys->Get('BBS') . '&key=' . $Sys->Get('KEY');
-		$buf .= '&nofirst=true';
-		
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
-					{$buf&st=$1&to=$2" target="_blank">>>$1-$2</a>}g;
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)-(?!0)}
-					{$buf&st=$1&to=-1" target="_blank">>>$1-</a>}g;
-		$$text =~ s{&gt;&gt;-([1-9][0-9]*)}
-					{$buf&st=1&to=$1" target="_blank">>>$1-</a>}g;
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)}
-					{$buf&st=$1&to=$1" target="_blank">>>$1</a>}g;
-	}
-	else{
-		# URLベースを生成
-		my $buf = '<a class=reply_link rel="noopener noreferrer" href="';
-		$buf .= $pathCGI .  '/read.cgi/';
-		$buf .= $Sys->Get('BBS') . '/' . $Sys->Get('KEY');
-		
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
-					{$buf/$1-$2n" target="_blank">>>$1-$2</a>}g;
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)-(?!0)}
-					{$buf/$1-" target="_blank">>>$1-</a>}g;
-		$$text =~ s{&gt;&gt;-([1-9][0-9]*)}
-					{$buf/-$1" target="_blank">>>-$1</a>}g;
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)}
-					{$buf/$1" target="_blank">>>$1</a>}g;
-	}
-	$$text	=~ s{>>(?=[1-9])}{&gt;&gt;}g;
-	
-	return $text;
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
 #	特殊引用変換 - ConvertSpecialQuotation
 #	--------------------------------------------
 #	引　数：$Sys	SYSTEM

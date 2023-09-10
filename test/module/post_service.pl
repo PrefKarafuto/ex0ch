@@ -13,6 +13,7 @@ use Digest::MD5;
 #use JSON;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
+no warnings 'once';
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -102,7 +103,7 @@ sub Init
 sub Write
 {
 	my $this = shift;
-	
+
 	# 書き込み前準備
 	$this->ReadyBeforeCheck();
 	
@@ -134,10 +135,12 @@ sub Write
 	$Threads->LoadAttr($Sys);
  	my $idSet = $Threads->GetAttr($threadid,'noid');
  	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
+
+	#コマンドによる過去ログ送り用（猶予のため）
+	ToKakoLog($Sys,$Threads);
 	
 	# 情報欄
  	my $idpart = 'ID:none';
-	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
 	if (!$idSet){
 		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $Conv->MakeIDnew($Sys, 8), $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
 	}
@@ -371,6 +374,8 @@ sub ReadyBeforeWrite
 
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
+	my $commandAuth = $Sec->IsAuthority($capID, $ZP::CAP_REG_COMMAND, $Form->Get('bbs'));
+
 	#スレ立て時用コマンド
 	if($Sys->Equal('MODE', 1)){
 		Command($Sys,$Form,$Threads,$CommandSet,1);
@@ -394,6 +399,9 @@ sub ReadyBeforeWrite
 			if($inputPass eq $threadPass){
 				Command($Sys,$Form,$Threads,$CommandSet,0);
 			}
+		}
+		elsif($commandAuth){
+			Command($Sys,$Form,$Threads,$CommandSet,0);
 		}
 	}
 	
@@ -477,8 +485,28 @@ sub Command
 			$Threads->SaveAttr($Sys);
 			$Command .= '※スレスト<br>';
 		}
+		#過去ログ送り
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!pool/ && ($setBitMask & 512)){
+			$Threads->SetAttr($threadid, 'pool',1);
+			$Threads->SaveAttr($Sys);
+			$Command .= '※過去ログ送り<br>';
+		}
 		#スレタイ変更
+#		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.*?)(<br>|$)/ && ($setBitMask & 1024)){
+#			my $newTitle = $2;
+#			if($newTitle){
+#				$newTitle =~ s/"/&quot;/g;
+#				$newTitle =~ s/&/&amp;/g;
+#				$newTitle =~ s/</&lt;/g;
+#				$newTitle =~ s/>/&gt;/g;
+#				$newTitle =~ s/(\r\n|\r|\n)//g;
+#			}
+#			$Threads->SetAttr($threadid, 'changetitle',$newTitle);
+#			$Threads->SaveAttr($Sys);
+#			$Command .= '※スレタイ変更：'.$newTitle.'<br>';
+#		}
 	}
+
 	##スレ立て時＆スレ中パスワード保持者のみ
 	#強制sage
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage/ && ($setBitMask & 4)){
@@ -487,10 +515,16 @@ sub Command
 		$Command .= '※強制sage<br>';
 	}
 	#強制age
-#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float/ && ($setBitMask & 512)){
+#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float/ && ($setBitMask & 2048)){
 #		$Threads->SetAttr($threadid, 'float',1);
 #		$Threads->SaveAttr($Sys);
 #		$Command .= '※強制age<br>';
+#	}
+	#不落
+#	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool/ && ($setBitMask & 4096)){
+#		$Threads->SetAttr($threadid, 'nopool',1);
+#		$Threads->SaveAttr($Sys);
+#		$Command .= '※不落<br>';
 #	}
 	#名無し強制
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774/ && ($setBitMask & 64)){
@@ -498,6 +532,12 @@ sub Command
 		$Threads->SaveAttr($Sys);
 		$Command .= '※強制名無し<br>';
 		$Form->Set('FROM','');
+	}
+	#実況モード
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!live/ && ($setBitMask & 1024)){
+		$Threads->SetAttr($threadid, 'live',1);
+		$Threads->SaveAttr($Sys);
+		$Command .= '※実況スレ<br>';
 	}
 	#名無し変更
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/ && ($setBitMask & 128)){
@@ -532,6 +572,53 @@ sub Command
 	}
 }
 
+#過去ログ送り
+sub ToKakoLog
+{
+	my($Sys,$Threads) = @_;
+	require './module/file_utils.pl';
+	my $Pools = POOL_THREAD->new;
+	my $elapsed = 60*60;	#一時間
+	my $nowtime = time;
+	$Pools->Load($Sys);
+	
+	my $path = $Sys->Get('BBSPATH').'/'.$Sys->Get('BBS');
+	
+	my $BBSname = '';	#別の掲示板に移す場合
+	my $otherBBSpath = $Sys->Get('BBSPATH').'/'.$BBSname;
+	
+	my @threadList = ();
+	$Threads->GetKeySet('ALL', '', \@threadList);
+	$Threads->LoadAttr($Sys);
+	
+	# 現在の板の全スレッドをチェック
+	foreach my $id (@threadList) {
+		# 書き込もうとしているスレッドはスルー
+		#next if ($Sys->Get('KEY') eq $id);
+		
+		my $attrLive = $Threads->GetAttr($id,'live');
+		my $attrPool = $Threads->GetAttr($id,'pool');
+		
+		# datの最終更新日時
+		my $lastmodif = (stat "$path/dat/$id.dat")[9];
+		
+		# 設定時間更新されてなければプールに移動(dat落ち)
+		if (($attrLive && ($nowtime - $lastmodif > $elapsed)) || $attrPool) {
+			$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
+			if($BBSname){
+				FILE_UTILS::Move("$path/dat/$id.dat", "$otherBBSpath/dat/$id.dat");	#別の掲示板に移す場合
+			}else{
+				FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
+			}
+			$Threads->Delete($id);
+		}
+	}
+	
+	# スレッド情報を保存
+	$Pools->Save($Sys);
+	$Threads->Save($Sys);
+	
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	プラグイン処理

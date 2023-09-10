@@ -145,7 +145,8 @@ our $CAP_REG_NGUSER				= 21; # ユーザー 規制解除
 our $CAP_REG_NGWORD				= 22; # NGワード 規制解除
 our $CAP_DISP_NOSLIP			= 23; # 端末識別子非表示
 our $CAP_DISP_CUSTOMID			= 24; # 専用ID許可
-our $CAP_MAXNUM					= 24;
+our $CAP_REG_COMMAND			= 25; # コマンド許可
+our $CAP_MAXNUM					= 25;
 # USER AUTHORITY
 our $AUTH_SYSADMIN		=  0; # システム管理権限(形式的に)
 our $AUTH_USERGROUP		=  1; # 管理グループ設定
