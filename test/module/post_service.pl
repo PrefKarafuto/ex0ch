@@ -583,9 +583,11 @@ sub ToKakoLog
 	$Pools->Load($Sys);
 	
 	my $path = $Sys->Get('BBSPATH').'/'.$Sys->Get('BBS');
-	
-	my $BBSname = '';	#別の掲示板に移す場合
-	my $otherBBSpath = $Sys->Get('BBSPATH').'/'.$BBSname;
+
+	#別の掲示板に過去ログを移す場合はここに掲示板ディレクトリ名を入れる
+	my $BBSname = '';	#注意：現状、設定すると全ての掲示板のコマンドによる過去ログがここになる！
+						#限定したかったら、他の掲示板で!poolや!liveを無効にする
+	my $otherBBSpath = $Sys->Get('BBSPATH').'/'.$BBSname;	
 	
 	my @threadList = ();
 	$Threads->GetKeySet('ALL', '', \@threadList);
@@ -607,6 +609,27 @@ sub ToKakoLog
 			$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 			if($BBSname){
 				FILE_UTILS::Move("$path/dat/$id.dat", "$otherBBSpath/dat/$id.dat");	#別の掲示板に移す場合
+				require './module/bbs_service.pl';
+				my $BBSAid = BBS_SERVICE -> new;
+
+				#$Sysで指すBBS名を一時変更するため保存
+				my $originalBBSname = $Sys->Get('BBS');
+				my $originalMODE = $Sys->Get('MODE');
+				$Sys->Set('BBS', $BBSname);
+				$Sys->Set('MODE','CREATE');
+
+				# subject.txt更新
+				$Threads->Load($Sys);
+				$Threads->UpdateAll($Sys);
+				$Threads->Save($Sys);
+				# index.html更新
+				$BBSAid->Init($Sys,undef);
+				$BBSAid->CreateIndex();
+				$BBSAid->CreateSubback();
+
+				#$Sysの内容を元に戻す
+				$Sys->Set('BBS', $originalBBSname);
+				$Sys->Set('MODE',$originalMODE);
 			}else{
 				FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
 			}
