@@ -76,6 +76,12 @@ sub DoPrint
 	if ($subMode eq 'LIST') {														# スレッド一覧画面
 		PrintThreadList($Page, $Sys, $Form);
 	}
+	elsif ($subMode eq 'COPY') {													# スレッドコピー確認画面
+		PrintThreadCopy($Page, $Sys, $Form, 1);
+	}
+	elsif ($subMode eq 'MOVE') {													# スレッド移動確認画面
+		PrintThreadCopy($Page, $Sys, $Form, 0);
+	}
 	elsif ($subMode eq 'STOP') {													# スレッド停止確認画面
 		PrintThreadStop($Page, $Sys, $Form, 1);
 	}
@@ -106,14 +112,14 @@ sub DoPrint
 		$BASE->PrintError($this->{'LOG'});
 	}
 	elsif ($subMode eq 'AUTORESDEL') {                                             # レス一括削除設定画面
-            PrintResAutoDelete($Page, $Sys, $Form, $BBS);
-        }
-        elsif ($subMode eq 'ABONELUMPRES') {                                        # レス一括あぼーん確認画面
-            PrintResLumpDelete($Page, $Sys, $Form, $BBS, 1);
-        }
-        elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除確認画面
-            PrintResLumpDelete($Page, $Sys, $Form, $BBS, 0);
-        }
+        PrintResAutoDelete($Page, $Sys, $Form, $BBS);
+    }
+    elsif ($subMode eq 'ABONELUMPRES') {                                        # レス一括あぼーん確認画面
+        PrintResLumpDelete($Page, $Sys, $Form, $BBS, 1);
+    }
+    elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除確認画面
+        PrintResLumpDelete($Page, $Sys, $Form, $BBS, 0);
+    }
 	
 	# 掲示板情報を設定
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
@@ -156,6 +162,12 @@ sub DoFunction
 	elsif ($subMode eq 'RESTART') {													# 再開
 		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 0);
 	}
+	elsif ($subMode eq 'COPY') {													# コピー
+		$err = FunctionThreadCopy($Sys, $Form, $this->{'LOG'}, 1);
+	}
+	elsif ($subMode eq 'MOVE') {													# 移動
+		$err = FunctionThreadCopy($Sys, $Form, $this->{'LOG'}, 0);
+	}
 	elsif ($subMode eq 'ATTR') {													# 属性付加
 		$err = FunctionThreadAttr($Sys, $Form, $this->{'LOG'}, 1);
 	}
@@ -178,11 +190,11 @@ sub DoFunction
 		$err = FunctionThreadAutoPooling($Sys, $Form, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'ABONELUMPRES') {                                           # レス一括あぼ～ん
-            $err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 1);
-        }
-        elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除
-            $err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 0);
-        }
+        $err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 1);
+    }
+    elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除
+        $err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 0);
+    }
 	# 処理結果表示
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", "ERROR:$err");
@@ -271,7 +283,7 @@ sub PrintThreadList
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("表\示数<input type=text name=DISPNUM size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"　表\示　\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">全</a></th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250px\">Thread Title</td>");
@@ -319,15 +331,16 @@ sub PrintThreadList
 		$Page->Print("<td align=center>$id</td><td align=center>$res</td>");
 		my @attrstr = ();
 		push @attrstr, '停止' if ($isstop);
-		push @attrstr, '停止コマンド' if ($Threads->GetAttr($id, 'stop'));
 		push @attrstr, '浮上' if ($Threads->GetAttr($id, 'float'));
 		push @attrstr, '不落' if ($Threads->GetAttr($id, 'nopool'));
 		push @attrstr, 'sage進行' if ($Threads->GetAttr($id, 'sagemode'));
-		push @attrstr, '最大レス数変更' if ($Threads->GetAttr($id, 'maxres'));
+		push @attrstr, "最大レス数:$Threads->GetAttr($id, 'maxres')" if ($Threads->GetAttr($id, 'maxres'));
 		push @attrstr, 'ID無し' if ($Threads->GetAttr($id, 'noid'));
+		push @attrstr, '実況モード' if ($Threads->GetAttr($id, 'live'));
 		push @attrstr, 'ID変更' if ($Threads->GetAttr($id, 'changeid'));
+		push @attrstr, '過去ログ送り' if ($Threads->GetAttr($id, 'pool'));
 		push @attrstr, '強制名無し' if ($Threads->GetAttr($id, 'force774'));
-		push @attrstr, '名無し変更' if ($Threads->GetAttr($id, 'change774'));
+		push @attrstr, "名無し->$Threads->GetAttr($id, 'change774')" if ($Threads->GetAttr($id, 'change774'));
 		$Page->Print("<td>@attrstr</td></tr>\n");
 	}
 	$common		= "onclick=\"DoSubmit('bbs.thread','DISP'";
@@ -335,8 +348,8 @@ sub PrintThreadList
 	
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
-#	$Page->Print("<input type=button value=\" コピー \" $common2,'COPY')\"> ");
-#	$Page->Print("<input type=button value=\"　移動　\" $common2,'MOVE')\"> ");
+	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ");
+	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ");
 	$Page->Print("<input type=button value=\"subject更新\" $common2,'UPDATE')\"> ")			if ($isUpdate);
 	$Page->Print("<input type=button value=\"subject再作成\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
 	$Page->Print("<input type=button value=\"　停止　\" $common,'STOP')\"> ")				if ($isStop);
@@ -351,6 +364,7 @@ sub PrintThreadList
 		$Page->Print("<option value=noid>ID無し");
 		$Page->Print("<option value=changeid>ID変更");
 		$Page->Print("<option value=force774>名無し強制");
+		$Page->Print("<option value=force774>実況モード");
 		$Page->Print("</select> ");
 		$Page->Print("<input type=button value=\"付加\" $common,'ATTR')\"> ");
 		$Page->Print("<input type=button value=\"解除\" $common,'DEATTR')\"> ");
@@ -363,7 +377,104 @@ sub PrintThreadList
 	$Page->HTMLInput('hidden', 'DISPST', '');
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
 }
+#------------------------------------------------------------------------------------------------------------
+#
+#	スレッドコピー
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintThreadCopy
+{
+	my ($Page, $SYS, $Form, $mode) = @_;
+	my (@threadList, $Threads, $id, $subj, $res);
+	my ($common, $text);
+	my ($BBS, $Category, @bbsSet, @catSet, $name, $category, $subject, $status);
+	my ($sCat, @belongBBS, $belongID);
+	
+	$SYS->Set('_TITLE', ($mode ? 'Thread Copy' : 'Thread Move'));
+	$text = ($mode ? 'コピー' : '移動');
+	
+	require './module/thread.pl';
+	$Threads = THREAD->new;
 
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
+	$BBS->Load($SYS);
+	$Category->Load($SYS);
+	
+	$sCat = $Form->Get('BBS_CATEGORY', '');
+	
+	# ユーザ所属のBBS一覧を取得
+	$SYS->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($SYS->Get('ADMIN')->{'USER'}, $BBS, \@belongBBS);
+	
+	# 掲示板情報を取得
+	if ($sCat eq '' || $sCat eq 'ALL') {
+		$BBS->GetKeySet('ALL', '', \@bbsSet);
+	}
+	else {
+		$BBS->GetKeySet('CATEGORY', $sCat, \@bbsSet);
+	}
+	$Category->GetKeySet(\@catSet);
+	
+	$Threads->Load($SYS);
+	@threadList = $Form->GetAtArray('THREADS');
+	$status = @threadList ? "" : "disabled";
+
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=3>以下のスレッドを$text\します。</td></tr>");
+	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Thread Title</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Thread Key</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:50\">Res</td></td>\n");
+	
+	foreach $id (@threadList) {
+		$subj	= $Threads->Get('SUBJECT', $id);
+		$res	= $Threads->Get('RES', $id);
+		
+		$Page->Print("<tr><td>$subj</a></td>");
+		$Page->Print("<td align=center>$id</td><td align=center>$res</td></tr>\n");
+		$Page->HTMLInput('hidden', 'THREADS', $id);
+	}
+	$common = "DoSubmit('bbs.thread','FUNC','" . ($mode ? 'COPY' : 'MOVE') . "')";
+	
+	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
+	
+	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
+	$Page->Print("※注：$text\先に同じファイル名のスレッドがあると上書きされます<br>");
+	$Page->Print("　　　スレッドの属性は$text\されません</b><br>");
+	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
+
+	$Page->Print("<tr><td colspan=3 align=left>");
+
+	$Page->Print("$text\先: <select name=TOBBS required>");
+	if(@bbsSet <= 1){
+		$Page->Print("<option value=\"\" disabled>選択可能な掲示板がありません");
+	}else{
+		$Page->Print("<option value=\"\" disabled>選択してください");
+		foreach my $listid (@bbsSet) {
+			next if ($BBS->Get('DIR', $listid) eq $SYS->Get('BBS'));
+			foreach $belongID (@belongBBS) {
+				if ($listid eq $belongID) {
+					$name		= $BBS->Get('NAME', $listid);
+					$category	= $BBS->Get('CATEGORY', $listid);
+					$category	= $Category->Get('NAME', $category);
+					$Page->Print("<option value=$listid>$name");
+				}
+			}
+		}
+	}
+	$Page->Print("</select> ");
+
+	$Page->Print('<input type=button value="　' . $text . "　\" onclick=\"$common;\" $status> ");
+	$Page->Print("</td></tr>\n");
+	$Page->Print("</table><br>");
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	スレッド停止確認表示
@@ -436,7 +547,15 @@ sub PrintThreadAttr
 	
 	$Sys->Set('_TITLE', ($mode ? 'Thread Add Attribute' : 'Thread Remove Attribute'));
 	
-	my %alist = ('float'=>'浮上', 'nopool'=>'不落', 'sagemode'=>'sage進行');
+	my %alist = (
+	'float'=>'浮上',
+	'nopool'=>'不落',
+	'sagemode'=>'sage進行',
+	'noid'=>'IDなし',
+	'changeid'=>'独自ID',
+	'force774'=>'強制名無し',
+	'live'=>'実況モード'
+	);
 	my $attr = $Form->Get('ATTR');
 	my $name = $attr;
 	$name = $alist{$attr} if (defined $alist{$name});
@@ -696,7 +815,97 @@ sub FunctionThreadStop
 	
 	return 0;
 }
+#------------------------------------------------------------------------------------------------------------
+#
+#	スレッドコピー
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionThreadCopy
+{
+	my ($Sys, $Form, $pLog, $mode) = @_;
+	my (@threadList, $Threads, $path, $bbs, $tobbs, $topath, $Info, $id);
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_THREADPOOL, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	require './module/thread.pl';
+	require './module/bbs_info.pl';
+	require './module/file_utils.pl';
+	$Threads = THREAD->new;
+	$Info = BBS_INFO->new;
+	
+	$Threads->Load($Sys);
+	$Info->Load($Sys);
+	
+	@threadList = $Form->GetAtArray('THREADS');
+	return 1 if (!@threadList);
 
+	$tobbs 		= $Form->Get('TOBBS');
+	$bbs		= $Sys->Get('BBS');
+	$path		= $Sys->Get('BBSPATH') . "/$bbs";
+	$topath		= $Sys->Get('BBSPATH') . "/".$Info->Get('DIR',$tobbs);
+	
+	foreach $id (@threadList) {
+		next if (! defined $Threads->Get('RES', $id));
+		if($mode){	#Copy
+			push @$pLog, 'スレッド「' . $Threads->Get('SUBJECT', $id) 
+			. '」を'.$Info->Get('NAME',$tobbs).'にコピー';
+
+			FILE_UTILS::Copy("$path/dat/$id.dat","$topath/dat/$id.dat");
+		}
+		else{		#Move
+			push @$pLog, 'スレッド「' . $Threads->Get('SUBJECT', $id) 
+			. '」を'.$Info->Get('NAME',$tobbs).'に移動';
+
+			$Threads->Delete($id);
+			FILE_UTILS::Move("$path/dat/$id.dat","$topath/dat/$id.dat");
+		}
+	}
+	$Threads->Save($Sys);
+	
+	require './module/bbs_service.pl';
+	my $BBSAid = BBS_SERVICE -> new;
+
+	#$Sysで指すBBS名を一時変更するため保存
+	my $originalBBSname = $Sys->Get('BBS');
+	my $originalMODE = $Sys->Get('MODE');
+	$Sys->Set('BBS', $Info->Get('DIR',$tobbs));
+	$Sys->Set('MODE','CREATE');
+
+	# subject.txt更新
+	$Threads->Load($Sys);
+	$Threads->UpdateAll($Sys);
+	$Threads->Save($Sys);
+	# index.html更新
+	$BBSAid->Init($Sys,undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
+
+	#$Sysの内容を元に戻す
+	$Sys->Set('BBS', $originalBBSname);
+
+	if(!$mode){
+		# index.html更新
+		$BBSAid->Init($Sys,undef);
+		$BBSAid->CreateIndex();
+		$BBSAid->CreateSubback();
+	}
+
+	$Sys->Set('MODE',$originalMODE);
+
+	return 0;
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	スレッド浮上／解除
