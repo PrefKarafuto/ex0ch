@@ -706,12 +706,13 @@ sub IsRegulation
 	my $islocalip = 0;
 	
 	$islocalip = 1 if ($addr =~ /^(127|172|192|10)\./);
-	
+
+	require './module/dat.pl';
+	$Threads->LoadAttr($Sys);
+	my $threadid = $Sys->Get('KEY');
+
 	# レス書き込みモード時のみ
 	if ($Sys->Equal('MODE', 2)) {
-		require './module/dat.pl';
-		$Threads->LoadAttr($Sys);
-		my $threadid = $Sys->Get('KEY');
 		my $AttrResMax = $Threads->GetAttr($threadid,'maxres');
 		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 		# 移転スレッド
@@ -822,6 +823,14 @@ sub IsRegulation
 			my $Samba = int($Set->Get('BBS_SAMBATIME', '') eq '' ? $Sys->Get('DEFSAMBA') : $Set->Get('BBS_SAMBATIME'));
 			my $Houshi = int($Set->Get('BBS_HOUSHITIME', '') eq '' ? $Sys->Get('DEFHOUSHI') : $Set->Get('BBS_HOUSHITIME'));
 			my $Holdtm = int($Sys->Get('SAMBATM'));
+
+			#実況モードで連投規制緩和
+			my $livenum = 2;
+			if($Threads->GetAttr($threadid,'live')){
+				$Samba = $Samba / $livenum;
+				$Holdtm = $Holdtm / $livenum;
+				$Houshi = $Houshi / $livenum;
+			}
 			
 			# Samba
 			if ($Samba && !$Sec->IsAuthority($capID, $ZP::CAP_REG_SAMBA, $bbs)) {
