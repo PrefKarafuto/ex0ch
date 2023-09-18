@@ -243,6 +243,7 @@ sub PrintIndexHead
 	my $title = $this->{'SET'}->Get('BBS_TITLE');
 	my $link = $this->{'SET'}->Get('BBS_TITLE_LINK');
 	my $image = $this->{'SET'}->Get('BBS_TITLE_PICTURE');
+	my $CSP = $this->{'SYS'}->Get('CSP');
 #	my $code = $this->{'CODE'};
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
@@ -271,6 +272,8 @@ HEAD
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));
 	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
+	
+	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/;">') if ($CSP);
 	
 	$Caption->Print($Page, undef);
 	

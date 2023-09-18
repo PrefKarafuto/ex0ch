@@ -192,6 +192,7 @@ sub PrintReadHead
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $datone = $Dat->Get(0);
 	my $description = 'ERROR:スレッドが存在しません。';
+	my $CSP = $Sys->Get('CSP');
 	
 	if (defined $datone && ref($datone) eq 'SCALAR') {
     	my @threadTop = split(/<>/, $$datone);
@@ -233,6 +234,8 @@ HTML
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
 	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Set->Get('BBS_HCAPTCHA'));
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($Set->Get('BBS_HCAPTCHA'));
+
+	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/;">') if ($CSP);
 
 	$Caption->Print($Page, undef);
 	
