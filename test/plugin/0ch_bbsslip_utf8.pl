@@ -82,20 +82,19 @@ sub execute
 	#板のBBS_SLIP設定を確認
 	my $bbsslip = $bbssetting->Get('BBS_SLIP');
 
-	if ($bbsslip eq 'vvvvv') {
-		#IP・リモホ・UAを取得
-		my $ip_addr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
-		my $remoho  = gethostbyaddr(inet_aton($ip_addr), AF_INET);
-		my $ua = "$ENV{'HTTP_USER_AGENT'}";
+	#IP・リモホ・UAを取得
+	my $ip_addr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
+	my $remoho  = gethostbyaddr(inet_aton($ip_addr), AF_INET);
+	my $ua = "$ENV{'HTTP_USER_AGENT'}";
 
-		#BBS_SLIP機能呼び出し
-		my $res = BBS_SLIP($ip_addr, $remoho, $ua);
-
+	#BBS_SLIP機能呼び出し
+	if ($bbsslip =~ /^v{3,6}$/){
 		#名前欄にワッチョイもどきを追加
 		my $from = $Form->Get('FROM');
 		if ($from eq '') {
 			$from = $bbssetting->Get('BBS_NONAME_NAME');
 		}
+		my $res = BBS_SLIP($ip_addr, $remoho, $ua, $bbsslip);
 		$from = "${from} </b>(${res})<b> </b>";
 		$Form->Set('FROM',$from);
 	}
@@ -437,7 +436,19 @@ sub BBS_SLIP
 
 
 	#bbs_slipを生成
-	my $slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
+	my $slip_result = 'undef';
+	if($bbsslip eq 'vvv'){
+		$slip_result = ${slip_nickname};
+	}
+	elsif($bbsslip eq 'vvvv'){
+		$slip_result = "${slip_nickname} [${ip_addr}]";
+	}
+	elsif($bbsslip eq 'vvvvv'){
+		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
+	}
+	elsif($bbsslip eq 'vvvvvv'){
+		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ip_addr}]";
+	}
 
 
 	return $slip_result;

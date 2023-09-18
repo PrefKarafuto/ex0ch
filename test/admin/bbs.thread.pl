@@ -459,11 +459,11 @@ sub PrintThreadCopy
 		$Page->Print("<option value=\"\" disabled>選択してください");
 		foreach my $listid (@bbsSet) {
 			next if ($BBS->Get('DIR', $listid) eq $SYS->Get('BBS'));
+			$category	= $Category->Get('NAME', $BBS->Get('CATEGORY', $listid));
+			$Page->Print("<optgroup label=\"$category\">");
 			foreach $belongID (@belongBBS) {
 				if ($listid eq $belongID) {
 					$name		= $BBS->Get('NAME', $listid);
-					$category	= $BBS->Get('CATEGORY', $listid);
-					$category	= $Category->Get('NAME', $category);
 					$Page->Print("<option value=$listid>$name");
 				}
 			}
@@ -870,6 +870,7 @@ sub FunctionThreadCopy
 
 			$Threads->Delete($id);
 			FILE_UTILS::Move("$path/dat/$id.dat","$topath/dat/$id.dat");
+			unlink "$path/dat/$id.dat";
 		}
 	}
 	$Threads->Save($Sys);
@@ -1201,10 +1202,33 @@ sub FunctionThreadAutoPooling
 		# フラグありの状態ならDAT落ちする
 		if ($bPool) {
 			push @$pLog, 'スレッド「' . $Threads->Get('SUBJECT', $id) . '」をDAT落ち';
-			$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
+			if(!$Sys->{'SET'}->Get('BBS_KAKO')){
+				$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
+				FILE_UTILS::Copy("$base/dat/$id.dat", "$base/pool/$id.cgi");
+			}
+			#別の掲示板に移す場合
+			else{
+				FILE_UTILS::Move("$base/dat/$id.dat", $Sys->{'SET'}->Get('BBS_KAKO')."/dat/$id.dat");	
+				require './module/bbs_service.pl';
+				my $BBSAid = BBS_SERVICE -> new;
+				#$Sysで指すBBS名を一時変更するため保存
+				my $originalBBSname = $Sys->Get('BBS');
+				my $originalMODE = $Sys->Get('MODE');
+				$Sys->Set('BBS', $Sys->{'SET'}->Get('BBS_KAKO'));
+				$Sys->Set('MODE','CREATE');
+				# subject.txt更新
+				$Threads->Load($Sys);
+				$Threads->UpdateAll($Sys);
+				$Threads->Save($Sys);
+				# index.html更新
+				$BBSAid->Init($Sys,undef);
+				$BBSAid->CreateIndex();
+				$BBSAid->CreateSubback();
+				#$Sysの内容を元に戻す
+				$Sys->Set('BBS', $originalBBSname);
+				$Sys->Set('MODE',$originalMODE);
+			}
 			$Threads->Delete($id);
-			
-			FILE_UTILS::Copy("$base/dat/$id.dat", "$base/pool/$id.cgi");
 			unlink "$base/dat/$id.dat";
 		}
 	}

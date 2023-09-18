@@ -200,6 +200,7 @@ sub Write
 		$resNum = DAT::GetNumFromFile($datPath);
 		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 		if ($resNum >= $MAXRES) {
+			return $ZP::E_LIMIT_OVERMAXRES if ($resNum > $MAXRES);
 			# datにOVERスレッドレスを書き込む
 			Get1001Data($Sys, \$line,$MAXRES);
 			DAT::DirectAppend($Sys, $datPath, $line);
@@ -234,10 +235,36 @@ sub Write
 				
 				# 不落属性あり
 				next if ($Threads->GetAttr($lid, 'nopool'));
-				
-				$Pools->Add($lid, $Threads->Get('SUBJECT', $lid), $Threads->Get('RES', $lid));
+				if(!$Set->Get('BBS_KAKO')){
+					$Pools->Add($lid, $Threads->Get('SUBJECT', $lid), $Threads->Get('RES', $lid));
+					FILE_UTILS::Copy("$path/dat/$lid.dat", "$path/pool/$lid.cgi");
+				}
+				#別の掲示板に移す場合
+				else{
+					FILE_UTILS::Move("$path/dat/$lid.dat", $Set->Get('BBS_KAKO')."/dat/$lid.dat");	
+					require './module/bbs_service.pl';
+					my $BBSAid = BBS_SERVICE -> new;
+
+					#$Sysで指すBBS名を一時変更するため保存
+					my $originalBBSname = $Sys->Get('BBS');
+					my $originalMODE = $Sys->Get('MODE');
+					$Sys->Set('BBS', $Set->Get('BBS_KAKO'));
+					$Sys->Set('MODE','CREATE');
+
+					# subject.txt更新
+					$Threads->Load($Sys);
+					$Threads->UpdateAll($Sys);
+					$Threads->Save($Sys);
+					# index.html更新
+					$BBSAid->Init($Sys,undef);
+					$BBSAid->CreateIndex();
+					$BBSAid->CreateSubback();
+
+					#$Sysの内容を元に戻す
+					$Sys->Set('BBS', $originalBBSname);
+					$Sys->Set('MODE',$originalMODE);
+				}
 				$Threads->Delete($lid);
-				FILE_UTILS::Copy("$path/dat/$lid.dat", "$path/pool/$lid.cgi");
 				unlink "$path/dat/$lid.dat";
 			}
 			
@@ -585,8 +612,7 @@ sub ToKakoLog
 	my $path = $Sys->Get('BBSPATH').'/'.$Sys->Get('BBS');
 
 	#別の掲示板に過去ログを移す場合はここに掲示板ディレクトリ名を入れる
-	my $BBSname = '';	#注意：現状、設定すると全ての掲示板のコマンドによる過去ログがここになる！
-						#限定したかったら、他の掲示板で!poolや!liveを無効にする
+	my $BBSname = $Sys->{'SET'}->Get('BBS_KAKO');
 	my $otherBBSpath = $Sys->Get('BBSPATH').'/'.$BBSname;	
 	
 	my @threadList = ();
@@ -606,7 +632,6 @@ sub ToKakoLog
 		
 		# 設定時間更新されてなければプールに移動(dat落ち)
 		if (($attrLive && ($nowtime - $lastmodif > $elapsed)) || $attrPool) {
-			$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 			if($BBSname){
 				FILE_UTILS::Move("$path/dat/$id.dat", "$otherBBSpath/dat/$id.dat");	#別の掲示板に移す場合
 				require './module/bbs_service.pl';
@@ -631,6 +656,7 @@ sub ToKakoLog
 				$Sys->Set('BBS', $originalBBSname);
 				$Sys->Set('MODE',$originalMODE);
 			}else{
+				$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 				FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
 			}
 			$Threads->Delete($id);

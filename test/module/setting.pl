@@ -378,6 +378,7 @@ sub InitSettingData
 		'BBS_READTYPE'			=> '5ch',
 		'BBS_POSTCOLOR'			=> '#FFFFFF',
 		'BBS_MASCOT'			=> '',
+		'BBS_KAKO'				=> '',
   		'BBS_COMMAND'			=> 0
 	);
 	

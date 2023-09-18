@@ -1142,7 +1142,7 @@ sub GetIDPart
 		} else {
 			$str = "$koyuu";
 		}
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && !$Set->Get('BBS_SLIP')) {
 			$str .= " $type";
 		}
 		return "HOST:$str";
@@ -1158,7 +1158,7 @@ sub GetIDPart
 		} else {
 			$str = "($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}";
 		}
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && !$Set->Get('BBS_SLIP')) {
 			$str .= " $type";
 		}
 		return "発信元:$str";
@@ -1176,7 +1176,7 @@ sub GetIDPart
 		} else {
 			$str = "($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};";
 		}
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && !$Set->Get('BBS_SLIP')) {
 			$str .= " $type";
 		}
 		return "発信元:$str";
@@ -1185,7 +1185,7 @@ sub GetIDPart
 	# 各キャップ専用ID
 	elsif ($customid && $Sec->Get($capID, 'CUSTOMID', 1) ne '') {
 		my $str = $Sec->Get($capID, 'CUSTOMID', 1);
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && !$Set->Get('BBS_SLIP')) {
 			$str .= " $type";
 		}
 		return "ID:$str";
@@ -1203,7 +1203,7 @@ sub GetIDPart
 		} else {
 			$str = $id;
 		}
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && !$Set->Get('BBS_SLIP')) {
 			$str .= "$type";
 		}
 		return "ID:$str";

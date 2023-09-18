@@ -226,6 +226,7 @@ sub PrintSettingInfo
 	$Setting->Load($SYS);
 	
 	$Setting->GetKeySet(\@settingKeys);
+	@settingKeys = sort @settingKeys;
 	$keyNum = @settingKeys;
 	push @settingKeys, '';
 	
@@ -258,12 +259,33 @@ sub PrintSettingInfo
 sub PrintBaseSetting
 {
 	my ($Page, $Sys, $Form) = @_;
+	my (@threadList, $id);
+	my ($BBS, $Category, @bbsSet, @catSet, $name, $category);
+	my ($sCat, @belongBBS, $belongID);
 	
 	$Sys->Set('_TITLE', 'BBS Base Setting');
 	
 	require './module/setting.pl';
 	my $Setting = SETTING->new;
 	$Setting->Load($Sys);
+
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
+	$BBS->Load($Sys);
+	$Category->Load($Sys);
+
+	# ユーザ所属のBBS一覧を取得
+	$Sys->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($Sys->Get('ADMIN')->{'USER'}, $BBS, \@belongBBS);
+	
+	# 掲示板情報を取得
+	if ($sCat eq '' || $sCat eq 'ALL') {
+		$BBS->GetKeySet('ALL', '', \@bbsSet);
+	}
+	else {
+		$BBS->GetKeySet('CATEGORY', $sCat, \@bbsSet);
+	}
+	$Category->GetKeySet(\@catSet);
 	
 	my $setSubTitle		= $Setting->Get('BBS_SUBTITLE');
 	my $setKanban		= $Setting->Get('BBS_TITLE_PICTURE');
@@ -275,6 +297,7 @@ sub PrintBaseSetting
 	my $setCookiePath	= $Setting->Get('BBS_COOKIEPATH');
 	my $setRefCushion	= $Setting->Get('BBS_REFERER_CUSHION');
 	my $setFavicon  	= $Setting->Get('BBS_FAVICON');
+	my $setKako		  	= $Setting->Get('BBS_KAKO');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -299,6 +322,25 @@ sub PrintBaseSetting
 	$Page->Print("<input type=text size=80 name=BBS_COOKIEPATH value=\"$setCookiePath\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">リファラクッション</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_REFERER_CUSHION value=\"$setRefCushion\"></td></tr>");
+
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">DAT落ちスレッド保存先</td><td>");
+	$Page->Print("<select name=BBS_KAKO required>");
+	$Page->Print("<option value=\"\">プール(外部からのアクセス不可)");
+	foreach my $listid (@bbsSet) {
+		next if ($BBS->Get('DIR', $listid) eq $Sys->Get('BBS'));
+		$category	= $Category->Get('NAME', $BBS->Get('CATEGORY', $listid));
+		$Page->Print("<optgroup label=\"$category\">");
+		foreach $belongID (@belongBBS) {
+			if ($listid eq $belongID) {
+				my $selKako = $setKako eq $BBS->Get('DIR', $listid) ?  "selected" : "";
+				$name		= $BBS->Get('NAME', $listid);
+				$Page->Print("<option value=".$BBS->Get('DIR', $listid)." $selKako>$name");
+			}
+		}
+	}
+	$Page->Print("</select></td></tr>");
+
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"　設定　\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETBASE');\"></td></tr></table>");
@@ -740,6 +782,13 @@ sub PrintOtherSetting
 	my $selIDhost		= ($setIDHost eq 'checked' ? 'selected' : '');
 	my $selIDkarafuto	= ($setIDHost eq 'karafuto' ? 'selected' : '');
 	my $selIDsiberia	= ($setIDHost eq 'siberia' ? 'selected' : '');
+
+	my $selSlipNone		= ($setIPSave eq '' ? 'selected' : '');
+	my $selSlipChecked	= ($setIPSave eq 'checked' ? 'selected' : '');
+	my $selSlipVVV		= ($setIPSave eq 'vvv' ? 'selected' : '');
+	my $selSlipVVVV		= ($setIPSave eq 'vvvv' ? 'selected' : '');
+	my $selSlipVVVVV	= ($setIPSave eq 'vvvvv' ? 'selected' : '');
+	my $selSlipVVVVVV	= ($setIPSave eq 'vvvvvv' ? 'selected' : '');
 	
 	my $setThreadNum	= $Setting->Get('BBS_THREAD_NUMBER');
 	my $setContentNum	= $Setting->Get('BBS_CONTENTS_NUMBER');
@@ -776,8 +825,14 @@ sub PrintOtherSetting
 	$Page->Print("<option value=BBS_DISP_IP2 $selIDkarafuto>発信元表示(樺太)");
 	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>発信元表示(シベリア)");
 	$Page->Print("</select></td>");
-	$Page->Print("<td class=\"DetailTitle\">機種識別子(ID末尾)</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_SLIP $setIPSave value=on>付加する</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">機種識別子(BBS_SLIP)</td><td><select name=BBS_SLIP>");
+	$Page->Print("<option value=\"\" $selSlipNone>なし");
+	$Page->Print("<option value=checked $selSlipChecked>ID末尾表示");
+	$Page->Print("<option value=vvv $selSlipVVV>ﾜｯﾁｮｲ");
+	$Page->Print("<option value=vvvv $selSlipVVVV>ﾜｯﾁｮｲ+IP");
+	$Page->Print("<option value=vvvvv $selSlipVVVVV>ﾜｯﾁｮｲ+KOROKORO");
+	$Page->Print("<option value=vvvvvv $selSlipVVVVVV>ﾜｯﾁｮｲ+KOROKORO+IP");
+	$Page->Print("</select></td>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
@@ -805,7 +860,7 @@ sub PrintOtherSetting
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
     
-    	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
+    $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("</td>");
 	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
@@ -917,6 +972,7 @@ sub FunctionBaseSetting
 	$Setting->Set('BBS_DELETE_NAME', $Form->Get('BBS_DELETE_NAME'));
 	$Setting->Set('BBS_COOKIEPATH', $Form->Get('BBS_COOKIEPATH'));
 	$Setting->Set('BBS_REFERER_CUSHION', $Form->Get('BBS_REFERER_CUSHION'));
+	$Setting->Set('BBS_KAKO', $Form->Get('BBS_KAKO'));
 	
 	$Setting->Save($Sys);
 	
@@ -979,7 +1035,7 @@ sub FunctionColorSetting
 	$Setting->Set('BBS_CAP_COLOR', $capColor);
 	$Setting->Set('BBS_READTYPE', $Form->Get('BBS_READTYPE'));
 	$Setting->Set('BBS_POSTCOLOR', $Form->Get('BBS_POSTCOLOR'));
-    	$Setting->Set('BBS_HIGHLIGHT', ($Form->Equal('BBS_HIGHLIGHT', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_HIGHLIGHT', ($Form->Equal('BBS_HIGHLIGHT', 'on') ? 'checked' : ''));
 	
 	$Setting->Save($Sys);
 	
@@ -1196,49 +1252,33 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_NEWSUBJECT', ($Form->Equal('BBS_NEWSUBJECT', 'on') ? '1' : ''));
 	$Setting->Set('BBS_YMD_WEEKS', $Form->Get('BBS_YMD_WEEKS'));
 	$Setting->Set('BBS_TRIPCOLUMN', $Form->Get('BBS_TRIPCOLUMN'));
-	$Setting->Set('BBS_SLIP', ($Form->Equal('BBS_SLIP', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_SLIP', $Form->Get('BBS_SLIP'));
 
-    	$Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
-    	$Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
-    	$Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
-    	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
-    	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
+    #$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	
 	# ID表示設定
-	# 酷いけど仕方ないね…
-	# HOST表示
-	if ( $Form->Equal('ID_DISP', 'BBS_DISP_IP1') ) {
-		$Setting->Set('BBS_DISP_IP', 'checked');
-		$Setting->Set('BBS_FORCE_ID', '');
-		$Setting->Set('BBS_NO_ID', '');
-	}
-	# karafuto
-	elsif ( $Form->Equal('ID_DISP', 'BBS_DISP_IP2') ) {
-		$Setting->Set('BBS_DISP_IP', 'karafuto');
-		$Setting->Set('BBS_FORCE_ID', '');
-		$Setting->Set('BBS_NO_ID', '');
-	}
-	# siberia
-	elsif ( $Form->Equal('ID_DISP', 'BBS_DISP_IP3') ) {
-		$Setting->Set('BBS_DISP_IP', 'siberia');
-		$Setting->Set('BBS_FORCE_ID', '');
-		$Setting->Set('BBS_NO_ID', '');
-	}
-	elsif ( $Form->Equal('ID_DISP', 'BBS_FORCE_ID') ) {
-		$Setting->Set('BBS_DISP_IP', '');
-		$Setting->Set('BBS_FORCE_ID', 'checked');
-		$Setting->Set('BBS_NO_ID', '');
-	}
-	elsif ( $Form->Equal('ID_DISP', 'BBS_NO_ID') ) {
-		$Setting->Set('BBS_DISP_IP', '');
-		$Setting->Set('BBS_FORCE_ID', '');
-		$Setting->Set('BBS_NO_ID', 'checked');
-	}
-	else {
+	my %settings_map = (
+    'BBS_DISP_IP1' => { 'BBS_DISP_IP' => 'checked', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#ホスト表示
+    'BBS_DISP_IP2' => { 'BBS_DISP_IP' => 'karafuto', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#発信元表示(樺太)
+    'BBS_DISP_IP3' => { 'BBS_DISP_IP' => 'siberia', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#発信元表示(シベリア)
+    'BBS_FORCE_ID' => { 'BBS_DISP_IP' => '', 'BBS_FORCE_ID' => 'checked', 'BBS_NO_ID' => '' },	#強制ID
+    'BBS_NO_ID'    => { 'BBS_DISP_IP' => '', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => 'checked' },	#ID表示なし
+	);
+
+	if (my $settings = $settings_map{$Form->Get('ID_DISP')}) {
+		while (my ($key, $value) = each %$settings) {
+			$Setting->Set($key, $value);
+		}
+	} else {
 		$Setting->Set('BBS_DISP_IP', '');
 		$Setting->Set('BBS_FORCE_ID', '');
 		$Setting->Set('BBS_NO_ID', '');
 	}
+	
 	
 	$Setting->Save($Sys);
 	
