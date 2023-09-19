@@ -79,10 +79,11 @@ https://akros-ac.jp/8277/
 }
 
 .responsive{
-position:relative;
-width:95%;
-height:0;
-padding-top:75%;
+    position:relative;
+    padding-bottom: 56.25%; /* 16:9 */
+    height: 0;
+    overflow: hidden;
+    max-width: 300px
 }
 .responsive iframe{
 position:absolute;
