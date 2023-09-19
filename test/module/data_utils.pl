@@ -248,21 +248,23 @@ sub ConvertTweet
 #つべニコ動埋め込み
 sub ConvertMovie
 {
-	my $this = shift;
-	my ($text) = @_ ;
-	
-	my $reg1 = '(https://youtu\.be/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';             # YoutubeURL検索
-	my $reg2 = '(https://nico\.ms/([a-z]+)([0-9])+)';	                                    # ニコ動URL検索
-	my $reg3 = '(https://(www\.)?youtube\.com/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';  # YoutubeURL検索
-	my $reg4 = '(https://(www\.)?nicovideo\.jp/([a-z]+)/([a-z]+)([0-9])+/?)';	            # ニコ動URL検索
-	
-	$$text =~ s|$reg1|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-	$$text =~ s|$reg2|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-	$$text =~ s|$reg3|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-	$$text =~ s|$reg4|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-	
-	return $text;
-	
+    my $this = shift;
+    my ($text) = @_ ;
+
+    # Youtube URL patterns
+    my $youtube_pattern1 = qr{(https://youtu\.be/([a-zA-Z0-9_-]+))};
+    my $youtube_pattern2 = qr{(https://(www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+))};
+
+    # NicoNico URL patterns
+    my $nico_pattern1 = qr{(https://nico\.ms/sm([0-9]+))};
+    my $nico_pattern2 = qr{(https://(www\.)?nicovideo\.jp/watch/sm([0-9]+))};
+
+    $$text =~ s|$youtube_pattern1|<div class="responsive"><iframe width="560" height="315" src="https://www.youtube.com/embed/$2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
+    $$text =~ s|$youtube_pattern2|<div class="responsive"><iframe width="560" height="315" src="https://www.youtube.com/embed/$3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
+    $$text =~ s|$nico_pattern1|<div class="responsive"><iframe width="560" height="315" src="https://embed.nicovideo.jp/watch/sm$2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
+    $$text =~ s|$nico_pattern2|<div class="responsive"><iframe width="560" height="315" src="https://embed.nicovideo.jp/watch/sm$3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
+
+    return $text;
 }
 
 #------------------------------------------------------------------------------------------------------------
