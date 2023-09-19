@@ -8,7 +8,7 @@ package ZPL_bbsslip;
 
 use Socket;
 use Digest::MD5 qw(md5_hex);
-use Net::Whois::Raw;
+#use Net::Whois::Raw;
 use Geo::IP;
 use utf8;
 
@@ -75,9 +75,8 @@ sub execute
 
 	#板設定の読み込み
 	require './module/setting.pl';
-	$this->{'SET'} = SETTING->new;
-	$this->{'SET'}->Load($Sys);
-	my $bbssetting = $this->{'SET'};
+	my $bbssetting = SETTING->new;
+	$bbssetting->Load($Sys);
 
 	#板のBBS_SLIP設定を確認
 	my $bbsslip = $bbssetting->Get('BBS_SLIP');
@@ -114,7 +113,7 @@ sub execute
 #------------------------------------------------------------------------------------------------------------
 sub BBS_SLIP
 {
-	my ($ip_addr, $remoho, $ua) = @_;
+	my ($ip_addr, $remoho, $ua, $bbsslip) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
 
 	#bbs_slipに使用する文字
@@ -421,19 +420,24 @@ sub BBS_SLIP
 }
 
 
+	# Geo::IPがインストールされているかチェック
+	my $geo_ip_installed = eval {
+	    require Geo::IP;
+	    1;  # 成功
+	};
+
 	# 国を判定
 	my $gi_dat = "./datas/GeoIPCity.dat";
-	if (-f $gi_dat) {
-		my $gi = Geo::IP->open($gi_dat, GEOIP_STANDARD);
-		my $record = $gi->record_by_addr($ip_addr);
-		my $ip_country =  $record->country_code;
-		if ($ip_country =~ /^(?!.*JP).*$/) {
-			$slip_nickname = "ｶﾞｲｺｰｸ${fixed_nickname_end}[${ip_country}]";
-			$slip_aa = $ip_country;
-			$slip_bb = $slip_ip;
-		}
+	if ($geo_ip_installed && -f $gi_dat) {
+	    my $gi = Geo::IP->open($gi_dat, GEOIP_STANDARD);
+	    my $record = $gi->record_by_addr($ip_addr);
+	    my $ip_country =  $record->country_code;
+	    if ($ip_country =~ /^(?!.*JP).*$/) {
+	        $slip_nickname = "ｶﾞｲｺｰｸ${fixed_nickname_end}[${ip_country}]";
+	        $slip_aa = $ip_country;
+	        $slip_bb = $slip_ip;
+	    }
 	}
-
 
 	#bbs_slipを生成
 	my $slip_result = 'undef';
@@ -449,7 +453,6 @@ sub BBS_SLIP
 	elsif($bbsslip eq 'vvvvvv'){
 		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ip_addr}]";
 	}
-
 
 	return $slip_result;
 }
