@@ -137,7 +137,7 @@ sub Write
  	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
 
 	#コマンドによる過去ログ送り用（猶予のため）
-	ToKakoLog($Sys,$Threads);
+	ToKakoLog($Sys,$Set,$Threads);
 	
 	# 情報欄
  	my $idpart = 'ID:none';
@@ -602,7 +602,7 @@ sub Command
 #過去ログ送り
 sub ToKakoLog
 {
-	my($Sys,$Threads) = @_;
+	my($Sys,$Set,$Threads) = @_;
 	require './module/file_utils.pl';
 	my $Pools = POOL_THREAD->new;
 	my $elapsed = 60*60;	#一時間
@@ -612,7 +612,7 @@ sub ToKakoLog
 	my $path = $Sys->Get('BBSPATH').'/'.$Sys->Get('BBS');
 
 	#別の掲示板に過去ログを移す場合はここに掲示板ディレクトリ名を入れる
-	my $BBSname = $Sys->{'SET'}->Get('BBS_KAKO');
+	my $BBSname = $Set->Get('BBS_KAKO');
 	my $otherBBSpath = $Sys->Get('BBSPATH').'/'.$BBSname;	
 	
 	my @threadList = ();
