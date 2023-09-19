@@ -1148,6 +1148,9 @@ sub FunctionThreadAutoPooling
 	require './module/file_utils.pl';
 	$Threads = THREAD->new;
 	$Pools = POOL_THREAD->new;
+	require './module/setting.pl';
+	my $Set = SETTING->new;
+	$Set->Load($Sys);
 	
 	$Threads->Load($Sys);
 	$Pools->Load($Sys);
@@ -1202,19 +1205,19 @@ sub FunctionThreadAutoPooling
 		# フラグありの状態ならDAT落ちする
 		if ($bPool) {
 			push @$pLog, 'スレッド「' . $Threads->Get('SUBJECT', $id) . '」をDAT落ち';
-			if(!$Sys->{'SET'}->Get('BBS_KAKO')){
+			if(!$Set->Get('BBS_KAKO')){
 				$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 				FILE_UTILS::Copy("$base/dat/$id.dat", "$base/pool/$id.cgi");
 			}
 			#別の掲示板に移す場合
 			else{
-				FILE_UTILS::Move("$base/dat/$id.dat", $Sys->{'SET'}->Get('BBS_KAKO')."/dat/$id.dat");	
+				FILE_UTILS::Move("$base/dat/$id.dat", $Set->Get('BBS_KAKO')."/dat/$id.dat");	
 				require './module/bbs_service.pl';
 				my $BBSAid = BBS_SERVICE -> new;
 				#$Sysで指すBBS名を一時変更するため保存
 				my $originalBBSname = $Sys->Get('BBS');
 				my $originalMODE = $Sys->Get('MODE');
-				$Sys->Set('BBS', $Sys->{'SET'}->Get('BBS_KAKO'));
+				$Sys->Set('BBS', $Set->Get('BBS_KAKO'));
 				$Sys->Set('MODE','CREATE');
 				# subject.txt更新
 				$Threads->Load($Sys);
