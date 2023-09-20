@@ -1,3 +1,5 @@
+VPN
+/vpn/
 MillenVpn
 /[\w-]+\.me77\.me/
 NordVpn
