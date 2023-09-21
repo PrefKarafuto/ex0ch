@@ -642,6 +642,7 @@ sub PrintThreadPreviewOne
 	$Threads->LoadAttr($Sys);
 	my $AttrMax = $Threads->GetAttr($key,'maxres');
 	my $threadStop = $Threads->GetAttr($key,'stop');
+	my $threadPool = $Threads->GetAttr($key,'pool');
 	my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 	# 表示数の正規化
 	my ($start, $end) = $this->{'CONV'}->RegularDispNum($Sys, $Dat, 1, $contNum, $contNum);
@@ -653,7 +654,7 @@ sub PrintThreadPreviewOne
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop){
+	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>

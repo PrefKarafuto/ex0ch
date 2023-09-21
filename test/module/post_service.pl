@@ -135,6 +135,7 @@ sub Write
 	$Threads->LoadAttr($Sys);
  	my $idSet = $Threads->GetAttr($threadid,'noid');
  	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
+	return $ZP::E_LIMIT_MOVEDTHREAD if ($Threads->GetAttr($threadid,'pool'));
 
 	#コマンドによる過去ログ送り用（猶予のため）
 	ToKakoLog($Sys,$Set,$Threads);
@@ -238,6 +239,7 @@ sub Write
 				if(!$Set->Get('BBS_KAKO')){
 					$Pools->Add($lid, $Threads->Get('SUBJECT', $lid), $Threads->Get('RES', $lid));
 					FILE_UTILS::Copy("$path/dat/$lid.dat", "$path/pool/$lid.cgi");
+					$Threads->Delete($lid);
 				}
 				#別の掲示板に移す場合
 				else{
@@ -256,15 +258,14 @@ sub Write
 					$Threads->UpdateAll($Sys);
 					$Threads->Save($Sys);
 					# index.html更新
-					$BBSAid->Init($Sys,undef);
-					$BBSAid->CreateIndex();
-					$BBSAid->CreateSubback();
+					#$BBSAid->Init($Sys,undef);
+					#$BBSAid->CreateIndex();
+					#$BBSAid->CreateSubback();
 
 					#$Sysの内容を元に戻す
 					$Sys->Set('BBS', $originalBBSname);
 					$Sys->Set('MODE',$originalMODE);
 				}
-				$Threads->Delete($lid);
 				unlink "$path/dat/$lid.dat";
 			}
 			
@@ -479,7 +480,7 @@ sub Command
 			$Form->Set('mail',$mail);
 		}
 		#最大レス数変更
-		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]{3,4})/ && ($setBitMask & 2)) {
+		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]{3,4})(<br>|$)/ && ($setBitMask & 2)) {
 			if ($2 && $2 >= 100 && $2 <= 2000) {
 				$Threads->SetAttr($threadid, 'maxres', int $2);
 				my $maxres = $Threads->GetAttr($threadid, 'maxres');
@@ -507,13 +508,13 @@ sub Command
 			}
 		}
 		#スレスト
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop/ && ($setBitMask & 8)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop(<br>|$)/ && ($setBitMask & 8)){
 			$Threads->SetAttr($threadid, 'stop',1);
 			$Threads->SaveAttr($Sys);
 			$Command .= '※スレスト<br>';
 		}
 		#過去ログ送り
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!pool/ && ($setBitMask & 512)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!pool(<br>|$)/ && ($setBitMask & 512)){
 			$Threads->SetAttr($threadid, 'pool',1);
 			$Threads->SaveAttr($Sys);
 			$Command .= '※過去ログ送り<br>';
@@ -536,32 +537,32 @@ sub Command
 
 	##スレ立て時＆スレ中パスワード保持者のみ
 	#強制sage
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage/ && ($setBitMask & 4)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage(<br>|$)/ && ($setBitMask & 4)){
 		$Threads->SetAttr($threadid, 'sagemode',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※強制sage<br>';
 	}
 	#強制age
-#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float/ && ($setBitMask & 2048)){
+#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float(<br>|$)/ && ($setBitMask & 2048)){
 #		$Threads->SetAttr($threadid, 'float',1);
 #		$Threads->SaveAttr($Sys);
 #		$Command .= '※強制age<br>';
 #	}
 	#不落
-#	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool/ && ($setBitMask & 4096)){
+#	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool(<br>|$)/ && ($setBitMask & 4096)){
 #		$Threads->SetAttr($threadid, 'nopool',1);
 #		$Threads->SaveAttr($Sys);
 #		$Command .= '※不落<br>';
 #	}
 	#名無し強制
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774/ && ($setBitMask & 64)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774(<br>|$)/ && ($setBitMask & 64)){
 		$Threads->SetAttr($threadid, 'force774',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※強制名無し<br>';
 		$Form->Set('FROM','');
 	}
 	#実況モード
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!live/ && ($setBitMask & 1024)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!live(<br>|$)/ && ($setBitMask & 1024)){
 		$Threads->SetAttr($threadid, 'live',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※実況スレ<br>';
@@ -582,12 +583,12 @@ sub Command
 		$Form->Set('FROM','');
 	}
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid/ && ($setBitMask & 16)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid(<br>|$)/ && ($setBitMask & 16)){
 		$Threads->SetAttr($threadid, 'noid',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※ID無し<br>';
 	}
-	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid/ && ($setBitMask & 32)){
+	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid(<br>|$)/ && ($setBitMask & 32)){
 		$Threads->SetAttr($threadid, 'changeid',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※ID変更<br>';
@@ -599,75 +600,88 @@ sub Command
 	}
 }
 
-#過去ログ送り
-sub ToKakoLog
-{
-	my($Sys,$Set,$Threads) = @_;
-	require './module/file_utils.pl';
-	my $Pools = POOL_THREAD->new;
-	my $elapsed = 60*60;	#一時間
-	my $nowtime = time;
-	$Pools->Load($Sys);
-	
-	my $path = $Sys->Get('BBSPATH').'/'.$Sys->Get('BBS');
+# 過去ログの移動や保存を行う
+sub ToKakoLog {
+    my ($Sys, $Set, $Threads) = @_;
+    
+    require './module/file_utils.pl';
+    require './module/bbs_service.pl';  # 一度だけ読み込む
+    my $Pools = POOL_THREAD->new;
+    my $BBSAid = BBS_SERVICE->new;  # 一度だけインスタンス化
 
-	#別の掲示板に過去ログを移す場合はここに掲示板ディレクトリ名を入れる
-	my $BBSname = $Set->Get('BBS_KAKO');
-	my $otherBBSpath = $Sys->Get('BBSPATH').'/'.$BBSname;	
-	
-	my @threadList = ();
-	$Threads->GetKeySet('ALL', '', \@threadList);
-	$Threads->LoadAttr($Sys);
-	
-	# 現在の板の全スレッドをチェック
-	foreach my $id (@threadList) {
-		# 書き込もうとしているスレッドはスルー
-		#next if ($Sys->Get('KEY') eq $id);
-		
-		my $attrLive = $Threads->GetAttr($id,'live');
-		my $attrPool = $Threads->GetAttr($id,'pool');
-		
-		# datの最終更新日時
-		my $lastmodif = (stat "$path/dat/$id.dat")[9];
-		
-		# 設定時間更新されてなければプールに移動(dat落ち)
-		if (($attrLive && ($nowtime - $lastmodif > $elapsed)) || $attrPool) {
-			if($BBSname){
-				FILE_UTILS::Move("$path/dat/$id.dat", "$otherBBSpath/dat/$id.dat");	#別の掲示板に移す場合
-				require './module/bbs_service.pl';
-				my $BBSAid = BBS_SERVICE -> new;
+    my $elapsed = 60 * 60;  # 1時間
+    my $nowtime = time;
+    
+    my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
+    my $BBSname = $Set->Get('BBS_KAKO');
+    my $otherBBSpath = $Sys->Get('BBSPATH') . '/' . $BBSname;
+    
+    my @threadList = ();
+    my $isUpdate = '';  # 更新が必要な場合
+    
+    $Threads->GetKeySet('ALL', '', \@threadList);
+    $Threads->LoadAttr($Sys);
 
-				#$Sysで指すBBS名を一時変更するため保存
-				my $originalBBSname = $Sys->Get('BBS');
-				my $originalMODE = $Sys->Get('MODE');
-				$Sys->Set('BBS', $BBSname);
-				$Sys->Set('MODE','CREATE');
+    foreach my $id (@threadList) {
+        my $need_update = process_thread($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $nowtime, $elapsed, $BBSname);
+        $isUpdate = 1 if $need_update;  # 更新が必要ならフラグをたてる
+    }
 
-				# subject.txt更新
-				$Threads->Load($Sys);
-				$Threads->UpdateAll($Sys);
-				$Threads->Save($Sys);
-				# index.html更新
-				$BBSAid->Init($Sys,undef);
-				$BBSAid->CreateIndex();
-				$BBSAid->CreateSubback();
+    if ($isUpdate && $BBSname) {
+    	update_board($Sys, $Threads, $BBSAid,undef);
+		update_board($Sys, $Threads, $BBSAid,$BBSname)
+    }
 
-				#$Sysの内容を元に戻す
-				$Sys->Set('BBS', $originalBBSname);
-				$Sys->Set('MODE',$originalMODE);
-			}else{
-				$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
-				FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
-			}
-			$Threads->Delete($id);
-		}
-	}
-	
-	# スレッド情報を保存
-	$Pools->Save($Sys);
-	$Threads->Save($Sys);
-	
+    $Pools->Save($Sys);
+    $Threads->Save($Sys);
 }
+
+# 各スレッドに対する処理
+# 更新が必要な場合は1を、そうでない場合は0を返す
+sub process_thread {
+    my ($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $nowtime, $elapsed, $BBSname) = @_;
+    
+    my $need_update = 0;
+
+    my $attrLive = $Threads->GetAttr($id, 'live');
+    my $attrPool = $Threads->GetAttr($id, 'pool');
+    my $lastmodif = (stat "$path/dat/$id.dat")[9];
+    
+    if (($attrLive && ($nowtime - $lastmodif > $elapsed)) || $attrPool) {
+        $need_update = 1;
+
+        if ($BBSname) {
+            FILE_UTILS::Move("$path/dat/$id.dat", "$otherBBSpath/dat/$id.dat");
+        } else {
+            $Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
+			FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
+        }
+    }
+    return $need_update;
+}
+
+# 掲示板を更新
+sub update_board {
+    my ($Sys, $Threads, $BBSAid,$BBSname) = @_;
+    
+    $Sys->Set('BBS', $BBSname) if $BBSname;
+	
+    #subject.txt更新
+    $Threads->Load($Sys);
+    $Threads->UpdateAll($Sys);
+    $Threads->Save($Sys);
+    
+	#index.html&subback.html更新
+	if(!$BBSname){
+	$Sys->Set('MODE', 'CREATE');
+    $BBSAid->Init($Sys, undef);
+    $BBSAid->CreateIndex();
+    $BBSAid->CreateSubback();
+    }
+	return 0;
+}
+
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	プラグイン処理
