@@ -346,6 +346,7 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=C_NGUSER $authNum[20] value=on>ユーザー規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_NGWORD $authNum[21] value=on>NGワード規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_COMMAND $authNum[24] value=on>コマンド使用可<br>");
+	$Page->Print("<input type=checkbox name=C_NOATTR $authNum[25] value=on>スレッド属性無効<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示
@@ -549,6 +550,7 @@ sub FunctionGroupSetting
 	$authNum[22]	= $Form->Equal('C_NOSLIP', 'on') ? 1 : 0;
 	$authNum[23]	= $Form->Equal('C_CUSTOMID', 'on') ? 1 : 0;
 	$authNum[24]	= $Form->Equal('C_COMMAND', 'on') ? 1 : 0;
+	$authNum[25]	= $Form->Equal('C_NOATTR', 'on') ? 1 : 0;
 	
 	for ($i = 0 ; $i < $ZP::CAP_MAXNUM ; $i++) {
 		if ($authNum[$i]){

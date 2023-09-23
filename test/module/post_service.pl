@@ -118,9 +118,6 @@ sub Write
 	# 規制チェック
 	return $err if (($err = $this->IsRegulation()) != $ZP::E_SUCCESS);
 	
-	# 改造版で追加
-	# hCaptcha認証
-	#return $err if (($err = $this->Certification_hCaptcha()) != $ZP::E_SUCCESS);
 
 	# データの書き込み
 	require './module/dat.pl';
@@ -130,6 +127,13 @@ sub Write
 	my $Conv = $this->{'CONV'};
 	my $Threads = $this->{'THREADS'};
 	my $Sec = $this->{'SECURITY'};
+
+	# 改造版で追加
+	# hCaptcha認証
+	if ($Set->Get('BBS_HCAPTCHA')){
+		$err = Certification_hCaptcha();
+		return $err if $err != $ZP::E_SUCCESS;
+	}
 	
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
@@ -403,6 +407,7 @@ sub ReadyBeforeWrite
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
 	my $commandAuth = $Sec->IsAuthority($capID, $ZP::CAP_REG_COMMAND, $Form->Get('bbs'));
+	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 
 	#スレ立て時用コマンド
 	if($Sys->Equal('MODE', 1)){
@@ -439,7 +444,7 @@ sub ReadyBeforeWrite
 	
 	# 名無し設定
 	$from = $Form->Get('FROM', '');
-	if ($from eq ''||$Threads->GetAttr($threadid,'force774')) {
+	if (($from eq ''||$Threads->GetAttr($threadid,'force774')) && !$noAttr) {
 		if($Threads->GetAttr($threadid,'change774')){
 			$from = $Threads->GetAttr($threadid,'change774');
 		}
@@ -449,8 +454,16 @@ sub ReadyBeforeWrite
 		$Form->Set('FROM', $from);
 	}
 	$this->ExecutePlugin(16);
+
+	my $isSlip = $Threads->GetAttr($threadid,'slip');
+	my $bbsslip = $isSlip ? $isSlip : $Set->Get('BBS_SLIP');
+
+	$this->addSlip($Sys, $Form, $bbsslip) if (!$Sec->IsAuthority($capID, $ZP::CAP_DISP_HANLDLE, $bbs) || !$noAttr);
+	$this->Ninpocho($Sys,$Form) if ($Set->Get('BBS_NINJA'));
+
 	$this->OMIKUJI($Sys, $Form);	#おみくじ
 	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
+
 	return 0;
 }
 #ユーザーコマンド
@@ -543,17 +556,23 @@ sub Command
 		$Command .= '※強制sage<br>';
 	}
 	#強制age
-#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float(<br>|$)/ && ($setBitMask & 2048)){
+#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float(<br>|$)/ && ($setBitMask & )){
 #		$Threads->SetAttr($threadid, 'float',1);
 #		$Threads->SaveAttr($Sys);
 #		$Command .= '※強制age<br>';
 #	}
 	#不落
-#	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool(<br>|$)/ && ($setBitMask & 4096)){
+#	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool(<br>|$)/ && ($setBitMask & )){
 #		$Threads->SetAttr($threadid, 'nopool',1);
 #		$Threads->SaveAttr($Sys);
 #		$Command .= '※不落<br>';
 #	}
+	#BBS_SLIP
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!slip:(v{3,6})(<br>|$)/ && ($setBitMask & 2048)){
+		$Threads->SetAttr($threadid, 'slip',$2);
+		$Threads->SaveAttr($Sys);
+		$Command .= '※BBS_SLIP='.$2.'<br>';
+	}
 	#名無し強制
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774(<br>|$)/ && ($setBitMask & 64)){
 		$Threads->SetAttr($threadid, 'force774',1);
@@ -1071,7 +1090,7 @@ sub NormalizationNameMail
 	
 	return $ZP::E_SUCCESS;
 }
-=pod
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	改造版で追加
@@ -1082,53 +1101,47 @@ sub NormalizationNameMail
 #			規制チェックにかかったらエラーコードを返す
 #
 #------------------------------------------------------------------------------------------------------------
-sub Certification_hCaptcha
-{
-	my	$this = shift;
-	# 変数の大文字と小文字には気を付けて
-	# 宣言しないといけないのに長い時間を要した
-	my $Form = $this->{'FORM'};
-	my $Sys = $this->{'SYS'};
+sub Certification_hCaptcha {
+    my $this = shift;
+    my $Form = $this->{'FORM'};
+    my $Sys = $this->{'SYS'};
 
-	# hCaptcha「あり」の場合
-	my $secretkey = $Sys->Get('HCAPTCHA_SECRETKEY');
+    my $secretkey = $Sys->Get('HCAPTCHA_SECRETKEY');
 
-	if ($secretkey ne '') {
-	#シークレットキー
-	my $url = 'https://hcaptcha.com/siteverify';
+    # hCaptcha「あり」の場合
+    if ($secretkey ne '') {
+        my $url = 'https://hcaptcha.com/siteverify';
+        my $ua = LWP::UserAgent->new();
+        my $recaptcha_response = $Form->Get('g-recaptcha-response');
+        my $remote_ip = $ENV{REMOTE_ADDR};
+        my $response = $ua->post(
+            $url,
+            {
+                remoteip => $remote_ip,
+                response => $recaptcha_response,
+                secret => $secretkey,
+            },
+        );
 
-	my $ua = LWP::UserAgent->new();
-	my $recaptcha_response = $Form->Get('g-recaptcha-response');
-	my $remote_ip = $ENV{REMOTE_ADDR};
-	my $response = $ua->post(
-	    $url,
-	    {
-	        remoteip => $remote_ip,
-	        response => $recaptcha_response,
-	        secret => $secretkey,
-	    },
-	);
-		if ( $response->is_success() ) {
-		    my $json = $response->decoded_content();
-		    my $out = parse_json($json);
-		    if ( $out->{success} ) {
-
-			#print "Content-Type: text/html; charset=Shift_JIS\n\n";
-			#print "認証ができています\n"
-
-			}else{
-			#print "Content-Type: text/html; charset=Shift_JIS\n\n";
-			#print("認証ができていません！");
-
-			return $ZP::E_FORM_NOCAPTCHA;
-			}
-		}
-
-	}
-
-			return $ZP::E_SUCCESS;
+        if ($response->is_success()) {
+            my $json = $response->decoded_content();
+            my $out = parse_json($json);
+            if ($out->{success}) {
+                return $ZP::E_SUCCESS;  # 認証成功時に成功コードを返す
+            } else {
+                return $ZP::E_FORM_NOCAPTCHA;  # 認証失敗時に失敗コードを返す
+            }
+        } else {
+            return $ZP::E_FORM_NOCAPTCHA;  # 通信失敗などでも失敗コードを返す
+        }
+    }
+    # hCaptcha「なし」の場合（ここはビジネスロジックに応じて適切に処理してください）
+    else {
+        return $ZP::E_SUCCESS;
+    }
 }
-=cut
+
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	テキスト欄の正規化
@@ -1268,7 +1281,150 @@ sub SaveHost
 		$Logger->Write();
 	}
 }
+sub addSlip
+{
+	my $this = shift;
+	my ($Sys, $Form,$bbsslip) = @_;
+	my $Set = $this->{'SET'};
 
+	use Socket;
+	require './module/data_utils.pl';
+
+	#IP・リモホ・UAを取得
+	my $ip_addr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
+	my $remoho  = gethostbyaddr(inet_aton($ip_addr), AF_INET);
+	my $ua =  $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
+
+	#BBS_SLIP機能呼び出し
+	if ($bbsslip =~ /^v{3,6}$/){
+		#名前欄にワッチョイもどきを追加
+		my $from = $Form->Get('FROM');
+		if ($from eq '') {
+			$from = $Set->Get('BBS_NONAME_NAME');
+		}
+		my $res = DATA_UTILS::BBS_SLIP($ip_addr, $remoho, $ua, $bbsslip);
+		$from = "${from} </b>(${res})<b> </b>";
+		$Form->Set('FROM',$from);
+	}
+
+	return 0;
+}
+sub Ninpocho
+{
+	my $this = shift;
+	my ($Sys, $Form, $type) = @_;
+	my ($total_code, $infoDir);
+	require './module/data_utils.pl';
+	DATA_UTILS->new;
+
+	# infoディレクトリ
+	$infoDir = $Sys->Get('INFO');
+
+	# IPアドレスを取得
+	my $ipAddr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
+
+		# Cookie管理モジュールを用意
+		my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
+
+		# CookieからセッションIDを取得
+		my $sid = $Cookie->Get('countsession');
+		if ($sid eq '') {
+			my %cookies = fetch CGI::Cookie;
+			if (exists $cookies{'countsession'}) {
+				$sid = $cookies{'countsession'}->value;
+				$sid =~ s/"//g;
+			}
+		}
+
+		# 忍法帖データディレクトリを設定
+		my $ninDir = ".$infoDir/.nin/";
+		mkdir $ninDir if ! -d $ninDir;
+
+		# IPアドレスを記録
+		my $ssPath = "${ninDir}cgisess_${sid}";
+		$sid = '' if ! -f $ssPath;
+		my $ipPath = "${ninDir}ip_${ipAddr}";
+		if ($sid ne '' && ! -f $ipPath) {
+			open(my $fh, ">", $ipPath);
+			print $fh $sid;
+			close($fh);
+		}
+		if (-f $ipPath && open(my $fh, "<", $ipPath)) {
+			my $sidData = <$fh>;
+			$sid = $sidData if $sidData ne '';
+			my $ssPath = "${ninDir}cgisess_${sid}";
+			$sid = '' if ! -f $ssPath;
+			if ($sid eq '' && -f $ipPath) {
+				open(my $fh, ">", $ipPath);
+				print $fh '';
+				close($fh);
+			} else {
+				$total_code .= 'ｲ' if $sid ne '';
+			}
+			close($fh);
+		}
+		if ($sid eq '' && -d $ninDir) {
+			my $fsrslt = DATA_UTILS::fsearch($ninDir, $ipAddr);
+			if ($fsrslt =~ /cgisess_/) {
+				$sid = $fsrslt;
+        		$sid =~ s|.+?cgisess_||;
+				$total_code .= 'ｲ';
+			}
+		}
+
+    # セッションを読み込む
+    my $session = CGI::Session->new('driver:file;serializer:default', $sid, { Directory => $ninDir }) || 0;
+
+    # セッションから忍法帖Lvを取得
+    my $ninLv = $session->param('ninLv') || 1;
+
+		# セッションから書き込み数を取得
+		my $count = $session->param('count') || 0;
+
+    # 書き込んだ時間を取得
+		my $resTime = time();
+    # 書き込んだ時間の23時間後を取得
+		my $time23h = time() + 82800;
+		# セッションから前回レベルアップしたときの時間を取得
+		my $lvUpTime = $session->param('lvuptime') || $time23h;
+
+    # 書き込み数をカウント
+		$count++;
+
+		# レベルの上限
+		my $lvLim = 40;
+
+    # 前回のレベルアップから23時間以上経過していればレベルアップ
+    if ($resTime >= $lvUpTime && $ninLv < $lvLim) {
+      $ninLv++;
+      $lvUpTime = $time23h;
+    }
+
+		# セッションに記録
+		if ($session) {
+			$session->param('count', $count);
+			$session->param('ninLv', $ninLv);
+			$session->param('lvuptime', $lvUpTime);
+		}
+
+		# セッションIDをクッキーに出力
+		if ($sid eq '') {
+			$sid = $session->id();
+		}
+		$Cookie->Set('countsession', $sid);
+
+		# 名前欄取得
+		my $name = $Form->Get('FROM');
+
+		# 名前欄書き換え
+		$name =~ s|!ninja|</b>【忍法帖Lv.$ninLv】<b>|g;
+		$name =~ s|!total|</b>【総カキコ数:$count】<b>|g;
+
+		# 名前欄再設定
+		$Form->Set('FROM', $name);
+
+	return 0;
+}
 #SPAMBLOCK
 sub SpamBlock
 {

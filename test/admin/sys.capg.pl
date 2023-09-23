@@ -311,6 +311,7 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=C_NGUSER $authNum[20] value=on>ユーザー規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_NGWORD $authNum[21] value=on>NGワード規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_COMMAND $authNum[24] value=on>コマンド使用可<br>");
+	$Page->Print("<input type=checkbox name=C_NOATTR $authNum[25] value=on>スレッド属性無効<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示
@@ -471,6 +472,7 @@ sub FunctionGroupSetting
 		'C_NGUSER'			=> $ZP::CAP_REG_NGUSER,
 		'C_NGWORD'			=> $ZP::CAP_REG_NGWORD,
 		'C_COMMAND'			=> $ZP::CAP_REG_COMMAND,
+		'C_NOATTR'			=> $ZP::CAP_REG_NOATTR,
 	);
 	my @auths = ();
 	foreach (keys %field2auth) {

@@ -62,6 +62,9 @@ sub BBSCGI
 			}
 			PrintBBSJump($CGI, $Page);
 		}
+		elsif ($err == $ZP::E_FORM_NOCAPTCHA) {
+			PrintBBShCaptcha($CGI, $Page);
+		}
 		else {
 			PrintBBSError($CGI, $Page, $err);
 		}

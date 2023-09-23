@@ -639,7 +639,7 @@ sub PrintPlusSecSetting
 	$Trip12		= $SYS->Get('TRIP12');
 	$SPAMHAUS	= $SYS->Get('SPAMHAUS');
 	$SPAMCOP	= $SYS->Get('SPAMCOP');
-    	$BARRACUDA	= $SYS->Get('BARRACUDA');
+    $BARRACUDA	= $SYS->Get('BARRACUDA');
 	
 	my $hCaptcha_sitekey 	= $SYS->Get('HCAPTCHA_SITEKEY');
 	my $hCaptcha_secretkey  = $SYS->Get('HCAPTCHA_SECRETKEY');
@@ -648,7 +648,7 @@ sub PrintPlusSecSetting
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
 	$shaus		= ($SPAMHAUS == 1 ? 'checked' : '');
 	$scop		= ($SPAMCOP == 1 ? 'checked' : '');
-    	$bc	        = ($BARRACUDA == 1 ? 'checked' : '');
+    $bc	        = ($BARRACUDA == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	

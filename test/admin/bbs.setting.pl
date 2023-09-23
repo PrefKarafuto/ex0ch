@@ -703,6 +703,7 @@ sub PrintCommandSetting
 	my $setdelcmd = $setBitMask & 256 ? 'checked' : '';
 	my $setpool = $setBitMask & 512 ? 'checked' : '';
 	my $setlive = $setBitMask & 1024 ? 'checked' : '';
+	my $setslip = $setBitMask & 2048 ? 'checked' : '';
 	
 	my $isEnabledInfo = $setpass ? '有効' : '';
 	my $setView = $setpass ? '' : '"opacity: 0.5;"';
@@ -722,6 +723,9 @@ sub PrintCommandSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">強制sage（!sage）</td><td>");
 	$Page->Print("<input type=checkbox name=SAGE value=4 $setsage>有効</tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">BBS_SLIP（!slip:[vvv/vvvv/vvvvv/vvvvvv]）</td><td>");
+	$Page->Print("<input type=checkbox name=SLIP value=4 $setslip>有効</tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">ID無し（!noid）</td><td>");
 	$Page->Print("<input type=checkbox name=NOID value=8 $setnoid>有効</td></tr>");
@@ -807,6 +811,8 @@ sub PrintOtherSetting
 	my $setMovie    	= $Setting->Get('BBS_MOVIE');
 	my $setURLtoTitle   = $Setting->Get('BBS_URL_TITLE');
 	my $setImage    	= $Sys->Get('IMGTAG');
+	my $setNinja		= $Setting->Get('BBS_NINJA');
+	my $setUpLoad		= $Setting->Get('BBS_UPLOAD');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
@@ -825,6 +831,8 @@ sub PrintOtherSetting
 	$Page->Print("<option value=BBS_DISP_IP2 $selIDkarafuto>発信元表示(樺太)");
 	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>発信元表示(シベリア)");
 	$Page->Print("</select></td>");
+	$Page->Print("<td class=\"DetailTitle\">忍法帖</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_NINJA value=checked $setNinja>有効</td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">機種識別子(BBS_SLIP)</td><td><select name=BBS_SLIP>");
 	$Page->Print("<option value=\"\" $selSlipNone>なし");
 	$Page->Print("<option value=checked $selSlipChecked>ID末尾表示");
@@ -833,7 +841,9 @@ sub PrintOtherSetting
 	$Page->Print("<option value=vvvvv $selSlipVVVVV>ﾜｯﾁｮｲ+KOROKORO");
 	$Page->Print("<option value=vvvvvv $selSlipVVVVVV>ﾜｯﾁｮｲ+KOROKORO+IP");
 	$Page->Print("</select></td>");
-	
+	$Page->Print("<td class=\"DetailTitle\">画像アップロード</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_UPLOAD value=checked $setUpLoad>有効</td>");
+
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
 	$Page->Print("<td class=\"DetailTitle\"><s>文字参照</s></td><td>");
@@ -1173,7 +1183,7 @@ sub FunctionCommandSetting
 	}
 	# 入力チェック
 	{
-		my @inList = qw(PASS MAXRES SAGE NOID CHID FC774 CH774 LIVE STOP POOL DELCMD);
+		my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE STOP POOL DELCMD);
 		foreach (@inList) {
 			my $status = $Form->Get($_) ?  '有効' : '無効';
 			push @$pLog, "「$_」を「" . $status. '」に設定';
@@ -1187,6 +1197,7 @@ sub FunctionCommandSetting
 	$commandSet |= $Form->Get('PASS');
 	$commandSet |= $Form->Get('MAXRES');
 	$commandSet |= $Form->Get('SAGE');
+	$commandSet |= $Form->Get('SLIP');
 	$commandSet |= $Form->Get('NOID');
 	$commandSet |= $Form->Get('CHID');
 	$commandSet |= $Form->Get('FC774');
@@ -1253,6 +1264,7 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_YMD_WEEKS', $Form->Get('BBS_YMD_WEEKS'));
 	$Setting->Set('BBS_TRIPCOLUMN', $Form->Get('BBS_TRIPCOLUMN'));
 	$Setting->Set('BBS_SLIP', $Form->Get('BBS_SLIP'));
+	$Setting->Set('BBS_NINJA', $Form->Get('BBS_NINJA'));
 
     $Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
