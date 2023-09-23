@@ -131,7 +131,7 @@ sub Write
 	# 改造版で追加
 	# hCaptcha認証
 	if ($Set->Get('BBS_HCAPTCHA')){
-		$err = Certification_hCaptcha();
+		$err = $this->Certification_hCaptcha();
 		return $err if $err != $ZP::E_SUCCESS;
 	}
 	
