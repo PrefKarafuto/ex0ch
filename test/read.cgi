@@ -190,6 +190,7 @@ sub PrintReadHead
 	my $favicon = $Set->Get('BBS_FAVICON');
 	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
+	my $bbspath = $Sys->Get('BBS');
 	my $datone = $Dat->Get(0);
 	my $description = 'ERROR:スレッドが存在しません。';
 	my $CSP = $Sys->Get('CSP');
@@ -228,7 +229,7 @@ sub PrintReadHead
  <meta name="twitter:card" content="summary">
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
- <link rel="icon" href="$favicon">
+ <link rel="icon" href="../../../../$bbspath/$favicon">
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
