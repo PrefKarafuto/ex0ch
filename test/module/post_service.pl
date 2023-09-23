@@ -10,7 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
 use Digest::MD5;
-#use JSON;
+use JSON;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
 no warnings 'once';
@@ -1103,45 +1103,38 @@ sub NormalizationNameMail
 #------------------------------------------------------------------------------------------------------------
 sub Certification_hCaptcha {
     my $this = shift;
-    my $Form = $this->{'FORM'};
-    my $Sys = $this->{'SYS'};
+    my ($Sys,$Form) = @_;
 
     my $secretkey = $Sys->Get('HCAPTCHA_SECRETKEY');
+    my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
 
-    # hCaptcha「あり」の場合
-    if ($secretkey ne '') {
-        my $url = 'https://hcaptcha.com/siteverify';
-        my $ua = LWP::UserAgent->new();
-        my $recaptcha_response = $Form->Get('g-recaptcha-response');
-        my $remote_ip = $ENV{REMOTE_ADDR};
-        my $response = $ua->post(
-            $url,
-            {
-                remoteip => $remote_ip,
-                response => $recaptcha_response,
-                secret => $secretkey,
-            },
-        );
-
-        if ($response->is_success()) {
-            my $json = $response->decoded_content();
-            my $out = parse_json($json);
-            if ($out->{success}) {
-                return $ZP::E_SUCCESS;  # 認証成功時に成功コードを返す
-            } else {
-                return $ZP::E_FORM_NOCAPTCHA;  # 認証失敗時に失敗コードを返す
-            }
+    my $url = 'https://api.hcaptcha.com/siteverify';
+    my $ua = LWP::UserAgent->new();
+    my $recaptcha_response = $Form->Get('h-captcha-response');
+    my $remote_ip = $ENV{REMOTE_ADDR};
+        
+    my $response = $ua->post($url,{
+			secret => $secretkey,
+			response => $recaptcha_response,
+			remoteip => $remote_ip
+           });
+    if ($response->is_success()) {
+        my $json_text = $response->decoded_content();
+           
+        # JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
+        my $out = decode_json($json_text);
+           
+        if ($out->{success}) {
+           return $ZP::E_SUCCESS;
         } else {
-            return $ZP::E_FORM_NOCAPTCHA;  # 通信失敗などでも失敗コードを返す
+           return $ZP::E_FORM_NOCAPTCHA;
         }
-    }
-    # hCaptcha「なし」の場合（ここはビジネスロジックに応じて適切に処理してください）
-    else {
-        return $ZP::E_SUCCESS;
+    } else {
+		#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
+		#ここの返り値を$ZP::E_SYSTEM_ERRORに変えればエラーがあるか確認可能
+    	return $ZP::E_SUCCESS;
     }
 }
-
-
 #------------------------------------------------------------------------------------------------------------
 #
 #	テキスト欄の正規化

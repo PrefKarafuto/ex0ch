@@ -580,6 +580,10 @@ sub PrintBBShCaptcha
 
  <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="script-src 'self' https://hcaptcha.com https://*.hcaptcha.com;
+frame-src 'self' https://hcaptcha.com https://*.hcaptcha.com;
+style-src 'self' https://hcaptcha.com https://*.hcaptcha.com;
+connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com;">
  <script src='https://js.hcaptcha.com/1/api.js' async defer></script>
   <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
  <title>■ hCaptcha確認 ■</title>
@@ -605,9 +609,9 @@ HTML
 <font size="4" color="#FF0000"><b>hCaptcha確認</b></font>
 HTML
 	my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
-	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>\n");
-	$Page->Print("<form method=\"POST\" action=\"./bbs.cgi\">");
 	
+	$Page->Print("<form method=\"POST\" action=\"./bbs.cgi\">");
+	$Page->Print("<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>\n");
 	$msg =~ s/<br>/\n/g;
 	
 	$Page->HTMLInput('hidden', 'subject', $subject);
