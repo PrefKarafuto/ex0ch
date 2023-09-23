@@ -819,7 +819,7 @@ sub MakeIDnew
 	my @ip = split(/\./,$addr);
 	my $ua =  $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
 
-	my $provider;
+	my $provider = '';
 	my $HOST = $ENV{'HTTP_HOST'};
 
 	# プロバイダのドメインを取得
