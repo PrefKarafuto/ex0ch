@@ -334,6 +334,7 @@ sub PrintThreadList
 		push @attrstr, '浮上' if ($Threads->GetAttr($id, 'float'));
 		push @attrstr, '不落' if ($Threads->GetAttr($id, 'nopool'));
 		push @attrstr, 'sage進行' if ($Threads->GetAttr($id, 'sagemode'));
+		push @attrstr, "SLIP:$Threads->GetAttr($id, 'slip')" if ($Threads->GetAttr($id, 'slip'));
 		push @attrstr, "最大レス数:$Threads->GetAttr($id, 'maxres')" if ($Threads->GetAttr($id, 'maxres'));
 		push @attrstr, 'ID無し' if ($Threads->GetAttr($id, 'noid'));
 		push @attrstr, '実況モード' if ($Threads->GetAttr($id, 'live'));
@@ -446,13 +447,12 @@ sub PrintThreadCopy
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	
 	$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
-	$Page->Print("※注：$text\先に同じファイル名のスレッドがあると上書きされます<br>");
-	$Page->Print("　　　スレッドの属性は$text\されません</b><br>");
+	$Page->Print("※注：スレッドの属性は$text\されません</b><br>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 
 	$Page->Print("<tr><td colspan=3 align=left>");
 
-	$Page->Print("$text\先: <select name=TOBBS required>");
+	$Page->Print("$text\先: <select name=TOBBS required $status>");
 	if(@bbsSet <= 1){
 		$Page->Print("<option value=\"\" disabled>選択可能な掲示板がありません");
 	}else{
@@ -470,7 +470,7 @@ sub PrintThreadCopy
 		}
 	}
 	$Page->Print("</select> ");
-
+	$Page->Print("<input type=checkbox value=on name=RENAME $status>同名のファイルがあればリネーム");
 	$Page->Print('<input type=button value="　' . $text . "　\" onclick=\"$common;\" $status> ");
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
@@ -828,7 +828,7 @@ sub FunctionThreadStop
 sub FunctionThreadCopy
 {
 	my ($Sys, $Form, $pLog, $mode) = @_;
-	my (@threadList, $Threads, $path, $bbs, $tobbs, $topath, $Info, $id);
+	my (@threadList, $Threads, $path, $bbs, $tobbs, $topath, $Info, $id,$rename,$withAttr);
 	
 	# 権限チェック
 	{
@@ -852,25 +852,33 @@ sub FunctionThreadCopy
 	return 1 if (!@threadList);
 
 	$tobbs 		= $Form->Get('TOBBS');
+	$rename		= $Form->Get('RENAME');
+	$withAttr	= $Form->Get('ATTR');
 	$bbs		= $Sys->Get('BBS');
 	$path		= $Sys->Get('BBSPATH') . "/$bbs";
 	$topath		= $Sys->Get('BBSPATH') . "/".$Info->Get('DIR',$tobbs);
+
+	my $text = $mode ? 'コピー':'移動';
 	
 	foreach $id (@threadList) {
 		next if (! defined $Threads->Get('RES', $id));
+		if($withAttr){
+			$Threads->LoadAttr($Sys);
+		}
+		if($rename){
+			while(0){
+				if(-f "$topath/dat/$id.dat"){$id++;}
+				else{last;}
+			}
+		}
+		push @$pLog, 'スレッド「' . $Threads->Get('SUBJECT', $id) 
+			. '」を'.$Info->Get('NAME',$tobbs).'に'.$text;
 		if($mode){	#Copy
-			push @$pLog, 'スレッド「' . $Threads->Get('SUBJECT', $id) 
-			. '」を'.$Info->Get('NAME',$tobbs).'にコピー';
-
 			FILE_UTILS::Copy("$path/dat/$id.dat","$topath/dat/$id.dat");
 		}
 		else{		#Move
-			push @$pLog, 'スレッド「' . $Threads->Get('SUBJECT', $id) 
-			. '」を'.$Info->Get('NAME',$tobbs).'に移動';
-
 			$Threads->Delete($id);
 			FILE_UTILS::Move("$path/dat/$id.dat","$topath/dat/$id.dat");
-			unlink "$path/dat/$id.dat";
 		}
 	}
 	$Threads->Save($Sys);
@@ -1013,7 +1021,7 @@ sub FunctionThreadPooling
 sub FunctionThreadDelete
 {
 	my ($Sys, $Form, $pLog) = @_;
-	my (@threadList, $Threads, $path, $bbs, $id);
+	my (@threadList, $Threads, $path, $bbs, $id,$BBSAid);
 	
 	# 権限チェック
 	{
@@ -1025,7 +1033,9 @@ sub FunctionThreadDelete
 		}
 	}
 	require './module/thread.pl';
+	require './module/bbs_service.pl';
 	$Threads = THREAD->new;
+	$BBSAid = BBS_SERVICE->new;
 	
 	$Threads->Load($Sys);
 	
@@ -1042,6 +1052,20 @@ sub FunctionThreadDelete
 		unlink "$path/log/$id.cgi";
 		unlink "$path/log/del_$id.cgi";
 	}
+	#subject.txt更新
+    $Threads->Load($Sys);
+    $Threads->UpdateAll($Sys);
+    $Threads->Save($Sys);
+
+	#my $originalMODE = $Sys->Get('MODE');
+    
+	#index.html&subback.html更新
+	#$Sys->Set('MODE', 'CREATE');
+    #$BBSAid->Init($Sys, undef);
+    #$BBSAid->CreateIndex();
+    #$BBSAid->CreateSubback();
+	#$Sys->Set('MODE',$originalMODE);
+
 	$Threads->Save($Sys);
 	
 	return 0;
@@ -1216,20 +1240,20 @@ sub FunctionThreadAutoPooling
 				my $BBSAid = BBS_SERVICE -> new;
 				#$Sysで指すBBS名を一時変更するため保存
 				my $originalBBSname = $Sys->Get('BBS');
-				my $originalMODE = $Sys->Get('MODE');
+				#my $originalMODE = $Sys->Get('MODE');
 				$Sys->Set('BBS', $Set->Get('BBS_KAKO'));
-				$Sys->Set('MODE','CREATE');
+				#$Sys->Set('MODE','CREATE');
 				# subject.txt更新
 				$Threads->Load($Sys);
 				$Threads->UpdateAll($Sys);
 				$Threads->Save($Sys);
 				# index.html更新
-				$BBSAid->Init($Sys,undef);
-				$BBSAid->CreateIndex();
-				$BBSAid->CreateSubback();
+				#$BBSAid->Init($Sys,undef);
+				#$BBSAid->CreateIndex();
+				#$BBSAid->CreateSubback();
 				#$Sysの内容を元に戻す
 				$Sys->Set('BBS', $originalBBSname);
-				$Sys->Set('MODE',$originalMODE);
+				#$Sys->Set('MODE',$originalMODE);
 			}
 			$Threads->Delete($id);
 			unlink "$base/dat/$id.dat";
