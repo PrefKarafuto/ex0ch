@@ -725,7 +725,7 @@ sub PrintCommandSetting
 	$Page->Print("<input type=checkbox name=SAGE value=4 $setsage>有効</tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">BBS_SLIP（!slip:[vvv/vvvv/vvvvv/vvvvvv]）</td><td>");
-	$Page->Print("<input type=checkbox name=SLIP value=4 $setslip>有効</tr>");
+	$Page->Print("<input type=checkbox name=SLIP value=2048 $setslip>有効</tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">ID無し（!noid）</td><td>");
 	$Page->Print("<input type=checkbox name=NOID value=8 $setnoid>有効</td></tr>");
