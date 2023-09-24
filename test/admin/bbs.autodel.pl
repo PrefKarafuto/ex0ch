@@ -107,7 +107,7 @@ HTML
   </script>
 HTML
 }
- 
+
 #------------------------------------------------------------------------------------------------------------
 #
 #   検索結果出力 - Search
@@ -509,6 +509,7 @@ sub FunctionResLumpDelete
     push @$pLog, '以下のレスを' . ($mode ? 'あぼ～ん' : '削除') . 'しました。';
    
     require './module/thread.pl'; # read Threads
+    require './module/bbs_service.pl';
    
     %wholeSet = ();
     @valueSet = $Form->GetAtArray('RESS');
@@ -646,7 +647,16 @@ sub FunctionResLumpDelete
             }
         }
     }
-   
+	#subject.txt更新
+    $Threads->Load($Sys);
+    $Threads->UpdateAll($Sys);
+    $Threads->Save($Sys);
+    my $BBSAid = BBS_SERVICE->new;
+	#index.html&subback.html更新
+	$Sys->Set('MODE', 'CREATE');
+    $BBSAid->Init($Sys, undef);
+    $BBSAid->CreateIndex();
+    $BBSAid->CreateSubback();
    
     return 0;
 }
