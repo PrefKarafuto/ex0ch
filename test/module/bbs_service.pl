@@ -243,6 +243,7 @@ sub PrintIndexHead
 	my $title = $this->{'SET'}->Get('BBS_TITLE');
 	my $link = $this->{'SET'}->Get('BBS_TITLE_LINK');
 	my $image = $this->{'SET'}->Get('BBS_TITLE_PICTURE');
+	my $CSP = $this->{'SYS'}->Get('CSP');
 #	my $code = $this->{'CODE'};
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
@@ -271,6 +272,8 @@ HEAD
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));
 	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
+	
+	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/;">') if ($CSP);
 	
 	$Caption->Print($Page, undef);
 	
@@ -536,7 +539,7 @@ sub PrintIndexFoot
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
   <td>
-  <form method="POST" action="$cgipath/bbs.cgi?guid=ON" style="margin:1.2em 0;">
+  <form method="POST" action="$cgipath/bbs.cgi" style="margin:1.2em 0;">
   <input type="submit" value="新規スレッド作成画面へ"><br>
   <input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
@@ -549,7 +552,7 @@ FORM
 	# スレッド作成フォームはindexと同じ画面に表示
 	else {
 		$Page->Print(<<FORM);
-<form method="POST" action="$cgipath/bbs.cgi?guid=ON">
+<form method="POST" action="$cgipath/bbs.cgi">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td nowrap><div class ="reverse_order">
@@ -639,6 +642,7 @@ sub PrintThreadPreviewOne
 	$Threads->LoadAttr($Sys);
 	my $AttrMax = $Threads->GetAttr($key,'maxres');
 	my $threadStop = $Threads->GetAttr($key,'stop');
+	my $threadPool = $Threads->GetAttr($key,'pool');
 	my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 	# 表示数の正規化
 	my ($start, $end) = $this->{'CONV'}->RegularDispNum($Sys, $Dat, 1, $contNum, $contNum);
@@ -650,11 +654,11 @@ sub PrintThreadPreviewOne
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop){
+	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
   </dl>
-  <form method="POST" action="$cgiPath/bbs.cgi?guid=ON">
+  <form method="POST" action="$cgiPath/bbs.cgi">
    <blockquote>
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">

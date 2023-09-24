@@ -246,7 +246,7 @@ sub InitSystemValue
 		'DATA'		=> '/datas',									# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS dev-r109 20230904',						# CGIバージョン
+		'VERSION'	=> '0ch+ BBS dev-r117 20230923',						# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -294,6 +294,7 @@ sub InitSystemValue
 		'HCAPTCHA_SITEKEY'	=>'',									#hCaptchaサイトキー
 		'HCAPTCHA_SECRETKEY'	=>'',									#hCaptchaシークレットキー
 		'IMGTAG'		=> 0,									#画像リンクをIMGタグに変換
+		'CSP'			=> 0,
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,

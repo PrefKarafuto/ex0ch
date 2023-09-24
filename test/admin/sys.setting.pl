@@ -478,7 +478,7 @@ sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -493,6 +493,7 @@ sub PrintOtherSetting
 	$FastMode	= $SYS->Get('FASTMODE');
 	$BBSGET		= $SYS->Get('BBSGET');
 	$upCheck	= $SYS->Get('UPCHECK');
+	$CSP		= $SYS->Get('CSP');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
@@ -500,6 +501,7 @@ sub PrintOtherSetting
 	$pathInfo	= ($pathKind == 0 ? 'checked' : '');
 	$pathQuery	= ($pathKind == 1 ? 'checked' : '');
 	$bbsget		= ($BBSGET == 1 ? 'checked' : '');
+	$CSPSet		= ($CSP == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
 	
@@ -516,6 +518,8 @@ sub PrintOtherSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
 	$Page->Print("画像リンクをIMGタグに変換</td>");
+	$Page->Print("<tr><td colspan=2><input type=checkbox name=CSP $CSPSet value=on>");
+	$Page->Print("Youtube/niconico/Imgur埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=URLLINK $linkChk value=on>");
 	$Page->Print("本文中URLへの自動リンク</td>");
 	$Page->Print("<tr><td colspan=2><b>以下自動リンクOFF時のみ有効</b></td></tr>\n");
@@ -635,7 +639,7 @@ sub PrintPlusSecSetting
 	$Trip12		= $SYS->Get('TRIP12');
 	$SPAMHAUS	= $SYS->Get('SPAMHAUS');
 	$SPAMCOP	= $SYS->Get('SPAMCOP');
-    	$BARRACUDA	= $SYS->Get('BARRACUDA');
+    $BARRACUDA	= $SYS->Get('BARRACUDA');
 	
 	my $hCaptcha_sitekey 	= $SYS->Get('HCAPTCHA_SITEKEY');
 	my $hCaptcha_secretkey  = $SYS->Get('HCAPTCHA_SECRETKEY');
@@ -644,7 +648,7 @@ sub PrintPlusSecSetting
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
 	$shaus		= ($SPAMHAUS == 1 ? 'checked' : '');
 	$scop		= ($SPAMCOP == 1 ? 'checked' : '');
-    	$bc	        = ($BARRACUDA == 1 ? 'checked' : '');
+    $bc	        = ($BARRACUDA == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -1103,6 +1107,7 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('FASTMODE', ($Form->Equal('FASTMODE', 'on') ? 1 : 0));
 	$SYSTEM->Set('BBSGET', ($Form->Equal('BBSGET', 'on') ? 1 : 0));
 	$SYSTEM->Set('UPCHECK', $Form->Get('UPCHECK'));
+	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
 	
 	$SYSTEM->Save();
 	

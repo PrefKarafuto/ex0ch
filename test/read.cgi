@@ -190,8 +190,10 @@ sub PrintReadHead
 	my $favicon = $Set->Get('BBS_FAVICON');
 	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
+	my $bbspath = $Sys->Get('BBS');
 	my $datone = $Dat->Get(0);
 	my $description = 'ERROR:スレッドが存在しません。';
+	my $CSP = $Sys->Get('CSP');
 	
 	if (defined $datone && ref($datone) eq 'SCALAR') {
     	my @threadTop = split(/<>/, $$datone);
@@ -227,12 +229,14 @@ sub PrintReadHead
  <meta name="twitter:card" content="summary">
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
- <link rel="icon" href="$favicon">
+ <link rel="icon" href="../../../../$bbspath/$favicon">
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
 	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Set->Get('BBS_HCAPTCHA'));
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($Set->Get('BBS_HCAPTCHA'));
+
+	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/;">') if ($CSP);
 
 	$Caption->Print($Page, undef);
 	
@@ -349,7 +353,7 @@ sub PrintReadMenu
 		my $title = $Dat->GetSubject();
 		my $ttlCol = $Set->Get('BBS_SUBJECT_COLOR');
 		$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
-		$Page->Print("<h1 style=\"color:$ttlCol;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title</h1>\n\n");
+		$Page->Print("<h1 style=\"color:$ttlCol;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title ($resNum)</h1>\n\n");
 		$Page->Print("<dl class=\"thread\">\n");
 	}
 }
@@ -441,7 +445,8 @@ sub PrintReadFoot
 	$Threads->LoadAttr($Sys);
 	my $AttrMax = $Threads->GetAttr($key,'maxres');
 	my $threadStop = $Threads->GetAttr($key,'stop');
-	my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
+	my $threadPool = $Threads->GetAttr($key,'pool');
+	$rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 
 	# datファイルのサイズ表示
 	$Page->Print("</dl>\n\n<font color=\"red\" face=\"Arial\"><b>${datSize}KB</b></font>\n\n");
@@ -489,7 +494,7 @@ sub PrintReadFoot
 	my $isstop = $permt == $perms;
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
-	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop &&!$threadStop) {
+	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop &&!$threadStop &&!$threadPool) {
 		my $cookName = '';
 		my $cookMail = '';
 		my $tm = int(time);
@@ -512,7 +517,7 @@ sub PrintReadFoot
 		}
 		
 		$Page->Print(<<HTML);
-<form method="POST" action="$cgipath/bbs.cgi?guid=ON">
+<form method="POST" action="$cgipath/bbs.cgi">
 <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
 <input type="submit" value="書き込む"><br class="smartphone">
 名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">
