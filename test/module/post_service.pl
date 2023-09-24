@@ -1307,8 +1307,9 @@ sub Ninpocho
 	my $this = shift;
 	my ($Sys, $Form, $type) = @_;
 	my ($total_code, $infoDir);
-	require './module/data_utils.pl';
-	DATA_UTILS->new;
+	require './module/file_utils.pl';
+	use CGI::Cookie;
+	use CGI::Session;
 
 	# infoディレクトリ
 	$infoDir = $Sys->Get('INFO');
@@ -1357,7 +1358,7 @@ sub Ninpocho
 			close($fh);
 		}
 		if ($sid eq '' && -d $ninDir) {
-			my $fsrslt = DATA_UTILS::fsearch($ninDir, $ipAddr);
+			my $fsrslt = FILE_UTILS::fsearch($ninDir, $ipAddr);
 			if ($fsrslt =~ /cgisess_/) {
 				$sid = $fsrslt;
         		$sid =~ s|.+?cgisess_||;
