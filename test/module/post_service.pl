@@ -1410,9 +1410,23 @@ sub Ninpocho
 		# 名前欄取得
 		my $name = $Form->Get('FROM');
 
-		# 名前欄書き換え
-		$name =~ s|!ninja|</b>【忍法帖Lv.$ninLv】<b>|g;
-		$name =~ s|!total|</b>【総カキコ数:$count】<b>|g;
+    # 現在の時刻を取得
+    my $currentTime = time();
+    # 現在の時刻と$lvUpTimeとの差を計算
+    my $timeDiff = $lvUpTime - $currentTime;
+    # 差分を時間単位と分単位で計算
+    my $hoursDiff = int($timeDiff / 3600); # 1時間 = 3600秒
+    my $minutesDiff = int(($timeDiff % 3600) / 60); # 残りの秒数を分に変換
+
+    # 残り時間表示用
+    my $timeDisplay = "";
+    $timeDisplay .= "${hoursDiff}時間" if $hoursDiff > 0;
+    $timeDisplay .= "${minutesDiff}分" if $minutesDiff > 0 || $hoursDiff == 0; # 分が0でも時間が0の場合は表示する
+    
+    # 名前欄書き換え
+    my $minutes = int($lvUpTime / 60);
+    $name =~ s|!ninja|</b>【忍法帖Lv.$ninLv(LvUPまで${timeDisplay})】<b>|g;
+    $name =~ s|!total|</b>【総投稿数:$count】<b>|g;
 
 		# 名前欄再設定
 		$Form->Set('FROM', $name);
