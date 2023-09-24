@@ -259,10 +259,13 @@ sub ConvertMovie
     my $nico_pattern1 = qr{(https://nico\.ms/sm([0-9]+))};
     my $nico_pattern2 = qr{(https://(www\.)?nicovideo\.jp/watch/sm([0-9]+))};
 
-    $$text =~ s|$youtube_pattern1|<div class="responsive"><iframe width="560" height="315" src="https://www.youtube.com/embed/$2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-    $$text =~ s|$youtube_pattern2|<div class="responsive"><iframe width="560" height="315" src="https://www.youtube.com/embed/$3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-    $$text =~ s|$nico_pattern1|<div class="responsive"><iframe width="560" height="315" src="https://embed.nicovideo.jp/watch/sm$2" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-    $$text =~ s|$nico_pattern2|<div class="responsive"><iframe width="560" height="315" src="https://embed.nicovideo.jp/watch/sm$3" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
+	my $reg1 = '<div class="video"><div class="video_iframe"><iframe width="560" height="315" src=';
+	my $reg2 = 'frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div></div>';
+
+    $$text =~ s|$youtube_pattern1|$reg1"https://www.youtube.com/embed/$2"$reg2|g;
+    $$text =~ s|$youtube_pattern2|$reg1"https://www.youtube.com/embed/$3"$reg2|g;
+    $$text =~ s|$nico_pattern1|$reg1"https://embed.nicovideo.jp/watch/sm$3"$reg2|g;
+	$$text =~ s|$nico_pattern2|$reg1"https://embed.nicovideo.jp/watch/sm$3"$reg2|g;
 
     return $text;
 }
