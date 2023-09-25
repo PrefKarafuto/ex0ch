@@ -211,7 +211,8 @@ sub PrintReadHead
     	}
 	
 	# HTMLヘッダの出力
-	$Page->Print("Content-type: text/html\n\n");
+  $Page->Print("Content-type: text/html\n");
+  $Page->Print("Cache-Control: max-age=0, s-maxage=1, stale-while-revalidate=2\n\n");
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja" prefix="og: http://ogp.me/ns#">
@@ -829,8 +830,9 @@ sub PrintReadError
 	my $code = $CGI->{'CODE'};
 	
 	# HTMLヘッダの出力
-	$Page->Print("Content-type: text/html\n\n");
-	$Page->Print("<html><head><title>ＥＲＲＯＲ！！</title>\n");
+  $Page->Print("Content-type: text/html\n");
+  $Page->Print("Cache-Control: max-age=0, s-maxage=1, stale-while-revalidate=2\n\n");
+  $Page->Print("<html><head><title>ＥＲＲＯＲ！！</title>\n");
 	$Page->Print("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">");
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print('</head><!--nobanner-->');
