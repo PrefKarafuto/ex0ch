@@ -239,14 +239,14 @@ sub InitSystemValue
 	my ($pSys, $pKey) = @_;
 	
 	my %sys = (
-		'SYSFILE'	=> './info/system.cgi',								# システム設定ファイル
+		'SYSFILE'	=> './info/system.cgi',						# システム設定ファイル
 		'SERVER'	=> '',										# 設置サーバパス
 		'CGIPATH'	=> '/test',									# CGI設置パス
 		'INFO'		=> '/info',									# 管理データ設置パス
-		'DATA'		=> '/datas',									# 初期データ設置パス
+		'DATA'		=> '/datas',								# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS dev-r117 20230923',						# CGIバージョン
+		'VERSION'	=> '0ch+ BBS dev-r118 20230925',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -267,8 +267,8 @@ sub InitSystemValue
 		'LINKST'	=> 23,										# リンク禁止開始時間
 		'LINKED'	=> 2,										# リンク禁止終了時間
 		'PATHKIND'	=> 0,										# 生成パスの種類
-		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',					# ヘッダ下部の表示文字列
-		'HEADURL'	=> '../test/search.cgi',							# ヘッダ下部のURL
+		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',		# ヘッダ下部の表示文字列
+		'HEADURL'	=> '../test/search.cgi',					# ヘッダ下部のURL
 		'FASTMODE'	=> 0,										# 高速モード
 		
 		# ここからぜろプラオリジナル
@@ -289,10 +289,10 @@ sub InitSystemValue
 		# DNSBL設定
 		'SPAMHAUS'		=> 0,									# zen.spamhaus.org
 		'SPAMCOP'		=> 0,									# bl.spamcop.net
-		'BARRACUDA'	    	=> 0,									# b.barracudacentral.org
+		'BARRACUDA'	    => 0,									# b.barracudacentral.org
 		
-		'HCAPTCHA_SITEKEY'	=>'',									#hCaptchaサイトキー
-		'HCAPTCHA_SECRETKEY'	=>'',									#hCaptchaシークレットキー
+		'HCAPTCHA_SITEKEY'	=>'',								#hCaptchaサイトキー
+		'HCAPTCHA_SECRETKEY'	=>'',							#hCaptchaシークレットキー
 		'IMGTAG'		=> 0,									#画像リンクをIMGタグに変換
 		'CSP'			=> 0,
 		
