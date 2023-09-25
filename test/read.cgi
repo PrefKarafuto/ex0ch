@@ -545,8 +545,29 @@ width:95%;
 margin:0;
 }
 </style>
-
-
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const images = document.querySelectorAll('.post_image');
+    const overlay = document.getElementById('overlay');
+    const overlayImage = document.getElementById('overlay-image');
+  
+    images.forEach((image) => {
+      image.addEventListener('click', function() {
+        overlayImage.src = this.src;
+        overlayImage.onload = function() {
+          overlay.style.display = 'block';
+        };
+      });
+    });
+  
+    overlay.addEventListener('click', function(event) {
+      // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
+      if (event.target !== overlayImage) {
+        overlay.style.display = 'none';
+      }
+    });
+  });
+</script>
 </body>
 </html>
 HTML
