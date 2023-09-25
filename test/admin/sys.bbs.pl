@@ -140,6 +140,9 @@ sub DoFunction
 	elsif ($subMode eq 'UPDATEBBS') {												# 掲示板更新
 		$err = FunctionBBSUpdate($Sys, $Form, $this->{'LOG'});
 	}
+	elsif ($subMode eq 'UPDATEBBSMENU') {											# BBEMENU更新
+		$err = FunctionBBSMenuUpdate($Sys, $Form, $this->{'LOG'});
+	}
 	
 	# 処理結果表示
 	if ($err) {
@@ -267,6 +270,7 @@ sub PrintBBSList
 	$Page->Print("<input type=button value=\"カテゴリ変更\" $common2,'CATCHANGE')\"> ")	if (1);
 	$Page->Print("<input type=button value=\"情報更新\" $common1,'UPDATE')\"> ")		if ($isSysad);
 	$Page->Print("<input type=button value=\"index更新\" $common1,'UPDATEBBS')\"> ")	if (1);
+	$Page->Print("<input type=button value=\"bbsmenu更新\" $common1,'UPDATEBBSMENU')\"> ")	if (1);
 	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\"> ")		if ($isSysad);
 	$Page->Print("</td></tr></table>\n");
 }
@@ -766,6 +770,108 @@ sub FunctionBBSUpdate
 		push @$pLog, "■掲示板「$name」を更新しました。";
 	}
 	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	BBSMENU情報の更新
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionBBSMenuUpdate
+{
+	my ($SYS, $Form, $pLog) = @_;
+	my ($BBS,$Page,$Category);
+	
+	require './module/buffer_output.pl';
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
+	$Page = BUFFER_OUTPUT->new;
+	
+	my @time=localtime;
+	$time[5] += 1900;
+	$time[4] ++;
+	
+	my $bbsmenu = getbbsmenu($SYS,$BBS,$Category);
+	my $url = $SYS->Get('SERVER');
+	my $bbsname = $SYS->Get('SITENAME') ? $SYS->Get('SITENAME') : "Newぜろちゃんねるプラス";
+	
+	$Page->Print("<head>");
+	$Page->Print("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Shift_JIS\">");
+	$Page->Print("<title>BBS MENU - $bbsname</title>");
+	$Page->Print("<base target=\"_blank\">");
+	$Page->Print("</head>");
+	
+	if (! defined $bbsmenu) {
+		$Page->Print("掲示板がありません。");
+		push @$pLog, '■BBSMENUに記載可能な掲示板がありません。';
+	}else{
+	
+		$Page->Print("<body text=\"#CC3300\" bgcolor=\"#FFFFFF\" link=\"#0000FF\" alink=\"#ff0000\" vlink=\"#660099\">");
+		$Page->Print("<b>$bbsname</b><br>");
+		$Page->Print("<font size=\"2\">");
+		foreach my $category (@$bbsmenu) {
+			$Page->Print("<br><b>$category->{name}</b><br>\n");
+			foreach my $bbs (@{$category->{list}}) {
+				$Page->Print("<a href=\"$bbs->{url}\">$bbs->{name}</a><br>\n");
+			}
+		}
+		$Page->Print("<br>更新日<br>$time[5]/$time[4]/$time[3]");
+		$Page->Print("</font></body>");
+		$Page->Flush(1, $SYS->Get('PM-TXT'), "../bbsmenu.html");
+	
+		push @$pLog, '■BBSMENUの更新が正常に終了しました。';
+	}
+	
+	return 0;
+}
+sub getbbsmenu
+{
+	my($SYS,$BBS,$Category) = @_;
+	require "./module/data_utils.pl";
+	
+	my $basedir = $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', ''));
+	
+	$BBS->Load($SYS);
+	$Category->Load($SYS);
+	
+	my @catSet = ();
+	$Category->GetKeySet(\@catSet);
+	
+	my $bbsmenu = [];
+	
+	foreach my $catid (sort @catSet) {
+		my $catData = {};
+		
+		$catData->{name} = $Category->Get('NAME', $catid);
+		
+		my $bbslist = [];
+		$catData->{list} = $bbslist;
+		
+		my @bbsSet = ();
+		$BBS->GetKeySet('CATEGORY', $catid, \@bbsSet);
+		
+		foreach my $bbsid (sort @bbsSet) {
+			my $bbsData = {};
+			
+			$bbsData->{name} = $BBS->Get('NAME', $bbsid);
+			
+			my $bbsDir = $BBS->Get('DIR', $bbsid);
+			$bbsData->{dir} = $bbsDir;
+			$bbsData->{url} = "$basedir/$bbsDir";
+			
+			push @$bbslist, $bbsData;
+		}
+		
+		push @$bbsmenu, $catData;
+	}
+	
+	return $bbsmenu;
 }
 
 #------------------------------------------------------------------------------------------------------------

@@ -675,6 +675,9 @@ sub process_thread {
             $Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 			FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
         }
+		$Threads->Delete($id);
+		$Threads->DeleteAttr($id);
+		$Threads->SaveAttr($Sys);
     }
     return $need_update;
 }

@@ -298,7 +298,7 @@ sub PrintSystemInfo
 sub PrintBasicSetting
 {
 	my ($Page, $SYS, $Form) = @_;
-	my ($server, $cgi, $bbs, $info, $data, $common);
+	my ($server, $cgi, $bbs, $info, $data, $common,$sitename);
 	
 	$SYS->Set('_TITLE', 'System Base Setting');
 	
@@ -307,6 +307,7 @@ sub PrintBasicSetting
 	$bbs	= $SYS->Get('BBSPATH');
 	$info	= $SYS->Get('INFO');
 	$data	= $SYS->Get('DATA');
+	$sitename	= $SYS->Get('SITENAME');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','BASIC');\"";
 	if ($server eq '') {
@@ -346,6 +347,11 @@ sub PrintBasicSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">システムデータディレクトリ(/ から始める)<br><span class=\"NormalStyle\">");
 	$Page->Print("　例1: .jp/test/info → <span class=\"UnderLine\">/datas</span><br>");
 	$Page->Print("<td><input type=text size=60 name=DATA value=\"$data\" ></td></tr>\n");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">サイトの名称(任意)<br><span class=\"WebSiteName\">");
+	$Page->Print("　例1: 6ちゃんねる<br>");
+	$Page->Print("　例2: 樺太庁のホームページ</span></td>");
+	$Page->Print("<td><input type=text size=60 name=SITENAME value=\"$sitename\" ></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
 	$Page->Print("<input type=button value=\"　設定　\" $common></td></tr>\n");
@@ -946,6 +952,7 @@ sub FunctionBasicSetting
 	$SYSTEM->Set('BBSPATH', $Form->Get('BBSPATH'));
 	$SYSTEM->Set('INFO', $Form->Get('INFO'));
 	$SYSTEM->Set('DATA', $Form->Get('DATA'));
+	$SYSTEM->Set('SITENAME', $Form->Get('SITENAME'));
 	
 	$SYSTEM->Save();
 	
