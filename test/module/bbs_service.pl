@@ -320,7 +320,7 @@ HEAD
 	$Page->Print(<<HTML);
 <br>
  <center>
-  <a href="$cgipath/bbsmenu.cgi" style="color:inherit;text-decoration: none;">
+  <a href="../bbsmenu.html" style="color:inherit;text-decoration: none;">
    <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;">$title</div>
   </a>
  </center>
