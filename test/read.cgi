@@ -537,7 +537,10 @@ READ.CGI - $ver<br>
 <a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
 </div>
 </div>
-
+<div id="overlay">
+    <span id="close-button">&times;</span>
+    <img id="overlay-image">
+  </div>
 <style>
 /* スマホ用レイアウト */
 textarea {

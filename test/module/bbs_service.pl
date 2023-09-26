@@ -590,7 +590,10 @@ BBS.CGI - $ver (Perl)
 @{[ $Sys->Get('BARRACUDA') ? '+BarracudaCentral' : '' ]}
 +Samba24=$samba<br>
 </div>
-
+<div id="overlay">
+    <span id="close-button">&times;</span>
+    <img id="overlay-image">
+  </div>
 <style>
 /* スマホ用レイアウト */
 img {
