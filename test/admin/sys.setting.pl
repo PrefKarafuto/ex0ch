@@ -239,12 +239,18 @@ sub PrintSystemInfo
 		CGI::Session
 		Storable
 		Digest::SHA::PurePerl
+		Digest::MD5
 		Net::DNS::Lite
 		List::MoreUtils
 		LWP::UserAgent
 		XML::Simple
 	), qw(
 		Net::DNS
+	), qw(
+		CGI::Carp
+		Net::Whois::Raw
+		Geo::IP
+		JSON
 	));
 	
 	my $core = {};
@@ -275,12 +281,7 @@ sub PrintSystemInfo
 		$var = "<b>$var</b>" if (!defined $core->{$pkg} || $core->{$pkg} ne $var);
 		$Page->Print("<tr><td class=\"DetailTitle\">$pkg</td><td>$var</td></tr>\n");
 	}
-	
-	$Page->Print("<tr><td colspan=2></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\"></td><td></td></tr>\n");
-	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	
 	$Page->Print("</table>");
 	
 }
