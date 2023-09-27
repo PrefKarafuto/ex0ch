@@ -794,13 +794,15 @@ sub FunctionBBSMenuUpdate
 	$Page = BUFFER_OUTPUT->new;
 	
 	my @time=localtime;
+	my $modifTime = time();
 	$time[5] += 1900;
 	$time[4] ++;
 	
 	my $bbsmenu = getbbsmenu($SYS,$BBS,$Category);
 	my $url = $SYS->Get('SERVER');
 	my $bbsname = $SYS->Get('SITENAME') ? $SYS->Get('SITENAME') : "Newぜろちゃんねるプラス";
-	
+
+	#bbsmenu.html生成
 	$Page->Print("<head>");
 	$Page->Print("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Shift_JIS\">");
 	$Page->Print("<title>BBS MENU - $bbsname</title>");
@@ -824,6 +826,45 @@ sub FunctionBBSMenuUpdate
 		$Page->Print("<br>更新日<br>$time[5]/$time[4]/$time[3]");
 		$Page->Print("</font></body>");
 		$Page->Flush(1, $SYS->Get('PM-TXT'), "../bbsmenu.html");
+
+		#bbsmenu.json生成
+		my @day_of_week = qw/Sun Mon Tue Wed Thu Fri Sat/;
+		my %bbsmenu_json = (
+			"last_modify" => $modifTime,
+			"last_modify_string" => "$time[5]/$time[4]/$time[3]($day_of_week[$time[6]]) $time[2]:$time[1]:$time[0]",
+			"description" => "$bbsname",
+			"menu_list" => [],
+		);
+		
+		my $catNum = 1;
+		foreach my $category (@$bbsmenu) {
+			my $category_json = {
+			    "category_total" => $#{$category->{list}}+1,
+				"category_name" => "$category->{name}",
+				"category_number" => "$catNum",
+				"category_content" => [],
+			};
+			push @{$bbsmenu_json{"menu_list"}}, $category_json;
+			
+			my $catOrder = 1;
+			foreach my $bbs (@{$category->{list}}) {
+				push @{$category_json->{"category_content"}}, {
+				    "board_name" => "$bbs->{name}",
+					"category_name" => "$category->{name}",
+					"directory_name" => "$bbs->{dir}",
+					"category" => $catNum,
+					"url" => "$bbs->{url}",
+					"category_order" => $catOrder,
+				}; 
+				$catOrder++;
+			}
+			$catNum++;
+		}
+		open my $fh, '>:raw', '../bbsmenu.json' or die "Could not open file: $!";
+		chmod $SYS->Get('PM-TXT'),$fh;
+		my $json_text = encode_json(\%bbsmenu_json);
+		print $fh $json_text;
+		close $fh;
 	
 		push @$pLog, '■BBSMENUの更新が正常に終了しました。';
 	}
