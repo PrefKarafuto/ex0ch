@@ -274,6 +274,9 @@ HTML
 sub PrintReadMenu
 {
 	my ($CGI, $Page) = @_;
+
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
 	
 	# 前準備
 	my $Sys = $CGI->{'SYS'};
@@ -330,7 +333,9 @@ sub PrintReadMenu
 	
 	# レス数限界警告表示
 	{
-		my $rmax = $Sys->Get('RESMAX');
+		$Threads->LoadAttr($Sys);
+		my $AttrMax = $Threads->GetAttr($key,'maxres');
+		my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 		
 		if ($resNum >= $rmax) {
 			$Page->Print("<div style=\"background-color:red;color:white;line-height:3em;margin:1px;padding:1px;\">\n");
