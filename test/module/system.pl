@@ -268,8 +268,8 @@ sub InitSystemValue
 		'LINKST'	=> 23,										# リンク禁止開始時間
 		'LINKED'	=> 2,										# リンク禁止終了時間
 		'PATHKIND'	=> 0,										# 生成パスの種類
-		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',		# ヘッダ下部の表示文字列
-		'HEADURL'	=> '../test/search.cgi',					# ヘッダ下部のURL
+		'HEADTEXT'	=> '<small>■<b>掲示板一覧(bbsmenu)</b>■</small>',		# ヘッダ下部の表示文字列
+		'HEADURL'	=> '../bbsmenu.html',					# ヘッダ下部のURL
 		'FASTMODE'	=> 0,										# 高速モード
 		
 		# ここからぜろプラオリジナル
