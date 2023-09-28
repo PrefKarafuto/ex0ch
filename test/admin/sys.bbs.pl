@@ -786,7 +786,7 @@ sub FunctionBBSMenuUpdate
 {
 	my ($SYS, $Form, $pLog) = @_;
 	my ($BBS,$Page,$Category);
-	
+	use JSON::PP;
 	require './module/buffer_output.pl';
 	require './module/bbs_info.pl';
 	$BBS = BBS_INFO->new;
@@ -862,7 +862,8 @@ sub FunctionBBSMenuUpdate
 		}
 		open my $fh, '>:raw', '../bbsmenu.json' or die "Could not open file: $!";
 		chmod $SYS->Get('PM-TXT'),$fh;
-		my $json_text = encode_json(\%bbsmenu_json);
+		my $json = JSON::PP->new->canonical(1);  # キーを辞書順にソート
+		my $json_text = $json->encode(\%bbsmenu_json);
 		print $fh $json_text;
 		close $fh;
 	
