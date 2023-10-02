@@ -1255,8 +1255,9 @@ sub Ninpocho
 
 		# proxycheck
 		my $previp = $session->param('previp') || '';
+    my $checkKey = '';
 		if ( ( !$exp || ($ninlv < 5 && $delIP && $ipAddr ne $previp) ) && (!$ismobile && !$badIP && !$isFwifi && !$bbslim) ) {
-			my $url = "http://proxycheck.io/v2/${ipAddr}?key=417101-193z67-725054-b7100g";
+			my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}";
 			my $ua = LWP::UserAgent->new();
 			my $response = $ua->post($url);
 			if ( $response->is_success() ) {
