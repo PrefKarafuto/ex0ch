@@ -249,6 +249,7 @@ sub PrintSystemInfo
 	), qw(
 		CGI::Carp
 		Net::Whois::Raw
+		WP::Protocol::https
 		Geo::IP
 		JSON
 	));

@@ -143,11 +143,12 @@ sub Write
 
 	#コマンドによる過去ログ送り用（猶予のため）
 	ToKakoLog($Sys,$Set,$Threads);
+	my $Ninja = $Set->Get('BBS_NINJA');#忍法帖が設定されていたらID生成に使用
 	
 	# 情報欄
  	my $idpart = 'ID:none';
 	if (!$idSet){
-		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $Conv->MakeIDnew($Sys, 8), $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
+		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $Conv->MakeIDnew($Sys, 8,$Ninja), $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
 	}
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
 	my $bepart = '';

@@ -811,7 +811,7 @@ sub MakeID
 }
 sub MakeIDnew {
     my $this = shift;
-    my ($Sys, $column) = @_;
+    my ($Sys, $column,$Ninja) = @_;
 
     require './module/thread.pl';
     my $Threads = THREAD->new;
@@ -865,13 +865,12 @@ sub MakeIDnew {
     $ctx->add(':', $Sys->Get('SERVER'));
     $ctx->add(':', $Sys->Get('BBS'));
     # 正しいセッションが存在する場合はセッションIDを、存在しない場合はIPを使ってIDを生成
-    if ($valid_session) {
+    if ($valid_session && $Ninja) {
         $ctx->add(':', $sid);
     } else {
-        $ctx->add(':', $ip[0].$provider);
+        $ctx->add(':', $ip[0].$ip[1].$provider);
+		$ctx->add(':', $ua);
     }
-
-    $ctx->add(':', $ua);
     $ctx->add(':', join('-', (localtime)[3,4,5]));
     $ctx->add(':', $Sys->Get('KEY')) if ($Threads->GetAttr($Sys->Get('KEY'),'changeid'));
     

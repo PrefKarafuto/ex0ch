@@ -229,6 +229,7 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('sys.cap','DISP','LIST');">キャップ</a> |
  <a href="javascript:DoSubmit('sys.capg','DISP','LIST');">共通キャップグループ</a> |
  <a href="javascript:DoSubmit('sys.setting','DISP','INFO');">システム設定</a> |
+ <a href="javascript:DoSubmit('sys.union','DISP','INFO');">掲示板サーバー連合設定</a> |
  <a href="javascript:DoSubmit('sys.edit','DISP','BANNER_PC');">共通告知欄の編集</a> |
 HTML
 		
@@ -241,6 +242,8 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('bbs.pool','DISP','LIST');">プール</a> |
  <a href="javascript:DoSubmit('bbs.kako','DISP','LIST');">過去ログ</a> |
  <a href="javascript:DoSubmit('bbs.setting','DISP','SETINFO');">掲示板設定</a> |
+ <a href="javascript:DoSubmit('bbs.ninja','DISP','SETINFO');">忍法帖</a> |
+ <a href="javascript:DoSubmit('bbs.command','DISP','SETINFO');">各種コマンド設定</a> |
  <a href="javascript:DoSubmit('bbs.edit','DISP','HEAD');">各種編集</a> |
  <a href="javascript:DoSubmit('bbs.user','DISP','LIST');">管理グループ</a> |
  <a href="javascript:DoSubmit('bbs.cap','DISP','LIST');">キャップグループ</a> |
@@ -262,7 +265,7 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('login','','');">ログオフ</a>
 </div>
  
-<div class="MainHead" align="right">0ch+ BBS System Manager</div>
+<div class="MainHead" align="right">New 0ch+ BBS System Manager</div>
 
 <table cellspacing="0" width="100%" height="400">
  <tr>
@@ -384,7 +387,7 @@ $Page->Print(<<HTML);
 </table>
 
 <div class="MainFoot">
- Copyright 2001 - 2023 0ch+ BBS : Loggin User - <b>$user</b><br>
+ Copyright 2001 - 2023 New 0ch+ BBS : Loggin User - <b>$user</b><br>
  Build Version:<b>$ver</b>@{[$nverflag ? " (New Version is Available.)" : '']}
 </div>
 
