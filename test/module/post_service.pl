@@ -522,7 +522,7 @@ sub Command
 			}
 		}
 		#スレスト
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop(<br>|$)/ && ($setBitMask & 8)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop(<br>|$)/ && ($setBitMask & 128)){
 			$Threads->SetAttr($threadid, 'stop',1);
 			$Threads->SaveAttr($Sys);
 			$Command .= '※スレスト<br>';
@@ -534,7 +534,7 @@ sub Command
 			$Command .= '※過去ログ送り<br>';
 		}
 		#スレタイ変更
-#		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.*?)(<br>|$)/ && ($setBitMask & 1024)){
+#		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.*?)(<br>|$)/ && ($setBitMask & )){
 #			my $newTitle = $2;
 #			if($newTitle){
 #				$newTitle =~ s/"/&quot;/g;
@@ -575,7 +575,7 @@ sub Command
 		$Command .= '※BBS_SLIP='.$2.'<br>';
 	}
 	#名無し強制
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774(<br>|$)/ && ($setBitMask & 64)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774(<br>|$)/ && ($setBitMask & 32)){
 		$Threads->SetAttr($threadid, 'force774',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※強制名無し<br>';
@@ -588,11 +588,10 @@ sub Command
 		$Command .= '※実況スレ<br>';
 	}
 	#名無し変更
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/ && ($setBitMask & 128)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/ && ($setBitMask & 64)){
 		my $new774 = $2;
 		if($new774){
 			$new774 =~ s/"/&quot;/g;
-			$new774 =~ s/&/&amp;/g;
 			$new774 =~ s/</&lt;/g;
 			$new774 =~ s/>/&gt;/g;
 			$new774 =~ s/(\r\n|\r|\n)//g;
@@ -603,12 +602,12 @@ sub Command
 		$Form->Set('FROM','');
 	}
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid(<br>|$)/ && ($setBitMask & 16)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid(<br>|$)/ && ($setBitMask & 8)){
 		$Threads->SetAttr($threadid, 'noid',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※ID無し<br>';
 	}
-	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid(<br>|$)/ && ($setBitMask & 32)){
+	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid(<br>|$)/ && ($setBitMask & 16)){
 		$Threads->SetAttr($threadid, 'changeid',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※ID変更<br>';

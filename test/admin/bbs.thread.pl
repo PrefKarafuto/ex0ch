@@ -329,19 +329,22 @@ sub PrintThreadList
 			$Page->Print("<td>$n: $subj</td>");
 		}
 		$Page->Print("<td align=center>$id</td><td align=center>$res</td>");
+		
+		my $isSLIP = $Threads->GetAttr($id, 'slip');
+		my $is774 = $Threads->GetAttr($id, 'change774');
 		my @attrstr = ();
 		push @attrstr, '停止' if ($isstop);
 		push @attrstr, '浮上' if ($Threads->GetAttr($id, 'float'));
 		push @attrstr, '不落' if ($Threads->GetAttr($id, 'nopool'));
 		push @attrstr, 'sage進行' if ($Threads->GetAttr($id, 'sagemode'));
-		push @attrstr, "SLIP:$Threads->GetAttr($id, 'slip')" if ($Threads->GetAttr($id, 'slip'));
+		push @attrstr, "SLIP:$isSLIP" if ($isSLIP);
 		push @attrstr, "最大レス数:$Threads->GetAttr($id, 'maxres')" if ($Threads->GetAttr($id, 'maxres'));
 		push @attrstr, 'ID無し' if ($Threads->GetAttr($id, 'noid'));
 		push @attrstr, '実況モード' if ($Threads->GetAttr($id, 'live'));
 		push @attrstr, 'ID変更' if ($Threads->GetAttr($id, 'changeid'));
 		push @attrstr, '過去ログ送り' if ($Threads->GetAttr($id, 'pool'));
 		push @attrstr, '強制名無し' if ($Threads->GetAttr($id, 'force774'));
-		push @attrstr, "名無し->$Threads->GetAttr($id, 'change774')" if ($Threads->GetAttr($id, 'change774'));
+		push @attrstr, "名無し->$is774" if ($is774);
 		$Page->Print("<td>@attrstr</td></tr>\n");
 	}
 	$common		= "onclick=\"DoSubmit('bbs.thread','DISP'";
