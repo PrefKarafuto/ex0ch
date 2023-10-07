@@ -1337,8 +1337,8 @@ sub ConvertCharacter2
 		$$data =~ s/◆/◇/g;
   		$$data =~ s/&#9733;/&#9734;/g;
 		$$data =~ s/&#9670;/&#9671;/g;
-		$$data =~ s/&#x2605;/&#x2606;/g;
-		$$data =~ s/&#x25c6;/&#x25c7;/g;
+		$$data =~ s/&#(x|X)0?2605;/&#x2606;/g;
+		$$data =~ s/&#(x|X)0?25c6;/&#x25c7;/g;
 		$$data =~ s/削除/”削除”/g;
 	}
 	
