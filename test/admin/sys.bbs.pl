@@ -906,6 +906,7 @@ sub getbbsmenu
 			my $bbsDir = $BBS->Get('DIR', $bbsid);
 			$bbsData->{dir} = $bbsDir;
 			$basedir =~ s/\/$//;
+			$bbsDir =~ s/^\///;
 			$bbsData->{url} = "$basedir/$bbsDir";
 			
 			push @$bbslist, $bbsData;
