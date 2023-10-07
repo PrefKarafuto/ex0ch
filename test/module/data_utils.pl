@@ -10,6 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use Encode;
+use HTML::Entities;
 no warnings qw(once);
 
 #------------------------------------------------------------------------------------------------------------
@@ -1327,27 +1328,30 @@ sub ConvertCharacter1
 sub ConvertCharacter2
 {
 	my $this = shift;
-	my ($data, $mode) = @_;
+	my ($data_ref, $mode) = @_;
 	
-	$$data = '' if (!defined $$data);
+	# 未定義なら空文字列に
+	$$data_ref = '' if (!defined $$data_ref);
 	
+	# 実体参照や数値参照を通常の文字列に変換
+	my $decoded_data = decode_entities($$data_ref);
+
 	# name mail
 	if ($mode == 0 || $mode == 1) {
-		$$data =~ s/★/☆/g;
-		$$data =~ s/◆/◇/g;
-  		$$data =~ s/&#0{0,}9733;/&#0{0,}9734;/g;
-		$$data =~ s/&#0{0,}9670;/&#0{0,}9671;/g;
-		$$data =~ s/&#(x|X)0{0,}2605;/&#x2606;/g;
-		$$data =~ s/&#(x|X)0{0,}25(c|C)6;/&#x25c7;/g;
-		$$data =~ s/削除/”削除”/g;
+		$decoded_data =~ s/★/☆/g;
+		$decoded_data =~ s/◆/◇/g;
+		$decoded_data =~ s/削除/”削除”/g;
 	}
 	
 	# name
 	if ($mode == 0) {
-		$$data =~ s/管理/”管理”/g;
-		$$data =~ s/管直/”管直”/g;
-		$$data =~ s/復帰/”復帰”/g;
+		$decoded_data =~ s/管理/”管理”/g;
+		$decoded_data =~ s/管直/”管直”/g;
+		$decoded_data =~ s/復帰/”復帰”/g;
 	}
+
+	# 変換後のデータを元の変数に戻す
+	$$data_ref = $decoded_data;
 }
 
 #------------------------------------------------------------------------------------------------------------

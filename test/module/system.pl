@@ -247,7 +247,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS dev-r121 20230927',			# CGIバージョン
+		'VERSION'	=> '0ch+ BBS dev-r122 20231017',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション

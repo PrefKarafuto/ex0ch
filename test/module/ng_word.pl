@@ -8,6 +8,7 @@ package	NG_WORD;
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
+use HTML::Entities;
 use warnings;
 
 #------------------------------------------------------------------------------------------------------------
@@ -207,27 +208,33 @@ sub Check
 		next if ($word eq '');
 		foreach my $key (@$pList) {
 			my $work = $Form->Get($key);
-            if($word =~ /^(!reg:)/&& $word !~ /\Q(?{\E/ && $word !~ /\Q(??{\E/){
-                $regexWord = substr($word,5);
-                if ($work =~ /$regexWord/){return 3;}
-            }
-            else{
-			if ($work =~ /\Q$word\E/) {
-				if ($this->{'METHOD'} eq 'host') {
-					return 2;
-				}
-				elsif ($this->{'METHOD'} eq 'disable') {
+			# ここでデコード
+			my $decoded_work = decode_entities($work);
+
+			if($word =~ /^(!reg:)/ && $word !~ /\Q(?{\E/ && $word !~ /\Q(??{\E/) {
+				$regexWord = substr($word, 5);
+				if ($decoded_work =~ /$regexWord/) {
 					return 3;
 				}
-				else {
-					return 1;
+			}
+			else {
+				if ($decoded_work =~ /\Q$word\E/) {
+					if ($this->{'METHOD'} eq 'host') {
+						return 2;
+					}
+					elsif ($this->{'METHOD'} eq 'disable') {
+						return 3;
+					}
+					else {
+						return 1;
+					}
 				}
 			}
-            }
 		}
 	}
 	return 0;
 }
+
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -249,7 +256,6 @@ sub Method
 	# 代替用文字列を設定
 	my $substitute = '';
 	if ($this->{'METHOD'} eq 'delete') {
-		#$substitute = '<b><font color=red>削除</font></b>';
 		$substitute = '';
 	}
 	else {
@@ -262,14 +268,19 @@ sub Method
 		next if ($word eq '');
 		foreach my $key (@$pList) {
 			my $work = $Form->Get($key);
+			# ここでデコード
+			my $decoded_work = decode_entities($work);
+
 			my $subst = $substitute;
 			$subst = $this->{'REPLACE'}->[$i] if (defined $this->{'REPLACE'}->[$i]);
-			if ($work =~ s/\Q$word\E/$subst/g) {
-				$Form->Set($key, $work);
+			if ($decoded_work =~ s/\Q$word\E/$subst/g) {
+				# 変更があった場合だけ値を更新
+				$Form->Set($key, $decoded_work);
 			}
 		}
 	}
 }
+
 
 #============================================================================================================
 #	モジュール終端

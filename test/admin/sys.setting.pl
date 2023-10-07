@@ -247,6 +247,7 @@ sub PrintSystemInfo
 	), qw(
 		Net::DNS
 	), qw(
+		HTML::Entities
 		CGI::Carp
 		Net::Whois::Raw
 		WP::Protocol::https
