@@ -1334,6 +1334,8 @@ sub ConvertCharacter2
 	$$data_ref = '' if (!defined $$data_ref);
 	
 	# 実体参照や数値参照を通常の文字列に変換
+	
+	$$data_ref =~ s/<br>/\n/g;
 	my $decoded_data = decode_entities($$data_ref);
 
 	# name mail
@@ -1352,6 +1354,7 @@ sub ConvertCharacter2
 
 	# 変換後のデータを元の変数に戻す
 	$decoded_data = encode_entities($decoded_data);
+	$decoded_data =~ s/\n/<br>/g;
 	$$data_ref = $decoded_data;
 }
 
