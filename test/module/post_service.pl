@@ -589,13 +589,10 @@ sub Command
 	}
 	#名無し変更
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/ && ($setBitMask & 64)){
+		use HTML::Entities;
 		my $new774 = $2;
-		if($new774){
-			$new774 =~ s/"/&quot;/g;
-			$new774 =~ s/</&lt;/g;
-			$new774 =~ s/>/&gt;/g;
-			$new774 =~ s/(\r\n|\r|\n)//g;
-		}
+		$new774 = encode_entities($new774);
+		$new774 =~ s/&amp;/&/g;
 		$Threads->SetAttr($threadid, 'change774',$new774);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※名無し：'.$new774.'<br>';
