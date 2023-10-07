@@ -1337,8 +1337,8 @@ sub ConvertCharacter2
 	if ($mode == 0 || $mode == 1) {
 		$$data_ref =~ s/★/☆/g;
 		$$data_ref =~ s/◆/◇/g;
-		$$data_ref =~ s/&#0{0,}9733;/&#0{0,}9734;/g;
-		$$data_ref =~ s/&#0{0,}9670;/&#0{0,}9671;/g;
+		$$data_ref =~ s/&#0{0,}9733;/&#9734;/g;
+		$$data_ref =~ s/&#0{0,}9670;/&#9671;/g;
 		$$data_ref =~ s/&#(x|X)0{0,}2605;/&#x2606;/g;
 		$$data_ref =~ s/&#(x|X)0{0,}25(c|C)6;/&#x25c7;/g;
 		$$data_ref =~ s/削除/”削除”/g;
