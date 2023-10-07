@@ -596,7 +596,6 @@ sub Command
 		$Threads->SetAttr($threadid, 'change774',$new774);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※名無し：'.$new774.'<br>';
-		$Form->Set('FROM','');
 	}
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid(<br>|$)/ && ($setBitMask & 8)){
