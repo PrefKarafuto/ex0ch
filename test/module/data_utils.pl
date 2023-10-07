@@ -1351,6 +1351,7 @@ sub ConvertCharacter2
 	}
 
 	# 変換後のデータを元の変数に戻す
+	$decoded_data = encode_entities($decoded_data);
 	$$data_ref = $decoded_data;
 }
 
