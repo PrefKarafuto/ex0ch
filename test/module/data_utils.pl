@@ -1332,30 +1332,25 @@ sub ConvertCharacter2
 	
 	# 未定義なら空文字列に
 	$$data_ref = '' if (!defined $$data_ref);
-	
-	# 実体参照や数値参照を通常の文字列に変換
-	
-	$$data_ref =~ s/<br>/\n/g;
-	my $decoded_data = decode_entities($$data_ref);
 
 	# name mail
 	if ($mode == 0 || $mode == 1) {
-		$decoded_data =~ s/★/☆/g;
-		$decoded_data =~ s/◆/◇/g;
-		$decoded_data =~ s/削除/”削除”/g;
+		$$data_ref =~ s/★/☆/g;
+		$$data_ref =~ s/◆/◇/g;
+		$$data_ref =~ s/&#0{0,}9733;/&#0{0,}9734;/g;
+		$$data_ref =~ s/&#0{0,}9670;/&#0{0,}9671;/g;
+		$$data_ref =~ s/&#(x|X)0{0,}2605;/&#x2606;/g;
+		$$data_ref =~ s/&#(x|X)0{0,}25(c|C)6;/&#x25c7;/g;
+		$$data_ref =~ s/削除/”削除”/g;
 	}
 	
 	# name
 	if ($mode == 0) {
-		$decoded_data =~ s/管理/”管理”/g;
-		$decoded_data =~ s/管直/”管直”/g;
-		$decoded_data =~ s/復帰/”復帰”/g;
+		$$data_ref =~ s/管理/”管理”/g;
+		$$data_ref =~ s/管直/”管直”/g;
+		$$data_ref =~ s/復帰/”復帰”/g;
 	}
 
-	# 変換後のデータを元の変数に戻す
-	$decoded_data = encode_entities($decoded_data);
-	$decoded_data =~ s/\n/<br>/g;
-	$$data_ref = $decoded_data;
 }
 
 #------------------------------------------------------------------------------------------------------------
