@@ -1337,10 +1337,10 @@ sub ConvertCharacter2
 	if ($mode == 0 || $mode == 1) {
 		$$data_ref =~ s/★/☆/g;
 		$$data_ref =~ s/◆/◇/g;
-		$$data_ref =~ s/&#0{0,}9733;/&#9734;/g;
-		$$data_ref =~ s/&#0{0,}9670;/&#9671;/g;
-		$$data_ref =~ s/&#x0{0,}2605;/&#x2606;/gi;
-		$$data_ref =~ s/&#x0{0,}25c6;/&#x25c7;/gi;
+		$$data_ref =~ s/&#0{0,}9733;/☆/g;
+		$$data_ref =~ s/&#0{0,}9670;/◇/g;
+		$$data_ref =~ s/&#x0{0,}2605;/☆/gi;
+		$$data_ref =~ s/&#x0{0,}25c6;/◇/gi;
 		$$data_ref =~ s/(削|&#0{0,}(21066|x524a);)(除|&#0{0,}(38500|x6994);)/”削除”/gi;
 	}
 	
