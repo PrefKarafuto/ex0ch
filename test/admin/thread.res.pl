@@ -587,6 +587,10 @@ sub FunctionResDelete
 		$logsize = $LOG->Size();
 		$lastnum = $Dat->Size() - 1;
 	}
+
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+	$Threads->Load($Sys);
 	
 	# 各値を設定
 	@resSet	= $Form->GetAtArray('RESS');
@@ -643,6 +647,9 @@ sub FunctionResDelete
 		$Dat->Save($Sys);
 		$LOG->Save($Sys) if (! $mode);
 	}
+	# subject.txt更新
+	$Threads->UpdateAll($Sys);
+	$Threads->Save($Sys);
 	
 	# ログの設定
 	$delCnt = 0;

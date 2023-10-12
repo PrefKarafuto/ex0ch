@@ -154,9 +154,9 @@ sub execute
 			# モバイル判定
 			my $ismobile = is_mobile($country, $ipAddr, $remoho, $Form);
 			# 公衆Wi-Fi判定
-			my $isFwifi = = is_public_wifi($country, $remoho, $ipAddr);
+			my $isFwifi = is_public_wifi($country, $remoho, $ipAddr);
 			# 匿名化判定
-			my $isAnon = = is_anonymous($isFwifi, $country, $remoho, $ipAddr, $infoDir);
+			my $isAnon = is_anonymous($isFwifi, $country, $remoho, $ipAddr, $infoDir);
 
 			# Cookie管理モジュールを用意
 			my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
@@ -201,10 +201,12 @@ sub execute
 				$name = $noname if $name eq '';
 
 				# SLIPが有効なら実行
-				my $absnz = 1 if $session->param($Sys->Get('BBS'));
-				if ($bbs_slip =~ /^(?:v{3,6}|verbose)$/ || $thslip =~ /^(?:v{3,6}|verbose)$/ || ($name =~ /!slip:v(?:{3,6}|verbose)/ && !$Threads->GetAttr($threadid, 'ngk')) || $absnz) {
+				my $bbsflag = 1 if $session->param($Sys->Get('BBS'));
+				if ($bbs_slip =~ /^(?:v{3,6}|verbose)$/ || $thslip =~ /^(?:v{3,6}|verbose)$/ || ($name =~ /!slip:v(?:{3,6}|verbose)/ && !$Threads->GetAttr($threadid, 'ngk')) || $bbsflag) {
 					# BBS_SLIP機能を呼び出し
-					my $name = generate_name_field($Sys, $Form, $Threads, $threadid, $bbsSet, $ipAddr, $remoho, $ua, $country, $ismobile, $isFwifi, $isAnon, $session, $bbs_slip, $thslip, $name, $absnz);
+					my $onedayslip = $bbs_slip !~ /^v{5,6}/ && $thslip !~ /^v{5,6}/ && $name !~ /!slip:v{5,6}/ ? 1 : 0;
+					my $res = BBS_SLIP($Sys, $Form, $Threads, $threadid, $bbsSet, $ipAddr, $remoho, $ua, $country, $ismobile, $isFwifi, $isAnon, $session, $onedayslip);
+					my $name = generate_name_field($res, $bbs_slip, $thslip, $name, $bbsflag, $bbs_noname);
 					$Form->Set('FROM', $name);
 				}
 
@@ -223,14 +225,9 @@ sub execute
 #	SLIP生成
 #------------------------------------------------------------------------------------------------------------
 sub generate_name_field {
-    my ($Sys, $Form, $Threads, $threadid, $bbsSet, $ipAddr, $remoho, $ua, $country, $ismobile, $isFwifi, $isAnon, $session, $bbs_slip, $thslip, $name, $absnz) = @_;
-
-    # BBS_SLIP機能を呼び出し
-    my $onedayslip = $bbs_slip !~ /^v{5,6}/ && $thslip !~ /^v{5,6}/ && $name !~ /!slip:v{5,6}/ ? 1 : 0;
-    my $res = BBS_SLIP($Sys, $Form, $Threads, $threadid, $bbsSet, $ipAddr, $remoho, $ua, $country, $ismobile, $isFwifi, $isAnon, $session, $onedayslip);
-
+    my ($res, $bbs_slip, $thslip, $name, $bbsflag, $bbs_noname) = @_;
     my $zero = 1;
-    if ($bbs_slip !~ /^v{3,6}/ && $thslip !~ /^v{3,6}/ && $name !~ /!slip:v{3,6}/ && !$absnz) {
+    if ($bbs_slip !~ /^v{3,6}/ && $thslip !~ /^v{3,6}/ && $name !~ /!slip:v{3,6}/ && !$bbsflag) {
         if ($res =~ /^\s(<\/b>\s\(.\)<b>)/) {
             $res = $1;
             $zero = 0;
@@ -242,7 +239,7 @@ sub generate_name_field {
     }
 
     # 名前欄にワッチョイもどきを追加
-    $res =~ s/\s.{4}-.{4}// if $bbs_slip !~ /^v{4,6}/ && $thslip !~ /^v{4,6}/ && $name !~ /!slip:v{4,6}/ && !$absnz && $zero;
+    $res =~ s/\s.{4}-.{4}// if $bbs_slip !~ /^v{4,6}/ && $thslip !~ /^v{4,6}/ && $name !~ /!slip:v{4,6}/ && !$bbsflag && $zero;
     if ($name =~ /!slip:v{3,6}/) {
         $name = $bbs_noname . $1 if $name =~ /^(!slip:v+)$/;
         $name =~ s/!slip:v{3,6}.*/${res}/;
@@ -590,7 +587,7 @@ sub is_mobile {
 
 #------------------------------------------------------------------------------------------------------------
 #	忍法帖セッション取得
-#	-------------------------------------------------------------------------------------
+#------------------------------------------------------------------------------------------------------------
 sub NinSS
 {
 	my ($Sys, $Form, $Cookie, $ipAddr, $remoho, $ua, $delIP, $ismobile) = @_;
@@ -4822,4 +4819,5 @@ sub SetConf
 #============================================================================================================
 #	Module END
 #============================================================================================================
+}
 1;
