@@ -417,6 +417,9 @@ sub ReadyBeforeWrite
 	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 
 	#スレ立て時用コマンド
+	my $ipua = $addr.$ENV{'HTTP_USER_AGENT'};
+	my $is1 = $ipua eq Get1IPUA($Sys,$threadid) ? 1 : 0;
+	
 	if($Sys->Equal('MODE', 1)){
 		Command($Sys,$Form,$Threads,$CommandSet,1);
 	}
@@ -440,7 +443,7 @@ sub ReadyBeforeWrite
 				Command($Sys,$Form,$Threads,$CommandSet,0);
 			}
 		}
-		elsif($commandAuth){
+		elsif($commandAuth || $is1){
 			Command($Sys,$Form,$Threads,$CommandSet,0);
 		}
 	}
@@ -472,6 +475,20 @@ sub ReadyBeforeWrite
 	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
 
 	return 0;
+}
+sub Get1IPUA
+{
+	my ($Sys,$threadid) = @_;
+	require './module/log.pl';
+	my $Logger = LOG->new;
+	my $logPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/' . $threadid;
+	$Logger->Open($logPath, 0, 1 | 2);
+
+	my @log = split(/<>/,$Logger->Get(0));
+	my $ip = $log[6];
+	my $ua = $log[8];
+
+	return $ip.$ua;
 }
 #ユーザーコマンド
 sub Command
