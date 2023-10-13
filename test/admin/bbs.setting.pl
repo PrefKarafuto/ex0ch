@@ -813,6 +813,7 @@ sub PrintOtherSetting
 	my $setImage    	= $Sys->Get('IMGTAG');
 	my $setNinja		= $Setting->Get('BBS_NINJA');
 	my $setUpLoad		= $Setting->Get('BBS_UPLOAD');
+	my $setTitleID		= $Setting->Get('BBS_TITLEID');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
@@ -886,6 +887,9 @@ sub PrintOtherSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">本文中スレURLをスレタイに変換</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setURLtoTitle>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレタイにIDを付加</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_TITLEID value=on $setTitleID>有効</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
@@ -1270,6 +1274,7 @@ sub FunctionOtherSetting
     $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
     #$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	
 	# ID表示設定

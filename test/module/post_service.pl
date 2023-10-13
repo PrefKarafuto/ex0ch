@@ -147,8 +147,9 @@ sub Write
 	
 	# 情報欄
  	my $idpart = 'ID:none';
+	my $id = $Conv->MakeIDnew($Sys, 8,$Ninja);
 	if (!$idSet){
-		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $Conv->MakeIDnew($Sys, 8,$Ninja), $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
+		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
 	}
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
 	my $bepart = '';
@@ -181,6 +182,11 @@ sub Write
 	$info .= " $idpart" if ($idpart ne '');
 	$info .= " $bepart" if ($bepart ne '');
 	$info .= " $extrapart" if ($extrapart ne '');
+
+	if($Set->Get('BBS_TITLEID')){
+		# スレ立て時にスレタイにID付加
+		$subject += " [★$id]";
+	}
 	
 	my $data = "$name<>$mail<>$info<>$text<>$subject";
 	my $line = "$data\n";

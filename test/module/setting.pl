@@ -379,6 +379,7 @@ sub InitSettingData
 		'BBS_POSTCOLOR'			=> '#FFFFFF',
 		'BBS_MASCOT'			=> '',
 		'BBS_KAKO'				=> '',
+		'BBS_TITLEID'			=> '',
   		'BBS_COMMAND'			=> 0
 	);
 	
