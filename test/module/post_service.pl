@@ -419,7 +419,7 @@ sub ReadyBeforeWrite
 	#スレ立て時用コマンド
 	my $ipua = $addr.$ENV{'HTTP_USER_AGENT'};
 	my $is1 = $ipua eq Get1IPUA($Sys,$threadid) ? 1 : 0;
-	
+
 	if($Sys->Equal('MODE', 1)){
 		Command($Sys,$Form,$Threads,$CommandSet,1);
 	}
@@ -443,7 +443,7 @@ sub ReadyBeforeWrite
 				Command($Sys,$Form,$Threads,$CommandSet,0);
 			}
 		}
-		elsif($commandAuth || $is1){
+		elsif($commandAuth){
 			Command($Sys,$Form,$Threads,$CommandSet,0);
 		}
 	}
