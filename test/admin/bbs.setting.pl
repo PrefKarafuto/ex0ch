@@ -871,7 +871,7 @@ sub PrintOtherSetting
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
     
-    $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
+    $Page->Print("<tr><td rowspan=6 class=\"DetailTitle\"></td><td rowspan=6>");
 	$Page->Print("</td>");
 	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
