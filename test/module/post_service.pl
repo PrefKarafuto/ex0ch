@@ -185,7 +185,7 @@ sub Write
 
 	if($Set->Get('BBS_TITLEID')){
 		# スレ立て時にスレタイにID付加
-		$subject += " [★$id]";
+		$subject = $subject." [★$id]";
 	}
 	
 	my $data = "$name<>$mail<>$info<>$text<>$subject";
