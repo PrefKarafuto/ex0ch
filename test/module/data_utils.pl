@@ -160,7 +160,7 @@ sub ConvertURL
 	
 	my $server = $Sys->Get('SERVER');
 	my $cushion = $Set->Get('BBS_REFERER_CUSHION');
-	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*';/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
+	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://([A-Za-z0-9-.\~*';/?:\@=+\$,%#]+(?![lg]t;)+)};	# URL検索１
 	my $reg2 = q{<(?<!a href=")(?<!src=")(https?|ftp)::(([-\w.!~*';/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
 	
 	# 携帯から
@@ -215,7 +215,7 @@ sub ConvertImgur
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src=")(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
+	my $reg = '(?<!src=")(https?://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
 	
 	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1"></a></blockquote>|g;
 	
@@ -239,7 +239,7 @@ sub ConvertTweet
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src=")(?<!a href=")(https://(twitter|x)\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
+	my $reg = '(?<!src=")(?<!a href=")(https?://(twitter|x)\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
 	
 	$$text =~ s|$reg|<a href="$1">$1</a><br><blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
 	
@@ -253,12 +253,12 @@ sub ConvertMovie
     my ($text) = @_ ;
 
     # Youtube URL patterns
-    my $youtube_pattern1 = qr{(https://youtu\.be/([a-zA-Z0-9_-]+))};
-    my $youtube_pattern2 = qr{(https://(www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+))};
+    my $youtube_pattern1 = qr{(https?://youtu\.be/([a-zA-Z0-9_-]+))};
+    my $youtube_pattern2 = qr{(https?://(www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+))};
 
     # NicoNico URL patterns
-    my $nico_pattern1 = qr{(https://nico\.ms/sm([0-9]+))};
-    my $nico_pattern2 = qr{(https://(www\.)?nicovideo\.jp/watch/sm([0-9]+))};
+    my $nico_pattern1 = qr{(https?://nico\.ms/sm([0-9]+))};
+    my $nico_pattern2 = qr{(https?://(www\.)?nicovideo\.jp/watch/sm([0-9]+))};
 
 	my $reg1 = '<div class="video"><div class="video_iframe"><iframe width="560" height="315" src=';
 	my $reg2 = 'frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div></div>';
