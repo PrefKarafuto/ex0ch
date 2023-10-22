@@ -121,8 +121,8 @@ sub execute
 	my $CGI = $sys->Get('MainCGI');
 	my $Threads = $CGI->{'THREADS'} || $sys->Get('_THREAD_');
 	$Threads->LoadAttr($sys);
-    my $Set = $CGI->{'SET'};
-    $Set->Load($sys);
+    my $set = $CGI->{'SET'};
+    $set->Load($sys);
 	my $threadid = $sys->Get('KEY');
     my $message = $form->Get('MESSAGE');
 
@@ -160,7 +160,7 @@ sub execute
             $Threads->SetAttr($threadid,'othello_first',int(rand(2)));      #0:スレ主が先攻（黒）・1:スレ主が後攻（白）
 
             $first = $Threads->GetAttr($threadid,'othello_first'); 
-            $Threads->SetAttr($threadid,'othello_next',$First);
+            $Threads->SetAttr($threadid,'othello_next',$first);
             $turn = $Threads->GetAttr($threadid,'othello_next');
 
             $form->Set('MESSAGE',$message.'<hr>ゲームスタート！<br>'
@@ -284,7 +284,7 @@ sub execute
                     }elsif($blackNum > $whiteNum){
                         $blackNum += 64 - $totalNum;
                     }
-                    $result = ${game_result}."<br>".print_board(reverse_assign_boards($own_board, $opponent_board,$turn))
+                    $result = ${game_result}."<br>".print_board($white_stone,$black_stone)
                     ."<br>合計" . $totalNum-4 . "手<br>Final Score:●->$blackNum  ○->$whiteNum";
                 }
             }
@@ -546,7 +546,7 @@ sub getPositionLast
     my $all_filled = $own_board | $opponent_board;
 
     # すべてのマスが埋まっている場合は-1を返す
-    if ($all_filled == 0xFFFFFFFFFFFFFFFF) {
+    if ($all_filled == Math::BigInt->from_hex("0xFFFFFFFFFFFFFFFF")) {
         return -1;
     }
 
