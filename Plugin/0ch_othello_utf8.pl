@@ -589,7 +589,7 @@ sub print_board {
 
     $result .= "─"."┴─" x 8 . "┘<br>";
 
-    return $result;
+    return '<font face="MS Gothic" style="font-size: 16px; line-height: 16px;">'.$result.'</font>';
 }
 
 # オセロ用のコマンドを本文から取得
