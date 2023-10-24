@@ -8,7 +8,6 @@
 #============================================================================================================
 package ZPL_othello;
 use utf8;
-use Math::BigInt;
 use open IO =>':encoding(cp932)';
 #------------------------------------------------------------------------------------------------------------
 #	コンストラクタ
@@ -131,11 +130,14 @@ sub execute
     }
 
 	if (($type & (16)) && $Threads->GetAttr($threadid,'othello') && getOthelloCommand($message,'') && !($sys->Equal('MODE',1))) {
+        use bigint;
+
+        my $white_def = 0x0000001008000000;
+        my $black_def = 0x0000000810000000;
         # 設定値取得
         my $master_info = $Threads->GetAttr($threadid,'othello_master'); #スレ主の情報
-        my $opponent_info = $Threads->GetAttr($threadid,'othello_opp'); #対戦相手の情報
-        my $first = $Threads->GetAttr($threadid,'othello_first');       #0:スレ主が先攻（黒）・1:スレ主が後攻（白）
-        my $turn = $Threads->GetAttr($threadid,'othello_next');         #どちらが打つか(0:黒・1:白)
+        my $opponent_info = $Threads->GetAttr($threadid,'othello_opp');  #対戦相手の情報
+        my $first = $Threads->GetAttr($threadid,'othello_first'); #先攻が対戦相手なら1
 
         my $thMaster = GetYourInfo($sys,$threadid) eq $master_info ? 1 : 0 ;  #スレ主かどうか
 
@@ -155,41 +157,41 @@ sub execute
 
         #startコマンドで初期化
         if(getOthelloCommand($message,'start') && $opponent_info && $thMaster){ 
-            $Threads->SetAttr($threadid,'white_stone',"0x0000001008000000");
-            $Threads->SetAttr($threadid,'black_stone',"0x0000000810000000");
-            $Threads->SetAttr($threadid,'othello_first',int(rand(2)));      #0:スレ主が先攻（黒）・1:スレ主が後攻（白）
+            $Threads->SetAttr($threadid,'white_stone',$white_def);
+            $Threads->SetAttr($threadid,'black_stone',$black_def);
 
-            $first = $Threads->GetAttr($threadid,'othello_first'); 
-            $Threads->SetAttr($threadid,'othello_next',$first);
-            $turn = $Threads->GetAttr($threadid,'othello_next');
+            my $rand = int(rand(2));      #0:スレ主が先攻（黒）・1:スレ主が後攻（白）
+            $Threads->SetAttr($threadid,'othello_first',$rand);            #先攻が対戦相手か 
 
             $form->Set('MESSAGE',$message.'<hr>ゲームスタート！<br>'
-            .print_board(Math::BigInt->from_hex("0x0000001008000000"),Math::BigInt->from_hex("0x0000000810000000")).'<br>NEXT:●');#黒が先攻
+            .print_board($white_def,$black_def,1).'<br>NEXT:●');        #黒が先攻
 
+            $form->Set('FROM',makeName($sys,$set,$form,$rand));
+            $Threads->SaveAttr($sys);
             return 0;
         }
-        my $white_stone = Math::BigInt->from_hex($Threads->GetAttr($threadid,'white_stone'));   #白石の配置
-        my $black_stone = Math::BigInt->from_hex($Threads->GetAttr($threadid,'black_stone'));   #黒石の配置      
+        my $white_stone = $Threads->GetAttr($threadid,'white_stone');   #白石の配置
+        my $black_stone = $Threads->GetAttr($threadid,'black_stone');   #黒石の配置    
+        my $whiteNum = popcount($white_stone);
+        my $blackNum = popcount($black_stone);
+        my $totalNum = $whiteNum + $blackNum - 4;
+
+        #どちらが打つか(0:黒・1:白)
+        my $turn = $totalNum % 2;
 
         #名前欄設定
-        if($thMaster || $opponent){
+        if(($thMaster || $opponent) && $white_stone && $black_stone){
             my $name_from = makeName($sys,$set,$form,$turn);
             $form->Set('FROM',$name_from);
         }
 
         #オセロの実行部分
         if ($white_stone && $black_stone && is_turn($turn, $first, $thMaster, $opponent)){
-            my $whiteNum = popcount($white_stone);
-            my $blackNum = popcount($black_stone);
-            my $totalNum = $whiteNum + $blackNum;
             my $result = '';
 
             if($totalNum <= 64){
                 my $thisStone = $turn ? '○' : '●';
                 my $nextStone = $turn ? '●' : '○';
-
-                #スレ主と対戦相手のどちらが置いたかに応じて白黒を自陣か敵陣かに設定
-                my ($own_board, $opponent_board) = assign_boards($white_stone, $black_stone, $turn);
 
                 #putコマンドの場合
                 if(getOthelloCommand($message,'put')){    
@@ -197,23 +199,26 @@ sub execute
                     my $positionNum = convert_position($position);
                     
                     #指定位置に置けるか調べる
-                    if(can_place_stone($own_board, $opponent_board, $positionNum)){
+                    my $put_result = play_move($white_stone, $black_stone,$turn, $positionNum);
+                    if($put_result){
                         #置けるなら置いてひっくり返す
-                        ($own_board, $opponent_board) = place_and_flip($own_board, $opponent_board, $positionNum);
+                        ($white_stone, $black_stone) = @$put_result;
 
                         #63番目の石を置き終わった時点で終了処理
                         if ($totalNum == 62){
-                            my $positionLast = getPositionLast($opponent_board, $own_board);
-                            if(can_place_stone($opponent_board, $own_board, $positionLast)){
+                            my $positionLast = getPositionLast($white_stone, $black_stone, $turn);
+                            my $opp_put_result = play_move($white_stone, $black_stone, !$turn, $positionLast);
+                            if($opp_put_result){
                                 #相手が置けるなら置く
-                                ($opponent_board, $own_board) = place_and_flip($opponent_board, $own_board, $positionLast);
+                                ($white_stone, $black_stone) = @$opp_put_result;
                             }else{
                                 #相手が置けないなら自分が置けるか確認
-                                if(can_place_stone($own_board, $opponent_board, $positionNum)){
-                                    ($own_board, $opponent_board) = place_and_flip($own_board, $opponent_board, $positionNum);
+                                my $last_put_result = play_move($white_stone, $black_stone, $turn, $positionLast);
+                                if($last_put_result){
+                                    #自分が置けるなら置く
+                                    ($white_stone, $black_stone) = @$last_put_result;
                                 }
                             }
-                            ($white_stone, $black_stone) = reverse_assign_boards($own_board, $opponent_board,$turn);
 
                             $whiteNum = popcount($white_stone);
                             $blackNum = popcount($black_stone);
@@ -226,16 +231,18 @@ sub execute
                             }elsif($blackNum > $whiteNum){
                                 $blackNum += 64 - $totalNum;
                             }
-                            $result = "ゲーム終了！${game_result}<br>".print_board(reverse_assign_boards($own_board, $opponent_board,$turn))
+                            $result = "ゲーム終了！${game_result}<br>".print_board($white_stone, $black_stone)
                             ."<br>合計" . $totalNum-4 . "手<br>Final Score:●->$blackNum  ○->$whiteNum";
-                            $Threads->SetAttr($threadid,'othello_next',undef);
+                            $Threads->SetAttr($threadid,'othello_first',undef);
                         }
                         else{
                             #置いた結果の表示を生成
+                            $whiteNum = popcount($white_stone);
+                            $blackNum = popcount($black_stone);
+                            $totalNum = $whiteNum + $blackNum -4;
                             $result = "${position}に${thisStone}を置きました。<br>"
-                            .print_board(reverse_assign_boards($own_board, $opponent_board,$turn))
-                            ."<br>" . $totalNum-4 . "手目／NEXT:${nextStone}<br>Score:●->$blackNum  ○->$whiteNum";
-                            $Threads->SetAttr($threadid,'othello_next',!$turn);
+                            .print_board($white_stone, $black_stone)
+                            ."<br>" . $totalNum . "手目／NEXT:${nextStone}<br>Score:●->$blackNum  ○->$whiteNum";
                         }
                     }else{
                         $result = "${position}には${thisStone}を置けません。";
@@ -244,11 +251,11 @@ sub execute
                 #passコマンドの場合
                 elsif(getOthelloCommand($message,'pass')){
                     #passできるかどうか確認
-                    if(isPass($own_board, $opponent_board)){
+                    if(legal_moves($white_stone, $black_stone, $turn)){
                         $result = "置ける場所があるためパスはできません。";
                     }else{
                         #passした場合に相手が置けるか確認
-                        if(isPass($opponent_board, $own_board)){
+                        if(legal_moves($white_stone, $black_stone, !$turn)){
                             #置けるならpass
                             $result = "パスしました。<br>NEXT:${nextStone}";
                         }else{
@@ -259,22 +266,20 @@ sub execute
                             }elsif($blackNum > $whiteNum){
                                 $blackNum += 64 - $totalNum;
                             }
-                            $result = "ゲーム終了！${game_result}<br>".print_board(reverse_assign_boards($own_board, $opponent_board,$turn))
+                            $result = "ゲーム終了！${game_result}<br>".print_board($white_stone, $black_stone)
                             ."<br>合計" . $totalNum-4 . "手<br>Final Score:●->$blackNum  ○->$whiteNum";
-                            $Threads->SetAttr($threadid,'othello_next',undef);
+                            $Threads->SetAttr($threadid,'othello_first',undef);
                         }
                     }
                 }
                 #単純に譜面を表示する場合
                 elsif(getOthelloCommand($message,'view')){
-                    $result = print_board($white_stone, $black_stone)
-                    ."<br>" . $totalNum-4 . "手目／NEXT:${nextStone}<br>Score:●->$blackNum  ○->$whiteNum";
+                    $result = "現在の譜面<br>".print_board($white_stone, $black_stone)
+                    ."<br>". ${totalNum}."手／NEXT:${nextStone}<br>Score:●->$blackNum  ○->$whiteNum";
                 }
-                #自陣と敵陣の情報を白石黒石に戻す
-                ($white_stone, $black_stone) = reverse_assign_boards($own_board, $opponent_board,$turn);
 
-                $Threads->SetAttr($threadid,'white_stone',Math::BigInt->as_hex($white_stone));
-                $Threads->SetAttr($threadid,'black_stone',Math::BigInt->as_hex($black_stone));
+                $Threads->SetAttr($threadid,'white_stone',$white_stone);
+                $Threads->SetAttr($threadid,'black_stone',$black_stone);
             }else{
                 #終了後にリザルト表示する場合
                 if(getOthelloCommand($message,'result')){
@@ -357,7 +362,7 @@ sub is_turn {
 
 #石の数カウント
 sub popcount {
-    my $n = @_;
+    my ($n) = @_; 
     my $count = 0;
     while ($n) {
         $count += $n & 1;
@@ -383,124 +388,122 @@ sub makeName
     return $yourName;
 }
 
-#黒側白側交換
-sub assign_boards {
-    my ($white_stone, $black_stone, $next) = @_;
-    my ($own_board, $opponent_board);
+use constant {
+    SHIFT_MASK_LIST => [
+        { shift => 1, mask => 0x7f7f7f7f7f7f7f7f },
+        { shift => -1, mask => 0x7f7f7f7f7f7f7f7f },
+        { shift => 8, mask => 0xffffffffffffffff },
+        { shift => -8, mask => 0xffffffffffffffff },
+        { shift => 7, mask => 0x7f7f7f7f7f7f7f7f },
+        { shift => -7, mask => 0x7f7f7f7f7f7f7f7f },
+        { shift => 9, mask => 0xffffffffffffffff },
+        { shift => -9, mask => 0xffffffffffffffff },
+    ],
+};
 
-    if ($next == 1) {
-        $own_board = $white_stone;
-        $opponent_board = $black_stone;
-    } else {
-        $own_board = $black_stone;
-        $opponent_board = $white_stone;
-    }
-
-    return ($own_board, $opponent_board);
-}
-sub reverse_assign_boards {
-    my ($own_board, $opponent_board, $next) = @_;
-    my ($white_stone, $black_stone);
-
-    if ($next == 1) {
-        $white_stone = $own_board;
-        $black_stone = $opponent_board;
-    } else {
-        $black_stone = $own_board;
-        $white_stone = $opponent_board;
-    }
-
-    return ($white_stone, $black_stone);
-}
-
-# ビットマスクを引数にとり、指定した位置に石を置けるかを返す
-sub can_place_stone {
+sub reverse_stones {
     my ($own_board, $opponent_board, $position) = @_;
+    my $flip_mask = 0;
     
-    # すでに石が置かれているか確認
-    return 0 if ($own_board | $opponent_board) & (1 << $position);
-    
-    # 8方向を調べる
-    my @directions = (-1, 1, -8, 8, -7, 7, -9, 9);
-    
-    foreach my $dir (@directions) {
-        my $current = $position + $dir;
-        my $found_opponent = 0;
+    for my $shift_mask (@{+SHIFT_MASK_LIST}) {
+        my $shift = $shift_mask->{shift};
+        my $mask = $shift_mask->{mask};
         
-        while ($current >= 0 && $current < 64) {
-            # 枠外かどうか
-            if (($current % 8 - $position % 8) ** 2 > 1) {
+        my $outflank = 0;
+        my $current = $position;
+        
+        while (1) {
+            $current += $shift;
+            
+            if (($current & $mask) == 0) {
                 last;
             }
             
-            # 相手の石があるか
-            if ($opponent_board & (1 << $current)) {
-                $found_opponent = 1;
-            } elsif ($own_board & (1 << $current)) {
-                if ($found_opponent) {
-                    return 1;
-                }
-                last;
-            } else {
+            if (($opponent_board & (1 << $current)) == 0) {
                 last;
             }
             
-            $current += $dir;
+            $outflank |= (1 << $current);
+        }
+        
+        $current += $shift;
+        
+        if (($own_board & (1 << $current)) != 0) {
+            $flip_mask |= $outflank;
         }
     }
     
-    return 0;
+    return ($own_board ^ ($flip_mask | (1 << $position)), $opponent_board ^ $flip_mask);
 }
 
-# 石を置いてひっくり返す
-sub place_and_flip {
-    my ($own_board, $opponent_board, $position) = @_;
-    
-    # 石を置く
-    $own_board |= (1 << $position);
-    
-    # 8方向を調べる
-    my @directions = (-1, 1, -8, 8, -7, 7, -9, 9);
-    
-    foreach my $dir (@directions) {
-        my $current = $position + $dir;
-        my $found_opponent = 0;
-        
-        my @to_flip = ();
-        
-        while ($current >= 0 && $current < 64) {
-            # 枠外かどうか
-            if (($current % 8 - $position % 8) ** 2 > 1) {
-                last;
-            }
-            
-            # 相手の石があるか
-            if ($opponent_board & (1 << $current)) {
-                $found_opponent = 1;
-                push @to_flip, $current;
-            } elsif ($own_board & (1 << $current)) {
-                if ($found_opponent) {
-                    # 石をひっくり返す
-                    foreach my $flip (@to_flip) {
-                        $own_board |= (1 << $flip);
-                        $opponent_board &= ~(1 << $flip);
-                    }
-                }
-                last;
-            } else {
-                last;
-            }
-            
-            $current += $dir;
+sub line_calc {
+    my ($board, $mask, $shift) = @_;
+    my $result = 0;
+
+    while ($mask) {
+        if ($shift > 0) {
+            $board <<= $shift;
+            $mask <<= $shift;
+        } else {
+            $board >>= -$shift;
+            $mask >>= -$shift;
         }
+
+        $result |= $board & $mask;
+    }
+
+    return $result;
+}
+
+sub play_move {
+    my ($white_stone, $black_stone, $turn, $position) = @_;
+    
+    my ($own_board, $opponent_board) = $turn ? ($white_stone, $black_stone) : ($black_stone, $white_stone);
+
+    # 合法手かどうか確認
+    my $legal_moves = legal_moves($white_stone, $black_stone,$turn);
+    if (($legal_moves & (1 << $position)) == 0) {
+        return 0;
     }
     
-    return ($own_board, $opponent_board);
+    # 石をひっくり返す
+    my ($new_own_board, $new_opponent_board) = reverse_stones($own_board, $opponent_board, $position);
+    
+    if ($turn == 0) {
+        return [$new_opponent_board, $new_own_board];
+    } else {
+        return [$new_own_board, $new_opponent_board];
+    }
 }
+
+sub calc {
+    my ($tp, $ntp, $mask, $shift) = @_;
+    my $line_l = ($tp << $shift) & ($ntp & $mask);
+    my $line_r = ($tp >> -$shift) & ($ntp & $mask);
+    return ($line_l >> $shift) | ($line_r >> -$shift);
+}
+
+sub legal_moves {
+    my ($white_stone, $black_stone, $turn) = @_;
+    my ($tp, $ntp) = $turn == 0 ? ($black_stone, $white_stone) : ($white_stone, $black_stone);
+    
+    my $blank_board = ~($tp | $ntp);
+    my $possible = 0;
+
+    foreach my $item (@{+SHIFT_MASK_LIST}) {
+        $possible |= calc($tp, $ntp, $item->{mask}, $item->{shift});
+    }
+    
+    return $possible & $blank_board;
+}
+
 
 # グリッド名から数字に変換
 sub convert_position {
-    my ($col, $row) = @_;
+    my ($position) = @_;
+    return undef unless length($position) == 2;
+
+    my ($col, $row) = split(//,$position);
 
     # A-Hを0-7に変換
     my $col_index = ord(uc($col)) - ord('A');
@@ -529,24 +532,15 @@ sub reverse_convert_position {
     return $col.$row;
 }
 
-# 置ける場所があるか調べる
-sub isPass
-{
-    my ($own_board, $opponent_board) = @_;
-    for my $num (0..63){
-        return 1 if can_place_stone($own_board, $opponent_board, $num);
-    }
-    return 0;
-}
-
 #最後に残った場所を取得
 sub getPositionLast
 {
-    my ($own_board, $opponent_board) = @_;
+    my ($white_stone, $black_stone,$turn) = @_;
+    my ($own_board, $opponent_board) = $turn ? ($white_stone, $black_stone) : ($black_stone, $white_stone);
     my $all_filled = $own_board | $opponent_board;
 
     # すべてのマスが埋まっている場合は-1を返す
-    if ($all_filled == Math::BigInt->from_hex("0xFFFFFFFFFFFFFFFF")) {
+    if ($all_filled == 0xFFFFFFFFFFFFFFFF) {
         return -1;
     }
 
@@ -559,9 +553,8 @@ sub getPositionLast
     return -1;  # 空きマスがない場合
 }
 
-# 盤面を生成
 sub print_board {
-    my ($white_stone, $black_stone) = @_;
+    my ($white_stone, $black_stone, $turn) = @_;
     my $result = "";
 
     $result .= "　│Ａ│Ｂ│Ｃ│Ｄ│Ｅ│Ｆ│Ｇ│Ｈ│<br>";
@@ -570,17 +563,17 @@ sub print_board {
     for my $row (0..7) {
         for my $col (0..7) {
             my $pos = $row * 8 + $col;
-            my $mask = Math::BigInt->bone->blsft($pos);  # equivalent to (1 << $pos)
+            my $mask = 1 << $pos;  # 通常の整数でビットマスクを作成
             my $ch = $col == 0 ? $row+1 : '';
-            $ch =~ tr/0-9/０-９/;
+            $ch =~ tr/1-9/１-９/;
 
             $result .= "$ch│";
-            if ($white_stone->copy->band($mask)->is_zero() == 0) {  # if white_stone & (1 << pos) is not zero
+            if ($white_stone & $mask) {  # ビット演算を通常の整数で行う
                 $result .= "○";
-            } elsif ($black_stone->copy->band($mask)->is_zero() == 0) {  # if black_stone & (1 << pos) is not zero
+            } elsif ($black_stone & $mask) {
                 $result .= "●";
             } else {
-                $result .= "　";
+                    $result .= "　";
             }
         }
         $result .= "│<br>";
@@ -589,7 +582,7 @@ sub print_board {
 
     $result .= "─"."┴─" x 8 . "┘<br>";
 
-    return '<font face="MS Gothic" style="font-size: 16px; line-height: 16px;">'.$result.'</font>';
+    return '<div class="aaview">'.$result.'</div>';
 }
 
 # オセロ用のコマンドを本文から取得
