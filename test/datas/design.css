@@ -61,10 +61,9 @@
     background-position-y: bottom;
 }
 .aaview{
-    font-family:MS PGothic;
+    font-family:MS Gothic;
     font-size: 16px;
     line-height:1;
-    font-size:2vmin;
     white-space:nowrap;
 }
 /*
