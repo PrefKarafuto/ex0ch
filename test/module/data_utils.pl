@@ -1606,6 +1606,28 @@ sub MakePath
 	
 	return $path3;
 }
+# IPv4とIPv6に対応した逆引き用関数
+# 逆引き不可ならundefを返す
+sub reverse_lookup {
+    my ($ip_addr) = @_;
+	use Socket qw( inet_aton inet_pton AF_INET AF_INET6 getaddrinfo getnameinfo SOCK_RAW NI_NAMEREQD );
+    if ($ip_addr =~ m/:/) {
+        # IPv6
+        my ($err, @res) = getaddrinfo($ip_addr, '', { family => AF_INET6, socktype => SOCK_RAW });
+        return unless @res;
+
+        my ($err2, $hostname) = getnameinfo($res[0]->{addr}, NI_NAMEREQD);
+        return $hostname if $hostname;
+    } else {
+        # IPv4
+        my $packed_ip = inet_aton($ip_addr);
+        return unless $packed_ip;
+
+        my $hostname = gethostbyaddr($packed_ip, AF_INET);
+        return $hostname if $hostname;
+    }
+    return;
+}
 #BBS SLIP生成
 sub BBS_SLIP
 {
