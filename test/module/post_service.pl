@@ -183,9 +183,9 @@ sub Write
 	$info .= " $bepart" if ($bepart ne '');
 	$info .= " $extrapart" if ($extrapart ne '');
 
-	if($Set->Get('BBS_TITLEID')){
+	if($subject && $Set->Get('BBS_TITLEID') && $Sys->Equal('MODE', 1)){
 		# スレ立て時にスレタイにID付加
-		$subject = $subject." [★$id]";
+		$subject = $subject." [$id★]";
 	}
 	
 	my $data = "$name<>$mail<>$info<>$text<>$subject";
