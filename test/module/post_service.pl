@@ -1307,7 +1307,7 @@ sub addSlip
 
 	#IP・リモホ・UAを取得
 	my $ip_addr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
-	my $remoho  = gethostbyaddr(inet_aton($ip_addr), AF_INET);
+	my $remoho  = DATA_UTILS->reverse_reverse_lookup($ip_addr);
 	my $ua =  $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
 
 	#BBS_SLIP機能呼び出し

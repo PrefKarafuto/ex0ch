@@ -136,13 +136,15 @@ sub Set
 {
 	my $this = shift;
 	my ($I, $data1, $data2, $koyuu, $data, $mode) = @_;
-	
+	require './module/data_utils.pl';
+
 	$mode = '0' if (! defined $mode);
+	my $ip_addr = (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	
-	my $host = $ENV{'REMOTE_HOST'};
+	my $host = DATA_UTILS->reverse_reverse_lookup($ip_addr);
 	if ($mode ne '0') {
 		if ($mode eq 'P') {
-			$host = "$host($koyuu)(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR})";
+			$host = "$host($koyuu)$ip_addr";
 		}
 		else {
 			$host = "$host($koyuu)";
@@ -165,7 +167,7 @@ sub Set
 				substr($logdat[3], 0, 30),
 				$logdat[4],
 				$host,
-				(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}),
+				$ip_addr,
 				$data1,
 				$ENV{'HTTP_USER_AGENT'}
 			);
