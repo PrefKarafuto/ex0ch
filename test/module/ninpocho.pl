@@ -27,7 +27,7 @@ sub new
 	
 	my $obj = {
         'SESSION'	    => undef,   # セッション
-		'NINJA'	        => undef,   # 忍法帖情報
+	    'NINJA'	        => undef,   # 忍法帖情報
         'SID'	        => undef,   # セッションID
 	};
 	bless $obj, $class;
@@ -103,6 +103,11 @@ sub Load
         }
     }
     $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
+    if ($session->is_empty) {
+        # セッションが空（存在しない）場合は新規作成
+        $session = CGI::Session->new("driver:file", undef, {Directory => $ninDir});
+        $sid = $session->id(); # 新しいセッションIDを取得
+    }
     $ninpocho = $session->param('ninpocho');
 
     $this->{'SESSION'} = $session;
@@ -163,6 +168,29 @@ sub Set
             }
             $current = $current->{$key};
         }
+    }
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#   忍法帖削除
+#   -------------------------------------------------------------------------------------
+#	@param	$Sys	SYSTEM
+#   @param  $sid    セッションID
+#   @return 削除に成功したら1　$sidで指定されたセッションがなければ0
+#
+#------------------------------------------------------------------------------------------------------------
+sub Delete
+{
+    my ($Sys, $sid) = @_;
+    my $infoDir = $Sys->Get('INFO');
+	my $ninDir = ".$infoDir/.ninpocho/";
+    my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
+    if ($session->is_empty) {
+        return 0;
+    } else {
+        $session->delete();
+        return 1;
     }
 }
 
