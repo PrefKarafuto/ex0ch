@@ -47,16 +47,17 @@ sub new
 sub Load
 {
 	my $this = shift;
-	my ($Sys,$password) = @_;
+	my ($Sys,$password,$sid) = @_;
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/";
 
+    # ディレクトリ作成は掲示板作成時に行うようにする予定
 	mkdir $ninDir if ! -d $ninDir;
     mkdir $ninDir.'hash/' if ! -d $ninDir.'hash/';
 
-    my $sid = $Cookie->Get('countsession');
+    $sid = $Cookie->Get('countsession') if !defined $sid;
     my $ninpocho = '';
     my $session = '';
 
