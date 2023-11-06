@@ -174,25 +174,35 @@ sub Set
 
 #------------------------------------------------------------------------------------------------------------
 #
-#   忍法帖削除
+#   忍法帖削除（admin.cgiでの使用を想定）
 #   -------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
-#   @param  $sid    セッションID
+#   @param  $sid_array_ref    セッションIDの配列リファレンス
 #   @return 削除に成功したら1　$sidで指定されたセッションがなければ0
 #
 #------------------------------------------------------------------------------------------------------------
-sub Delete
-{
-    my ($Sys, $sid) = @_;
+sub Delete {
+    my ($Sys, $sid_array_ref) = @_;
     my $infoDir = $Sys->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
-    my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
-    if ($session->is_empty) {
-        return 0;
-    } else {
-        $session->delete();
-        return 1;
+    my $ninDir = ".$infoDir/.ninpocho/";
+    my @file_list = (
+        'hash/user_info.cgi',
+        'hash/password.cgi',
+        'hash/ip_addr.cgi'
+    );
+
+    foreach my $sid (@$sid_array_ref) {
+        my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
+        if ($session->is_empty) {
+            next; # このセッションIDは無効なので次へ
+        } else {
+            $session->delete();
+            foreach my $filename (@file_list) {
+                DeleteHashValue($sid, $filename);
+            }
+        }
     }
+    return 1; # 処理が完了したら1を返す
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -293,7 +303,26 @@ sub SetHash {
     store $hash_table, $filename;
     chmod 0600,$filename,
 }
+sub DeleteHashValue {
+    my ($target_value, $filename) = @_;
+    my $hash_table = {};
 
+    if (-e $filename) {
+        $hash_table = retrieve($filename);
+
+        # ハッシュテーブルの各キーと値を繰り返し確認
+        foreach my $key (keys %$hash_table) {
+            # 値が目的の値と一致した場合、その要素を削除
+            if ($hash_table->{$key}->{value} eq $target_value) {
+                delete $hash_table->{$key};
+            }
+        }
+
+        # 変更をファイルに保存
+        store $hash_table, $filename;
+        chmod 0600,$filename;
+    }
+}
 sub MakeUserInfo
 {
     my $Sys = shift;
