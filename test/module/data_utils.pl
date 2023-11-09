@@ -860,8 +860,8 @@ sub MakeIDnew {
 		}
 	}
 
-    require Digest::SHA::PurePerl;
-    my $ctx = Digest::SHA::PurePerl->new;
+    require Digest::MD5;
+    my $ctx = Digest::MD5->new;
     $ctx->add('0ch+ ID Generation');
     $ctx->add(':', $Sys->Get('SERVER'));
     $ctx->add(':', $Sys->Get('BBS'));
@@ -1836,7 +1836,7 @@ sub BBS_SLIP
 	#逆引き判定
 	if ($slip_remoho eq "none") { #逆引きできない場合
 		my $isunknown = "yes";
-		my $res = whois($ip_addr);
+		my $res = "";#whois($ip_addr);　軽量化
 
 		#モバイル回線判定
 		my $mobile_nickname_idx = -1;
@@ -1946,6 +1946,7 @@ sub BBS_SLIP
 	    require Geo::IP;
 	    1;  # 成功
 	};
+	$geo_ip_installed = 0;#軽量化
 
 	# 国を判定
 	my $gi_dat = "./datas/GeoIPCity.dat";
