@@ -160,8 +160,8 @@ sub ConvertURL
 	
 	my $server = $Sys->Get('SERVER');
 	my $cushion = $Set->Get('BBS_REFERER_CUSHION');
-	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://([A-Za-z0-9-_.\~*';/?:\@=+\$,%#]+(?![lg]t;)+)};	# URL検索１
-	my $reg2 = q{<(?<!a href=")(?<!src=")(https?|ftp)::(([-/w_.!~*';/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
+	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*'();/?:\@=_+\$,%#]|&(?![lg]t;))+)};	# URL検索１
+	my $reg2 = q{<(https?|ftp)::(([-\w.!~*'();/?:\@=_+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
 	
 	# 携帯から
 	if ($mode eq 'O') {
