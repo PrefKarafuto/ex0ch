@@ -300,13 +300,14 @@ sub PrintResList
 			$Page->Print('' . ($i + 1));
 		}
 		$common2 = "\"javascript:SetOption('NINJA_ID','$logs[9]');";
-		$common2 .= "DoSubmit('bbs.ninja','DISP','EDIT')\"";
+		$common2 .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
 		$Page->Print("：<font color=forestgreen><b>$elem[0]</b></font>[$elem[1]]");
 		$Page->Print("：$elem[2]</dt><dd>$elem[3]");
-		$Page->Print("<br><br><hr>HOST:$logs[5]<br>IP:$logs[6]<br>UA:$logs[8]<br>忍法帖ID:$logs[9]") if (defined $log && $isAccessUser);
+		$Page->Print("<br><br><hr>HOST:$logs[5]<br>IP:$logs[6]<br>UA:$logs[8]<br>忍法帖ID:<a href=$common2>$logs[9]</a>") if (defined $log && $isAccessUser);
 		$Page->Print("</dd></td></tr>\n");
 	}
 	$Page->HTMLInput('hidden', 'SELECT_RES', '');
+	$Page->HTMLInput('hidden', 'NINJA_ID', '');
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	# システム権限有無による表示抑制

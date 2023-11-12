@@ -80,7 +80,8 @@ sub DoPrint
 	elsif ($subMode eq 'DELETE') {                                             # 忍法帖削除画面
         PrintNinjaDelete($Page, $Sys, $Form);
     }
-	
+	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
+	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 	$BASE->Print($Sys->Get('_TITLE'), 1);
 }
 
@@ -139,8 +140,11 @@ sub DoFunction
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
-	
+
+	$Base->SetMenu('スレッド一覧へ戻る', "'thread.res','DISP','LIST'");
+	$Base->SetMenu('掲示板管理へ戻る', "'bbs.thread','DISP','LIST'");
 	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
+
 }
 
 #------------------------------------------------------------------------------------------------------------
