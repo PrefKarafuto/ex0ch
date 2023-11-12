@@ -142,7 +142,7 @@ sub Set
 	$mode = '0' if (! defined $mode);
 	my $ip_addr = (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
 	
-	my $host = DATA_UTILS::reverse_lookup($ip_addr);
+	my $host = $ENV{'REMOTE_HOST'};
 	if ($mode ne '0') {
 		if ($mode eq 'P') {
 			$host = "$host($koyuu)$ip_addr";

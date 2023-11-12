@@ -108,7 +108,7 @@ sub Load
         $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
     }
     
-    if ($session->is_empty) {
+    if ($session->is_empty && !($mode && $sid)) {
         # セッションが空（存在しない）場合は新規作成
         $session = CGI::Session->new("driver:file", undef, {Directory => $ninDir});
         $sid = $session->id(); # 新しいセッションIDを取得
@@ -123,13 +123,13 @@ sub Load
         $this->{'SATUS'} = 1;
         $ninpocho = $session->param('ninpocho');
         $this->{'SESSION'} = $session;
+        if (defined $ninpocho) {
+            $this->{'NINJA'} = %{$ninpocho};
+        } else {
+            $this->{'NINJA'} = {};
+        }
     }
-    
-    if (defined $ninpocho) {
-        $this->{'NINJA'} = %{$ninpocho};
-    } else {
-        $this->{'NINJA'} = {};
-    }
+
     $this->{'SID'} = $sid;
     return $sid;
 }
