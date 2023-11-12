@@ -129,13 +129,14 @@ sub Save
 #			$koyuu : 端末固有識別子
 #			$data  : DAT形式のログ
 #			$mode  : ID末尾分
+#			$sid   : セッションID
 #	戻り値：なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub Set
 {
 	my $this = shift;
-	my ($I, $data1, $data2, $koyuu, $data, $mode) = @_;
+	my ($I, $data1, $data2, $koyuu, $data, $mode, $sid) = @_;
 	require './module/data_utils.pl';
 
 	$mode = '0' if (! defined $mode);
@@ -169,7 +170,8 @@ sub Set
 				$host,
 				$ip_addr,
 				$data1,
-				$ENV{'HTTP_USER_AGENT'}
+				$ENV{'HTTP_USER_AGENT'},
+				$sid
 			);
 			
 		}
