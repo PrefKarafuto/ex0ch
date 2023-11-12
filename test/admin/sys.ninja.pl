@@ -1,9 +1,9 @@
 #============================================================================================================
 #
-#	掲示板管理 - スレッド モジュール
-#	bbs.thread.pl
+#	忍法帖管理 - ニンジャ モジュール
+#	sys.thread.pl
 #	---------------------------------------------------------------------------
-#	2004.02.07 start
+#	2023.11.10 start
 #
 #============================================================================================================
 package	MODULE;
@@ -48,30 +48,20 @@ sub DoPrint
 {
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
-	my ($subMode, $BASE, $BBS, $Page);
+	my ($subMode, $BASE, $Page);
 	
 	require './admin/admin_cgi_base.pl';
-	require './module/bbs_info.pl';
-	require './admin/bbs.autodel.pl';
 	$BASE = ADMIN_CGI_BASE->new;
-	$BBS = $pSys->{'AD_BBS'};
 	
-	# 掲示板情報の読み込みとグループ設定
-	if (! defined $BBS) {
-		require './module/bbs_info.pl';
-		$BBS = BBS_INFO->new;
-		
-		$BBS->Load($Sys);
-		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
-		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
-	}
+	# 管理情報を登録
+	$Sys->Set('ADMIN', $pSys);
 	
 	# 管理マスタオブジェクトの生成
 	$Page		= $BASE->Create($Sys, $Form);
 	$subMode	= $Form->Get('MODE_SUB');
 	
 	# メニューの設定
-	SetMenuList($BASE, $pSys, $Sys->Get('BBS'));
+	SetMenuList($BASE, $pSys);
 	
 	if ($subMode eq 'LIST') {														# 忍法帖一覧画面
 		PrintNinjaList($Page, $Sys, $Form);
@@ -87,14 +77,11 @@ sub DoPrint
 		$Sys->Set('_TITLE', 'Process Failed');
 		$BASE->PrintError($this->{'LOG'});
 	}
-	elsif ($subMode eq 'AUTORESDEL') {                                             # 忍法帖削除画面
-        PrintNinjaDelete($Page, $Sys, $Form, $BBS);
+	elsif ($subMode eq 'DELETE') {                                             # 忍法帖削除画面
+        PrintNinjaDelete($Page, $Sys, $Form);
     }
 	
-	# 掲示板情報を設定
-	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
-	
-	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
+	$BASE->Print($Sys->Get('_TITLE'), 1);
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -111,17 +98,10 @@ sub DoFunction
 {
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
-	my ($subMode, $err, $BBS);
-	
-	require './module/bbs_info.pl';
-	require './admin/bbs.autodel.pl';
-	$BBS = BBS_INFO->new;
+	my ($subMode, $err);
 	
 	# 管理情報を登録
-	$BBS->Load($Sys);
-	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$Sys->Set('ADMIN', $pSys);
-	$pSys->{'SECINFO'}->SetGroupInfo($Sys->Get('BBS'));
 	
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
@@ -145,7 +125,6 @@ sub DoFunction
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", 'COMPLETE');
 		$Form->Set('MODE_SUB', 'COMPLETE');
 	}
-	$pSys->{'AD_BBS'} = $BBS;
 	$this->DoPrint($Sys, $Form, $pSys);
 }
 
@@ -166,7 +145,7 @@ sub SetMenuList
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	スレッド一覧の表示
+#	忍法帖一覧の表示
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	ページコンテキスト
 #	@param	$SYS	システム変数
@@ -189,10 +168,10 @@ sub PrintNinpochoList
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	$dispEd		= (($dispSt + $dispNum) > $ThreadNum ? $ThreadNum : ($dispSt + $dispNum));
 	
-	# 権限取得
-	my $isNinjaView	= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAVIEW, $SYS->Get('BBS'));
-	my $isNinjaEdit	= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAEDIT, $SYS->Get('BBS'));
-	my $isNinjaDelete	= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJADELETE, $SYS->Get('BBS'));
+	# 権限取得(未実装)
+	my $isNinjaView	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAVIEW, $SYS->Get('BBS'));
+	my $isNinjaEdit	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAEDIT, $SYS->Get('BBS'));
+	my $isNinjaDelete	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJADELETE, $SYS->Get('BBS'));
 	
 	# ヘッダ部分の表示
 	$common = "DoSubmit('bbs.ninja','DISP','LIST');";
@@ -263,6 +242,16 @@ sub PrintNinpochoList
 	$Page->HTMLInput('hidden', 'NINJA_ID', '');
 }
 
+#------------------------------------------------------------------------------------------------------------
+#
+#	忍法帖編集画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
 sub PrintNinpochoEdit
 {
 	my ($Page, $SYS, $Form, $mode) = @_;
@@ -394,7 +383,7 @@ sub PrintNinpochoEdit
 	$Page->Print("</table><br>");
 
 }
-
+# 作成中
 #============================================================================================================
 #	Module END
 #============================================================================================================
