@@ -220,7 +220,7 @@ HTML
 		$id = $noticeSet[$i];
 		if ($Notices->IsInclude($id, $curUser) && ! $Notices->IsLimitOut($id)) {
 			if ($Notices->Get('FROM', $id) eq '0000000000') {
-				$from = '0ch+管理システム';
+				$from = 'ex0ch管理システム';
 			}
 			else {
 				$from = $Sys->Get('ADMIN')->{'SECINFO'}->{'USER'}->Get('NAME', $Notices->Get('FROM', $id));
@@ -614,10 +614,10 @@ sub CheckVersionUpdate
 		
 		# 通知内容
 		my $note = join('<br>', @{$nr->Get('Detail')});
-		my $subject = "0ch+ New Version $newver is Released.";
+		my $subject = "ex0ch New Version $newver is Released.";
 		my $content = "<!-- \*Ver=$newver\* --> $note";
 		
-		# 通知者 0ch+管理システム
+		# 通知者 ex0ch管理システム
 		my $from = '0000000000';
 		
 		# 通知先 管理者権限を持つユーザ

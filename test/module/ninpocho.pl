@@ -65,7 +65,7 @@ sub Load
     if (defined $password) {
         # パスワードとセッションIDのハッシュテーブルをファイルから読み込む
         my $ctx = Digest::MD5->new;
-        $ctx->add('0ch+ ID Generation');
+        $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
         $ctx->add(':', $password);
         my $pass_hash = $ctx->b64digest;
@@ -89,7 +89,7 @@ sub Load
             if($sid eq '') {
                 my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
                 my $ctx = Digest::MD5->new;
-                $ctx->add('0ch+ ID Generation');
+                $ctx->add('ex0ch ID Generation');
                 $ctx->add(':', $Sys->Get('SERVER'));
                 $ctx->add(':', $addr);
                 my $ip_hash = $ctx->b64digest;
@@ -238,7 +238,7 @@ sub Save
     # Hashテーブルを設定
     my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
     my $ctx = Digest::MD5->new;
-    $ctx->add('0ch+ ID Generation');
+    $ctx->add('ex0ch ID Generation');
     $ctx->add(':', $Sys->Get('SERVER'));
     $ctx->add(':', $addr);
     my $ip_hash = $ctx->b64digest;
@@ -248,7 +248,7 @@ sub Save
     SetHash($user,$sid,$ninDir.'hash/user_info.cgi',$limit);
     if (defined $password) {
         my $ctx = Digest::MD5->new;
-        $ctx->add('0ch+ ID Generation');
+        $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
         $ctx->add(':', $password);
         my $pass_hash = $ctx->b64digest;
@@ -346,7 +346,7 @@ sub MakeUserInfo
         }
     }
     my $ctx = Digest::MD5->new;
-    $ctx->add('0ch+ ID Generation');
+    $ctx->add('ex0ch ID Generation');
     $ctx->add(':', $Sys->Get('SERVER'));
     $ctx->add(':', $ip[0].$ip[1].$provider);
     $ctx->add(':', $ua);

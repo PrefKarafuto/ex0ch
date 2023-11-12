@@ -282,13 +282,13 @@ sub InitSettingData
 	
 	my %set = (
 		# ２ちゃんねる互換設定項目
-		'BBS_TITLE'			=> '掲示板＠ぜろちゃんねるプラス',
+		'BBS_TITLE'			=> '掲示板＠EXぜろちゃんねる',
 		'BBS_TITLE_PICTURE'		=> 'kanban.gif',
 		'BBS_TITLE_COLOR'		=> '#000000',
 		'BBS_TITLE_LINK'		=> 'https://github.com/PrefKarafuto/New_0ch_Plus/',
 		'BBS_BG_COLOR'			=> '#FFFFFF',
 		'BBS_BG_PICTURE'		=> 'ba.gif',
-		'BBS_NONAME_NAME'		=> '名無しさん＠ぜろちゃんねるプラス',
+		'BBS_NONAME_NAME'		=> '名無しさん＠EXぜろちゃんねる',
 		'BBS_MAKETHREAD_COLOR'		=> '#CCFFCC',
 		'BBS_MENU_COLOR'		=> '#CCFFCC',
 		'BBS_THREAD_COLOR'		=> '#EFEFEF',

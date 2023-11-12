@@ -263,7 +263,7 @@ sub PrintIndexHead
  <meta property="og:description" content="$bbsinfo">
  <meta property="og:type" content="website">
  <meta property="og:image" content="$image">
- <meta property="og:site_name" content="ぜろちゃんねるプラス">
+ <meta property="og:site_name" content="EXぜろちゃんねる">
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
  <link rel="icon" href="$favicon">
@@ -583,7 +583,7 @@ HTML
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">EXぜろちゃんねる</a>
 BBS.CGI - $ver (Perl)
 @{[ $Sys->Get('SPAMHAUS') ? '+Spamhaus' : '' ]}
 @{[ $Sys->Get('SPAMCOP') ? '+SpamCop' : '' ]}

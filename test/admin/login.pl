@@ -135,8 +135,8 @@ $Page->Print(<<HTML);
     
     <div class="Sorce">
      <b>
-     <font face="Arial" size="3" color="red">0ch+ Administration Page</font><br>
-     <font face="Arial">Powered by 0ch/0ch+/New0ch+ script and 0ch/0ch+/New0ch+ modules 2001-2023</font>
+     <font face="Arial" size="3" color="red">ex0ch Administration Page</font><br>
+     <font face="Arial">Powered by 0ch/0ch+/ex0ch script and 0ch/0ch+/ex0ch modules 2001-2023</font>
      </b>
     </div>
     

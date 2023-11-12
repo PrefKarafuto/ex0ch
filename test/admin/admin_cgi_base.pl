@@ -157,7 +157,7 @@ sub PrintHTML
 <html lang="ja">
 <head>
  
- <title>ぜろちゃんねるプラス管理 - [ $ttl ]</title>
+ <title>EXぜろちゃんねる管理 - [ $ttl ]</title>
  
 HTML
 	
@@ -265,7 +265,7 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('login','','');">ログオフ</a>
 </div>
  
-<div class="MainHead" align="right">New 0ch+ BBS System Manager</div>
+<div class="MainHead" align="right">EX0ch BBS System Manager</div>
 
 <table cellspacing="0" width="100%" height="400">
  <tr>
@@ -387,7 +387,7 @@ $Page->Print(<<HTML);
 </table>
 
 <div class="MainFoot">
- Copyright 2001 - 2023 New 0ch+ BBS : Loggin User - <b>$user</b><br>
+ Copyright 2001 - 2023 EX0ch BBS : Loggin User - <b>$user</b><br>
  Build Version:<b>$ver</b>@{[$nverflag ? " (New Version is Available.)" : '']}
 </div>
 

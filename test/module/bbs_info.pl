@@ -343,7 +343,7 @@ sub CreateContents
 	$Page->Print('<html><!--nobanner--><body><small><center><br>');
 	
 	# ここらへんに自分の掲示板の名前を入れる
-	$Page->Print('<b>0ch+ BBS<br>');
+	$Page->Print('<b>ex0ch BBS<br>');
 	$Page->Print("Contents</b><br><br><hr></center><br>\n");
 	
 	foreach my $cid (@catSet) {

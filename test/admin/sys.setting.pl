@@ -5,7 +5,7 @@
 #	---------------------------------------------------------------------------
 #	2004.02.14 start
 #
-#	ぜろちゃんねるプラス
+#	EXぜろちゃんねる
 #	2010.08.12 設定項目追加による改変
 #
 #============================================================================================================
@@ -221,7 +221,7 @@ sub PrintSystemInfo
 {
 	my ($Page, $SYS, $Form) = @_;
 	
-	$SYS->Set('_TITLE', '0ch+ Administrator Information');
+	$SYS->Set('_TITLE', 'ex0ch Administrator Information');
 	
 	my $zerover = $SYS->Get('VERSION');
 	my $perlver = $];
@@ -261,11 +261,11 @@ sub PrintSystemInfo
 		$core = $Module::CoreList::version{$perlver};
 	};
 	
-	$Page->Print("<br><b>0ch+ BBS - Administrator Script</b>");
+	$Page->Print("<br><b>ex0ch BBS - Administrator Script</b>");
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■0ch+ Information</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■ex0ch Information</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Version</td><td>$zerover</td></tr>\n");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Perl Information</td></tr>\n");
@@ -562,7 +562,7 @@ sub PrintOtherSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	表示設定画面の表示(ぜろちゃんねるプラスオリジナル)
+#	表示設定画面の表示(EXぜろちゃんねるオリジナル)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	ページコンテキスト
 #	@param	$SYS	システム変数
@@ -620,7 +620,7 @@ sub PrintPlusViewSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	規制設定画面の表示(ぜろちゃんねるプラスオリジナル)
+#	規制設定画面の表示(EXぜろちゃんねるオリジナル)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	ページコンテキスト
 #	@param	$SYS	システム変数
@@ -1140,7 +1140,7 @@ sub FunctionOtherSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	表示設定(ぜろちゃんねるプラスオリジナル)
+#	表示設定(EXぜろちゃんねるオリジナル)
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	システム変数
 #	@param	$Form	フォーム変数
@@ -1191,7 +1191,7 @@ sub FunctionPlusViewSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	規制設定(ぜろちゃんねるプラスオリジナル)
+#	規制設定(EXぜろちゃんねるオリジナル)
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	システム変数
 #	@param	$Form	フォーム変数

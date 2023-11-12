@@ -317,7 +317,7 @@ sub PrintBBSCreate
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板ディレクトリ</td><td>");
 	$Page->Print("<input type=text size=60 name=BBS_DIR value=\"[ディレクトリ名]\"></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板名称</td><td>");
-	$Page->Print("<input type=text size=60 name=BBS_NAME value=\"[掲示板名]＠0ch掲示板\"></td></tr>\n");
+	$Page->Print("<input type=text size=60 name=BBS_NAME value=\"[掲示板名]＠ex0ch掲示板\"></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">説明</td><td>");
 	$Page->Print("<input type=text size=60 name=BBS_EXPLANATION value=\"[説明]\"></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板設定継承</td>");
@@ -800,7 +800,7 @@ sub FunctionBBSMenuUpdate
 	
 	my $bbsmenu = getbbsmenu($SYS,$BBS,$Category);
 	my $url = $SYS->Get('SERVER');
-	my $bbsname = $SYS->Get('SITENAME') ? $SYS->Get('SITENAME') : "Newぜろちゃんねるプラス";
+	my $bbsname = $SYS->Get('SITENAME') ? $SYS->Get('SITENAME') : "EXぜろちゃんねる";
 
 	#bbsmenu.html生成
 	$Page->Print("<head>");

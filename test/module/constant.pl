@@ -2,7 +2,7 @@
 #
 #	定数モジュール(ZP)
 #
-#	by ぜろちゃんねるプラス
+#	by EXぜろちゃんねる
 #	http://zerochplus.sourceforge.jp/
 #   https://github.com/PrefKarafuto/New_0ch_Plus/
 #

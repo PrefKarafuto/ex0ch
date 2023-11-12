@@ -539,7 +539,7 @@ HTML
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">EXぜろちゃんねる</a>
 </div>
 </div>
 <div id="overlay">
@@ -735,7 +735,7 @@ sub PrintReadSearch
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $var<br>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">EXぜろちゃんねる</a>
 </div>
 
 </body>
@@ -812,7 +812,7 @@ sub PrintReadSearch
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $var<br>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">EXぜろちゃんねる</a>
 </div>
 
 </body>
@@ -916,7 +916,7 @@ sub PrintDiscovery
 
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">EXぜろちゃんねる</a>
 </div>
 
 </body>

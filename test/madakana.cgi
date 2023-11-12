@@ -157,7 +157,7 @@ HTML
 あなたのリモホ[<span style="color:red;font-weight:bold;">$HOST</span>]
 </p>
 <p>
-by <font color="green">ぜろちゃんねるプラス ★</font>
+by <font color="green">EXぜろちゃんねる ★</font>
 </p>
 <p>
 ##############################################################################<br>
@@ -273,7 +273,7 @@ sub PrintMadaFoot
 <hr>
 
 <div>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">EXぜろちゃんねる</a>
 MADAKANA.CGI - $ver
 </div>
 

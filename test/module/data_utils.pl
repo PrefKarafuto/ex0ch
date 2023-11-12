@@ -862,7 +862,7 @@ sub MakeIDnew {
 
     require Digest::MD5;
     my $ctx = Digest::MD5->new;
-    $ctx->add('0ch+ ID Generation');
+    $ctx->add('ex0ch ID Generation');
     $ctx->add(':', $Sys->Get('SERVER'));
     $ctx->add(':', $Sys->Get('BBS'));
     # 正しいセッションが存在する場合はセッションIDを、存在しない場合はIPを使ってIDを生成
