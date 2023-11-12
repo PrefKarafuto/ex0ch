@@ -29,6 +29,7 @@ sub new
         'SESSION'	    => undef,   # セッション
 	    'NINJA'	        => undef,   # 忍法帖情報
         'SID'	        => undef,   # セッションID
+        'STATUS'        => undef,   # 忍法帖が有効か無効か
 	};
 	bless $obj, $class;
 	
@@ -41,13 +42,15 @@ sub new
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
 #	@param	$password	あればパスワードで忍法帖をロード。無ければ通常ロード
+#	@param	$sid	あればセッションIDで忍法帖をロード。無ければ通常ロード
+#	@param	$mode	1なら忍法帖を作らない（セッションIDのみ利用したい場合）
 #	@return	パスワードがあり、かつセッションIDが見つからない場合0
 #
 #------------------------------------------------------------------------------------------------------------
 sub Load
 {
 	my $this = shift;
-	my ($Sys,$password,$sid) = @_;
+	my ($Sys,$password,$sid,$mode) = @_;
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
 	my $infoDir = $Sys->Get('INFO');
@@ -102,19 +105,33 @@ sub Load
                 }
             }
         }
+        $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
     }
-    $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
+    
     if ($session->is_empty) {
         # セッションが空（存在しない）場合は新規作成
         $session = CGI::Session->new("driver:file", undef, {Directory => $ninDir});
         $sid = $session->id(); # 新しいセッションIDを取得
     }
-    $ninpocho = $session->param('ninpocho');
 
-    $this->{'SESSION'} = $session;
+    if($mode){
+        # セッションIDのみ利用する場合
+        $session->delete();
+        $session->flush();
+        $this->{'STATUS'} = 0;
+    }else{
+        $this->{'SATUS'} = 1;
+        $ninpocho = $session->param('ninpocho');
+        $this->{'SESSION'} = $session;
+    }
+    
+    if (defined $ninpocho) {
+        $this->{'NINJA'} = %{$ninpocho};
+    } else {
+        $this->{'NINJA'} = {};
+    }
     $this->{'SID'} = $sid;
-	$this->{'NINJA'} = %{$ninpocho};
-
+    return $sid;
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -130,6 +147,7 @@ sub Get
     my $this = shift;
     my @path = @_;
     my $current = $this->{'NINJA'};
+    return 0 if !$this->{'STATUS'};
     
     for my $key (@path) {
         return unless exists $current->{$key};
@@ -155,6 +173,7 @@ sub Set
     
     # パスが空である場合は失敗とみなす
     return 0 unless @path;
+    return 0 if !$this->{'STATUS'};
     
     my $current = $this->{'NINJA'};
     
@@ -222,18 +241,19 @@ sub Save
     my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/";
     my $limit = 60*60*24*30; # 30日
-	
-    $this->{'SESSION'}->param('ninpocho',$this->{'NINJA'});
-
-    my $sid = $this->{'SESSION'}->id();
-    my $session = $this->{'SESSION'};
+    my $sid = $this->{'SID'};
 
 	# SIDをクッキーに出力
 	$Cookie->Set('countsession', $sid);
-    # セッション有効期限を30日後に設定
-    $session->expire('+30d');
-	# セッションを閉じる
-	$session->close();
+
+    if($this->{'STATUS'}){
+        my $session = $this->{'SESSION'};
+        $session->param('ninpocho',$this->{'NINJA'});
+        # セッション有効期限を30日後に設定
+        $session->expire('+30d');
+        # セッションを閉じる
+        $session->close();
+    }
 
     # Hashテーブルを設定
     my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
@@ -246,7 +266,7 @@ sub Save
 
     SetHash($ip_hash,$sid,$ninDir.'hash/ip_addr.cgi',$limit);
     SetHash($user,$sid,$ninDir.'hash/user_info.cgi',$limit);
-    if (defined $password) {
+    if (defined $password && $this->{'STATUS'}) {
         my $ctx = Digest::MD5->new;
         $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
