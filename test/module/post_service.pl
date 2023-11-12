@@ -132,6 +132,18 @@ sub Write
 	my $Conv = $this->{'CONV'};
 	my $Threads = $this->{'THREADS'};
 	my $Sec = $this->{'SECURITY'};
+	# Cookie管理モジュールを用意
+	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
+
+	# CookieからセッションIDを取得
+	my $sid = $Cookie->Get('countsession');
+	if ($sid eq '') {
+		my %cookies = fetch CGI::Cookie;
+		if (exists $cookies{'countsession'}) {
+			$sid = $cookies{'countsession'}->value;
+			$sid =~ s/"//g;
+		}
+	}
 
 	# 改造版で追加
 	# hCaptcha認証
@@ -202,7 +214,7 @@ sub Write
 	require './module/manager_log.pl';
 	my $Log = MANAGER_LOG->new;
 	$Log->Load($Sys, 'WRT', $threadid);
-	$Log->Set($Set, length($Form->Get('MESSAGE')), $Sys->Get('VERSION'), $Sys->Get('KOYUU'), $data, $Sys->Get('AGENT', 0));
+	$Log->Set($Set, length($Form->Get('MESSAGE')), $Sys->Get('VERSION'), $Sys->Get('KOYUU'), $data, $Sys->Get('AGENT', 0),$sid);
 	$Log->Save($Sys);
 	
 	# リモートホスト保存(SETTING.TXT変更により、常に保存)
