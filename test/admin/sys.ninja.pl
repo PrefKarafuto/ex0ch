@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	忍法帖管理 - ニンジャ モジュール
+#	忍法帖管理 - ニンジャ モジュール ！作成中！
 #	sys.thread.pl
 #	---------------------------------------------------------------------------
 #	2023.11.10 start
@@ -67,7 +67,7 @@ sub DoPrint
 		PrintNinjaList($Page, $Sys, $Form);
 	}
 	elsif ($subMode eq 'EDIT') {													# 忍法帖確認・編集画面
-		PrintNinjaEdit($Page, $Sys, $Form, 1);
+		PrintNinjaEdit($Page, $Sys, $Form, 0);
 	}
 	elsif ($subMode eq 'COMPLETE') {												# 処理完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
@@ -106,14 +106,14 @@ sub DoFunction
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
 	
-	if ($subMode eq 'DELETE') {														# 停止
-		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 1);
+	if ($subMode eq 'DELETE') {														# 削除
+		$err = FunctionNinjaDelete($Sys, $Form, $this->{'LOG'}, 1);
 	}
-	elsif ($subMode eq 'SAVE') {													# 再開
-		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 0);
+	elsif ($subMode eq 'SAVE') {													# 保存
+		$err = FunctionNinjaSave($Sys, $Form, $this->{'LOG'}, 0);
 	}
-	elsif ($subMode eq 'BAN') {													# コピー
-		$err = FunctionThreadCopy($Sys, $Form, $this->{'LOG'}, 1);
+	elsif ($subMode eq 'BAN') {													# BAN
+		$err = FunctionNinjaBan($Sys, $Form, $this->{'LOG'}, 1);
 	}
 	# 処理結果表示
 	if ($err) {
