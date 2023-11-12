@@ -379,11 +379,13 @@ sub PrintNinpochoEdit
 	$Page->Print("<td><input type=text name=COM_LIST value=\"\" $isDisabledVmode></td></tr>\n");
 
     $Page->HTMLInput('hidden', 'NINPOCHO', $id);
-	$common = "DoSubmit('bbs.thread','FUNC','EDIT')";
+	$common = "DoSubmit('sys.ninja','FUNC','SAVE')";
+	my $common2 = "DoSubmit('sys.ninja','DISP','SEARCH')";
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3 align=left>");
-	#$Page->Print('<input type=button value="　保存　" onclick=\"'.$common.';\">)') if $mode;
+	$Page->Print('<input type=button value="書き込みを検索" disabled onclick=\"'.$common2.';\">');
+	$Page->Print('<input type=button value="　保存　" disabled onclick=\"'.$common.';\">') ;#if $mode;
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 
