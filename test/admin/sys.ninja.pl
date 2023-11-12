@@ -141,9 +141,9 @@ sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
 
-	$Base->SetMenu('スレッド一覧へ戻る', "'thread.res','DISP','LIST'");
-	$Base->SetMenu('掲示板管理へ戻る', "'bbs.thread','DISP','LIST'");
-	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
+	$Base->SetMenu('レス一覧へ戻る', "'thread.res','DISP','LIST'");
+	$Base->SetMenu('スレッド一覧へ戻る', "'bbs.thread','DISP','LIST'");
+	$Base->SetMenu('掲示板一覧へ戻る', "'sys.bbs','DISP','LIST'");
 
 }
 
@@ -280,7 +280,7 @@ sub PrintNinpochoEdit
     $Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ユーザー情報</td></tr>\n");
 	$Page->Print("<tr><td>忍法帖ID</td>");
 	$Page->Print("<td><input type=text size=60 name=NINID value=".$load_sid." $isDisabled></td></tr>\n");
-=pod
+
     $Page->Print("<tr><td>忍法帖Lv</td>");
 	$Page->Print("<td><input type=text size=60 name=NINLV value=\"\" $isDisabled></td></tr>\n");
     $Page->Print("<tr><td>説明</td>");
@@ -377,7 +377,7 @@ sub PrintNinpochoEdit
 	$Page->Print("<td><input type=checkbox name=ACCEPT_COM value=on $isDisabledVmode></td></tr>\n");
     $Page->Print("<tr><td>許可するコマンド一覧<small>(2進数ビットフラグで指定)</small></td>");
 	$Page->Print("<td><input type=text name=COM_LIST value=\"\" $isDisabledVmode></td></tr>\n");
-=cut
+
     $Page->HTMLInput('hidden', 'NINPOCHO', $id);
 	$common = "DoSubmit('bbs.thread','FUNC','EDIT')";
 	
