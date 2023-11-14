@@ -1298,8 +1298,8 @@ sub ConvertCharacter1
 	# all
 	$$data =~ s/</&lt;/g;
 	$$data =~ s/>/&gt;/g;
-	$$data =~ s/&#0{0,}10;?//g;
-	$$data =~ s/&#0{0,}13;?//g;
+	$$data =~ s/&#0*1[03];//gi;
+	$$data =~ s/&#[xX]0*[aAdD];//gi; 
 	$$data =~ s/&#0{0,}xd;?//gi;
 	$$data =~ s/&#0{0,}xa;?//gi;
 	
