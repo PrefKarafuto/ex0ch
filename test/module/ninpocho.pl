@@ -116,8 +116,6 @@ sub Load
 
     if($mode){
         # セッションIDのみ利用する場合
-        $session->delete();
-        $session->flush();
         $this->{'STATUS'} = 0;
     }else{
         $this->{'SATUS'} = 1;
@@ -133,7 +131,37 @@ sub Load
     $this->{'SID'} = $sid;
     return $sid;
 }
+# セッションIDから忍法帖を読み込む(admin.cgi用)
+sub LoadOnly {
+    my ($Sys, $sid) = @_;
+    my $this = shift;
+    my $infoDir = $Sys->Get('INFO');
+    my $ninDir = ".$infoDir/.ninpocho/";
+    my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
 
+    # セッションの読み込みが失敗した場合、0を返す
+    unless (defined $session) {
+        $this->{'STATUS'} = 0;
+        return 0;
+    }
+
+    my $ninpocho = $session->param('ninpocho');
+    $this->{'NINJA'} = %{$ninpocho};
+    $this->{'SESSION'} = $session;
+    $this->{'STATUS'} = 1;
+    return 1; # 正常に読み込みが完了した場合、1を返す
+}
+# セッションに忍法帖保存(admin.cgi用)
+sub SaveOnly
+{
+    my $this = shift;
+    return 0 if $this->{'STATUS'} == 0;
+    my $session = $this->{'SESSION'};
+    $session->param('ninpocho',$this->{'NINJA'});
+    # セッションを閉じる
+    $session->close();
+    return 1;
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #   忍法帖情報取得（可変長の引数リストに対応）
