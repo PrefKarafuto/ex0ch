@@ -164,7 +164,7 @@ sub Write
 	
 	# 情報欄
  	my $idpart = 'ID:none';
-	my $id = $Conv->MakeIDnew($Sys, 8,$Ninja);
+	my $id = $Conv->MakeIDnew($Sys, 8,$sid);
 	if (!$idSet){
 		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
 	}
@@ -306,7 +306,7 @@ sub Write
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
 	}
-	
+	$Cookie->Set('countsession',$sid);
 	return $err;
 }
 

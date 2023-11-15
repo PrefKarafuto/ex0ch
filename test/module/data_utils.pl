@@ -812,40 +812,18 @@ sub MakeID
 }
 sub MakeIDnew {
     my $this = shift;
-    my ($Sys, $column,$Ninja) = @_;
+    my ($Sys, $column,$sid) = @_;
 
     require './module/thread.pl';
     my $Threads = THREAD->new;
     $Threads->LoadAttr($Sys);
-
-    # セッション情報を取得
-    my $infoDir = $Sys->Get('INFO');
-    my $ninDir = ".$infoDir/.nin/";
-    my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
-    my $sid = $Cookie->Get('countsession');
-	if ($sid eq '') {
-		my %cookies = fetch CGI::Cookie;
-		if (exists $cookies{'countsession'}) {
-			$sid = $cookies{'countsession'}->value;
-			$sid =~ s/"//g;
-		}
-	}
-
-    # セッションが存在するか確認。初期値は0(not valid)。
-    my $valid_session = 0;
-    if ($sid) {
-        my $user_session = CGI::Session->new('driver:file;serializer:default', $sid, { Directory => $ninDir }) || 0;
-        if ($user_session) {
-            $valid_session = 1;
-        }
-    }
 
     my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
     my @ip = split(/\./,$addr);
     my $ua = $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
 
     my $provider;
-    my $HOST = $ENV{'HTTP_HOST'};
+    my $HOST = $ENV{'REMOTE_HOST'};
 
 	# プロバイダのドメインを取得
 	if ($HOST) {
@@ -865,8 +843,8 @@ sub MakeIDnew {
     $ctx->add('ex0ch ID Generation');
     $ctx->add(':', $Sys->Get('SERVER'));
     $ctx->add(':', $Sys->Get('BBS'));
-    # 正しいセッションが存在する場合はセッションIDを、存在しない場合はIPを使ってIDを生成
-    if ($valid_session && $Ninja) {
+    # セッションIDが存在する場合はセッションIDを、存在しない場合はIP+UAを使ってIDを生成
+    if ($sid) {
         $ctx->add(':', $sid);
     } else {
         $ctx->add(':', $ip[0].$ip[1].$provider);
