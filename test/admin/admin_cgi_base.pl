@@ -263,7 +263,7 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('login','','');">ログオフ</a>
 </div>
  
-<div class="MainHead" align="right">EX0ch BBS System Manager</div>
+<div class="MainHead" align="right">Ex0ch BBS System Manager</div>
 
 <table cellspacing="0" width="100%" height="400">
  <tr>
