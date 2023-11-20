@@ -1,7 +1,7 @@
 #============================================================================================================
 #
-#	忍法帖管理 - ニンジャ モジュール ！作成中！
-#	sys.ninja.pl
+#	掲示板メニュー用忍法帖管理 - ニンジャ モジュール ！作成中！
+#	bbs.ninja.pl
 #	---------------------------------------------------------------------------
 #	2023.11.10 start
 #
@@ -63,10 +63,7 @@ sub DoPrint
 	# メニューの設定
 	SetMenuList($BASE, $pSys);
 	
-	if ($subMode eq 'LIST') {														# 忍法帖一覧画面
-		PrintNinjaList($Page, $Sys, $Form);
-	}
-	elsif ($subMode eq 'EDIT') {													# 忍法帖確認・編集画面
+	if ($subMode eq 'EDIT') {													# 忍法帖確認・編集画面
 		PrintNinjaEdit($Page, $Sys, $Form, 0);
 	}
 	elsif ($subMode eq 'COMPLETE') {												# 処理完了画面
@@ -141,107 +138,10 @@ sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
 
-	$Base->SetMenu('忍法帖の設定', "'sys.ninja','DISP','SET'");
+	$Base->SetMenu('レス一覧へ戻る', "'thread.res','DISP','LIST'");
+	$Base->SetMenu('スレッド一覧へ戻る', "'bbs.thread','DISP','LIST'");
+	$Base->SetMenu('掲示板一覧へ戻る', "'sys.bbs','DISP','LIST'");
 
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
-#	忍法帖一覧の表示
-#	-------------------------------------------------------------------------------------
-#	@param	$Page	ページコンテキスト
-#	@param	$SYS	システム変数
-#	@param	$Form	フォーム変数
-#	@return	なし
-#
-#------------------------------------------------------------------------------------------------------------
-sub PrintNinjaList
-{
-	my ($Page, $SYS, $Form) = @_;
-	my (@threadSet, $ThreadNum, $key, $res, $file_name, $i);
-	my ($dispSt, $dispEd, $dispNum, $bgColor, $base);
-	my ($common, $common2, $n, $Threads, $id, $mtime,$last_mod);
-	
-	$SYS->Set('_TITLE', 'Ninpocho List');
-	
-	# 表示数の設定
-	$dispNum	= $Form->Get('DISPNUM', 10);
-	$dispSt		= $Form->Get('DISPST', 0) || 0;
-	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
-	$dispEd		= (($dispSt + $dispNum) > $ThreadNum ? $ThreadNum : ($dispSt + $dispNum));
-	
-	# 権限取得(未実装)
-	my $isNinjaView	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAVIEW, $SYS->Get('BBS'));
-	my $isNinjaEdit	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAEDIT, $SYS->Get('BBS'));
-	my $isNinjaDelete	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJADELETE, $SYS->Get('BBS'));
-	
-	# ヘッダ部分の表示
-	$common = "DoSubmit('bbs.ninja','DISP','LIST');";
-	
-	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
-	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
-	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
-	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("表\示数<input type=text name=DISPNUM size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
-	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('NINPOCHO')\">全</a></th>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:250px\">忍法帖ID</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">最終更新</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Level</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">書き込み内容を閲覧</td></tr>\n");
-
-    my $infoDir = $SYS->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
-    my @session_files = sort { (stat($a))[9] <=> (stat($b))[9] } glob($ninDir.'cgisess_.*');
-	
-	for ($i = $dispSt ; $i < $dispEd ; $i++) {
-		$n		= $i + 1;
-		$file_name		= $session_files[$i];
-		$file_name	=~ /cgisses_(.*)/;
-        $id = $1;
-        $mtime = (stat($file_name))[9];
-        my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($mtime);
-        $year += 1900;
-        $mon++;
-        $last_mod = sprintf("%04d/%02d/%02d %02d:%02d:%02d", $year, $mon, $mday, $hour, $min, $sec);
-		my $level = "";
-		
-		# 表示背景色設定
-		#if ($Threads->GetAttr($id, 'stop')) { # use from 0.8.x
-		#if ($isstop) {				$bgColor = '#ffcfff'; }	# 停止スレッド
-		#elsif ($res > $resmax) {		$bgColor = '#cfffff'; }	# 最大数スレッド
-		#elsif ($Threads->GetAttr($id, 'pass')) {$bgColor = '#cfcfff'; }	# パス設定スレッド
-		#elsif (DAT::IsMoved("$base/$id.dat")) {	$bgColor = '#ffffcf'; }	# 移転スレッド
-		#else {					$bgColor = '#ffffff'; }	# 通常スレッド
-		
-		$common = "\"javascript:SetOption('NINJA_ID','$id');";
-		$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
-		
-		$Page->Print("<tr bgcolor=$bgColor>");
-		$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
-		if ($isNinjaEdit || $isNinjaView) {
-			$Page->Print("<td>$n: <a href=$common>$id</a></td>");
-		}
-		else {
-			$Page->Print("<td>$n: $id</td>");
-		}
-		$Page->Print("<td align=center>$last_mod</td><td align=center>$level</td>");
-		$Page->Print("<td><a href=\"\">検索</a></td></tr>\n");
-	}
-	$common		= "onclick=\"DoSubmit('sys.ninja','DISP'";
-	$common2	= "onclick=\"DoSubmit('sys.ninja','FUNC'";
-	
-	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><td colspan=5 align=left>");
-	$Page->Print("<input type=button value=\"一覧更新\" $common,'LIST')\"> ");
-	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\"> ") if ($isNinjaDelete);
-	$Page->Print("</td></tr>\n");
-	$Page->Print("</table><br>");
-	
-	$Page->HTMLInput('hidden', 'DISPST', '');
-	$Page->HTMLInput('hidden', 'NINJA_ID', '');
 }
 
 #------------------------------------------------------------------------------------------------------------
