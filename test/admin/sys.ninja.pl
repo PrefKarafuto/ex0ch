@@ -160,7 +160,7 @@ sub PrintNinjaList
 	my ($Page, $SYS, $Form) = @_;
 	my (@threadSet, $ThreadNum, $key, $res, $file_name, $i);
 	my ($dispSt, $dispEd, $dispNum, $bgColor, $base);
-	my ($common, $common2, $n, $Threads, $id, $mtime,$last_mod);
+	my ($common, $common2, $n, $Threads, $mtime,$last_mod);
 	
 	$SYS->Set('_TITLE', 'Ninpocho List');
 	
@@ -168,7 +168,7 @@ sub PrintNinjaList
 	$dispNum	= $Form->Get('DISPNUM', 10);
 	$dispSt		= $Form->Get('DISPST', 0) || 0;
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
-	$dispEd		= (($dispSt + $dispNum) > $ThreadNum ? $ThreadNum : ($dispSt + $dispNum));
+	
 	
 	# 権限取得(未実装)
 	my $isNinjaView	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAVIEW, $SYS->Get('BBS'));
@@ -193,42 +193,30 @@ sub PrintNinjaList
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">書き込み内容を閲覧</td></tr>\n");
 
     my $infoDir = $SYS->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
-    my @session_files = sort { (stat($a))[9] <=> (stat($b))[9] } glob($ninDir.'cgisess_.*');
-	
+	my $ninDir = ".$infoDir/.nin/"; #三男用忍法帖ディレクトリ。今後は.ninpochoに移行予定
+    my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
+    my $sessnum = @session_files;
+    $dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));
+    
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$n		= $i + 1;
 		$file_name		= $session_files[$i];
-		$file_name	=~ /cgisses_(.*)/;
-        $id = $1;
+		$file_name	=~ /cgisess_([0-9a-f]+)/;
+        my $id = $1;
         $mtime = (stat($file_name))[9];
         my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($mtime);
         $year += 1900;
         $mon++;
         $last_mod = sprintf("%04d/%02d/%02d %02d:%02d:%02d", $year, $mon, $mday, $hour, $min, $sec);
 		my $level = "";
-		
-		# 表示背景色設定
-		#if ($Threads->GetAttr($id, 'stop')) { # use from 0.8.x
-		#if ($isstop) {				$bgColor = '#ffcfff'; }	# 停止スレッド
-		#elsif ($res > $resmax) {		$bgColor = '#cfffff'; }	# 最大数スレッド
-		#elsif ($Threads->GetAttr($id, 'pass')) {$bgColor = '#cfcfff'; }	# パス設定スレッド
-		#elsif (DAT::IsMoved("$base/$id.dat")) {	$bgColor = '#ffffcf'; }	# 移転スレッド
-		#else {					$bgColor = '#ffffff'; }	# 通常スレッド
-		
 		$common = "\"javascript:SetOption('NINJA_ID','$id');";
 		$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
 		
 		$Page->Print("<tr bgcolor=$bgColor>");
 		$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
-		if ($isNinjaEdit || $isNinjaView) {
-			$Page->Print("<td>$n: <a href=$common>$id</a></td>");
-		}
-		else {
-			$Page->Print("<td>$n: $id</td>");
-		}
+		$Page->Print("<td>$n: <a href=$common>$id</a></td>");
 		$Page->Print("<td align=center>$last_mod</td><td align=center>$level</td>");
-		$Page->Print("<td><a href=\"\">検索</a></td></tr>\n");
+		$Page->Print("<td></td></tr>\n");# 検索
 	}
 	$common		= "onclick=\"DoSubmit('sys.ninja','DISP'";
 	$common2	= "onclick=\"DoSubmit('sys.ninja','FUNC'";

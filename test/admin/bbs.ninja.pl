@@ -139,8 +139,6 @@ sub SetMenuList
 	my ($Base, $pSys, $bbs) = @_;
 
 	$Base->SetMenu('レス一覧へ戻る', "'thread.res','DISP','LIST'");
-	$Base->SetMenu('スレッド一覧へ戻る', "'bbs.thread','DISP','LIST'");
-	$Base->SetMenu('掲示板一覧へ戻る', "'sys.bbs','DISP','LIST'");
 
 }
 
@@ -293,7 +291,12 @@ sub PrintNinjaEdit
 	$Page->Print("</table><br>");
 
 }
-# 作成中
+# 忍法帖保存
+sub FunctionNinjaSave
+{
+	# 作成中
+}
+
 #============================================================================================================
 #	Module END
 #============================================================================================================
