@@ -171,6 +171,11 @@ sub PrintNinjaList
 	$dispNum	= $Form->Get('DISPNUM', 10);
 	$dispSt		= $Form->Get('DISPST', 0) || 0;
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
+	my $infoDir = $SYS->Get('INFO');
+	my $ninDir = ".$infoDir/.nin/"; #三男用忍法帖ディレクトリ。今後は.ninpochoに移行予定
+    my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
+    my $sessnum = @session_files;
+    $dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));
 	
 	
 	# 権限取得(未実装)
@@ -179,13 +184,14 @@ sub PrintNinjaList
 	my $isNinjaDelete	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJADELETE, $SYS->Get('BBS'));
 	
 	# ヘッダ部分の表示
-	$common = "DoSubmit('bbs.ninja','DISP','LIST');";
+	$common = "DoSubmit('sys.ninja','DISP','LIST');";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
+	$Page->Print("忍法帖総数：$sessnum　");
 	$Page->Print("表\示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
@@ -194,12 +200,6 @@ sub PrintNinjaList
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">最終更新</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Level</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">書き込み内容を閲覧</td></tr>\n");
-
-    my $infoDir = $SYS->Get('INFO');
-	my $ninDir = ".$infoDir/.nin/"; #三男用忍法帖ディレクトリ。今後は.ninpochoに移行予定
-    my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
-    my $sessnum = @session_files;
-    $dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));
     
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$n		= $i + 1;
@@ -411,7 +411,7 @@ sub PrintNinjaSearch
     $cTYPE[1] = ($types & 2 ? 'checked' : '');
     $cTYPE[2] = ($types & 4 ? 'checked' : '');
    
-    $SYS->Set('_TITLE', 'Ninpocho Search (準備中)');
+    $SYS->Set('_TITLE', 'Ninpocho Search');
    
     $Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
     $Page->Print("  <tr><td colspan=2>以下の各条件に当てはまる忍法帖を検索します。</td></tr>\n");
