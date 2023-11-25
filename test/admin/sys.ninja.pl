@@ -67,7 +67,10 @@ sub DoPrint
 		PrintNinjaList($Page, $Sys, $Form);
 	}
 	elsif ($subMode eq 'EDIT') {													# 忍法帖確認・編集画面
-		PrintNinjaEdit($Page, $Sys, $Form, 0);
+		PrintNinjaEdit($Page, $Sys, $Form);
+	}
+	elsif ($subMode eq 'SEARCH') {													# 忍法帖確認・編集画面
+		PrintNinjaSearch($Page, $Sys, $Form);
 	}
 	elsif ($subMode eq 'COMPLETE') {												# 処理完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
@@ -141,7 +144,7 @@ sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
 
-	$Base->SetMenu('忍法帖の設定', "'sys.ninja','DISP','SET'");
+	$Base->SetMenu('忍法帖を検索', "'sys.ninja','DISP','SEARCH'");
 
 }
 
@@ -379,6 +382,84 @@ sub PrintNinjaEdit
 	$Page->Print('<input type=button value="　保存　" disabled onclick=\"'.$common.';\">') ;#if $mode;
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
+
+}
+sub PrintNinjaSearch
+{
+    my ($Page, $SYS, $Form, $BBS) = @_;
+    my ($common);
+    my ($name, $dir);
+    my ($sMODE, $sBBS, $sKEY, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
+   
+    my $sanitize = sub {
+        $_ = shift;
+        s/&/&amp;/g;
+        s/</&lt;/g;
+        s/>/&gt;/g;
+        s/"/&#34;/g;#"
+        return $_;
+    };
+   
+    $sMODE  = "BBS";#&$sanitize($Form->Get('SMODE', ''));
+    $sBBS = &$sanitize($Form->Get('SBBS', ''));
+    $sKEY   = &$sanitize($Form->Get('KEY', ''));
+    $sWORD  = &$sanitize($Form->Get('WORD'));
+    @sTYPE  = $Form->GetAtArray('TYPE', 0);
+    $id = $Form->Get('TARGET_BBS', '');
+    $types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0);
+    $cTYPE[0] = ($types & 1 ? 'checked' : '');
+    $cTYPE[1] = ($types & 2 ? 'checked' : '');
+    $cTYPE[2] = ($types & 4 ? 'checked' : '');
+   
+    $SYS->Set('_TITLE', 'Ninpocho Search (準備中)');
+   
+    $Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
+    $Page->Print("  <tr><td colspan=2>以下の各条件に当てはまる忍法帖を検索します。</td></tr>\n");
+    $Page->Print("  <tr><td colspan=2><hr></td></tr>\n");
+    $Page->Print("  <tr>\n");
+    $Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
+    $Page->Print("    <td class=\"DetailTitle\">条件設定値</td></tr>\n");
+    $Page->Print("</select></td></tr>\n");
+    $Page->Print("<input type=hidden name=SBBS value=$id>");
+    $Page->Print(<<HTML);
+  <tr>
+    <td>検索ワード</td>
+    <td>
+HTML
+    $Page->Print("<input type=text disabled size=60 name=WORD onkeydown=\"go(event.keyCode);\" value=\"$sWORD\" accept-charset=\"Shift_JIS\">");
+   
+    $common = "DoSubmit('bbs.thread','DISP','AUTORESDEL')";
+   
+    $Page->Print(<<HTML);
+    </td>
+  </tr>
+  <tr>
+    <td>検索種別</td>
+    <td>
+      <input type="checkbox" name="TYPE" value="2" $cTYPE[1] checked disabled >？？？<br>
+      <input type="checkbox" name="TYPE" value="1" $cTYPE[0] disabled>？？？<br>
+      <input type="checkbox" name="TYPE" value="4" $cTYPE[2] disabled>？？？<br>
+    </td>
+  </tr>
+  <tr>
+    <td colspan=2><hr></td>
+  </tr>
+  <tr>
+    <td colspan=2 align=right>
+      <input type=button value="　検索　" onclick="$common" style="float: left;" disabled>
+    </td>
+  </tr>
+</table>
+HTML
+   
+    # 検索ワードがある場合は検索を実行する
+    if ($Form->Get('WORD', '') ne '') {
+        #Search($SYS, $Form, $Page,$BBS); #ここを実装する
+    }
+   
+    $Page->Print("<script>function go(keyCode).
+	{if(keyCode==13) DoSubmit('sys.ninja','DISP','SEARCH');.
+	}</script>");
 
 }
 # 作成中
