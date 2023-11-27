@@ -27,7 +27,6 @@ sub new
 	
 	my $obj = {
         'SESSION'	    => undef,   # セッション
-	    'NINJA'	        => undef,   # 忍法帖情報
         'SID'	        => undef,   # セッションID
         'STATUS'        => undef,   # 忍法帖が有効か無効か
 	};
@@ -54,14 +53,13 @@ sub Load
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
 	my $infoDir = $Sys->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
+	my $ninDir = "./$infoDir/.nin/";
 
     # ディレクトリ作成は掲示板作成時に行うようにする予定
 	mkdir $ninDir if ! -d $ninDir;
     mkdir $ninDir.'hash/' if ! -d $ninDir.'hash/';
 
     $sid = $Cookie->Get('countsession') if !defined $sid;
-    my $ninpocho = '';
     my $session = '';
 
     # パスワードが提供された場合
@@ -77,7 +75,6 @@ sub Load
         if ($sid) {
             # セッションをロード
             $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
-            $ninpocho = $session->param('ninpocho') if defined $session;
         } else {
             # セッションIDが見つからない場合
             return 0;
@@ -119,13 +116,7 @@ sub Load
         $this->{'STATUS'} = 0;
     }else{
         $this->{'SATUS'} = 1;
-        $ninpocho = $session->param('ninpocho');
         $this->{'SESSION'} = $session;
-        if (defined $ninpocho) {
-            $this->{'NINJA'} = %{$ninpocho};
-        } else {
-            $this->{'NINJA'} = {};
-        }
     }
 
     $this->{'SID'} = $sid;
@@ -133,22 +124,21 @@ sub Load
 }
 # セッションIDから忍法帖を読み込む(admin.cgi用)
 sub LoadOnly {
-    my ($Sys, $sid) = @_;
     my $this = shift;
+    my ($Sys, $sid) = @_;
     my $infoDir = $Sys->Get('INFO');
-    my $ninDir = ".$infoDir/.ninpocho/";
+    my $ninDir = "./$infoDir/.nin/";
     my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
 
     # セッションの読み込みが失敗した場合、0を返す
     unless (defined $session) {
-        $this->{'STATUS'} = 0;
-        return 0;
+       $this->{'STATUS'} = 0;
+      return 0;
     }
 
-    my $ninpocho = $session->param('ninpocho');
-    $this->{'NINJA'} = %{$ninpocho};
     $this->{'SESSION'} = $session;
     $this->{'STATUS'} = 1;
+    $this->{'SID'} = $sid;
     return 1; # 正常に読み込みが完了した場合、1を返す
 }
 # セッションに忍法帖保存(admin.cgi用)
@@ -156,10 +146,8 @@ sub SaveOnly
 {
     my $this = shift;
     return 0 if $this->{'STATUS'} == 0;
-    my $session = $this->{'SESSION'};
-    $session->param('ninpocho',$this->{'NINJA'});
     # セッションを閉じる
-    $session->close();
+    $this->{'SESSION'}->flush();
     return 1;
 }
 #------------------------------------------------------------------------------------------------------------
@@ -173,16 +161,12 @@ sub SaveOnly
 sub Get
 {
     my $this = shift;
-    my @path = @_;
-    my $current = $this->{'NINJA'};
-    return 0 if !$this->{'STATUS'};
+    my ($name) = @_;
+    return "ERR" if !$this->{'STATUS'};
+    my $session = $this->{'SESSION'};
+    my $val = $session->param($name);
     
-    for my $key (@path) {
-        return unless exists $current->{$key};
-        $current = $current->{$key};
-    }
-    
-    return $current;
+    return $val;
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -196,27 +180,11 @@ sub Get
 sub Set
 {
     my $this = shift;
-    my $val = pop;  # 最後の引数は設定値
-    my @path = @_;  # 残りの引数はパス
+    my ($name, $val) = @_;
     
-    # パスが空である場合は失敗とみなす
-    return 0 unless @path;
     return 0 if !$this->{'STATUS'};
-    
-    my $current = $this->{'NINJA'};
-    
-    for my $i (0..$#path) {
-        my $key = $path[$i];
-        
-        if ($i == $#path) {
-            $current->{$key} = $val;
-        } else {
-            unless (exists $current->{$key} && ref $current->{$key} eq 'HASH') {
-                $current->{$key} = {};
-            }
-            $current = $current->{$key};
-        }
-    }
+    $this->{'SESSION'}->param($name,$val);
+
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -229,9 +197,10 @@ sub Set
 #
 #------------------------------------------------------------------------------------------------------------
 sub Delete {
+    my $this=shift;
     my ($Sys, $sid_array_ref) = @_;
     my $infoDir = $Sys->Get('INFO');
-    my $ninDir = ".$infoDir/.ninpocho/";
+    my $ninDir = "./$infoDir/.nin/";
     my @file_list = (
         'hash/user_info.cgi',
         'hash/password.cgi',
@@ -243,13 +212,29 @@ sub Delete {
         if ($session->is_empty) {
             next; # このセッションIDは無効なので次へ
         } else {
-            $session->delete();
+            my $session_file = $session->find($sid);
+            unlink $session_file if -e $session_file;
             foreach my $filename (@file_list) {
                 DeleteHashValue($sid, $filename);
             }
         }
     }
     return 1; # 処理が完了したら1を返す
+}
+# 期限切れセッションのファイルを削除
+sub cleanup_expired_session {
+    my ($Sys, $session_id) = @_;
+
+    # セッションをロード（セッションファイルはまだ削除しない）
+    my $session = CGI::Session->load("driver:File", $session_id, {Directory=>'/path/to/sessions'});
+
+    # セッションが期限切れの場合、ファイルを削除
+    if ($session->is_expired) {
+        Delete($Sys,$session_id);
+        return 1;  # 期限切れのセッションを削除した
+    }
+
+    return 0;  # セッションは期限切れではない
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -267,7 +252,7 @@ sub Save
 	my ($Sys,$password) = @_;
 	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $infoDir = $Sys->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
+	my $ninDir = ".$infoDir/.nin/";
     my $limit = 60*60*24*30; # 30日
     my $sid = $this->{'SID'};
 
@@ -276,11 +261,10 @@ sub Save
 
     if($this->{'STATUS'}){
         my $session = $this->{'SESSION'};
-        $session->param('ninpocho',$this->{'NINJA'});
         # セッション有効期限を30日後に設定
         $session->expire('+30d');
         # セッションを閉じる
-        $session->close();
+        $session->flush();
     }
 
     # Hashテーブルを設定

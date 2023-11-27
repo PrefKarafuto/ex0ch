@@ -172,7 +172,7 @@ sub PrintNinjaList
 	$dispSt		= $Form->Get('DISPST', 0) || 0;
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	my $infoDir = $SYS->Get('INFO');
-	my $ninDir = ".$infoDir/.nin/"; #三男用忍法帖ディレクトリ。今後は.ninpochoに移行予定
+	my $ninDir = "./$infoDir/.nin/"; #三男用忍法帖ディレクトリ。今後は.ninpochoに移行予定
     my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
     my $sessnum = @session_files;
     $dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));
@@ -196,10 +196,10 @@ sub PrintNinjaList
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('NINPOCHO')\">全</a></th>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:250px\">忍法帖ID</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:200px\">忍法帖ID</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">最終更新</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Level</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">書き込み内容を閲覧</td></tr>\n");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Size</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">書き込み内容を閲覧</td></tr>\n");
     
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$n		= $i + 1;
@@ -207,6 +207,7 @@ sub PrintNinjaList
 		$file_name	=~ /cgisess_([0-9a-f]+)/;
         my $id = $1;
         $mtime = (stat($file_name))[9];
+		my $size = (stat($file_name))[7];
         my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($mtime);
         $year += 1900;
         $mon++;
@@ -218,7 +219,7 @@ sub PrintNinjaList
 		$Page->Print("<tr bgcolor=$bgColor>");
 		$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
 		$Page->Print("<td>$n: <a href=$common>$id</a></td>");
-		$Page->Print("<td align=center>$last_mod</td><td align=center>$level</td>");
+		$Page->Print("<td align=center>$last_mod</td><td align=center>$size</td>");
 		$Page->Print("<td></td></tr>\n");# 検索
 	}
 	$common		= "onclick=\"DoSubmit('sys.ninja','DISP'";
@@ -227,7 +228,8 @@ sub PrintNinjaList
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
 	$Page->Print("<input type=button value=\"一覧更新\" $common,'LIST')\"> ");
-	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\"> ") if ($isNinjaDelete);
+	$Page->Print("<input type=button value=\"　期限切れの忍法帖をクリア　\" $common2,'LIMDELETE')\" disabled> ");
+	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\" disabled> ");# if ($isNinjaDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	
@@ -250,7 +252,8 @@ sub PrintNinjaEdit
 	my ($Page, $SYS, $Form, $mode) = @_;
 	my (@threadList, $Ninja, $id, $subj, $res);
 	my ($common, $text);
-	
+	use POSIX qw(strftime);
+
 	$SYS->Set('_TITLE', ($mode ? 'Ninpocho Edit' : 'Ninpocho View'));
 	$text = ($mode ? '編集' : '確認');
     my $isDisabled = $mode ? '' : 'disabled';   # 編集すべきでない項目
@@ -261,6 +264,14 @@ sub PrintNinjaEdit
 	
     my $sid = $Form->Get('NINJA_ID');
 	$Ninja->LoadOnly($SYS,$sid);
+
+	#既定で保存されるセッション情報
+	my $SESSION_ID = $Ninja->Get('_SESSION_ID');
+	my $SESSION_REMOTE_ADDR = $Ninja->Get('_SESSION_REMOTE_ADDR');
+	my $SESSION_ATIME = strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('_SESSION_ATIME'));
+	my $SESSION_CTIME = strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('_SESSION_CTIME'));
+	
+	#忍法帖の情報
 	my $lv = $Ninja->Get('ninLv');
 	my $count = $Ninja->Get('count');
 	my $lvuptime = $Ninja->Get('lvuptime');
@@ -271,24 +282,24 @@ sub PrintNinjaEdit
 	
     $Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ユーザー情報</td></tr>\n");
 	$Page->Print("<tr><td>忍法帖ID</td>");
-	$Page->Print("<td><input type=text size=60 name=NINID value=\"$sid\" $isDisabled></td></tr>\n");
+	$Page->Print("<td><input type=text size=60 name=NINID value=\"$SESSION_ID\" $isDisabled></td></tr>\n");
 
     $Page->Print("<tr><td>忍法帖Lv</td>");
 	$Page->Print("<td><input type=text size=60 name=NINLV value=\"$lv\" $isDisabled></td></tr>\n");
     $Page->Print("<tr><td>説明</td>");
 	$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"\" $isDisabledVmode></td></tr>\n");
     $Page->Print("<tr><td>作成日時</td>");
-	$Page->Print("<td><input type=text size=60 name=DATE value=\"\" $isDisabled></td></tr>\n");
+	$Page->Print("<td><input type=text size=60 name=DATE value=\"$SESSION_CTIME\" $isDisabled></td></tr>\n");
     $Page->Print("<tr><td>作成時の書き込み内容</td>");
 	$Page->Print("<td><input type=text size=60 name=MESSAGE value=\"\" $isDisabled></td></tr>\n");
 	$Page->Print("<tr><td>作成時のIPアドレス</td>");
-	$Page->Print("<td><input type=text size=60 name=ADDR value=\"\" $isDisabled></td></tr>\n");
+	$Page->Print("<td><input type=text size=60 name=ADDR value=\"$SESSION_REMOTE_ADDR\" $isDisabled></td></tr>\n");
     $Page->Print("<tr><td>作成時のHOST</td>");
 	$Page->Print("<td><input type=text size=60 name=HOST value=\"\" $isDisabled></td></tr>\n");
     $Page->Print("<tr><td>作成時のユーザーエージェント</td>");
 	$Page->Print("<td><input type=text size=60 name=UA value=\"\" $isDisabled></td></tr>\n");
     $Page->Print("<tr><td>最終更新日時</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_DATE value=\"\" $isDisabled></td></tr>\n");
+	$Page->Print("<td><input type=text size=60 name=LAST_DATE value=\"$SESSION_ATIME\" $isDisabled></td></tr>\n");
     $Page->Print("<tr><td>最新書き込み内容</td>");
 	$Page->Print("<td><input type=text size=60 name=LAST_MESSAGE value=\"\" $isDisabled></td></tr>\n");
 	$Page->Print("<tr><td>最新IPアドレス</td>");
