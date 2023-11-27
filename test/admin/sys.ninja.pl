@@ -228,7 +228,7 @@ sub PrintNinjaList
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
 	$Page->Print("<input type=button value=\"一覧更新\" $common,'LIST')\"> ");
-	$Page->Print("<input type=button value=\"　期限切れの忍法帖をクリア　\" $common2,'LIMDELETE')\" disabled> ");
+	$Page->Print("<input type=button value=\"　期限切れの忍法帖をクリア　\" $common2,'CLEAR')\" disabled> ");
 	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\" disabled> ");# if ($isNinjaDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
