@@ -163,7 +163,8 @@ sub PrintNinjaList
 	my ($Page, $SYS, $Form) = @_;
 	my (@threadSet, $ThreadNum, $key, $res, $file_name, $i);
 	my ($dispSt, $dispEd, $dispNum, $bgColor, $base);
-	my ($common, $common2, $n, $Threads, $mtime,$last_mod);
+	my ($common, $common2, $n, $Threads, $mtime, $ctime, $last_mod, $crt_time);
+	use POSIX qw(strftime);
 	
 	$SYS->Set('_TITLE', 'Ninpocho List');
 	
@@ -172,7 +173,7 @@ sub PrintNinjaList
 	$dispSt		= $Form->Get('DISPST', 0) || 0;
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	my $infoDir = $SYS->Get('INFO');
-	my $ninDir = "./$infoDir/.nin/"; #三男用忍法帖ディレクトリ。今後は.ninpochoに移行予定
+	my $ninDir = ".$infoDir/.nin/"; #三男用忍法帖ディレクトリ。今後は.ninpochoに移行予定
     my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
     my $sessnum = @session_files;
     $dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));
@@ -195,32 +196,27 @@ sub PrintNinjaList
 	$Page->Print("表\示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('NINPOCHO')\">全</a></th>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:200px\">忍法帖ID</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">最終更新</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Size</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">書き込み内容を閲覧</td></tr>\n");
+	$Page->Print("<tr><th style=\"width:30px\"></th>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">忍法帖ID</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:10px\">Size</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">作成日時</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">最終更新</td></tr>\n");
     
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$n		= $i + 1;
 		$file_name		= $session_files[$i];
 		$file_name	=~ /cgisess_([0-9a-f]+)/;
         my $id = $1;
-        $mtime = (stat($file_name))[9];
+        $mtime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[9]);
+		$ctime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[10]);
 		my $size = (stat($file_name))[7];
-        my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($mtime);
-        $year += 1900;
-        $mon++;
-        $last_mod = sprintf("%04d/%02d/%02d %02d:%02d:%02d", $year, $mon, $mday, $hour, $min, $sec);
-		my $level = "";
 		$common = "\"javascript:SetOption('NINJA_ID','$id');";
 		$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
 		
 		$Page->Print("<tr bgcolor=$bgColor>");
 		$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
 		$Page->Print("<td>$n: <a href=$common>$id</a></td>");
-		$Page->Print("<td align=center>$last_mod</td><td align=center>$size</td>");
-		$Page->Print("<td></td></tr>\n");# 検索
+		$Page->Print("<td>$size</td><td>$ctime</td><td>$mtime</td></tr>\n");
 	}
 	$common		= "onclick=\"DoSubmit('sys.ninja','DISP'";
 	$common2	= "onclick=\"DoSubmit('sys.ninja','FUNC'";
@@ -228,7 +224,7 @@ sub PrintNinjaList
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
 	$Page->Print("<input type=button value=\"一覧更新\" $common,'LIST')\"> ");
-	$Page->Print("<input type=button value=\"　期限切れの忍法帖をクリア　\" $common2,'CLEAR')\" disabled> ");
+	$Page->Print("<input type=button value=\"　期限切れの忍法帖をクリア　\" $common2,'LIMDELETE')\" disabled> ");
 	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\" disabled> ");# if ($isNinjaDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
@@ -388,9 +384,9 @@ sub PrintNinjaEdit
 	my $common2 = "DoSubmit('sys.ninja','DISP','SEARCH')";
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
-	$Page->Print("<tr><td colspan=3 align=left>");
-	$Page->Print('<input type=button value="書き込みを検索" disabled onclick=\"'.$common2.';\">');
-	$Page->Print('<input type=button value="　保存　" disabled onclick=\"'.$common.';\">') ;#if $mode;
+	$Page->Print("<tr><td colspan=3>");
+	$Page->Print('<input type=button value="　書き込みを検索　" disabled onclick=\"'.$common2.';\">');
+	$Page->Print('<input type=button value="　保存　" disabled onclick=\"'.$common.';\" class="delete">') ;#if $mode;
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 

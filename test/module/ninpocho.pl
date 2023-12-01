@@ -212,8 +212,10 @@ sub Delete {
         if ($session->is_empty) {
             next; # このセッションIDは無効なので次へ
         } else {
-            my $session_file = $session->find($sid);
-            unlink $session_file if -e $session_file;
+            if ( ($session->ctime) <= time() ) {
+                $session->delete();
+                $session->flush();
+            }
             foreach my $filename (@file_list) {
                 DeleteHashValue($sid, $filename);
             }
@@ -253,8 +255,14 @@ sub Save
 	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.nin/";
-    my $limit = 60*60*24*30; # 30日
+    my $limit = 60*60*24;
     my $sid = $this->{'SID'};
+
+    if($password){
+        $limit = $limit*365;
+    }else{
+        $limit = $limit*30;
+    }
 
 	# SIDをクッキーに出力
 	$Cookie->Set('countsession', $sid);
@@ -262,7 +270,7 @@ sub Save
     if($this->{'STATUS'}){
         my $session = $this->{'SESSION'};
         # セッション有効期限を30日後に設定
-        $session->expire('+30d');
+        $session->expire($limit);
         # セッションを閉じる
         $session->flush();
     }
