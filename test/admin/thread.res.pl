@@ -301,9 +301,13 @@ sub PrintResList
 		}
 		$common2 = "\"javascript:SetOption('NINJA_ID','$logs[9]');";
 		$common2 .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
+		my $str = $logs[9];
+		my $length = length($str);
+		my $half = int($length / 2);
+		substr($str, $half) = '*' x ($length - $half);
 		$Page->Print("：<font color=forestgreen><b>$elem[0]</b></font>[$elem[1]]");
 		$Page->Print("：$elem[2]</dt><dd>$elem[3]");
-		$Page->Print("<br><br><hr>HOST:$logs[5]<br>IP:$logs[6]<br>UA:$logs[8]<br>忍法帖ID:<a href=$common2>$logs[9]</a>") if (defined $log && $isAccessUser);
+		$Page->Print("<br><br><hr>HOST:$logs[5]<br>IP:$logs[6]<br>UA:$logs[8]<br>SessionID:<a href=$common2>$str</a>") if (defined $log && $isAccessUser);
 		$Page->Print("</dd></td></tr>\n");
 	}
 	$Page->HTMLInput('hidden', 'SELECT_RES', '');

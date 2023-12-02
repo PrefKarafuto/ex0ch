@@ -1613,8 +1613,8 @@ sub BBS_SLIP
 	my ($slip_ip, $slip_remoho, $slip_ua);
 
 	use Digest::MD5 qw(md5_hex);
-	#use Net::Whois::Raw;
-	#use Geo::IP;
+	use Net::Whois::Raw;
+	use Geo::IP;
 
 	#bbs_slipに使用する文字
 	my @slip_char = (0..9, "a".."z", "A".."Z", ".", "/");
@@ -1814,7 +1814,7 @@ sub BBS_SLIP
 	#逆引き判定
 	if ($slip_remoho eq "none") { #逆引きできない場合
 		my $isunknown = "yes";
-		my $res = "";#whois($ip_addr);　軽量化
+		my $res = whois($ip_addr);
 
 		#モバイル回線判定
 		my $mobile_nickname_idx = -1;
@@ -1924,7 +1924,6 @@ sub BBS_SLIP
 
 	# 国を判定
 	my $gi_dat = "./datas/GeoIPCity.dat";
-=pod
 	if ($geo_ip_installed && -f $gi_dat) {
 	    my $gi = Geo::IP->open($gi_dat, GEOIP_STANDARD);
 	    my $record = $gi->record_by_addr($ip_addr);
@@ -1935,7 +1934,7 @@ sub BBS_SLIP
 	        $slip_bb = $slip_ip;
 	    }
 	}
-=cut
+
 	#bbs_slipを生成
 	my $slip_result = 'undef';
 	if($bbsslip eq 'vvv'){

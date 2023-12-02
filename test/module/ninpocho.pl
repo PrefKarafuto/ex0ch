@@ -284,8 +284,8 @@ sub Save
     my $ip_hash = $ctx->b64digest;
     my $user = MakeUserInfo($Sys);
 
-    SetHash($ip_hash,$sid,$ninDir.'hash/ip_addr.cgi',$limit);
-    SetHash($user,$sid,$ninDir.'hash/user_info.cgi',$limit);
+    SetHash($ip_hash,$sid,$ninDir.'hash/ip_addr.cgi',60*60*24);
+    SetHash($user,$sid,$ninDir.'hash/user_info.cgi',60*60*24*7);
     if (defined $password && $this->{'STATUS'}) {
         my $ctx = Digest::MD5->new;
         $ctx->add('ex0ch ID Generation');
