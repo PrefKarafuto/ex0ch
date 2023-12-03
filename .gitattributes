@@ -1,4 +1,4 @@
-.pl linguist-language=Perl
+*.pl linguist-language=Perl
 
 #windowsで開発したときに改行コードがCRLFにならないようにする
 * text=auto eol=lf
