@@ -1370,7 +1370,7 @@ sub Ninpocho
 		}
 
 		# 忍法帖データディレクトリを設定
-		my $ninDir = ".$infoDir/.nin/";
+		my $ninDir = "./$infoDir/.nin/";
 		mkdir $ninDir if ! -d $ninDir;
 
 		# IPアドレスを記録

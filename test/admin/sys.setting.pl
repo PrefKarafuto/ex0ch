@@ -250,7 +250,6 @@ sub PrintSystemInfo
 		HTML::Entities
 		CGI::Carp
 		Net::Whois::Raw
-		WP::Protocol::https
 		Geo::IP
 		JSON
 	));

@@ -238,7 +238,13 @@ sub cleanup_expired_session {
 
     return 0;  # セッションは期限切れではない
 }
-
+# ID生成
+sub generate_id
+{
+    my $md5 = Digest::MD5->new();
+    $md5->add($$,time(),rand(time));
+    return $md5->hexdigest();
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	忍法帖情報保存
