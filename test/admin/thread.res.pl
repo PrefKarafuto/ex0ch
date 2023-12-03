@@ -300,7 +300,7 @@ sub PrintResList
 			$Page->Print('' . ($i + 1));
 		}
 		$common2 = "\"javascript:SetOption('NINJA_ID','$logs[9]');";
-		$common2 .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
+		$common2 .= "DoSubmit('bbs.ninja','DISP','EDIT')\"";
 		my $str = $logs[9];
 		my $length = length($str);
 		my $half = int($length / 2);
