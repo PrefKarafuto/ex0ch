@@ -133,17 +133,9 @@ sub Write
 	my $Threads = $this->{'THREADS'};
 	my $Sec = $this->{'SECURITY'};
 	# Cookie管理モジュールを用意
-	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
-
-	# CookieからセッションIDを取得
-	my $sid = $Cookie->Get('countsession');
-	if ($sid eq '') {
-		my %cookies = fetch CGI::Cookie;
-		if (exists $cookies{'countsession'}) {
-			$sid = $cookies{'countsession'}->value;
-			$sid =~ s/"//g;
-		}
-	}
+	require './module/ninpocho.pl';
+	my $Ninja = NINPOCHO->new;
+	my $sid = $Ninja->Load($Sys);
 
 	# 改造版で追加
 	# hCaptcha認証
@@ -160,11 +152,11 @@ sub Write
 
 	#コマンドによる過去ログ送り用（猶予のため）
 	ToKakoLog($Sys,$Set,$Threads);
-	my $Ninja = $Set->Get('BBS_NINJA');#忍法帖が設定されていたらID生成に使用
+	my $isNinja = $Set->Get('BBS_NINJA');#忍法帖が設定されていたらID生成に使用
 	
 	# 情報欄
  	my $idpart = 'ID:none';
-	my $id = $Conv->MakeIDnew($Sys, 8,$sid);
+	my $id = $Conv->MakeIDnew($Sys, 8, $sid);
 	if (!$idSet){
 		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
 	}
@@ -183,6 +175,7 @@ sub Write
 	
 	# 書き込み直前処理
 	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1);
+	$this->Ninpocho($Sys,$Form,$Ninja,$sid) if $isNinja;
 	return $err if ($err != $ZP::E_SUCCESS);
 	
 	# レス要素の取得
@@ -306,7 +299,7 @@ sub Write
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
 	}
-	$Cookie->Set('countsession',$sid);
+	$Ninja->Save($Sys);
 	return $err;
 }
 
@@ -486,7 +479,6 @@ sub ReadyBeforeWrite
 	my $bbsslip = $isSlip ? $isSlip : $Set->Get('BBS_SLIP');
 
 	$this->addSlip($Sys, $Form, $bbsslip) if (!$Sec->IsAuthority($capID, $ZP::CAP_DISP_HANLDLE, $bbs) || !$noAttr);
-	$this->Ninpocho($Sys,$Form) if ($Set->Get('BBS_NINJA'));
 
 	$this->OMIKUJI($Sys, $Form);	#おみくじ
 	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
@@ -1344,88 +1336,26 @@ sub addSlip
 sub Ninpocho
 {
 	my $this = shift;
-	my ($Sys, $Form, $type) = @_;
-	my ($total_code, $infoDir);
-	require './module/file_utils.pl';
-	use CGI::Cookie;
-	use CGI::Session;
-
-	# infoディレクトリ
-	$infoDir = $Sys->Get('INFO');
-
-	# IPアドレスを取得
-	my $ipAddr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
-
-		# Cookie管理モジュールを用意
-		my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
-
-		# CookieからセッションIDを取得
-		my $sid = $Cookie->Get('countsession');
-		if ($sid eq '') {
-			my %cookies = fetch CGI::Cookie;
-			if (exists $cookies{'countsession'}) {
-				$sid = $cookies{'countsession'}->value;
-				$sid =~ s/"//g;
-			}
-		}
-
-		# 忍法帖データディレクトリを設定
-		my $ninDir = "./$infoDir/.nin/";
-		mkdir $ninDir if ! -d $ninDir;
-
-		# IPアドレスを記録
-		my $ssPath = "${ninDir}cgisess_${sid}";
-		$sid = '' if ! -f $ssPath;
-		my $ipPath = "${ninDir}ip_${ipAddr}";
-		if ($sid ne '' && ! -f $ipPath) {
-			open(my $fh, ">", $ipPath);
-			print $fh $sid;
-			close($fh);
-		}
-		if (-f $ipPath && open(my $fh, "<", $ipPath)) {
-			my $sidData = <$fh>;
-			$sid = $sidData if $sidData ne '';
-			my $ssPath = "${ninDir}cgisess_${sid}";
-			$sid = '' if ! -f $ssPath;
-			if ($sid eq '' && -f $ipPath) {
-				open(my $fh, ">", $ipPath);
-				print $fh '';
-				close($fh);
-			} else {
-				$total_code .= 'ｲ' if $sid ne '';
-			}
-			close($fh);
-		}
-		if ($sid eq '' && -d $ninDir) {
-			my $fsrslt = FILE_UTILS::fsearch($ninDir, $ipAddr);
-			if ($fsrslt =~ /cgisess_/) {
-				$sid = $fsrslt;
-        		$sid =~ s|.+?cgisess_||;
-				$total_code .= 'ｲ';
-			}
-		}
-
-    # セッションを読み込む
-    my $session = CGI::Session->new('driver:file;serializer:default', $sid, { Directory => $ninDir }) || 0;
+	my ($Sys, $Form, $Ninja, $sid) = @_;
 
     # セッションから忍法帖Lvを取得
-    my $ninLv = $session->param('ninLv') || 1;
+    my $ninLv = $Ninja->Get('ninLv') || 1;
 
-		# セッションから書き込み数を取得
-		my $count = $session->param('count') || 0;
+	# セッションから書き込み数を取得
+	my $count = $Ninja->Get('count') || 0;
 
     # 書き込んだ時間を取得
-		my $resTime = time();
+	my $resTime = time();
     # 書き込んだ時間の23時間後を取得
-		my $time23h = time() + 82800;
-		# セッションから前回レベルアップしたときの時間を取得
-		my $lvUpTime = $session->param('lvuptime') || $time23h;
+	my $time23h = time() + 82800;
+	# セッションから前回レベルアップしたときの時間を取得
+	my $lvUpTime = $Ninja->Get('lvuptime') || $time23h;
 
     # 書き込み数をカウント
-		$count++;
+	$count++;
 
-		# レベルの上限
-		my $lvLim = 40;
+	# レベルの上限
+	my $lvLim = 40;
 
     # 前回のレベルアップから23時間以上経過していればレベルアップ
     if ($resTime >= $lvUpTime && $ninLv < $lvLim) {
@@ -1433,49 +1363,43 @@ sub Ninpocho
       $lvUpTime = $time23h;
     }
 
-		# セッションに記録
-		if ($session) {
-			$session->param('count', $count);
-			$session->param('ninLv', $ninLv);
-			$session->param('lvuptime', $lvUpTime);
-		}
+	# セッションに記録
+	if ($Ninja) {
+		$Ninja->Set('count', $count);
+		$Ninja->Set('ninLv', $ninLv);
+		$Ninja->Set('lvuptime', $lvUpTime);
+	}
 
-		# セッションIDをクッキーに出力
-		if ($sid eq '') {
-			$sid = $session->id();
-		}
-		$Cookie->Set('countsession', $sid);
+	# 名前欄取得
+	my $name = $Form->Get('FROM');
 
-		# 名前欄取得
-		my $name = $Form->Get('FROM');
+	# 現在の時刻を取得
+	my $currentTime = time();
+	# 現在の時刻と$lvUpTimeとの差を計算
+	my $timeDiff = $lvUpTime - $currentTime;
+	# 差分を時間単位と分単位で計算
+	my $hoursDiff = int($timeDiff / 3600); # 1時間 = 3600秒
+	my $minutesDiff = int(($timeDiff % 3600) / 60); # 残りの秒数を分に変換
 
-		# 現在の時刻を取得
-		my $currentTime = time();
-		# 現在の時刻と$lvUpTimeとの差を計算
-		my $timeDiff = $lvUpTime - $currentTime;
-		# 差分を時間単位と分単位で計算
-		my $hoursDiff = int($timeDiff / 3600); # 1時間 = 3600秒
-		my $minutesDiff = int(($timeDiff % 3600) / 60); # 残りの秒数を分に変換
+	# 残り時間表示用
+	my $timeDisplay = "";
+	$timeDisplay .= "${hoursDiff}時間" if $hoursDiff > 0;
+	$timeDisplay .= "${minutesDiff}分" if $minutesDiff > 0 || $hoursDiff == 0; # 分が0でも時間が0の場合は表示する
 
-		# 残り時間表示用
-		my $timeDisplay = "";
-		$timeDisplay .= "${hoursDiff}時間" if $hoursDiff > 0;
-		$timeDisplay .= "${minutesDiff}分" if $minutesDiff > 0 || $hoursDiff == 0; # 分が0でも時間が0の場合は表示する
+	my $minutes = int($lvUpTime / 60);
+	#セッションハイジャック防止用
+	my $length = length($sid);
+	my $half = int($length / 2);
+	substr($sid, $half) = '*' x ($length - $half);
 
-		my $minutes = int($lvUpTime / 60);
-		#セッションハイジャック防止用
-		my $length = length($sid);
-		my $half = int($length / 2);
-		substr($sid, $half) = '*' x ($length - $half);
+	# 名前欄書き換え
+	$name =~ s|!id|</b>【忍法帖ID:$sid】<b>|g;
+	$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|g;
+	$name =~ s|!ninja|</b>【忍法帖Lv.$ninLv】<b>|g;
+	$name =~ s|!total|</b>【総カキコ数:$count】<b>|g;
 
-		# 名前欄書き換え
-		$name =~ s|!id|</b>【忍法帖ID:$sid】<b>|g;
-		$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|g;
-		$name =~ s|!ninja|</b>【忍法帖Lv.$ninLv】<b>|g;
-		$name =~ s|!total|</b>【総カキコ数:$count】<b>|g;
-
-		# 名前欄再設定
-		$Form->Set('FROM', $name);
+	# 名前欄再設定
+	$Form->Set('FROM', $name);
 
 	return 0;
 }
