@@ -79,15 +79,16 @@ sub Load
         #改竄をチェック
         $sid = $Cookie->Get('countsession');
         $sec = $Cookie->Get('securitykey');
-
-        if($sid){
+        if($sec){
             my $ctx = Digest::MD5->new;
             $ctx->add($Sys->Get('SECURITY_KEY'));
             $ctx->add(':', $sid);
             #一致しなかったら改竄されているか旧仕様
             return if ($ctx->b64digest ne $sec);
-        }else{
-            #cookieにsessionIDが保存されていない場合
+        }
+
+        #cookieにsessionIDが保存されていない場合
+        if(!$sid){
             my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
             my $ctx = Digest::MD5->new;
             $ctx->add('ex0ch ID Generation');
@@ -113,7 +114,7 @@ sub Load
             $this->{'SID'} = generate_id();
         }
     }
-    
+
     return $sid;
 }
 # セッションIDから忍法帖を読み込む(admin.cgi用)
