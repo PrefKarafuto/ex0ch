@@ -89,7 +89,14 @@ sub Load
 	else {
 		$pSys->{'LIMTIME'} = 0;
 	}
-	
+
+	#セキュリティキーの設定
+	if (!$pSys->{'SECURITY_KEY'}){
+		my $md5 = Digest::MD5->new();
+		$md5->add($$,time(),rand(time));
+		$pSys->{'SECURITY_KEY'} = $md5->hexdigest();
+	}
+
 	if ($this->Get('CONFVER', '') ne $pSys->{'VERSION'}) {
 		$this->Save();
 	}
@@ -291,6 +298,8 @@ sub InitSystemValue
 		'SPAMHAUS'		=> 0,									# zen.spamhaus.org
 		'SPAMCOP'		=> 0,									# bl.spamcop.net
 		'BARRACUDA'	    => 0,									# b.barracudacentral.org
+
+		'SECURITY_KEY'	=> '',
 		
 		'HCAPTCHA_SITEKEY'	=>'',								#hCaptchaサイトキー
 		'HCAPTCHA_SECRETKEY'	=>'',							#hCaptchaシークレットキー
