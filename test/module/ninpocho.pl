@@ -83,7 +83,7 @@ sub Load
             my $ctx = Digest::MD5->new;
             $ctx->add($Sys->Get('SECURITY_KEY'));
             $ctx->add(':', $sid);
-            #一致しなかったら改竄されているか旧仕様
+            #一致しなかったら改竄されている
             return if ($ctx->b64digest ne $sec);
         }else{
             #セキュリティキーが無かった場合
