@@ -85,6 +85,9 @@ sub Load
             $ctx->add(':', $sid);
             #一致しなかったら改竄されているか旧仕様
             return if ($ctx->b64digest ne $sec);
+        }else{
+            #セキュリティキーが無かった場合
+            #return;
         }
 
         #cookieにsessionIDが保存されていない場合
