@@ -104,9 +104,9 @@ sub Write
 {
 	my $this = shift;
 	require './module/data_utils.pl';
-	my $ip_addr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
-	if(!$ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq $ip_addr){
-		$ENV{'REMOTE_HOST'} = DATA_UTILS::reverse_lookup($ip_addr);
+	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
+	if(!$ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq $ENV{'REMOTE_ADDR'}){
+		$ENV{'REMOTE_HOST'} = DATA_UTILS::reverse_lookup($ENV{'REMOTE_ADDR'});
 	}
 
 	# 書き込み前準備

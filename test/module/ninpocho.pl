@@ -51,9 +51,10 @@ sub Load
 {
 	my $this = shift;
 	my ($Sys,$password) = @_;
-    my ($sid,$sec);
+    my ($sid,$sid_saved,$sid_before,$sec);
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
+    my $Form = $Sys->Get('MainCGI')->{'FORM'};
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = "./$infoDir/.ninpocho/";
 
@@ -67,47 +68,77 @@ sub Load
         $this->{'SATUS'} = 0;
     }
 
+    #cookieから取得
+    $sid = $Cookie->Get('countsession');
+    $sec = $Cookie->Get('securitykey');
+    my %cookies = fetch CGI::Cookie;
+    if (!$sid && exists $cookies{'countsession'}) {
+        $sid = $cookies{'countsession'}->value;
+        $sid =~ s/"//g;
+    }
+    if (!$sec && exists $cookies{'securitykey'}) {
+        $sec = $cookies{'securitykey'}->value;
+        $sec =~ s/"//g;
+    }
+
+    #改竄をチェック
+    if($sec){
+        my $ctx = Digest::MD5->new;
+        $ctx->add($Sys->Get('SECURITY_KEY'));
+        $ctx->add(':', $sid);
+        #一致しなかったら改竄されている
+        return if ($ctx->b64digest ne $sec);
+    }else{
+        #セキュリティキーが無い場合
+        #return;
+    }
+
+    #cookieにsessionIDが保存されていない場合
+    if(!$sid){
+        my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+        my $ctx = Digest::MD5->new;
+        $ctx->add('ex0ch ID Generation');
+        $ctx->add(':', $Sys->Get('SERVER'));
+        $ctx->add(':', $addr);
+
+        $sid = GetHash($ctx->b64digest,$ninDir.'hash/ip_addr.cgi');
+        if(!$sid) {
+            $sid = GetHash(MakeUserInfo($Sys),$ninDir.'hash/user_info.cgi');
+        }
+    }
+
+    #パスワードがあった場合
     if($password && $this->{'SATUS'}){
-        #パスワードがあった場合
         my $ctx = Digest::MD5->new;
         $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
         $ctx->add(':', $password);
 
-        $sid = GetHash($ctx->b64digest,$ninDir.'hash/password.cgi');
-    }else{
-        #改竄をチェック
-        $sid = $Cookie->Get('countsession');
-        $sec = $Cookie->Get('securitykey');
-        if($sec){
-            my $ctx = Digest::MD5->new;
-            $ctx->add($Sys->Get('SECURITY_KEY'));
-            $ctx->add(':', $sid);
-            #一致しなかったら改竄されている
-            return if ($ctx->b64digest ne $sec);
-        }else{
-            #セキュリティキーが無かった場合
-            #return;
-        }
-
-        #cookieにsessionIDが保存されていない場合
-        if(!$sid){
-            my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
-            my $ctx = Digest::MD5->new;
-            $ctx->add('ex0ch ID Generation');
-            $ctx->add(':', $Sys->Get('SERVER'));
-            $ctx->add(':', $addr);
-
-            $sid = GetHash($ctx->b64digest,$ninDir.'hash/ip_addr.cgi');
-            if(!$sid) {
-                $sid = GetHash(MakeUserInfo($Sys),$ninDir.'hash/user_info.cgi');
-            }
+        $sid_saved = GetHash($ctx->b64digest,$ninDir.'hash/password.cgi');
+        if($sid_saved){
+            $sid_before = $sid;
+            $sid = $sid_saved;
         }
     }
 
     if($this->{'SATUS'}){
         #忍法帖が有効の場合
-        $this->{'SESSION'} = CGI::Session->new("driver:file", $sid, {Directory => $ninDir});
+        $this->{'SESSION'} = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
+        if($this->{'SESSION'}->is_empty){
+            $this->{'SESSION'} = CGI::Session->new("driver:file", $sid, {Directory => $ninDir});
+            $sid = CGI::Session->id();
+            #新規作成時に追加
+            $this->Set('new_message',substr($Form->Get('MESSAGE'), 0, 30));
+        }else{
+            if ($sid && $sid_before && $sid_before ne $sid_saved){
+                #忍法帖ロード時に追加
+                $this->Set('load_message',substr($Form->Get('MESSAGE'), 0, 30));
+                $this->Set('load_from',$sid_before);
+                $this->Set('load_time',localtime(time));
+                $this->Set('load_addr',$ENV{'REMOTE_ADDR'});
+                $this->Set('load_host',$ENV{'REMOTE_HOST'});
+            }
+        }
         $this->{'SID'} = $sid;
     }else{
         #セッションIDのみ使う場合
@@ -118,7 +149,7 @@ sub Load
         }
     }
 
-    return $sid;
+    return $this->{'SID'};
 }
 # セッションIDから忍法帖を読み込む(admin.cgi用)
 sub LoadOnly {
@@ -160,7 +191,7 @@ sub Get
 {
     my $this = shift;
     my ($name) = @_;
-    return "ERR" if !$this->{'STATUS'};
+    return if !$this->{'STATUS'};
     my $session = $this->{'SESSION'};
     my $val = $session->param($name);
     
