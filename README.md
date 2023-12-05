@@ -33,9 +33,9 @@ Shift_JISからUTF-8への書き換えに伴い、旧来の0ch/0ch+用プラグ�
     |  + 1000.txt  
     |  + 2000000000.dat  
     |  :  
-    + info/
-  　｜　+ .ninpocho/           - 忍法帖保存ディレクトリ
-  　｜　+ .session/            - セッション情報保存ディレクトリ
+    + info/  
+    |  + .ninpocho/           - 忍法帖保存ディレクトリ  
+    |  + .session/            - セッション情報保存ディレクトリ  
     |  + category.cgi         - 掲示板カテゴリの初期定義ファイル  
     |  + errmes.cgi           - エラーメッセージ定義ファイル  
     |  + users.cgi            - 初期ユーザ(Administrator)定義ファイル  
