@@ -380,7 +380,13 @@ sub InitSettingData
 		'BBS_MASCOT'			=> '',
 		'BBS_KAKO'				=> '',
 		'BBS_TITLEID'			=> '',
-  		'BBS_COMMAND'			=> 0
+  		'BBS_COMMAND'			=> 0 ,
+
+		#忍法帖関連
+		'NINJA_FORCESAGE'		=> 2,
+		'NINJA_MAKETHREAD'		=> 2,
+		'NINJA_THREADSTOP'		=> 10,
+		'NINJA_USERBAN'			=> 10,
 	);
 	
 	while (my ($key, $val) = each(%set)) {
