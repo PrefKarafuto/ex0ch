@@ -92,6 +92,7 @@ sub Load
 
 	#セキュリティキーの設定
 	if (!$pSys->{'SECURITY_KEY'}){
+		use Digest::MD5;
 		my $md5 = Digest::MD5->new();
 		$md5->add($$,time(),rand(time));
 		$pSys->{'SECURITY_KEY'} = $md5->hexdigest();
