@@ -217,7 +217,7 @@ sub ConvertImgur
 	
 	my $reg = '(?<!src=")(https?://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
 	
-	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1"></a></blockquote>|g;
+	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1">$1</a></blockquote>|g;
 	
 	return $text;
 	
