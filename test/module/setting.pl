@@ -285,7 +285,7 @@ sub InitSettingData
 		'BBS_TITLE'			=> '掲示板＠EXぜろちゃんねる',
 		'BBS_TITLE_PICTURE'		=> 'kanban.gif',
 		'BBS_TITLE_COLOR'		=> '#000000',
-		'BBS_TITLE_LINK'		=> 'https://github.com/PrefKarafuto/New_0ch_Plus/',
+		'BBS_TITLE_LINK'		=> 'https://github.com/PrefKarafuto/ex0ch',
 		'BBS_BG_COLOR'			=> '#FFFFFF',
 		'BBS_BG_PICTURE'		=> 'ba.gif',
 		'BBS_NONAME_NAME'		=> '名無しさん＠EXぜろちゃんねる',

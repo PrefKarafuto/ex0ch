@@ -235,7 +235,7 @@ sub PrintFoot
 	$Page->Print(<<HTML);
 
 <div class="foot">
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">EXぜろちゃんねる</a>
+<a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 SEARCH.CGI - $ver
 </div>
 

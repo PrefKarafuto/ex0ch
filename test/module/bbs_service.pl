@@ -583,7 +583,7 @@ HTML
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">EXぜろちゃんねる</a>
+<a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 BBS.CGI - $ver (Perl)
 @{[ $Sys->Get('SPAMHAUS') ? '+Spamhaus' : '' ]}
 @{[ $Sys->Get('SPAMCOP') ? '+SpamCop' : '' ]}

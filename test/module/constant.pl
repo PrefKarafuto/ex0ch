@@ -4,7 +4,7 @@
 #
 #	by EXぜろちゃんねる
 #	http://zerochplus.sourceforge.jp/
-#   https://github.com/PrefKarafuto/New_0ch_Plus/
+#   https://github.com/PrefKarafuto/ex0ch
 #
 #============================================================================================================
 package	ZP;
