@@ -115,7 +115,7 @@ sub Load
         $ctx->add(':', $password);
 
         $sid_saved = GetHash($ctx->b64digest,$ninDir.'hash/password.cgi');
-        if($sid_saved){
+        if($sid_saved && $sid_saved ne $sid){
             $sid_before = $sid;
             $sid = $sid_saved;
         }
@@ -128,15 +128,15 @@ sub Load
             $this->{'SESSION'} = CGI::Session->new("driver:file", $sid, {Directory => $ninDir});
             $sid = CGI::Session->id();
             #新規作成時に追加
-            $this->Set('new_message',substr($Form->Get('MESSAGE'), 0, 30));
+            Set('new_message',substr($Form->Get('MESSAGE'), 0, 30));
         }else{
             if ($sid && $sid_before && $sid_before ne $sid_saved){
                 #忍法帖ロード時に追加
-                $this->Set('load_message',substr($Form->Get('MESSAGE'), 0, 30));
-                $this->Set('load_from',$sid_before);
-                $this->Set('load_time',localtime(time));
-                $this->Set('load_addr',$ENV{'REMOTE_ADDR'});
-                $this->Set('load_host',$ENV{'REMOTE_HOST'});
+                Set('load_message',substr($Form->Get('MESSAGE'), 0, 30));
+                Set('load_from',$sid_before);
+                Set('load_time',localtime(time));
+                Set('load_addr',$ENV{'REMOTE_ADDR'});
+                Set('load_host',$ENV{'REMOTE_HOST'});
             }
         }
         $this->{'SID'} = $sid;
@@ -318,22 +318,20 @@ sub Save
 
     # Hashテーブルを設定
     my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
-    my $ctx = Digest::MD5->new;
-    $ctx->add('ex0ch ID Generation');
-    $ctx->add(':', $Sys->Get('SERVER'));
-    $ctx->add(':', $addr);
-    my $ip_hash = $ctx->b64digest;
+    my $ctx2 = Digest::MD5->new;
+    $ctx2->add(':', $Sys->Get('SERVER'));
+    $ctx2->add(':', $addr);
+    my $ip_hash = $ctx2->b64digest;
     my $user = MakeUserInfo($Sys);
 
-    SetHash($ip_hash,$sid,$ninDir.'hash/ip_addr.cgi',60*60*24);
-    SetHash($user,$sid,$ninDir.'hash/user_info.cgi',60*60*24*7);
+    SetHash($ip_hash,$sid,60*60*24+localtime(time),$ninDir.'hash/ip_addr.cgi');
+    SetHash($user,$sid,60*60*24+localtime(time),$ninDir.'hash/user_info.cgi');
     if (defined $password && $this->{'STATUS'}) {
-        my $ctx = Digest::MD5->new;
-        $ctx->add('ex0ch ID Generation');
-        $ctx->add(':', $Sys->Get('SERVER'));
-        $ctx->add(':', $password);
-        my $pass_hash = $ctx->b64digest;
-        SetHash($pass_hash,$sid,$ninDir.'hash/password.cgi',$limit);
+        my $ctx3 = Digest::MD5->new;
+        $ctx3->add(':', $Sys->Get('SERVER'));
+        $ctx3->add(':', $password);
+        my $pass_hash = $ctx3->b64digest;
+        SetHash($pass_hash,$sid,$limit+localtime(time),$ninDir.'hash/password.cgi');
     }
 	
 }
@@ -346,14 +344,11 @@ sub GetHash {
     if (-e $filename) {
         $hash_table = retrieve($filename);
     }
-
-    # 現在時刻
-    my $now = time;
     
     # キーに対応する値が存在するかチェック
     if (exists $hash_table->{$key}) {
         # 有効期限をチェック
-        if ($hash_table->{$key}{expiry} < $now) {
+        if ($hash_table->{$key}{expiry} < localtime(time)) {
             # 有効期限切れの場合は削除してundefを返す
             delete $hash_table->{$key};
             store $hash_table, $filename;
@@ -370,7 +365,7 @@ sub GetHash {
 
 # パラメータをハッシュテーブルに保存し、ファイルに保存する関数
 sub SetHash {
-    my ($key, $value, $filename, $expiry) = @_;
+    my ($key, $value, $expiry ,$filename) = @_;
     my $hash_table = {};
 
     if (-e $filename) {
@@ -379,11 +374,28 @@ sub SetHash {
 
     $hash_table->{$key} = {
         value => $value,
-        expiry => time + $expiry,
+        expiry => $expiry,
     };
     store $hash_table, $filename;
     chmod 0600,$filename,
 }
+sub DeleteHash
+{
+    my ($key, $filename) = @_;
+    my $hash_table = {};
+
+    if (-e $filename) {
+        $hash_table = retrieve($filename);
+        # 値が目的の値と一致した場合、その要素を削除
+        if ($hash_table->{$key}) {
+            delete $hash_table->{$key};
+        }
+    }
+        # 変更をファイルに保存
+        store $hash_table, $filename;
+        chmod 0600,$filename;
+}
+
 sub DeleteHashValue {
     my ($target_value, $filename) = @_;
     my $hash_table = {};
@@ -404,6 +416,7 @@ sub DeleteHashValue {
         chmod 0600,$filename;
     }
 }
+
 sub MakeUserInfo
 {
     my $Sys = shift;
