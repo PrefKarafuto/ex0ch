@@ -11,7 +11,7 @@ MullvadVpn
 ExpressVpn
 /[\w-]+\.expressvpn\.com/
 ProtonVpn
-//
+/[\w-]+\.protonvpn\.net/
 PureVpn
 /[\w-]+\.pointtoserver\.com/
 /[\w-]+\.ptoserver\.com/
@@ -32,7 +32,7 @@ VyprVpn
 IPVanishVpn
 /[\w-]+(\.vpn)?\.ipvanish\.com/
 AvastVpn
-//
+/[\w-]+\.avast\.com/
 PrivateVpn
 /[\w-]+\.pvdata\.host/
 VpnGate
