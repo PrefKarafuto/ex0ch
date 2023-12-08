@@ -1312,7 +1312,7 @@ sub addSlip
 	my $Set = $this->{'SET'};
 
 	use Socket;
-	require './module/data_utils.pl';
+	require './module/slip.pl';
 
 	#IP・リモホ・UAを取得
 	my $ip_addr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
@@ -1326,7 +1326,7 @@ sub addSlip
 		if ($from eq '') {
 			$from = $Set->Get('BBS_NONAME_NAME');
 		}
-		my $res = DATA_UTILS::BBS_SLIP($ip_addr, $remoho, $ua, $bbsslip);
+		my $res = SLIP::BBS_SLIP_OLD($ip_addr, $remoho, $ua, $bbsslip);
 		$from = "${from} </b>(${res})<b> </b>";
 		$Form->Set('FROM',$from);
 	}
