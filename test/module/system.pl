@@ -276,8 +276,8 @@ sub InitSystemValue
 		'LINKST'	=> 23,										# リンク禁止開始時間
 		'LINKED'	=> 2,										# リンク禁止終了時間
 		'PATHKIND'	=> 0,										# 生成パスの種類
-		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',		# ヘッダ下部の表示文字列
-		'HEADURL'	=> '../search.cgi',					# ヘッダ下部のURL
+		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',	  # ヘッダ下部の表示文字列
+		'HEADURL'	=> '../search.cgi',							# ヘッダ下部のURL
 		'FASTMODE'	=> 0,										# 高速モード
 		
 		# ここからぜろプラオリジナル
@@ -287,8 +287,8 @@ sub InitSystemValue
 		'BANNER'	=> 1,										# read.cgi他の告知欄の表示
 		'KAKIKO'	=> 1,										# 2重かきこですか？？
 		'COUNTER'	=> '',										# 機能削除済につき未使用
-		'PRTEXT'	=> 'EXぜろちゃんねる',					# PR欄の表示文字列
-		'PRLINK'	=> 'https://github.com/PrefKarafuto/ex0ch',				# PR欄のリンクURL
+		'PRTEXT'	=> 'EXぜろちゃんねる',						# PR欄の表示文字列
+		'PRLINK'	=> 'https://github.com/PrefKarafuto/ex0ch',	# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
 		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
@@ -300,11 +300,16 @@ sub InitSystemValue
 		'SPAMCOP'		=> 0,									# bl.spamcop.net
 		'BARRACUDA'	    => 0,									# b.barracudacentral.org
 
-		'SECURITY_KEY'	=> '',
+		'SECURITY_KEY'	=> '',									# セキュリティキー（初回起動時に自動設定されます）
+		'LAST_FLUSH'	=> '',									# 定期的に動かす必要がある機能用
 		
-		'HCAPTCHA_SITEKEY'	=>'',								#hCaptchaサイトキー
-		'HCAPTCHA_SECRETKEY'	=>'',							#hCaptchaシークレットキー
-		'IMGTAG'		=> 0,									#画像リンクをIMGタグに変換
+		'RECAPTCHA_SITEKEY'		=> '',							# reCaptchaサイトキー
+		'RECAPTCHA_SECRETKEY'	=> '',							# reCaptchaシークレットキー
+		'HCAPTCHA_SITEKEY'		=> '',							# hCaptchaサイトキー
+		'HCAPTCHA_SECRETKEY'	=> '',							# hCaptchaシークレットキー
+		'TURNSTILE_SITEKEY'		=> '',							# Turnstileサイトキー
+		'TURNSTILE_SECRETKEY'	=> '',							# Turnstileシークレットキー
+		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換
 		'CSP'			=> 0,
 		
 		'PERM_EXEC'		=> 0700,

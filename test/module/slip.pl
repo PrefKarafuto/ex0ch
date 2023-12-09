@@ -74,6 +74,7 @@ sub is_anonymous {
     if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
         my @anon_remoho = (
             '^.*\\.(vpngate\\.v4\\.open\\.ad\\.jp|opengw\\.net)$',
+			'^.*\\.(vpn|tor|proxy|private)$',
             '^.*\\.(?:ablenetvps\\.ne\\.jp|amazonaws\\.com|arena\\.ne\\.jp|akamaitechnologies\\.com|cdn77\\.com|cnode\\.io|datapacket\\.com|digita-vm\\.com|googleusercontent\\.com|hmk-temp\\.com||kagoya\\.net|linodeusercontent\\.com|sakura\\.ne\\.jp|vultrusercontent\\.com|xtom\\.com)$',
             '^.*\\.(?:tsc-soft\\.com|53ja\\.net)$'
         );
@@ -87,16 +88,9 @@ sub is_anonymous {
     }
 
     my $vpngate_ip_txt = "$infoDir/vpngate-ip.txt";
-    if (open(my $fh, "<", $vpngate_ip_txt)) {
-        while (my $line = readline $fh) {
-            chomp $line;
-            if ($ipAddr eq $line) {
-                $isAnon = 1;
-                last;
-            }
-        }
-        close($fh);
-    }
+	my $tor_ip_txt = "$infoDir/tor-ip.txt";
+    $isAnon += ListCheck($ipAddr,$vpngate_ip_txt) ;
+	$isAnon += ListCheck($ipAddr,$tor_ip_txt);
 
     return $isAnon;
 }
@@ -135,23 +129,11 @@ sub get_country_by_ip {
     my ($ipAddr) = @_;
     my $country;
 
-    if ($ipAddr !~ /:/) {
-        my $gi_dat = './datas/GeoIPCity.dat';
-        if (-f $gi_dat) {
-            use Geo::IP;
-            my $gi = Geo::IP->open($gi_dat, GEOIP_STANDARD) || 0;
-            if ($gi) {
-                my $record = $gi->record_by_addr($ipAddr);
-                $country = $record->country_code if $record;
-            }
-        }
-    } else {
-        my $res = whois($ipAddr);
-        for my $line (split /\n/, $res) {
-            if ($line =~ /country:\s*([A-Z]{2})/i) {
-                $country = $1;
-                last;
-            }
+    my $res = whois($ipAddr);
+    for my $line (split /\n/, $res) {
+        if ($line =~ /country:\s*([A-Z]{2})/i) {
+            $country = $1;
+            last;
         }
     }
 
@@ -379,25 +361,6 @@ sub is_mobile {
     return $ismobile;
 }
 
-#プロキシかどうかチェック
-sub is_proxy
-{
-	my ($checkKey) = @_;
-	my $ipAddr = $ENV{'REMOTE_ADDR'};
-	
-	if($checkKey){
-		my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=1";#VPNが検出された場合もプロキシ判定とする
-		my $ua = LWP::UserAgent->new();
-		my $response = $ua->post($url);
-		if ( $response->is_success() ) {
-			my $json = $response->decoded_content();
-			my $out = decode_json($json);
-			my $isProxy = $out->{$ipAddr}->{"proxy"};
-			return 1 if $isProxy eq 'yes';
-		}
-	}
-	return 0;
-}
 sub GetTorExitNodeList
 {
 	my ($fileName) = @_;
