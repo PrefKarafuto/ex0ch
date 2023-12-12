@@ -36,7 +36,7 @@ sub is_denied_ip {
     return exists $denied_ips->{$ipAddr} ? 1 : 0;
 }
 
-# ローカル串判定
+# ローカルで串判定
 sub is_proxy_local {
     my ($remoho, $ipAddr, $infoDir) = @_;
     my $isAnon = 0;
@@ -52,32 +52,8 @@ sub is_proxy_local {
 
     return $isAnon;
 }
-
-# 匿名化判定
-sub is_anonymous {
-    my ($isFwifi, $country, $remoho, $ipAddr, $infoDir) = @_;
-    my $isAnon = 0;
-
-    if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
-        my @anon_remoho = (
-            '^.*\\.(vpngate\\.v4\\.open\\.ad\\.jp|opengw\\.net)$',
-            '^.*\\.(?:ablenetvps\\.ne\\.jp|amazonaws\\.com|arena\\.ne\\.jp|akamaitechnologies\\.com|cdn77\\.com|cnode\\.io|datapacket\\.com|digita-vm\\.com|googleusercontent\\.com|hmk-temp\\.com||kagoya\\.net|linodeusercontent\\.com|sakura\\.ne\\.jp|vultrusercontent\\.com|xtom\\.com)$',
-            '^.*\\.(?:tsc-soft\\.com|53ja\\.net)$'
-        );
-
-        for my $name (@anon_remoho) {
-            if ($remoho =~ /(?:${name})/i) {
-                $isAnon = 1;
-                last;
-            }
-        }
-    }
-
-    return $isAnon;
-}
-
-#串かどうか外部APIでチェック
-sub is_proxy {
+#外部APIでチェック
+sub is_proxy_api {
     my ($ipAddr, $infoDir, $checkKey) = @_;
     return 0 unless defined $checkKey;
 
@@ -101,6 +77,29 @@ sub is_proxy {
         }
     }
     return 0;
+}
+
+# 匿名化判定
+sub is_anonymous {
+    my ($isFwifi, $country, $remoho, $ipAddr, $infoDir) = @_;
+    my $isAnon = 0;
+
+    if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
+        my @anon_remoho = (
+            '^.*\\.(vpngate\\.v4\\.open\\.ad\\.jp|opengw\\.net)$',
+            '^.*\\.(?:ablenetvps\\.ne\\.jp|amazonaws\\.com|arena\\.ne\\.jp|akamaitechnologies\\.com|cdn77\\.com|cnode\\.io|datapacket\\.com|digita-vm\\.com|googleusercontent\\.com|hmk-temp\\.com||kagoya\\.net|linodeusercontent\\.com|sakura\\.ne\\.jp|vultrusercontent\\.com|xtom\\.com)$',
+            '^.*\\.(?:tsc-soft\\.com|53ja\\.net)$'
+        );
+
+        for my $name (@anon_remoho) {
+            if ($remoho =~ /(?:${name})/i) {
+                $isAnon = 1;
+                last;
+            }
+        }
+    }
+
+    return $isAnon;
 }
 
 # 公衆Wifi判定
@@ -446,6 +445,12 @@ sub BBS_SLIP
 	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);
 	my $isProxy = is_proxy_local($ipAddr,$remoho,$infoDir);
 	my $isAnon = is_anonymous($isFwifi,$country,$ipAddr,$remoho,$infoDir);
+
+	# 外部APIによるプロキシ判定
+	# 使わない場合は$checkKeyを0に
+	if(!$isProxy && !$isAnon && $checkKey){
+		$isProxy = is_proxy_api($ipAddr,$infoDir,$checkKey);
+	}
 
 	# bbs_slipに使用する文字
 	my @slip_chars = (0..9, 'a'..'z', 'A'..'Z', '.', '/');
