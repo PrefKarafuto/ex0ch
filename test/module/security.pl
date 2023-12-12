@@ -667,7 +667,7 @@ sub IsLogin
 		return (0, '') if (!$userid);
 		
 		my $session = CGI::Session->new($opt->{'driver'}, undef, $opt->{'option'});
-		$session->param('addr', (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}));
+		$session->param('addr', ($ENV{'REMOTE_ADDR'}));
 		$session->param('user', $name);
 		$session->param('uid', $userid);
 		$session->expire("+$opt->{'min'}m");
@@ -677,7 +677,7 @@ sub IsLogin
 		my $session = CGI::Session->new($opt->{'driver'}, $sid, $opt->{'option'});
 		
 		$_ = $session->param('addr');
-		if (!defined $_ || $_ ne (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR})) {
+		if (!defined $_ || $_ ne ($ENV{'REMOTE_ADDR'})) {
 			$session->delete();
 			return (0, '');
 		}

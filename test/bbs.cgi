@@ -142,8 +142,10 @@ sub Initialize
 	
 	# ホスト情報設定(DNS逆引き)
 	#変数初期化チェックを挿入。
+	#IPアドレスの設定とリモホ逆引き用
+	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
 	if(!defined $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq '') {
-		$ENV{'REMOTE_HOST'} = $Conv->GetRemoteHost();
+		$ENV{'REMOTE_HOST'} = $Conv->reverse_lookup($ENV{'REMOTE_ADDR'});
 	}
 	$Form->Set('HOST', $ENV{'REMOTE_HOST'});
 	

@@ -98,7 +98,8 @@ sub Initialize
 	$oSYS->{'MainCGI'} = $pSYS;
 	
 	# ホスト情報設定(DNS逆引き)
-	$ENV{'REMOTE_HOST'} = $oCONV->GetRemoteHost() unless ($ENV{'REMOTE_HOST'});
+	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
+	$ENV{'REMOTE_HOST'} = $oCONV->reverse_lookup($ENV{'REMOTE_ADDR'}) unless ($ENV{'REMOTE_HOST'});
 	$pSYS->{'FORM'}->Set('HOST', $ENV{'REMOTE_HOST'});
 	
 	return 0;
@@ -128,7 +129,7 @@ sub PrintMadaHead
 	
 	$code	= $Sys->{'CODE'};
 	$HOST	= $Sys->{'FORM'}->Get('HOST');
-	$ADDR	= (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
+	$ADDR	= ($ENV{'REMOTE_ADDR'});
 	
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
@@ -188,7 +189,7 @@ sub PrintMadaCont
 	$vUser = USER->new;
 	
 	$HOST	= $Sys->{'FORM'}->Get('HOST');
-	$ADDR	= (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
+	$ADDR	= ($ENV{'REMOTE_ADDR'});
 	$BBSpath	= $Sys->{'SYS'}->Get('BBSPATH');
 	
 	#$sys->Set('HITS', $line);

@@ -140,7 +140,7 @@ sub Set
 	require './module/data_utils.pl';
 
 	$mode = '0' if (! defined $mode);
-	my $ip_addr = (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
+	my $ip_addr = ($ENV{'REMOTE_ADDR'});
 	
 	my $host = $ENV{'REMOTE_HOST'};
 	if ($mode ne '0') {
@@ -280,7 +280,7 @@ sub Search
 	else {
 		if ($mode ne '0') {
 			if ($mode eq 'P') {
-				$host = "$host($data)(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR})";
+				$host = "$host($data)($ENV{'REMOTE_ADDR'})";
 			}
 			else {
 				$host = "$host($data)";

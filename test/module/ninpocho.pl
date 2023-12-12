@@ -95,7 +95,7 @@ sub Load
 
     #cookieにsessionIDが保存されていない場合
     if(!$sid){
-        my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+        my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx = Digest::MD5->new;
         $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
@@ -317,7 +317,7 @@ sub Save
     }
 
     # Hashテーブルを設定
-    my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+    my $addr = $ENV{'REMOTE_ADDR'};
     my $ctx2 = Digest::MD5->new;
     $ctx2->add(':', $Sys->Get('SERVER'));
     $ctx2->add(':', $addr);
@@ -420,7 +420,7 @@ sub DeleteHashValue {
 sub MakeUserInfo
 {
     my $Sys = shift;
-    my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+    my $addr = $ENV{'REMOTE_ADDR'};
     my @ip = split(/\./,$addr);
     my $ua = $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
 

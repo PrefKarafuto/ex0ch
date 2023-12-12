@@ -579,7 +579,7 @@ sub GetClient
 	
 	my $ua = $ENV{'HTTP_USER_AGENT'} || '';
 	my $host = $ENV{'REMOTE_HOST'};
-	my $addr = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+	my $addr = $ENV{'REMOTE_ADDR'};
 	my $client = 0;
 	
 	require './module/cidr_list.pl';
@@ -724,9 +724,9 @@ sub GetProductInfo
 	elsif ( $client & $ZP::C_P2 ) {
 		# $ENV{'HTTP_X_P2_CLIENT_IP'} - (発言者のIP)
 		# $ENV{'HTTP_X_P2_MOBILE_SERIAL_BBM'} - (発言者の固体識別番号)
-		$ENV{'REMOTE_P2'} = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
-		(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}) = $ENV{'HTTP_X_P2_CLIENT_IP'};
-		$ENV{'REMOTE_HOST'} = $this->GetRemoteHost(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
+		$ENV{'REMOTE_P2'} = $ENV{'REMOTE_ADDR'};
+		($ENV{'REMOTE_ADDR'}) = $ENV{'HTTP_X_P2_CLIENT_IP'};
+		$ENV{'REMOTE_HOST'} = $this->reverse_lookup($ENV{'REMOTE_ADDR'});
 		if( $ENV{'HTTP_X_P2_MOBILE_SERIAL_BBM'} ne "" ) {
 			$product = $ENV{'HTTP_X_P2_MOBILE_SERIAL_BBM'};
 		}
@@ -754,7 +754,7 @@ sub GetRemoteHost
 {
 	my $this = shift;
 	
-	my $host = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+	my $host = $ENV{'REMOTE_ADDR'};
 	$host = gethostbyaddr(pack('C4', split(/\./, $host)), 2) || $host;
 	
 	return $host;
@@ -791,7 +791,7 @@ sub MakeID
 	}
 	else {
 		# IPを分解
-		my @nums = split(/\./, (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}));
+		my @nums = split(/\./, ($ENV{'REMOTE_ADDR'}));
 		# 上位3つの1桁目取得
 		$uid = substr($nums[3], -2) . substr($nums[2], -2) . substr($nums[1], -1);
 	}
@@ -818,7 +818,7 @@ sub MakeIDnew {
     my $Threads = THREAD->new;
     $Threads->LoadAttr($Sys);
 
-    my $addr = $ENV{HTTP_CF_CONNECTING_IP} ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+    my $addr = $ENV{'REMOTE_ADDR'};
     my @ip = split(/\./,$addr);
     my $ua = $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
 
@@ -1167,7 +1167,7 @@ sub GetIDPart
 		} elsif ($type eq 'O') {
 			$str = "$koyuu $ENV{'REMOTE_HOST'}";
 		} elsif ($type eq 'P') {
-			$str = "$koyuu $ENV{'REMOTE_HOST'} (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};)";
+			$str = "$koyuu $ENV{'REMOTE_HOST'} ($ENV{'REMOTE_ADDR'};)";
 		} else {
 			$str = "$koyuu";
 		}
@@ -1185,7 +1185,7 @@ sub GetIDPart
 		} elsif ($type eq 'P') {
 			$str = "$ENV{'REMOTE_P2'}";
 		} else {
-			$str = "($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}";
+			$str = "$ENV{'REMOTE_ADDR'}";
 		}
 		if (!$noslip && $Set->Get('BBS_SLIP')) {
 			$str .= " $type";
@@ -1201,9 +1201,9 @@ sub GetIDPart
 		} elsif ($type eq 'P') {
 			$str = "$ENV{'HTTP_X_P2_CLIENT_IP'} ($koyuu)";
 		} elsif ($type eq 'O') {
-			$str = "($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR} ($koyuu)";
+			$str = "$ENV{'REMOTE_ADDR'} ($koyuu)";
 		} else {
-			$str = "($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};";
+			$str = "$ENV{'REMOTE_ADDR'};";
 		}
 		if (!$noslip && $Set->Get('BBS_SLIP')) {
 			$str .= " $type";
@@ -1422,7 +1422,7 @@ sub IsProxy
     push(@dnsbls, 'b.barracudacentral.org') if($Sys->Get('BARRACUDA'));
 	
 	# DNSBL問い合わせ
-	my $addr = join('.', reverse( split(/\./, (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}))));
+	my $addr = join('.', reverse( split(/\./,$ENV{'REMOTE_ADDR'})));
 	foreach my $dnsbl (@dnsbls) {
 		if (CheckDNSBL("$addr.$dnsbl") eq '127.0.0.2') {
 			$Form->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");

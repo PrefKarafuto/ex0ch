@@ -75,9 +75,10 @@ sub DoFunction
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
 	my ($host, $Security, $Mod);
+	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
 	
 	require './module/data_utils.pl';
-	$host = DATA_UTILS::GetRemoteHost();
+	$host = DATA_UTILS::reverse_lookup($ENV{'REMOTE_ADDR'});
 	
 	# ログイン情報を確認
 	if ($pSys->{'USER'}) {

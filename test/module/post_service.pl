@@ -103,11 +103,6 @@ sub Init
 sub Write
 {
 	my $this = shift;
-	require './module/data_utils.pl';
-	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
-	if(!$ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq $ENV{'REMOTE_ADDR'}){
-		$ENV{'REMOTE_HOST'} = DATA_UTILS::reverse_lookup($ENV{'REMOTE_ADDR'});
-	}
 
 	# 書き込み前準備
 	$this->ReadyBeforeCheck();
@@ -371,7 +366,7 @@ sub ReadyBeforeWrite
 	my $koyuu = $Sys->Get('KOYUU');
 	my $client = $Sys->Get('CLIENT');
 	my $host = $ENV{'REMOTE_HOST'};
-	my $addr = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+	my $addr = $ENV{'REMOTE_ADDR'};
 	my $Threads = $this->{'THREADS'};
 	
 	# 規制ユーザ・NGワードチェック
@@ -792,7 +787,7 @@ sub IsRegulation
 	my $mode = $Sys->Get('AGENT');
 	my $koyuu = $Sys->Get('KOYUU');
 	my $host = $ENV{'REMOTE_HOST'};
-	my $addr = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+	my $addr = $ENV{'REMOTE_ADDR'};
 	my $islocalip = 0;
 	
 	$islocalip = 1 if ($addr =~ /^(127|172|192|10)\./);
@@ -1227,7 +1222,7 @@ sub NormalizationContents
 	#if (!$Sec->IsAuthority($capID, $ZP::CAP_DISP_NOHOST, $bbs)) {
 	#	if ($Set->Equal('BBS_RAWIP_CHECK', 'checked') && $Sys->Equal('MODE', 1)) {
 	#		$text .= ' <hr> <font color=tomato face=Arial><b>';
-	#		$text .= (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}) , $host , </b></font><br>";
+	#		$text .= ($ENV{'REMOTE_ADDR'}) , $host , </b></font><br>";
 	#	}
 	#}
 	
@@ -1290,7 +1285,7 @@ sub SaveHost
 	
 	if ($agent ne '0') {
 		if ($agent eq 'P') {
-			$host = "$host($koyuu)(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR})";
+			$host = "$host($koyuu)($ENV{'REMOTE_ADDR'})";
 		}
 		else {
 			$host = "$host($koyuu)";
@@ -1315,7 +1310,7 @@ sub addSlip
 	require './module/slip.pl';
 
 	#IP・リモホ・UAを取得
-	my $ip_addr = ($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'};
+	my $ip_addr = $ENV{'REMOTE_ADDR'};
 	my $remoho  = $ENV{'REMOTE_HOST'};
 	my $ua =  $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
 
@@ -1425,7 +1420,7 @@ sub SpamBlock
 	
 	my $point = 0;
 	
-	if ($ENV{'REMOTE_HOST'} eq (($ENV{'HTTP_CF_CONNECTING_IP'}) ? $ENV{'HTTP_CF_CONNECTING_IP'} : $ENV{'REMOTE_ADDR'})) {
+	if ($ENV{'REMOTE_HOST'} eq ($ENV{'REMOTE_ADDR'})) {
 		$point += $nohost_point;
 	}
 	if ($name ne '' && $name !~ /[^\x09\x0a\x0d\x20-\x7e]/) {
@@ -1501,7 +1496,7 @@ sub tasukeruyo
 	$agent	= $sys->Get('AGENT');
 	$mes	= $form->Get('MESSAGE');
 	$ua		= $ENV{'HTTP_USER_AGENT'};
-	$addr	= (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
+	$addr	= ($ENV{'REMOTE_ADDR'});
 	
 	if ( $from =~ /^.*tasukeruyo/ ) {
 		if ( $agent eq 'O' || $agent eq 'P' || $agent eq 'i' ) {
