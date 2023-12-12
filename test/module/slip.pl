@@ -14,6 +14,7 @@ use Digest::MD5 qw(md5_hex);
 use Net::Whois::Raw;
 use Geo::IP;
 use Storable qw(store retrieve);
+$Net::Whois::Raw::OMIT_MSG = 1;
 #------------------------------------------------------------------------------------------------------------
 #	SLIP生成
 #------------------------------------------------------------------------------------------------------------
@@ -74,13 +75,13 @@ sub is_anonymous {
     if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
         my @anon_remoho = (
             '^.*\\.(vpngate\\.v4\\.open\\.ad\\.jp|opengw\\.net)$',
-			'^.*\\.(vpn|tor|proxy|private)$',
+			'(vpn|tor|proxy|onion)',
             '^.*\\.(?:ablenetvps\\.ne\\.jp|amazonaws\\.com|arena\\.ne\\.jp|akamaitechnologies\\.com|cdn77\\.com|cnode\\.io|datapacket\\.com|digita-vm\\.com|googleusercontent\\.com|hmk-temp\\.com||kagoya\\.net|linodeusercontent\\.com|sakura\\.ne\\.jp|vultrusercontent\\.com|xtom\\.com)$',
             '^.*\\.(?:tsc-soft\\.com|53ja\\.net)$'
         );
 
         for my $name (@anon_remoho) {
-            if ($remoho =~ /(?:${name})/) {
+            if ($remoho =~ /(?:${name})/i) {
                 $isAnon = 1;
                 last;
             }
@@ -97,7 +98,7 @@ sub is_anonymous {
 
 # 公衆Wifi判定
 sub is_public_wifi {
-    my ($country, $remoho, $ipAddr) = @_;
+    my ($country, $ipAddr, $remoho) = @_;
     my $isFwifi = '';
 
     if ($country eq 'JP' && $remoho ne $ipAddr) {
@@ -142,7 +143,7 @@ sub get_country_by_ip {
 
 # モバイル判定
 sub is_mobile {
-    my ($country, $ipAddr, $remoho, $Form) = @_;
+    my ($country, $ipAddr, $remoho) = @_;
 
 	my $ismobile = '';
 	if ($country eq 'JP') {
@@ -361,6 +362,7 @@ sub is_mobile {
     return $ismobile;
 }
 
+# 匿名化判定用Tor/VPN-Gate判定
 sub GetTorExitNodeList
 {
 	my ($fileName) = @_;
@@ -448,91 +450,32 @@ sub ListCheck {
 #------------------------------------------------------------------------------------------------------------
 sub BBS_SLIP
 {
-	my ($Sys, $Form, $Threads, $threadid, $bbsSet, $ipAddr, $remoho, $ua, $country, $ismobile, $isFwifi, $isAnon, $session, $onedayslip) = @_;
+	my ($ipAddr, $remoho, $ua, $bbsslip, $infoDir, $chid) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
 
-	# bbs
-	my $bbs = $Sys->Get('BBS');
-
-	# infoディレクトリ
-	my $infoDir = $Sys->Get('INFO');
+	# 各種判定
+	my $country = get_country_by_ip($ipAddr);
+	my $ismobile = is_mobile($country,$ipAddr,$remoho);
+	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);
+	my $isAnon = is_anonymous($isFwifi,$country,$ipAddr,$remoho,$infoDir);
 
 	# bbs_slipに使用する文字
 	my @slip_chars = (0..9, 'a'..'z', 'A'..'Z', '.', '/');
 
-	# 日時を取得
-	$ENV{'TZ'} = "JST-9";
-	my ($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime(time);
-
 	# 一週間で文字列変更
-	my $fpath = ".$infoDir/slip_change";
-	if (! -f $fpath && open(my $fh, '>', $fpath)) {
-		my $randnum1 = int(rand 1000000);
-		my $randnum2 = int(rand 1000000);
-		my $randnum3 = int(rand 1000000);
-		my $randnum4 = int(rand 1000000);
-		print $fh "$yday:$randnum1:$randnum2:$randnum3:$randnum4";
-		close($fh);
-	}
-	my $data = '';
-    my $yday2 = '';
-	if (open(my $fh, "<", $fpath)) {
-		$data = <$fh>;
-	}
-	my $chnum1 = 0;
-	my $chnum2 = 0;
-	my $chnum3 = 0;
-	my $chnum4 = 0;
-	if ($data =~ /^(\d+):(\d+):(\d+):(\d+):(\d+)$/) {
-		$yday2 = $1;
-		$chnum1 = $2;
-		$chnum2 = $3;
-		$chnum3 = $4;
-		$chnum4 = $5;
-	}
-	if ($yday == $yday2 + 7) {
-		if (open(my $fh, '>', $fpath)) {
-			my $randnum1 = int(rand 1000000);
-			my $randnum2 = int(rand 1000000);
-			my $randnum3 = int(rand 1000000);
-			my $randnum4 = int(rand 1000000);
-			$chnum1 = $randnum1;
-			$chnum2 = $randnum2;
-			$chnum3 = $randnum3;
-			$chnum4 = $randnum4;
-			print $fh "$yday:$randnum1:$randnum2:$randnum3:$randnum4";
-			close($fh);
-		}
-	}
+	my $week_number = int(localtime(time) / (60 * 60 * 24 * 7));
+	my ($chnum1,$chnum2,$chnum3,$chnum4);
+	srand($week_number);
+	$chnum1 = int(rand(1000000));
+	srand($week_number*2);
+	$chnum2 = int(rand(1000000));
+	srand($week_number*3);
+	$chnum3 = int(rand(1000000));
+	srand($week_number*4);
+	$chnum4 = int(rand(1000000));
 
-	# idを取得
-	my $id = $Form->Get('idpart');
 	#idの末尾
 	my $idEnd = '0';
-
-
-	#ID
-	my $sid = $session->param('_SESSION_ID') || 0;
-	my $chid = 0;
-	if ($sid) {
-		require Digest::SHA::PurePerl;
-		my $ctx = Digest::SHA::PurePerl->new;
-		$ctx->add('0ch+ ID Generation');
-		$ctx->add(':', $Sys->Get('SERVER'));
-		$ctx->add(':', $bbs);
-		$ctx->add(':', join('-', (localtime)[3,4,5]));
-		$ctx->add(':', $sid);
-		# chid
-		if ( $Threads->GetAttr($threadid, 'chid') && ($Sys->Equal('MODE', 2) || !$Sys->Equal('BBS', 'news1')) ) {
-			my $chkey = $Threads->GetAttr($threadid, 'chkey');
-			$chid = $chkey ? hex(substr(md5_hex($chkey), 0, 8)) : $threadid;
-			$ctx->add(':', $chid);
-			$ctx->add(':', int rand(10000)) if $Sys->Equal('MODE', 1) && $Form->Get('MESSAGE') =~ /!hidenusi/;
-		}
-		$id = $ctx->b64digest;
-		$id = 'ID:' . substr($id, 0, 8);
-	}
-	$chid += $yday ** 2 + 14 if $onedayslip;
 
 	# slip_ip生成
 	my $fo = '';
@@ -546,6 +489,8 @@ sub BBS_SLIP
 	$slip_ip = $remoho =~ /^KD.*au-net\.ne\.jp$/ ? $ip_char1 . $ip_char1 : $ip_char1 . $ip_char2;
 
 	# slip_remoho生成
+	my $year = (localtime(time))[5];
+	my $mon = (localtime(time))[4];
 	$remoho =~ /^.*?[.\d\-]([^.\d\-].+\.[a-z]{2,})$/;
 	my $remoho_name = $1;
 	my $remoho_dig = md5_hex($remoho_name);
@@ -578,7 +523,7 @@ sub BBS_SLIP
 
 	# bbs_slipの初期設定
 	my $slip_id = '';
-	my $slip_nickname = "ワ${fixed_nickname_end}";
+	my $slip_nickname = "ﾜｯﾁｮｲ${fixed_nickname_end}";
 	my $slip_aa = $slip_ip;
 	my $slip_bb = $slip_remoho;
 	my $slip_cccc = $slip_ua;
@@ -586,16 +531,16 @@ sub BBS_SLIP
 	# 特殊回線のリモホ
 	my @special_remoho = (
 		'.*\\.ac\\.jp',
-    '.*\\.ed\\.jp',
-    '.*\\.(?:co\\.jp|com)',
-    '.*\\.go\\.jp'
+		'.*\\.ed\\.jp',
+		'.*\\.(?:co\\.jp|com)',
+		'.*\\.go\\.jp'
 		);
 	# 特殊回線のニックネーム
 	my @special_nicknames = (
 		"大学${fixed_nickname_end}",
-    "学校${fixed_nickname_end}",
-    "会社${fixed_nickname_end}",
-    "役所${fixed_nickname_end}"
+		"学校${fixed_nickname_end}",
+		"会社${fixed_nickname_end}",
+		"役所${fixed_nickname_end}"
 		);
 	my @special_idEnd = (
 		'6',
@@ -705,18 +650,27 @@ sub BBS_SLIP
 		}
 	}
 
-	# noid
-	my $noid = $Threads->GetAttr($threadid, 'noid') || 0;
-	$noid = 1 if $bbs eq 'noid';
-	#idを設定
-	$id = $Form->Set('idpart', $id) if !$noid;
-
 	# bbs_slipを生成
-	my $kaisen = $idEnd ne '0' && !$noid ? " </b> ($idEnd)<b>" : '';
-	my $slip_result = "$kaisen </b>(${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc})<b>";
+	my $slip_result = '';
+	if($bbsslip eq 'vvv'){
+		$slip_result = ${slip_nickname};
+	}
+	elsif($bbsslip eq 'vvvv'){
+		$slip_result = "${slip_nickname} [${ipAddr}]";
+	}
+	elsif($bbsslip eq 'vvvvv'){
+		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
+	}
+	elsif($bbsslip eq 'vvvvvv'){
+		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ipAddr}]";
+	}
 
-	return $slip_result;
+	# slip文字列とID末尾
+	# 匿名環境の場合は末尾が"8"になる
+	return $slip_result,$idEnd;
 }
+
+# 旧式
 sub BBS_SLIP_OLD
 {
 	my ($ip_addr, $remoho, $ua, $bbsslip) = @_;
@@ -1025,7 +979,7 @@ sub BBS_SLIP_OLD
       $slip_nickname = "ｼｬﾁｰｸ${fixed_nickname_end}";
     }
   }
-}
+	}
 
 	# Geo::IPがインストールされているかチェック
 	my $geo_ip_installed = 0;#軽量化
