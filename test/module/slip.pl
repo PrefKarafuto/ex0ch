@@ -442,6 +442,7 @@ sub ListCheck {
 #------------------------------------------------------------------------------------------------------------
 sub BBS_SLIP
 {
+	my $this = shift;
 	my ($bbsslip, $infoDir, $chid, $checkKey) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
 
