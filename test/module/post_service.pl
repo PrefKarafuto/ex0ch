@@ -166,12 +166,12 @@ sub Write
 
 	#忍法帖パス
 	my $password = '';
-	if($Form->Get('mail') =~ /(^|<br>)!load:({8,30})(<br>|$)/ && $isNinja){
-		$password = $1;
+	if($Form->Get('mail') =~ /(^|<br>)!load:(.){10,30}(<br>|$)/ && $isNinja){
+		$password = $2;
 	}
 	my $sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
-	if($Form->Get('mail') =~ /(^|<br>)!save:({8,30})(<br>|$)/ && $isNinja){
-		$password = $1;
+	if($Form->Get('mail') =~ /(^|<br>)!save:(.){10,30}(<br>|$)/ && $isNinja){
+		$password = $2;
 	}
 	
 	# 情報欄

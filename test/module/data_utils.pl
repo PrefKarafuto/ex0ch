@@ -10,6 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use Encode;
+use Net::DNS;
 use HTML::Entities;
 no warnings qw(once);
 
@@ -1584,17 +1585,41 @@ sub MakePath
 	
 	return $path3;
 }
-# IPv4とIPv6に対応した逆引き用関数
+
+# 逆引き関数
 sub reverse_lookup {
+	my $this = shift;
     my ($ip_addr) = @_;
-	use Socket qw( inet_pton AF_INET AF_INET6 getaddrinfo getnameinfo SOCK_RAW NI_NAMEREQD );
-    my $family = $ip_addr =~ /:/ ? AF_INET6 : AF_INET;
-    my ($err, @res) = getaddrinfo($ip_addr, '', { family => $family, socktype => SOCK_RAW });
+    my $resolver = Net::DNS::Resolver->new;
 
-    return unless @res;
+    # IPアドレスを逆引き用の形式に変換
+    my $arpa = ip2arpa($ip_addr);
 
-    my ($err2, $hostname) = getnameinfo($res[0]->{addr}, NI_NAMEREQD);
-    return $hostname ? $hostname : $ip_addr;
+    # PTRクエリを実行
+    my $query = $resolver->search($arpa, "PTR");
+
+    # DNS応答をチェック
+    if ($query) {
+        foreach my $rr ($query->answer) {
+            next unless $rr->type eq "PTR";
+            return $rr->ptrdname;  # PTRレコードからホスト名を取得
+        }
+    }
+
+    # ホスト名が見つからない場合はIPアドレスをそのまま返す
+    return $ip_addr;
+}
+
+# IPアドレスをARPANET形式に変換する補助関数
+sub ip2arpa {
+    my ($ip) = @_;
+    if ($ip =~ /:/) {  # IPv6
+        my @parts = split(':', $ip);
+        my $arpa = join('.', reverse split(//, join('', map { sprintf("%04x", hex($_ || 0)) } @parts)));
+        return "$arpa.ip6.arpa";
+    } else {  # IPv4
+        return join('.', reverse split(/\./, $ip)) . ".in-addr.arpa";
+    }
 }
 
 #============================================================================================================
