@@ -173,7 +173,7 @@ sub PrintNinjaList
 	$dispSt		= $Form->Get('DISPST', 0) || 0;
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	my $infoDir = $SYS->Get('INFO');
-	my $ninDir = ".$infoDir/.nin/"; #三男用忍法帖ディレクトリ。今後は.ninpochoに移行予定
+	my $ninDir = ".$infoDir/.ninpocho/"; 
     my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
     my $sessnum = @session_files;
     $dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));

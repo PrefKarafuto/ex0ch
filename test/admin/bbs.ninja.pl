@@ -79,7 +79,7 @@ sub DoPrint
     }
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
-	$BASE->Print($Sys->Get('_TITLE'), 1);
+	$BASE->Print($Sys->Get('_TITLE'), 4);
 }
 
 #------------------------------------------------------------------------------------------------------------
