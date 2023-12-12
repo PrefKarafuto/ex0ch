@@ -12,37 +12,10 @@ use CGI::Session;
 use CGI::Cookie;
 use Digest::MD5 qw(md5_hex);
 use Net::Whois::Raw;
-use Geo::IP;
+use JSON;
+use LWP::UserAgent;
 use Storable qw(store retrieve);
 $Net::Whois::Raw::OMIT_MSG = 1;
-#------------------------------------------------------------------------------------------------------------
-#	SLIP生成
-#------------------------------------------------------------------------------------------------------------
-sub generate_name_field {
-    my ($res, $bbs_slip, $thslip, $name, $bbsflag, $bbs_noname) = @_;
-    my $zero = 1;
-    if ($bbs_slip !~ /^v{3,6}/ && $thslip !~ /^v{3,6}/ && $name !~ /!slip:v{3,6}/ && !$bbsflag) {
-        if ($res =~ /^\s(<\/b>\s\(.\)<b>)/) {
-            $res = $1;
-            $zero = 0;
-        } else {
-            $res = '';
-        }
-    } else {
-        $zero = 0 if $res =~ /^\s<\/b>\s\(.\)<b>/;
-    }
-
-    # 名前欄にワッチョイもどきを追加
-    $res =~ s/\s.{4}-.{4}// if $bbs_slip !~ /^v{4,6}/ && $thslip !~ /^v{4,6}/ && $name !~ /!slip:v{4,6}/ && !$bbsflag && $zero;
-    if ($name =~ /!slip:v{3,6}/) {
-        $name = $bbs_noname . $1 if $name =~ /^(!slip:v+)$/;
-        $name =~ s/!slip:v{3,6}.*/${res}/;
-    } else {
-        $name = "${name}${res}";
-    }
-
-    return $name;
-}
 
 #------------------------------------------------------------------------------------------------------------
 #	各種判定
@@ -50,21 +23,34 @@ sub generate_name_field {
 # 拒否IP
 sub is_denied_ip {
     my ($ipAddr, $infoDir) = @_;
-    my $denyIP = 0;
 
-    my $denyIP_txt = "$infoDir/denyip.txt";
-    if (open(my $fh, "<", $denyIP_txt)) {
-        while (my $line = readline $fh) {
-            chomp $line;
-            if ($ipAddr eq $line) {
-                $denyIP = 1;
-                last;
-            }
-        }
-        close($fh);
-    }
+    my $denyIP_file = "$infoDir/IP/deny.cgi";
 
-    return $denyIP;
+    # ファイルが存在しない場合はすぐに0を返す
+    return 0 unless -e $denyIP_file;
+
+    # ファイルからハッシュテーブルを読み込む
+    my $denied_ips = retrieve($denyIP_file);
+
+    # IPアドレスがハッシュテーブルに存在するかチェック
+    return exists $denied_ips->{$ipAddr} ? 1 : 0;
+}
+
+# ローカル串判定
+sub is_proxy_local {
+    my ($remoho, $ipAddr, $infoDir) = @_;
+    my $isAnon = 0;
+
+	if ($remoho =~ /(vpn|tor|proxy|onion)/i) {
+		$isAnon = 1;
+	}
+
+    my $vpngate = "$infoDir/IP/vpngate.cgi";
+	my $tor = "$infoDir/IP/tor.cgi";
+    $isAnon += ListCheck($ipAddr,$vpngate) ;
+	$isAnon += ListCheck($ipAddr,$tor);
+
+    return $isAnon;
 }
 
 # 匿名化判定
@@ -75,7 +61,6 @@ sub is_anonymous {
     if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
         my @anon_remoho = (
             '^.*\\.(vpngate\\.v4\\.open\\.ad\\.jp|opengw\\.net)$',
-			'(vpn|tor|proxy|onion)',
             '^.*\\.(?:ablenetvps\\.ne\\.jp|amazonaws\\.com|arena\\.ne\\.jp|akamaitechnologies\\.com|cdn77\\.com|cnode\\.io|datapacket\\.com|digita-vm\\.com|googleusercontent\\.com|hmk-temp\\.com||kagoya\\.net|linodeusercontent\\.com|sakura\\.ne\\.jp|vultrusercontent\\.com|xtom\\.com)$',
             '^.*\\.(?:tsc-soft\\.com|53ja\\.net)$'
         );
@@ -88,12 +73,34 @@ sub is_anonymous {
         }
     }
 
-    my $vpngate_ip_txt = "$infoDir/vpngate-ip.txt";
-	my $tor_ip_txt = "$infoDir/tor-ip.txt";
-    $isAnon += ListCheck($ipAddr,$vpngate_ip_txt) ;
-	$isAnon += ListCheck($ipAddr,$tor_ip_txt);
-
     return $isAnon;
+}
+
+#串かどうか外部APIでチェック
+sub is_proxy {
+    my ($ipAddr, $infoDir, $checkKey) = @_;
+    return 0 unless defined $checkKey;
+
+    my $file = "$infoDir/IP/proxy.cgi";
+    my $proxy_list = retrieve($file) if -e $file;
+    $proxy_list = {} unless defined $proxy_list;
+    return 1 if exists $proxy_list->{$ipAddr};
+
+    my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=1";
+    my $ua = LWP::UserAgent->new();
+    my $response = $ua->get($url);
+    if ($response->is_success) {
+        my $json = $response->decoded_content();
+        my $out = decode_json($json);
+        my $isProxy = $out->{$ipAddr}->{"proxy"};
+        if ($isProxy eq 'yes') {
+            $proxy_list->{$ipAddr} = localtime(time);
+            store $proxy_list, $file;
+			chmod 0600, $file;
+            return 1;
+        }
+    }
+    return 0;
 }
 
 # 公衆Wifi判定
@@ -197,51 +204,51 @@ sub is_mobile {
 			"ftel"
 			);
 		@mobile_nicknames = (
-			"オッペケー",
-			"オッッペケ",
-			"オッペケエ",
-			"オッペケケ",
-			"ササクッテロラ",
-			"ササクッテロリ",
-			"ササクッテロル",
-			"ササクッテロレ",
-			"ハゲ",
-			"アウアウアー",
-			"アウアウイー",
-			"アウアウウー",
-			"アウアウエー",
-			"アウアウオー",
-			"アウアウカー",
-			"アウアウケー",
-			"スプー",
-			"スプッッ",
-			"スップ",
-			"スッップ",
-			"スププ",
-			"スフッ",
-			"スップー",
-			"スププー",
-			"ペラペラ",
-			"エアペラ",
-			"ブーイモ",
-			"ベーイモ",
-			"オイコラミネオ",
-			"ワントンキン",
-			"ワンミングク",
-			"バットンキン",
-			"バッミングク",
-			"ラクッペペ",
-			"ラクラッペ",
-			"アウアウクー",
-			"ドコグロ",
-			"ドナドナ",
-			"トンモー",
-			"アメ",
-			"ニフモ",
-			"リブモ",
-			"イルクン",
-			"ゲマー",
-			"フリッテル"
+			"ｵｯﾍﾟｹｰ",
+			"ｵｯｯﾍﾟｹ",
+			"ｵｯﾍﾟｹｴ",
+			"ｵｯﾍﾟｹｹ",
+			"ｻｻｸｯﾃﾛﾗ",
+			"ｻｻｸｯﾃﾛﾘ",
+			"ｻｻｸｯﾃﾛﾙ",
+			"ｻｻｸｯﾃﾛﾚ",
+			"ﾊｹﾞ",
+			"ｱｳｱｳｱｰ",
+			"ｱｳｱｳｲｰ",
+			"ｱｳｱｳｳｰ",
+			"ｱｳｱｳｴｰ",
+			"ｱｳｱｳｵｰ",
+			"ｱｳｱｳｶｰ",
+			"ｱｳｱｳｹｰ",
+			"ｽﾌﾟｰ",
+			"ｽﾌﾟｯｯ",
+			"ｽｯﾌﾟ",
+			"ｽｯｯﾌﾟ",
+			"ｽﾌﾟﾌﾟ",
+			"ｽﾌｯ",
+			"ｽｯﾌﾟｰ",
+			"ｽﾌﾟﾌﾟｰ",
+			"ﾍﾞﾗﾍﾟﾗ",
+			"ｴｱﾍﾟﾗ",
+			"ﾌﾞｰｲﾓ",
+			"ﾍﾞｰｲﾓ",
+			"ｵｲｺﾗﾐﾈｵ",
+			"ﾜﾝﾄﾝｷﾝ",
+			"ﾜﾝﾐﾝｸﾞｸ",
+			"ﾊﾞｯﾄﾝｷﾝ",
+			"ﾊﾞｯﾐﾝｸﾞｸ",
+			"ﾗｸｯﾍﾟﾍﾟ",
+			"ﾗｸﾗｯﾍﾟ",
+			"ｱｳｱｳｸｰ",
+			"ﾄﾞｺｸﾞﾛ",
+			"ﾄﾞﾅﾄﾞﾅ",
+			"ﾄﾝﾓｰ",
+			"ｱﾒ",
+			"ﾆﾌﾓ",
+			"ﾘﾌﾞﾓ",
+			"ｲﾙｸﾝ",
+			"ｹﾞﾏｰ",
+			"ﾌﾘｯﾃﾙ"
 			) if $isSlipName5ch;
 		if ($remoho ne $ipAddr) {
 			my @mobile_remoho = (
@@ -335,7 +342,7 @@ sub is_mobile {
 			if (!$ismobile) {
 				for my $name (@rakuten_mno_ip) {
 					if ($ipAddr =~ /${name}/) {
-						$ismobile = $isSlipName5ch ? 'テテンテンテン' : 'ten';
+						$ismobile = $isSlipName5ch ? 'ﾃﾃﾝﾃﾝﾃﾝ' : 'ten';
 						last;
 					}
 				}
@@ -363,100 +370,81 @@ sub is_mobile {
 }
 
 # 匿名化判定用Tor/VPN-Gate判定
-sub GetTorExitNodeList
-{
-	my ($fileName) = @_;
-	# 新しいUserAgentオブジェクトを作成
-	my $ua = LWP::UserAgent->new;
+sub GetTorExitNodeList {
+    my ($fileName) = @_;
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->get('https://check.torproject.org/exit-addresses');
 
-	# HTTPリクエストを送信し、レスポンスを受け取る
-	my $response = $ua->get('https://check.torproject.org/exit-addresses');
+    if ($response->is_success) {
+        my $content = $response->decoded_content;
+        my %ips; # 新しいハッシュを初期化
 
-	if ($response->is_success) {
-		# レスポンスのコンテンツを取得
-		my $content = $response->decoded_content;
+        while ($content =~ /ExitAddress (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g) {
+            $ips{$1} = 1;
+        }
 
-		# IPアドレスを格納するためのハッシュ
-		my %ips;
-
-		# 正規表現を使用してExitAddressを検索し、IPアドレスをハッシュに保存（重複排除）
-		while ($content =~ /ExitAddress (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g) {
-			$ips{$1} = 1;
-		}
-
-		# ファイルにIPアドレスを保存
-		open(my $fh, '>', $fileName);
-		foreach my $ip (keys %ips) {
-			print $fh "$ip\n";
-		}
-		close $fh;
-		return 1;
-	}
-	return 0;
+        store \%ips, $fileName; # 新しいデータでファイルを上書き
+		chmod 0600, $fileName;
+        return 1;
+    }
+    return 0;
 }
-sub GetVPNGateList
-{
-	my ($fileName) = @_;
-	# 新しいUserAgentオブジェクトを作成
-	my $ua = LWP::UserAgent->new;
+sub GetVPNGateList {
+    my ($fileName) = @_;
+    my $ua = LWP::UserAgent->new;
+    my $response = $ua->get('http://www.vpngate.net/api/iphone/');
 
-	# HTTPリクエストを送信し、レスポンスを受け取る
-	my $response = $ua->get('http://www.vpngate.net/api/iphone/');
+    if ($response->is_success) {
+        my $content = $response->decoded_content;
+        my %ips; # 新しいハッシュを初期化
 
-	if ($response->is_success) {
-		# レスポンスのコンテンツを取得
-		my $content = $response->decoded_content;
+        while ($content =~ /,(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),/g) {
+            $ips{$1} = 1;
+        }
 
-		# IPアドレスを格納するためのハッシュ
-		my %ips;
-
-		# IPアドレスをハッシュに保存（重複排除）
-		while ($content =~ /,(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),/g) {
-			$ips{$1} = 1;
-		}
-
-		# ファイルにIPアドレスを保存
-		open(my $fh, '>', $fileName);
-		foreach my $ip (keys %ips) {
-			print $fh "$ip\n";
-		}
-		close $fh;
-		return 1;
-	}
-	return 0;
+        store \%ips, $fileName; # 新しいデータでファイルを上書き
+		chmod 0600, $fileName;
+        return 1;
+    }
+    return 0;
 }
 sub ListCheck {
     my ($ipAddr, $fileName) = @_;
 
-    # ファイルハンドルの宣言
-    my $fh;
+    # ファイルが存在しない場合はundefを返す
+    return undef unless -e $fileName;
 
-    # ファイルを開けるかチェック
-    unless (open($fh, '<', $fileName)) {
-        return undef;
-    }
-
-    # 保存されたIPアドレスを読み込む
-    my %saved_ips = map { chomp; $_ => 1 } <$fh>;
-    close $fh;
+    # ファイルからハッシュテーブルを読み込む
+    my $saved_ips = retrieve($fileName);
 
     # ユーザーのIPアドレスがリストにあるかどうかをチェック
-    return 1 if (exists $saved_ips{$ipAddr});
+    return 1 if exists $saved_ips->{$ipAddr};
     return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #	BBS_SLIP生成
+#	-------------------------------------------------------------------------------------
+#	@param	$ipAddr		IPアドレス
+#	@param	$remoho		リモートホスト
+#	@param	$ua			ユーザーエージェント
+#	@param	$bbsslip	slip種別(/(undef)/vvv/vvvv/vvvvv/vvvvvv/)
+#	@param	$infoDir	infoディレクトリ
+#	@param	$chid		SLIP_ID変更用
+#	@param	$checkKey	プロキシチェックAPI問い合わせ用
+#	@return	$slip_result
+#	@return	$idEnd		ID末尾
 #------------------------------------------------------------------------------------------------------------
 sub BBS_SLIP
 {
-	my ($ipAddr, $remoho, $ua, $bbsslip, $infoDir, $chid) = @_;
+	my ($ipAddr, $remoho, $ua, $bbsslip, $infoDir, $chid, $checkKey) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
 
 	# 各種判定
 	my $country = get_country_by_ip($ipAddr);
 	my $ismobile = is_mobile($country,$ipAddr,$remoho);
 	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);
+	my $isProxy = is_proxy_local($ipAddr,$remoho,$infoDir);
 	my $isAnon = is_anonymous($isFwifi,$country,$ipAddr,$remoho,$infoDir);
 
 	# bbs_slipに使用する文字
@@ -549,107 +537,113 @@ sub BBS_SLIP
 		'G'
 	);
 
-	# 逆引き判定
-	if (!$slip_remoho || $ipAddr eq $remoho) { # 逆引きできない場合
-		my $unknown = 1;
+	# 串判定
+	if ($isProxy) {
+		$idEnd = '8';
+		$slip_nickname = '串';	
+		$slip_nickname .= $fixed_nickname_end;
+	}else{
+		# 逆引き判定
+		if (!$slip_remoho || $ipAddr eq $remoho) { # 逆引きできない場合
+			my $unknown = 1;
 
-		# モバイル回線判定
-		if ($unknown && $ismobile) {
-			$slip_id = 'MM';
-			$idEnd = substr($slip_id, -1, 1);
-			$slip_nickname = "${ismobile}${mobile_nickname_end}";
-			$slip_aa = $slip_id;
-			$slip_bb = $slip_ip;
-			$unknown = 0;
-		}
-		if ($unknown && $ua =~ /DoCoMo\//) { #ガラケー
-			$slip_id = 'KK';
-			$idEnd = substr($slip_id, -1, 1);
-			$slip_nickname = "fph${mobile_nickname_end}";
-			$slip_aa = $slip_id;
-			$slip_bb = $slip_ip;
-			$unknown = 0;
-		}
-
-		# 国を判定
-		if ($unknown && $country) {
-			$idEnd = 'H';
-			$slip_nickname = "${country}${fixed_nickname_end}";
-			$slip_aa = $country;
-			$slip_bb = $slip_ip;
-			$unknown = 0;
-		}
-
-		# 逆引き不可能
-		if ($unknown) {
-			$slip_id = 'hh';
-			$idEnd = 'h';
-			$slip_nickname = "unk${fixed_nickname_end}";
-			$slip_aa = $slip_id;
-			$slip_bb = $slip_ip;
-		}
-
-	} else { # 逆引きできる場合
-		my $remoho_checked = 0;
-
-		# 国を判定
-		if (!$remoho_checked && $country && $country ne 'JP') {
-			$idEnd = 'H';
-			$slip_nickname = "${country}${fixed_nickname_end}";
-			$slip_aa = $country;
-			$slip_bb = $slip_ip;
-			$remoho_checked = 1;
-		}
-
-		# 匿名判定
-		if (!$remoho_checked && $isAnon) {
-			$idEnd = '8';
-			$slip_nickname = 'anon';	
-			$slip_nickname .= $fixed_nickname_end;
-			$remoho_checked = 1;
-		}
-
-		# モバイル回線判定
-		if (!$remoho_checked && $ismobile) {
-				# モバイル回線のslip_id
+			# モバイル回線判定
+			if ($unknown && $ismobile) {
 				$slip_id = 'MM';
-				$slip_id = 'Sr' if $ismobile =~ /^(?:om|オッ|sb|ハゲ)/;
-				$slip_id = 'Sp' if $ismobile =~ /^(?:pw|ササ)/;
-				$slip_id = 'Sa' if $ismobile =~ /^(?:au|アウアウ)/;
-				$slip_id = 'Sd' if $ismobile =~ /^(?:sp|ス)/;
-				$slip_id = 'SD' if $ismobile =~ /pera|ペラ/;
 				$idEnd = substr($slip_id, -1, 1);
 				$slip_nickname = "${ismobile}${mobile_nickname_end}";
 				$slip_aa = $slip_id;
 				$slip_bb = $slip_ip;
+				$unknown = 0;
+			}
+			if ($unknown && $ua =~ /DoCoMo\//) { #ガラケー
+				$slip_id = 'KK';
+				$idEnd = substr($slip_id, -1, 1);
+				$slip_nickname = "fph${mobile_nickname_end}";
+				$slip_aa = $slip_id;
+				$slip_bb = $slip_ip;
+				$unknown = 0;
+			}
+
+			# 国を判定
+			if ($unknown && $country) {
+				$idEnd = 'H';
+				$slip_nickname = "${country}${fixed_nickname_end}";
+				$slip_aa = $country;
+				$slip_bb = $slip_ip;
+				$unknown = 0;
+			}
+
+			# 逆引き不可能
+			if ($unknown) {
+				$slip_id = 'hh';
+				$idEnd = 'h';
+				$slip_nickname = "unk${fixed_nickname_end}";
+				$slip_aa = $slip_id;
+				$slip_bb = $slip_ip;
+			}
+
+		} else { # 逆引きできる場合
+			my $remoho_checked = 0;
+
+			# 国を判定
+			if (!$remoho_checked && $country && $country ne 'JP') {
+				$idEnd = 'H';
+				$slip_nickname = "${country}${fixed_nickname_end}";
+				$slip_aa = $country;
+				$slip_bb = $slip_ip;
 				$remoho_checked = 1;
-		}
+			}
 
-		# 公衆判定
-		if (!$remoho_checked && $isFwifi) {
-			$slip_nickname = "${isFwifi}${fixed_nickname_end}";
-			$slip_id = 'FF';
-			$idEnd = substr($slip_id, -1, 1);
-			$slip_aa = $slip_id;
-			$slip_bb = $slip_ip;
-			$remoho_checked = 1;
-		}
+			# 匿名判定
+			if (!$remoho_checked && $isAnon) {
+				$idEnd = '8';
+				$slip_nickname = 'anon';	
+				$slip_nickname .= $fixed_nickname_end;
+				$remoho_checked = 1;
+			}
 
-		# 特殊回線判定
-		if (!$remoho_checked) {
-			my $special_idx = 0;
-			for my $name (@special_remoho) {
-				if ($remoho =~ /^(?:${name})$/) {
-					$idEnd = $special_idEnd[$special_idx];
-					$slip_nickname = $special_nicknames[$special_idx];
+			# モバイル回線判定
+			if (!$remoho_checked && $ismobile) {
+					# モバイル回線のslip_id
+					$slip_id = 'MM';
+					$slip_id = 'Sr' if $ismobile =~ /^(?:om|オッ|sb|ハゲ)/;
+					$slip_id = 'Sp' if $ismobile =~ /^(?:pw|ササ)/;
+					$slip_id = 'Sa' if $ismobile =~ /^(?:au|アウアウ)/;
+					$slip_id = 'Sd' if $ismobile =~ /^(?:sp|ス)/;
+					$slip_id = 'SD' if $ismobile =~ /pera|ペラ/;
+					$idEnd = substr($slip_id, -1, 1);
+					$slip_nickname = "${ismobile}${mobile_nickname_end}";
+					$slip_aa = $slip_id;
+					$slip_bb = $slip_ip;
 					$remoho_checked = 1;
-					last;
+			}
+
+			# 公衆判定
+			if (!$remoho_checked && $isFwifi) {
+				$slip_nickname = "${isFwifi}${fixed_nickname_end}";
+				$slip_id = 'FF';
+				$idEnd = substr($slip_id, -1, 1);
+				$slip_aa = $slip_id;
+				$slip_bb = $slip_ip;
+				$remoho_checked = 1;
+			}
+
+			# 特殊回線判定
+			if (!$remoho_checked) {
+				my $special_idx = 0;
+				for my $name (@special_remoho) {
+					if ($remoho =~ /^(?:${name})$/) {
+						$idEnd = $special_idEnd[$special_idx];
+						$slip_nickname = $special_nicknames[$special_idx];
+						$remoho_checked = 1;
+						last;
+					}
+					$special_idx++;
 				}
-				$special_idx++;
 			}
 		}
 	}
-
 	# bbs_slipを生成
 	my $slip_result = '';
 	if($bbsslip eq 'vvv'){
@@ -979,22 +973,6 @@ sub BBS_SLIP_OLD
       $slip_nickname = "ｼｬﾁｰｸ${fixed_nickname_end}";
     }
   }
-	}
-
-	# Geo::IPがインストールされているかチェック
-	my $geo_ip_installed = 0;#軽量化
-
-	# 国を判定
-	my $gi_dat = "./datas/GeoIPCity.dat";
-	if ($geo_ip_installed && -f $gi_dat) {
-	    my $gi = Geo::IP->open($gi_dat, GEOIP_STANDARD);
-	    my $record = $gi->record_by_addr($ip_addr);
-	    my $ip_country =  $record->country_code;
-	    if ($ip_country =~ /^(?!.*JP).*$/) {
-	        $slip_nickname = "ｶﾞｲｺｰｸ${fixed_nickname_end}[${ip_country}]";
-	        $slip_aa = $ip_country;
-	        $slip_bb = $slip_ip;
-	    }
 	}
 
 	#bbs_slipを生成

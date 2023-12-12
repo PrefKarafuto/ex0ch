@@ -1596,22 +1596,7 @@ sub reverse_lookup {
     my ($err2, $hostname) = getnameinfo($res[0]->{addr}, NI_NAMEREQD);
     return $hostname ? $hostname : $ip_addr;
 }
-#プロキシかどうかチェック
-sub is_proxy
-{
-	my ($ipAddr, $checkKey) = @_;
 
-	my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=1";#VPNが検出された場合もプロキシ判定とする
-	my $ua = LWP::UserAgent->new();
-	my $response = $ua->post($url);
-	if ( $response->is_success() ) {
-		my $json = $response->decoded_content();
-		my $out = decode_json($json);
-		my $isProxy = $out->{$ipAddr}->{"proxy"};
-		return 1 if $isProxy eq 'yes';
-	}
-	return 0;
-}
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================
