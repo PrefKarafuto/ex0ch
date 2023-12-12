@@ -127,10 +127,11 @@ sub Write
 	my $Conv = $this->{'CONV'};
 	my $Threads = $this->{'THREADS'};
 	my $Sec = $this->{'SECURITY'};
-	# Cookie管理モジュールを用意
+	# 管理モジュールを用意
 	require './module/ninpocho.pl';
+	require './module/slip.pl';
+	my $slip = SLIP->new;
 	my $Ninja = NINPOCHO->new;
-	my $sid = $Ninja->Load($Sys);
 
 	# 改造版で追加
 	# hCaptcha認証
@@ -147,13 +148,37 @@ sub Write
 
 	#コマンドによる過去ログ送り用（猶予のため）
 	ToKakoLog($Sys,$Set,$Threads);
-	my $isNinja = $Set->Get('BBS_NINJA');#忍法帖が設定されていたらID生成に使用
+
+	#忍法帖が設定されていたらID生成に使用
+	my $isNinja = $Set->Get('BBS_NINJA');
+
+	# SLIP
+	my $isSlip = $Threads->GetAttr($threadid,'slip');
+	my $bbsslip = $isSlip ? $isSlip : $Set->Get('BBS_SLIP');
+
+	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
+	my $handle = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_HANLDLE, $Form->Get('bbs'));
+	
+	# BBS_SLIP付加とID末尾取得
+	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
+	my ($slip_result,$idEnd) = $slip->BBS_SLIP($bbsslip, $Sys->Get('INFO'),$chid,undef) if (!$handle || !$noAttr);
+	$idEnd = $idEnd ? $idEnd : $Sys->Get('AGENT');
+
+	#忍法帖パス
+	my $password = '';
+	if($Form->Get('mail') =~ /(^|<br>)!load:({8,30})(<br>|$)/ && $isNinja){
+		$password = $1;
+	}
+	my $sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
+	if($Form->Get('mail') =~ /(^|<br>)!save:({8,30})(<br>|$)/ && $isNinja){
+		$password = $1;
+	}
 	
 	# 情報欄
- 	my $idpart = 'ID:none';
+ 	my $idpart = 'ID:???';
 	my $id = $Conv->MakeIDnew($Sys, 8, $sid);
 	if (!$idSet){
-		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $Sys->Get('AGENT'));
+		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $idEnd);
 	}
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
 	my $bepart = '';
@@ -170,14 +195,18 @@ sub Write
 	
 	# 書き込み直前処理
 	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1);
-	$this->Ninpocho($Sys,$Form,$Ninja,$sid) if $isNinja;
 	return $err if ($err != $ZP::E_SUCCESS);
+
+	# 忍法帖
+	$this->Ninpocho($Sys,$Form,$Ninja,$sid) if $isNinja;
 	
 	# レス要素の取得
 	my $subject = $Form->Get('subject', '');
 	my $name = $Form->Get('FROM', '');
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
+	#SLIPがあった場合は付加する
+	$name .= "</b> (${slip_result})<b>" if ($slip_result);
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
@@ -185,6 +214,7 @@ sub Write
 	$extrapart = $Form->Get('extrapart', '');
 	my $info = $datepart;
 	$info .= " $idpart" if ($idpart ne '');
+	$info .= "$idEnd" if ($idpart ne '');
 	$info .= " $bepart" if ($bepart ne '');
 	$info .= " $extrapart" if ($extrapart ne '');
 
@@ -294,7 +324,7 @@ sub Write
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
 	}
-	$Ninja->Save($Sys);
+	$Ninja->Save($Sys,$password);
 	return $err;
 }
 
@@ -469,11 +499,6 @@ sub ReadyBeforeWrite
 		$Form->Set('FROM', $from);
 	}
 	$this->ExecutePlugin(16);
-
-	my $isSlip = $Threads->GetAttr($threadid,'slip');
-	my $bbsslip = $isSlip ? $isSlip : $Set->Get('BBS_SLIP');
-
-	$this->addSlip($Sys, $Form, $bbsslip) if (!$Sec->IsAuthority($capID, $ZP::CAP_DISP_HANLDLE, $bbs) || !$noAttr);
 
 	$this->OMIKUJI($Sys, $Form);	#おみくじ
 	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
@@ -1300,34 +1325,7 @@ sub SaveHost
 		$Logger->Write();
 	}
 }
-sub addSlip
-{
-	my $this = shift;
-	my ($Sys, $Form,$bbsslip) = @_;
-	my $Set = $this->{'SET'};
 
-	use Socket;
-	require './module/slip.pl';
-
-	#IP・リモホ・UAを取得
-	my $ip_addr = $ENV{'REMOTE_ADDR'};
-	my $remoho  = $ENV{'REMOTE_HOST'};
-	my $ua =  $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
-
-	#BBS_SLIP機能呼び出し
-	if ($bbsslip =~ /^v{3,6}$/){
-		#名前欄にワッチョイもどきを追加
-		my $from = $Form->Get('FROM');
-		if ($from eq '') {
-			$from = $Set->Get('BBS_NONAME_NAME');
-		}
-		my $res = SLIP::BBS_SLIP_OLD($ip_addr, $remoho, $ua, $bbsslip);
-		$from = "${from} </b>(${res})<b> </b>";
-		$Form->Set('FROM',$from);
-	}
-
-	return 0;
-}
 sub Ninpocho
 {
 	my $this = shift;

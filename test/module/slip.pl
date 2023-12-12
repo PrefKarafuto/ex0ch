@@ -16,7 +16,16 @@ use JSON;
 use LWP::UserAgent;
 use Storable qw(store retrieve);
 $Net::Whois::Raw::OMIT_MSG = 1;
-
+# コンストラクタ
+sub new
+{
+	my $class = shift;
+	
+	my $obj = {};
+	bless $obj, $class;
+	
+	return $obj;
+}
 #------------------------------------------------------------------------------------------------------------
 #	各種判定
 #------------------------------------------------------------------------------------------------------------
@@ -424,9 +433,6 @@ sub ListCheck {
 #------------------------------------------------------------------------------------------------------------
 #	BBS_SLIP生成
 #	-------------------------------------------------------------------------------------
-#	@param	$ipAddr		IPアドレス
-#	@param	$remoho		リモートホスト
-#	@param	$ua			ユーザーエージェント
 #	@param	$bbsslip	slip種別(/(undef)/vvv/vvvv/vvvvv/vvvvvv/)
 #	@param	$infoDir	infoディレクトリ
 #	@param	$chid		SLIP_ID変更用
@@ -436,8 +442,12 @@ sub ListCheck {
 #------------------------------------------------------------------------------------------------------------
 sub BBS_SLIP
 {
-	my ($ipAddr, $remoho, $ua, $bbsslip, $infoDir, $chid, $checkKey) = @_;
+	my ($bbsslip, $infoDir, $chid, $checkKey) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
+
+	my $ipAddr = $ENV{'REMOTE_ADDR'};
+	my $remoho = $ENV{'REMOTE_HOST'};
+	my $ua = $ENV{'HTTP_USER_AGENT'};
 
 	# 各種判定
 	my $country = get_country_by_ip($ipAddr);

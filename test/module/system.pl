@@ -309,6 +309,8 @@ sub InitSystemValue
 		'HCAPTCHA_SECRETKEY'	=> '',							# hCaptchaシークレットキー
 		'TURNSTILE_SITEKEY'		=> '',							# Turnstileサイトキー
 		'TURNSTILE_SECRETKEY'	=> '',							# Turnstileシークレットキー
+		'PROXYCHECK_APIKEY'		=> '',							# ProxyCheck.io APIキー
+
 		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換
 		'CSP'			=> 0,
 		

@@ -30,6 +30,7 @@ sub new
         'SESSION'	    => undef,   # セッション
         'SID'	        => undef,   # セッションID
         'STATUS'        => undef,   # 忍法帖が有効か無効か
+        'ANON'          => undef,   # 匿名化状態か
 	};
 	bless $obj, $class;
 	
@@ -41,6 +42,7 @@ sub new
 #	忍法帖ロード
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
+#	@param	$isAnon 	匿名化されてるかどうか
 #	@param	$password	あればパスワードで忍法帖をロード。無ければ通常ロード
 #	@param	$sid	あればセッションIDで忍法帖をロード。無ければ通常ロード
 #	@param	$mode	1なら忍法帖を作らない（セッションIDのみ利用したい場合）
@@ -50,7 +52,7 @@ sub new
 sub Load
 {
 	my $this = shift;
-	my ($Sys,$password) = @_;
+	my ($Sys,$isAnon,$password) = @_;
     my ($sid,$sid_saved,$sid_before,$sec);
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
@@ -61,6 +63,8 @@ sub Load
     # ディレクトリ作成は掲示板作成時に行うようにする予定
 	mkdir $ninDir if ! -d $ninDir;
     mkdir $ninDir.'hash/' if ! -d $ninDir.'hash/';
+
+    $this->{'ANON'} = $isAnon eq '8' ? 1 : 0;
 
     if($Sys->Get('BBS_NINJA')){
         $this->{'SATUS'} = 1;
@@ -94,7 +98,7 @@ sub Load
     }
 
     #cookieにsessionIDが保存されていない場合
-    if(!$sid){
+    if(!$sid && !$this->{'ANON'}){
         my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx = Digest::MD5->new;
         $ctx->add('ex0ch ID Generation');
@@ -317,15 +321,17 @@ sub Save
     }
 
     # Hashテーブルを設定
-    my $addr = $ENV{'REMOTE_ADDR'};
-    my $ctx2 = Digest::MD5->new;
-    $ctx2->add(':', $Sys->Get('SERVER'));
-    $ctx2->add(':', $addr);
-    my $ip_hash = $ctx2->b64digest;
-    my $user = MakeUserInfo($Sys);
+    if(!$this->{'ANON'} && $this->{'STATUS'}){
+        my $addr = $ENV{'REMOTE_ADDR'};
+        my $ctx2 = Digest::MD5->new;
+        $ctx2->add(':', $Sys->Get('SERVER'));
+        $ctx2->add(':', $addr);
+        my $ip_hash = $ctx2->b64digest;
+        my $user = MakeUserInfo($Sys);
 
-    SetHash($ip_hash,$sid,60*60*24+localtime(time),$ninDir.'hash/ip_addr.cgi');
-    SetHash($user,$sid,60*60*24+localtime(time),$ninDir.'hash/user_info.cgi');
+        SetHash($ip_hash,$sid,60*60*24+localtime(time),$ninDir.'hash/ip_addr.cgi');
+        SetHash($user,$sid,60*60*24+localtime(time),$ninDir.'hash/user_info.cgi');
+    }
     if (defined $password && $this->{'STATUS'}) {
         my $ctx3 = Digest::MD5->new;
         $ctx3->add(':', $Sys->Get('SERVER'));
