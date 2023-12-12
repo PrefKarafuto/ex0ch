@@ -144,7 +144,9 @@ sub is_public_wifi {
 sub get_country_by_ip {
     my ($ipAddr) = @_;
     my $country;
-
+	# 重いので応急的に対応。
+	# そのうちGeo::IPに移行
+	return 'JP';
     my $res = whois($ipAddr);
     for my $line (split /\n/, $res) {
         if ($line =~ /country:\s*([A-Z]{2})/i) {
@@ -360,7 +362,10 @@ sub is_mobile {
 				'LogicLinks',
 				'SORASIM'
 				);
-			if (!$ismobile) {
+			# 重いので応急的に対応。
+			# そのうちGeo::IPに移行
+			#if (!$ismobile) {
+			if (0){
 				my $res = whois($ipAddr);
 				my $idx = 0;
 				for my $name (@mobile_whois) {
