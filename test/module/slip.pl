@@ -208,10 +208,7 @@ sub is_mobile {
 			"tone",
 			"ame",
 			"nif",
-			"lib",
-			"mkun",
-			"lmate",
-			"ftel"
+			"lib"
 			);
 		@mobile_nicknames = (
 			"ｵｯﾍﾟｹｰ",
@@ -255,10 +252,7 @@ sub is_mobile {
 			"ﾄﾝﾓｰ",
 			"ｱﾒ",
 			"ﾆﾌﾓ",
-			"ﾘﾌﾞﾓ",
-			"ｲﾙｸﾝ",
-			"ｹﾞﾏｰ",
-			"ﾌﾘｯﾃﾙ"
+			"ﾘﾌﾞﾓ"
 			) if $isSlipName5ch;
 		if ($remoho ne $ipAddr) {
 			my @mobile_remoho = (
@@ -357,21 +351,26 @@ sub is_mobile {
 					}
 				}
 			}
-			my @mobile_whois = (
-				'Plus One marketing',
-				'LogicLinks',
-				'SORASIM'
-				);
-			# 重いので応急的に対応。
-			# そのうちGeo::IPに移行
-			#if (!$ismobile) {
-			if (0){
-				my $res = whois($ipAddr);
-				my $idx = 0;
-				for my $name (@mobile_whois) {
-					$idx--;
-					if ($res =~ /.*${name}.*/) {
-						$ismobile = $mobile_nicknames[$idx];
+			my @sorasim_ip = (
+				'103\\.41\\.25[2-5]\\.\\d{1,3}',
+				'153\\.124\\.(16[8-9]|17[0-5])\\.\\d{1,3}'
+			);
+			if (!$ismobile) {
+				for my $name (@sorasim_ip) {
+					if ($ipAddr =~ /.*${name}.*/) {
+						$ismobile = $isSlipName5ch ? 'ｲﾙｸﾝ' : 'mkun';
+						last;
+					}
+				}
+			}
+			my @logiclinks_ip = (
+				'103\\.90\\.1[6-9]\\.\\d{1,3}',
+				'219\\.100\\.18[0-3]\\.\\d{1,3}'
+			);
+			if (!$ismobile) {
+				for my $name (@logiclinks_ip) {
+					if ($ipAddr =~ /.*${name}.*/) {
+						$ismobile = $isSlipName5ch ? 'ｹﾞﾏｰ' : 'lmate';
 						last;
 					}
 				}
