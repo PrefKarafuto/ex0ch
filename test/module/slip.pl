@@ -142,18 +142,19 @@ sub is_public_wifi {
 
 # IPから国を判定
 sub get_country_by_ip {
-    my ($ipAddr) = @_;
+    my ($ipAddr,$infoDir) = @_;
     my $country;
+	my $result = binary_search_ip_range($ipAddr,$infoDir.'/IP/jp_ipv4.cgi');
+
+	$country = $result ? 'JP' : 0;
 	# 重いので応急的に対応。
-	# そのうちGeo::IPに移行
-	return 'JP';
-    my $res = whois($ipAddr);
-    for my $line (split /\n/, $res) {
-        if ($line =~ /country:\s*([A-Z]{2})/i) {
-            $country = $1;
-            last;
-        }
-    }
+#    my $res = whois($ipAddr);
+#    for my $line (split /\n/, $res) {
+#        if ($line =~ /country:\s*([A-Z]{2})/i) {
+#            $country = $1;
+#            last;
+#        }
+#    }
 
     return $country;
 }
@@ -381,6 +382,87 @@ sub is_mobile {
     return $ismobile;
 }
 
+# 日本IPリスト取得用
+sub GetApnicJPIPList
+{
+	my ($filename) = @_;
+	my $ua = LWP::UserAgent->new;
+	my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
+
+	# URLからデータを取得
+	my $response = $ua->get($url);
+	die "データの取得に失敗: ", $response->status_line unless $response->is_success;
+	my $data = $response->decoded_content;
+
+	# 日本のIP範囲を抽出し、マージ
+	my @jp_ip_ranges;
+	my $last_end = -1;
+	foreach my $line (split /\n/, $data) {
+		if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|(\d+)\|allocated$/) {
+			my $start_ip_num = ip_to_number($1);
+			my $end_ip_num = $start_ip_num + $2 - 1;
+
+			# 連続する範囲をマージ
+			if ($start_ip_num == $last_end + 1) {
+				$jp_ip_ranges[-1]->{end} = $end_ip_num;
+			} else {
+				push @jp_ip_ranges, { start => $start_ip_num, end => $end_ip_num };
+			}
+			$last_end = $end_ip_num;
+		}
+	}
+
+	# 範囲をファイルに保存
+	open my $file, '>', $filename or die "ファイルを開けません: $!";
+	foreach my $range (@jp_ip_ranges) {
+		print $file "$range->{start}-$range->{end}\n";
+	}
+	close $file;
+}
+sub binary_search_ip_range {
+    my ($ipAddr, $filename) = @_;
+	my $ip_num = ip_to_number($ipAddr);
+	my $ranges = load_ip_ranges($filename);
+    my $low = 0;
+    my $high = @$ranges - 1;
+
+    while ($low <= $high) {
+        my $mid = int(($low + $high) / 2);
+        if ($ip_num < $ranges->[$mid]->{start}) {
+            $high = $mid - 1;
+        } elsif ($ip_num > $ranges->[$mid]->{end}) {
+            $low = $mid + 1;
+        } else {
+            return 1; # IPアドレスは範囲内にあります
+        }
+    }
+
+    return 0; # IPアドレスは範囲外です
+}
+sub load_ip_ranges {
+    my $filename = shift;
+    my @ranges;
+
+    open my $file, '<', $filename or die "ファイルを開けません: $!";
+    while (my $line = <$file>) {
+        chomp $line;
+        my ($start, $end) = split /-/, $line;
+        push @ranges, { start => $start, end => $end };
+    }
+    close $file;
+
+    return @ranges;
+}
+sub ip_to_number {
+    my $ip = shift;
+    my $number = 0;
+    my @octets = split /\./, $ip;
+    for (my $i = 0; $i < 4; $i++) {
+        $number += $octets[$i] << (8 * (3 - $i));
+    }
+    return $number;
+}
+
 # 匿名化判定用Tor/VPN-Gate判定
 sub GetTorExitNodeList {
     my ($fileName) = @_;
@@ -455,7 +537,7 @@ sub BBS_SLIP
 	my $ua = $ENV{'HTTP_USER_AGENT'};
 
 	# 各種判定
-	my $country = get_country_by_ip($ipAddr);
+	my $country = get_country_by_ip($ipAddr,$infoDir);
 	my $ismobile = is_mobile($country,$ipAddr,$remoho);
 	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);
 	my $isProxy = is_proxy_local($ipAddr,$remoho,$infoDir);
