@@ -13,6 +13,7 @@ use CGI::Cookie;
 use Digest::MD5 qw(md5_hex);
 use Net::Whois::Raw;
 use JSON;
+use Math::BigInt;
 use LWP::UserAgent;
 use Storable qw(store retrieve);
 $Net::Whois::Raw::OMIT_MSG = 1;
@@ -149,11 +150,17 @@ sub is_public_wifi {
 # IPから国を判定
 sub get_country_by_ip {
     my ($ipAddr,$infoDir) = @_;
-    my $filename = "./$infoDir/IP_List/jp_ipv4.cgi";
-	if(localtime(time()) - (stat($filename))[9] > 60*60*24*7 || !(-e $filename)){
-		GetApnicJPIPList($filename);
+    my $filename_ipv4 = "./$infoDir/IP_List/jp_ipv4.cgi";
+	my $filename_ipv6 = "./$infoDir/IP_List/jp_ipv6.cgi";
+	if(localtime(time()) - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
+		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
 	}
-	my $result = binary_search_ip_range($ipAddr,$filename);
+	my $result = '';
+	if ($ipAddr =~ /\./){
+		$result = binary_search_ip_range($ipAddr,$filename_ipv4);
+	}else{
+		$result = binary_search_ip_range($ipAddr,$filename_ipv6);
+	}
 
 	my $country = $result ? 'JP' : 0;
 
@@ -384,47 +391,67 @@ sub is_mobile {
 }
 
 # 日本IPリスト取得用
-sub GetApnicJPIPList
-{
-	my ($filename) = @_;
-	my $ua = LWP::UserAgent->new;
-	my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
+sub GetApnicJPIPList {
+    my ($filename_ipv4, $filename_ipv6) = @_;
+    my $ua = LWP::UserAgent->new;
+    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
 
-	# URLからデータを取得
-	my $response = $ua->get($url);
-	die "データの取得に失敗: ", $response->status_line unless $response->is_success;
-	my $data = $response->decoded_content;
+    my $response = $ua->get($url);
+    die "データの取得に失敗: ", $response->status_line unless $response->is_success;
+    my $data = $response->decoded_content;
 
-	# 日本のIP範囲を抽出し、マージ
-	my @jp_ip_ranges;
-	my $last_end = -1;
-	foreach my $line (split /\n/, $data) {
-		if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|(\d+)\|allocated$/) {
-			my $start_ip_num = ip_to_number($1);
-			my $end_ip_num = $start_ip_num + $2 - 1;
+    my @jp_ipv4_ranges;
+    my @jp_ipv6_ranges;
+    my $last_end_ipv4 = -1;
+    my $last_end_ipv6 = Math::BigInt->new(-1);
 
-			# 連続する範囲をマージ
-			if ($start_ip_num == $last_end + 1) {
-				$jp_ip_ranges[-1]->{end} = $end_ip_num;
-			} else {
-				push @jp_ip_ranges, { start => $start_ip_num, end => $end_ip_num };
-			}
-			$last_end = $end_ip_num;
-		}
-	}
+    foreach my $line (split /\n/, $data) {
+        if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|.*$/) {
+            # IPv4の範囲処理
+            my $start_ip_num = ip_to_number($1);
+            my $end_ip_num = $start_ip_num + $2 - 1;
 
-	# 範囲をファイルに保存
-	open my $file, '>', $filename or die "ファイルを開けません: $!";
-	foreach my $range (@jp_ip_ranges) {
-		print $file "$range->{start}-$range->{end}\n";
-	}
-	close $file;
-	chmod 0600, $file;
+            if ($start_ip_num == $last_end_ipv4 + 1) {
+                $jp_ipv4_ranges[-1]->{end} = $end_ip_num;
+            } else {
+                push @jp_ipv4_ranges, { start => $start_ip_num, end => $end_ip_num };
+            }
+            $last_end_ipv4 = $end_ip_num;
+        }
+        elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|.*$/) {
+            # IPv6の範囲処理
+            my $start_ip_num = ip_to_number($1);
+            my $end_ip_num = $start_ip_num + Math::BigInt->new(2)->bpow($2) - 1;
+
+            if ($start_ip_num == $last_end_ipv6 + 1) {
+                $jp_ipv6_ranges[-1]->{end} = $end_ip_num;
+            } else {
+                push @jp_ipv6_ranges, { start => $start_ip_num, end => $end_ip_num };
+            }
+            $last_end_ipv6 = $end_ip_num;
+        }
+    }
+
+    # IPv4範囲をファイルに保存
+    open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
+    foreach my $range (@jp_ipv4_ranges) {
+        print $file_ipv4 "$range->{start}-$range->{end}\n";
+    }
+    close $file_ipv4;
+    chmod 0600, $filename_ipv4;
+
+    # IPv6範囲をファイルに保存
+    open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
+    foreach my $range (@jp_ipv6_ranges) {
+        print $file_ipv6 "$range->{start}-$range->{end}\n";
+    }
+    close $file_ipv6;
+    chmod 0600, $filename_ipv6;
 }
 sub binary_search_ip_range {
     my ($ipAddr, $filename) = @_;
-	my $ip_num = ip_to_number($ipAddr);
-	my $ranges = load_ip_ranges($filename);
+    my $ip_num = ip_to_number($ipAddr);
+    my $ranges = load_ip_ranges($filename);
     my $low = 0;
     my $high = @$ranges - 1;
 
@@ -449,7 +476,10 @@ sub load_ip_ranges {
     while (my $line = <$file>) {
         chomp $line;
         my ($start, $end) = split /-/, $line;
-        push @ranges, { start => $start, end => $end };
+        push @ranges, { 
+            start => Math::BigInt->new($start), 
+            end => Math::BigInt->new($end)
+        };
     }
     close $file;
 
@@ -457,26 +487,41 @@ sub load_ip_ranges {
 }
 sub ip_to_number {
     my $ip = shift;
-    my $number = 0;
-    my @octets = split /\./, $ip;
-    for (my $i = 0; $i < 4; $i++) {
-        $number += $octets[$i] << (8 * (3 - $i));
+
+    if ($ip =~ /^\d{1,3}(?:\.\d{1,3}){3}$/) { # IPv4
+        return unpack("N", pack("C4", split(/\./, $ip)));
+    } elsif ($ip =~ /^[0-9a-f:]+$/i) { # IPv6
+        # 省略記法の処理
+        if ($ip =~ /::/) {
+            my $filler = ':' . ('0:' x (8 - (() = $ip =~ /:/g))) . '0';
+            $ip =~ s/::/$filler/;
+            $ip =~ s/^:/0:/; # 先頭が省略された場合
+            $ip =~ s/:$/:0/; # 末尾が省略された場合
+        }
+
+        my $bigint = Math::BigInt->new(0);
+        foreach my $part (split /:/, $ip) {
+            $bigint = ($bigint << 16) + hex($part);
+        }
+        return $bigint;
+    } else {
+        return undef;
     }
-    return $number;
 }
 
 # 匿名化判定用Tor/VPN-Gate判定
 sub GetTorExitNodeList {
     my ($fileName) = @_;
     my $ua = LWP::UserAgent->new;
-    my $response = $ua->get('https://check.torproject.org/exit-addresses');
+    my $response = $ua->get('https://www.dan.me.uk/torlist/?exit');
 
     if ($response->is_success) {
         my $content = $response->decoded_content;
         my %ips; # 新しいハッシュを初期化
 
-        while ($content =~ /ExitAddress (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/g) {
-            $ips{$1} = 1;
+        # 各行を処理してIPアドレスを抽出
+        foreach my $line (split /\n/, $content) {
+            $ips{$line} = 1 if $line;  # 空行を除外
         }
 
         store \%ips, $fileName; # 新しいデータでファイルを上書き
