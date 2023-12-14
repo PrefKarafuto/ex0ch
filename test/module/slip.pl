@@ -33,7 +33,7 @@ sub new
 sub is_denied_ip {
     my ($ipAddr, $infoDir) = @_;
 
-    my $denyIP_file = "$infoDir/IP/deny.cgi";
+    my $denyIP_file = "./$infoDir/IP_List/deny.cgi";
 
     # ファイルが存在しない場合はすぐに0を返す
     return 0 unless -e $denyIP_file;
@@ -54,8 +54,14 @@ sub is_proxy_local {
 		$isAnon = 1;
 	}
 
-    my $vpngate = "$infoDir/IP/vpngate.cgi";
-	my $tor = "$infoDir/IP/tor.cgi";
+    my $vpngate = "./$infoDir/IP_List/vpngate.cgi";
+	my $tor = "./$infoDir/IP_List/tor.cgi";
+	if(localtime(time()) - (stat($vpngate))[9] > 60*60*24*7 || !(-e $vpngate)){
+		GetVPNGateList($vpngate);
+	}
+	if(localtime(time()) - (stat($tor))[9] > 60*60*24*7 || !(-e $tor)){
+		GetTorExitNodeList($tor);
+	}
     $isAnon += ListCheck($ipAddr,$vpngate) ;
 	$isAnon += ListCheck($ipAddr,$tor);
 
@@ -66,7 +72,7 @@ sub is_proxy_api {
     my ($ipAddr, $infoDir, $checkKey) = @_;
     return 0 unless defined $checkKey;
 
-    my $file = "$infoDir/IP/proxy.cgi";
+    my $file = "./$infoDir/IP_List/proxy.cgi";
     my $proxy_list = retrieve($file) if -e $file;
     $proxy_list = {} unless defined $proxy_list;
     return 1 if exists $proxy_list->{$ipAddr};
@@ -143,18 +149,13 @@ sub is_public_wifi {
 # IPから国を判定
 sub get_country_by_ip {
     my ($ipAddr,$infoDir) = @_;
-    my $country;
-	my $result = binary_search_ip_range($ipAddr,$infoDir.'/IP/jp_ipv4.cgi');
+    my $filename = "./$infoDir/IP_List/jp_ipv4.cgi";
+	if(localtime(time()) - (stat($filename))[9] > 60*60*24*7 || !(-e $filename)){
+		GetApnicJPIPList($filename);
+	}
+	my $result = binary_search_ip_range($ipAddr,$filename);
 
-	$country = $result ? 'JP' : 0;
-	# 重いので応急的に対応。
-#    my $res = whois($ipAddr);
-#    for my $line (split /\n/, $res) {
-#        if ($line =~ /country:\s*([A-Z]{2})/i) {
-#            $country = $1;
-#            last;
-#        }
-#    }
+	my $country = $result ? 'JP' : 0;
 
     return $country;
 }
@@ -418,6 +419,7 @@ sub GetApnicJPIPList
 		print $file "$range->{start}-$range->{end}\n";
 	}
 	close $file;
+	chmod 0600, $file;
 }
 sub binary_search_ip_range {
     my ($ipAddr, $filename) = @_;
@@ -451,7 +453,7 @@ sub load_ip_ranges {
     }
     close $file;
 
-    return @ranges;
+    return \@ranges;
 }
 sub ip_to_number {
     my $ip = shift;

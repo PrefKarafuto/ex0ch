@@ -256,21 +256,6 @@ sub Delete {
     }
     return 1; # 処理が完了したら1を返す
 }
-# 期限切れセッションのファイルを削除
-sub cleanup_expired_session {
-    my ($Sys, $session_id) = @_;
-
-    # セッションをロード（セッションファイルはまだ削除しない）
-    my $session = CGI::Session->load("driver:File", $session_id, {Directory=>'/path/to/sessions'});
-
-    # セッションが期限切れの場合、ファイルを削除
-    if ($session->is_expired) {
-        Delete($Sys,$session_id);
-        return 1;  # 期限切れのセッションを削除した
-    }
-
-    return 0;  # セッションは期限切れではない
-}
 # ID生成
 sub generate_id
 {
