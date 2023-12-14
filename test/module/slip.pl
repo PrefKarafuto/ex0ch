@@ -63,7 +63,7 @@ sub is_proxy_local {
 	if(localtime(time()) - (stat($tor))[9] > 60*60*24*7 || !(-e $tor)){
 		GetTorExitNodeList($tor);
 	}
-    $isAnon += ListCheck($ipAddr,$vpngate) ;
+    $isAnon += ListCheck($ipAddr,$vpngate);
 	$isAnon += ListCheck($ipAddr,$tor);
 
     return $isAnon;
