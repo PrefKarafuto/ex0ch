@@ -1478,6 +1478,7 @@ sub IsProxyLite
 #------------------------------------------------------------------------------------------------------------
 sub CheckDNSBL
 {
+	my $this = shift;
 	my ($host) = @_;
 	
 	my $ret = eval {
@@ -1589,6 +1590,7 @@ sub MakePath
 
 # 逆引き関数
 sub reverse_lookup {
+	my $this = shift;
     my ($ip) = @_;
 
     # IPv4とIPv6のアドレスを判断し、適切なSocket定数を使用

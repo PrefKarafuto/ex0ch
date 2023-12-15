@@ -53,23 +53,19 @@ sub Load
 {
 	my $this = shift;
 	my ($Sys,$isAnon,$password) = @_;
-    my ($sid,$sid_saved,$sid_before,$sec);
+    my ($sid,$sid_saved,$sid_before,$sec,$stat);
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $Form = $Sys->Get('MainCGI')->{'FORM'};
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = "./$infoDir/.ninpocho/";
 
-    # ディレクトリ作成は掲示板作成時に行うようにする予定
-	mkdir $ninDir if ! -d $ninDir;
-    mkdir $ninDir.'hash/' if ! -d $ninDir.'hash/';
-
     $this->{'ANON'} = $isAnon eq '8' ? 1 : 0;
 
-    if($Sys->Get('BBS_NINJA')){
-        $this->{'SATUS'} = 1;
+    if($Sys->Get('BBS_NINJA') eq 'checked'){
+        $stat = 1;
     }else{
-        $this->{'SATUS'} = 0;
+        $stat = 0;
     }
 
     #cookieから取得
@@ -112,7 +108,7 @@ sub Load
     }
 
     #パスワードがあった場合
-    if($password && $this->{'SATUS'}){
+    if($password && $stat){
         my $ctx = Digest::MD5->new;
         $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
@@ -125,11 +121,11 @@ sub Load
         }
     }
 
-    if($this->{'SATUS'}){
+    if($stat){
         #忍法帖が有効の場合
-        $this->{'SESSION'} = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
-        if($this->{'SESSION'}->is_empty){
-            $this->{'SESSION'} = CGI::Session->new("driver:file", $sid, {Directory => $ninDir});
+        my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
+        if($session ->is_empty){
+            $session  = CGI::Session->new("driver:file", $sid, {Directory => $ninDir});
             $sid = CGI::Session->id();
             #新規作成時に追加
             Set('new_message',substr($Form->Get('MESSAGE'), 0, 30));
@@ -143,6 +139,7 @@ sub Load
                 Set('load_host',$ENV{'REMOTE_HOST'});
             }
         }
+        $this->{'SESSION'} = $session;
         $this->{'SID'} = $sid;
     }else{
         #セッションIDのみ使う場合
@@ -153,7 +150,7 @@ sub Load
         }
     }
 
-    return $this->{'SID'};
+    return $sid;
 }
 # セッションIDから忍法帖を読み込む(admin.cgi用)
 sub LoadOnly {
@@ -300,7 +297,7 @@ sub Save
     if($this->{'STATUS'}){
         my $session = $this->{'SESSION'};
         # セッション有効期限を30日後に設定
-        $session->expire($limit);
+        $session->expire('30d');
         # セッションを閉じる
         $session->flush();
     }
