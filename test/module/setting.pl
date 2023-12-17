@@ -100,7 +100,15 @@ sub Save
 		BBS_BE_TYPE2			BBS_NO_ID				BBS_JP_CHECK			BBS_VIP931
 		BBS_4WORLD				BBS_YMD_WEEKS			BBS_NINJA				
 	);
-	
+	# ５ちゃんねるで追加された項目
+	my @ch5setting = qw(
+		BBS_FORCE_NOID			BBS_FORCE_NOMAIL		BBS_FORCE_NONAME		BBS_ARR
+		EMOTICONS				BBS_DISABLE_NO			BBS_USE_VIPQ2			BBS_PHONE
+		BBS_COPIPE				BBS_NO_MADAKANA			BBS_FORIGN_PASS			BBS_BBX_PASS
+		BBS_OEKAKI				BBS_SOKO				BBS_BEICON				BBS_DISP_ORIG
+		BBS_TITLE_ORIG			BBS_FR_LEVEL			BBS_FR_SECOND			BBS_SAMBA24
+		BBS_ADD_THREAD			BBS_NOSUSU				BBS_FAKE_COUNTRY
+	);
 	my %orz = %{$this->{'SETTING'}};
 	
 	chmod($Sys->Get('PM-TXT'), $path);
@@ -374,7 +382,8 @@ sub InitSettingData
         'BBS_OMIKUJI'           => '',
 		'BBS_FAVICON'           => 'icon.png',
 
-		'BBS_HCAPTCHA'			=> '',
+		'BBS_CAPTCHA'			=> '',
+		'BBS_AUTH'				=> '',
 		'BBS_READTYPE'			=> '5ch',
 		'BBS_POSTCOLOR'			=> '#FFFFFF',
 		'BBS_MASCOT'			=> '',
@@ -383,10 +392,10 @@ sub InitSettingData
   		'BBS_COMMAND'			=> 0 ,
 
 		#忍法帖関連
-		'NINJA_FORCESAGE'		=> 2,
-		'NINJA_MAKETHREAD'		=> 2,
-		'NINJA_THREADSTOP'		=> 10,
-		'NINJA_USERBAN'			=> 10,
+		'NINJA_FORCE_SAGE'		=> 2,
+		'NINJA_MAKE_THREAD'		=> 2,
+		'NINJA_THREAD_STOP'		=> 10,
+		'NINJA_USER_BAN'		=> 10,
 	);
 	
 	while (my ($key, $val) = each(%set)) {
