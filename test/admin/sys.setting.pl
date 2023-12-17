@@ -682,15 +682,25 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">DNSBL設定</td></tr>\n");
 	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください<br>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_TOREXIT $torexit value=on>");
-	$Page->Print("<a href=\"https://www.dan.me.uk/dnsbl\" target=\"_blank\">Dan.me.uk(Tor出口ノード判定)</a>\n");
+	$Page->Print("<a href=\"https://www.dan.me.uk/dnsbl\" target=\"_blank\">Dan.me.uk</a>(Tor出口ノード判定)\n");
 	$Page->Print("</td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">hCaptcha設定</td></tr>\n");
-	$Page->Print("<tr><td>サイトキーを入力<br>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">外部APIキー</td></tr>\n");
+	$Page->Print("<tr><td>hCaptcha サイトキー<br>");
 	$Page->Print("<td><input type=text size=60  name=HCAPTCHA_SITEKEY value=\"$hCaptcha_sitekey\"></td></tr>\n");
-	$Page->Print("<tr><td>シークレットキーを入力</td>");
+	$Page->Print("<tr><td>hCaptcha シークレットキー</td>");
 	$Page->Print("<td><input type=text size=60 name=HCAPTCHA_SECRETKEY value=\"$hCaptcha_secretkey\"></td></tr>\n");
-	
+	$Page->Print("<tr><td>reCaptcha サイトキー<br>");
+	$Page->Print("<td><input type=text size=60  name=RECAPTCHA_SITEKEY value=\"\" disabled></td></tr>\n");
+	$Page->Print("<tr><td>reCaptcha シークレットキー</td>");
+	$Page->Print("<td><input type=text size=60 name=RECAPTCHA_SECRETKEY value=\"\" disabled></td></tr>\n");
+	$Page->Print("<tr><td>Turnstile サイトキー<br>");
+	$Page->Print("<td><input type=text size=60  name=TURNSTILE_SITEKEY value=\"\" disabled></td></tr>\n");
+	$Page->Print("<tr><td>Turnstile シークレットキー</td>");
+	$Page->Print("<td><input type=text size=60 name=TURNSTILE_SECRETKEY value=\"\" disabled></td></tr>\n");
+	$Page->Print("<tr><td>ProxyCheck APIキー</td>");
+	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"\" disabled></td></tr>\n");
+
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
 	$Page->Print("<input type=button value=\"　設定　\" $common></td></tr>\n");
