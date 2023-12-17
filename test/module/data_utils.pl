@@ -1415,18 +1415,13 @@ sub IsProxy
 	my $this = shift;
 	my ($Sys, $Form, $from, $mode) = @_;
 	
-	# 携帯, iPhone(3G回線) はプロキシ規制を回避する
-	return 0 if ($mode eq 'O' || $mode eq 'i');
-	
 	my @dnsbls = ();
-	push(@dnsbls, 'zen.spamhaus.org') if($Sys->Get('SPAMHAUS'));
-	push(@dnsbls, 'bl.spamcop.net') if($Sys->Get('SPAMCOP'));
-    push(@dnsbls, 'b.barracudacentral.org') if($Sys->Get('BARRACUDA'));
+	# Tor検出用
+	push(@dnsbls, 'torexit.dan.me.uk') if($Sys->Get('DNSBL_TOREXIT'));
 	
 	# DNSBL問い合わせ
-	my $addr = join('.', reverse( split(/\./,$ENV{'REMOTE_ADDR'})));
 	foreach my $dnsbl (@dnsbls) {
-		if (CheckDNSBL("$addr.$dnsbl") eq '127.0.0.2') {
+		if (CheckDNSBL($ENV{'REMOTE_ADDR'},$dnsbl,'127.0.0.100')) {
 			$Form->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
 			return ($mode eq 'P' ? 0 : 1);
 		}
@@ -1434,86 +1429,41 @@ sub IsProxy
 	
 	return 0;
 }
-#簡易版
-sub IsProxyLite
-{
-	my $PROXY = 0;
-
-	# HTTP 環境変数をチェック
-	if ($ENV{'HTTP_X_FORWARDED_FOR'} && $ENV{'REMOTE_ADDR'} ne $ENV{'HTTP_X_FORWARDED_FOR'}) {
-		$PROXY = 1;
-	}
-	if ($ENV{'HTTP_VIA'}) {
-		$PROXY = 1;
-	}
-	if ($ENV{'HTTP_FORWARDED'}) {
-		$PROXY = 1;
-	}
-	if ($ENV{'HTTP_CACHE_INFO'}) {
-		$PROXY = 1;
-	}
-	if ($ENV{'HTTP_CLIENT_IP'}) {
-		$PROXY = 1;
-	}
-	if ($ENV{'HTTP_PROXY_CONNECTION'}) {
-		$PROXY = 1;
-	}
-	if ($ENV{'HTTP_SP_HOST'}) {
-		$PROXY = 1;
-	}
-	if ($ENV{'HTTP_X_LOCKING'}) {
-		$PROXY = 1;
-	}
-
-	return $PROXY;
-}
 
 #------------------------------------------------------------------------------------------------------------
 #
 #	DNSBL正引き(timeout付き) - CheckDNSBL
 #	--------------------------------------
-#	引　数：$host : 正引きするHOST
-#	戻り値：プロキシであれば127.0.0.2
 #
 #------------------------------------------------------------------------------------------------------------
-sub CheckDNSBL
-{
-	my $this = shift;
-	my ($host) = @_;
-	
-	my $ret = eval {
-		require Net::DNS;
-		my $res = Net::DNS::Resolver->new;
-		$res->tcp_timeout(1);
-		$res->udp_timeout(1);
-		$res->retry(1);
-		
-		if ((my $query = $res->query($host))) {
-			my @ans = $query->answer;
-			
-			foreach (@ans) {
-				return $_->address;
-			}
-		}
-		if ($res->errorstring eq 'query timed out') {
-			return '127.0.0.0';
-		}
-	};
-	
-	return $ret if (defined $ret);
-	
-	if ($@) {
-		require Net::DNS::Lite;
-		my $res = Net::DNS::Lite->new(
-			server => [ qw(8.8.4.4 8.8.8.8) ], # google public dns
-			timeout => [2, 3],
-		);
-		
-		my @ans = $res->resolve($host, 'a');
-		return $_->[4] foreach (@ans);
-	}
-	
-	return '127.0.0.1';
+sub CheckDNSBL {
+    my ($ip, $DNSBL_host, $expected_ip) = @_;
+    my $reversed_ip = '';
+
+    if ($ip =~ /:/) {  # IPv6アドレスの場合
+        $ip =~ s/://g;
+        $reversed_ip = join('.', reverse(split('', $ip)));
+    } else {  # IPv4アドレスの場合
+        $reversed_ip = join('.', reverse(split(/\./, $ip)));
+    }
+
+    my $query_host = "$reversed_ip.$DNSBL_host";
+
+    my $res = Net::DNS::Resolver->new(
+        tcp_timeout => 1,  # TCPタイムアウトを1秒に設定
+        udp_timeout => 1,  # UDPタイムアウトを1秒に設定
+        retry       => 1,  # 再試行回数を1回に設定
+    );
+
+    my $query = $res->query($query_host, "A");
+
+    if ($query) {
+        foreach my $rr ($query->answer) {
+            next unless $rr->type eq "A";
+            return 1 if $rr->address eq $expected_ip;  # 期待されるIPアドレスにマッチした場合は1を返す
+        }
+    }
+    return 0;  # マッチしない場合は0を返す
 }
 
 #------------------------------------------------------------------------------------------------------------

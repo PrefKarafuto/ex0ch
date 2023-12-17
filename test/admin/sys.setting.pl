@@ -634,8 +634,8 @@ sub PrintPlusSecSetting
 {
 	
 	my ($Page, $SYS, $Form) = @_;
-	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $SPAMHAUS, $SPAMCOP, $BARRACUDA);
-	my ($kakiko, $trip12, $shaus, $scop ,$bc);
+	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT);
+	my ($kakiko, $trip12, $torexit);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Regulation Setting');
@@ -645,18 +645,14 @@ sub PrintPlusSecSetting
 	$DefSamba	= $SYS->Get('DEFSAMBA');
 	$DefHoushi	= $SYS->Get('DEFHOUSHI');
 	$Trip12		= $SYS->Get('TRIP12');
-	$SPAMHAUS	= $SYS->Get('SPAMHAUS');
-	$SPAMCOP	= $SYS->Get('SPAMCOP');
-    $BARRACUDA	= $SYS->Get('BARRACUDA');
+	$TOREXIT	= $SYS->Get('DNSBL_TOREXIT');
 	
 	my $hCaptcha_sitekey 	= $SYS->Get('HCAPTCHA_SITEKEY');
 	my $hCaptcha_secretkey  = $SYS->Get('HCAPTCHA_SECRETKEY');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
-	$shaus		= ($SPAMHAUS == 1 ? 'checked' : '');
-	$scop		= ($SPAMCOP == 1 ? 'checked' : '');
-    $bc	        = ($BARRACUDA == 1 ? 'checked' : '');
+	$torexit	= ($TOREXIT == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -685,12 +681,8 @@ sub PrintPlusSecSetting
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">DNSBL設定</td></tr>\n");
 	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください<br>\n");
-	$Page->Print("<input type=checkbox name=SPAMHAUS $shaus value=on>");
-	$Page->Print("<a href=\"https://www.spamhaus.org/organization/dnsblusage/\" target=\"_blank\">Spamhaus</a>\n");
-	$Page->Print("<input type=checkbox name=SPAMCOP $scop value=on>");
-	$Page->Print("<a href=\"https://www.spamcop.net/fom-serve/cache/291.html\" target=\"_blank\">SpamCop</a>\n");
-	$Page->Print("<input type=checkbox name=BARRACUDA $bc value=on>");
-	$Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">BarracudaCentral</a>\n");
+	$Page->Print("<input type=checkbox name=DNSBL_TOREXIT $torexit value=on>");
+	$Page->Print("<a href=\"https://www.dan.me.uk/dnsbl\" target=\"_blank\">Dan.me.uk(Tor出口ノード判定)</a>\n");
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">hCaptcha設定</td></tr>\n");
@@ -1224,9 +1216,7 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('DEFSAMBA', $Form->Get('DEFSAMBA'));
 	$SYSTEM->Set('DEFHOUSHI', $Form->Get('DEFHOUSHI'));
 	$SYSTEM->Set('TRIP12', ($Form->Equal('TRIP12', 'on') ? 1 : 0));
-	$SYSTEM->Set('SPAMHAUS', ($Form->Equal('SPAMHAUS', 'on') ? 1 : 0));
-	$SYSTEM->Set('SPAMCOP', ($Form->Equal('SPAMCOP', 'on') ? 1 : 0));
-	$SYSTEM->Set('BARRACUDA', ($Form->Equal('BARRACUDA', 'on') ? 1 : 0));
+	$SYSTEM->Set('DNSBL_TOREXIT', ($Form->Equal('DNSBL_TOREXIT', 'on') ? 1 : 0));
 	$SYSTEM->Set('HCAPTCHA_SITEKEY', $Form->Get('HCAPTCHA_SITEKEY'));
 	$SYSTEM->Set('HCAPTCHA_SECRETKEY', $Form->Get('HCAPTCHA_SECRETKEY'));
 	$SYSTEM->Save();
@@ -1237,9 +1227,7 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 Samba待機秒数：' . $SYSTEM->Get('DEFSAMBA');
 		push @$pLog, '　　　 Samba奉仕時間：' . $SYSTEM->Get('DEFHOUSHI');
 		push @$pLog, '　　　 12桁トリップ：' . $SYSTEM->Get('TRIP12');
-		push @$pLog, '　　　 Spamhaus：' . $SYSTEM->Get('SPAMHAUS');
-		push @$pLog, '　　　 SpamCop：' . $SYSTEM->Get('SPAMCOP');
-		push @$pLog, '　　　 Barracuda：' . $SYSTEM->Get('BARRACUDA');
+		push @$pLog, '　　　 Dan.me.uk：' . $SYSTEM->Get('DNSBL_TOREXIT');
 		push @$pLog, '　　　 hCaptchaサイトキー：' . $SYSTEM->Get('HCAPTCHA_SITEKEY');
 		push @$pLog, '　　　 hCaptchaシークレットキー：' . $SYSTEM->Get('HCAPTCHA_SECRETKEY');
 	}

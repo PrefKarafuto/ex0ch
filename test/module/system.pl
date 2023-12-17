@@ -296,9 +296,7 @@ sub InitSystemValue
 		'UPCHECK'	=> 0,										# 更新チェック間隔(日)
 		
 		# DNSBL設定
-		'SPAMHAUS'		=> 0,									# zen.spamhaus.org
-		'SPAMCOP'		=> 0,									# bl.spamcop.net
-		'BARRACUDA'	    => 0,									# b.barracudacentral.org
+		'DNSBL_TOREXIT'	=> 0,									# torexit.dan.me.uk
 
 		'SECURITY_KEY'	=> '',									# セキュリティキー（初回起動時に自動設定されます）
 		'LAST_FLUSH'	=> '',									# 定期的に動かす必要がある機能用
