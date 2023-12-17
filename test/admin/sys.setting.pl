@@ -686,19 +686,19 @@ sub PrintPlusSecSetting
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">外部APIキー</td></tr>\n");
-	$Page->Print("<tr><td>hCaptcha サイトキー<br>");
+	$Page->Print("<tr><td><a href=\"https://www.hcaptcha.com/\">hCaptcha</a> サイトキー<br>");
 	$Page->Print("<td><input type=text size=60  name=HCAPTCHA_SITEKEY value=\"$hCaptcha_sitekey\"></td></tr>\n");
 	$Page->Print("<tr><td>hCaptcha シークレットキー</td>");
 	$Page->Print("<td><input type=text size=60 name=HCAPTCHA_SECRETKEY value=\"$hCaptcha_secretkey\"></td></tr>\n");
-	$Page->Print("<tr><td>reCaptcha サイトキー<br>");
+	$Page->Print("<tr><td><a href=\"https://www.google.com/recaptcha/about/\">reCaptcha</a> サイトキー<br>");
 	$Page->Print("<td><input type=text size=60  name=RECAPTCHA_SITEKEY value=\"\" disabled></td></tr>\n");
 	$Page->Print("<tr><td>reCaptcha シークレットキー</td>");
 	$Page->Print("<td><input type=text size=60 name=RECAPTCHA_SECRETKEY value=\"\" disabled></td></tr>\n");
-	$Page->Print("<tr><td>Turnstile サイトキー<br>");
+	$Page->Print("<tr><td><a href=\"https://www.cloudflare.com/ja-jp/products/turnstile/\">Turnstile</a> サイトキー<br>");
 	$Page->Print("<td><input type=text size=60  name=TURNSTILE_SITEKEY value=\"\" disabled></td></tr>\n");
 	$Page->Print("<tr><td>Turnstile シークレットキー</td>");
 	$Page->Print("<td><input type=text size=60 name=TURNSTILE_SECRETKEY value=\"\" disabled></td></tr>\n");
-	$Page->Print("<tr><td>ProxyCheck APIキー</td>");
+	$Page->Print("<tr><td><a href=\"https://proxycheck.io/api/\">ProxyCheck</a> APIキー</td>");
 	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"\" disabled></td></tr>\n");
 
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
