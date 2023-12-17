@@ -57,10 +57,10 @@ sub is_proxy_local {
 
     my $vpngate = "./$infoDir/IP_List/vpngate.cgi";
 	my $tor = "./$infoDir/IP_List/tor.cgi";
-	if(localtime(time()) - (stat($vpngate))[9] > 60*60*24*7 || !(-e $vpngate)){
+	if(time - (stat($vpngate))[9] > 60*60*24*7 || !(-e $vpngate)){
 		GetVPNGateList($vpngate);
 	}
-	if(localtime(time()) - (stat($tor))[9] > 60*60*24*7 || !(-e $tor)){
+	if(time - (stat($tor))[9] > 60*60*24*7 || !(-e $tor)){
 		GetTorExitNodeList($tor);
 	}
     $isAnon += ListCheck($ipAddr,$vpngate);
@@ -86,7 +86,7 @@ sub is_proxy_api {
         my $out = decode_json($json);
         my $isProxy = $out->{$ipAddr}->{"proxy"};
         if ($isProxy eq 'yes') {
-            $proxy_list->{$ipAddr} = localtime(time);
+            $proxy_list->{$ipAddr} = time;
             store $proxy_list, $file;
 			chmod 0600, $file;
             return 1;
@@ -152,7 +152,7 @@ sub get_country_by_ip {
     my ($ipAddr,$infoDir) = @_;
     my $filename_ipv4 = "./$infoDir/IP_List/jp_ipv4.cgi";
 	my $filename_ipv6 = "./$infoDir/IP_List/jp_ipv6.cgi";
-	if(localtime(time()) - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
+	if(time - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
 		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
 	}
 	my $result = '';
@@ -600,7 +600,7 @@ sub BBS_SLIP
 	my @slip_chars = (0..9, 'a'..'z', 'A'..'Z', '.', '/');
 
 	# 一週間で文字列変更
-	my $week_number = int(localtime(time) / (60 * 60 * 24 * 7));
+	my $week_number = int(time / (60 * 60 * 24 * 7));
 	my ($chnum1,$chnum2,$chnum3,$chnum4);
 	srand($week_number);
 	$chnum1 = int(rand(1000000));

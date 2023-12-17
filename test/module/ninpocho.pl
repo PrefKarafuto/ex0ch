@@ -27,10 +27,9 @@ sub new
 	my $class = shift;
 	
 	my $obj = {
-        'SESSION'	    => undef,   # セッション
+        'SESSION'	    => undef,   # セッションオブジェクト
         'SID'	        => undef,   # セッションID
-        'STATUS'        => undef,   # 忍法帖が有効か無効か
-        'ANON'          => undef,   # 匿名化状態か
+        'ANON_FLAG'     => undef,   # 匿名化状態か
 	};
 	bless $obj, $class;
 	
@@ -53,20 +52,15 @@ sub Load
 {
 	my $this = shift;
 	my ($Sys,$isAnon,$password) = @_;
-    my ($sid,$sid_saved,$sid_before,$sec,$stat);
+    my ($sid,$sid_saved,$sid_before,$sec);
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $Form = $Sys->Get('MainCGI')->{'FORM'};
+    my $Set = $Sys->Get('MainCGI')->{'SET'};
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = "./$infoDir/.ninpocho/";
 
-    $this->{'ANON'} = $isAnon eq '8' ? 1 : 0;
-
-    if($Sys->Get('BBS_NINJA') eq 'checked'){
-        $stat = 1;
-    }else{
-        $stat = 0;
-    }
+    $this->{'ANON_FLAG'} = $isAnon eq '8' ? 1 : 0;
 
     #cookieから取得
     $sid = $Cookie->Get('countsession');
@@ -94,54 +88,57 @@ sub Load
     }
 
     #cookieにsessionIDが保存されていない場合
-    if(!$sid && !$this->{'ANON'}){
+    if(!$sid && !$this->{'ANON_FLAG'}){
         my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx = Digest::MD5->new;
+        my $expiry = 60*60*24;
         $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
         $ctx->add(':', $addr);
 
-        $sid = GetHash($ctx->b64digest,$ninDir.'hash/ip_addr.cgi');
+        $sid = GetHash($ctx->b64digest,$expiry,$ninDir.'hash/ip_addr.cgi');
         if(!$sid) {
-            $sid = GetHash(MakeUserInfo($Sys),$ninDir.'hash/user_info.cgi');
+            $sid = GetHash(MakeUserInfo($Sys),$expiry,$ninDir.'hash/user_info.cgi');
         }
     }
 
     #パスワードがあった場合
-    if($password && $stat){
+    if($password && $Set->Get('BBS_NINJA')){
         my $ctx = Digest::MD5->new;
+        my $long_expiry = 60*60*24*365;
         $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
         $ctx->add(':', $password);
 
-        $sid_saved = GetHash($ctx->b64digest,$ninDir.'hash/password.cgi');
+        $sid_saved = GetHash($ctx->b64digest,$long_expiry,$ninDir.'hash/password.cgi');
         if($sid_saved && $sid_saved ne $sid){
             $sid_before = $sid;
             $sid = $sid_saved;
         }
     }
 
-    if($stat){
+    if($Set->Get('BBS_NINJA')){
         #忍法帖が有効の場合
         my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
         if($session ->is_empty){
             $session  = CGI::Session->new("driver:file", $sid, {Directory => $ninDir});
-            $sid = CGI::Session->id();
+            $sid = $session->id();
             #新規作成時に追加
-            Set('new_message',substr($Form->Get('MESSAGE'), 0, 30));
+            $session->param('new_message',substr($Form->Get('MESSAGE'), 0, 30));
         }else{
             if ($sid && $sid_before && $sid_before ne $sid_saved){
                 #忍法帖ロード時に追加
-                Set('load_message',substr($Form->Get('MESSAGE'), 0, 30));
-                Set('load_from',$sid_before);
-                Set('load_time',localtime(time));
-                Set('load_addr',$ENV{'REMOTE_ADDR'});
-                Set('load_host',$ENV{'REMOTE_HOST'});
+                $session->param('load_message',substr($Form->Get('MESSAGE'), 0, 30));
+                $session->param('load_from',$sid_before);
+                $session->param('load_time',time);
+                $session->param('load_addr',$ENV{'REMOTE_ADDR'});
+                $session->param('load_host',$ENV{'REMOTE_HOST'});
             }
         }
         $this->{'SESSION'} = $session;
         $this->{'SID'} = $sid;
     }else{
+        $this->{'SESSION'} = undef;
         #セッションIDのみ使う場合
         if($sid){
             $this->{'SID'} = $sid;
@@ -161,13 +158,9 @@ sub LoadOnly {
     my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
 
     # セッションの読み込みが失敗した場合、0を返す
-    unless (defined $session) {
-       $this->{'STATUS'} = 0;
-      return 0;
-    }
+    return 0 unless $session;
 
     $this->{'SESSION'} = $session;
-    $this->{'STATUS'} = 1;
     $this->{'SID'} = $sid;
     return 1; # 正常に読み込みが完了した場合、1を返す
 }
@@ -175,14 +168,14 @@ sub LoadOnly {
 sub SaveOnly
 {
     my $this = shift;
-    return 0 if $this->{'STATUS'} == 0;
+    return 0 unless $this->{'SESSION'};
     # セッションを閉じる
     $this->{'SESSION'}->flush();
     return 1;
 }
 #------------------------------------------------------------------------------------------------------------
 #
-#   忍法帖情報取得（可変長の引数リストに対応）
+#   忍法帖情報取得
 #   -------------------------------------------------------------------------------------
 #   @param  可変長の情報種別パス
 #   @return 忍法帖の要素の情報
@@ -192,16 +185,16 @@ sub Get
 {
     my $this = shift;
     my ($name) = @_;
-    return if !$this->{'STATUS'};
-    my $session = $this->{'SESSION'};
-    my $val = $session->param($name);
+
+    return unless $this->{'SESSION'};
+    my $val = $this->{'SESSION'}->param($name);
     
     return $val;
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#   忍法帖情報設定（可変長の引数リストに対応）
+#   忍法帖情報設定
 #   -------------------------------------------------------------------------------------
 #   @param  可変長の情報種別パス
 #   @param  $val        設定値
@@ -212,9 +205,10 @@ sub Set
     my $this = shift;
     my ($name, $val) = @_;
     
-    return 0 if !$this->{'STATUS'};
+    return unless $this->{'SESSION'};
     $this->{'SESSION'}->param($name,$val);
 
+    return $this->{'SESSION'}->param($name);
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -276,14 +270,9 @@ sub Save
 	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/";
-    my $limit = 60*60*24;
     my $sid = $this->{'SID'};
-
-    if($password){
-        $limit = $limit*365;
-    }else{
-        $limit = $limit*30;
-    }
+    my $session = $this->{'SESSION'};
+    my $pass_hash = '';
 
 	# SIDをクッキーに出力
 	$Cookie->Set('countsession', $sid);
@@ -294,16 +283,8 @@ sub Save
     my $sec = $ctx->b64digest;
     $Cookie->Set('securitykey', $sec);
 
-    if($this->{'STATUS'}){
-        my $session = $this->{'SESSION'};
-        # セッション有効期限を30日後に設定
-        $session->expire('30d');
-        # セッションを閉じる
-        $session->flush();
-    }
-
     # Hashテーブルを設定
-    if(!$this->{'ANON'} && $this->{'STATUS'}){
+    if(!$this->{'ANON_FLAG'} && $session){
         my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx2 = Digest::MD5->new;
         $ctx2->add(':', $Sys->Get('SERVER'));
@@ -311,22 +292,33 @@ sub Save
         my $ip_hash = $ctx2->b64digest;
         my $user = MakeUserInfo($Sys);
 
-        SetHash($ip_hash,$sid,60*60*24+localtime(time),$ninDir.'hash/ip_addr.cgi');
-        SetHash($user,$sid,60*60*24+localtime(time),$ninDir.'hash/user_info.cgi');
+        SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
+        SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
     }
-    if (defined $password && $this->{'STATUS'}) {
+    if (defined $password && $session) {
         my $ctx3 = Digest::MD5->new;
         $ctx3->add(':', $Sys->Get('SERVER'));
         $ctx3->add(':', $password);
-        my $pass_hash = $ctx3->b64digest;
-        SetHash($pass_hash,$sid,$limit+localtime(time),$ninDir.'hash/password.cgi');
+        $pass_hash = $ctx3->b64digest;
+        SetHash($pass_hash,$sid,time,$ninDir.'hash/password.cgi');
+        $session->param('password',$pass_hash);
     }
-	
+
+	if($this->{'SESSION'}){
+        # セッション有効期限を30日後に設定
+        if($session->param('password')){
+            $session->expire('1y');
+        }else{
+            $session->expire('30d');
+        }
+        # セッションを閉じる
+        $session->flush();
+    }
 }
 
 # ハッシュテーブルをファイルから読み込む関数
 sub GetHash {
-    my ($key, $filename) = @_;
+    my ($key, $expiry,$filename) = @_;
     my $hash_table = {};
 
     if (-e $filename) {
@@ -336,13 +328,15 @@ sub GetHash {
     # キーに対応する値が存在するかチェック
     if (exists $hash_table->{$key}) {
         # 有効期限をチェック
-        if ($hash_table->{$key}{expiry} < localtime(time)) {
+        if (($hash_table->{$key}{time} + $expiry) < time) {
             # 有効期限切れの場合は削除してundefを返す
             delete $hash_table->{$key};
             store $hash_table, $filename;
             return undef;
         } else {
             # 有効期限内の場合は値を返す
+            $hash_table->{$key}{time} = time;
+            store $hash_table, $filename;
             return $hash_table->{$key}{value};
         }
     } else {
@@ -353,7 +347,7 @@ sub GetHash {
 
 # パラメータをハッシュテーブルに保存し、ファイルに保存する関数
 sub SetHash {
-    my ($key, $value, $expiry ,$filename) = @_;
+    my ($key, $value, $time ,$filename) = @_;
     my $hash_table = {};
 
     if (-e $filename) {
@@ -362,7 +356,7 @@ sub SetHash {
 
     $hash_table->{$key} = {
         value => $value,
-        expiry => $expiry,
+        time => $time,
     };
     store $hash_table, $filename;
     chmod 0600,$filename,
