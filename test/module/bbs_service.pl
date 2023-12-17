@@ -585,9 +585,9 @@ HTML
 <div style="margin-top:1.2em;">
 <a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 BBS.CGI - $ver (Perl)
-@{[ $Sys->Get('SPAMHAUS') ? '+Spamhaus' : '' ]}
-@{[ $Sys->Get('SPAMCOP') ? '+SpamCop' : '' ]}
-@{[ $Sys->Get('BARRACUDA') ? '+BarracudaCentral' : '' ]}
+@{[ $Sys->Get('DNSBL_TOREXIT') ? '+dan.me.uk' : '' ]}
+@{[ $Set->Get('BBS_NINJA') ? '+忍法帖' : '' ]}
+@{[ $Set->Get('BBS_AUTH') ? '+ユーザー認証' : '' ]}
 +Samba24=$samba<br>
 </div>
 <div id="overlay">
