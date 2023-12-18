@@ -197,9 +197,8 @@ sub PrintNinjaList
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30px\"></th>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">忍法帖ID</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:180px\">忍法帖ID</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:10px\">Size</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">作成日時</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">最終更新</td></tr>\n");
     
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
@@ -208,7 +207,6 @@ sub PrintNinjaList
 		$file_name	=~ /cgisess_([0-9a-f]+)/;
         my $id = $1;
         $mtime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[9]);
-		$ctime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[10]);
 		my $size = (stat($file_name))[7];
 		$common = "\"javascript:SetOption('NINJA_ID','$id');";
 		$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
@@ -216,7 +214,7 @@ sub PrintNinjaList
 		$Page->Print("<tr bgcolor=$bgColor>");
 		$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
 		$Page->Print("<td>$n: <a href=$common>$id</a></td>");
-		$Page->Print("<td>$size</td><td>$ctime</td><td>$mtime</td></tr>\n");
+		$Page->Print("<td>$size</td><td>$mtime</td></tr>\n");
 	}
 	$common		= "onclick=\"DoSubmit('sys.ninja','DISP'";
 	$common2	= "onclick=\"DoSubmit('sys.ninja','FUNC'";

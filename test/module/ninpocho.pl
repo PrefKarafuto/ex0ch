@@ -121,7 +121,7 @@ sub Load
         #忍法帖が有効の場合
         my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
         if($session ->is_empty){
-            $session  = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
+            $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
             $sid = $session->id();
             #新規作成時に追加
             $session->param('new_message',substr($Form->Get('MESSAGE'), 0, 30));
@@ -155,7 +155,7 @@ sub LoadOnly {
     my ($Sys, $sid) = @_;
     my $infoDir = $Sys->Get('INFO');
     my $ninDir = "./$infoDir/.ninpocho/";
-    my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
+    my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
 
     # セッションの読み込みが失敗した場合、0を返す
     return 0 unless $session;

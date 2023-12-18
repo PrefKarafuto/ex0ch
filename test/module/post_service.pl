@@ -194,7 +194,7 @@ sub Write
 	$Sys->Set('updown', $updown);
 	
 	# 書き込み直前処理
-	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1);
+	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$sid);
 	return $err if ($err != $ZP::E_SUCCESS);
 
 	# 忍法帖
@@ -384,7 +384,7 @@ sub ReadyBeforeCheck
 sub ReadyBeforeWrite
 {
 	my $this = shift;
-	my ($res) = @_;
+	my ($res,$sid) = @_;
 	
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
@@ -452,9 +452,6 @@ sub ReadyBeforeWrite
 	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 
 	#スレ立て時用コマンド
-	my $ipua = $addr.$ENV{'HTTP_USER_AGENT'};
-	my $is1 = $ipua eq Get1IPUA($Sys,$threadid) ? 1 : 0;
-
 	if($Sys->Equal('MODE', 1)){
 		Command($Sys,$Form,$Threads,$CommandSet,1);
 	}
@@ -478,7 +475,7 @@ sub ReadyBeforeWrite
 				Command($Sys,$Form,$Threads,$CommandSet,0);
 			}
 		}
-		elsif($commandAuth){
+		elsif($commandAuth || Get1SessionID($Sys,$threadid) eq $sid){
 			Command($Sys,$Form,$Threads,$CommandSet,0);
 		}
 	}
@@ -505,19 +502,15 @@ sub ReadyBeforeWrite
 
 	return 0;
 }
-sub Get1IPUA
+sub Get1SessionID
 {
 	my ($Sys,$threadid) = @_;
 	require './module/log.pl';
 	my $Logger = LOG->new;
 	my $logPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/' . $threadid;
 	$Logger->Open($logPath, 0, 1 | 2);
-
-	my @log = split(/<>/,$Logger->Get(0));
-	my $ip = $log[6];
-	my $ua = $log[8];
-
-	return $ip.$ua;
+	my $sid = (split(/<>/,$Logger->Get(0)))[9];
+	return $sid;
 }
 #ユーザーコマンド
 sub Command
