@@ -71,27 +71,36 @@ sub is_proxy_local {
 #外部APIでチェック
 sub is_proxy_api {
     my ($ipAddr, $infoDir, $checkKey) = @_;
-    return 0 unless defined $checkKey;
-
     my $file = "./$infoDir/IP_List/proxy.cgi";
+	my $w_file = "./$infoDir/IP_List/no_proxy.cgi";
     my $proxy_list = retrieve($file) if -e $file;
+	my $white_list = retrieve($w_file) if -e $w_file;
     $proxy_list = {} unless defined $proxy_list;
+	$white_list = {} unless defined $white_list;
     return 1 if exists $proxy_list->{$ipAddr};
+	return 0 if exists $white_list->{$ipAddr};
 
-    my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=1";
-    my $ua = LWP::UserAgent->new();
-    my $response = $ua->get($url);
-    if ($response->is_success) {
-        my $json = $response->decoded_content();
-        my $out = decode_json($json);
-        my $isProxy = $out->{$ipAddr}->{"proxy"};
-        if ($isProxy eq 'yes') {
-            $proxy_list->{$ipAddr} = time;
-            store $proxy_list, $file;
-			chmod 0600, $file;
-            return 1;
-        }
-    }
+	if($checkKey){
+		my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=1";
+		my $ua = LWP::UserAgent->new();
+		my $response = $ua->get($url);
+		if ($response->is_success) {
+			my $json = $response->decoded_content();
+			my $out = decode_json($json);
+			my $isProxy = $out->{$ipAddr}->{"proxy"};
+			if ($isProxy eq 'yes') {
+				$proxy_list->{$ipAddr} = time;
+				store $proxy_list, $file;
+				chmod 0600, $file;
+				return 1;
+			}else{
+				$white_list->{$ipAddr} = time;
+				store $white_list, $w_file;
+				chmod 0600, $w_file;
+				return 0;
+			}
+		}
+	}
     return 0;
 }
 
