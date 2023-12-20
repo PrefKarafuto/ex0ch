@@ -180,6 +180,7 @@ sub PrintNinjaEdit
 	my $lv = $Ninja->Get('ninLv');
 	my $count = $Ninja->Get('count');
 	my $lvuptime = $Ninja->Get('lvuptime');
+	my $ninID = crypt($sid,$sid);
 
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖を$text\します。</td></tr>");
@@ -187,7 +188,7 @@ sub PrintNinjaEdit
 	
     $Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ユーザー情報</td></tr>\n");
 	$Page->Print("<tr><td>忍法帖ID</td>");
-	$Page->Print("<td><input type=text size=60 name=NINID value=\"$SESSION_ID\" $isDisabled></td></tr>\n");
+	$Page->Print("<td><input type=text size=60 name=NINID value=\"$ninID\" $isDisabled></td></tr>\n");
 
     $Page->Print("<tr><td>忍法帖Lv</td>");
 	$Page->Print("<td><input type=text size=60 name=NINLV value=\"$lv\" $isDisabled></td></tr>\n");

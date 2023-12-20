@@ -1372,13 +1372,10 @@ sub Ninpocho
 	$timeDisplay .= "${minutesDiff}分" if $minutesDiff > 0 || $hoursDiff == 0; # 分が0でも時間が0の場合は表示する
 
 	my $minutes = int($lvUpTime / 60);
-	#セッションハイジャック防止用
-	my $length = length($sid);
-	my $half = int($length / 2);
-	substr($sid, $half) = '*' x ($length - $half);
 
 	# 名前欄書き換え
-	$name =~ s|!id|</b>【忍法帖ID:$sid】<b>|g;
+	my $ninID = crypt($sid,$sid);
+	$name =~ s|!id|</b>【忍法帖ID:$ninID】<b>|g;
 	$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|g;
 	$name =~ s|!ninja|</b>【忍法帖Lv.$ninLv】<b>|g;
 	$name =~ s|!total|</b>【総カキコ数:$count】<b>|g;
