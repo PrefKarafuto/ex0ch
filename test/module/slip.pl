@@ -51,17 +51,16 @@ sub is_proxy_local {
     my ($remoho, $ipAddr, $infoDir) = @_;
     my $isAnon = 0;
 
-	if ($remoho =~ /(vpn|tor|proxy|onion)/i) {
-		$isAnon = 1;
+    my $vpngate = "./$infoDir/IP_List/vpngate.bin";
+	my $tor = "./$infoDir/IP_List/tor.bin";
+	if(!(-e $vpngate)){
+		GetIPList('https://gist.githubusercontent.com/japankun/'
+			.'2cf80906dc4d1c9adf01c299a09c46c6/raw/'
+			.'cce593213613e4ef85a6fda4bf8b3924afbd3e80/'
+			.'vpngate.all.20231211.txt',$vpngate);
 	}
-
-    my $vpngate = "./$infoDir/IP_List/vpngate.cgi";
-	my $tor = "./$infoDir/IP_List/tor.cgi";
-	if(time - (stat($vpngate))[9] > 60*60*24*7 || !(-e $vpngate)){
-		GetVPNGateList($vpngate);
-	}
-	if(time - (stat($tor))[9] > 60*60*24*7 || !(-e $tor)){
-		GetTorExitNodeList($tor);
+	if(time - (stat($tor))[9] > 60*60 || !(-e $tor)){
+		GetIPList('https://www.dan.me.uk/torlist/?exit',$tor);
 	}
     $isAnon += ListCheck($ipAddr,$vpngate);
 	$isAnon += ListCheck($ipAddr,$tor);
@@ -112,6 +111,7 @@ sub is_anonymous {
     if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
         my @anon_remoho = (
             '^.*\\.(vpngate\\.v4\\.open\\.ad\\.jp|opengw\\.net)$',
+			'(vpn|tor|proxy|onion)',
             '^.*\\.(?:ablenetvps\\.ne\\.jp|amazonaws\\.com|arena\\.ne\\.jp|akamaitechnologies\\.com|cdn77\\.com|cnode\\.io|datapacket\\.com|digita-vm\\.com|googleusercontent\\.com|hmk-temp\\.com||kagoya\\.net|linodeusercontent\\.com|sakura\\.ne\\.jp|vultrusercontent\\.com|xtom\\.com)$',
             '^.*\\.(?:tsc-soft\\.com|53ja\\.net)$'
         );
@@ -171,7 +171,7 @@ sub get_country_by_ip {
 		$result = binary_search_ip_range($ipAddr,$filename_ipv6);
 	}
 
-	my $country = $result ? 'JP' : 0;
+	my $country = $result ? 'JP' : 'ｶﾞｲｺｰｸ';
 
     return $country;
 }
@@ -519,10 +519,10 @@ sub ip_to_number {
 }
 
 # 匿名化判定用Tor/VPN-Gate判定
-sub GetTorExitNodeList {
-    my ($fileName) = @_;
+sub GetIPList {
+    my ($url,$fileName) = @_;
     my $ua = LWP::UserAgent->new;
-    my $response = $ua->get('https://www.dan.me.uk/torlist/?exit');
+    my $response = $ua->get($url);
 
     if ($response->is_success) {
         my $content = $response->decoded_content;
@@ -539,25 +539,7 @@ sub GetTorExitNodeList {
     }
     return 0;
 }
-sub GetVPNGateList {
-    my ($fileName) = @_;
-    my $ua = LWP::UserAgent->new;
-    my $response = $ua->get('http://www.vpngate.net/api/iphone/');
 
-    if ($response->is_success) {
-        my $content = $response->decoded_content;
-        my %ips; # 新しいハッシュを初期化
-
-        while ($content =~ /,(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),/g) {
-            $ips{$1} = 1;
-        }
-
-        store \%ips, $fileName; # 新しいデータでファイルを上書き
-		chmod 0600, $fileName;
-        return 1;
-    }
-    return 0;
-}
 sub ListCheck {
     my ($ipAddr, $fileName) = @_;
 
@@ -683,10 +665,10 @@ sub BBS_SLIP
 		);
 	# 特殊回線のニックネーム
 	my @special_nicknames = (
-		"大学${fixed_nickname_end}",
-		"学校${fixed_nickname_end}",
-		"会社${fixed_nickname_end}",
-		"役所${fixed_nickname_end}"
+		"ｶﾞｯｸｼ${fixed_nickname_end}",
+		"ﾎﾞﾝﾎﾞﾝ${fixed_nickname_end}",
+		"ｼｬﾁｰｸ${fixed_nickname_end}",
+		"ｺﾑｲｰﾝ${fixed_nickname_end}"
 		);
 	my @special_idEnd = (
 		'6',
@@ -698,7 +680,7 @@ sub BBS_SLIP
 	# 串判定
 	if ($isProxy) {
 		$idEnd = '8';
-		$slip_nickname = '串';	
+		$slip_nickname = 'ｸｼｻﾞｼ';	
 		$slip_nickname .= $fixed_nickname_end;
 	}else{
 		# 逆引き判定
@@ -736,7 +718,7 @@ sub BBS_SLIP
 			if ($unknown) {
 				$slip_id = 'hh';
 				$idEnd = 'h';
-				$slip_nickname = "unk${fixed_nickname_end}";
+				$slip_nickname = "ｱﾝﾀﾀﾞﾚ${fixed_nickname_end}";
 				$slip_aa = $slip_id;
 				$slip_bb = $slip_ip;
 			}
