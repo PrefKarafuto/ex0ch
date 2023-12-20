@@ -214,7 +214,6 @@ sub Write
 	$extrapart = $Form->Get('extrapart', '');
 	my $info = $datepart;
 	$info .= " $idpart" if ($idpart ne '');
-	$info .= "$idEnd" if ($idpart ne '');
 	$info .= " $bepart" if ($bepart ne '');
 	$info .= " $extrapart" if ($extrapart ne '');
 
