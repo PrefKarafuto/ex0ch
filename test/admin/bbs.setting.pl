@@ -789,6 +789,8 @@ sub PrintOtherSetting
 
 	my $selSlipNone		= ($setIPSave eq '' ? 'selected' : '');
 	my $selSlipChecked	= ($setIPSave eq 'checked' ? 'selected' : '');
+	my $selSlipFeature	= ($setIPSave eq 'feature' ? 'selected' : '');
+	#my $selSlipVerbose	= ($setIPSave eq 'verbose' ? 'selected' : '');
 	my $selSlipVVV		= ($setIPSave eq 'vvv' ? 'selected' : '');
 	my $selSlipVVVV		= ($setIPSave eq 'vvvv' ? 'selected' : '');
 	my $selSlipVVVVV	= ($setIPSave eq 'vvvvv' ? 'selected' : '');
@@ -836,7 +838,9 @@ sub PrintOtherSetting
 	$Page->Print("<input type=checkbox name=BBS_NINJA value=checked $setNinja>有効</td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">機種識別子(BBS_SLIP)</td><td><select name=BBS_SLIP>");
 	$Page->Print("<option value=\"\" $selSlipNone>なし");
-	$Page->Print("<option value=checked $selSlipChecked>ID末尾表示");
+	$Page->Print("<option value=checked $selSlipChecked>ID末尾簡易表示");
+	$Page->Print("<option value=feature $selSlipFeature>ID末尾標準表示");
+	#$Page->Print("<option value=verbose $selSlipVerbose>ID末尾詳細表示");
 	$Page->Print("<option value=vvv $selSlipVVV>ﾜｯﾁｮｲ");
 	$Page->Print("<option value=vvvv $selSlipVVVV>ﾜｯﾁｮｲ+IP");
 	$Page->Print("<option value=vvvvv $selSlipVVVVV>ﾜｯﾁｮｲ+KOROKORO");
