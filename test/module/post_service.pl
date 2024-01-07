@@ -137,7 +137,7 @@ sub Write
 	$Ninja->Load($Sys,8,undef);
 	if ($Set->Get('BBS_HCAPTCHA') && !$Form->Get('h-captcha-response') && !$Ninja->Get('auth')){
 		$err = $this->Certification_hCaptcha($Sys,$Form);
-		return $err if $err != $ZP::E_SUCCESS;
+		return $err if $err;
 	}
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
@@ -1183,12 +1183,12 @@ sub Certification_hCaptcha {
         my $out = decode_json($json_text);
            
         if ($out->{success} eq 'true') {
-           return $ZP::E_SUCCESS;
-        }elsif($out->{success} eq 'false') {
-			return 154;
+        	return 0;
+        }elsif($out->{success} eq 'false'){
+			return $ZP::E_FORM_FAILEDCAPTCHA
 		}else {
-           return $ZP::E_FORM_NOCAPTCHA;
-        }
+			return $ZP::E_FORM_NOCAPTCHA;
+		}
     } else {
 		#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
     	return -1;
