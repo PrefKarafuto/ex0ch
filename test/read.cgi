@@ -521,11 +521,13 @@ sub PrintReadFoot
 			$cookName = &$sanitize($Cookie->Get('NAME', '', 'utf8'));
 			$cookMail = &$sanitize($Cookie->Get('MAIL', '', 'utf8'));
 		}
-		
+		my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
+		my $Captcha = $Set->Get('BBS_HCAPTCHA') ? "<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>" : '';
+
 		$Page->Print(<<HTML);
 <form method="POST" action="$cgipath/bbs.cgi">
 <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
-<input type="submit" value="書き込む"><br class="smartphone">
+$Captcha<input type="submit" value="書き込む"><br class="smartphone">
 名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">
 E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="$cookMail" size="19"><br>
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>

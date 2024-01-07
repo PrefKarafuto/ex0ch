@@ -551,13 +551,15 @@ FORM
 	}
 	# スレッド作成フォームはindexと同じ画面に表示
 	else {
+		my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
+		my $Captcha = $Set->Get('BBS_HCAPTCHA') ? "<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>" : '';
 		$Page->Print(<<FORM);
 <form method="POST" action="$cgipath/bbs.cgi">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td nowrap><div class ="reverse_order">
   <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
-  <span class = "order1"><input type="submit" value="新規スレッド作成"><br class="smartphone"></span></div>
+  <span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha<br class="smartphone"></span></div>
   名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
@@ -680,14 +682,19 @@ sub PrintThreadPreviewOne
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
 	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
-	# 書き込みフォームの表示
-	$Page->Print(<<KAKIKO);
+		# 書き込みフォームの表示
+		my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
+		my $Captcha = $this->{'SET'}->Get('BBS_HCAPTCHA') ? "<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>" : '';
+
+		$Page->Print(<<KAKIKO);
   </dl>
+  <hr>
   <form method="POST" action="$cgiPath/bbs.cgi">
    <blockquote>
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
+   $Captcha
    <input type="submit" value="書き込む" name="submit"><br class="smartphone">
    名前：<input type="text" name="FROM" size="19"><br class="smartphone">
    E-mail：<input type="text" name="mail" size="19"><br>
@@ -697,8 +704,8 @@ sub PrintThreadPreviewOne
 KAKIKO
 	}
 	else{
-	$Page->Print("<hr>");
-	$Page->Print("<font size=4>READ ONLY</font><br><br>");
+		$Page->Print("<hr>");
+		$Page->Print("<font size=4>READ ONLY</font><br><br>");
 	}
 }
 

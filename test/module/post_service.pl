@@ -132,14 +132,13 @@ sub Write
 	require './module/slip.pl';
 	my $slip = SLIP->new;
 	my $Ninja = NINPOCHO->new;
-
-	# 改造版で追加
+	
 	# hCaptcha認証
-	if ($Set->Get('BBS_HCAPTCHA')){
+	$Ninja->Load($Sys,8,undef);
+	if ($Set->Get('BBS_HCAPTCHA') && !$Form->Get('h-captcha-response') && !$Ninja->Get('auth')){
 		$err = $this->Certification_hCaptcha($Sys,$Form);
 		return $err if $err != $ZP::E_SUCCESS;
 	}
-	
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
  	my $idSet = $Threads->GetAttr($threadid,'noid');
@@ -153,30 +152,47 @@ sub Write
 	my $isNinja = $Set->Get('BBS_NINJA');
 
 	# SLIP
-	my $isSlip = $Threads->GetAttr($threadid,'slip');
-	my $bbsslip = $isSlip ? $isSlip : $Set->Get('BBS_SLIP');
+	$Form->Get('FROM') =~ /(^|<br>)!slip:(v){3,6}(<br>|$)/;
+	my $comSlip = $2;	# ユーザーコマンドで設定されたSLIP
+	my $threadSlip = $Threads->GetAttr($threadid,'slip');	# スレッド属性で設定されたSLIP
+	my $bbsSlip = $Set->Get('BBS_SLIP');	# 掲示板設定のSLIP
+	$bbsSlip =~ s/checked/v/;
+	$bbsSlip =~ s/feature/vv/;
+	#$bbsSlip =~ s/verbose/vv/;
+	if($threadSlip){
+		if(length($bbsSlip) < length($threadSlip)){
+			$bbsSlip = $threadSlip;
+		}
+	}
+	if($comSlip){
+		if(length($bbsSlip) < length($comSlip)){
+			$bbsSlip = $comSlip;
+		}
+	}
 
 	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 	my $handle = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_HANLDLE, $Form->Get('bbs'));
 	
 	# BBS_SLIP付加とID末尾取得
 	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
-	my ($slip_result,$idEnd) = $slip->BBS_SLIP($bbsslip, $Sys->Get('INFO'),$chid,undef) if (!$handle || !$noAttr);
-	$idEnd = $idEnd ? $idEnd : $Sys->Get('AGENT');
+	my ($slip_result,$idEnd) = $slip->BBS_SLIP($bbsSlip, $Sys->Get('INFO'),$chid,undef) if (!$handle || !$noAttr);
+	$idEnd = $Set->Get('BBS_SLIP') eq 'checked' ? $Sys->Get('AGENT') : $idEnd;
 
 	#忍法帖パス
 	my $password = '';
+	my $sid = '';
 	if($Form->Get('mail') =~ /(^|<br>)!load:(.){10,30}(<br>|$)/ && $isNinja){
 		$password = $2;
+		$sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
 	}
-	my $sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
 	if($Form->Get('mail') =~ /(^|<br>)!save:(.){10,30}(<br>|$)/ && $isNinja){
 		$password = $2;
 	}
 	
 	# 情報欄
  	my $idpart = 'ID:???';
-	my $id = $Conv->MakeIDnew($Sys, 8, $sid);
+	my $threadkey = $Threads->GetAttr($threadid,'changeid') ? $threadid : '';
+	my $id = $Conv->MakeIDnew($Sys, 8, undef, $threadkey);
 	if (!$idSet){
 		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $idEnd);
 	}
@@ -1133,7 +1149,6 @@ sub NormalizationNameMail
 	
 	return $ZP::E_SUCCESS;
 }
-
 #------------------------------------------------------------------------------------------------------------
 #
 #	改造版で追加
@@ -1154,7 +1169,7 @@ sub Certification_hCaptcha {
     my $url = 'https://api.hcaptcha.com/siteverify';
     my $ua = LWP::UserAgent->new();
     my $recaptcha_response = $Form->Get('h-captcha-response');
-    my $remote_ip = $ENV{REMOTE_ADDR};
+    my $remote_ip = $ENV{'REMOTE_ADDR'};
         
     my $response = $ua->post($url,{
 			secret => $secretkey,
@@ -1167,15 +1182,16 @@ sub Certification_hCaptcha {
         # JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
         my $out = decode_json($json_text);
            
-        if ($out->{success}) {
+        if ($out->{success} eq 'true') {
            return $ZP::E_SUCCESS;
-        } else {
+        }elsif($out->{success} eq 'false') {
+			return 154;
+		}else {
            return $ZP::E_FORM_NOCAPTCHA;
         }
     } else {
 		#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
-		#ここの返り値を$ZP::E_SYSTEM_ERRORに変えればエラーがあるか確認可能
-    	return $ZP::E_SUCCESS;
+    	return -1;
     }
 }
 #------------------------------------------------------------------------------------------------------------
@@ -1353,6 +1369,15 @@ sub Ninpocho
 		$Ninja->Set('count', $count);
 		$Ninja->Set('ninLv', $ninLv);
 		$Ninja->Set('lvuptime', $lvUpTime);
+		#認証
+		unless($Ninja-Get('auth')){
+			$Ninja->Set('auth',1);
+			$Ninja->Set('auth_time',time);
+		}
+		if($Ninja-Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
+			$Ninja->Set('auth',0);
+			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
+		}
 	}
 
 	# 名前欄取得
