@@ -814,14 +814,10 @@ sub MakeID
 }
 sub MakeIDnew {
     my $this = shift;
-    my ($Sys, $column,$sid) = @_;
-
-    require './module/thread.pl';
-    my $Threads = THREAD->new;
-    $Threads->LoadAttr($Sys);
+    my ($Sys, $column,$sid,$chid) = @_;
 
     my $addr = $ENV{'REMOTE_ADDR'};
-    my @ip = split(/\./,$addr);
+    my @ip = ($addr =~ /:/) ? split(/:/,$addr) : split(/\./,$addr);
     my $ua = $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
 
     my $provider;
@@ -849,11 +845,11 @@ sub MakeIDnew {
     if ($sid) {
         $ctx->add(':', $sid);
     } else {
-        $ctx->add(':', $ip[0].$ip[1].$provider);
+        $ctx->add(':', $ip[0].$ip[1].($#ip > 3 ? $ip[2].$ip[3]:'').$provider);
 		$ctx->add(':', $ua);
     }
     $ctx->add(':', join('-', (localtime)[3,4,5]));
-    $ctx->add(':', $Sys->Get('KEY')) if ($Threads->GetAttr($Sys->Get('KEY'),'changeid'));
+    $ctx->add(':', $chid);
     
     my $id = $ctx->b64digest;
     $id = substr($id, 0, $column);
