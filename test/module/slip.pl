@@ -706,10 +706,10 @@ sub BBS_SLIP
 			}
 
 			# 国を判定
-			if ($unknown && $country) {
+			if ($unknown && $country ne 'JP') {
 				$idEnd = 'H';
 				$slip_nickname = "${country}${fixed_nickname_end}";
-				$slip_aa = $country;
+				$slip_aa = 'FC';
 				$slip_bb = $slip_ip;
 				$unknown = 0;
 			}
@@ -730,7 +730,7 @@ sub BBS_SLIP
 			if (!$remoho_checked && $country && $country ne 'JP') {
 				$idEnd = 'H';
 				$slip_nickname = "${country}${fixed_nickname_end}";
-				$slip_aa = $country;
+				$slip_aa = 'FC';
 				$slip_bb = $slip_ip;
 				$remoho_checked = 1;
 			}
@@ -784,8 +784,9 @@ sub BBS_SLIP
 			}
 		}
 	}
-	# bbs_slipを生成
-	my $slip_result = '';
+
+	# slip文字列とID末尾
+	my $slip_result = 'undef';
 	if($bbsslip eq 'vvv'){
 		$slip_result = ${slip_nickname};
 	}
@@ -798,8 +799,6 @@ sub BBS_SLIP
 	elsif($bbsslip eq 'vvvvvv'){
 		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ipAddr}]";
 	}
-
-	# slip文字列とID末尾
 	# 匿名環境の場合は末尾が"8"になる
 	return $slip_result,$idEnd;
 }
