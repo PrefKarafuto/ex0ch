@@ -1370,11 +1370,11 @@ sub Ninpocho
 		$Ninja->Set('ninLv', $ninLv);
 		$Ninja->Set('lvuptime', $lvUpTime);
 		#認証
-		unless($Ninja-Get('auth')){
+		unless($Ninja->Get('auth')){
 			$Ninja->Set('auth',1);
 			$Ninja->Set('auth_time',time);
 		}
-		if($Ninja-Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
+		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
 			$Ninja->Set('auth',0);
 			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
 		}
