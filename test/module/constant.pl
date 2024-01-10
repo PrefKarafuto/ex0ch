@@ -89,6 +89,8 @@ our $E_REG_SPAMKILL			= 602;
 our $E_REG_SAMETITLE		= 603;
 our $E_REG_NOTJPHOST		= 207;
 our $E_REG_DNSBL			= 997;
+our $E_REG_BAN              = 700;
+our $E_REG_NINLVLIMIT       = 701;
 #  BEに関するエラー
 our $E_BE_GETFAILED			= 890;
 our $E_BE_CONNECTFAILED		= 891;

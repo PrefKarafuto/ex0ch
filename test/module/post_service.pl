@@ -135,7 +135,7 @@ sub Write
 	
 	# hCaptcha認証
 	$Ninja->Load($Sys,8,undef);
-	if ($Set->Get('BBS_HCAPTCHA') && !$Form->Get('h-captcha-response') && !$Ninja->Get('auth')){
+	if ($Set->Get('BBS_HCAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha'))){
 		$err = $this->Certification_hCaptcha($Sys,$Form);
 		return $err if $err;
 	}
@@ -180,13 +180,28 @@ sub Write
 
 	#忍法帖パス
 	my $password = '';
-	my $sid = '';
+	my $sid = $Ninja->Load($Sys,$idEnd,undef);
 	if($Form->Get('mail') =~ /(^|<br>)!load:(.){10,30}(<br>|$)/ && $isNinja){
 		$password = $2;
 		$sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
 	}
 	if($Form->Get('mail') =~ /(^|<br>)!save:(.){10,30}(<br>|$)/ && $isNinja){
 		$password = $2;
+	}
+	
+	#BANチェック
+	my $nusisid = GetSessionID($Sys,$threadid,1);
+	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban')){
+		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
+		foreach my $userlist(@banuserAttr){
+			return $ZP::E_REG_BAN if($sid eq $userlist);
+		}
+	}
+
+	#忍法帖Lv制限チェック
+	my $lvLim = $Threads->GetAttr($threadid,'ninlvlim');
+	if($lvLim && $isNinja){
+		return $ZP::E_REG_NINLVLIMIT if $lvLim > $Ninja->Get('ninLv');
 	}
 	
 	# 情報欄
@@ -212,9 +227,11 @@ sub Write
 	# 書き込み直前処理
 	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$sid);
 	return $err if ($err != $ZP::E_SUCCESS);
-
 	# 忍法帖
-	$this->Ninpocho($Sys,$Form,$Ninja,$sid) if $isNinja;
+	if($isNinja){
+		my $ninerr = $this->Ninpocho($Sys,$Set,$Form,$Ninja,$sid);
+		return $ninerr if ($ninerr != $ZP::E_SUCCESS);
+	}
 	
 	# レス要素の取得
 	my $subject = $Form->Get('subject', '');
@@ -468,7 +485,7 @@ sub ReadyBeforeWrite
 
 	#スレ立て時用コマンド
 	if($Sys->Equal('MODE', 1)){
-		Command($Sys,$Form,$Threads,$CommandSet,1);
+		Command($Sys,$Form,$Set,$Threads,$CommandSet,1);
 	}
 	else{
 		if($Form->Get('mail') =~ /!pass:(.){1,30}/){
@@ -487,11 +504,11 @@ sub ReadyBeforeWrite
 			$Form->Set('mail',$mail);
 			
 			if($inputPass eq $threadPass){
-				Command($Sys,$Form,$Threads,$CommandSet,0);
+				Command($Sys,$Form,$Set,$Threads,$CommandSet,0);
 			}
 		}
-		elsif($commandAuth || Get1SessionID($Sys,$threadid) eq $sid){
-			Command($Sys,$Form,$Threads,$CommandSet,0);
+		elsif($commandAuth || GetSessionID($Sys,$threadid,1) eq $sid){
+			Command($Sys,$Form,$Set,$Threads,$CommandSet,0);
 		}
 	}
 	
@@ -517,20 +534,24 @@ sub ReadyBeforeWrite
 
 	return 0;
 }
-sub Get1SessionID
+sub GetSessionID
 {
-	my ($Sys,$threadid) = @_;
+	my ($Sys,$threadid,$resnum) = @_;
 	require './module/log.pl';
 	my $Logger = LOG->new;
 	my $logPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/' . $threadid;
+	$resnum--;
 	$Logger->Open($logPath, 0, 1 | 2);
-	my $sid = (split(/<>/,$Logger->Get(0)))[9];
+
+	# レス番が存在しない場合はundefが返る
+	my $sid = (split(/<>/,$Logger->Get($resnum)))[9];
+
 	return $sid;
 }
 #ユーザーコマンド
 sub Command
 {
-	my ($Sys,$Form,$Threads,$setBitMask,$mode) = @_;
+	my ($Sys,$Form,$Set,$Threads,$setBitMask,$mode) = @_;
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
 	my $Command = '';
@@ -554,11 +575,19 @@ sub Command
 			$Form->Set('mail',$mail);
 		}
 		#最大レス数変更
-		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([0-9]{3,4})(<br>|$)/ && ($setBitMask & 2)) {
-			if ($2 && $2 >= 100 && $2 <= 2000) {
+		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2)) {
+			my $resmin = 100;
+			my $resmax = 2000;
+			if ($2 && $2 >= $resmin && $2 <= $resmax) {
 				$Threads->SetAttr($threadid, 'maxres', int $2);
 				my $maxres = $Threads->GetAttr($threadid, 'maxres');
 				$Command .= '※最大'.$2.'レス<br>';
+			}else{
+				if($2 > $resmax){
+					$Command .= '値が過大<br>';
+				}else{
+					$Command .= '値が過小<br>';
+				}
 			}
 			$Threads->SaveAttr($Sys);
 		}
@@ -567,18 +596,44 @@ sub Command
 	##スレ中パスワード保持者のみ
 	if(!$mode){
 		#コマンド取り消し
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z]{4,10})(<br>|$)/ && ($setBitMask & 256)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z&;]{4,20})(<br>|$)/ && ($setBitMask & 256)){
 			my $delCommand = $2;
 			$delCommand =~ s/^sage$/sagemode/;
+			#BAN取り消し用
 			if($Threads->GetAttr($threadid, $delCommand)){
-				$Threads->SetAttr($threadid, $delCommand,'');
-				$Threads->SaveAttr($Sys);
-				$delCommand =~ s/^sagemode$/sage/;
-				$Command .= '※'.$delCommand.'取り消し<br>';
+				if($delCommand =~ /ban&gt;&gt;([1-9][0-9]*)/ ){
+					my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
+					my $bannum = @banuserAttr;
+					my $bansid = GetSessionID($Sys,$threadid,$1);
+					if($bannum){
+						if($bansid){
+							# grepを使って$bansidに一致しない要素だけを選択
+							my @newBanuserAttr = grep { $_ ne $bansid } @banuserAttr;
+							
+							if(@newBanuserAttr < @banuserAttr){
+								# 変更があればスレッド属性を更新
+								$Threads->SetAttr($threadid, join(',', @newBanuserAttr));
+								$Command .= "&gt;&gt;$1のBANを解除";
+							} else {
+								$Command .= "※対象はBANされていません<br>";
+							}
+						} else {
+							$Command .= "※無効なレス番号<br>";
+						}
+					}else {
+						$Command .= "※設定されていません<br>";
+					}
+				}
+				else{
+					$Threads->SetAttr($threadid, $delCommand,'');
+					$Threads->SaveAttr($Sys);
+					$delCommand =~ s/^sagemode$/sage/;
+					$Command .= '※'.$delCommand.'取り消し<br>';
+				}
 			}
 			else{
 				$delCommand =~ s/^sagemode$/sage/;
-				$Command .= '※'.$delCommand.'の取り消しに失敗しました<br>';
+				$Command .= '※'.$delCommand.'は設定されていません<br>';
 			}
 		}
 		#スレスト
@@ -594,19 +649,34 @@ sub Command
 			$Command .= '※過去ログ送り<br>';
 		}
 		#スレタイ変更
-#		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.*?)(<br>|$)/ && ($setBitMask & )){
-#			my $newTitle = $2;
-#			if($newTitle){
-#				$newTitle =~ s/"/&quot;/g;
-#				$newTitle =~ s/&/&amp;/g;
-#				$newTitle =~ s/</&lt;/g;
-#				$newTitle =~ s/>/&gt;/g;
-#				$newTitle =~ s/(\r\n|\r|\n)//g;
-#			}
-#			$Threads->SetAttr($threadid, 'changetitle',$newTitle);
-#			$Threads->SaveAttr($Sys);
-#			$Command .= '※スレタイ変更：'.$newTitle.'<br>';
-#		}
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.*?)(<br>|$)/ && ($setBitMask & 16384)){
+			my $newTitle = $2;
+			if($Set->Get('BBS_SUBJECT_COUNT') >= length($newTitle) && $newTitle){
+				require './module/dat.pl';
+				my $Dat = DAT->new;
+				my $Path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS').'/dat/'.$threadid.'.dat';
+				if($Dat->Load($Sys,$Path,0)){
+					my $line = $Dat->Get(0);
+					$line = $$line;
+					my @data = split(/<>/,$line);
+					my $Title = $data[4];
+					chomp($Title);
+					if($Title ne $newTitle){
+						$data[4] = $newTitle;
+						$Dat->Set(0,(join('<>',@data)."\n"));
+						$Dat->Save($Sys);
+						#subject.txt更新用
+						$Threads->Load($Sys);
+						$Threads->UpdateAll($Sys);
+						$Threads->Save($Sys);
+						$Command .= "※スレタイ変更：$Title → $newTitle<br>";
+					}
+					$Dat->Close();
+				}
+			}else{
+				$Command .= "※スレタイ長すぎ";
+			}
+		}
 	}
 
 	##スレ立て時＆スレ中パスワード保持者のみ
@@ -646,6 +716,44 @@ sub Command
 		$Threads->SetAttr($threadid, 'live',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※実況スレ<br>';
+	}
+	#BAN
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 4096)){
+		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
+		my $bannum = @banuserAttr;
+		my $bansid = GetSessionID($Sys,$threadid,$2);
+		my $nusisid = GetSessionID($Sys,$threadid,1);
+		if($bansid){
+			if($bansid ne $nusisid){
+				# grepを使って$bansidが@banuserAttrに存在するかをチェック
+				my @matched = grep { $_ eq $bansid } @banuserAttr;
+
+				if(@matched){
+					$Command .= "※既にBAN<br>";
+				} else {
+					# BANの処理
+					push(@banuserAttr, $bansid); # 新しい要素を配列の末尾に追加
+					$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
+					$Threads->SaveAttr($Sys);
+					$Command .= "※BAN：&gt;&gt;$2<br>";
+				}
+			} else {
+				$Command .= "※スレ主はBAN不可<br>";
+			}
+		} else {
+			$Command .= "※無効なレス番号<br>";
+		}
+	}
+	#忍法帖レベル制限
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!ninlv:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 8192)){
+		my $lvmax = 20;#$Sys->Get('MAXNINLV');
+		if($2 <= $lvmax){
+			$Threads->SetAttr($threadid, 'ninlvlim',$2);
+			$Threads->SaveAttr($Sys);
+			$Command .= "※忍法帖Lv$2未満は書き込み不可<br>";
+		}else{
+			$Command .= "※値高すぎ<br>";
+		}
 	}
 	#名無し変更
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/ && ($setBitMask & 64)){
@@ -870,7 +978,8 @@ sub IsRegulation
 	}
 	# JPホスト以外規制
 	if (!$islocalip && $Set->Equal('BBS_JP_CHECK', 'checked')) {
-		if ($host !~ /\.jp$/i) {
+		require './module/slip.pl';
+		if (get_country_by_ip($addr,$Sys->Get('INFO')) ne 'JP') {
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTJPHOST, $bbs)) {
 				return $ZP::E_REG_NOTJPHOST;
 			}
@@ -1337,7 +1446,7 @@ sub SaveHost
 sub Ninpocho
 {
 	my $this = shift;
-	my ($Sys, $Form, $Ninja, $sid) = @_;
+	my ($Sys, $Set, $Form, $Ninja, $sid) = @_;
 
     # セッションから忍法帖Lvを取得
     my $ninLv = $Ninja->Get('ninLv') || 1;
@@ -1356,7 +1465,7 @@ sub Ninpocho
 	$count++;
 
 	# レベルの上限
-	my $lvLim = 40;
+	my $lvLim = 40;#$Sys->Get('MAXNINLV');
 
     # 前回のレベルアップから23時間以上経過していればレベルアップ
     if ($resTime >= $lvUpTime && $ninLv < $lvLim) {
