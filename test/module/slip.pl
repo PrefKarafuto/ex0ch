@@ -158,6 +158,7 @@ sub is_public_wifi {
 
 # IPから国を判定
 sub get_country_by_ip {
+	my $this = shift;
     my ($ipAddr,$infoDir) = @_;
     my $filename_ipv4 = "./$infoDir/IP_List/jp_ipv4.cgi";
 	my $filename_ipv6 = "./$infoDir/IP_List/jp_ipv6.cgi";
