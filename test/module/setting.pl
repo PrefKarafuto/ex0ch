@@ -390,6 +390,7 @@ sub InitSettingData
 		'BBS_KAKO'				=> '',
 		'BBS_TITLEID'			=> '',
   		'BBS_COMMAND'			=> 0 ,
+		'BBS_HIDENUSI'			=> '',
 
 		#忍法帖関連
 		'NINJA_FORCE_SAGE'		=> 2,

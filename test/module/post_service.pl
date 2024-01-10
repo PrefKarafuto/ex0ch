@@ -243,6 +243,7 @@ sub Write
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
+	$idpart .= '(主)' if (($sid eq $nusisid) && !($Set->Get('BBS_HIDENUSI') || $Threads->GetAttr($threadid,'hidenusi')));
 	$bepart = $Form->Get('BEID', '');
 	$extrapart = $Form->Get('extrapart', '');
 	my $info = $datepart;
@@ -663,7 +664,8 @@ sub Command
 					chomp($Title);
 					if($Title ne $newTitle){
 						$data[4] = $newTitle;
-						$Dat->Set(0,(join('<>',@data)."\n"));
+						my $addMessage = '';	#[スレタイ変更]など
+						$Dat->Set(0,(join('<>',@data)."$addMessage\n"));
 						$Dat->Save($Sys);
 						#subject.txt更新用
 						$Threads->Load($Sys);
@@ -716,6 +718,12 @@ sub Command
 		$Threads->SetAttr($threadid, 'live',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※実況スレ<br>';
+	}
+	#スレ主非表示
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!hidenusi(<br>|$)/ && ($setBitMask & 32768)){
+		$Threads->SetAttr($threadid, 'hidenusi',1);
+		$Threads->SaveAttr($Sys);
+		$Command .= '※スレ主非表示<br>';
 	}
 	#BAN
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 4096)){
