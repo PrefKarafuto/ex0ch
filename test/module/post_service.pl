@@ -144,7 +144,7 @@ sub Write
  	my $idSet = $Threads->GetAttr($threadid,'noid');
  	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
 	return $ZP::E_LIMIT_MOVEDTHREAD if ($Threads->GetAttr($threadid,'pool'));
-
+	
 	#コマンドによる過去ログ送り用（猶予のため）
 	ToKakoLog($Sys,$Set,$Threads);
 
@@ -181,17 +181,21 @@ sub Write
 	#忍法帖パス
 	my $password = '';
 	my $sid = $Ninja->Load($Sys,$idEnd,undef);
-	if($Form->Get('mail') =~ /(^|<br>)!load:(.){10,30}(<br>|$)/ && $isNinja){
+	my $ninmail = $Form->Get('mail');
+	if($ninmail=~ /(^|<br>)!load:(.){10,30}(<br>|$)/ && $isNinja){
 		$password = $2;
+		$ninmail =~ s/!load:(.){10,30}//;
+		$Form->Set('mail',$ninmail);
 		$sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
-	}
-	if($Form->Get('mail') =~ /(^|<br>)!save:(.){10,30}(<br>|$)/ && $isNinja){
+	}elsif($ninmail =~ /(^|<br>)!save:(.){10,30}(<br>|$)/ && $isNinja){
 		$password = $2;
+		$ninmail =~ s/!lsave:(.){10,30}//;
+		$Form->Set('mail',$ninmail);
 	}
 	
 	#BANチェック
 	my $nusisid = GetSessionID($Sys,$threadid,1);
-	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban')){
+	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
 		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
 		foreach my $userlist(@banuserAttr){
 			return $ZP::E_REG_BAN if($sid eq $userlist);
@@ -200,7 +204,7 @@ sub Write
 
 	#忍法帖Lv制限チェック
 	my $lvLim = $Threads->GetAttr($threadid,'ninlvlim');
-	if($lvLim && $isNinja){
+	if($lvLim && $isNinja && !$noAttr){
 		return $ZP::E_REG_NINLVLIMIT if $lvLim > $Ninja->Get('ninLv');
 	}
 	
@@ -222,6 +226,7 @@ sub Write
 	my $updown = 'top';
 	$updown = '' if ($Form->Contain('mail', 'sage'));
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
+	$updown = '' if ($Ninja->Get('force_sage'));
 	$Sys->Set('updown', $updown);
 	
 	# 書き込み直前処理
@@ -239,7 +244,7 @@ sub Write
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
 	#SLIPがあった場合は付加する
-	$name .= "</b> (${slip_result})<b>" if ($slip_result);
+	$name .= "</b> (${slip_result})" if ($slip_result);
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
@@ -679,6 +684,42 @@ sub Command
 				$Command .= "※スレタイ長すぎ";
 			}
 		}
+		#追記
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!add:&gt;&gt;([1-9][0-9]*):?(.*)(<br>|$)/ && ($setBitMask & 65536)){
+			my $addMessage = $3;
+			my $targetNum = $2;
+			if($addMessage && $targetNum){
+				if(GetSessionID($Sys,$threadid,1) eq GetSessionID($Sys,$threadid,$targetNum)){
+					require './module/dat.pl';
+					my $Dat = DAT->new;
+					my $Path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS').'/dat/'.$threadid.'.dat';
+					if($Dat->Load($Sys,$Path,0)){
+						my $line = $Dat->Get($targetNum - 1);
+						if($line){
+							$line = $$line;
+							my @data = split(/<>/,$line);
+							my $Message = $data[3];
+							if($Set->Get('BBS_MESSAGE_COUNT') >= length($Message.$addMessage) && $addMessage){
+								my ($sec, $min, $hour, $mday, $mon, $year) = localtime;
+								$mon++;
+								$year += 1900;
+								$data[3] = $Message."<hr><font color=\"red\">※$year/$mon/$mday $hour:$min:$sec 追記</font><br>$addMessage";
+								$Dat->Set($targetNum - 1,(join('<>',@data)));
+								$Dat->Save($Sys);
+								$Command .= "※&gt;&gt;$2に追記<br>";
+							}else{
+								$Command .= "※追記長すぎ<br>";
+							}
+						}else{
+							$Command .= "※無効なレス番号<br>";
+						}
+						$Dat->Close();
+					}
+				}else{
+					$Command .= "※他人のレスには追記不可<br>";
+				}
+			}
+		}
 	}
 
 	##スレ立て時＆スレ中パスワード保持者のみ
@@ -689,17 +730,17 @@ sub Command
 		$Command .= '※強制sage<br>';
 	}
 	#強制age
-#	if($Form->Get('MESSAGE') =~ /(^|<br>)!float(<br>|$)/ && ($setBitMask & )){
-#		$Threads->SetAttr($threadid, 'float',1);
-#		$Threads->SaveAttr($Sys);
-#		$Command .= '※強制age<br>';
-#	}
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!float(<br>|$)/ && ($setBitMask & 131072)){
+		$Threads->SetAttr($threadid, 'float',1);
+		$Threads->SaveAttr($Sys);
+		$Command .= '※強制age<br>';
+	}
 	#不落
-#	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool(<br>|$)/ && ($setBitMask & )){
-#		$Threads->SetAttr($threadid, 'nopool',1);
-#		$Threads->SaveAttr($Sys);
-#		$Command .= '※不落<br>';
-#	}
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool(<br>|$)/ && ($setBitMask & 262144)){
+		$Threads->SetAttr($threadid, 'nopool',1);
+		$Threads->SaveAttr($Sys);
+		$Command .= '※不落<br>';
+	}
 	#BBS_SLIP
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!slip:(v{3,6})(<br>|$)/ && ($setBitMask & 2048)){
 		$Threads->SetAttr($threadid, 'slip',$2);
@@ -737,10 +778,11 @@ sub Command
 				my @matched = grep { $_ eq $bansid } @banuserAttr;
 
 				if(@matched){
-					$Command .= "※既にBAN<br>";
+					$Command .= "※既にBAN済<br>";
 				} else {
 					# BANの処理
 					push(@banuserAttr, $bansid); # 新しい要素を配列の末尾に追加
+					shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));
 					$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
 					$Threads->SaveAttr($Sys);
 					$Command .= "※BAN：&gt;&gt;$2<br>";
@@ -750,17 +792,6 @@ sub Command
 			}
 		} else {
 			$Command .= "※無効なレス番号<br>";
-		}
-	}
-	#忍法帖レベル制限
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!ninlv:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 8192)){
-		my $lvmax = 20;#$Sys->Get('MAXNINLV');
-		if($2 <= $lvmax){
-			$Threads->SetAttr($threadid, 'ninlvlim',$2);
-			$Threads->SaveAttr($Sys);
-			$Command .= "※忍法帖Lv$2未満は書き込み不可<br>";
-		}else{
-			$Command .= "※値高すぎ<br>";
 		}
 	}
 	#名無し変更
@@ -783,6 +814,21 @@ sub Command
 		$Threads->SetAttr($threadid, 'changeid',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※ID変更<br>';
+	}
+
+	#忍法帖があった場合
+	if($Set->Get('BBS_NINJA')){
+		#忍法帖レベル制限
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!ninlv:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 8192)){
+			my $lvmax = $Sys->Get('NINLVMAX');
+			if($2 <= $lvmax){
+				$Threads->SetAttr($threadid, 'ninlvlim',$2);
+				$Threads->SaveAttr($Sys);
+				$Command .= "※忍法帖Lv$2未満は書き込み不可<br>";
+			}else{
+				$Command .= "※値高すぎ<br>";
+			}
+		}
 	}
 	
 	if($Command){
@@ -1473,7 +1519,7 @@ sub Ninpocho
 	$count++;
 
 	# レベルの上限
-	my $lvLim = 40;#$Sys->Get('MAXNINLV');
+	my $lvLim = $Sys->Get('NINLVMAX');
 
     # 前回のレベルアップから23時間以上経過していればレベルアップ
     if ($resTime >= $lvUpTime && $ninLv < $lvLim) {
