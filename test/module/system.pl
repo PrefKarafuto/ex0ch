@@ -311,6 +311,8 @@ sub InitSystemValue
 
 		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換
 		'CSP'			=> 0,
+		'BANMAX'		=> 10,
+		'NINLVMAX'		=> 40,
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,
