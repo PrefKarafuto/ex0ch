@@ -391,6 +391,7 @@ sub InitSettingData
 		'BBS_TITLEID'			=> '',
   		'BBS_COMMAND'			=> 0 ,
 		'BBS_HIDENUSI'			=> '',
+		'BBS_MAILFIELD'			=> 'checked',
 
 		#忍法帖関連
 		'NINJA_FORCE_SAGE'		=> 2,

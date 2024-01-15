@@ -194,6 +194,8 @@ sub Write
 	}
 	
 	#BANチェック
+	return $ZP::E_REG_BAN if($Ninja->Get('ban')||($Ninja->Get('ban_thread') && $Sys->Equal('MODE', 1)));
+
 	my $nusisid = GetSessionID($Sys,$threadid,1);
 	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
 		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
@@ -795,10 +797,10 @@ sub Command
 		}
 	}
 	#名無し変更
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.*?)(<br>|$)/ && ($setBitMask & 64)){
-		use HTML::Entities;
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.+)(<br>|$)/ && ($setBitMask & 64)){
+		require HTML::Entities;
 		my $new774 = $2;
-		$new774 = encode_entities($new774);
+		$new774 = HTML::Entities::encode_entities($new774);
 		$new774 =~ s/&amp;/&/g;
 		$Threads->SetAttr($threadid, 'change774',$new774);
 		$Threads->SaveAttr($Sys);
@@ -1507,6 +1509,7 @@ sub Ninpocho
 
 	# セッションから書き込み数を取得
 	my $count = $Ninja->Get('count') || 0;
+	my $thread = $Ninja->Get('thread_count') || 0; 
 
     # 書き込んだ時間を取得
 	my $resTime = time();
@@ -1517,6 +1520,7 @@ sub Ninpocho
 
     # 書き込み数をカウント
 	$count++;
+	$thread++ if($Sys->Equal('MODE', 1));
 
 	# レベルの上限
 	my $lvLim = $Sys->Get('NINLVMAX');
@@ -1530,8 +1534,21 @@ sub Ninpocho
 	# セッションに記録
 	if ($Ninja) {
 		$Ninja->Set('count', $count);
+		$Ninja->Set('thread_count',$thread);
 		$Ninja->Set('ninLv', $ninLv);
 		$Ninja->Set('lvuptime', $lvUpTime);
+
+		$Ninja->Set('last_addr',$ENV{'REMOTE_ADDR'});
+		$Ninja->Set('last_host',$ENV{'REMOTE_HOST'});
+		$Ninja->Set('last_ua',$ENV{'HTTP_USER_AGENT'});
+		$Ninja->Set('last_wtime',time);
+		$Ninja->Set('last_mthread_time',time) if($Sys->Equal('MODE', 1));
+
+		my $mes = $Form->Get('MESSAGE');
+		$mes =~ s/<(b|h)r>//g;
+		$Ninja->Set('last_message',substr($mes, 0, 30));
+		$Ninja->Set('last_bbsdir',$Sys->Get('BBS'));
+        $Ninja->Set('last_threadkey',$Sys->Get('KEY'));
 		#認証
 		unless($Ninja->Get('auth')){
 			$Ninja->Set('auth',1);
@@ -1563,6 +1580,8 @@ sub Ninpocho
 
 	# 名前欄書き換え
 	my $ninID = crypt($sid,$sid);
+	$name = $Ninja->Get('force_kote') if $Ninja->Get('force_kote');
+	$name = $Set->Get('BBS_NONAME_NAME') if $Ninja->Get('force_774');
 	$name =~ s|!id|</b>【忍法帖ID:$ninID】<b>|g;
 	$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|g;
 	$name =~ s|!ninja|</b>【忍法帖Lv.$ninLv】<b>|g;
