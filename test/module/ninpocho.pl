@@ -127,11 +127,15 @@ sub Load
             $session->param('new_message',substr($Form->Get('MESSAGE'), 0, 30));
             $session->param('c_bbsdir',$Sys->Get('BBS'));
             $session->param('c_threadkey',$Sys->Get('KEY'));
+            $session->param('c_addr',$ENV{'REMOTE_ADDR'});
             $session->param('c_host',$ENV{'REMOTE_HOST'});
             $session->param('c_ua',$ENV{'HTTP_USER_AGENT'});
         }else{
             if ($sid && $sid_before && $sid_before ne $sid_saved){
                 #忍法帖ロード時に追加
+                my $load_count = $session->param('load_count') || 0;
+                $load_count++;
+                $session->param('load_count',$load_count);
                 $session->param('load_message',substr($Form->Get('MESSAGE'), 0, 30));
                 $session->param('load_from',$sid_before);
                 $session->param('load_time',time);

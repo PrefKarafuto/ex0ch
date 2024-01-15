@@ -194,7 +194,7 @@ sub Write
 	}
 	
 	#BANチェック
-	return $ZP::E_REG_BAN if($Ninja->Get('ban')||($Ninja->Get('ban_thread') && $Sys->Equal('MODE', 1)));
+	return $ZP::E_REG_BAN if($Ninja->Get('ban')||($Ninja->Get('ban_mthread') && $Sys->Equal('MODE', 1)));
 
 	my $nusisid = GetSessionID($Sys,$threadid,1);
 	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
@@ -232,7 +232,7 @@ sub Write
 	$Sys->Set('updown', $updown);
 	
 	# 書き込み直前処理
-	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$sid);
+	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja->Get('ban_command'),$sid);
 	return $err if ($err != $ZP::E_SUCCESS);
 	# 忍法帖
 	if($isNinja){
@@ -424,7 +424,7 @@ sub ReadyBeforeCheck
 sub ReadyBeforeWrite
 {
 	my $this = shift;
-	my ($res,$sid) = @_;
+	my ($res,$com,$sid) = @_;
 	
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
@@ -492,31 +492,33 @@ sub ReadyBeforeWrite
 	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 
 	#スレ立て時用コマンド
-	if($Sys->Equal('MODE', 1)){
-		Command($Sys,$Form,$Set,$Threads,$CommandSet,1);
-	}
-	else{
-		if($Form->Get('mail') =~ /!pass:(.){1,30}/){
-			require Digest::SHA::PurePerl;
-			my $ctx = Digest::SHA::PurePerl->new;
-			$ctx->add(':', $Sys->Get('SERVER'));
-			$ctx->add(':', $threadid);
-			$ctx->add(':', $1);
-			my $inputPass = $ctx->b64digest;
+	if(!$com){
+		if($Sys->Equal('MODE', 1)){
+			Command($Sys,$Form,$Set,$Threads,$CommandSet,1);
+		}
+		else{
+			if($Form->Get('mail') =~ /!pass:(.){1,30}/){
+				require Digest::SHA::PurePerl;
+				my $ctx = Digest::SHA::PurePerl->new;
+				$ctx->add(':', $Sys->Get('SERVER'));
+				$ctx->add(':', $threadid);
+				$ctx->add(':', $1);
+				my $inputPass = $ctx->b64digest;
 
-			my $threadPass = $Threads->GetAttr($threadid, 'pass');
+				my $threadPass = $Threads->GetAttr($threadid, 'pass');
 
-			#メール欄からpass削除
-			my $mail = $Form->Get('mail');
-			$mail =~ s/!pass:(.){1,30}//;
-			$Form->Set('mail',$mail);
-			
-			if($inputPass eq $threadPass){
+				#メール欄からpass削除
+				my $mail = $Form->Get('mail');
+				$mail =~ s/!pass:(.){1,30}//;
+				$Form->Set('mail',$mail);
+				
+				if($inputPass eq $threadPass){
+					Command($Sys,$Form,$Set,$Threads,$CommandSet,0);
+				}
+			}
+			elsif($commandAuth || GetSessionID($Sys,$threadid,1) eq $sid){
 				Command($Sys,$Form,$Set,$Threads,$CommandSet,0);
 			}
-		}
-		elsif($commandAuth || GetSessionID($Sys,$threadid,1) eq $sid){
-			Command($Sys,$Form,$Set,$Threads,$CommandSet,0);
 		}
 	}
 	
