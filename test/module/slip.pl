@@ -171,7 +171,7 @@ sub get_country_by_ip {
 	}else{
 		$result = binary_search_ip_range($ipAddr,$filename_ipv6);
 	}
-
+	return if $result == -1;
 	my $country = $result ? 'JP' : 'ｶﾞｲｺｰｸ';
 
     return $country;
@@ -406,9 +406,12 @@ sub GetApnicJPIPList {
     my $ua = LWP::UserAgent->new;
     my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
 
-    my $response = $ua->get($url);
-    die "データの取得に失敗: ", $response->status_line unless $response->is_success;
-    my $data = $response->decoded_content;
+	my $response = $ua->get($url);
+    unless ($response->is_success) {
+        warn "データの取得に失敗: " . $response->status_line;
+        return 0; # 失敗時に0を返す
+    }
+	my $data = $response->decoded_content;
 
     my @jp_ipv4_ranges;
     my @jp_ipv6_ranges;
@@ -442,26 +445,33 @@ sub GetApnicJPIPList {
         }
     }
 
-    # IPv4範囲をファイルに保存
-    open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
-    foreach my $range (@jp_ipv4_ranges) {
-        print $file_ipv4 "$range->{start}-$range->{end}\n";
-    }
-    close $file_ipv4;
-    chmod 0600, $filename_ipv4;
+	eval {
+        open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
+        foreach my $range (@jp_ipv4_ranges) {
+            print $file_ipv4 "$range->{start}-$range->{end}\n";
+        }
+        close $file_ipv4;
+        chmod 0600, $filename_ipv4;
 
-    # IPv6範囲をファイルに保存
-    open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
-    foreach my $range (@jp_ipv6_ranges) {
-        print $file_ipv6 "$range->{start}-$range->{end}\n";
+        open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
+        foreach my $range (@jp_ipv6_ranges) {
+            print $file_ipv6 "$range->{start}-$range->{end}\n";
+        }
+        close $file_ipv6;
+        chmod 0600, $filename_ipv6;
+    };
+    if ($@) {
+        warn "ファイル書き込みに失敗しました: $@";
+        return 0; # 失敗時に0を返す
     }
-    close $file_ipv6;
-    chmod 0600, $filename_ipv6;
+
+    return 1; # 成功時に1を返す
 }
 sub binary_search_ip_range {
     my ($ipAddr, $filename) = @_;
     my $ip_num = ip_to_number($ipAddr);
     my $ranges = load_ip_ranges($filename);
+	return -1 unless $ranges;
     my $low = 0;
     my $high = @$ranges - 1;
 
@@ -482,18 +492,30 @@ sub load_ip_ranges {
     my $filename = shift;
     my @ranges;
 
-    open my $file, '<', $filename or die "ファイルを開けません: $!";
-    while (my $line = <$file>) {
-        chomp $line;
-        my ($start, $end) = split /-/, $line;
-        push @ranges, { 
-            start => Math::BigInt->new($start), 
-            end => Math::BigInt->new($end)
-        };
+    # ファイルオープンと例外処理
+    open my $file, '<', $filename or do {
+        warn "ファイルを開けません: $filename";
+        return 0; # 失敗時に0を返す
+    };
+    
+    # ファイル読み込みと例外処理
+    eval {
+        while (my $line = <$file>) {
+            chomp $line;
+            my ($start, $end) = split /-/, $line;
+            push @ranges, {
+                start => Math::BigInt->new($start),
+                end => Math::BigInt->new($end)
+            };
+        }
+        close $file;
+    };
+    if ($@) {
+        warn "ファイル読み込み中にエラーが発生しました: $@";
+        return 0; # 失敗時に0を返す
     }
-    close $file;
 
-    return \@ranges;
+    return \@ranges; # 成功時にIP範囲の配列のリファレンスを返す
 }
 sub ip_to_number {
     my $ip = shift;
@@ -707,7 +729,7 @@ sub BBS_SLIP
 			}
 
 			# 国を判定
-			if ($unknown && $country ne 'JP') {
+			if ($unknown && $country ne 'JP' && $country) {
 				$idEnd = 'H';
 				$slip_nickname = "${country}${fixed_nickname_end}";
 				$slip_aa = 'FC';
