@@ -292,11 +292,11 @@ sub PrintNinjaEdit
 	my $c_host = $Ninja->Get('c_host');
 	my $c_ua = $Ninja->Get('c_ua');
 
-	my $auth_time = $Ninja->Get('auth_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('auth_time')) : 'N/A';
+	my $auth_time = $Ninja->Get('auth_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('auth_time')) : '';
 
 	my $load_message = $Ninja->Get('load_message');
 	my $load_from = $Ninja->Get('load_from');
-	my $load_time = $Ninja->Get('load_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('load_time')) : 'N/A';
+	my $load_time = $Ninja->Get('load_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('load_time')) : '';
 	my $load_bbsdir = $Ninja->Get('load_bbsdir');
 	my $load_threadkey = $Ninja->Get('load_threadkey');
 	my $load_count = $Ninja->Get('load_count');
@@ -307,8 +307,8 @@ sub PrintNinjaEdit
 	my $last_addr = $Ninja->Get('last_addr');
 	my $last_host = $Ninja->Get('last_host');
 	my $last_ua = $Ninja->Get('last_ua');
-	my $last_wtime = $Ninja->Get('last_wtime') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('last_wtime')) : 'N/A';
-	my $last_makethread_time = $Ninja->Get('last_mthread_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('last_mthread_time')) : 'N/A';
+	my $last_wtime = $Ninja->Get('last_wtime') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('last_wtime')) : '';
+	my $last_makethread_time = $Ninja->Get('last_mthread_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('last_mthread_time')) : '';
 	my $last_message = $Ninja->Get('last_message');
 	my $lasr_bbsdir = $Ninja->Get('last_bbsdir');
 	my $last_threadkey = $Ninja->Get('last_threadkey');
