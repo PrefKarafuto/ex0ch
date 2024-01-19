@@ -11,7 +11,6 @@ use open IO => ':encoding(cp932)';
 use warnings;
 use Encode;
 use Socket qw(inet_pton inet_aton AF_INET6 AF_INET);
-use Net::DNS;
 use HTML::Entities;
 no warnings qw(once);
 
@@ -1435,6 +1434,7 @@ sub IsProxy
 sub CheckDNSBL {
     my ($ip, $DNSBL_host, $expected_ip) = @_;
     my $reversed_ip = '';
+	require Net::DNS;
 
     if ($ip =~ /:/) {  # IPv6アドレスの場合
         $ip =~ s/://g;

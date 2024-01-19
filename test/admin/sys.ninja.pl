@@ -379,7 +379,7 @@ sub PrintNinjaEdit
     $Page->Print("<tr><td>強制コテ<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
 	$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\"></td></tr>\n");
 
-    $Page->HTMLInput('hidden', 'NINPOCHO', $id);
+    $Page->HTMLInput('hidden', 'SID', $sid);
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3>");
@@ -531,7 +531,7 @@ sub FunctionNinjaSave
 	}
 	# 入力チェック
 	{
-		my @inList = qw(BAN BAN_THREAD BAN_COM BAN_URL FORCE_SAGE FORCE_774 FORCE_CAPTCHA FORCE_KOTE);
+		my @inList = qw(BAN BAN_MTHREAD BAN_COM BAN_URL FORCE_SAGE FORCE_774 FORCE_CAPTCHA FORCE_KOTE);
 		foreach (@inList) {
 			my $set = $Form->Get($_) ? '有効' : '無効';
 			push @$pLog, "「$_」を${set}に設定";
@@ -539,7 +539,7 @@ sub FunctionNinjaSave
 	}
 	require './module/ninpocho.pl';
 	$Ninja = NINPOCHO->new;
-	$Ninja->LoadOnly($Sys,$Form->Get('NINPOCHO'));
+	$Ninja->LoadOnly($Sys,$Form->Get('SID'));
 	
 	$Ninja->Set('user_desc', $Form->Get('DESCRIPTION'));
 	$Ninja->Set('ban', $Form->Get('BAN'));

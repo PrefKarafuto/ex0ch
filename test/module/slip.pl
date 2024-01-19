@@ -11,12 +11,9 @@ use warnings;
 use CGI::Session;
 use CGI::Cookie;
 use Digest::MD5 qw(md5_hex);
-use Net::Whois::Raw;
 use JSON;
-use Math::BigInt;
 use LWP::UserAgent;
 use Storable qw(store retrieve);
-$Net::Whois::Raw::OMIT_MSG = 1;
 # コンストラクタ
 sub new
 {
@@ -413,6 +410,7 @@ sub GetApnicJPIPList {
         return 0; # 失敗時に0を返す
     }
 	my $data = $response->decoded_content;
+	require Math::BigInt;
 
     my @jp_ipv4_ranges;
     my @jp_ipv6_ranges;
@@ -501,6 +499,7 @@ sub load_ip_ranges {
     
     # ファイル読み込みと例外処理
     eval {
+		require Math::BigInt;
         while (my $line = <$file>) {
             chomp $line;
             my ($start, $end) = split /-/, $line;
@@ -531,7 +530,7 @@ sub ip_to_number {
             $ip =~ s/^:/0:/; # 先頭が省略された場合
             $ip =~ s/:$/:0/; # 末尾が省略された場合
         }
-
+		require Math::BigInt;
         my $bigint = Math::BigInt->new(0);
         foreach my $part (split /:/, $ip) {
             $bigint = ($bigint << 16) + hex($part);
@@ -832,8 +831,6 @@ sub BBS_SLIP_OLD
 {
 	my ($ip_addr, $remoho, $ua, $bbsslip) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
-
-	$Net::Whois::Raw::OMIT_MSG = 1;
 
 	#bbs_slipに使用する文字
 	my @slip_char = (0..9, "a".."z", "A".."Z", ".", "/");

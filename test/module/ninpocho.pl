@@ -308,7 +308,7 @@ sub Save
         SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
         SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
     }
-    if (defined $password && $session) {
+    if ($password && $session) {
         my $ctx3 = Digest::MD5->new;
         $ctx3->add(':', $Sys->Get('SERVER'));
         $ctx3->add(':', $password);

@@ -133,12 +133,6 @@ sub Write
 	my $slip = SLIP->new;
 	my $Ninja = NINPOCHO->new;
 	
-	# hCaptcha認証
-	$Ninja->Load($Sys,8,undef);
-	if ($Set->Get('BBS_HCAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha'))){
-		$err = $this->Certification_hCaptcha($Sys,$Form);
-		return $err if $err;
-	}
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
  	my $idSet = $Threads->GetAttr($threadid,'noid');
@@ -178,6 +172,12 @@ sub Write
 	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
 	my ($slip_result,$idEnd) = $slip->BBS_SLIP($bbsSlip, $Sys->Get('INFO'),$chid,undef) if (!$handle || !$noAttr);
 	$idEnd = $Set->Get('BBS_SLIP') eq 'checked' ? $Sys->Get('AGENT') : $idEnd;
+
+	# hCaptcha認証
+	if ($Set->Get('BBS_HCAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha'))){
+		$err = $this->Certification_hCaptcha($Sys,$Form);
+		return $err if $err;
+	}
 
 	#忍法帖パス
 	my $password = '';
