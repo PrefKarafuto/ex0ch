@@ -404,6 +404,7 @@ sub is_mobile {
 sub GetApnicJPIPList {
     my ($filename_ipv4, $filename_ipv6) = @_;
     my $ua = LWP::UserAgent->new;
+	$ua->timeout(1);
     my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
 
 	my $response = $ua->get($url);
@@ -809,7 +810,7 @@ sub BBS_SLIP
 	}
 
 	# slip文字列とID末尾
-	my $slip_result = 'undef';
+	my $slip_result = '';
 	if($bbsslip eq 'vvv'){
 		$slip_result = ${slip_nickname};
 	}
@@ -1138,7 +1139,7 @@ sub BBS_SLIP_OLD
 	}
 
 	#bbs_slipを生成
-	my $slip_result = 'undef';
+	my $slip_result = '';
 	if($bbsslip eq 'vvv'){
 		$slip_result = ${slip_nickname};
 	}
