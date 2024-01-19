@@ -220,65 +220,69 @@ sub PrintNinjaEdit
 	my $description = $Ninja->Get('user_desc');
 
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖を確認します。(${SESSION_ATIME}時点)</td></tr>");
-	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
+	if($SESSION_ID){
+		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖を確認します。(${SESSION_ATIME}時点)</td></tr>");
+		$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description</td></tr>\n");
-	$Page->Print("<tr><td>説明</td>");
-	$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60></td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description</td></tr>\n");
+		$Page->Print("<tr><td>説明</td>");
+		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60></td></tr>\n");
 
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">忍法帖Lv</td><td>$lv</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">作成日時</td><td>$SESSION_CTIME</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">作成時の書き込み</td><td>$newmes</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP</td><td>$c_addr</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST</td><td>$c_host</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA</td><td>$c_ua</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時</td><td>$last_wtime</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み</td><td>$last_message</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新IP</td><td>$last_addr</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新HOST</td><td>$last_host</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新UA</td><td>$last_ua</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">パスワード(Hash)</td><td>$password</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新ロード時刻</td><td>$load_time</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ロード元の忍法帖ID</td><td>$load_from</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">ロード時の書き込み</td><td>$load_message</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新ロードIP</td><td>$load_addr</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新ロードHOST</td><td>$load_host</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA</td><td>$load_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖Lv</td><td>$lv</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成日時</td><td>$SESSION_CTIME</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時の書き込み</td><td>$newmes</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP</td><td>$c_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST</td><td>$c_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA</td><td>$c_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時</td><td>$last_wtime</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み</td><td>$last_message</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新IP</td><td>$last_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新HOST</td><td>$last_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新UA</td><td>$last_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">パスワード(Hash)</td><td>$password</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロード時刻</td><td>$load_time</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ロード元の忍法帖ID</td><td>$load_from</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ロード時の書き込み</td><td>$load_message</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードIP</td><td>$load_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードHOST</td><td>$load_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA</td><td>$load_ua</td></tr>\n");
 
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">書き込み数</td><td>$count</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数</td><td>$thread_count</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数</td><td>$load_count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">書き込み数</td><td>$count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数</td><td>$thread_count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数</td><td>$load_count</td></tr>\n");
 
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
-	$Page->Print("<tr><td>書き込み禁止</td>");
-	$Page->Print("<td><input type=checkbox name=BAN value=on $is_ban></td></tr>\n");
-    $Page->Print("<tr><td>スレ立て禁止</td>");
-	$Page->Print("<td><input type=checkbox name=BAN_MTHREAD value=on $is_ban_mthread></td></tr>\n");
-    $Page->Print("<tr><td>コマンド禁止</td>");
-	$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
-    $Page->Print("<tr><td>URL禁止</td>");
-	$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
-    $Page->Print("<tr><td>強制sage</td>");
-	$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage></td></tr>\n");
-	$Page->Print("<tr><td>ユーザー認証</td>");
-	$Page->Print("<td><input type=checkbox name=IS_AUTH value=on $is_auth></td></tr>\n");
-    $Page->Print("<tr><td>Captcha強制</td>");
-	$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha></td></tr>\n");
-    $Page->Print("<tr><td>名無し強制</td>");
-	$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774></td></tr>\n");
-    $Page->Print("<tr><td>強制コテ<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
-	$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\"></td></tr>\n");
+		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
+		$Page->Print("<tr><td>書き込み禁止</td>");
+		$Page->Print("<td><input type=checkbox name=BAN value=on $is_ban></td></tr>\n");
+		$Page->Print("<tr><td>スレ立て禁止</td>");
+		$Page->Print("<td><input type=checkbox name=BAN_MTHREAD value=on $is_ban_mthread></td></tr>\n");
+		$Page->Print("<tr><td>コマンド禁止</td>");
+		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
+		$Page->Print("<tr><td>URL禁止</td>");
+		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
+		$Page->Print("<tr><td>強制sage</td>");
+		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage></td></tr>\n");
+		$Page->Print("<tr><td>ユーザー認証</td>");
+		$Page->Print("<td><input type=checkbox name=IS_AUTH value=on $is_auth></td></tr>\n");
+		$Page->Print("<tr><td>Captcha強制</td>");
+		$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha></td></tr>\n");
+		$Page->Print("<tr><td>名無し強制</td>");
+		$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774></td></tr>\n");
+		$Page->Print("<tr><td>強制コテ<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
+		$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\"></td></tr>\n");
+	}else{
+		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖データは存在しません。</td></tr>");
+	}
 
     $Page->HTMLInput('hidden', 'SID', $sid);
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3>");
 	$Page->Print('<input type=button value="　書き込みを検索　" disabled onclick="DoSubmit(\'sys.ninja\',\'DISP\',\'SEARCH\');">');
-	$Page->Print('<input type=button value="　保存　" onclick="DoSubmit(\'sys.ninja\',\'FUNC\',\'SAVE\');" class="delete">') if $isNinjaAuth;
+	$Page->Print('<input type=button value="　保存　" onclick="DoSubmit(\'sys.ninja\',\'FUNC\',\'SAVE\');" class="delete">') if $isNinjaAuth && $SESSION_ID;
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 
