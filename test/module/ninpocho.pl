@@ -241,22 +241,24 @@ sub Delete {
         'hash/password.cgi',
         'hash/ip_addr.cgi'
     );
+    my $count = 0;
 
     foreach my $sid (@$sid_array_ref) {
-        my $session = CGI::Session->load("driver:file", $sid, {Directory => $ninDir});
+        my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
         if ($session->is_empty) {
             next; # このセッションIDは無効なので次へ
         } else {
             if ( ($session->ctime) <= time() ) {
                 $session->delete();
                 $session->flush();
+                $count++;
             }
             foreach my $filename (@file_list) {
                 DeleteHashValue($sid, $filename);
             }
         }
     }
-    return 1; # 処理が完了したら1を返す
+    return $count;
 }
 # ID生成
 sub generate_id

@@ -172,6 +172,7 @@ sub Write
 
 	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 	my $handle = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_HANLDLE, $Form->Get('bbs'));
+	my $noslip = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_NOSLIP, $Form->Get('bbs'));
 	
 	# BBS_SLIP付加とID末尾取得
 	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
@@ -246,7 +247,7 @@ sub Write
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
 	#SLIPがあった場合は付加する
-	$name .= "</b> (${slip_result})" if ($slip_result);
+	$name .= "</b> (${slip_result})" if ($slip_result && !$noslip);
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
@@ -659,7 +660,7 @@ sub Command
 			$Command .= '※過去ログ送り<br>';
 		}
 		#スレタイ変更
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.*?)(<br>|$)/ && ($setBitMask & 16384)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.+)(<br>|$)/ && ($setBitMask & 16384)){
 			my $newTitle = $2;
 			if($Set->Get('BBS_SUBJECT_COUNT') >= length($newTitle) && $newTitle){
 				require './module/dat.pl';
@@ -688,17 +689,66 @@ sub Command
 				$Command .= "※スレタイ長すぎ";
 			}
 		}
+		#レス削除(現在ペナルティが無いので、使えないようにしてある)
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!delete:&gt;&gt;([1-9][0-9]*)(-[1-9][0-9]*)?(<br>|$)/ && ($setBitMask & 524288) && 0){
+			my $target = $2 - 1;
+			my $target2 = $3 - 1;
+			$target2 =~ s/-// if $target2;
+
+			if($target){
+				require './module/dat.pl';
+				my $Dat = DAT->new;
+				my $Path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS').'/dat/'.$threadid.'.dat';
+				if($Dat->Load($Sys,$Path,0)){
+					if($target2 && $target < $target2){
+						my $li = $Dat->Get($target2);
+						$li = $$li;
+						if($li){
+							my $i;
+							for($i = $target;$i <= $target2;$i++){
+								my $line = $Dat->Get($i);
+								$line = $$line;
+								if($line){
+									my $deleteMessage = "ユーザー削除<>ユーザー削除<>ユーザー削除<>ユーザー削除<>\n";
+									$Dat->Set($i,$deleteMessage);
+								}else{
+									$Dat->Save($Sys);
+									last;
+								}
+							}
+							$Command .= "※&gt:&gt;${target}-${target2}を削除<br>";
+
+						}else{
+							$Command .= "※範囲指定が変<br>";
+						}
+
+					}else{
+						my $line = $Dat->Get($target);
+						$line = $$line;
+						if($line){
+							my $deleteMessage = "ユーザー削除<>ユーザー削除<>ユーザー削除<>ユーザー削除<>\n";
+							$Dat->Set($target,$deleteMessage);
+							$Dat->Save($Sys);
+							$Command .= "※&gt:&gt;${target}を削除<br>";
+						}else{
+							$Command .= "※存在しません<br>";
+						}
+					}
+					$Dat->Close();
+				}
+			}
+		}
 		#追記
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!add:&gt;&gt;([1-9][0-9]*):?(.*)(<br>|$)/ && ($setBitMask & 65536)){
 			my $addMessage = $3;
-			my $targetNum = $2;
-			if($addMessage && $targetNum){
-				if(GetSessionID($Sys,$threadid,1) eq GetSessionID($Sys,$threadid,$targetNum)){
+			my $targetNum = $2 - 1;
+			if($addMessage && $targetNum + 1){
+				if(GetSessionID($Sys,$threadid,1) eq GetSessionID($Sys,$threadid,$targetNum +1)){
 					require './module/dat.pl';
 					my $Dat = DAT->new;
 					my $Path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS').'/dat/'.$threadid.'.dat';
 					if($Dat->Load($Sys,$Path,0)){
-						my $line = $Dat->Get($targetNum - 1);
+						my $line = $Dat->Get($targetNum);
 						if($line){
 							$line = $$line;
 							my @data = split(/<>/,$line);
@@ -708,7 +758,7 @@ sub Command
 								$mon++;
 								$year += 1900;
 								$data[3] = $Message."<hr><font color=\"red\">※$year/$mon/$mday $hour:$min:$sec 追記</font><br>$addMessage";
-								$Dat->Set($targetNum - 1,(join('<>',@data)));
+								$Dat->Set($targetNum,(join('<>',@data)));
 								$Dat->Save($Sys);
 								$Command .= "※&gt;&gt;$2に追記<br>";
 							}else{
@@ -1036,14 +1086,14 @@ sub IsRegulation
 	}
 	# JPホスト以外規制
 	if (!$islocalip && $Set->Equal('BBS_JP_CHECK', 'checked')) {
-		require './module/slip.pl';
-		if (get_country_by_ip($addr,$Sys->Get('INFO')) ne 'JP') {
+		#require './module/slip.pl';
+		if ($ENV{'REMOTE_HOST'} !~ /\.jp$/){#(get_country_by_ip($addr,$Sys->Get('INFO')) ne 'JP') {
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTJPHOST, $bbs)) {
 				return $ZP::E_REG_NOTJPHOST;
 			}
 		}
 	}
-	
+
 	# スレッド作成モード
 	if ($Sys->Equal('MODE', 1)) {
 		# スレッドキーが重複しないようにする

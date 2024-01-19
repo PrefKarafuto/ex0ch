@@ -704,9 +704,14 @@ sub PrintCommandSetting
 	my $setpool = $setBitMask & 512 ? 'checked' : '';
 	my $setlive = $setBitMask & 1024 ? 'checked' : '';
 	my $setslip = $setBitMask & 2048 ? 'checked' : '';
-	
-	my $isEnabledInfo = $setpass ? '有効' : '';
-	my $setView = $setpass ? '' : '"opacity: 0.5;"';
+	my $setban = $setBitMask & 4096 ? 'checked' : '';
+	my $setninlv = $setBitMask & 8192 ? 'checked' : '';
+	my $setchtt = $setBitMask & 16384 ? 'checked' : '';
+	my $sethidenusi = $setBitMask & 32768 ? 'checked' : '';
+	my $setadd = $setBitMask & 65536 ? 'checked' : '';
+	my $setage = $setBitMask & 131072 ? 'checked' : '';
+	my $setnopool = $setBitMask & 262144 ? 'checked' : '';
+	my $setdelete = $setBitMask & 524288 ? 'checked' : '';
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>有効にしたいコマンドにチェックを入れ、[設定]ボタンを押してください。</td></tr>");
@@ -717,9 +722,6 @@ sub PrintCommandSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド最大レス（!maxres:[100-2000]）</td><td>");
 	$Page->Print("<input type=checkbox name=MAXRES value=2 $setmaxres>有効</td></tr>");
-	$Page->Print("<tr><td colspan=4><hr></td></tr>");
-	
-	$Page->Print("<tr><td colspan=4>スレ立て時に本文中に記述。スレッドパスワード設定時のみスレッド中で使用可。</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">強制sage（!sage）</td><td>");
 	$Page->Print("<input type=checkbox name=SAGE value=4 $setsage>有効</tr>");
@@ -742,14 +744,41 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">書き込みが一時間なければ過去ログ送り（!live）</td><td>");
 	$Page->Print("<input type=checkbox name=LIVE value=1024 $setlive>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=$setView>スレッドストップ ※スレッド中のみ（!stop）</td><td>");
-	$Page->Print("<input type=checkbox name=STOP value=128 $setstop>$isEnabledInfo</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレ主表示無し（!hidenusi）</td><td>");
+	$Page->Print("<input type=checkbox name=NONUSI value=32768 $sethidenusi>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=$setView>過去ログ送り ※スレッド中のみ（!pool）</td><td>");
-	$Page->Print("<input type=checkbox name=POOL value=512 $setpool>$isEnabledInfo</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">強制age（!age）</td><td>");
+	$Page->Print("<input type=checkbox name=AGE value=131072 $setage>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\" style=$setView>コマンド取り消し ※スレッド中のみ（!delcmd:[command]）</td><td>");
-	$Page->Print("<input type=checkbox name=DELCMD value=256 $setdelcmd>$isEnabledInfo</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">不落（!nopool）</td><td>");
+	$Page->Print("<input type=checkbox name=NOPOOL value=262144 $setnopool>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninlv:[レベル]）</td><td>");
+	$Page->Print("<input type=checkbox name=NINLV value=8192 $setninlv>有効</td></tr>");
+
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	$Page->Print("<tr><td colspan=4>スレッド中のみ</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレッドストップ（!stop）</td><td>");
+	$Page->Print("<input type=checkbox name=STOP value=128 $setstop></td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">過去ログ送り（!pool）</td><td>");
+	$Page->Print("<input type=checkbox name=POOL value=512 $setpool></td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\"w>コマンド取り消し（!delcmd:[command]）</td><td>");
+	$Page->Print("<input type=checkbox name=DELCMD value=256 $setdelcmd></td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">アクセス禁止（!ban:[>>レス番]）</td><td>");
+	$Page->Print("<input type=checkbox name=BAN value=4096 $setban></td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレタイ変更（!changetitle:[新スレタイ]）</td><td>");
+	$Page->Print("<input type=checkbox name=CHTT value=16384 $setchtt></td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">追記（!add:[>>レス番]:[追記内容]）</td><td>");
+	$Page->Print("<input type=checkbox name=ADD value=65536 $setadd></td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番]）</td><td>");
+	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete></td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
@@ -1189,34 +1218,23 @@ sub FunctionCommandSetting
 			return 1000;
 		}
 	}
-	# 入力チェック
-	{
-		my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE STOP POOL DELCMD);
-		foreach (@inList) {
-			my $status = $Form->Get($_) ?  '有効' : '無効';
-			push @$pLog, "「$_」を「" . $status. '」に設定';
-		}
-	}
+	
 	require './module/setting.pl';
 	$Setting = SETTING->new;
 	$Setting->Load($Sys);
 	
 	my $commandSet = 0;
-	$commandSet |= $Form->Get('PASS');
-	$commandSet |= $Form->Get('MAXRES');
-	$commandSet |= $Form->Get('SAGE');
-	$commandSet |= $Form->Get('SLIP');
-	$commandSet |= $Form->Get('NOID');
-	$commandSet |= $Form->Get('CHID');
-	$commandSet |= $Form->Get('FC774');
-	$commandSet |= $Form->Get('CH774');
-	$commandSet |= $Form->Get('LIVE');
-	$commandSet |= $Form->Get('STOP');
-	$commandSet |= $Form->Get('POOL');
-	$commandSet |= $Form->Get('DELCMD');
+	my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
+					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE);
+
+	foreach (@inList) {
+		# 入力チェック	
+		my $status = $Form->Get($_) ?  '有効' : '無効';
+		$commandSet |= $Form->Get($_);
+		push @$pLog, "「$_」を「" . $status. '」に設定';
+	}
 	
 	$Setting->Set('BBS_COMMAND', $commandSet);
-	
 	$Setting->Save($Sys);
 	
 	return 0;

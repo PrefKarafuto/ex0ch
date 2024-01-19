@@ -149,7 +149,7 @@ our $CAP_REG_NGWORD				= 22; # NGワード 規制解除
 our $CAP_DISP_NOSLIP			= 23; # 端末識別子非表示
 our $CAP_DISP_CUSTOMID			= 24; # 専用ID許可
 our $CAP_REG_COMMAND			= 25; # コマンド許可
-our $CAP_REG_NOATTR			    = 26; # スレッド属性無効
+our $CAP_REG_NOATTR			    = 26; # スレッド属性による規制解除
 our $CAP_MAXNUM					= 26;
 # USER AUTHORITY
 our $AUTH_SYSADMIN		=  0; # システム管理権限(形式的に)
@@ -168,7 +168,8 @@ our $AUTH_RESDELETE		= 12; # レスあぼーん
 our $AUTH_RESEDIT		= 13; # レス編集
 our $AUTH_BBSEDIT		= 14; # 各種編集
 our $AUTH_LOGVIEW		= 15; # ログの閲覧・削除
-our $AUTH_MAXNUM		= 15;
+our $AUTH_NINJAEDIT		= 16; # 忍法帖の閲覧・編集
+our $AUTH_MAXNUM		= 16;
 
 
 # REGEXP

@@ -69,7 +69,7 @@ sub DoPrint
 	elsif ($subMode eq 'EDIT') {													# 忍法帖確認・編集画面
 		PrintNinjaEdit($Page, $Sys, $Form);
 	}
-	elsif ($subMode eq 'SEARCH') {													# 忍法帖確認・編集画面
+	elsif ($subMode eq 'SEARCH') {													# 忍法帖検索
 		PrintNinjaSearch($Page, $Sys, $Form);
 	}
 	elsif ($subMode eq 'COMPLETE') {												# 処理完了画面
@@ -111,10 +111,13 @@ sub DoFunction
 	$err		= 0;
 	
 	if ($subMode eq 'DELETE') {														# 削除
-		$err = FunctionNinjaDelete($Sys, $Form, $this->{'LOG'}, 1);
+		$err = FunctionNinjaDelete($Sys, $Form, $this->{'LOG'});
+	}
+	elsif ($subMode eq 'LIMDELETE') {													# BAN
+		$err = FunctionNinjaLimDelete($Sys, $Form, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'SAVE') {													# 保存
-		$err = FunctionNinjaSave($Sys, $Form, $this->{'LOG'}, 0);
+		$err = FunctionNinjaSave($Sys, $Form, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'BAN') {													# BAN
 		$err = FunctionNinjaBan($Sys, $Form, $this->{'LOG'}, 1);
@@ -179,11 +182,9 @@ sub PrintNinjaList
     $dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));
 	
 	
-	# 権限取得(未実装)
-	my $isNinjaView	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAVIEW, $SYS->Get('BBS'));
-	my $isNinjaEdit	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJAEDIT, $SYS->Get('BBS'));
-	my $isNinjaDelete	= "";#$SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_NINJADELETE, $SYS->Get('BBS'));
-	
+	# 権限取得
+	my $isAuth	= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_SYSADMIN, '*');
+
 	# ヘッダ部分の表示
 	$common = "DoSubmit('sys.ninja','DISP','LIST');";
 	
@@ -208,12 +209,17 @@ sub PrintNinjaList
         my $id = $1;
         $mtime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[9]);
 		my $size = (stat($file_name))[7];
-		$common = "\"javascript:SetOption('NINJA_ID','$id');";
-		$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
 		
 		$Page->Print("<tr bgcolor=$bgColor>");
-		$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
-		$Page->Print("<td>$n: <a href=$common>$id</a></td>");
+		if($isAuth){
+			$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
+
+			$common = "\"javascript:SetOption('NINJA_ID','$id');";
+			$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
+			$Page->Print("<td>$n: <a href=$common>$id</a></td>");
+		}else{
+			$Page->Print("<td>$n: $id</td>");
+		}
 		$Page->Print("<td>$size</td><td>$mtime</td></tr>\n");
 	}
 	$common		= "onclick=\"DoSubmit('sys.ninja','DISP'";
@@ -222,8 +228,8 @@ sub PrintNinjaList
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
 	$Page->Print("<input type=button value=\"一覧更新\" $common,'LIST')\"> ");
-	$Page->Print("<input type=button value=\"　期限切れの忍法帖をクリア　\" $common2,'LIMDELETE')\" disabled> ");
-	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\" disabled> ");# if ($isNinjaDelete);
+	$Page->Print("<input type=button value=\"　期限切れの忍法帖をクリア　\" $common2,'LIMDELETE')\"> ");
+	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\"> ") if ($isAuth);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	
@@ -243,15 +249,22 @@ sub PrintNinjaList
 #------------------------------------------------------------------------------------------------------------
 sub PrintNinjaEdit
 {
-	my ($Page, $SYS, $Form, $mode) = @_;
+	my ($Page, $SYS, $Form) = @_;
 	my (@threadList, $Ninja, $id, $subj, $res);
 	my ($common, $text);
 	use POSIX qw(strftime);
 
-	$SYS->Set('_TITLE', ($mode ? 'Ninpocho Edit' : 'Ninpocho View'));
-	$text = ($mode ? '編集' : '確認');
-    my $isDisabled = $mode ? '' : 'disabled';   # 編集すべきでない項目
-    my $isDisabledVmode = $mode == -1 ? '': 'disabled';    # 編集可の項目
+	$SYS->Set('_TITLE','Ninpocho Edit');
+
+	# 権限チェック
+	{
+		my $SEC	= $SYS->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $SYS->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_SYSADMIN, '*')) == 0) {
+			return 1000;
+		}
+	}
 	
 	require './module/ninpocho.pl';
 	$Ninja = NINPOCHO->new;
@@ -279,9 +292,11 @@ sub PrintNinjaEdit
 	my $c_host = $Ninja->Get('c_host');
 	my $c_ua = $Ninja->Get('c_ua');
 
+	my $auth_time = $Ninja->Get('auth_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('auth_time')) : 'N/A';
+
 	my $load_message = $Ninja->Get('load_message');
 	my $load_from = $Ninja->Get('load_from');
-	my $load_time = strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('load_time'));
+	my $load_time = $Ninja->Get('load_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('load_time')) : 'N/A';
 	my $load_bbsdir = $Ninja->Get('load_bbsdir');
 	my $load_threadkey = $Ninja->Get('load_threadkey');
 	my $load_count = $Ninja->Get('load_count');
@@ -292,8 +307,8 @@ sub PrintNinjaEdit
 	my $last_addr = $Ninja->Get('last_addr');
 	my $last_host = $Ninja->Get('last_host');
 	my $last_ua = $Ninja->Get('last_ua');
-	my $last_wtime = strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('last_wtime'));
-	my $last_makethread_time = strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('last_mthread_time'));
+	my $last_wtime = $Ninja->Get('last_wtime') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('last_wtime')) : 'N/A';
+	my $last_makethread_time = $Ninja->Get('last_mthread_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('last_mthread_time')) : 'N/A';
 	my $last_message = $Ninja->Get('last_message');
 	my $lasr_bbsdir = $Ninja->Get('last_bbsdir');
 	my $last_threadkey = $Ninja->Get('last_threadkey');
@@ -305,135 +320,71 @@ sub PrintNinjaEdit
 	my $is_force_kote = $Ninja->Get('force_kote');
 	my $is_force_774 = $Ninja->Get('force_774') ? 'checked' : '';
 	my $is_auth = $Ninja->Get('auth') ? 'checked' : '';
-	my $auth_time = strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('auth_time'));
 	my $is_force_captcha = $Ninja->Get('force_captcha') ? 'checked' : '';
 
 	my $password = $Ninja->Get('password');
 	my $description = $Ninja->Get('user_desc');
 
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖を$text\します。</td></tr>");
+	$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖を確認します。(${SESSION_ATIME}時点)</td></tr>");
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
-	
-    $Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ユーザー情報</td></tr>\n");
-	$Page->Print("<tr><td>忍法帖ID</td>");
-	$Page->Print("<td><input type=text size=60 name=NINID value=\"$ninID\" $isDisabled></td></tr>\n");
 
-    $Page->Print("<tr><td>忍法帖Lv</td>");
-	$Page->Print("<td><input type=text size=60 name=NINLV value=\"$lv\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>説明</td>");
-	$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" $isDisabledVmode></td></tr>\n");
-    $Page->Print("<tr><td>作成日時</td>");
-	$Page->Print("<td><input type=text size=60 name=DATE value=\"$SESSION_CTIME\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>作成時の書き込み内容</td>");
-	$Page->Print("<td><input type=text size=60 name=MESSAGE value=\"$newmes\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>作成時のIPアドレス</td>");
-	$Page->Print("<td><input type=text size=60 name=ADDR value=\"$c_addr\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>作成時のHOST</td>");
-	$Page->Print("<td><input type=text size=60 name=HOST value=\"$c_host\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>作成時のユーザーエージェント</td>");
-	$Page->Print("<td><input type=text size=60 name=UA value=\"$c_ua\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>最終更新日時</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_DATE value=\"$SESSION_ATIME\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>最新書き込み時刻</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_DATE value=\"$last_wtime\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>最新書き込み内容</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_MESSAGE value=\"$last_message\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>最新IPアドレス</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_ADDR value=\"$last_addr\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>最新HOST</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_HOST value=\"$last_host\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>最新ユーザーエージェント</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_UA value=\"$last_ua\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>パスワード</td>");
-	$Page->Print("<td><input type=text size=60 name=LOAD_PASS value=\"$password\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>ロード元の忍法帖ID</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_LOAD_ID value=\"$load_from\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>最終ロード時刻</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_LOAD value=\"$load_time\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>最終LvUp時刻</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_LVUP value=\"$lvuptime\" $isDisabled></td></tr>\n");
-=pod
-    $Page->Print("<tr><td>最終注意時刻</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_CAUTION value=\"\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>最終警告時刻</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_WARN value=\"\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>最終規制時刻</td>");
-	$Page->Print("<td><input type=text size=60 name=LAST_BAN value=\"\" $isDisabled></td></tr>\n");
-=cut
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">統計</td></tr>\n");
-	$Page->Print("<tr><td>書き込み数</td>");
-	$Page->Print("<td><input type=text name=TOTAL_COUNT value=\"$count\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>スレ建て回数</td>");
-	$Page->Print("<td><input type=text name=MAKE_THREAD_COUNT value=\"$thread_count\" $isDisabled></td></tr>\n");
-=pod
-    $Page->Print("<tr><td>経験値</td>");
-	$Page->Print("<td><input type=text name=EXP value=\"\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>ゴールド</td>");
-	$Page->Print("<td><input type=text name=GOLD value=\"\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>書き込み失敗回数</td>");
-	$Page->Print("<td><input type=text name=FAILD_COUNT value=\"\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>スレ建て失敗回数</td>");
-	$Page->Print("<td><input type=text name=FAILD_THREAD value=\"\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>コマンド発動回数</td>");
-	$Page->Print("<td><input type=text name=COM_COUNT value=\"\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>IDなしスレ作成回数</td>");
-	$Page->Print("<td><input type=text name=NOID_THREAD value=\"\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>ID変更スレ作成回数</td>");
-	$Page->Print("<td><input type=text name=CHID_THREAD value=\"\" $isDisabled></td></tr>\n");
-=cut
-    $Page->Print("<tr><td>忍法帖ロード回数</td>");
-	$Page->Print("<td><input type=text name=LOAD_COUNT value=\"$load_count\" $isDisabled></td></tr>\n");
-=pod
-    $Page->Print("<tr><td>注意回数</td>");
-	$Page->Print("<td><input type=text name=CAUTION_COUNT value=\"\" $isDisabled></td></tr>\n");
-    $Page->Print("<tr><td>警告回数</td>");
-	$Page->Print("<td><input type=text name=WARN_COUNT value=\"\" $isDisabled></td></tr>\n");
-	$Page->Print("<tr><td>規制回数</td>");
-	$Page->Print("<td><input type=text name=BAN_COUNT value=\"\" $isDisabled></td></tr>\n");
-=cut
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">規制</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description</td></tr>\n");
+	$Page->Print("<tr><td>説明</td>");
+	$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60></td></tr>\n");
+
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">忍法帖Lv</td><td>$lv</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">作成日時</td><td>$SESSION_CTIME</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">作成時の書き込み</td><td>$newmes</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP</td><td>$c_addr</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST</td><td>$c_host</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA</td><td>$c_ua</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時</td><td>$last_wtime</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み</td><td>$last_message</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新IP</td><td>$last_addr</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新HOST</td><td>$last_host</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新UA</td><td>$last_ua</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">パスワード(Hash)</td><td>$password</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新ロード時刻</td><td>$load_time</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">ロード元の忍法帖ID</td><td>$load_from</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">ロード時の書き込み</td><td>$load_message</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新ロードIP</td><td>$load_addr</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新ロードHOST</td><td>$load_host</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA</td><td>$load_ua</td></tr>\n");
+
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">書き込み数</td><td>$count</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数</td><td>$thread_count</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数</td><td>$load_count</td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
 	$Page->Print("<tr><td>書き込み禁止</td>");
-	$Page->Print("<td><input type=checkbox name=BAN value=on $isDisabledVmode $is_ban></td></tr>\n");
+	$Page->Print("<td><input type=checkbox name=BAN value=on $is_ban></td></tr>\n");
     $Page->Print("<tr><td>スレ立て禁止</td>");
-	$Page->Print("<td><input type=checkbox name=BAN_THREAD value=on $isDisabledVmode $is_ban_mthread></td></tr>\n");
+	$Page->Print("<td><input type=checkbox name=BAN_MTHREAD value=on $is_ban_mthread></td></tr>\n");
     $Page->Print("<tr><td>コマンド禁止</td>");
-	$Page->Print("<td><input type=checkbox name=BAN_COM value=on $isDisabledVmode $is_ban_command></td></tr>\n");
-=pod
+	$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
     $Page->Print("<tr><td>URL禁止</td>");
-	$Page->Print("<td><input type=checkbox name=BAN_URL value=on $isDisabledVmode></td></tr>\n");
-=cut
+	$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
     $Page->Print("<tr><td>強制sage</td>");
-	$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $isDisabledVmode $is_force_sage></td></tr>\n");
+	$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage></td></tr>\n");
+	$Page->Print("<tr><td>ユーザー認証</td>");
+	$Page->Print("<td><input type=checkbox name=IS_AUTH value=on $is_auth></td></tr>\n");
     $Page->Print("<tr><td>Captcha強制</td>");
-	$Page->Print("<td><input type=text name=FORCE_CAPTCHA value=on $isDisabledVmode $is_force_captcha></td></tr>\n");
+	$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha></td></tr>\n");
     $Page->Print("<tr><td>名無し強制</td>");
-	$Page->Print("<td><input type=checkbox name=FORCE_774 value=on $isDisabledVmode $is_force_774></td></tr>\n");
-    $Page->Print("<tr><td>強制コテ<small>(名前欄用コマンド使用可)</small></td>");
-	$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\" $isDisabledVmode></td></tr>\n");
-=pod
-    $Page->Print("<tr><td>ホワイトリスト<small>(掲示板のディレクトリ名をコンマで区切って入力)</small></td>");
-	$Page->Print("<td><input type=text name=WHITE_LIST value=\"\" $isDisabledVmode></td></tr>\n");
-
-    $Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">その他</td></tr>\n");
-	$Page->Print("<tr><td>忍法帖を更新しない</td>");
-	$Page->Print("<td><input type=checkbox name=NO_UPDATE value=on $isDisabledVmode></td></tr>\n");
-    $Page->Print("<tr><td>規制無視</td>");
-	$Page->Print("<td><input type=checkbox name=NO_LV value=on $isDisabledVmode></td></tr>\n");
-    $Page->Print("<tr><td>コマンド許可</td>");
-	$Page->Print("<td><input type=checkbox name=ACCEPT_COM value=on $isDisabledVmode></td></tr>\n");
-    $Page->Print("<tr><td>許可するコマンド一覧<small>(2進数ビットフラグで指定)</small></td>");
-	$Page->Print("<td><input type=text name=COM_LIST value=\"\" $isDisabledVmode></td></tr>\n");
-=cut
+	$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774></td></tr>\n");
+    $Page->Print("<tr><td>強制コテ<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
+	$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\"></td></tr>\n");
 
     $Page->HTMLInput('hidden', 'NINPOCHO', $id);
-	$common = "DoSubmit('sys.ninja','FUNC','SAVE')";
-	my $common2 = "DoSubmit('sys.ninja','DISP','SEARCH')";
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3>");
-	$Page->Print('<input type=button value="　書き込みを検索　" disabled onclick=\"'.$common2.';\">');
-	$Page->Print('<input type=button value="　保存　" disabled onclick=\"'.$common.';\" class="delete">') ;#if $mode;
+	$Page->Print('<input type=button value="　書き込みを検索　" disabled onclick="DoSubmit(\'sys.ninja\',\'DISP\',\'SEARCH\');">');
+	$Page->Print('<input type=button value="　保存　" onclick="DoSubmit(\'sys.ninja\',\'FUNC\',\'SAVE\');" class="delete">') ;#if $mode;
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 
@@ -516,7 +467,95 @@ HTML
 	}</script>");
 
 }
-# 作成中
+sub FunctionNinjaDelete
+{
+	my ($Sys, $Form, $pLog) =@_;
+	require './module/ninpocho.pl';
+
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_SYSADMIN, '*')) == 0) {
+			return 1000;
+		}
+	}
+
+	my $Ninja = NINPOCHO->new;
+	my $infoDir = $Sys->Get('INFO');
+	my $ninDir = ".$infoDir/.ninpocho/"; 
+    my @ninList = $Form->GetAtArray('NINPOCHO');
+	my $count = @ninList;
+
+	my $result = $Ninja->Delete($Sys,\@ninList);
+
+	push @$pLog, $count == $result ? "${result}個の忍法帖を削除": "選択された${count}個中${result}個の忍法帖を削除";
+
+	return 0;
+}
+sub FunctionNinjaLimDelete
+{
+	my ($Sys, $Form, $pLog) =@_;
+	require './module/ninpocho.pl';
+	my $Ninja = NINPOCHO->new;
+	my $infoDir = $Sys->Get('INFO');
+	my $ninDir = ".$infoDir/.ninpocho/"; 
+    my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
+    my $sessnum = @session_files;
+	my $count = 0;
+
+	foreach my $sid(@session_files){
+		$sid =~ s/^cgisess_//;
+		unless($Ninja->LoadOnly($Sys,$sid)){
+			$count++;
+		}
+	}
+	push @$pLog, "${count}/${sessnum}の忍法帖が期限切れ削除";
+
+	return 0;
+}
+sub FunctionNinjaSave
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my ($Ninja);
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_SYSADMIN, '*')) == 0) {
+			return 1000;
+		}
+	}
+	# 入力チェック
+	{
+		my @inList = qw(BAN BAN_THREAD BAN_COM BAN_URL FORCE_SAGE FORCE_774 FORCE_CAPTCHA FORCE_KOTE);
+		foreach (@inList) {
+			my $set = $Form->Get($_) ? '有効' : '無効';
+			push @$pLog, "「$_」を${set}に設定";
+		}
+	}
+	require './module/ninpocho.pl';
+	$Ninja = NINPOCHO->new;
+	$Ninja->LoadOnly($Sys,$Form->Get('NINPOCHO'));
+	
+	$Ninja->Set('user_desc', $Form->Get('DESCRIPTION'));
+	$Ninja->Set('ban', $Form->Get('BAN'));
+	$Ninja->Set('ban_mthread', $Form->Get('BAN_MTHREAD'));
+	$Ninja->Set('ban_command', $Form->Get('BAN_COM'));
+	$Ninja->Set('ban_url', $Form->Get('BAN_URL'));
+	$Ninja->Set('force_sage', $Form->Get('FORCE_SAGE'));
+	$Ninja->Set('force_774', $Form->Get('FORCE_774'));
+	$Ninja->Set('force_captcha', $Form->Get('FORCE_CAPTCHA'));
+	$Ninja->Set('force_kote', $Form->Get('FORCE_KOTE'));
+	$Ninja->Set('auth', $Form->Get('IS_AUTH'));
+	
+	$Ninja->SaveOnly();
+	
+	return 0;
+}
 #============================================================================================================
 #	Module END
 #============================================================================================================
