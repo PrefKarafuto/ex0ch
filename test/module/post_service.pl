@@ -1389,29 +1389,30 @@ sub Certification_hCaptcha {
     my $ua = LWP::UserAgent->new();
     my $recaptcha_response = $Form->Get('h-captcha-response');
     my $remote_ip = $ENV{'REMOTE_ADDR'};
-        
-    my $response = $ua->post($url,{
+	if($recaptcha_response){
+		my $response = $ua->post($url,{
 			secret => $secretkey,
 			response => $recaptcha_response,
 			remoteip => $remote_ip
            });
-    if ($response->is_success()) {
-        my $json_text = $response->decoded_content();
-           
-        # JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
-        my $out = decode_json($json_text);
-           
-        if ($out->{success} eq 'true') {
-        	return 0;
-        }elsif($out->{success} eq 'false'){
-			return $ZP::E_FORM_FAILEDCAPTCHA
-		}else {
-			return $ZP::E_FORM_NOCAPTCHA;
+		if ($response->is_success()) {
+			my $json_text = $response->decoded_content();
+			
+			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
+			my $out = decode_json($json_text);
+			
+			if ($out->{success} eq 'true') {
+				return 0;
+			}else{
+				return $ZP::E_FORM_FAILEDCAPTCHA
+			}
+		} else {
+			#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
+			return -1;
 		}
-    } else {
-		#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
-    	return -1;
-    }
+	}else{
+		return $ZP::E_FORM_NOCAPTCHA;
+	}
 }
 #------------------------------------------------------------------------------------------------------------
 #
