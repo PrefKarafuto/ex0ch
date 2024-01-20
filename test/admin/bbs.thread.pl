@@ -332,18 +332,22 @@ sub PrintThreadList
 		
 		my $isSLIP = $Threads->GetAttr($id, 'slip');
 		my $is774 = $Threads->GetAttr($id, 'change774');
+		my $maxres = $Threads->GetAttr($id, 'maxres');
+		my $ninlv = $Threads->GetAttr($id, 'ninlv');
 		my @attrstr = ();
 		push @attrstr, '停止' if ($isstop);
 		push @attrstr, '浮上' if ($Threads->GetAttr($id, 'float'));
 		push @attrstr, '不落' if ($Threads->GetAttr($id, 'nopool'));
 		push @attrstr, 'sage進行' if ($Threads->GetAttr($id, 'sagemode'));
 		push @attrstr, "SLIP:$isSLIP" if ($isSLIP);
-		push @attrstr, "最大レス数:$Threads->GetAttr($id, 'maxres')" if ($Threads->GetAttr($id, 'maxres'));
+		push @attrstr, "最大レス数:$maxres" if ($maxres);
 		push @attrstr, 'ID無し' if ($Threads->GetAttr($id, 'noid'));
 		push @attrstr, '実況モード' if ($Threads->GetAttr($id, 'live'));
 		push @attrstr, 'ID変更' if ($Threads->GetAttr($id, 'changeid'));
 		push @attrstr, '過去ログ送り' if ($Threads->GetAttr($id, 'pool'));
 		push @attrstr, '強制名無し' if ($Threads->GetAttr($id, 'force774'));
+		push @attrstr, 'スレ主表示なし' if ($Threads->GetAttr($id, 'hidenusi'));
+		push @attrstr, "レベル制限:$ninlv" if ($ninlv && $Set->Get('BBS_NINJA'));
 		push @attrstr, "名無し->$is774" if ($is774);
 		$Page->Print("<td>@attrstr</td></tr>\n");
 	}
@@ -352,8 +356,8 @@ sub PrintThreadList
 	
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
-	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ");
-	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ");
+	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ")				if ($isDelete);
+	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ")				if ($isDelete);
 	$Page->Print("<input type=button value=\"subject更新\" $common2,'UPDATE')\"> ")			if ($isUpdate);
 	$Page->Print("<input type=button value=\"subject再作成\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
 	$Page->Print("<input type=button value=\"　停止　\" $common,'STOP')\"> ")				if ($isStop);
@@ -368,7 +372,7 @@ sub PrintThreadList
 		$Page->Print("<option value=noid>ID無し");
 		$Page->Print("<option value=changeid>ID変更");
 		$Page->Print("<option value=force774>名無し強制");
-		$Page->Print("<option value=force774>実況モード");
+		$Page->Print("<option value=live>実況モード");
 		$Page->Print("</select> ");
 		$Page->Print("<input type=button value=\"付加\" $common,'ATTR')\"> ");
 		$Page->Print("<input type=button value=\"解除\" $common,'DEATTR')\"> ");
