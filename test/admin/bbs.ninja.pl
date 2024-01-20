@@ -209,8 +209,11 @@ sub PrintNinjaEdit
 	my $lasr_bbsdir = $Ninja->Get('last_bbsdir');
 	my $last_threadkey = $Ninja->Get('last_threadkey');
 
-	my $is_ban = $Ninja->Get('ban') ? 'checked' : '';
-	my $is_ban_mthread = $Ninja->Get('ban_mthread') ? 'checked' : '';
+	my $ban = $Ninja->Get('ban');
+	my $selBanNone = $ban eq ''? 'selected' : '';
+	my $selBanEnable = $ban eq 'ban'||'on' ? 'selected' : '';
+	my $selBanMakeThread = $ban eq 'thread' ? 'selected' : '';
+
 	my $is_ban_command = $Ninja->Get('ban_command') ? 'checked' : '';
 	my $is_force_sage = $Ninja->Get('force_sage') ? 'checked' : '';
 	my $is_force_kote = $Ninja->Get('force_kote');
@@ -227,7 +230,7 @@ sub PrintNinjaEdit
 
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description</td></tr>\n");
 		$Page->Print("<tr><td>説明</td>");
-		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60 $is_disable></td></tr>\n");
+		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60></td></tr>\n");
 
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
@@ -261,22 +264,24 @@ sub PrintNinjaEdit
 
 		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
 		$Page->Print("<tr><td>書き込み禁止</td>");
-		$Page->Print("<td><input type=checkbox name=BAN value=on $is_ban $is_disable></td></tr>\n");
-		$Page->Print("<tr><td>スレ立て禁止</td>");
-		$Page->Print("<td><input type=checkbox name=BAN_MTHREAD value=on $is_ban_mthread $is_disable></td></tr>\n");
+		$Page->Print("<td><select name=BAN>");
+		$Page->Print("<option value=\"\" $selBanNone>--");
+		$Page->Print("<option value=ban $selBanEnable>有効");
+		$Page->Print("<option value=thread $selBanMakeThread>スレッド作成のみ禁止");
+		$Page->Print("</select></td></tr>\n");
 		$Page->Print("<tr><td>コマンド禁止</td>");
-		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command $is_disable></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
 		$Page->Print("<tr><td>URL禁止</td>");
 		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
 		$Page->Print("<tr><td>強制sage</td>");
-		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage $is_disable></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage></td></tr>\n");
 		$Page->Print("<tr><td>Captcha強制</td>");
-		$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha $is_disable></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha></td></tr>\n");
 		$Page->Print("<tr><td>名無し強制</td>");
-		$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774 $is_disable></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774></td></tr>\n");
 		$Page->Print("<tr><td>強制コテ<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
-		$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\" $is_disable></td></tr>\n");
-	}else{
+		$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\"></td></tr>\n");
+		}else{
 		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖データは存在しません。</td></tr>");
 	}
 
@@ -284,8 +289,8 @@ sub PrintNinjaEdit
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3>");
-	$Page->Print('<input type=button value="　書き込みを検索　" disabled onclick="DoSubmit(\'sys.ninja\',\'DISP\',\'SEARCH\');">');
-	$Page->Print('<input type=button value="　保存　" onclick="DoSubmit(\'sys.ninja\',\'FUNC\',\'SAVE\');" class="delete">') if $isNinjaAuth && $SESSION_ID;
+	$Page->Print('<input type=button value="　書き込みを検索　" disabled onclick="DoSubmit(\'bbs.ninja\',\'DISP\',\'SEARCH\');">');
+	$Page->Print('<input type=button value="　保存　" onclick="DoSubmit(\'bbs.ninja\',\'FUNC\',\'SAVE\');" class="delete">') if $isNinjaAuth && $SESSION_ID;
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 
@@ -307,7 +312,7 @@ sub FunctionNinjaSave
 	}
 	# 入力チェック
 	{
-		my @inList = qw(BAN BAN_MTHREAD BAN_COM BAN_URL FORCE_SAGE FORCE_774 FORCE_CAPTCHA FORCE_KOTE);
+		my @inList = qw(BAN BAN_COM BAN_URL FORCE_SAGE FORCE_774 FORCE_CAPTCHA FORCE_KOTE);
 		foreach (@inList) {
 			my $set = $Form->Get($_) ? '有効' : '無効';
 			push @$pLog, "「$_」を${set}に設定";
@@ -319,7 +324,6 @@ sub FunctionNinjaSave
 	
 	$Ninja->Set('user_desc', $Form->Get('DESCRIPTION'));
 	$Ninja->Set('ban', $Form->Get('BAN'));
-	$Ninja->Set('ban_mthread', $Form->Get('BAN_MTHREAD'));
 	$Ninja->Set('ban_command', $Form->Get('BAN_COM'));
 	$Ninja->Set('ban_url', $Form->Get('BAN_URL'));
 	$Ninja->Set('force_sage', $Form->Get('FORCE_SAGE'));

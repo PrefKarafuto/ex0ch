@@ -314,8 +314,11 @@ sub PrintNinjaEdit
 	my $lasr_bbsdir = $Ninja->Get('last_bbsdir');
 	my $last_threadkey = $Ninja->Get('last_threadkey');
 
-	my $is_ban = $Ninja->Get('ban') ? 'checked' : '';
-	my $is_ban_mthread = $Ninja->Get('ban_mthread') ? 'checked' : '';
+	my $ban = $Ninja->Get('ban');
+	my $selBanNone = $ban eq ''? 'selected' : '';
+	my $selBanEnable = $ban eq 'ban'||'on' ? 'selected' : '';
+	my $selBanMakeThread = $ban eq 'thread' ? 'selected' : '';
+
 	my $is_ban_command = $Ninja->Get('ban_command') ? 'checked' : '';
 	my $is_force_sage = $Ninja->Get('force_sage') ? 'checked' : '';
 	my $is_force_kote = $Ninja->Get('force_kote');
@@ -366,9 +369,11 @@ sub PrintNinjaEdit
 
 		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
 		$Page->Print("<tr><td>書き込み禁止</td>");
-		$Page->Print("<td><input type=checkbox name=BAN value=on $is_ban></td></tr>\n");
-		$Page->Print("<tr><td>スレ立て禁止</td>");
-		$Page->Print("<td><input type=checkbox name=BAN_MTHREAD value=on $is_ban_mthread></td></tr>\n");
+		$Page->Print("<td><select name=BAN>");
+		$Page->Print("<option value=\"\" $selBanNone>--");
+		$Page->Print("<option value=ban $selBanEnable>有効");
+		$Page->Print("<option value=thread $selBanMakeThread>スレッド作成のみ禁止");
+		$Page->Print("</select></td></tr>\n");
 		$Page->Print("<tr><td>コマンド禁止</td>");
 		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
 		$Page->Print("<tr><td>URL禁止</td>");
@@ -537,7 +542,7 @@ sub FunctionNinjaSave
 	}
 	# 入力チェック
 	{
-		my @inList = qw(BAN BAN_MTHREAD BAN_COM BAN_URL FORCE_SAGE FORCE_774 FORCE_CAPTCHA FORCE_KOTE);
+		my @inList = qw(BAN BAN_COM BAN_URL FORCE_SAGE FORCE_774 FORCE_CAPTCHA FORCE_KOTE);
 		foreach (@inList) {
 			my $set = $Form->Get($_) ? '有効' : '無効';
 			push @$pLog, "「$_」を${set}に設定";
@@ -549,7 +554,6 @@ sub FunctionNinjaSave
 	
 	$Ninja->Set('user_desc', $Form->Get('DESCRIPTION'));
 	$Ninja->Set('ban', $Form->Get('BAN'));
-	$Ninja->Set('ban_mthread', $Form->Get('BAN_MTHREAD'));
 	$Ninja->Set('ban_command', $Form->Get('BAN_COM'));
 	$Ninja->Set('ban_url', $Form->Get('BAN_URL'));
 	$Ninja->Set('force_sage', $Form->Get('FORCE_SAGE'));

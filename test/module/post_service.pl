@@ -195,7 +195,7 @@ sub Write
 	}
 	
 	#BANチェック
-	return $ZP::E_REG_BAN if($Ninja->Get('ban')||($Ninja->Get('ban_mthread') && $Sys->Equal('MODE', 1)));
+	return $ZP::E_REG_BAN if($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1)));
 
 	my $nusisid = GetSessionID($Sys,$threadid,1);
 	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
