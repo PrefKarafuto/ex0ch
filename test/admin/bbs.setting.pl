@@ -843,7 +843,7 @@ sub PrintOtherSetting
 	my $setURLtoTitle   = $Setting->Get('BBS_URL_TITLE');
 	my $setImage    	= $Sys->Get('IMGTAG');
 	my $setNinja		= $Setting->Get('BBS_NINJA');
-	my $setUpLoad		= $Setting->Get('BBS_UPLOAD');
+	my $setHideNusi		= $Setting->Get('BBS_HIDENUSI');
 	my $setTitleID		= $Setting->Get('BBS_TITLEID');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
@@ -864,7 +864,7 @@ sub PrintOtherSetting
 	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>発信元表示(シベリア)");
 	$Page->Print("</select></td>");
 	$Page->Print("<td class=\"DetailTitle\">忍法帖</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_NINJA value=checked $setNinja>有効</td>");
+	$Page->Print("<input type=checkbox name=BBS_NINJA value=on $setNinja>有効</td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">機種識別子(BBS_SLIP)</td><td><select name=BBS_SLIP>");
 	$Page->Print("<option value=\"\" $selSlipNone>なし");
 	$Page->Print("<option value=checked $selSlipChecked>ID末尾簡易表示");
@@ -875,8 +875,8 @@ sub PrintOtherSetting
 	$Page->Print("<option value=vvvvv $selSlipVVVVV>ﾜｯﾁｮｲ+KOROKORO");
 	$Page->Print("<option value=vvvvvv $selSlipVVVVVV>ﾜｯﾁｮｲ+KOROKORO+IP");
 	$Page->Print("</select></td>");
-	$Page->Print("<td class=\"DetailTitle\">画像アップロード</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_UPLOAD value=checked $setUpLoad>有効</td>");
+	$Page->Print("<td class=\"DetailTitle\">スレ主表示を隠す</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_HIDENUSI value=on $setHideNusi>有効</td>");
 
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
@@ -1290,8 +1290,8 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_YMD_WEEKS', $Form->Get('BBS_YMD_WEEKS'));
 	$Setting->Set('BBS_TRIPCOLUMN', $Form->Get('BBS_TRIPCOLUMN'));
 	$Setting->Set('BBS_SLIP', $Form->Get('BBS_SLIP'));
-	$Setting->Set('BBS_NINJA', $Form->Get('BBS_NINJA'));
-
+	$Setting->Set('BBS_NINJA', ($Form->Equal('BBS_NINJA', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_HIDENUSI', ($Form->Equal('BBS_HIDENUSI', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
