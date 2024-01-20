@@ -736,6 +736,8 @@ sub Command
 					}
 					$Dat->Close();
 				}
+			}else{
+				$Command .= "※>>1のレスは削除不可<br>";
 			}
 		}
 		#追記
