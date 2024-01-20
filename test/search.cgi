@@ -105,6 +105,7 @@ sub PrintHead
 
  <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Script-Type" content="text/css">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
  <title>検索＠0chPlus</title>
 

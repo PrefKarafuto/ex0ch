@@ -709,7 +709,7 @@ sub PrintCommandSetting
 	my $setchtt = $setBitMask & 16384 ? 'checked' : '';
 	my $sethidenusi = $setBitMask & 32768 ? 'checked' : '';
 	my $setadd = $setBitMask & 65536 ? 'checked' : '';
-	my $setage = $setBitMask & 131072 ? 'checked' : '';
+	my $setfloat = $setBitMask & 131072 ? 'checked' : '';
 	my $setnopool = $setBitMask & 262144 ? 'checked' : '';
 	my $setdelete = $setBitMask & 524288 ? 'checked' : '';
 	
@@ -747,8 +747,8 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">スレ主表示無し（!hidenusi）</td><td>");
 	$Page->Print("<input type=checkbox name=NONUSI value=32768 $sethidenusi>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">強制age（!age）</td><td>");
-	$Page->Print("<input type=checkbox name=AGE value=131072 $setage>有効</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">強制age（!float）</td><td>");
+	$Page->Print("<input type=checkbox name=AGE value=131072 $setfloat>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">不落（!nopool）</td><td>");
 	$Page->Print("<input type=checkbox name=NOPOOL value=262144 $setnopool>有効</td></tr>");
