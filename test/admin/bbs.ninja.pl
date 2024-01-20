@@ -211,7 +211,7 @@ sub PrintNinjaEdit
 
 	my $ban = $Ninja->Get('ban');
 	my $selBanNone = $ban eq '' ? 'selected' : '';
-	my $selBanEnable = $ban eq 'ban'||'on' ? 'selected' : '';
+	my $selBanEnable = $ban eq 'ban' ? 'selected' : '';
 	my $selBanMakeThread = $ban eq 'thread' ? 'selected' : '';
 
 	my $is_ban_command = $Ninja->Get('ban_command') ? 'checked' : '';
