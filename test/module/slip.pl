@@ -160,15 +160,16 @@ sub get_country_by_ip {
     my $filename_ipv4 = "./$infoDir/IP_List/jp_ipv4.cgi";
 	my $filename_ipv6 = "./$infoDir/IP_List/jp_ipv6.cgi";
 	if(time - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
-		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
+		#GetApnicJPIPList($filename_ipv4,$filename_ipv6);
 	}
 	my $result = '';
 	if ($ipAddr =~ /\./){
-		$result = binary_search_ip_range($ipAddr,$filename_ipv4);
+		#$result = binary_search_ip_range($ipAddr,$filename_ipv4);
 	}else{
-		$result = binary_search_ip_range($ipAddr,$filename_ipv6);
+		#$result = binary_search_ip_range($ipAddr,$filename_ipv6);
 	}
 	return if $result == -1;
+	$result = $ENV{'REMOTE_HOST'} =~ /\.jp$/ ? 1 : 0;
 	my $country = $result ? 'JP' : 'ｶﾞｲｺｰｸ';
 
     return $country;
