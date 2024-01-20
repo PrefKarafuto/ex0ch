@@ -315,7 +315,7 @@ sub PrintNinjaEdit
 	my $last_threadkey = $Ninja->Get('last_threadkey');
 
 	my $ban = $Ninja->Get('ban');
-	my $selBanNone = $ban eq ''? 'selected' : '';
+	my $selBanNone = $ban eq '' ? 'selected' : '';
 	my $selBanEnable = $ban eq 'ban'||'on' ? 'selected' : '';
 	my $selBanMakeThread = $ban eq 'thread' ? 'selected' : '';
 
@@ -370,9 +370,9 @@ sub PrintNinjaEdit
 		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
 		$Page->Print("<tr><td>書き込み禁止</td>");
 		$Page->Print("<td><select name=BAN>");
-		$Page->Print("<option value=\"\" $selBanNone>--");
-		$Page->Print("<option value=ban $selBanEnable>有効");
-		$Page->Print("<option value=thread $selBanMakeThread>スレッド作成のみ禁止");
+		$Page->Print("<option value=\"\" $selBanNone>無効</option>");
+		$Page->Print("<option value=ban $selBanEnable>有効</option>");
+		$Page->Print("<option value=thread $selBanMakeThread>スレッド作成のみ禁止</option>");
 		$Page->Print("</select></td></tr>\n");
 		$Page->Print("<tr><td>コマンド禁止</td>");
 		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
