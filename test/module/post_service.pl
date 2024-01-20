@@ -1572,7 +1572,6 @@ sub Ninpocho
 
     # 書き込み数をカウント
 	$count++;
-	$thread++ if($Sys->Equal('MODE', 1));
 
 	# レベルの上限
 	my $lvLim = $Sys->Get('NINLVMAX');
@@ -1586,7 +1585,6 @@ sub Ninpocho
 	# セッションに記録
 	if ($Ninja) {
 		$Ninja->Set('count', $count);
-		$Ninja->Set('thread_count',$thread);
 		$Ninja->Set('ninLv', $ninLv);
 		$Ninja->Set('lvuptime', $lvUpTime);
 
@@ -1594,7 +1592,12 @@ sub Ninpocho
 		$Ninja->Set('last_host',$ENV{'REMOTE_HOST'});
 		$Ninja->Set('last_ua',$ENV{'HTTP_USER_AGENT'});
 		$Ninja->Set('last_wtime',time);
-		$Ninja->Set('last_mthread_time',time) if($Sys->Equal('MODE', 1));
+		if($Sys->Equal('MODE', 1)){
+			$thread++;
+			$Ninja->Set('thread_count',$thread);
+			$Ninja->Set('last_mthread_time',time);
+			$Ninja->Set('thread_title',substr($Form->Get('subject'), 0, 30));
+		}
 
 		my $mes = $Form->Get('MESSAGE');
 		$mes =~ s/<(b|h)r>//g;

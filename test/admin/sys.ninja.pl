@@ -292,6 +292,7 @@ sub PrintNinjaEdit
 	my $c_host = $Ninja->Get('c_host');
 	my $c_ua = $Ninja->Get('c_ua');
 
+	my $is_auth = $Ninja->Get('auth') ? '済み' : 'なし';
 	my $auth_time = $Ninja->Get('auth_time') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('auth_time')) : '';
 
 	my $load_message = $Ninja->Get('load_message');
@@ -319,7 +320,6 @@ sub PrintNinjaEdit
 	my $is_force_sage = $Ninja->Get('force_sage') ? 'checked' : '';
 	my $is_force_kote = $Ninja->Get('force_kote');
 	my $is_force_774 = $Ninja->Get('force_774') ? 'checked' : '';
-	my $is_auth = $Ninja->Get('auth') ? 'checked' : '';
 	my $is_force_captcha = $Ninja->Get('force_captcha') ? 'checked' : '';
 
 	my $password = $Ninja->Get('password');
@@ -337,11 +337,15 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖Lv</td><td>$lv</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">前回LvUP日時</td><td>$lvuptime</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">作成日時</td><td>$SESSION_CTIME</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">作成時の書き込み</td><td>$newmes</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP</td><td>$c_addr</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST</td><td>$c_host</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA</td><td>$c_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ユーザー認証</td><td>$is_auth</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最終認証日時</td><td>$auth_time</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最終スレ立て日時</td><td>$last_makethread_time</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時</td><td>$last_wtime</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み</td><td>$last_message</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">最新IP</td><td>$last_addr</td></tr>\n");
@@ -371,8 +375,6 @@ sub PrintNinjaEdit
 		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
 		$Page->Print("<tr><td>強制sage</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage></td></tr>\n");
-		$Page->Print("<tr><td>ユーザー認証</td>");
-		$Page->Print("<td><input type=checkbox name=IS_AUTH value=on $is_auth></td></tr>\n");
 		$Page->Print("<tr><td>Captcha強制</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha></td></tr>\n");
 		$Page->Print("<tr><td>名無し強制</td>");
