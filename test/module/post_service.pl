@@ -173,6 +173,7 @@ sub Write
 	my ($slip_result,$idEnd) = $slip->BBS_SLIP($bbsSlip, $Sys->Get('INFO'),$chid,undef) if (!$handle || !$noAttr);
 	$idEnd = $Set->Get('BBS_SLIP') eq 'checked' ? $Sys->Get('AGENT') : $idEnd;
 
+	my $sid = $Ninja->Load($Sys,$idEnd,undef);
 	# hCaptcha認証
 	if ($Set->Get('BBS_HCAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha'))){
 		$err = $this->Certification_hCaptcha($Sys,$Form);
@@ -181,7 +182,6 @@ sub Write
 
 	#忍法帖パス
 	my $password = '';
-	my $sid = $Ninja->Load($Sys,$idEnd,undef);
 	my $ninmail = $Form->Get('mail');
 	if($ninmail=~ /(^|<br>)!load:(.){10,30}(<br>|$)/ && $isNinja){
 		$password = $2;
