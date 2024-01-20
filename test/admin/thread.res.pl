@@ -304,7 +304,8 @@ sub PrintResList
 		my $str = $logs[9];
 		my $length = length($str);
 		my $half = int($length / 2);
-		substr($str, $half) = '*' x ($length - $half);
+		substr($str, 0, $half) = '*' x $half;
+
 		$Page->Print("：<font color=forestgreen><b>$elem[0]</b></font>[$elem[1]]");
 		$Page->Print("：$elem[2]</dt><dd>$elem[3]");
 		$Page->Print("<br><br><hr>HOST:$logs[5]<br>IP:$logs[6]<br>UA:$logs[8]<br>SessionID:<a href=$common2>$str</a>") if (defined $log && $isAccessUser);
