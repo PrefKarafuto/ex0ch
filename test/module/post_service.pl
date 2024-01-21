@@ -493,7 +493,7 @@ sub ReadyBeforeWrite
 	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 
 	#スレ立て時用コマンド
-	if(!$com){
+	if($com ne 'on'){
 		if($Sys->Equal('MODE', 1)){
 			Command($Sys,$Form,$Set,$Threads,$CommandSet,1);
 		}
@@ -531,7 +531,8 @@ sub ReadyBeforeWrite
 	$from = $Form->Get('FROM', '');
 	if (($from eq ''||$Threads->GetAttr($threadid,'force774')) && !$noAttr) {
 		if($Threads->GetAttr($threadid,'change774')){
-			$from = $Threads->GetAttr($threadid,'change774');
+			require HTML::Entities;
+			$from = HTML::Entities::decode($Threads->GetAttr($threadid,'change774'));
 		}
 		else{
 			$from = $this->{'SET'}->Get('BBS_NONAME_NAME');
@@ -676,7 +677,7 @@ sub Command
 						my ($sec, $min, $hour, $mday, $mon, $year) = localtime;
 						$mon++;
 						$year += 1900;
-						$data[3] .= "<hr><font color=\"red\">※$year/$mon/$mday $hour:$min:$sec スレタイ変更<br>変更前：$Title</font>";
+						$data[3] .= "<hr><font color=\"red\">※$year/$mon/$mday $hour:$min:$sec スレタイ変更</font><br>変更前：$Title";
 						$data[4] = $newTitle;
 						my $addMessage = '';	#[スレタイ変更]など
 						$Dat->Set(0,(join('<>',@data)."$addMessage\n"));
@@ -694,54 +695,68 @@ sub Command
 			}
 		}
 		#レス削除(現在ペナルティが無いので、使えないようにしてある)
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!delete:&gt;&gt;([1-9][0-9]*)(-[1-9][0-9]*)?(<br>|$)/ && ($setBitMask & 524288) && 0){
-			my $target = $2 - 1;
-			my $target2 = $3 - 1;
-			$target2 =~ s/-// if $target2;
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!delete:&gt;&gt;([1-9][0-9]*)-?([1-9][0-9]*)?(<br>|$)/ && ($setBitMask & 524288) && 0){
+			my $target = $2;
+			my $target2 = $3;
+			my $del = 'ユーザー削除';
 
-			if($target){
+			if($target - 1){
 				require './module/dat.pl';
 				my $Dat = DAT->new;
 				my $Path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS').'/dat/'.$threadid.'.dat';
 				if($Dat->Load($Sys,$Path,0)){
 					if($target2 && $target < $target2){
-						my $li = $Dat->Get($target2);
+						my $li = $Dat->Get($target2-1);
 						$li = $$li;
+						my $count = 0;
 						if($li){
 							my $i;
-							for($i = $target;$i <= $target2;$i++){
+							for($i = $target-1;$i <= $target2-1;$i++){
 								my $line = $Dat->Get($i);
 								$line = $$line;
-								if($line){
-									my $deleteMessage = "ユーザー削除<>ユーザー削除<>ユーザー削除<>ユーザー削除<>\n";
-									$Dat->Set($i,$deleteMessage);
+								if ((split(/<>/,$line))[4] eq ''){
+									if($line){
+										my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
+										$Dat->Set($i,$deleteMessage);
+									}else{
+										last;
+									}
 								}else{
-									$Dat->Save($Sys);
-									last;
+									$count++;
 								}
 							}
-							$Command .= "※&gt:&gt;${target}-${target2}を削除<br>";
-
+							$Dat->Save($Sys);
+							if($count == 0){
+								$Command .= "※&gt;&gt;${target}-${target2}を削除<br>";
+							}elsif($count < ($target2-$target) && $count){
+								$Command .= "※&gt;&gt;${target}-${target2}の内削除済みの${count}レスを除き削除<br>";
+							}else{
+								$Command .= "※&gt;&gt;${target}-${target2}は削除済み<br>";
+							}
 						}else{
 							$Command .= "※範囲指定が変<br>";
 						}
 
 					}else{
-						my $line = $Dat->Get($target);
+						my $line = $Dat->Get($target-1);
 						$line = $$line;
-						if($line){
-							my $deleteMessage = "ユーザー削除<>ユーザー削除<>ユーザー削除<>ユーザー削除<>\n";
-							$Dat->Set($target,$deleteMessage);
+						if ((split(/<>/,$line))[4] eq ''){
+							if($line){
+							my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
+							$Dat->Set($target-1,$deleteMessage);
 							$Dat->Save($Sys);
-							$Command .= "※&gt:&gt;${target}を削除<br>";
+							$Command .= "※&gt;&gt;${target}を削除<br>";
+							}else{
+								$Command .= "※存在しません<br>";
+							}
 						}else{
-							$Command .= "※存在しません<br>";
+							$Command .= "※削除済み<br>";
 						}
 					}
 					$Dat->Close();
 				}
 			}else{
-				$Command .= "※>>1のレスは削除不可<br>";
+				$Command .= "※>>1は削除不可<br>";
 			}
 		}
 		#追記
@@ -855,14 +870,19 @@ sub Command
 		}
 	}
 	#名無し変更
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!change774:(.+)(<br>|$)/ && ($setBitMask & 64)){
-		require HTML::Entities;
-		my $new774 = $2;
-		$new774 = HTML::Entities::encode_entities($new774);
-		$new774 =~ s/&amp;/&/g;
-		$Threads->SetAttr($threadid, 'change774',$new774);
-		$Threads->SaveAttr($Sys);
-		$Command .= '※名無し：'.$new774.'<br>';
+	if($Form->Get('MESSAGE') =~ /(?:^|<br>\s*)!change774:(\S.*?\S|\S)\s*(?=<br>|$)/ && ($setBitMask & 64)){
+		my $new774 = $1;
+		if($Set->Get('BBS_NAME_COUNT') => length($new774)){
+			require HTML::Entities;
+			my $new774 = $1;
+			$new774 = HTML::Entities::encode_entities($new774);
+			$Threads->SetAttr($threadid, 'change774',$new774);
+			$Threads->SaveAttr($Sys);
+			$new774 = HTML::Entities::decode($new774);
+			$Command .= '※名無し：'.$new774.'<br>';
+		}else{
+			$Command .= '※名無し長すぎ<br>';
+		}
 	}
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid(<br>|$)/ && ($setBitMask & 8)){
