@@ -673,6 +673,10 @@ sub Command
 					my $Title = $data[4];
 					chomp($Title);
 					if($Title ne $newTitle){
+						my ($sec, $min, $hour, $mday, $mon, $year) = localtime;
+						$mon++;
+						$year += 1900;
+						$data[3] .= "<hr><font color=\"red\">※$year/$mon/$mday $hour:$min:$sec スレタイ変更<br>変更前：$Title</font>";
 						$data[4] = $newTitle;
 						my $addMessage = '';	#[スレタイ変更]など
 						$Dat->Set(0,(join('<>',@data)."$addMessage\n"));
@@ -686,7 +690,7 @@ sub Command
 					$Dat->Close();
 				}
 			}else{
-				$Command .= "※スレタイ長すぎ";
+				$Command .= "※スレタイ長すぎ" if $newTitle;
 			}
 		}
 		#レス削除(現在ペナルティが無いので、使えないようにしてある)
@@ -759,7 +763,7 @@ sub Command
 								my ($sec, $min, $hour, $mday, $mon, $year) = localtime;
 								$mon++;
 								$year += 1900;
-								$data[3] = $Message."<hr><font color=\"red\">※$year/$mon/$mday $hour:$min:$sec 追記</font><br>$addMessage";
+								$data[3] .= "<hr><font color=\"red\">※$year/$mon/$mday $hour:$min:$sec 追記</font><br>$addMessage";
 								$Dat->Set($targetNum,(join('<>',@data)));
 								$Dat->Save($Sys);
 								$Command .= "※&gt;&gt;$2に追記<br>";

@@ -561,7 +561,15 @@ sub PrintThreadAttr
 	'noid'=>'IDなし',
 	'changeid'=>'独自ID',
 	'force774'=>'強制名無し',
-	'live'=>'実況モード'
+	'live'=>'実況モード',
+	'hidenusi'=>'スレ主表示なし',
+	);
+	my %blist = (
+		'pass'=>'パスワード',
+		'slip'=>'最大レス数',
+		'change774'=>'名無し変更',
+		'ban'=>'アクセス禁止',
+		'ninlv'=>'忍法帖Lv制限',
 	);
 	my $attr = $Form->Get('ATTR');
 	my $name = $attr;
