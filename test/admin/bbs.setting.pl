@@ -711,7 +711,7 @@ sub PrintCommandSetting
 	my $setadd = $setBitMask & 65536 ? 'checked' : '';
 	my $setfloat = $setBitMask & 131072 ? 'checked' : '';
 	my $setnopool = $setBitMask & 262144 ? 'checked' : '';
-	my $setdelete = $setBitMask & 524288 ? 'checked' : '';
+	my $setdelete = '';#$setBitMask & 524288 ? 'checked' : '';
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>有効にしたいコマンドにチェックを入れ、[設定]ボタンを押してください。</td></tr>");
@@ -777,8 +777,8 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">追記（!add:[>>レス番]:[追記内容]）</td><td>");
 	$Page->Print("<input type=checkbox name=ADD value=65536 $setadd></td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番]）</td><td>");
-	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete></td></tr>");
+	$Page->Print("<td class=\"DetailTitle\"><s>レス削除（!delete:[>>レス番]）</s></td><td>");
+	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete disabled></td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
