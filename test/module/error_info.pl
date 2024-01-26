@@ -108,6 +108,7 @@ sub Print
 	
 	my $Form = $CGI->{'FORM'};
 	my $Sys = $CGI->{'SYS'};
+	my $Set = $CGI->{'SET'};
 	my $version = $Sys->Get('VERSION');
 	my $bbsPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
 	my $message = $this->{'MESSAGE'}->{$err};
@@ -138,8 +139,26 @@ sub Print
 	my $mail = &$sanitize($Form->Get('MAIL'));
     my $key = $Form->Get('key');
     my $t = &$sanitize($Form->Get('subject',''));
-    my $title = $t?"(New)$t":"$key";
 	my $msg = $Form->Get('MESSAGE');
+
+	#超過対策
+	if($Set->Get('BBS_MESSAGE_COUNT') < length($msg)){
+		$msg = substr($msg,0,$Set->Get('BBS_MESSAGE_COUNT'));
+		$msg .= ' ...(長すぎたので省略)';
+	}
+	if($Set->Get('BBS_NAME_COUNT') < length($name)){
+		$name = substr($name,0,$Set->Get('BBS_NAME_COUNT'));
+		$name .= ' ...(長すぎたので省略)';
+	}
+	if($Set->Get('BBS_MAIL_COUNT') < length($mail)){
+		$mail = substr($mail,0,$Set->Get('BBS_MAIL_COUNT'));
+		$mail .= ' ...(長すぎたので省略)';
+	}
+	if($Set->Get('BBS_SUBJECT_COUNT') < length($t) && $t){
+		$t = substr($t,0,$Set->Get('BBS_SUBJECT_COUNT'));
+		$t .= ' ...(長すぎたので省略)';
+	}
+	my $title = $t?"(New)$t":"$key";
 	
 	$Log->Load($Sys, 'FLR', '');
 	$Log->Set('', $err,"$title<>$name<>$mail<>$msg", $koyuu, $mode);
