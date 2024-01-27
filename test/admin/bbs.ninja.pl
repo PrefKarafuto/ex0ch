@@ -314,14 +314,13 @@ sub PrintNinjaSidSearch
     my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $sid, $dir);
     my (@types, $Type);
     my (@resList, %bbsCount, %threadCount);
-
-	$Sys->Set('_TITLE','User Writing History');
    
     require './module/admin_search.pl';
     $Search = ADMIN_SEARCH->new;
 	require './module/bbs_info.pl';
 	$BBS = BBS_INFO->new;
 	$BBS->Load($Sys);
+	$Sys->Set('_TITLE','BBS User Writing History - '.$BBS->Get('NAME', $Form->Get('TARGET_BBS')));
 	
     $sid = $Form->Get('SID');
    
