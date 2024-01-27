@@ -326,7 +326,9 @@ sub PrintNinjaSidSearch
     $sid = $Form->Get('SID');
    
     # 検索オブジェクトの設定と検索の実行
-    $Search->Create($Sys, 1,undef,$Form->Get('TARGET_BBS'),$Sys->Get('BBS'));
+    my $bbsid = $Form->Get('TARGET_BBS');
+	my $bbsdir = $BBS->Get('DIR',$bbsid);
+    $Search->Create($Sys, 1,undef,$bbsid,$bbsdir);
     $Search->Run_LogS(undef,undef,undef,$sid);
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>この掲示板内での、SessionID:$sid\のユーザーの書き込み履歴を表示します。</td></tr>");
@@ -378,7 +380,7 @@ sub PrintNinjaSidSearch
         return;
     }
     if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
-        #PrintResultFoot($Page);
+        PrintResultFoot($Page);
     }
     else{
         $Page->Print("</table>\n");
@@ -542,8 +544,8 @@ sub PrintResultFoot
     $Page->Print(<<HTML);
   <tr>
     <td colspan=2 align=right>
-      <input type=button value="　あぼ～ん　" $common,'ABONELUMPRES')">
-     <input type=button value="　透明あぼ～ん　" $common,'DELLUMPRES')">
+      <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
+     <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
     </td>
   </tr>
 HTML

@@ -559,7 +559,7 @@ sub PrintNinjaSidSearch
         return;
     }
     if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
-        #PrintResultFoot($Page);
+        PrintResultFoot($Page);
     }
     else{
         $Page->Print("</table>\n");
@@ -723,8 +723,8 @@ sub PrintResultFoot
     $Page->Print(<<HTML);
   <tr>
     <td colspan=2 align=right>
-      <input type=button value="　あぼ～ん　" $common,'ABONELUMPRES')">
-     <input type=button value="　透明あぼ～ん　" $common,'DELLUMPRES')">
+      <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
+     <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
     </td>
   </tr>
 HTML
