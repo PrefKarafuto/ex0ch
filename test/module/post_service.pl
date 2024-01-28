@@ -193,6 +193,7 @@ sub Write
 		$ninmail =~ s/!lsave:(.){10,30}//;
 		$Form->Set('mail',$ninmail);
 	}
+	$Sys->Set('SID',$sid);
 	
 	#BANチェック
 	return $ZP::E_REG_BAN if($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1)));
@@ -251,7 +252,9 @@ sub Write
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
-	$idpart .= '(主)' if (($sid eq $nusisid) && !($Set->Get('BBS_HIDENUSI') || $Threads->GetAttr($threadid,'hidenusi')));
+	unless ($Set->Get('BBS_HIDENUSI') || $Threads->GetAttr($threadid,'hidenusi')){
+		$idpart .= '(主)' if (($sid eq $nusisid) || $Sys->Equal('MODE', 1));
+	}
 	$bepart = $Form->Get('BEID', '');
 	$extrapart = $Form->Get('extrapart', '');
 	my $info = $datepart;
