@@ -1541,22 +1541,15 @@ sub reverse_lookup {
     my ($ip) = @_;
 
     # IPv4とIPv6のアドレスを判断し、適切なSocket定数を使用
-    my $addr;
-    if ($ip =~ /:/) {
-        # IPv6アドレスの処理
-        $addr = inet_pton(AF_INET6, $ip);
-    } else {
-        # IPv4アドレスの処理
-        $addr = inet_aton($ip);
-    }
+	my $inet = $ip =~ /:/ ? AF_INET6 : AF_INET;
+    my $addr = inet_pton($inet, $ip);
 
     # 逆引き実施
-    my $host = gethostbyaddr($addr, $ip =~ /:/ ? AF_INET6 : AF_INET);
+    my $host = gethostbyaddr($addr, $inet);
 
     # 逆引きが成功した場合はホスト名を、失敗した場合はIPアドレスを返す
     return $host ? $host : $ip;
 }
-
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================

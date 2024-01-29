@@ -678,7 +678,7 @@ sub PrintResult
     #$name = $BBS->Get('NAME', $bbsSet[0]);
     $value = "$bbsID/$$pResult[1]/$$pResult[2]";
         if($isAbone && $$pResult[2]!=1){
-        	#$Page->Print("<input type=checkbox name=RESS value=\"$value\">");
+        	$Page->Print("<input type=checkbox name=RESS value=\"$value\" disabled>");
         }
     $Page->Print(<<HTML);
     </td>
@@ -723,6 +723,8 @@ sub PrintResultFoot
     $Page->Print(<<HTML);
   <tr>
     <td colspan=2 align=right>
+	<hr>
+	<br>
       <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
      <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
     </td>

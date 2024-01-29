@@ -362,6 +362,7 @@ sub PrintResultFoot
     $Page->Print(<<HTML);
   <tr>
     <td colspan=2 align=right>
+    <hr>
       <input type=button value="　あぼ～ん　" $common,'ABONELUMPRES')">
      <input type=button value="　透明あぼ～ん　" $common,'DELLUMPRES')">
     </td>

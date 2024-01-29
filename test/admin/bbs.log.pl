@@ -462,7 +462,7 @@ sub FunctionAllowMessage
 	my $Conv = DATA_UTILS->new;
 	my $message_date = $Conv->GetDate($Set,undef,$elem[0]);
 	my $allowed_date = $Conv->GetDate($Set,undef,undef);
-	my $data = "$name<><>$allowed_date ALLOWED MESSAGE($message_date)<>$message<>";
+	my $data = "$name<><>$allowed_date Allowed($message_date)<>$message<>";
 
 	# ログ書き込み
 	if(-e $datPath){
