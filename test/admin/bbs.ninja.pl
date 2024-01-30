@@ -180,7 +180,7 @@ sub PrintNinjaEdit
 	my $lv = $Ninja->Get('ninLv');
 	my $count = $Ninja->Get('count');
 	my $thread_count = $Ninja->Get('thread_count');
-	my $lvuptime = $Ninja->Get('lvuptime');
+	my $lvuptime = $Ninja->Get('lvuptime') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('lvuptime')) : '';
 	my $ninID = crypt($sid,$sid);
 
 	my $newmes = $Ninja->Get('new_message');
