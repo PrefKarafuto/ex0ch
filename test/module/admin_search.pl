@@ -299,8 +299,10 @@ sub LogSearch
                 if ($match_count == $condition_count) {
                     my $SetStr = "$bbsID<>$key<>" . ($i + 1) . '<>';
                     my $pDat = $DAT->Get($i);
-                    $SetStr .= $$pDat;
-                    push @$pResultSet, $SetStr;
+                    if(defined $pDat){
+                        $SetStr .= $$pDat;
+                        push @$pResultSet, $SetStr;
+                    }
                 }
             }
             $DAT->Close();
