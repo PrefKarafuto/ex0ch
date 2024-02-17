@@ -175,8 +175,8 @@ sub Write
 
 	my $sid = $Ninja->Load($Sys,$idEnd,undef);
 	# hCaptcha認証
-	if ($Set->Get('BBS_HCAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha'))){
-		$err = $this->Certification_hCaptcha($Sys,$Form);
+	if ($Set->Get('BBS_CAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha'))){
+		$err = $this->Certification_Captcha($Sys,$Form);
 		return $err if $err;
 	}
 
@@ -1404,28 +1404,40 @@ sub NormalizationNameMail
 #------------------------------------------------------------------------------------------------------------
 #
 #	改造版で追加
-#	hCaptchaの認証
+#	Captchaの認証
 #	-------------------------------------------------------------------------------------
 #	@param	なし
 #	@return	規制通過なら0を返す
 #			規制チェックにかかったらエラーコードを返す
 #
 #------------------------------------------------------------------------------------------------------------
-sub Certification_hCaptcha {
+sub Certification_Captcha {
     my $this = shift;
     my ($Sys,$Form) = @_;
+	my ($captcha_response,$url);
 
-    my $secretkey = $Sys->Get('HCAPTCHA_SECRETKEY');
-    my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
+	my $captcha_kind = $Sys->Get('CAPTCHA');
+    my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+    my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+	if($captcha_kind eq 'h-captcha'){
+		$captcha_response = $Form->Get('h-captcha-response');
+    	$url = 'https://api.hcaptcha.com/siteverify';
+	}elsif($captcha_kind eq 'g-recaptcha'){
+		$captcha_response = $Form->Get('g-recaptcha-response');
+    	$url = 'https://www.google.com/recaptcha/api/siteverify';
+	}elsif($captcha_kind eq 'cf-turnstile'){
+		$captcha_response = $Form->Get('cf-turnstile-response');
+    	$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+	}else{
+		return 0;
+	}
 
-    my $url = 'https://api.hcaptcha.com/siteverify';
     my $ua = LWP::UserAgent->new();
-    my $recaptcha_response = $Form->Get('h-captcha-response');
     my $remote_ip = $ENV{'REMOTE_ADDR'};
-	if($recaptcha_response){
+	if($captcha_response){
 		my $response = $ua->post($url,{
 			secret => $secretkey,
-			response => $recaptcha_response,
+			response => $captcha_response,
 			remoteip => $remote_ip
            });
 		if ($response->is_success()) {

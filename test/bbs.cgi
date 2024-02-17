@@ -285,7 +285,11 @@ sub PrintBBSThreadCreate
 	$Caption->Print($Page, undef);
 	$Page->Print(" <title>$title</title>\n\n");
 	$Page->Print("<link rel=\"stylesheet\" type=\"text/css\" href=\"./datas/design.css\">\n");
-	$Page->Print("<script src='https://js.hcaptcha.com/1/api.js' async defer></script>\n");
+	if($Set->Get('BBS_CAPTCHA')){
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
+	}
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
 	# <body>タグ出力
@@ -329,8 +333,9 @@ sub PrintBBSThreadCreate
 		my $bbs = $Form->Get('bbs');
 		my $tm = int(time);
 		my $ver = $Sys->Get('VERSION');
-		my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
-		my $Captcha = $Set->Get('BBS_HCAPTCHA') ? "<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>" : '';
+		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+		my $classname = $Sys->Get('CAPTCHA');
+		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<HTML);
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">

@@ -270,9 +270,11 @@ sub PrintIndexHead
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));
-	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
-	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
-	
+	if($this->{'SET'}->Get('BBS_CAPTCHA')){
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'cf-turnstile');
+	}
 	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
 	
 	$Caption->Print($Page, undef);
@@ -551,8 +553,9 @@ FORM
 	}
 	# スレッド作成フォームはindexと同じ画面に表示
 	else {
-		my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
-		my $Captcha = $Set->Get('BBS_HCAPTCHA') ? "<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>" : '';
+		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+		my $classname = $Sys->Get('CAPTCHA');
+		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 		$Page->Print(<<FORM);
 <form method="POST" action="$cgipath/bbs.cgi">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
@@ -683,8 +686,9 @@ sub PrintThreadPreviewOne
 	}
 	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
 		# 書き込みフォームの表示
-		my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
-		my $Captcha = $this->{'SET'}->Get('BBS_HCAPTCHA') ? "<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>" : '';
+		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+		my $classname = $Sys->Get('CAPTCHA');
+		my $Captcha = $this->{'SET'}->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<KAKIKO);
   </dl>

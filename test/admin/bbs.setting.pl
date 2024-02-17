@@ -335,7 +335,7 @@ sub PrintBaseSetting
 			if ($listid eq $belongID) {
 				my $selKako = $setKako eq $BBS->Get('DIR', $listid) ?  "selected" : "";
 				$name		= $BBS->Get('NAME', $listid);
-				$Page->Print("<option value=".$BBS->Get('DIR', $listid)." $selKako>$name");
+				$Page->Print("<option value=".$BBS->Get('DIR', $listid)." $selKako>$name</option>");
 			}
 		}
 	}
@@ -573,8 +573,8 @@ sub PrintLimitSetting
 	my $setSpamPoint	= $Setting->Get('BBS_SPAMKILLI_POINT');
 
 	# 改造版で追加
-	my $hCaptcha		= $Setting->Get('BBS_HCAPTCHA');
-	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY') eq undef || $Sys->Get('HCAPTCHA_SECRETKEY') eq undef) ? 'hCaptchaのキーが設定されていません':'有効');
+	my $Captcha		= $Setting->Get('BBS_CAPTCHA');
+	my $setCapInfo 		= (($Sys->Get('CAPTCHA_SITEKEY') eq undef || $Sys->Get('CAPTCHA_SECRETKEY') eq undef) ? 'Captchaのキーが設定されていません':'有効');
 	my $setCap		= ($setCapInfo eq '有効' ? '' : 'style="opacity:0.5"');
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
@@ -619,8 +619,8 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_JP_CHECK $setOverSea value=on>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(携帯)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>携帯から許可</td>");
-	$Page->Print("<td class=\"DetailTitle\">hCaptcha</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_HCAPTCHA $hCaptcha value=on $setCap>$setCapInfo</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">Captcha</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_CAPTCHA $Captcha value=on $setCap>$setCapInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">マルチポスト制限</td><td>");
@@ -1187,7 +1187,7 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_SPAMKILLI_POINT', $Form->Get('BBS_SPAMKILL_POINT'));
 
 	# 改造版で追加
-	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_CAPTCHA', ($Form->Equal('BBS_CAPTCHA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
 
 	$Setting->Save($Sys);

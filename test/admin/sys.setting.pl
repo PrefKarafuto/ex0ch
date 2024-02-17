@@ -634,7 +634,7 @@ sub PrintPlusSecSetting
 {
 	
 	my ($Page, $SYS, $Form) = @_;
-	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT);
+	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha);
 	my ($kakiko, $trip12, $torexit);
 	my ($common);
 	
@@ -646,9 +646,14 @@ sub PrintPlusSecSetting
 	$DefHoushi	= $SYS->Get('DEFHOUSHI');
 	$Trip12		= $SYS->Get('TRIP12');
 	$TOREXIT	= $SYS->Get('DNSBL_TOREXIT');
+	$Captcha	= $SYS->Get('CAPTCHA');
 	
-	my $hCaptcha_sitekey 	= $SYS->Get('HCAPTCHA_SITEKEY');
-	my $hCaptcha_secretkey  = $SYS->Get('HCAPTCHA_SECRETKEY');
+	my $noCapSet = $Captcha ? '':'selected';
+	my $hCapSet = $Captcha eq 'hcaptcha' ? 'selected' : '';
+	my $reCapSet = $Captcha eq 'recaptcha' ? 'selected' : '';
+	my $TurnSet = $Captcha eq 'turnstile' ? 'selected' : '';
+	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
+	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
@@ -686,18 +691,17 @@ sub PrintPlusSecSetting
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">外部APIキー</td></tr>\n");
-	$Page->Print("<tr><td><a href=\"https://www.hcaptcha.com/\">hCaptcha</a> サイトキー<br>");
-	$Page->Print("<td><input type=text size=60  name=HCAPTCHA_SITEKEY value=\"$hCaptcha_sitekey\"></td></tr>\n");
-	$Page->Print("<tr><td>hCaptcha シークレットキー</td>");
-	$Page->Print("<td><input type=text size=60 name=HCAPTCHA_SECRETKEY value=\"$hCaptcha_secretkey\"></td></tr>\n");
-	$Page->Print("<tr><td><a href=\"https://www.google.com/recaptcha/about/\">reCaptcha</a> サイトキー<br>");
-	$Page->Print("<td><input type=text size=60  name=RECAPTCHA_SITEKEY value=\"\" disabled></td></tr>\n");
-	$Page->Print("<tr><td>reCaptcha シークレットキー</td>");
-	$Page->Print("<td><input type=text size=60 name=RECAPTCHA_SECRETKEY value=\"\" disabled></td></tr>\n");
-	$Page->Print("<tr><td><a href=\"https://www.cloudflare.com/ja-jp/products/turnstile/\">Turnstile</a> サイトキー<br>");
-	$Page->Print("<td><input type=text size=60  name=TURNSTILE_SITEKEY value=\"\" disabled></td></tr>\n");
-	$Page->Print("<tr><td>Turnstile シークレットキー</td>");
-	$Page->Print("<td><input type=text size=60 name=TURNSTILE_SECRETKEY value=\"\" disabled></td></tr>\n");
+	$Page->Print("<tr><td>Captcha種別<br><td>");
+	$Page->Print("<select name=CAPTCHA required>");
+	$Page->Print("<option value=\"\" $noCapSet>なし</option>");
+	$Page->Print("<option value=\"h-captcha\" $hCapSet>hCaptcha</option>");
+	$Page->Print("<option value=\"g-recaptcha\" $reCapSet>reCAPTCHA v2</option>");
+	$Page->Print("<option value=\"cf-turnstile\" $TurnSet>Turnstile</option>");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>Captchaサイトキー<br>");
+	$Page->Print("<td><input type=text size=60  name=CAPTCHA_SITEKEY value=\"$Captcha_sitekey\"></td></tr>\n");
+	$Page->Print("<tr><td>Captchaシークレットキー</td>");
+	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
 	$Page->Print("<tr><td><a href=\"https://proxycheck.io/api/\">ProxyCheck</a> APIキー</td>");
 	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"\" disabled></td></tr>\n");
 
@@ -1227,8 +1231,9 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('DEFHOUSHI', $Form->Get('DEFHOUSHI'));
 	$SYSTEM->Set('TRIP12', ($Form->Equal('TRIP12', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_TOREXIT', ($Form->Equal('DNSBL_TOREXIT', 'on') ? 1 : 0));
-	$SYSTEM->Set('HCAPTCHA_SITEKEY', $Form->Get('HCAPTCHA_SITEKEY'));
-	$SYSTEM->Set('HCAPTCHA_SECRETKEY', $Form->Get('HCAPTCHA_SECRETKEY'));
+	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));
+	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
+	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));
 	$SYSTEM->Save();
 	
 	{
@@ -1238,8 +1243,8 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 Samba奉仕時間：' . $SYSTEM->Get('DEFHOUSHI');
 		push @$pLog, '　　　 12桁トリップ：' . $SYSTEM->Get('TRIP12');
 		push @$pLog, '　　　 Dan.me.uk：' . $SYSTEM->Get('DNSBL_TOREXIT');
-		push @$pLog, '　　　 hCaptchaサイトキー：' . $SYSTEM->Get('HCAPTCHA_SITEKEY');
-		push @$pLog, '　　　 hCaptchaシークレットキー：' . $SYSTEM->Get('HCAPTCHA_SECRETKEY');
+		push @$pLog, '　　　 hCaptchaサイトキー：' . $SYSTEM->Get('CAPTCHA_SITEKEY');
+		push @$pLog, '　　　 hCaptchaシークレットキー：' . $SYSTEM->Get('CAPTCHA_SECRETKEY');
 	}
 	return 0;
 }

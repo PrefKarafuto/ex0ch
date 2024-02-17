@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS dev-r136 20240127',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r137 20240218',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -300,13 +300,10 @@ sub InitSystemValue
 
 		'SECURITY_KEY'	=> '',									# セキュリティキー（初回起動時に自動設定されます）
 		'LAST_FLUSH'	=> '',									# 定期的に動かす必要がある機能用
-		
-		'RECAPTCHA_SITEKEY'		=> '',							# reCaptchaサイトキー
-		'RECAPTCHA_SECRETKEY'	=> '',							# reCaptchaシークレットキー
-		'HCAPTCHA_SITEKEY'		=> '',							# hCaptchaサイトキー
-		'HCAPTCHA_SECRETKEY'	=> '',							# hCaptchaシークレットキー
-		'TURNSTILE_SITEKEY'		=> '',							# Turnstileサイトキー
-		'TURNSTILE_SECRETKEY'	=> '',							# Turnstileシークレットキー
+
+		'CAPTCHA'		=> '',									# キャプチャの種類
+		'CAPTCHA_SITEKEY'		=> '',							# Captchaサイトキー
+		'CAPTCHA_SECRETKEY'	=> '',								# Captchaシークレットキー
 		'PROXYCHECK_APIKEY'		=> '',							# ProxyCheck.io APIキー
 
 		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換

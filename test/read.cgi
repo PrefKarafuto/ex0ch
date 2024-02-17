@@ -233,9 +233,11 @@ sub PrintReadHead
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
-	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Set->Get('BBS_HCAPTCHA'));
-	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($Set->Get('BBS_HCAPTCHA'));
-
+	if($Set->Get('BBS_CAPTCHA')){
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
+	}
 	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
 
 	$Caption->Print($Page, undef);
@@ -520,8 +522,9 @@ sub PrintReadFoot
 			$cookName = &$sanitize($Cookie->Get('NAME', '', 'utf8'));
 			$cookMail = &$sanitize($Cookie->Get('MAIL', '', 'utf8'));
 		}
-		my $sitekey = $Sys->Get('HCAPTCHA_SITEKEY');
-		my $Captcha = $Set->Get('BBS_HCAPTCHA') ? "<div class=\"h-captcha\" data-sitekey=\"$sitekey\"></div>" : '';
+		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+		my $classname = $Sys->Get('CAPTCHA');
+		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<HTML);
 <form method="POST" action="$cgipath/bbs.cgi">
