@@ -1418,7 +1418,6 @@ sub Certification_Captcha {
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
     my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
-    my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	if($captcha_kind eq 'h-captcha'){
 		$captcha_response = $Form->Get('h-captcha-response');
     	$url = 'https://api.hcaptcha.com/siteverify';
@@ -1433,12 +1432,11 @@ sub Certification_Captcha {
 	}
 
     my $ua = LWP::UserAgent->new();
-    my $remote_ip = $ENV{'REMOTE_ADDR'};
 	if($captcha_response){
 		my $response = $ua->post($url,{
 			secret => $secretkey,
 			response => $captcha_response,
-			remoteip => $remote_ip
+			remoteip => $ENV{'REMOTE_ADDR'},
            });
 		if ($response->is_success()) {
 			my $json_text = $response->decoded_content();
