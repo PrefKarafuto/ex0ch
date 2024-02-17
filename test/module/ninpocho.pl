@@ -61,34 +61,10 @@ sub Load
 	my $ninDir = "./$infoDir/.ninpocho/";
 
     $this->{'ANON_FLAG'} = $isAnon eq '8' ? 1 : 0;
-
-    #cookieから取得
-    $sid = $Cookie->Get('countsession');
-    $sec = $Cookie->Get('securitykey');
-    my %cookies = fetch CGI::Cookie;
-    if (!$sid && exists $cookies{'countsession'}) {
-        $sid = $cookies{'countsession'}->value;
-        $sid =~ s/"//g;
-    }
-    if (!$sec && exists $cookies{'securitykey'}) {
-        $sec = $cookies{'securitykey'}->value;
-        $sec =~ s/"//g;
-    }
-
-    #改竄をチェック
-    if($sec){
-        my $ctx = Digest::MD5->new;
-        $ctx->add($Sys->Get('SECURITY_KEY'));
-        $ctx->add(':', $sid);
-        #一致しなかったら改竄されている
-        return if ($ctx->b64digest ne $sec);
-    }else{
-        #セキュリティキーが無い場合
-        #return;
-    }
+    $sid = $Sys->Get('SID');
 
     #cookieにsessionIDが保存されていない場合
-    if(!$sid && !$this->{'ANON_FLAG'}){
+    unless ($sid && $this->{'ANON_FLAG'}){
         my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx = Digest::MD5->new;
         my $expiry = 60*60*24;
@@ -163,7 +139,7 @@ sub Load
 # セッションIDから忍法帖を読み込む(admin.cgi用)
 sub LoadOnly {
     my $this = shift;
-    my ($Sys, $sid) = @_;
+    my ($Sys,$sid) = @_;
     my $infoDir = $Sys->Get('INFO');
     my $ninDir = "./$infoDir/.ninpocho/";
     my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});

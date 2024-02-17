@@ -12,6 +12,7 @@ use warnings;
 use Encode;
 use Socket qw(inet_pton inet_aton AF_INET6 AF_INET);
 use HTML::Entities;
+use Storable;
 no warnings qw(once);
 
 #------------------------------------------------------------------------------------------------------------
@@ -1397,7 +1398,243 @@ sub IsReferer
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	プロクシチェック - IsProxy
+#	日本IPチェック - IsJPIP
+#	--------------------------------------
+#	引　数：$Sys   : SYSTEM
+#			$mode	: VPNフラグの設定
+#	戻り値：プロクシなら対象ポート番号
+#
+#------------------------------------------------------------------------------------------------------------
+sub IsJPIP {
+	my $this = shift;
+    my ($Sys) = @_;
+	my $ipAddr = $ENV{'REMOTE_ADDR'};
+	my $infoDir = $Sys->Get('INFO');
+
+	return 1 if $ENV{'REMOTE_HOST'} =~ /\.jp$/;
+
+    my $filename_ipv4 = "./$infoDir/IP_List/jp_ipv4.cgi";
+	my $filename_ipv6 = "./$infoDir/IP_List/jp_ipv6.cgi";
+
+	if(time - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
+		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
+	}
+
+	my $result = '';
+	if ($ipAddr =~ /\./){
+		$result = binary_search_ip_range($ipAddr,$filename_ipv4);
+	}else{
+		$result = binary_search_ip_range($ipAddr,$filename_ipv6);
+	}
+	return if $result == -1;
+
+	return $result;
+}
+# 日本IPリスト取得用
+sub GetApnicJPIPList {
+    my ($filename_ipv4, $filename_ipv6) = @_;
+    my $ua = LWP::UserAgent->new;
+	$ua->timeout(1);
+    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
+
+	my $response = $ua->get($url);
+    unless ($response->is_success) {
+        warn "データの取得に失敗: " . $response->status_line;
+        return 0; # 失敗時に0を返す
+    }
+	my $data = $response->decoded_content;
+	require Math::BigInt;
+
+    my @jp_ipv4_ranges;
+    my @jp_ipv6_ranges;
+    my $last_end_ipv4 = -1;
+    my $last_end_ipv6 = Math::BigInt->new(-1);
+
+    foreach my $line (split /\n/, $data) {
+        if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|.*$/) {
+            # IPv4の範囲処理
+            my $start_ip_num = ip_to_number($1);
+            my $end_ip_num = $start_ip_num + $2 - 1;
+
+            if ($start_ip_num == $last_end_ipv4 + 1) {
+                $jp_ipv4_ranges[-1]->{end} = $end_ip_num;
+            } else {
+                push @jp_ipv4_ranges, { start => $start_ip_num, end => $end_ip_num };
+            }
+            $last_end_ipv4 = $end_ip_num;
+        }
+        elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|.*$/) {
+            # IPv6の範囲処理
+            my $start_ip_num = ip_to_number($1);
+            my $end_ip_num = $start_ip_num + Math::BigInt->new(2)->bpow($2) - 1;
+
+            if ($start_ip_num == $last_end_ipv6 + 1) {
+                $jp_ipv6_ranges[-1]->{end} = $end_ip_num;
+            } else {
+                push @jp_ipv6_ranges, { start => $start_ip_num, end => $end_ip_num };
+            }
+            $last_end_ipv6 = $end_ip_num;
+        }
+    }
+
+	eval {
+        open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
+        foreach my $range (@jp_ipv4_ranges) {
+            print $file_ipv4 "$range->{start}-$range->{end}\n";
+        }
+        close $file_ipv4;
+        chmod 0600, $filename_ipv4;
+
+        open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
+        foreach my $range (@jp_ipv6_ranges) {
+            print $file_ipv6 "$range->{start}-$range->{end}\n";
+        }
+        close $file_ipv6;
+        chmod 0600, $filename_ipv6;
+    };
+    if ($@) {
+        warn "ファイル書き込みに失敗しました: $@";
+        return 0; # 失敗時に0を返す
+    }
+
+    return 1; # 成功時に1を返す
+}
+sub binary_search_ip_range {
+    my ($ipAddr, $filename) = @_;
+    my $ip_num = ip_to_number($ipAddr);
+    my $ranges = load_ip_ranges($filename);
+	return -1 unless $ranges;
+    my $low = 0;
+    my $high = @$ranges - 1;
+
+    while ($low <= $high) {
+        my $mid = int(($low + $high) / 2);
+        if ($ip_num < $ranges->[$mid]->{start}) {
+            $high = $mid - 1;
+        } elsif ($ip_num > $ranges->[$mid]->{end}) {
+            $low = $mid + 1;
+        } else {
+            return 1; # IPアドレスは範囲内にあります
+        }
+    }
+
+    return 0; # IPアドレスは範囲外です
+}
+sub load_ip_ranges {
+    my $filename = shift;
+    my @ranges;
+
+    # ファイルオープンと例外処理
+    open my $file, '<', $filename or do {
+        warn "ファイルを開けません: $filename";
+        return 0; # 失敗時に0を返す
+    };
+    
+    # ファイル読み込みと例外処理
+    eval {
+		require Math::BigInt;
+        while (my $line = <$file>) {
+            chomp $line;
+            my ($start, $end) = split /-/, $line;
+            push @ranges, {
+                start => Math::BigInt->new($start),
+                end => Math::BigInt->new($end)
+            };
+        }
+        close $file;
+    };
+    if ($@) {
+        warn "ファイル読み込み中にエラーが発生しました: $@";
+        return 0; # 失敗時に0を返す
+    }
+
+    return \@ranges; # 成功時にIP範囲の配列のリファレンスを返す
+}
+sub ip_to_number {
+    my $ip = shift;
+
+    if ($ip =~ /^\d{1,3}(?:\.\d{1,3}){3}$/) { # IPv4
+        return unpack("N", pack("C4", split(/\./, $ip)));
+    } elsif ($ip =~ /^[0-9a-f:]+$/i) { # IPv6
+        # 省略記法の処理
+        if ($ip =~ /::/) {
+            my $filler = ':' . ('0:' x (8 - (() = $ip =~ /:/g))) . '0';
+            $ip =~ s/::/$filler/;
+            $ip =~ s/^:/0:/; # 先頭が省略された場合
+            $ip =~ s/:$/:0/; # 末尾が省略された場合
+        }
+		require Math::BigInt;
+        my $bigint = Math::BigInt->new(0);
+        foreach my $part (split /:/, $ip) {
+            $bigint = ($bigint << 16) + hex($part);
+        }
+        return $bigint;
+    } else {
+        return undef;
+    }
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	プロクシチェック - IsProxyAPI
+#	--------------------------------------
+#	引　数：$Sys   : SYSTEM
+#			$mode	: VPNフラグの設定
+#	戻り値：プロクシなら対象ポート番号
+#
+#------------------------------------------------------------------------------------------------------------
+sub IsProxyAPI {
+	my $this = shift;
+    my ($Sys,$mode) = @_;
+
+	my $infoDir = $Sys->Get('INFO');
+	my $ipAddr = $ENV{'REMOTE_ADDR'};
+	my $checkKey = $Sys->Get('PROXYCHECK_APIKEY');
+
+	$mode //= 1;
+
+    my $file = "./$infoDir/IP_List/proxy_check.cgi";#結果のキャッシュ
+	my $proxy_list;
+    $proxy_list = retrieve($file) if -e $file;
+    $proxy_list = {} unless defined $proxy_list;
+
+	if($proxy_list->{$ipAddr}->{"time"} + 60*60*24*7 > time){
+		if($proxy_list->{$ipAddr}->{"flag"}){
+			return 1;
+		}else{
+			return 0;
+		}
+	}
+
+	if($checkKey){
+		my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=${mode}";
+		my $ua = LWP::UserAgent->new();
+		my $response = $ua->get($url);
+
+		if ($response->is_success) {
+			my $json = $response->decoded_content();
+			my $out = decode_json($json);
+			my $isProxy = $out->{$ipAddr}->{"proxy"};
+
+			if ($isProxy eq 'yes') {
+				$proxy_list->{$ipAddr}->{"flag"} = 1;
+				$proxy_list->{$ipAddr}->{"time"} = time;
+				store $proxy_list, $file;
+				chmod 0600, $file;
+				return 1;
+			}else{
+				$proxy_list->{$ipAddr}->{"flag"} = 0;
+				$proxy_list->{$ipAddr}->{"time"} = time;
+				store $proxy_list, $file;
+				chmod 0600, $file;
+				return 0;
+			}
+		}
+	}
+    return 0;
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	プロクシチェック - IsProxyDNSBL
 #	--------------------------------------
 #	引　数：$Sys   : SYSTEM
 #			$Form  : 
@@ -1406,19 +1643,20 @@ sub IsReferer
 #	戻り値：プロクシなら対象ポート番号
 #
 #------------------------------------------------------------------------------------------------------------
-sub IsProxy
+sub IsProxyDNSBL
 {
 	my $this = shift;
 	my ($Sys, $Form, $from, $mode) = @_;
 	
 	my @dnsbls = ();
-	# Tor検出用
-	push(@dnsbls, 'torexit.dan.me.uk') if($Sys->Get('DNSBL_TOREXIT'));
+	
+	push(@dnsbls, 'torexit.dan.me.uk') if($Sys->Get('DNSBL_TOREXIT'));# Tor検出用
 	
 	# DNSBL問い合わせ
 	foreach my $dnsbl (@dnsbls) {
 		if (CheckDNSBL($ENV{'REMOTE_ADDR'},$dnsbl,'127.0.0.100')) {
 			$Form->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
+			$Sys->Set('ISPROXY','tor');
 			return ($mode eq 'P' ? 0 : 1);
 		}
 	}
@@ -1433,6 +1671,7 @@ sub IsProxy
 #
 #------------------------------------------------------------------------------------------------------------
 sub CheckDNSBL {
+	my $this = shift;
     my ($ip, $DNSBL_host, $expected_ip) = @_;
     my $reversed_ip = '';
 	require Net::DNS;

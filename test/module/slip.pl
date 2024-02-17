@@ -43,62 +43,6 @@ sub is_denied_ip {
     return exists $denied_ips->{$ipAddr} ? 1 : 0;
 }
 
-# ローカルで串判定
-sub is_proxy_local {
-    my ($remoho, $ipAddr, $infoDir) = @_;
-    my $isAnon = 0;
-
-    my $vpngate = "./$infoDir/IP_List/vpngate.bin";
-	my $tor = "./$infoDir/IP_List/tor.bin";
-	if(!(-e $vpngate)){
-		GetIPList('https://gist.githubusercontent.com/japankun/'
-			.'2cf80906dc4d1c9adf01c299a09c46c6/raw/'
-			.'cce593213613e4ef85a6fda4bf8b3924afbd3e80/'
-			.'vpngate.all.20231211.txt',$vpngate);
-	}
-	if(time - (stat($tor))[9] > 60*60 || !(-e $tor)){
-		GetIPList('https://www.dan.me.uk/torlist/?exit',$tor);
-	}
-    $isAnon += ListCheck($ipAddr,$vpngate);
-	$isAnon += ListCheck($ipAddr,$tor);
-
-    return $isAnon;
-}
-#外部APIでチェック
-sub is_proxy_api {
-    my ($ipAddr, $infoDir, $checkKey) = @_;
-    my $file = "./$infoDir/IP_List/proxy.cgi";
-	my $w_file = "./$infoDir/IP_List/no_proxy.cgi";
-    my $proxy_list = retrieve($file) if -e $file;
-	my $white_list = retrieve($w_file) if -e $w_file;
-    $proxy_list = {} unless defined $proxy_list;
-	$white_list = {} unless defined $white_list;
-    return 1 if exists $proxy_list->{$ipAddr};
-	return 0 if exists $white_list->{$ipAddr};
-
-	if($checkKey){
-		my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=1";
-		my $ua = LWP::UserAgent->new();
-		my $response = $ua->get($url);
-		if ($response->is_success) {
-			my $json = $response->decoded_content();
-			my $out = decode_json($json);
-			my $isProxy = $out->{$ipAddr}->{"proxy"};
-			if ($isProxy eq 'yes') {
-				$proxy_list->{$ipAddr} = time;
-				store $proxy_list, $file;
-				chmod 0600, $file;
-				return 1;
-			}else{
-				$white_list->{$ipAddr} = time;
-				store $white_list, $w_file;
-				chmod 0600, $w_file;
-				return 0;
-			}
-		}
-	}
-    return 0;
-}
 
 # 匿名化判定
 sub is_anonymous {
@@ -153,27 +97,6 @@ sub is_public_wifi {
     return $isFwifi;
 }
 
-# IPから国を判定
-sub get_country_by_ip {
-	my $this = shift;
-    my ($ipAddr,$infoDir) = @_;
-    my $filename_ipv4 = "./$infoDir/IP_List/jp_ipv4.cgi";
-	my $filename_ipv6 = "./$infoDir/IP_List/jp_ipv6.cgi";
-	if(time - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
-		#GetApnicJPIPList($filename_ipv4,$filename_ipv6);
-	}
-	my $result = '';
-	if ($ipAddr =~ /\./){
-		#$result = binary_search_ip_range($ipAddr,$filename_ipv4);
-	}else{
-		#$result = binary_search_ip_range($ipAddr,$filename_ipv6);
-	}
-	return if $result == -1;
-	$result = $ENV{'REMOTE_HOST'} =~ /\.jp$/ ? 1 : 0;
-	my $country = $result ? 'JP' : 'ｶﾞｲｺｰｸ';
-
-    return $country;
-}
 
 # モバイル判定
 sub is_mobile {
@@ -398,186 +321,6 @@ sub is_mobile {
     return $ismobile;
 }
 
-# 日本IPリスト取得用
-sub GetApnicJPIPList {
-    my ($filename_ipv4, $filename_ipv6) = @_;
-    my $ua = LWP::UserAgent->new;
-	$ua->timeout(1);
-    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
-
-	my $response = $ua->get($url);
-    unless ($response->is_success) {
-        warn "データの取得に失敗: " . $response->status_line;
-        return 0; # 失敗時に0を返す
-    }
-	my $data = $response->decoded_content;
-	require Math::BigInt;
-
-    my @jp_ipv4_ranges;
-    my @jp_ipv6_ranges;
-    my $last_end_ipv4 = -1;
-    my $last_end_ipv6 = Math::BigInt->new(-1);
-
-    foreach my $line (split /\n/, $data) {
-        if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|.*$/) {
-            # IPv4の範囲処理
-            my $start_ip_num = ip_to_number($1);
-            my $end_ip_num = $start_ip_num + $2 - 1;
-
-            if ($start_ip_num == $last_end_ipv4 + 1) {
-                $jp_ipv4_ranges[-1]->{end} = $end_ip_num;
-            } else {
-                push @jp_ipv4_ranges, { start => $start_ip_num, end => $end_ip_num };
-            }
-            $last_end_ipv4 = $end_ip_num;
-        }
-        elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|.*$/) {
-            # IPv6の範囲処理
-            my $start_ip_num = ip_to_number($1);
-            my $end_ip_num = $start_ip_num + Math::BigInt->new(2)->bpow($2) - 1;
-
-            if ($start_ip_num == $last_end_ipv6 + 1) {
-                $jp_ipv6_ranges[-1]->{end} = $end_ip_num;
-            } else {
-                push @jp_ipv6_ranges, { start => $start_ip_num, end => $end_ip_num };
-            }
-            $last_end_ipv6 = $end_ip_num;
-        }
-    }
-
-	eval {
-        open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
-        foreach my $range (@jp_ipv4_ranges) {
-            print $file_ipv4 "$range->{start}-$range->{end}\n";
-        }
-        close $file_ipv4;
-        chmod 0600, $filename_ipv4;
-
-        open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
-        foreach my $range (@jp_ipv6_ranges) {
-            print $file_ipv6 "$range->{start}-$range->{end}\n";
-        }
-        close $file_ipv6;
-        chmod 0600, $filename_ipv6;
-    };
-    if ($@) {
-        warn "ファイル書き込みに失敗しました: $@";
-        return 0; # 失敗時に0を返す
-    }
-
-    return 1; # 成功時に1を返す
-}
-sub binary_search_ip_range {
-    my ($ipAddr, $filename) = @_;
-    my $ip_num = ip_to_number($ipAddr);
-    my $ranges = load_ip_ranges($filename);
-	return -1 unless $ranges;
-    my $low = 0;
-    my $high = @$ranges - 1;
-
-    while ($low <= $high) {
-        my $mid = int(($low + $high) / 2);
-        if ($ip_num < $ranges->[$mid]->{start}) {
-            $high = $mid - 1;
-        } elsif ($ip_num > $ranges->[$mid]->{end}) {
-            $low = $mid + 1;
-        } else {
-            return 1; # IPアドレスは範囲内にあります
-        }
-    }
-
-    return 0; # IPアドレスは範囲外です
-}
-sub load_ip_ranges {
-    my $filename = shift;
-    my @ranges;
-
-    # ファイルオープンと例外処理
-    open my $file, '<', $filename or do {
-        warn "ファイルを開けません: $filename";
-        return 0; # 失敗時に0を返す
-    };
-    
-    # ファイル読み込みと例外処理
-    eval {
-		require Math::BigInt;
-        while (my $line = <$file>) {
-            chomp $line;
-            my ($start, $end) = split /-/, $line;
-            push @ranges, {
-                start => Math::BigInt->new($start),
-                end => Math::BigInt->new($end)
-            };
-        }
-        close $file;
-    };
-    if ($@) {
-        warn "ファイル読み込み中にエラーが発生しました: $@";
-        return 0; # 失敗時に0を返す
-    }
-
-    return \@ranges; # 成功時にIP範囲の配列のリファレンスを返す
-}
-sub ip_to_number {
-    my $ip = shift;
-
-    if ($ip =~ /^\d{1,3}(?:\.\d{1,3}){3}$/) { # IPv4
-        return unpack("N", pack("C4", split(/\./, $ip)));
-    } elsif ($ip =~ /^[0-9a-f:]+$/i) { # IPv6
-        # 省略記法の処理
-        if ($ip =~ /::/) {
-            my $filler = ':' . ('0:' x (8 - (() = $ip =~ /:/g))) . '0';
-            $ip =~ s/::/$filler/;
-            $ip =~ s/^:/0:/; # 先頭が省略された場合
-            $ip =~ s/:$/:0/; # 末尾が省略された場合
-        }
-		require Math::BigInt;
-        my $bigint = Math::BigInt->new(0);
-        foreach my $part (split /:/, $ip) {
-            $bigint = ($bigint << 16) + hex($part);
-        }
-        return $bigint;
-    } else {
-        return undef;
-    }
-}
-
-# 匿名化判定用Tor/VPN-Gate判定
-sub GetIPList {
-    my ($url,$fileName) = @_;
-    my $ua = LWP::UserAgent->new;
-    my $response = $ua->get($url);
-
-    if ($response->is_success) {
-        my $content = $response->decoded_content;
-        my %ips; # 新しいハッシュを初期化
-
-        # 各行を処理してIPアドレスを抽出
-        foreach my $line (split /\n/, $content) {
-            $ips{$line} = 1 if $line;  # 空行を除外
-        }
-
-        store \%ips, $fileName; # 新しいデータでファイルを上書き
-		chmod 0600, $fileName;
-        return 1;
-    }
-    return 0;
-}
-
-sub ListCheck {
-    my ($ipAddr, $fileName) = @_;
-
-    # ファイルが存在しない場合はundefを返す
-    return undef unless -e $fileName;
-
-    # ファイルからハッシュテーブルを読み込む
-    my $saved_ips = retrieve($fileName);
-
-    # ユーザーのIPアドレスがリストにあるかどうかをチェック
-    return 1 if exists $saved_ips->{$ipAddr};
-    return 0;
-}
-
 #------------------------------------------------------------------------------------------------------------
 #	BBS_SLIP生成
 #	-------------------------------------------------------------------------------------
@@ -591,25 +334,20 @@ sub ListCheck {
 sub BBS_SLIP
 {
 	my $this = shift;
-	my ($bbsslip, $infoDir, $chid, $checkKey) = @_;
+	my ($Sys, $bbsslip, $chid) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
 
 	my $ipAddr = $ENV{'REMOTE_ADDR'};
 	my $remoho = $ENV{'REMOTE_HOST'};
 	my $ua = $ENV{'HTTP_USER_AGENT'};
+	my $infoDir = $Sys->Get('INFO');
 
 	# 各種判定
-	my $country = get_country_by_ip($ipAddr,$infoDir);
+	my $country = $Sys->Get('ISCOUNTRY') ? 'JP': 'ｶﾞｲｺｰｸ';
 	my $ismobile = is_mobile($country,$ipAddr,$remoho);
 	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);
-	my $isProxy = is_proxy_local($ipAddr,$remoho,$infoDir);
+	my $isProxy = $Sys->Get('ISPROXY');
 	my $isAnon = is_anonymous($isFwifi,$country,$ipAddr,$remoho,$infoDir);
-
-	# 外部APIによるプロキシ判定
-	# 使わない場合は$checkKeyを0に
-	if(!$isProxy && !$isAnon && $checkKey){
-		$isProxy = is_proxy_api($ipAddr,$infoDir,$checkKey);
-	}
 
 	# bbs_slipに使用する文字
 	my @slip_chars = (0..9, 'a'..'z', 'A'..'Z', '.', '/');

@@ -170,7 +170,7 @@ sub Write
 	
 	# BBS_SLIP付加とID末尾取得
 	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
-	my ($slip_result,$idEnd) = $slip->BBS_SLIP($bbsSlip, $Sys->Get('INFO'),$chid,undef) if (!$handle || !$noAttr);
+	my ($slip_result,$idEnd) = $slip->BBS_SLIP($Sys, $bbsSlip, $chid) if (!$handle || !$noAttr);
 	$idEnd = $Set->Get('BBS_SLIP') eq 'checked' ? $Sys->Get('AGENT') : $idEnd;
 
 	my $sid = $Ninja->Load($Sys,$idEnd,undef);
@@ -1098,28 +1098,34 @@ sub IsRegulation
 			return $ZP::E_POST_INVALIDREFERER;
 		}
 	}
+	# JPホスト以外規制
+	if (!$islocalip) {
+		if (!$this->{'CONV'}->IsJPIP($Sys)){
+			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTJPHOST, $bbs) && $Set->Equal('BBS_JP_CHECK', 'checked')) {
+				return $ZP::E_REG_NOTJPHOST;
+			}
+			$Sys->Set('IPCOUNTRY','abroad');
+		}
+	}
 	# PROXYチェック
-	if (!$islocalip && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {
-		if ($this->{'CONV'}->IsProxy($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {
+	if (!$islocalip) {
+		if ($this->{'CONV'}->IsProxyDNSBL($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {
 			#$this->{'FORM'}->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
-			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs)) {
+			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {
 				return $ZP::E_REG_DNSBL;
 			}
+			$Sys->Set('ISPROXY','tor');
+		}elsif($this->{'CONV'}->IsProxyAPI($this->{'SYS'},1) && $Sys->Get('PROXYCHECK_APIKEY')){
+			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {
+				return $ZP::E_REG_DNSBL;
+			}
+			$Sys->Set('ISPROXY','proxy');
 		}
 	}
 	# 読取専用
 	if (!$Set->Equal('BBS_READONLY', 'none')) {
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_LIMIT_READONLY, $bbs)) {
 			return $ZP::E_LIMIT_READONLY;
-		}
-	}
-	# JPホスト以外規制
-	if (!$islocalip && $Set->Equal('BBS_JP_CHECK', 'checked')) {
-		#require './module/slip.pl';
-		if ($ENV{'REMOTE_HOST'} !~ /\.jp$/){#(get_country_by_ip($addr,$Sys->Get('INFO')) ne 'JP') {
-			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTJPHOST, $bbs)) {
-				return $ZP::E_REG_NOTJPHOST;
-			}
 		}
 	}
 

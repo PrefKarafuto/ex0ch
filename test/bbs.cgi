@@ -210,7 +210,36 @@ sub Initialize
 			}
 		}
 	}
-	
+
+	#cookieからセッションID取得
+    my $sid = $Cookie->Get('countsession');
+    my $sec = $Cookie->Get('securitykey');
+    my %cookies = fetch CGI::Cookie;
+    if (!$sid && exists $cookies{'countsession'}) {
+        $sid = $cookies{'countsession'}->value;
+        $sid =~ s/"//g;
+    }
+    if (!$sec && exists $cookies{'securitykey'}) {
+        $sec = $cookies{'securitykey'}->value;
+        $sec =~ s/"//g;
+    }
+
+    #改竄をチェック
+	if($sid && $sec){
+		my $ctx = Digest::MD5->new;
+		$ctx->add($Sys->Get('SECURITY_KEY'));
+		$ctx->add(':', $sid);
+		
+		if ($ctx->b64digest eq $sec){
+			$Sys->Set('SID',$sid);
+		}else{
+			#一致しなかったら改竄されている
+			return $ZP::E_PAGE_COOKIE;
+		}
+	}else{
+		$Sys->Set('SID',undef);
+	}
+
 	# subjectの読み込み
 	$Threads->Load($Sys);
 	
