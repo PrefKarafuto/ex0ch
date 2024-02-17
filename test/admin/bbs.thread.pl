@@ -332,6 +332,7 @@ sub PrintThreadList
 		
 		my $isSLIP = $Threads->GetAttr($id, 'slip');
 		my $is774 = $Threads->GetAttr($id, 'change774');
+		$is774 = decoded_content($is774); 
 		my $maxres = $Threads->GetAttr($id, 'maxres');
 		my $ninlv = $Threads->GetAttr($id, 'ninlv');
 		my @attrstr = ();
