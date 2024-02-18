@@ -1695,12 +1695,11 @@ sub CheckDNSBL {
 
     my $query = $res->query($query_host, "A");
 
-    if ($query) {
-        foreach my $rr ($query->answer) {
-            next unless $rr->type eq "A";  # Aレコードが見つかった場合
-            return 1;  # Aレコードであれば1を返す
-        }
-    }
+	if ($query) {
+		foreach my $rr ($query->answer) {
+			return 1 if $rr->type eq "A";  # Aレコードが見つかったら1を返して終了
+		}
+	}
     return 0;  # マッチしない場合は0を返す
 }
 
