@@ -1098,17 +1098,22 @@ sub IsRegulation
 			return $ZP::E_POST_INVALIDREFERER;
 		}
 	}
-	# JPホスト以外規制
+	# IP関係
 	if (!$islocalip) {
+		# 逆引き不可規制
+		if ($ENV{'REMOTE_ADDR'} eq $ENV{'REMOTE_HOST'}){
+			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOHOST, $bbs) && $Set->Equal('BBS_REVERSE_CHECK', 'checked')) {
+				return $ZP::E_REG_NOHOST;
+			}
+		}
+		# JPホスト以外規制
 		if (!$this->{'CONV'}->IsJPIP($Sys)){
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOTJPHOST, $bbs) && $Set->Equal('BBS_JP_CHECK', 'checked')) {
 				return $ZP::E_REG_NOTJPHOST;
 			}
 			$Sys->Set('IPCOUNTRY','abroad');
 		}
-	}
-	# PROXYチェック
-	if (!$islocalip) {
+		# PROXYチェック
 		if ($this->{'CONV'}->IsProxyDNSBL($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {
 			#$this->{'FORM'}->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {

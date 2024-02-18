@@ -88,6 +88,7 @@ our $E_REG_NGUSER			= 601;
 our $E_REG_SPAMKILL			= 602;
 our $E_REG_SAMETITLE		= 603;
 our $E_REG_NOTJPHOST		= 207;
+our $E_REG_NOHOST		    = 208;
 our $E_REG_DNSBL			= 997;
 our $E_REG_BAN              = 700;
 our $E_REG_NINLVLIMIT       = 701;
@@ -150,7 +151,8 @@ our $CAP_DISP_NOSLIP			= 23; # 端末識別子非表示
 our $CAP_DISP_CUSTOMID			= 24; # 専用ID許可
 our $CAP_REG_COMMAND			= 25; # コマンド許可
 our $CAP_REG_NOATTR			    = 26; # スレッド属性による規制解除
-our $CAP_MAXNUM					= 26;
+our $CAP_REG_NOHOST             = 27; # 逆引き不可規制解除
+our $CAP_MAXNUM					= 27;
 # USER AUTHORITY
 our $AUTH_SYSADMIN		=  0; # システム管理権限(形式的に)
 our $AUTH_USERGROUP		=  1; # 管理グループ設定

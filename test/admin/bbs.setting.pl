@@ -580,6 +580,7 @@ sub PrintLimitSetting
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
 	my $setSameTitle	= $Setting->Get('BBS_SAMETHREAD');
+	my $setReverse		= $Setting->Get('BBS_REVERSE_CHECK');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -623,8 +624,8 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_CAPTCHA $Captcha value=on $setCap>$setCapInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">マルチポスト制限</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_MULTIPOST value=on disabled></td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">逆引き不可のIPからの投稿を制限</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_REVERSE_CHECK value=on $setReverse></td></tr>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -1189,6 +1190,7 @@ sub FunctionLimitSetting
 	# 改造版で追加
 	$Setting->Set('BBS_CAPTCHA', ($Form->Equal('BBS_CAPTCHA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_REVERSE_CHECK', ($Form->Equal('BBS_REVERSE_CHECK', 'on') ? 'checked' : ''));
 
 	$Setting->Save($Sys);
 	
