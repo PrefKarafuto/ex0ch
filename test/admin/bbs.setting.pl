@@ -619,7 +619,7 @@ sub PrintLimitSetting
 	$Page->Print("<option value=caps $selROcaps>キャップのみ可能");
 	$Page->Print("<option value=none $selROnone>書き込み可能");
 	$Page->Print("</select></td>");
-	$Page->Print("<td class=\"DetailTitle\">DNSBLチェック</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">DNSBL/Proxyチェック</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK $setProxy value=on $setDNSBL>$setInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(キャップ)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADCAPONLY $setCapOnly value=on>キャップのみ可能\</td>");
