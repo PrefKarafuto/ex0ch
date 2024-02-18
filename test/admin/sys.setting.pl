@@ -486,7 +486,7 @@ sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninlvmax, $cookieExp);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -502,6 +502,8 @@ sub PrintOtherSetting
 	$BBSGET		= $SYS->Get('BBSGET');
 	$upCheck	= $SYS->Get('UPCHECK');
 	$CSP		= $SYS->Get('CSP');
+	$ninlvmax	= $SYS->Get('NINLVMAX');
+	$cookieExp	= $SYS->Get('COOKIE_EXPIRY');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
@@ -550,6 +552,18 @@ sub PrintOtherSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック関連</td></tr>\n");
 	$Page->Print("<tr><td>更新チェックの間隔　※開発移行につき無効</td>");
 	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\" disabled>日(0でチェック無効)</td></tr>\n");
+	
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Cookie関連</td></tr>\n");
+	$Page->Print("<tr><td>Cookie有効期限</td>");
+	$Page->Print("<td><input type=text size=2 name=COOKIE_EXPIRY value=\"$cookieExp\">日</td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">忍法帖関連</td></tr>\n");
+	$Page->Print("<tr><td>忍法帖データ保持日数</td>");
+	$Page->Print("<td>最終書き込みから<input type=text size=2 name=NINRET value=\"30\" disabled>日</td></tr>\n");
+	$Page->Print("<tr><td>パスワード設定時の保持日数</td>");
+	$Page->Print("<td>最終書き込みから<input type=text size=2 name=NINPASSRET value=\"365\" disabled>日</td></tr>\n");
+	$Page->Print("<tr><td>忍法帖Lv上限</td>");
+	$Page->Print("<td><input type=text size=2 name=NINLVMAX value=\"$ninlvmax\"></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -1122,6 +1136,8 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('FASTMODE', ($Form->Equal('FASTMODE', 'on') ? 1 : 0));
 	$SYSTEM->Set('BBSGET', ($Form->Equal('BBSGET', 'on') ? 1 : 0));
 	$SYSTEM->Set('UPCHECK', $Form->Get('UPCHECK'));
+	$SYSTEM->Set('NINLVMAX', $Form->Get('NINLVMAX'));
+	$SYSTEM->Set('COOKIE_EXPIRY', $Form->Get('COOKIE_EXPIRY'));
 	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
 	
 	$SYSTEM->Save();
@@ -1138,6 +1154,8 @@ sub FunctionOtherSetting
 		push @$pLog, '　　　 PATH種別：' . $SYSTEM->Get('PATHKIND');
 		push @$pLog, '　　　 index.htmlを更新しない：' . $SYSTEM->Get('FASTMODE');
 		push @$pLog, '　　　 bbs.cgiのGETメソッド：' . $SYSTEM->Get('BBSGET');
+		push @$pLog, '　　　 Cookie有効期限：' . $SYSTEM->Get('COOKIE_EXPIRY');
+		push @$pLog, '　　　 忍法帖最大レベル：' . $SYSTEM->Get('NINLVMAX');
 		push @$pLog, '　　　 更新チェック間隔：' . $SYSTEM->Get('UPCHECK');
 	}
 	return 0;

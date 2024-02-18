@@ -190,7 +190,7 @@ sub Print
 		if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked')) {
 			$Cookie->Set('MAIL', $mail, 'utf8');
 		}
-		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * 30);
+		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
 		
 		$Page->Print("Content-type: text/html\n\n");
 		

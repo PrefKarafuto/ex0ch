@@ -310,6 +310,8 @@ sub InitSystemValue
 		'CSP'			=> 0,
 		'BANMAX'		=> 10,
 		'NINLVMAX'		=> 40,
+
+		'COOKIE_EXPIRY'	=> 30,									# Cookie期限
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,
