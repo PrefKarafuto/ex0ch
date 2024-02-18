@@ -785,8 +785,8 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">追記（!add:[>>レス番]:[追記内容]）</td><td>");
 	$Page->Print("<input type=checkbox name=ADD value=65536 $setadd></td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\"><s>レス削除（!delete:[>>レス番]）</s></td><td>");
-	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete disabled></td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番] </td><td>");
+	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete></td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
@@ -838,7 +838,7 @@ sub PrintNinpochoSetting
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=COST_TH value=\"$thcost\"></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">各種コマンド使用可能レベル</td><td>");
-	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setWrite\">以上</td>");
+	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setWrite\" disabled>以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=COST_COM value=\"$comcost\"></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレスト可能レベル</td><td>");
