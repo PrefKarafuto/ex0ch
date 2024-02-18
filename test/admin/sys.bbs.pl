@@ -803,27 +803,27 @@ sub FunctionBBSMenuUpdate
 	my $bbsname = $SYS->Get('SITENAME') ? $SYS->Get('SITENAME') : "EXぜろちゃんねる";
 
 	#bbsmenu.html生成
-	$Page->Print("<head>");
-	$Page->Print("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Shift_JIS\">");
-	$Page->Print("<title>BBS MENU - $bbsname</title>");
-	$Page->Print("<base target=\"_blank\">");
-	$Page->Print("</head>");
+	$Page->Print("<head>\n");
+	$Page->Print("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Shift_JIS\">\n");
+	$Page->Print("<title>BBS MENU - $bbsname</title>\n");
+	$Page->Print("<base target=\"_blank\">\n");
+	$Page->Print("</head>\n");
 	
 	if (! defined $bbsmenu) {
 		$Page->Print("掲示板がありません。");
 		push @$pLog, '■BBSMENUに記載可能な掲示板がありません。';
 	}else{
 	
-		$Page->Print("<body text=\"#CC3300\" bgcolor=\"#FFFFFF\" link=\"#0000FF\" alink=\"#ff0000\" vlink=\"#660099\">");
-		$Page->Print("<b>$bbsname</b><br>");
-		$Page->Print("<font size=\"2\">");
+		$Page->Print("<body text=\"#CC3300\" bgcolor=\"#FFFFFF\" link=\"#0000FF\" alink=\"#ff0000\" vlink=\"#660099\">\n");
+		$Page->Print("<b>$bbsname</b><br>\n");
+		$Page->Print("<font size=\"2\">\n");
 		foreach my $category (@$bbsmenu) {
 			$Page->Print("<br><b>$category->{name}</b><br>\n");
 			foreach my $bbs (@{$category->{list}}) {
 				$Page->Print("<a href=\"$bbs->{url}\">$bbs->{name}</a><br>\n");
 			}
 		}
-		$Page->Print("<br>更新日<br>$time[5]/$time[4]/$time[3]");
+		$Page->Print("<br>更新日<br>$time[5]/$time[4]/$time[3]\n");
 		$Page->Print("</font></body>");
 		$Page->Flush(1, $SYS->Get('PM-TXT'), "../bbsmenu.html");
 
@@ -861,7 +861,7 @@ sub FunctionBBSMenuUpdate
 			$catNum++;
 		}
 		open my $fh, '>:raw', '../bbsmenu.json' or die "Could not open file: $!";
-		chmod $SYS->Get('PM-TXT'),$fh;
+		chmod $fh,$SYS->Get('PM-TXT');
 		my $json = JSON::PP->new->canonical(1);  # キーを辞書順にソート
 		my $json_text = $json->encode(\%bbsmenu_json);
 		print $fh $json_text;
