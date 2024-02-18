@@ -1651,12 +1651,14 @@ sub IsProxyDNSBL
 	my @dnsbls = ();
 	
 	push(@dnsbls, 'torexit.dan.me.uk') if($Sys->Get('DNSBL_TOREXIT'));# Tor検出用
+	push(@dnsbls, 'all.s5h.net') if($Sys->Get('DNSBL_S5H'));
+	push(@dnsbls, 'dnsbl.dronebl.org') if($Sys->Get('DNSBL_DRONEBL'));
 	
 	# DNSBL問い合わせ
 	foreach my $dnsbl (@dnsbls) {
-		if (CheckDNSBL($ENV{'REMOTE_ADDR'},$dnsbl,'127.0.0.100')) {
+		if (CheckDNSBL($ENV{'REMOTE_ADDR'},$dnsbl)) {
 			$Form->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
-			$Sys->Set('ISPROXY','tor');
+			$Sys->Set('ISPROXY','dnsbl');
 			return ($mode eq 'P' ? 0 : 1);
 		}
 	}
@@ -1672,7 +1674,7 @@ sub IsProxyDNSBL
 #------------------------------------------------------------------------------------------------------------
 sub CheckDNSBL {
 	my $this = shift;
-    my ($ip, $DNSBL_host, $expected_ip) = @_;
+    my ($ip, $DNSBL_host) = @_;
     my $reversed_ip = '';
 	require Net::DNS;
 
@@ -1695,8 +1697,8 @@ sub CheckDNSBL {
 
     if ($query) {
         foreach my $rr ($query->answer) {
-            next unless $rr->type eq "A";
-            return 1 if $rr->address eq $expected_ip;  # 期待されるIPアドレスにマッチした場合は1を返す
+            next unless $rr->type eq "A";  # Aレコードが見つかった場合
+            return 1;  # Aレコードであれば1を返す
         }
     }
     return 0;  # マッチしない場合は0を返す

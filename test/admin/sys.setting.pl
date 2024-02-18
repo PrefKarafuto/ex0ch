@@ -651,7 +651,7 @@ sub PrintPlusSecSetting
 	
 	my ($Page, $SYS, $Form) = @_;
 	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha);
-	my ($kakiko, $trip12, $torexit);
+	my ($kakiko, $trip12, $torexit, $s5h, $dronebl);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Regulation Setting');
@@ -675,6 +675,8 @@ sub PrintPlusSecSetting
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
 	$torexit	= ($TOREXIT == 1 ? 'checked' : '');
+	$s5h		= ($SYS->Get('DNSBL_S5H') == 1 ? 'checked' : '');
+	$dronebl	= ($SYS->Get('DNSBL_DRONEBL') == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -705,6 +707,10 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください<br>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_TOREXIT $torexit value=on>");
 	$Page->Print("<a href=\"https://www.dan.me.uk/dnsbl\" target=\"_blank\">Dan.me.uk</a>(Tor出口ノード判定)\n");
+	$Page->Print("<input type=checkbox name=DNSBL_S5H $s5h value=on>");
+	$Page->Print("<a href=\"http://www.usenix.org.uk/content/rbl.html\" target=\"_blank\">S5H</a>\n");
+	$Page->Print("<input type=checkbox name=DNSBL_DRONEBL $dronebl value=on>");
+	$Page->Print("<a href=\"https://dronebl.org/\" target=\"_blank\">DroneBL</a>\n");
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">外部APIキー</td></tr>\n");
@@ -1256,6 +1262,8 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('DEFHOUSHI', $Form->Get('DEFHOUSHI'));
 	$SYSTEM->Set('TRIP12', ($Form->Equal('TRIP12', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_TOREXIT', ($Form->Equal('DNSBL_TOREXIT', 'on') ? 1 : 0));
+	$SYSTEM->Set('DNSBL_S5H', ($Form->Equal('DNSBL_S5H', 'on') ? 1 : 0));
+	$SYSTEM->Set('DNSBL_DRONEBL', ($Form->Equal('DNSBL_DRONEBL', 'on') ? 1 : 0));
 	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));
 	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
 	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));

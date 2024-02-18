@@ -297,6 +297,8 @@ sub InitSystemValue
 		
 		# DNSBL設定
 		'DNSBL_TOREXIT'	=> 0,									# torexit.dan.me.uk
+		'DNSBL_S5H'	=> 0,										# all.s5h.net
+		'DNSBL_DRONEBL'	=> 0,									# dnsbl.dronebl.org
 
 		'SECURITY_KEY'	=> '',									# セキュリティキー（初回起動時に自動設定されます）
 		'LAST_FLUSH'	=> '',									# 定期的に動かす必要がある機能用
