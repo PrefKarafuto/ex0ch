@@ -81,7 +81,9 @@ sub Load
     #パスワードがあった場合
     if($password && $Set->Get('BBS_NINJA')){
         my $ctx = Digest::MD5->new;
-        my $long_expiry = 60*60*24*365;
+        my $exp = $Sys->Get('PASS_EXPITY');
+        my $long_expiry = 60*60*24*$exp;
+        
         $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
         $ctx->add(':', $password);
@@ -296,9 +298,9 @@ sub Save
 	if($this->{'SESSION'}){
         # セッション有効期限を30日後に設定
         if($session->param('password')){
-            $session->expire('1y');
+            $session->expire($Sys->Get('PASS_EXPIRY').'d');
         }else{
-            $session->expire('30d');
+            $session->expire($Sys->Get('NIN_EXPIRY').'d');
         }
         # セッションを閉じる
         $session->flush();

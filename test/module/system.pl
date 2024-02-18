@@ -312,6 +312,8 @@ sub InitSystemValue
 		'NINLVMAX'		=> 40,
 
 		'COOKIE_EXPIRY'	=> 30,									# Cookie期限
+		'NIN_EXPIRY'	=> 30,
+		'PASS_EXPIRY'	=> 365,
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,
