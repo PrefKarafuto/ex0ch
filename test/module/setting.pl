@@ -393,11 +393,14 @@ sub InitSettingData
 		'BBS_HIDENUSI'			=> '',
 		'BBS_MAILFIELD'			=> 'checked',
 
-		#忍法帖関連
+		#忍法帖関連(必要Lv-消費Lv)
+		'NINLA_WRITE_MESSAGE'	=> 0,
 		'NINJA_FORCE_SAGE'		=> 2,
-		'NINJA_MAKE_THREAD'		=> 2,
-		'NINJA_THREAD_STOP'		=> 10,
-		'NINJA_USER_BAN'		=> 10,
+		'NINJA_MAKE_THREAD'		=> '2-0',
+		'NINJA_USE_COMMAND'		=> '5-0',
+		'NINJA_THREAD_STOP'		=> '10-1',
+		'NINJA_USER_BAN'		=> '10-2',
+		'NINJA_RES_DELETE'		=> '20-3',
 	);
 	
 	while (my ($key, $val) = each(%set)) {

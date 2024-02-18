@@ -12,6 +12,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use HTML::Entities;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -332,7 +333,7 @@ sub PrintThreadList
 		
 		my $isSLIP = $Threads->GetAttr($id, 'slip');
 		my $is774 = $Threads->GetAttr($id, 'change774');
-		$is774 = decoded_content($is774); 
+		$is774 = HTML::Entities::decode($is774);
 		my $maxres = $Threads->GetAttr($id, 'maxres');
 		my $ninlv = $Threads->GetAttr($id, 'ninlv');
 		my @attrstr = ();

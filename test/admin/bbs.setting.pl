@@ -90,6 +90,9 @@ sub DoPrint
  	elsif ($subMode eq 'SETCOMMAND') {												# ユーザーコマンド設定画面
 		PrintCommandSetting($Page, $Sys, $Form);
 	}
+	elsif ($subMode eq 'SETNINPOCHO') {												# 忍法帖設定画面
+		PrintNinpochoSetting($Page, $Sys, $Form);
+	}
 	elsif ($subMode eq 'SETOTHER') {												# その他設定画面
 		PrintOtherSetting($Page, $Sys, $Form);
 	}
@@ -151,6 +154,9 @@ sub DoFunction
  	elsif ($subMode eq 'SETCOMMAND') {												# ユーザーコマンド設定
 		$err = FunctionCommandSetting($Sys, $Form, $this->{'LOG'});
 	}
+	elsif ($subMode eq 'SETNINPOCHO') {												# 忍法帖設定
+		$err = FunctionNinpochoSetting($Sys, $Form, $this->{'LOG'});
+	}
 	elsif ($subMode eq 'SETOTHER') {												# その他設定
 		$err = FunctionOtherSetting($Sys, $Form, $this->{'LOG'});
 	}
@@ -196,6 +202,7 @@ sub SetMenuList
 		$Base->SetMenu('カラー設定', "'bbs.setting','DISP','SETCOLOR'");
 		$Base->SetMenu('制限・規制設定', "'bbs.setting','DISP','SETLIMIT'");
   		$Base->SetMenu('ユーザーコマンド設定', "'bbs.setting','DISP','SETCOMMAND'");
+		$Base->SetMenu('忍法帖設定', "'bbs.setting','DISP','SETNINPOCHO'");
 		$Base->SetMenu('その他設定', "'bbs.setting','DISP','SETOTHER'");
 		$Base->SetMenu('<hr>', '');
 		$Base->SetMenu('設定インポート', "'bbs.setting','DISP','SETIMPORT'");
@@ -787,6 +794,73 @@ sub PrintCommandSetting
 }
 #------------------------------------------------------------------------------------------------------------
 #
+#	忍法帖設定画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintNinpochoSetting
+{
+	my ($Page, $Sys, $Form) = @_;
+	
+	$Sys->Set('_TITLE', 'BBS Ninpocho Setting');
+	
+	require './module/setting.pl';
+	my $Setting = SETTING->new;
+	$Setting->Load($Sys);
+
+	my $ninlstat = $Setting->Get('BBS_NINJA') ? '最大Lv：'.$Sys->Get('NINLVMAX') : '無効';
+	
+	my $setWrite		= $Setting->Get('NINJA_WRITE_MESSAGE');
+	my $setSage			= $Setting->Get('NINJA_FORCE_SAGE');
+
+	my ($setThread,$thcost)		= split(/-/,$Setting->Get('NINJA_MAKE_THREAD'));
+	my ($setCommand,$comcost)		= split(/-/,$Setting->Get('NINJA_USE_COMMAND'));
+	my ($setStop,$stopcost)			= split(/-/,$Setting->Get('NINJA_THREAD_STOP'));
+	my ($setBan,$bancost)			= split(/-/,$Setting->Get('NINJA_USER_BAN'));
+	my ($setDelete,$delcost)		= split(/-/,$Setting->Get('NINJA_RES_DELETE'));
+
+	
+	$Page->Print("<center><table cellspcing=2 width=100%>");
+	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
+	$Page->Print("<tr><td colspan=4><hr><font size=4>忍法帖 $ninlstat</font><hr></td></tr>");
+	
+	$Page->Print("<tr><td class=\"DetailTitle\">書き込み可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_WRITE_MESSAGE value=\"$setWrite\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">sageを強制するレベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_FORCE_SAGE value=\"$setWrite\">まで</td>");
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">スレ立て可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_MAKE_THREAD value=\"$setThread\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_TH value=\"$thcost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">各種コマンド使用可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setWrite\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_COM value=\"$comcost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">スレスト可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_THREAD_STOP value=\"$setStop\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_STOP value=\"$stopcost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">BAN可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_USER_BAN value=\"$setBan\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_BAN value=\"$bancost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">レス削除可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_RES_DELETE value=\"$setDelete\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_DEL value=\"$delcost\"></td>");
+	
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
+	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETNINPOCHO');\"></td></tr></table>");
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
 #	その他設定画面の表示
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	ページコンテキスト
@@ -1237,6 +1311,54 @@ sub FunctionCommandSetting
 	}
 	
 	$Setting->Set('BBS_COMMAND', $commandSet);
+	$Setting->Save($Sys);
+	
+	return 0;
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	忍法帖設定
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionNinpochoSetting
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my ($Setting);
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_BBSSETTING, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	# 入力チェック
+	{
+		my @inList = qw(NINLA_WRITE_MESSAGE NINJA_FORCE_SAGE NINJA_MAKE_THREAD NINJA_USER_BAN
+		 NINJA_USE_COMMAND NINJA_THREAD_STOP NINJA_RES_DELETE);
+		foreach (@inList) {
+			push @$pLog, "「$_」を「" . $Form->Get($_) . '」に設定';
+		}
+	}
+	require './module/setting.pl';
+	$Setting = SETTING->new;
+	$Setting->Load($Sys);
+	
+	$Setting->Set('NINLA_WRITE_MESSAGE', $Form->Get('NINLA_WRITE_MESSAGE'));
+	$Setting->Set('NINJA_FORCE_SAGE', $Form->Get('NINJA_FORCE_SAGE'));
+	$Setting->Set('NINJA_MAKE_THREAD', $Form->Get('NINJA_MAKE_THREAD').'-'.$Form->Get('COST_TH'));
+	$Setting->Set('NINJA_USER_BAN', $Form->Get('NINJA_USER_BAN').'-'.$Form->Get('COST_BAN'));
+	$Setting->Set('NINJA_USE_COMMAND', $Form->Get('NINJA_USE_COMMAND').'-'.$Form->Get('COST_COM'));
+	$Setting->Set('NINJA_THREAD_STOP', $Form->Get('NINJA_THREAD_STOP').'-'.$Form->Get('COST_STOP'));
+	$Setting->Set('NINJA_RES_DELETE', $Form->Get('NINJA_RES_DELETE').'-'.$Form->Get('COST_DEL'));
+
 	$Setting->Save($Sys);
 	
 	return 0;
