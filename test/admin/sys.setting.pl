@@ -670,6 +670,7 @@ sub PrintPlusSecSetting
 	my $TurnSet = $Captcha eq 'cf-turnstile' ? 'selected' : '';
 	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
 	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
+	my $Proxy_apikey  = $SYS->Get('PROXYCHECK_APIKEY');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
@@ -719,7 +720,7 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr><td>Captchaシークレットキー</td>");
 	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
 	$Page->Print("<tr><td><a href=\"https://proxycheck.io/api/\">ProxyCheck</a> APIキー</td>");
-	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"\" disabled></td></tr>\n");
+	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"$Proxy_apikey\"></td></tr>\n");
 
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -1258,6 +1259,7 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));
 	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
 	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));
+	$SYSTEM->Set('PROXYCHECK_APIKEY', $Form->Get('PROXYCHECK_APIKEY'));
 	$SYSTEM->Save();
 	
 	{
@@ -1267,8 +1269,9 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 Samba奉仕時間：' . $SYSTEM->Get('DEFHOUSHI');
 		push @$pLog, '　　　 12桁トリップ：' . $SYSTEM->Get('TRIP12');
 		push @$pLog, '　　　 Dan.me.uk：' . $SYSTEM->Get('DNSBL_TOREXIT');
-		push @$pLog, '　　　 hCaptchaサイトキー：' . $SYSTEM->Get('CAPTCHA_SITEKEY');
-		push @$pLog, '　　　 hCaptchaシークレットキー：' . $SYSTEM->Get('CAPTCHA_SECRETKEY');
+		push @$pLog, '　　　 Captchaサイトキー：' . $SYSTEM->Get('CAPTCHA_SITEKEY');
+		push @$pLog, '　　　 Captchaシークレットキー：' . $SYSTEM->Get('CAPTCHA_SECRETKEY');
+		push @$pLog, '　　　 ProxyChecker APIキー：' . $SYSTEM->Get('PROXYCHECK_APIKEY');
 	}
 	return 0;
 }
