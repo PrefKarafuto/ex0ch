@@ -591,6 +591,8 @@ HTML
 <a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 BBS.CGI - $ver (Perl)
 @{[ $Sys->Get('DNSBL_TOREXIT') ? '+dan.me.uk' : '' ]}
+@{[ $Sys->Get('DNSBL_S5H') ? '+S5H' : '' ]}
+@{[ $Sys->Get('DNSBL_DRONEBL') ? '+DeoneBL' : '' ]}
 @{[ $Set->Get('BBS_NINJA') ? '+忍法帖' : '' ]}
 @{[ $Set->Get('BBS_AUTH') ? '+ユーザー認証' : '' ]}
 +Samba24=$samba<br>
