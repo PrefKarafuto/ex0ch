@@ -838,9 +838,9 @@ sub PrintNinpochoSetting
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=COST_TH value=\"$thcost\"></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">各種コマンド使用可能レベル</td><td>");
-	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setWrite\" disabled>以上</td>");
+	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setWrite\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
-	$Page->Print("<input type=text size=8 name=COST_COM value=\"$comcost\"></td>");
+	$Page->Print("<input type=text size=8 name=COST_COM value=\"$comcost\" disabled></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレスト可能レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=NINJA_THREAD_STOP value=\"$setStop\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
