@@ -831,14 +831,14 @@ sub PrintNinpochoSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">書き込み可能レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=NINJA_WRITE_MESSAGE value=\"$setWrite\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">sageを強制するレベル</td><td>");
-	$Page->Print("<input type=text size=8 name=NINJA_FORCE_SAGE value=\"$setWrite\">まで</td>");
+	$Page->Print("<input type=text size=8 name=NINJA_FORCE_SAGE value=\"$setSage\">まで</td>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレ立て可能レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=NINJA_MAKE_THREAD value=\"$setThread\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=COST_TH value=\"$thcost\"></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">各種コマンド使用可能レベル</td><td>");
-	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setWrite\">以上</td>");
+	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setCommand\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=COST_COM value=\"$comcost\" disabled></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレスト可能レベル</td><td>");
