@@ -649,9 +649,9 @@ sub PrintPlusSecSetting
 	$Captcha	= $SYS->Get('CAPTCHA');
 	
 	my $noCapSet = $Captcha ? '':'selected';
-	my $hCapSet = $Captcha eq 'hcaptcha' ? 'selected' : '';
-	my $reCapSet = $Captcha eq 'recaptcha' ? 'selected' : '';
-	my $TurnSet = $Captcha eq 'turnstile' ? 'selected' : '';
+	my $hCapSet = $Captcha eq 'h-captcha' ? 'selected' : '';
+	my $reCapSet = $Captcha eq 'g-recaptcha' ? 'selected' : '';
+	my $TurnSet = $Captcha eq 'cf-turnstile' ? 'selected' : '';
 	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
 	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
 
