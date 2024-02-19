@@ -327,6 +327,7 @@ sub InitSettingData
 		'timecount'			=> 7,
 		'timeclose'			=> 5,
 		'BBS_PROXY_CHECK'		=> '',
+		'BBS_DNSBL_CHECK'		=> '',
 		'BBS_OVERSEA_THREAD'		=> '',
 		'BBS_OVERSEA_PROXY'		=> '',
 		'BBS_RAWIP_CHECK'		=> '',

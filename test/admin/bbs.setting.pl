@@ -537,11 +537,13 @@ sub PrintLimitSetting
 	require './module/setting.pl';
 	my $Setting = SETTING->new;
 	$Setting->Load($Sys);
-	my $DNSBL = $Sys->Get('SPAMHAUS');
-	$DNSBL += $Sys->Get('SPAMCOP');
-	$DNSBL += $Sys->Get('BARRACUDA');
-	my $setDNSBL = ($DNSBL?'':'disabled');
+	my $DNSBL = $Sys->Get('DNSBL_TOREXIT');
+	$DNSBL += $Sys->Get('DNSBL_S5H');
+	$DNSBL += $Sys->Get('DNSBL_DRONEBL');
+	my $isDNSBL = ($DNSBL?'':'disabled');
 	my $setInfo = ($DNSBL == 0 ? 'システム設定でDNSBLが選択されていません' : '有効');
+	my $isProxyApi = $Sys->Get('PROXYCHECK_APIKEY') ? '':'disabled';
+	my $setInfo2 = $isProxyApi eq 'disabled' ? 'システム設定でAPIキーが設定されていません' : '有効';
 	# 設定値を取得
 	my $setResMax		= $Setting->Get('BBS_RES_MAX');
 	my $setSubMax		= $Setting->Get('BBS_SUBJECT_MAX');		# 最大スレッド数
@@ -554,6 +556,7 @@ sub PrintLimitSetting
 	my $setContinueMax	= $Setting->Get('timecount')||0;
 	my $setNoName		= $Setting->Get('NANASHI_CHECK');
 	my $setProxy		= $Setting->Get('BBS_PROXY_CHECK');
+	my $setDNSBL		= $Setting->Get('BBS_DNSBL_CHECK');
 	my $setOverSea		= $Setting->Get('BBS_JP_CHECK');
 	my $setTomato		= $Setting->Get('BBS_RAWIP_CHECK');
 	
@@ -619,8 +622,8 @@ sub PrintLimitSetting
 	$Page->Print("<option value=caps $selROcaps>キャップのみ可能");
 	$Page->Print("<option value=none $selROnone>書き込み可能");
 	$Page->Print("</select></td>");
-	$Page->Print("<td class=\"DetailTitle\">DNSBL/Proxyチェック</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK $setProxy value=on $setDNSBL>$setInfo</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">DNSBLチェック</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_DNSBL_CHECK $setDNSBL value=on $isDNSBL>$setInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(キャップ)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADCAPONLY $setCapOnly value=on>キャップのみ可能\</td>");
 	$Page->Print("<td class=\"DetailTitle\">海外ホスト規制</td><td>");
@@ -633,6 +636,10 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
 	$Page->Print("<td class=\"DetailTitle\">逆引き不可のIPからの投稿を制限</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_REVERSE_CHECK value=on $setReverse></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">プロキシ規制</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK value=on $setProxy>$setInfo2</td>");
+	$Page->Print("<td class=\"DetailTitle\">???</td><td>");
+	$Page->Print("<input type=checkbox name= value=on disabled></td></tr>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -1178,9 +1185,9 @@ sub FunctionLimitSetting
 {
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting);
-	my $DNSBL = $Sys->Get('SPAMHAUS');
-	$DNSBL += $Sys->Get('SPAMCOP');
-	$DNSBL += $Sys->Get('BARRACUDA');
+	my $DNSBL = $Sys->Get('DNSBL_TOREXIT');
+	$DNSBL += $Sys->Get('DNSBL_S5H');
+	$DNSBL += $Sys->Get('DNSBL_DRONEBL');
 	# 権限チェック
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
@@ -1234,8 +1241,11 @@ sub FunctionLimitSetting
 	$Setting->Set('timecount', $Form->Get('timecount'));
 	$Setting->Set('timeclose', $Form->Get('timeclose'));
 	$Setting->Set('NANASHI_CHECK', ($Form->Equal('NANASHI_CHECK', 'on') ? 'checked' : ''));
-	if($DNSBL != 0){
+	if($Sys->Get('PROXYCHECK_APIKEY')){
 	$Setting->Set('BBS_PROXY_CHECK', ($Form->Equal('BBS_PROXY_CHECK', 'on') ? 'checked' : ''));
+	}
+	if($DNSBL != 0){
+	$Setting->Set('BBS_DNSBL_CHECK', ($Form->Equal('BBS_DNSBL_CHECK', 'on') ? 'checked' : ''));
 	}
 	$Setting->Set('BBS_JP_CHECK', ($Form->Equal('BBS_JP_CHECK', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_RAWIP_CHECK', ($Form->Equal('BBS_RAWIP_CHECK', 'on') ? 'checked' : ''));

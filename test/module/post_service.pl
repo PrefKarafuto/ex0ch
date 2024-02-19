@@ -1169,10 +1169,10 @@ sub IsRegulation
 		# PROXYチェック
 		if ($this->{'CONV'}->IsProxyDNSBL($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {
 			#$this->{'FORM'}->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
-			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {
+			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_DNSBL_CHECK', 'checked')) {
 				return $ZP::E_REG_DNSBL;
 			}
-			$Sys->Set('ISPROXY','tor');
+			$Sys->Set('ISPROXY','bl');
 		}elsif($this->{'CONV'}->IsProxyAPI($this->{'SYS'},1) && $Sys->Get('PROXYCHECK_APIKEY')){
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {
 				return $ZP::E_REG_DNSBL;
