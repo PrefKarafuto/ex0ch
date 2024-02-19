@@ -263,19 +263,19 @@ sub Save
 	my $ninDir = ".$infoDir/.ninpocho/";
     my $sid = $this->{'SID'};
     my $session = $this->{'SESSION'};
-    my $pass_hash = '';
 
-	# SIDをクッキーに出力
-	$Cookie->Set('countsession', $sid);
-
+    # セキュリティキー生成
     my $ctx = Digest::MD5->new;
     $ctx->add($Sys->Get('SECURITY_KEY'));
     $ctx->add(':', $sid);
     my $sec = $ctx->b64digest;
     $Cookie->Set('securitykey', $sec);
+    $Cookie->Set('countsession', $sid);
+
+    return unless $session;
 
     # Hashテーブルを設定
-    if(!$this->{'ANON_FLAG'} && $session){
+    if(!$this->{'ANON_FLAG'}){
         my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx2 = Digest::MD5->new;
         $ctx2->add(':', $Sys->Get('SERVER'));
@@ -286,25 +286,27 @@ sub Save
         SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
         SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
     }
-    if ($password && $session) {
+    if ($password) {
         my $ctx3 = Digest::MD5->new;
         $ctx3->add(':', $Sys->Get('SERVER'));
         $ctx3->add(':', $password);
-        $pass_hash = $ctx3->b64digest;
+        my $pass_hash = $ctx3->b64digest;
+        # 既にpasswordが設定されていた場合、既存のパスワードを削除
+        if($session->param('password')){
+            DeleteHash($session->param('password'),'hash/password.cgi');
+        }
         SetHash($pass_hash,$sid,time,$ninDir.'hash/password.cgi');
         $session->param('password',$pass_hash);
     }
 
-	if($this->{'SESSION'}){
-        # セッション有効期限を30日後に設定
-        if($session->param('password')){
-            $session->expire($Sys->Get('PASS_EXPIRY').'d');
-        }else{
-            $session->expire($Sys->Get('NIN_EXPIRY').'d');
-        }
-        # セッションを閉じる
-        $session->flush();
+    # セッション有効期限を設定
+    if($session->param('password')){
+        $session->expire($Sys->Get('PASS_EXPIRY').'d');
+    }else{
+        $session->expire($Sys->Get('NIN_EXPIRY').'d');
     }
+    # セッションを閉じる
+    $session->flush();
 }
 
 # ハッシュテーブルをファイルから読み込む関数
