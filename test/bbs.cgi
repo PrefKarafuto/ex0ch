@@ -12,6 +12,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 no warnings 'once';
+use CGI::Cookie;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
