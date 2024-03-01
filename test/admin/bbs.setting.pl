@@ -846,7 +846,7 @@ sub PrintNinpochoSetting
 	$Page->Print("<input type=text size=8 name=COST_TH value=\"$thcost\"></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">各種コマンド使用可能レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setCommand\">以上</td>");
-	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"opacity: 0.5;\">消費レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=COST_COM value=\"$comcost\" disabled></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレスト可能レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=NINJA_THREAD_STOP value=\"$setStop\">以上</td>");
@@ -1361,7 +1361,7 @@ sub FunctionNinpochoSetting
 	$Setting = SETTING->new;
 	$Setting->Load($Sys);
 	
-	$Setting->Set('NINLA_WRITE_MESSAGE', $Form->Get('NINLA_WRITE_MESSAGE'));
+	$Setting->Set('NINJA_WRITE_MESSAGE', $Form->Get('NINLA_WRITE_MESSAGE'));
 	$Setting->Set('NINJA_FORCE_SAGE', $Form->Get('NINJA_FORCE_SAGE'));
 	$Setting->Set('NINJA_MAKE_THREAD', $Form->Get('NINJA_MAKE_THREAD').'-'.$Form->Get('COST_TH'));
 	$Setting->Set('NINJA_USER_BAN', $Form->Get('NINJA_USER_BAN').'-'.$Form->Get('COST_BAN'));
