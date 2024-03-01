@@ -192,7 +192,7 @@ sub SetMenuList
 sub PrintBBSList
 {
 	my ($Page, $SYS, $Form) = @_;
-	my ($BBS, $Category, @bbsSet, @catSet, $id, $name, $category, $subject);
+	my ($BBS, $Category, @bbsSet, @catSet, $id, $name, $category, $subject, $state);
 	my ($common1, $common2, $sCat, @belongBBS, $belongID, $isSysad);
 	
 	$SYS->Set('_TITLE', 'BBS List');
@@ -264,13 +264,14 @@ sub PrintBBSList
 	}
 	$common1 = "onclick=\"DoSubmit('sys.bbs','FUNC'";
 	$common2 = "onclick=\"DoSubmit('sys.bbs','DISP'";
+	$state = -f "../bbsmenu.html" ? '更新':'作成';
 	
 	$Page->HTMLInput('hidden', 'TARGET_BBS', '');
 	$Page->Print("<tr><td colspan=4 align=left><hr>");
 	$Page->Print("<input type=button value=\"カテゴリ変更\" $common2,'CATCHANGE')\"> ")	if (1);
 	$Page->Print("<input type=button value=\"情報更新\" $common1,'UPDATE')\"> ")		if ($isSysad);
 	$Page->Print("<input type=button value=\"index更新\" $common1,'UPDATEBBS')\"> ")	if (1);
-	$Page->Print("<input type=button value=\"bbsmenu更新\" $common1,'UPDATEBBSMENU')\"> ")	if (1);
+	$Page->Print("<input type=button value=\"bbsmenu$state\" $common1,'UPDATEBBSMENU')\"> ")	if (1);
 	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\"> ")		if ($isSysad);
 	$Page->Print("</td></tr></table>\n");
 }
