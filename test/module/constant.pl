@@ -152,7 +152,9 @@ our $CAP_DISP_CUSTOMID			= 24; # 専用ID許可
 our $CAP_REG_COMMAND			= 25; # コマンド許可
 our $CAP_REG_NOATTR			    = 26; # スレッド属性による規制解除
 our $CAP_REG_NOHOST             = 27; # 逆引き不可規制解除
-our $CAP_MAXNUM					= 27;
+our $CAP_REG_NONINJA            = 28; # 忍法帖規制解除
+our $CAP_REG_NOCAPTCHA          = 29; # キャプチャ規制解除
+our $CAP_MAXNUM					= 29;
 # USER AUTHORITY
 our $AUTH_SYSADMIN		=  0; # システム管理権限(形式的に)
 our $AUTH_USERGROUP		=  1; # 管理グループ設定

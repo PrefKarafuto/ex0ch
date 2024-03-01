@@ -704,7 +704,7 @@ sub PrintPlusSecSetting
 	$Page->Print("<td><input type=checkbox name=TRIP12 $trip12 value=on></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">DNSBL設定</td></tr>\n");
-	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください<br>\n");
+	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください(規制を行う場合は各掲示板の設定で有効にしてください)<br>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_TOREXIT $torexit value=on>");
 	$Page->Print("<a href=\"https://www.dan.me.uk/dnsbl\" target=\"_blank\">Dan.me.uk</a>(Tor出口ノード判定)\n");
 	$Page->Print("<input type=checkbox name=DNSBL_S5H $s5h value=on>");

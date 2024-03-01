@@ -30,6 +30,8 @@ sub new
         'SESSION'	    => undef,   # セッションオブジェクト
         'SID'	        => undef,   # セッションID
         'ANON_FLAG'     => undef,   # 匿名化状態か
+        'CREATE_FLAG'   => undef,   # 新規作成か
+        'LOAD_FLAG'     => undef,   # passからロードか
 	};
 	bless $obj, $class;
 	
@@ -77,25 +79,24 @@ sub Load
             $sid = GetHash(MakeUserInfo($Sys),$expiry,$ninDir.'hash/user_info.cgi');
         }
     }
-
-    #パスワードがあった場合
-    if($password && $Set->Get('BBS_NINJA')){
-        my $ctx = Digest::MD5->new;
-        my $exp = $Sys->Get('PASS_EXPITY');
-        my $long_expiry = 60*60*24*$exp;
-        
-        $ctx->add('ex0ch ID Generation');
-        $ctx->add(':', $Sys->Get('SERVER'));
-        $ctx->add(':', $password);
-
-        $sid_saved = GetHash($ctx->b64digest,$long_expiry,$ninDir.'hash/password.cgi');
-        if($sid_saved && $sid_saved ne $sid){
-            $sid_before = $sid;
-            $sid = $sid_saved;
-        }
-    }
-
+    
     if($Set->Get('BBS_NINJA')){
+        #パスワードがあった場合
+        if($password){
+            my $ctx = Digest::MD5->new;
+            my $exp = $Sys->Get('PASS_EXPITY');
+            my $long_expiry = 60*60*24*$exp;
+            
+            $ctx->add('ex0ch ID Generation');
+            $ctx->add(':', $Sys->Get('SERVER'));
+            $ctx->add(':', $password);
+
+            $sid_saved = GetHash($ctx->b64digest,$long_expiry,$ninDir.'hash/password.cgi');
+            if($sid_saved && $sid_saved ne $sid){
+                $sid_before = $sid;
+                $sid = $sid_saved;
+            }
+        }
         #忍法帖が有効の場合
         my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
         if($session ->is_empty){
@@ -122,6 +123,9 @@ sub Load
                 $session->param('load_addr',$ENV{'REMOTE_ADDR'});
                 $session->param('load_host',$ENV{'REMOTE_HOST'});
                 $session->param('load_ua',$ENV{'HTTP_USER_AGENT'});
+            }else{
+                # 通常時処理
+                # ninpocho.plでは行わない
             }
         }
         $this->{'SESSION'} = $session;
@@ -135,7 +139,7 @@ sub Load
             $this->{'SID'} = generate_id();
         }
     }
-
+    $Sys->Set('SID',$sid);
     return $sid;
 }
 # セッションIDから忍法帖を読み込む(admin.cgi用)

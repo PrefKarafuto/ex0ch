@@ -142,7 +142,7 @@ sub Write
 	#コマンドによる過去ログ送り用（猶予のため）
 	ToKakoLog($Sys,$Set,$Threads);
 
-	#忍法帖が設定されていたらID生成に使用
+	#忍法帖が設定されていたら
 	my $isNinja = $Set->Get('BBS_NINJA');
 
 	# SLIP
@@ -167,6 +167,9 @@ sub Write
 	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 	my $handle = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_HANLDLE, $Form->Get('bbs'));
 	my $noslip = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_NOSLIP, $Form->Get('bbs'));
+	my $noid = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_NOID, $Form->Get('bbs'));
+	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
+	my $noCaptcha = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOCAPTCHA, $Form->Get('bbs'));
 	
 	# BBS_SLIP付加とID末尾取得
 	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
@@ -175,7 +178,7 @@ sub Write
 
 	my $sid = $Ninja->Load($Sys,$idEnd,undef);
 	# hCaptcha認証
-	if ($Set->Get('BBS_CAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha'))){
+	if ($Set->Get('BBS_CAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) && !$noCaptcha){
 		$err = $this->Certification_Captcha($Sys,$Form);
 		return $err if $err;
 	}
@@ -183,26 +186,27 @@ sub Write
 	#忍法帖パス
 	my $password = '';
 	my $ninmail = $Form->Get('mail');
-	if($ninmail=~ /(^|<br>)!load:(.){10,30}(<br>|$)/ && $isNinja){
-		$password = $2;
+	if($ninmail=~ /!load:(.){10,30}/ && $isNinja){
+		$password = $1;
 		$ninmail =~ s/!load:(.){10,30}//;
 		$Form->Set('mail',$ninmail);
 		$sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
-	}elsif($ninmail =~ /(^|<br>)!save:(.){10,30}(<br>|$)/ && $isNinja){
-		$password = $2;
-		$ninmail =~ s/!lsave:(.){10,30}//;
+	}
+	elsif($ninmail =~ /!save:(.){10,30}/ && $isNinja){
+		$password = $1;
+		$ninmail =~ s/!save:(.){10,30}//;
 		$Form->Set('mail',$ninmail);
 	}
 	$Sys->Set('SID',$sid);
 	
 	#BANチェック
-	return $ZP::E_REG_BAN if($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1)));
+	return $ZP::E_REG_BAN if(!$noNinja&&($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1))));
 	
 	# レベル制限
 	my $ninlv = $Ninja->Get('ninlv');
 	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
-	if($isNinja){
+	if($isNinja && !$noNinja){
 		if($Sys->Equal('MODE', 0)){
 			# 書き込みモード
 			if($ninlv < $write_min) {
@@ -254,10 +258,10 @@ sub Write
 	$Sys->Set('updown', $updown);
 	
 	# 書き込み直前処理
-	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja->Get('ban_command'),$Ninja);
+	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja->Get('ban_command'),$Ninja,$ninlv);
 	return $err if ($err != $ZP::E_SUCCESS);
 	# 忍法帖
-	if($isNinja){
+	if($Sys->Get('BBS_NINJA')){
 		my $ninerr = $this->Ninpocho($Sys,$Set,$Form,$Ninja,$sid);
 		return $ninerr if ($ninerr != $ZP::E_SUCCESS);
 	}
@@ -272,7 +276,7 @@ sub Write
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
-	unless ($Set->Get('BBS_HIDENUSI') || $Threads->GetAttr($threadid,'hidenusi')){
+	unless ($Set->Get('BBS_HIDENUSI') || $Threads->GetAttr($threadid,'hidenusi') || $handle){
 		$idpart .= '(主)' if (($sid eq $nusisid) || $Sys->Equal('MODE', 1));
 	}
 	$bepart = $Form->Get('BEID', '');
@@ -282,9 +286,14 @@ sub Write
 	$info .= " $bepart" if ($bepart ne '');
 	$info .= " $extrapart" if ($extrapart ne '');
 
-	if($subject && $Set->Get('BBS_TITLEID') && $Sys->Equal('MODE', 1)){
+	if($subject && $Set->Get('BBS_TITLEID') && $Sys->Equal('MODE', 1) && !$noid){
 		# スレ立て時にスレタイにID付加
-		$subject = $subject." [$id★]";
+		if($handle){
+			my $capName = $Sec->Get($Sys->Get('CAPID'), 'NAME', 1, '');
+			$subject = $subject." [$capName★]";
+		}else{
+			$subject = $subject." [$id★]";
+		}
 	}
 	
 	my $data = "$name<>$mail<>$info<>$text<>$subject";
@@ -448,7 +457,7 @@ sub ReadyBeforeCheck
 sub ReadyBeforeWrite
 {
 	my $this = shift;
-	my ($res,$com,$Ninja) = @_;
+	my ($res,$com,$Ninja,$ninlv) = @_;
 	
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
@@ -516,7 +525,6 @@ sub ReadyBeforeWrite
 	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 
 	#スレ立て時用コマンド
-	my $ninlv = $Ninja->Get('ninlv');
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USE_COMMAND'));
 	if($com ne 'on' && (($Set->Get('BBS_NINJA') && $ninlv >= $min_level) || !$Set->Get('BBS_NINJA'))){
 		if($Sys->Equal('MODE', 1)){
