@@ -726,7 +726,7 @@ sub PrintCommandSetting
 	my $setadd = $setBitMask & 65536 ? 'checked' : '';
 	my $setfloat = $setBitMask & 131072 ? 'checked' : '';
 	my $setnopool = $setBitMask & 262144 ? 'checked' : '';
-	my $setdelete = '';#$setBitMask & 524288 ? 'checked' : '';
+	my $setdelete = $setBitMask & 524288 ? 'checked' : '';
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>有効にしたいコマンドにチェックを入れ、[設定]ボタンを押してください。</td></tr>");
@@ -775,25 +775,25 @@ sub PrintCommandSetting
 	$Page->Print("<tr><td colspan=4>スレッド中のみ</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">スレッドストップ（!stop）</td><td>");
-	$Page->Print("<input type=checkbox name=STOP value=128 $setstop></td></tr>");
+	$Page->Print("<input type=checkbox name=STOP value=128 $setstop>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">過去ログ送り（!pool）</td><td>");
-	$Page->Print("<input type=checkbox name=POOL value=512 $setpool></td></tr>");
+	$Page->Print("<input type=checkbox name=POOL value=512 $setpool>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\"w>コマンド取り消し（!delcmd:[command]）</td><td>");
-	$Page->Print("<input type=checkbox name=DELCMD value=256 $setdelcmd></td></tr>");
+	$Page->Print("<input type=checkbox name=DELCMD value=256 $setdelcmd>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">アクセス禁止（!ban:[>>レス番]）</td><td>");
-	$Page->Print("<input type=checkbox name=BAN value=4096 $setban></td></tr>");
+	$Page->Print("<input type=checkbox name=BAN value=4096 $setban>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">スレタイ変更（!changetitle:[新スレタイ]）</td><td>");
-	$Page->Print("<input type=checkbox name=CHTT value=16384 $setchtt></td></tr>");
+	$Page->Print("<input type=checkbox name=CHTT value=16384 $setchtt>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">追記（!add:[>>レス番]:[追記内容]）</td><td>");
-	$Page->Print("<input type=checkbox name=ADD value=65536 $setadd></td></tr>");
+	$Page->Print("<input type=checkbox name=ADD value=65536 $setadd>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番] </td><td>");
-	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete></td></tr>");
+	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete>有効</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
