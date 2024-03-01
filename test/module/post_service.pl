@@ -1496,7 +1496,7 @@ sub Certification_Captcha {
 	}else{
 		return 0;
 	}
-	
+
 	if($captcha_response){
 		my $ua = LWP::UserAgent->new();
 		my $response = $ua->post($url,{
@@ -1749,10 +1749,12 @@ sub Ninpocho
 	my $ninID = crypt($sid,$sid);
 	$name = $Ninja->Get('force_kote') if $Ninja->Get('force_kote');
 	$name = $Set->Get('BBS_NONAME_NAME') if $Ninja->Get('force_774');
-	$name =~ s|!id|</b>【忍法帖ID:$ninID】<b>|g;
-	$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|g;
-	$name =~ s|!ninja|</b>【忍法帖Lv.$ninLv】<b>|g;
-	$name =~ s|!total|</b>【総カキコ数:$count】<b>|g;
+	my $state = (split(/-/, $Set->Get('NINJA_MAKE_THREAD')))[0] <= $ninLv ? 'T':'';
+	$name =~ s|!ninja|</b> 忍法帖【Lv=$ninLv,xxxP$state,ID:$ninID】<b>|;
+	$name =~ s|!id|</b>【忍法帖ID:$ninID】<b>|;
+	$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|;
+	$name =~ s|!lv|</b>【忍法帖Lv.$ninLv】<b>|;
+	$name =~ s|!total|</b>【総カキコ数:$count】<b>|;
 
 	# 名前欄再設定
 	$Form->Set('FROM', $name);
