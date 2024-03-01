@@ -1496,9 +1496,9 @@ sub Certification_Captcha {
 	}else{
 		return 0;
 	}
-
-    my $ua = LWP::UserAgent->new();
+	
 	if($captcha_response){
+		my $ua = LWP::UserAgent->new();
 		my $response = $ua->post($url,{
 			secret => $secretkey,
 			response => $captcha_response,
