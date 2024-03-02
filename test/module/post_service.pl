@@ -1747,8 +1747,14 @@ sub Ninpocho
 	my $ninID = crypt($sid,$sid);
 	$name = $Ninja->Get('force_kote') if $Ninja->Get('force_kote');
 	$name = $Set->Get('BBS_NONAME_NAME') if $Ninja->Get('force_774');
-	my $state = (split(/-/, $Set->Get('NINJA_MAKE_THREAD')))[0] <= $ninLv ? 'T':'';
-	$name =~ s|!ninja|</b> 忍法帖【Lv=$ninLv,xxxP$state,ID:$ninID】<b>|;
+
+	my $B = (split(/-/, $Set->Get('NINJA_USER_BAN')))[0] <= $ninLv ? 'B':'x';		# BAN可
+	my $C = (split(/-/, $Set->Get('NINJA_USE_COMMAND')))[0] <= $ninLv ? 'C':'x';	# コマンド可
+	my $D = (split(/-/, $Set->Get('NINJA_RES_DELETE')))[0] <= $ninLv ? 'D':'x';		# レス削除可
+	my $P = $Set->Get('NINJA_WRITE_MESSAGE') <= $ninLv ? 'P': 'x';					# レス可
+	my $T = (split(/-/, $Set->Get('NINJA_MAKE_THREAD')))[0] <= $ninLv ? 'T':'x';	# スレたて可
+
+	$name =~ s|!ninja|</b> 忍法帖【Lv=$ninLv,$B$C$D$P$T,ID:$ninID】<b>|;
 	$name =~ s|!id|</b>【忍法帖ID:$ninID】<b>|;
 	$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|;
 	$name =~ s|!lv|</b>【忍法帖Lv.$ninLv】<b>|;
