@@ -585,6 +585,7 @@ HTML
 	# footの表示
 	$Caption->Load($Sys, 'FOOT');
 	$Caption->Print($Page, $Set);
+	$Page->Print("<div align=\"center\"><a href=\"./SETTING.TXT\">SETTING.TXT</div>");
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
