@@ -486,7 +486,7 @@ sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninlvmax, $cookieExp);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp);
 	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -502,7 +502,7 @@ sub PrintOtherSetting
 	$BBSGET		= $SYS->Get('BBSGET');
 	$upCheck	= $SYS->Get('UPCHECK');
 	$CSP		= $SYS->Get('CSP');
-	$ninlvmax	= $SYS->Get('NINLVMAX');
+	$ninLvmax	= $SYS->Get('NINLVMAX');
 	$cookieExp	= $SYS->Get('COOKIE_EXPIRY');
 	$nin_exp	= $SYS->Get('NIN_EXPIRY');
 	$pass_exp	= $SYS->Get('PASS_EXPIRY');
@@ -565,7 +565,7 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td>パスワード設定時の保持日数</td>");
 	$Page->Print("<td>最終書き込みから<input type=text size=2 name=PASS_EXPIRY value=\"$pass_exp\">日</td></tr>\n");
 	$Page->Print("<tr><td>忍法帖Lv上限</td>");
-	$Page->Print("<td><input type=text size=2 name=NINLVMAX value=\"$ninlvmax\"></td></tr>\n");
+	$Page->Print("<td><input type=text size=2 name=NINLVMAX value=\"$ninLvmax\"></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");

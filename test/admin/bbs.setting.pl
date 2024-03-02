@@ -720,7 +720,7 @@ sub PrintCommandSetting
 	my $setlive = $setBitMask & 1024 ? 'checked' : '';
 	my $setslip = $setBitMask & 2048 ? 'checked' : '';
 	my $setban = $setBitMask & 4096 ? 'checked' : '';
-	my $setninlv = $setBitMask & 8192 ? 'checked' : '';
+	my $setninLv = $setBitMask & 8192 ? 'checked' : '';
 	my $setchtt = $setBitMask & 16384 ? 'checked' : '';
 	my $sethidenusi = $setBitMask & 32768 ? 'checked' : '';
 	my $setadd = $setBitMask & 65536 ? 'checked' : '';
@@ -768,8 +768,8 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">不落（!nopool）</td><td>");
 	$Page->Print("<input type=checkbox name=NOPOOL value=262144 $setnopool>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninlv:[レベル]）</td><td>");
-	$Page->Print("<input type=checkbox name=NINLV value=8192 $setninlv>有効</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninLv:[レベル]）</td><td>");
+	$Page->Print("<input type=checkbox name=NINLV value=8192 $setninLv>有効</td></tr>");
 
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4>スレッド中のみ</td></tr>");

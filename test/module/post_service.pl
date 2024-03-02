@@ -203,24 +203,24 @@ sub Write
 	return $ZP::E_REG_BAN if(!$noNinja&&($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1))));
 	
 	# レベル制限
-	my $ninlv = $Ninja->Get('ninlv');
+	my $ninLv = $Ninja->Get('ninLv');
 	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
-	my $lvLim = $Threads->GetAttr($threadid,'ninlvlim');
+	my $lvLim = $Threads->GetAttr($threadid,'ninLvlim');
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
 	if($isNinja && !$noNinja){
-		if($Sys->Equal('MODE', 0)){
-			# 書き込みモード
-			if ($ninlv < $write_min){
-				return $ZP::E_REG_NINLVLIMIT 
-			}else{
-				return $ZP::E_REG_NINLVLIMIT if($ninlv < $lvLim && $write_min <= $lvLim && !$noAttr);
-			}
-		}else{
+		if($Sys->Equal('MODE', 1)){
 			# スレ立てモード
-			if($ninlv < $min_level){
+			if($ninLv < $min_level){
 				return $ZP::E_REG_NINLVLIMIT;
 			}else{
-				$Ninja->Set('ninlv',$ninlv - $factor);
+				$Ninja->Set('ninLv',$ninLv - $factor);
+			}
+		}else{
+			# 書き込みモード
+			if ($ninLv < $write_min){
+				return $ZP::E_REG_NINLVLIMIT;
+			}else{
+				return $ZP::E_REG_NINLVLIMIT if($ninLv < $lvLim && $write_min <= $lvLim && !$noAttr);
 			}
 		}
 	}
@@ -252,14 +252,14 @@ sub Write
 	$updown = '' if ($Form->Contain('mail', 'sage'));
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
 	$updown = '' if ($Ninja->Get('force_sage'));
-	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $ninlv && $isNinja);
+	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $ninLv && $isNinja);
 	$Sys->Set('updown', $updown);
 	
 	# 書き込み直前処理
-	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja->Get('ban_command'),$Ninja,$ninlv);
+	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja->Get('ban_command'),$Ninja,$ninLv);
 	return $err if ($err != $ZP::E_SUCCESS);
 	# 忍法帖
-	if($Sys->Get('BBS_NINJA')){
+	if($Set->Get('BBS_NINJA')){
 		my $ninerr = $this->Ninpocho($Sys,$Set,$Form,$Ninja,$sid);
 		return $ninerr if ($ninerr != $ZP::E_SUCCESS);
 	}
@@ -455,7 +455,7 @@ sub ReadyBeforeCheck
 sub ReadyBeforeWrite
 {
 	my $this = shift;
-	my ($res,$com,$Ninja,$ninlv) = @_;
+	my ($res,$com,$Ninja,$ninLv) = @_;
 	
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
@@ -524,7 +524,7 @@ sub ReadyBeforeWrite
 
 	#スレ立て時用コマンド
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USE_COMMAND'));
-	if($com ne 'on' && (($Set->Get('BBS_NINJA') && $ninlv >= $min_level) || !$Set->Get('BBS_NINJA'))){
+	if($com ne 'on' && (($Set->Get('BBS_NINJA') && $ninLv >= $min_level) || !$Set->Get('BBS_NINJA'))){
 		if($Sys->Equal('MODE', 1)){
 			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,1);
 		}
@@ -682,13 +682,13 @@ sub Command
 		}
 		#スレスト
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop(<br>|$)/ && ($setBitMask & 128)){
-			my $ninlv = $Ninja->Get('ninlv');
+			my $ninLv = $Ninja->Get('ninLv');
 			my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_THREAD_STOP'));
-			if(($NinStat && $ninlv >= $min_level)||!$NinStat){
+			if(($NinStat && $ninLv >= $min_level)||!$NinStat){
 				$Threads->SetAttr($threadid, 'stop',1);
 				$Threads->SaveAttr($Sys);
 				$Command .= '※スレスト<br>';
-				$Ninja->Set('ninlv',$ninlv - $factor);
+				$Ninja->Set('ninLv',$ninLv - $factor);
 			}else{
 				$Command .= '※レベル不足<br>';
 			}
@@ -739,7 +739,7 @@ sub Command
 			my $target2 = $3;
 			my $del = 'ユーザー削除';
 
-			my $ninlv = $Ninja->Get('ninlv');
+			my $ninLv = $Ninja->Get('ninLv');
 			my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_RES_DEL'));
 
 			if($target - 1){
@@ -749,7 +749,7 @@ sub Command
 				if($Dat->Load($Sys,$Path,0)){
 					if($target2 && $target < $target2){
 						my $cost = $factor * ($target2 - $target + 1);
-						if(($NinStat && $ninlv >= $min_level && $ninlv - $min_level >= $cost) || !$NinStat){
+						if(($NinStat && $ninLv >= $min_level && $ninLv - $min_level >= $cost) || !$NinStat){
 							my $li = $Dat->Get($target2-1);
 							$li = $$li;
 							my $count = 0;
@@ -777,7 +777,7 @@ sub Command
 								}else{
 									$Command .= "※&gt;&gt;${target}-${target2}は削除済み<br>";
 								}
-								$Ninja->Set('ninlv',$ninlv - $factor*$count);
+								$Ninja->Set('ninLv',$ninLv - $factor*$count);
 							}else{
 								$Command .= "※範囲指定が変<br>";
 							}
@@ -786,7 +786,7 @@ sub Command
 						}
 
 					}else{
-						if(($NinStat && $ninlv >= $min_level)||!$NinStat){
+						if(($NinStat && $ninLv >= $min_level)||!$NinStat){
 							my $line = $Dat->Get($target-1);
 							$line = $$line;
 							if ((split(/<>/,$line))[4] eq ''){
@@ -796,7 +796,7 @@ sub Command
 								$Dat->Save($Sys);
 								$Command .= "※&gt;&gt;${target}を削除<br>";
 
-								$Ninja->Set('ninlv',$ninlv - $factor);
+								$Ninja->Set('ninLv',$ninLv - $factor);
 								}else{
 									$Command .= "※存在しません<br>";
 								}
@@ -902,10 +902,10 @@ sub Command
 		my $bansid = GetSessionID($Sys,$threadid,$2);
 		my $nusisid = GetSessionID($Sys,$threadid,1);
 
-		my $ninlv = $Ninja->Get('ninlv');
+		my $ninLv = $Ninja->Get('ninLv');
 		my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USER_BAN'));
 
-		if(($NinStat && $ninlv >= $min_level) || !$NinStat){
+		if(($NinStat && $ninLv >= $min_level) || !$NinStat){
 			if($bansid){
 				if($bansid ne $nusisid){
 					# grepを使って$bansidが@banuserAttrに存在するかをチェック
@@ -920,7 +920,7 @@ sub Command
 						$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
 						$Threads->SaveAttr($Sys);
 						$Command .= "※BAN：&gt;&gt;$2<br>";
-						$Ninja->Set('ninlv',$ninlv - $factor);
+						$Ninja->Set('ninLv',$ninLv - $factor);
 					}
 				} else {
 					$Command .= "※スレ主はBAN不可<br>";
@@ -965,7 +965,7 @@ sub Command
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!ninlv:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 8192)){
 			my $lvmax = $Sys->Get('NINLVMAX');
 			if($2 <= $lvmax){
-				$Threads->SetAttr($threadid, 'ninlvlim',$2);
+				$Threads->SetAttr($threadid, 'ninLvlim',$2);
 				$Threads->SaveAttr($Sys);
 				$Command .= "※忍法帖Lv$2未満は書き込み不可<br>";
 			}else{

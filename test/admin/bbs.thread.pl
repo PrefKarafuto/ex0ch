@@ -335,7 +335,7 @@ sub PrintThreadList
 		my $is774 = $Threads->GetAttr($id, 'change774');
 		$is774 = HTML::Entities::decode($is774);
 		my $maxres = $Threads->GetAttr($id, 'maxres');
-		my $ninlv = $Threads->GetAttr($id, 'ninlv');
+		my $ninLv = $Threads->GetAttr($id, 'ninLv');
 		my @attrstr = ();
 		push @attrstr, '停止' if ($isstop);
 		push @attrstr, '浮上' if ($Threads->GetAttr($id, 'float'));
@@ -349,7 +349,7 @@ sub PrintThreadList
 		push @attrstr, '過去ログ送り' if ($Threads->GetAttr($id, 'pool'));
 		push @attrstr, '強制名無し' if ($Threads->GetAttr($id, 'force774'));
 		push @attrstr, 'スレ主表示なし' if ($Threads->GetAttr($id, 'hidenusi'));
-		push @attrstr, "レベル制限:$ninlv" if ($ninlv && $Set->Get('BBS_NINJA'));
+		push @attrstr, "レベル制限:$ninLv" if ($ninLv && $Set->Get('BBS_NINJA'));
 		push @attrstr, "名無し->$is774" if ($is774);
 		$Page->Print("<td>@attrstr</td></tr>\n");
 	}
@@ -571,7 +571,7 @@ sub PrintThreadAttr
 		'slip'=>'最大レス数',
 		'change774'=>'名無し変更',
 		'ban'=>'アクセス禁止',
-		'ninlv'=>'忍法帖Lv制限',
+		'ninLv'=>'忍法帖Lv制限',
 	);
 	my $attr = $Form->Get('ATTR');
 	my $name = $attr;
