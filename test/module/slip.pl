@@ -343,7 +343,7 @@ sub BBS_SLIP
 	my $infoDir = $Sys->Get('INFO');
 
 	# 各種判定
-	my $country = $Sys->Get('ISCOUNTRY') ? 'JP': 'ｶﾞｲｺｰｸ';
+	my $country = $Sys->Get('IPCOUNTRY') ne 'abroad' ? 'JP': 'ｶﾞｲｺｰｸ';
 	my $ismobile = is_mobile($country,$ipAddr,$remoho);
 	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);
 	my $isProxy = $Sys->Get('ISPROXY');
@@ -353,7 +353,7 @@ sub BBS_SLIP
 	my @slip_chars = (0..9, 'a'..'z', 'A'..'Z', '.', '/');
 
 	# 一週間で文字列変更
-	my $week_number = int(time / (60 * 60 * 24 * 7));
+	my $week_number = int((time + 172800) / (60 * 60 * 24 * 7));# 水曜9時に
 	my ($chnum1,$chnum2,$chnum3,$chnum4);
 	srand($week_number);
 	$chnum1 = int(rand(1000000));
