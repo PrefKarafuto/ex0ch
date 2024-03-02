@@ -1351,7 +1351,7 @@ sub FunctionNinpochoSetting
 	}
 	# 入力チェック
 	{
-		my @inList = qw(NINLA_WRITE_MESSAGE NINJA_FORCE_SAGE NINJA_MAKE_THREAD NINJA_USER_BAN
+		my @inList = qw(NINJA_WRITE_MESSAGE NINJA_FORCE_SAGE NINJA_MAKE_THREAD NINJA_USER_BAN
 		 NINJA_USE_COMMAND NINJA_THREAD_STOP NINJA_RES_DELETE);
 		foreach (@inList) {
 			push @$pLog, "「$_」を「" . $Form->Get($_) . '」に設定';
@@ -1361,7 +1361,7 @@ sub FunctionNinpochoSetting
 	$Setting = SETTING->new;
 	$Setting->Load($Sys);
 	
-	$Setting->Set('NINJA_WRITE_MESSAGE', $Form->Get('NINLA_WRITE_MESSAGE'));
+	$Setting->Set('NINJA_WRITE_MESSAGE', $Form->Get('NINJA_WRITE_MESSAGE'));
 	$Setting->Set('NINJA_FORCE_SAGE', $Form->Get('NINJA_FORCE_SAGE'));
 	$Setting->Set('NINJA_MAKE_THREAD', $Form->Get('NINJA_MAKE_THREAD').'-'.$Form->Get('COST_TH'));
 	$Setting->Set('NINJA_USER_BAN', $Form->Get('NINJA_USER_BAN').'-'.$Form->Get('COST_BAN'));

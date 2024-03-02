@@ -205,24 +205,22 @@ sub Write
 	# レベル制限
 	my $ninlv = $Ninja->Get('ninlv');
 	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
+	my $lvLim = $Threads->GetAttr($threadid,'ninlvlim');
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
 	if($isNinja && !$noNinja){
 		if($Sys->Equal('MODE', 0)){
 			# 書き込みモード
-			if($ninlv < $write_min) {
-				return $ZP::E_REG_NINLVLIMIT;
-			}
-			#忍法帖Lv制限チェック
-			my $lvLim = $Threads->GetAttr($threadid,'ninlvlim');
-			if($lvLim && !$noAttr){
-				return $ZP::E_REG_NINLVLIMIT if ($lvLim > $ninlv);
+			if ($ninlv < $write_min){
+				return $ZP::E_REG_NINLVLIMIT 
+			}else{
+				return $ZP::E_REG_NINLVLIMIT if($ninlv < $lvLim && $write_min <= $lvLim);
 			}
 		}else{
 			# スレ立てモード
 			if($ninlv < $min_level){
 				return $ZP::E_REG_NINLVLIMIT;
 			}else{
-				$Ninja->Set('ninlv',$ninlv - $factor)
+				$Ninja->Set('ninlv',$ninlv - $factor);
 			}
 		}
 	}
