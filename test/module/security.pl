@@ -69,6 +69,13 @@ sub Load
 	$this->{'SYSAD'} = {};
 	
 	my $path = '.' . $Sys->Get('INFO') . '/users.cgi';
+
+	unless(-f $path){
+		open (my $fh, '>', $path);
+		print $fh, "0000000001<>Administrator<>431XyHmErk<>システムアドミニストレータ<>システム管理者。<>1\n";
+		chmod($Sys->Get('PM-ADM'), $path);
+		close $fh;
+	}
 	
 	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
