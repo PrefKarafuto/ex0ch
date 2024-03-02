@@ -228,7 +228,7 @@ sub PrintReadHead
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
  <meta name="twitter:card" content="summary">
-  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
+  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
  <link rel="icon" href="../../../../$bbspath/$favicon">
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
