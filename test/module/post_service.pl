@@ -213,7 +213,7 @@ sub Write
 			if ($ninlv < $write_min){
 				return $ZP::E_REG_NINLVLIMIT 
 			}else{
-				return $ZP::E_REG_NINLVLIMIT if($ninlv < $lvLim && $write_min <= $lvLim);
+				return $ZP::E_REG_NINLVLIMIT if($ninlv < $lvLim && $write_min <= $lvLim && !$noAttr);
 			}
 		}else{
 			# スレ立てモード
