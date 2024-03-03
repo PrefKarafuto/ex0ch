@@ -29,48 +29,51 @@ GitHub: https://github.com/PrefKarafuto/ex0ch/
 - List::MoreUtils
 - Net::DNS::Lite
 
-インストール手順：
+インストール手順:
 1. GitHubレポジトリのReleasesから最新版をダウンロードし、ファイルを解凍してください。
-2. インストール先のサーバーの設定を確認し、各CGIファイルの先頭の"#!/usr/bin/perl"を必要に応じて変更してください。
+2. インストール先のサーバーの設定を確認し、必要に応じて各CGIファイルの先頭の"#!/usr/bin/perl"を変更してください。
 3. 必要なモジュールがサーバーに入っているか確認してください。無い場合はcpanm等でインストールします。
 4. FTP転送ソフトを使って、testフォルダごとサーバーにアップロードします。
 5. 各フォルダやファイルに、下記を参考にパーミッションを設定します。設定後にadmin.cgiにアクセスし本体の設定を行います。
+
+アップデート手順:
+1. 既存のtestフォルダを、ダウンロードしたtestフォルダで上書きしてください。
+2. 必要に応じて各CGIファイルの先頭の"#!/usr/bin/perl"を変更してください。
 
 パーミッション例:
 [701] 親ディレクトリ(設定できる場合)
     [701] test/
         [700] admin/
             [600] *.pl
-            [600] index.html (403用) 
+            [604] index.html (403用) 
         [701] datas/
             [604] *.*
-            [600] index.html (403用) 
+            [604] index.html (403用) 
         [700] info/
             [700] .auth/
-                [600] index.html (403用)
+                [604] index.html (403用)
             [700] .ninpocho/
-                [600] index.html (403用)
+                [604] index.html (403用)
             [700] .session/
-                [600] index.html (403用) 
+                [604] index.html (403用) 
             [700] .IP_List/
-                [600] index.html (403用) 
-            [600] *.cgi
+                [604] index.html (403用) 
             [600] index.html (403用) 
         [700] module/
             [600] *.pl
-            [600] index.html (403用) 
+            [604] index.html (403用) 
         [700] plugin/
             [600] 0ch_*_utf8.pl
-            [600] index.html (403用) 
+            [604] index.html (403用) 
         [700] plugin_conf/
             [600] 0ch_*.cgi
-            [600] index.html (403用) 
+            [604] index.html (403用) 
         [700] perllib/
             [700] */
             [600] *.*
-            [600] index.html (403用) 
+            [604] index.html (403用) 
         [700] *.cgi
-        [600] index.html (403用) 
+        [604] index.html (403用) 
 
 EXぜろちゃんねる初期設定：
 1. admin.cgiにアクセスし、ログイン画面でユーザ名：Administrator、初期パスワード：zerochを入力してログインします。
@@ -142,11 +145,12 @@ Wiki: https://github.com/PrefKarafuto/ex0ch/wiki
 
 ## 連絡先
 
+樺太庁長官 ◆i5oJWq7F9Gmc
 - E-mail: karafuto@na-cat.com
 - 不具合報告・問い合わせ先: https://github.com/PrefKarafuto/ex0ch/issues
 
 
 ## 謝辞
 
-本家ぜろちゃんねる開発者「精神衰弱◆kwSzvOHE」氏並びにぜろちゃんねるプラス開発者「windyakin◆windyaking」氏
+本家ぜろちゃんねる開発者「精神衰弱 ◆kwSzvOHE」氏並びにぜろちゃんねるプラス開発者「windyakin ◆windyaking」氏
 を初めとする両スクリプトの開発陣の方々、そして再開発に協力して頂いた皆様に心からの謝意を表します。
