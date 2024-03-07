@@ -93,15 +93,15 @@ sub Load {
 		'950' => { SUBJECT => '端末固有情報不明', MESSAGE => '端末固有情報を送信してください。' },
 		'997' => { SUBJECT => 'ＰＲＯＸＹ規制', MESSAGE => '公開ＰＲＯＸＹからの投稿は受け付けていません！！' },
 		'998' => { SUBJECT => 'ブラウザ変ですよん', MESSAGE => 'アクセス不正です。このCGIは外部からのアクセスは認めてないです。。' },
-        '999' => { subject => 'ブラウザ変ですよん', message => 'フォーム情報が正しく読めないです。' },
-        '990' => { subject => 'システムエラー', message => 'システムが変です。サポートで聞いたほうがいいかも。。' },
-		'991' => { subject => 'システムエラー', message => 'Captchaの設定が変です。管理者に連絡してくらはい。。' }
+        '999' => { SUBJECT => 'ブラウザ変ですよん', MESSAGE => 'フォーム情報が正しく読めないです。' },
+        '990' => { SUBJECT => 'システムエラー', MESSAGE => 'システムが変です。サポートで聞いたほうがいいかも。。' },
+		'991' => { SUBJECT => 'システムエラー', MESSAGE => 'Captchaの設定が変です。管理者に連絡してくらはい。。' }
     };
 
     # メッセージデータをオブジェクトに格納
     foreach my $id (keys %{$messages}) {
-        $this->{'SUBJECT'}->{$id} = $messages->{$id}->{subject};
-        $this->{'MESSAGE'}->{$id} = $messages->{$id}->{message};
+        $this->{'SUBJECT'}->{$id} = $messages->{$id}->{SUBJECT};
+        $this->{'MESSAGE'}->{$id} = $messages->{$id}->{MESSAGE};
     }
 }
 
