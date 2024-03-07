@@ -66,7 +66,7 @@ sub Load
     $sid = $Sys->Get('SID');
 
     #cookieにsessionIDが保存されていない場合
-    unless ($sid && $this->{'ANON_FLAG'}){
+    if (!$sid && !$this->{'ANON_FLAG'}){
         my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx = Digest::MD5->new;
         my $expiry = 60*60*24;
@@ -128,16 +128,14 @@ sub Load
             }
         }
         $this->{'SESSION'} = $session;
-        $this->{'SID'} = $sid;
     }else{
         $this->{'SESSION'} = undef;
         #セッションIDのみ使う場合
-        if($sid){
-            $this->{'SID'} = $sid;
-        }else{
+        if(!$sid){
             $this->{'SID'} = generate_id();
         }
     }
+    $this->{'SID'} = $sid;
     $Sys->Set('SID',$sid);
     return $sid;
 }
@@ -275,8 +273,6 @@ sub Save
     $Cookie->Set('securitykey', $sec);
     $Cookie->Set('countsession', $sid);
 
-    return unless $session;
-
     # Hashテーブルを設定
     if(!$this->{'ANON_FLAG'}){
         my $addr = $ENV{'REMOTE_ADDR'};
@@ -290,6 +286,10 @@ sub Save
         SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
         SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
     }
+
+    # 忍法帖を使わない場合
+    return unless $session;
+
     if ($password) {
         my $ctx3 = Digest::MD5->new;
         $ctx3->add($Sys->Get('SECURITY_KEY'));
