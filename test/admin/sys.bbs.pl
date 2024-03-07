@@ -198,6 +198,7 @@ sub PrintBBSList
 	$SYS->Set('_TITLE', 'BBS List');
 	
 	require './module/bbs_info.pl';
+	require './module/data_utils.pl';
 	$BBS = BBS_INFO->new;
 	$Category = CATEGORY_INFO->new;
 	$BBS->Load($SYS);
@@ -254,7 +255,7 @@ sub PrintBBSList
 				$category	= $BBS->Get('CATEGORY', $id);
 				$category	= $Category->Get('NAME', $category);
 				$url		= $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', '')).'/'.$BBS->Get('DIR', $belongID);
-				
+
 				$common1 = "\"javascript:SetOption('TARGET_BBS','$id');";
 				$common1 .= "DoSubmit('bbs.thread','DISP','LIST');\"";
 				
