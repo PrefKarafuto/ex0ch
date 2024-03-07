@@ -10,13 +10,10 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use Encode;
-<<<<<<< HEAD
-=======
 use Socket qw(inet_pton inet_aton AF_INET6 AF_INET);
 use HTML::Entities;
 use JSON;
 use Storable;
->>>>>>> main
 no warnings qw(once);
 
 #------------------------------------------------------------------------------------------------------------
@@ -166,13 +163,8 @@ sub ConvertURL
 	
 	my $server = $Sys->Get('SERVER');
 	my $cushion = $Set->Get('BBS_REFERER_CUSHION');
-<<<<<<< HEAD
-	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
-	my $reg2 = q{<(?<!a href=")(?<!src=")(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
-=======
 	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*'();/?:\@=_+\$,%#]|&(?![lg]t;))+)};	# URL検索１
 	my $reg2 = q{<(https?|ftp)::(([-\w.!~*'();/?:\@=_+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
->>>>>>> main
 	
 	# 携帯から
 	if ($mode eq 'O') {
@@ -226,15 +218,9 @@ sub ConvertImgur
 	my $this = shift;
 	my ($text) = @_ ;
 	
-<<<<<<< HEAD
-	my $reg = '(?<!src=")(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
-	
-	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1"></a></blockquote>|g;
-=======
 	my $reg = '(?<!src=")(https?://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
 	
 	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1">$1</a></blockquote>|g;
->>>>>>> main
 	
 	return $text;
 	
@@ -256,11 +242,7 @@ sub ConvertTweet
 	my $this = shift;
 	my ($text) = @_ ;
 	
-<<<<<<< HEAD
-	my $reg = '(?<!src=")(?<!a href=")(https://twitter\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
-=======
 	my $reg = '(?<!src=")(?<!a href=")(https?://(twitter|x)\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
->>>>>>> main
 	
 	$$text =~ s|$reg|<a href="$1">$1</a><br><blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
 	
@@ -459,32 +441,18 @@ sub ConvertImageTag
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
 		if ($index){
-<<<<<<< HEAD
-			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
-		}
-		else{
-			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
-=======
 			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" width=\"300px\" height=\"auto\">|g;
 		}
 		else{
 			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
->>>>>>> main
 		}
 	}
 	else{
 		if ($index){
-<<<<<<< HEAD
-			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
-		}
-		else{
-			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
-=======
 			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" width=\"300px\" height=\"auto\">|g;
 		}
 		else{
 			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img sclass=\"post_image\" src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
->>>>>>> main
 		}
 	}
 	return $text;

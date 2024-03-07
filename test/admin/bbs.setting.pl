@@ -304,10 +304,7 @@ sub PrintBaseSetting
 	my $setCookiePath	= $Setting->Get('BBS_COOKIEPATH');
 	my $setRefCushion	= $Setting->Get('BBS_REFERER_CUSHION');
 	my $setFavicon  	= $Setting->Get('BBS_FAVICON');
-<<<<<<< HEAD
-=======
 	my $setKako		  	= $Setting->Get('BBS_KAKO');
->>>>>>> main
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -593,10 +590,7 @@ sub PrintLimitSetting
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
 	my $setSameTitle	= $Setting->Get('BBS_SAMETHREAD');
-<<<<<<< HEAD
-=======
 	my $setReverse		= $Setting->Get('BBS_REVERSE_CHECK');
->>>>>>> main
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -636,14 +630,6 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_JP_CHECK $setOverSea value=on>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(携帯)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>携帯から許可</td>");
-<<<<<<< HEAD
-	$Page->Print("<td class=\"DetailTitle\">hCaptcha</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_HCAPTCHA $hCaptcha value=on $setCap>$setCapInfo</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">マルチポスト制限</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_MULTIPOST value=on disabled></td></tr>");
-=======
 	$Page->Print("<td class=\"DetailTitle\">Captcha</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_CAPTCHA $Captcha value=on $setCap>$setCapInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
@@ -654,7 +640,6 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK value=on $setProxy>$setInfo2</td>");
 	$Page->Print("<td class=\"DetailTitle\">???</td><td>");
 	$Page->Print("<input type=checkbox name= value=on disabled></td></tr>");
->>>>>>> main
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -1287,14 +1272,9 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_SPAMKILLI_POINT', $Form->Get('BBS_SPAMKILL_POINT'));
 
 	# 改造版で追加
-<<<<<<< HEAD
-	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
-	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
-=======
 	$Setting->Set('BBS_CAPTCHA', ($Form->Equal('BBS_CAPTCHA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_REVERSE_CHECK', ($Form->Equal('BBS_REVERSE_CHECK', 'on') ? 'checked' : ''));
->>>>>>> main
 
 	$Setting->Save($Sys);
 	
@@ -1443,15 +1423,6 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_NEWSUBJECT', ($Form->Equal('BBS_NEWSUBJECT', 'on') ? '1' : ''));
 	$Setting->Set('BBS_YMD_WEEKS', $Form->Get('BBS_YMD_WEEKS'));
 	$Setting->Set('BBS_TRIPCOLUMN', $Form->Get('BBS_TRIPCOLUMN'));
-<<<<<<< HEAD
-	$Setting->Set('BBS_SLIP', ($Form->Equal('BBS_SLIP', 'on') ? 'checked' : ''));
-
-    	$Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
-    	$Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
-    	$Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
-    	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
-    	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
-=======
 	$Setting->Set('BBS_SLIP', $Form->Get('BBS_SLIP'));
 	$Setting->Set('BBS_NINJA', ($Form->Equal('BBS_NINJA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_HIDENUSI', ($Form->Equal('BBS_HIDENUSI', 'on') ? 'checked' : ''));
@@ -1461,7 +1432,6 @@ sub FunctionOtherSetting
     $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
     #$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
->>>>>>> main
 	
 	# ID表示設定
 	my %settings_map = (

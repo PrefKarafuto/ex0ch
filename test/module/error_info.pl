@@ -174,10 +174,6 @@ sub Print
 	my $mail = &$sanitize($Form->Get('MAIL'));
     my $key = $Form->Get('key');
     my $t = &$sanitize($Form->Get('subject',''));
-<<<<<<< HEAD
-    my $title = $t?"(New)$t":"$key";
-	my $msg = $Form->Get('MESSAGE');
-=======
 	my $msg = $Form->Get('MESSAGE');
 
 	#超過対策
@@ -198,7 +194,6 @@ sub Print
 		$t .= ' ...(長すぎたので省略)';
 	}
 	my $title = $t?"(New)$t":"$key";
->>>>>>> main
 	
 	$Log->Load($Sys, 'FLR', '');
 	$Log->Set('', $err,"$title<>$name<>$mail<>$msg", $koyuu, $mode);

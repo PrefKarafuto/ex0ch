@@ -10,11 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
 use Digest::MD5;
-<<<<<<< HEAD
-#use JSON;
-=======
 use JSON;
->>>>>>> main
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
 no warnings 'once';
@@ -122,12 +118,6 @@ sub Write
 	# 規制チェック
 	return $err if (($err = $this->IsRegulation()) != $ZP::E_SUCCESS);
 	
-<<<<<<< HEAD
-	# 改造版で追加
-	# hCaptcha認証
-	#return $err if (($err = $this->Certification_hCaptcha()) != $ZP::E_SUCCESS);
-=======
->>>>>>> main
 
 	# データの書き込み
 	require './module/dat.pl';
@@ -1483,10 +1473,6 @@ sub NormalizationNameMail
 	
 	return $ZP::E_SUCCESS;
 }
-<<<<<<< HEAD
-=pod
-=======
->>>>>>> main
 #------------------------------------------------------------------------------------------------------------
 #
 #	改造版で追加
@@ -1497,54 +1483,10 @@ sub NormalizationNameMail
 #			規制チェックにかかったらエラーコードを返す
 #
 #------------------------------------------------------------------------------------------------------------
-<<<<<<< HEAD
-sub Certification_hCaptcha
-{
-	my	$this = shift;
-	# 変数の大文字と小文字には気を付けて
-	# 宣言しないといけないのに長い時間を要した
-	my $Form = $this->{'FORM'};
-	my $Sys = $this->{'SYS'};
-
-	# hCaptcha「あり」の場合
-	my $secretkey = $Sys->Get('HCAPTCHA_SECRETKEY');
-
-	if ($secretkey ne '') {
-	#シークレットキー
-	my $url = 'https://hcaptcha.com/siteverify';
-
-	my $ua = LWP::UserAgent->new();
-	my $recaptcha_response = $Form->Get('g-recaptcha-response');
-	my $remote_ip = $ENV{REMOTE_ADDR};
-	my $response = $ua->post(
-	    $url,
-	    {
-	        remoteip => $remote_ip,
-	        response => $recaptcha_response,
-	        secret => $secretkey,
-	    },
-	);
-		if ( $response->is_success() ) {
-		    my $json = $response->decoded_content();
-		    my $out = parse_json($json);
-		    if ( $out->{success} ) {
-
-			#print "Content-Type: text/html; charset=Shift_JIS\n\n";
-			#print "認証ができています\n"
-
-			}else{
-			#print "Content-Type: text/html; charset=Shift_JIS\n\n";
-			#print("認証ができていません！");
-
-			return $ZP::E_FORM_NOCAPTCHA;
-			}
-		}
-=======
 sub Certification_Captcha {
     my $this = shift;
     my ($Sys,$Form) = @_;
 	my ($captcha_response,$url);
->>>>>>> main
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
     my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
@@ -1587,10 +1529,6 @@ sub Certification_Captcha {
 		return $ZP::E_FORM_NOCAPTCHA;
 	}
 }
-<<<<<<< HEAD
-=cut
-=======
->>>>>>> main
 #------------------------------------------------------------------------------------------------------------
 #
 #	テキスト欄の正規化

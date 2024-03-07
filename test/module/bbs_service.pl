@@ -263,28 +263,19 @@ sub PrintIndexHead
  <meta property="og:description" content="$bbsinfo">
  <meta property="og:type" content="website">
  <meta property="og:image" content="$image">
-<<<<<<< HEAD
- <meta property="og:site_name" content="ぜろちゃんねるプラス">
-=======
  <meta property="og:site_name" content="EXぜろちゃんねる">
->>>>>>> main
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
  <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));
-<<<<<<< HEAD
-	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
-	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
-=======
 	if($this->{'SET'}->Get('BBS_CAPTCHA')){
 		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'h-captcha');
 		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'g-recaptcha');
 		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'cf-turnstile');
 	}
 	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
->>>>>>> main
 	
 	$Caption->Print($Page, undef);
 	
@@ -331,11 +322,7 @@ HEAD
 	$Page->Print(<<HTML);
 <br>
  <center>
-<<<<<<< HEAD
-  <a href="$cgipath/bbsmenu.cgi" style="color:inherit;text-decoration: none;">
-=======
   <a href="../bbsmenu.html" style="color:inherit;text-decoration: none;">
->>>>>>> main
    <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;">$title</div>
   </a>
  </center>
@@ -681,13 +668,6 @@ sub PrintThreadPreviewOne
 	my $key = $Sys->Get('KEY');
 	my $tm = time;
  	my $bbsPath = $Sys->Get('BBSPATH');
-<<<<<<< HEAD
-	
-	my $permt = DAT::GetPermission("$bbsPath/$bbs/dat/$key.dat");
-	my $perms = $Sys->Get('PM-STOP');
-	my $isstop = $permt == $perms;
-=======
->>>>>>> main
 	
 	my $permt = DAT::GetPermission("$bbsPath/$bbs/dat/$key.dat");
 	my $perms = $Sys->Get('PM-STOP');
@@ -711,11 +691,6 @@ sub PrintThreadPreviewOne
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
-<<<<<<< HEAD
-	if($Sys->Get('RESMAX') > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop){
-	# 書き込みフォームの表示
-	$Page->Print(<<KAKIKO);
-=======
 	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
 		# 書き込みフォームの表示
 		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
@@ -723,7 +698,6 @@ sub PrintThreadPreviewOne
 		my $Captcha = $this->{'SET'}->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<KAKIKO);
->>>>>>> main
   </dl>
   <hr>
   <form method="POST" action="$cgiPath/bbs.cgi">
@@ -741,13 +715,8 @@ sub PrintThreadPreviewOne
 KAKIKO
 	}
 	else{
-<<<<<<< HEAD
-	$Page->Print("<hr>");
-	$Page->Print("<font size=4>READ ONLY</font><br><br>");
-=======
 		$Page->Print("<hr>");
 		$Page->Print("<font size=4>READ ONLY</font><br><br>");
->>>>>>> main
 	}
 }
 
@@ -780,10 +749,7 @@ sub PrintResponse
 	my $nameCol = $this->{'SET'}->Get('BBS_NAME_COLOR');
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
 	my $aa='';
-<<<<<<< HEAD
-=======
  
->>>>>>> main
 	# URLと引用個所の適応
 	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
@@ -791,12 +757,8 @@ sub PrintResponse
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
 	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'),\$elem[3],1)if($Sys->Get('IMGTAG'));
-<<<<<<< HEAD
-	
-=======
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
  
->>>>>>> main
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
 	$Sys->Set('_NUM_', $n);

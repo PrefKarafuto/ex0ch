@@ -84,11 +84,7 @@ sub DoPrint
 		PrintLogs($Page, $Sys, $Form,$pSys, 2);
 	}
 	elsif ($subMode eq 'FAILURELOG') {												# 書き込み失敗ログ画面
-<<<<<<< HEAD
-		PrintLogs($Page, $Sys, $Form, 3);
-=======
 		PrintLogs($Page, $Sys, $Form, $pSys, 3);
->>>>>>> main
 	}
 	elsif ($subMode eq 'COMPLETE') {												# 完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
@@ -141,18 +137,12 @@ sub DoFunction
 	elsif ($subMode eq 'REMOVE_ERRORLOG') {										# ログ削除
 		$err = FunctionLogDelete($Sys, $Form, 2, $this->{'LOG'});
 	}
-<<<<<<< HEAD
-	elsif ($subMode eq 'REMOVE_FAILURELOG') {										# ログ削除
-		$err = FunctionLogDelete($Sys, $Form, 3, $this->{'LOG'});
-	}
-=======
 	elsif ($subMode eq 'REMOVE_FAILURELOG') {									# ログ削除
 		$err = FunctionLogDelete($Sys, $Form, 3, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'ALLOW') {												# 投稿許可
 		$err = FunctionAllowMessage($Sys, $Form, $this->{'LOG'});
 	}
->>>>>>> main
 	
 	# 処理結果表示
 	if ($err) {
@@ -257,11 +247,7 @@ sub PrintLogsInfo
 #------------------------------------------------------------------------------------------------------------
 sub PrintLogs
 {
-<<<<<<< HEAD
-	my ($Page, $Sys, $Form, $mode) = @_;
-=======
 	my ($Page, $Sys, $Form, $pSys, $mode) = @_;
->>>>>>> main
 	my ($Logger, $common, $logFile, $keyNum, $keySt, $Threads);
 	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isSysad, $data, $title, @elem);
 	
@@ -350,15 +336,6 @@ sub PrintLogs
 			}
 			elsif ($mode == 3){
 				$elem[1] .= ' (' . $Error->Get($elem[1], 'SUBJECT') . ')';
-<<<<<<< HEAD
-				if($elem[2] !~ /^\(New\)/){
-					$title = "<font color=red>".$Threads->Get('SUBJECT',$elem[2])."</font>";
-				}
-				else{
-					$title = "<font color=orange>".$elem[2]."</font>";
-				}
-				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>Title:$title<br>Name:$elem[3]<br>Mail:$elem[4]<br><hr size=1>$elem[5]</td><td>$elem[6]</td></tr>\n<td colspan=4><hr size=1></td>");
-=======
 				my $flag = 1;
 				if($elem[2] =~ /^\(New\)/){
 					$title = "<font color=orange>".$elem[2]."</font>";
@@ -380,7 +357,6 @@ sub PrintLogs
 					$Page->Print("<br><hr size=1><input type=button value=\"投稿許可\" $common,'ALLOW')\"> ") if $flag;
 				}
 				$Page->Print("</td><td>$elem[6]</td></tr>\n<td colspan=4><hr size=1></td>");
->>>>>>> main
 			}
 			
 		}
@@ -391,13 +367,9 @@ sub PrintLogs
 	$common = "onclick=\"DoSubmit('bbs.log','FUNC'";
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=4 align=left>");
-<<<<<<< HEAD
-	$Page->Print("<input type=button value=\"　削除　\" $common,'REMOVE_" . $Form->Get('MODE_SUB') . "')\" class=\"delete\"> ");
-=======
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $Sys->Get('BBS'))){
 		$Page->Print("<input type=button value=\"　削除　\" $common,'REMOVE_" . $Form->Get('MODE_SUB') . "')\" class=\"delete\"> ");
 	}
->>>>>>> main
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	$Page->HTMLInput('hidden', $keySt, '');

@@ -188,12 +188,6 @@ sub PrintReadHead
 	my $mascot = $Set->Get('BBS_MASCOT');
 	my $url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Sys->Get('KEY').'/';
 	my $favicon = $Set->Get('BBS_FAVICON');
-<<<<<<< HEAD
-    my $image = $Set->Get('BBS_TITLE_PICTURE');
-	my $bbsname = $Set->Get('BBS_TITLE');
-	my $datone = $Dat->Get(0);
-	my @threadTop = split(/<>/,$$datone);
-=======
 	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $bbspath = $Sys->Get('BBS');
@@ -215,7 +209,6 @@ sub PrintReadHead
     	if($image !~ /^https?:\/\//){
         	$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
     	}
->>>>>>> main
 	
     if($image !~ /^https?:\/\//){
         $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
@@ -234,25 +227,11 @@ sub PrintReadHead
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <meta property="og:url" content="$url">
  <meta property="og:title" content="$title">
-<<<<<<< HEAD
- <meta property="og:description" content="$threadTop[3]">
-=======
  <meta property="og:description" content="$description">
->>>>>>> main
  <meta property="og:type" content="article">
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
  <meta name="twitter:card" content="summary">
-<<<<<<< HEAD
- <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
- <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
- <link rel="icon" href="$favicon">
-HTML
-	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
-	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
-	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Set->Get('BBS_HCAPTCHA'));
-	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($Set->Get('BBS_HCAPTCHA'));
-=======
   <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
  <link rel="icon" href="../../../../$bbspath/$favicon">
 HTML
@@ -264,7 +243,6 @@ HTML
 		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
 	}
 	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
->>>>>>> main
 
 	$Caption->Print($Page, undef);
 	
@@ -527,11 +505,7 @@ sub PrintReadFoot
 	my $isstop = $permt == $perms;
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
-<<<<<<< HEAD
-	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop) {
-=======
 	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop &&!$threadStop &&!$threadPool) {
->>>>>>> main
 		my $cookName = '';
 		my $cookMail = '';
 		my $tm = int(time);
@@ -645,24 +619,15 @@ sub PrintResponse
 	my $aa='';
 	
 	# URLと引用個所の適応
-<<<<<<< HEAD
-    	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
-    	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
-=======
     $Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
->>>>>>> main
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
 	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
-<<<<<<< HEAD
-    	$Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
-=======
 	$Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 
->>>>>>> main
 	# メール欄有り
 	if ($elem[1] eq '') {
 		$Mail = "<font color=\"$nameCol\"><b>$elem[0]</b></font>";
