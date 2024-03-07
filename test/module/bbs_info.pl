@@ -424,7 +424,7 @@ sub Load
 
 	unless(-f $path){
 		open (my $fh, '>', $path);
-		print $fh, "0000000001<>一般<>一般、もしくは未分類の掲示板\n";
+		print $fh "0000000001<>一般<>一般、もしくは未分類の掲示板\n";
 		chmod($Sys->Get('PM-ADM'), $path);
 		close $fh;
 	}
