@@ -317,8 +317,9 @@ sub Write
 		# レス数が最大数を超えたらover設定をする
 		$resNum = DAT::GetNumFromFile($datPath);
 		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
-		if ($resNum >= $MAXRES) {
-			return $ZP::E_LIMIT_OVERMAXRES if ($resNum > $MAXRES);
+		if ($resNum > $MAXRES){
+			return $ZP::E_LIMIT_OVERMAXRES;
+		}elsif ($resNum = $MAXRES) {
 			# datにOVERスレッドレスを書き込む
 			Get1001Data($Sys, \$line,$MAXRES);
 			DAT::DirectAppend($Sys, $datPath, $line);
@@ -394,8 +395,8 @@ sub Write
 			$updown = $Sys->Get('updown', '');
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
+		$Ninja->Save($Sys,$password);
 	}
-	$Ninja->Save($Sys,$password);
 	return $err;
 }
 
