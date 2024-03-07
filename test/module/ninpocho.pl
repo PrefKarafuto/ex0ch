@@ -83,15 +83,14 @@ sub Load
     if($Set->Get('BBS_NINJA')){
         #パスワードがあった場合
         if($password){
-            my $ctx = Digest::MD5->new;
+            my $ctx2 = Digest::MD5->new;
             my $exp = $Sys->Get('PASS_EXPITY');
             my $long_expiry = 60*60*24*$exp;
             
-            $ctx->add('ex0ch ID Generation');
-            $ctx->add(':', $Sys->Get('SERVER'));
-            $ctx->add(':', $password);
+            $ctx2->add($Sys->Get('SECURITY_KEY'));
+            $ctx2->add(':', $password);
 
-            $sid_saved = GetHash($ctx->b64digest,$long_expiry,$ninDir.'hash/password.cgi');
+            $sid_saved = GetHash($ctx2->b64digest,$long_expiry,$ninDir.'hash/password.cgi');
             if($sid_saved && $sid_saved ne $sid){
                 $sid_before = $sid;
                 $sid = $sid_saved;
@@ -282,6 +281,7 @@ sub Save
     if(!$this->{'ANON_FLAG'}){
         my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx2 = Digest::MD5->new;
+        $ctx2->add('ex0ch ID Generation');
         $ctx2->add(':', $Sys->Get('SERVER'));
         $ctx2->add(':', $addr);
         my $ip_hash = $ctx2->b64digest;
@@ -292,7 +292,7 @@ sub Save
     }
     if ($password) {
         my $ctx3 = Digest::MD5->new;
-        $ctx3->add(':', $Sys->Get('SERVER'));
+        $ctx3->add($Sys->Get('SECURITY_KEY'));
         $ctx3->add(':', $password);
         my $pass_hash = $ctx3->b64digest;
         # 既にpasswordが設定されていた場合、既存のパスワードを削除
