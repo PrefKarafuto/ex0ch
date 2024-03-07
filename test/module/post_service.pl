@@ -191,6 +191,7 @@ sub Write
 		$ninmail =~ s/!load:(.){10,30}//;
 		$Form->Set('mail',$ninmail);
 		$sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
+		$password = '';
 	}
 	elsif($ninmail =~ /!save:(.){10,30}/ && $isNinja){
 		$password = $1;
