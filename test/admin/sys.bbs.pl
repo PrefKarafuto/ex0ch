@@ -192,7 +192,7 @@ sub SetMenuList
 sub PrintBBSList
 {
 	my ($Page, $SYS, $Form) = @_;
-	my ($BBS, $Category, @bbsSet, @catSet, $id, $name, $category, $subject, $state);
+	my ($BBS, $Category, @bbsSet, @catSet, $id, $name, $category, $subject, $state, $url);
 	my ($common1, $common2, $sCat, @belongBBS, $belongID, $isSysad);
 	
 	$SYS->Set('_TITLE', 'BBS List');
@@ -221,7 +221,7 @@ sub PrintBBSList
 	$Category->GetKeySet(\@catSet);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=4 align=right>カテゴリ");
+	$Page->Print("<tr><td colspan=5 align=right>カテゴリ");
 	$Page->Print("<select name=BBS_CATEGORY>");
 	$Page->Print("<option value=ALL>すべて</option>\n");
 	
@@ -241,7 +241,8 @@ sub PrintBBSList
 	# 掲示板リストを出力
 	$Page->Print("<tr><td style=\"width:20\">　</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">BBS Name</th>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Category</th>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:10\">URL</th>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:90\">Category</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">SubScription</th></tr>\n");
 	
 	foreach $id (@bbsSet) {
@@ -252,12 +253,13 @@ sub PrintBBSList
 				$subject	= $BBS->Get('SUBJECT', $id);
 				$category	= $BBS->Get('CATEGORY', $id);
 				$category	= $Category->Get('NAME', $category);
+				$url		= $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', '')).'/'.$BBS->Get('DIR', $belongID);
 				
 				$common1 = "\"javascript:SetOption('TARGET_BBS','$id');";
 				$common1 .= "DoSubmit('bbs.thread','DISP','LIST');\"";
 				
 				$Page->Print("<tr><td><input type=checkbox name=BBSS value=$id></td>");
-				$Page->Print("<td><a href=$common1>$name</a></td><td>$category</td>");
+				$Page->Print("<td><a href=$common1>$name</a></td><td><a href=$url target=_blank>[Jump]</a></td><td>$category</td>");
 				$Page->Print("<td>$subject</td></tr>\n");
 			}
 		}
@@ -267,7 +269,7 @@ sub PrintBBSList
 	$state = -f "../bbsmenu.html" ? '更新':'作成';
 	
 	$Page->HTMLInput('hidden', 'TARGET_BBS', '');
-	$Page->Print("<tr><td colspan=4 align=left><hr>");
+	$Page->Print("<tr><td colspan=5 align=left><hr>");
 	$Page->Print("<input type=button value=\"カテゴリ変更\" $common2,'CATCHANGE')\"> ")	if (1);
 	$Page->Print("<input type=button value=\"情報更新\" $common1,'UPDATE')\"> ")		if ($isSysad);
 	$Page->Print("<input type=button value=\"index更新\" $common1,'UPDATEBBS')\"> ")	if (1);
