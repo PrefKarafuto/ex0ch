@@ -319,7 +319,7 @@ sub Write
 		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 		if ($resNum > $MAXRES){
 			return $ZP::E_LIMIT_OVERMAXRES;
-		}elsif ($resNum = $MAXRES) {
+		}elsif ($resNum == $MAXRES) {
 			# datにOVERスレッドレスを書き込む
 			Get1001Data($Sys, \$line,$MAXRES);
 			DAT::DirectAppend($Sys, $datPath, $line);
@@ -1517,7 +1517,7 @@ sub Certification_Captcha {
 			}
 		} else {
 			#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
-			return -1;
+			return $ZP::E_SYSTEM_ERROR;
 		}
 	}else{
 		return $ZP::E_FORM_NOCAPTCHA;
