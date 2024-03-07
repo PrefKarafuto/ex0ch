@@ -562,11 +562,7 @@ FORM
  <tr>
   <td nowrap><div class ="reverse_order">
   <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
-<<<<<<< HEAD
-  <span class = "order1"><input type="submit" value="新規スレッド作成"><br class="smartphone"></span></div>
-=======
   <span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha<br class="smartphone"></span></div>
->>>>>>> main
   名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
