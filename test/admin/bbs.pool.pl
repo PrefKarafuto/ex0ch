@@ -189,12 +189,16 @@ sub PrintThreadList
 	my ($Page, $SYS, $Form) = @_;
 	my (@threadSet, $ThreadNum, $key, $res, $subj, $i);
 	my ($dispSt, $dispEd, $dispNum);
-	my ($common, $common2, $n, $Threads, $id);
+	my ($common, $common2, $n, $Threads,$Set, $id);
 	
 	$SYS->Set('_TITLE', 'Pool Thread List');
 	
 	require './module/thread.pl';
+	require './module/setting.pl';
 	$Threads = POOL_THREAD->new;
+	$Set = SETTING->new;
+
+	$Set->Load($SYS);
 	
 	$Threads->Load($SYS);
 	$Threads->GetKeySet('ALL', '', \@threadSet);
@@ -209,6 +213,11 @@ sub PrintThreadList
 	$common		= "DoSubmit('bbs.pool','DISP','LIST');";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	if($Set->Get('BBS_KAKO')){
+		$Page->Print("<tr><td bgcolor=yellow colspan=3><b><font color=red>");
+		$Page->Print("※注：過去ログ保存先には[".$Set->Get('BBS_KAKO')."]が設定されています。<br></td></tr>");
+	}
+
 	$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
@@ -490,6 +499,7 @@ sub FunctionThreadDelete
 	$Pools = POOL_THREAD->new;
 	
 	$Pools->Load($Sys);
+	$Pools->LoadAttr($Sys);
 	
 	@threadList = $Form->GetAtArray('THREADS');
 	$bbs		= $Sys->Get('BBS');
@@ -504,6 +514,7 @@ sub FunctionThreadDelete
 		unlink "$path/log/$id.cgi";
 		unlink "$path/log/del_$id.cgi";
 	}
+	$Pools->SaveAttr($Sys);
 	$Pools->Save($Sys);
 	
 	return 0;
@@ -635,6 +646,7 @@ sub FunctionCreateLogs
 		require './module/thread.pl';
 		$Pools = POOL_THREAD->new;
 		$Pools->Load($Sys);
+		$Pools->LoadAttr($Sys);
 	}
 	
 	foreach my $key (@poolSet) {
@@ -671,7 +683,10 @@ sub FunctionCreateLogs
 		}
 	}
 	
-	$Pools->Save($Sys) if ($isDelete);
+	if ($isDelete){
+		$Pools->SaveAttr($Sys);
+		$Pools->Save($Sys);
+	}
 	$Logs->UpdateIndex($Sys, $Page);
 	$Logs->Save($Sys);
 	

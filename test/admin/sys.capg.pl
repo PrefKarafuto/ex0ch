@@ -3,7 +3,7 @@
 #	システム管理 - 共通キャップグループ モジュール
 #	sys.capg.pl
 #	---------------------------------------------------------------------------
-#	2011.02.12 start ぜろちゃんねるプラス
+#	2011.02.12 start EXぜろちゃんねる
 #
 #============================================================================================================
 package	MODULE;
@@ -12,7 +12,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
-
+no warnings 'once';
 #------------------------------------------------------------------------------------------------------------
 #
 #	コンストラクタ
@@ -308,8 +308,13 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=C_SAMBA $authNum[17] value=on>Samba規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_PROXY $authNum[18] value=on>プロキシ規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_JPHOST $authNum[19] value=on>海外ホスト規制解除<br>");
+	$Page->Print("<input type=checkbox name=C_NOHOST $authNum[26] value=on>逆引き不可規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_NGUSER $authNum[20] value=on>ユーザー規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_NGWORD $authNum[21] value=on>NGワード規制解除<br>");
+	$Page->Print("<input type=checkbox name=C_COMMAND $authNum[24] value=on>コマンド使用可<br>");
+	$Page->Print("<input type=checkbox name=C_NOATTR $authNum[25] value=on>スレッド属性無効<br>");
+	$Page->Print("<input type=checkbox name=C_NONINJA $authNum[27] value=on>忍法帖無効<br>");
+	$Page->Print("<input type=checkbox name=C_NOCAPTCHA $authNum[28] value=on>Captcha無効<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示
@@ -467,8 +472,13 @@ sub FunctionGroupSetting
 		'C_SAMBA'			=> $ZP::CAP_REG_SAMBA,
 		'C_PROXY'			=> $ZP::CAP_REG_DNSBL,
 		'C_JPHOST'			=> $ZP::CAP_REG_NOTJPHOST,
+		'C_NOHOST'			=> $ZP::CAP_REG_NOHOST,
 		'C_NGUSER'			=> $ZP::CAP_REG_NGUSER,
 		'C_NGWORD'			=> $ZP::CAP_REG_NGWORD,
+		'C_COMMAND'			=> $ZP::CAP_REG_COMMAND,
+		'C_NOATTR'			=> $ZP::CAP_REG_NOATTR,
+		'C_NONINJA'			=> $ZP::CAP_REG_NONINJA,
+		'C_NOCAPTCHA'		=> $ZP::CAP_REG_NOCAPTCHA,
 	);
 	my @auths = ();
 	foreach (keys %field2auth) {

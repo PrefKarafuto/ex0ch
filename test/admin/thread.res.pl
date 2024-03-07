@@ -223,7 +223,7 @@ sub SetMenuList
 sub PrintResList
 {
 	my ($Page, $Sys, $Form, $Dat,$Logger) = @_;
-	my (@elem, $resNum, $dispNum, $dispSt, $dispEd, $common, $i);
+	my (@elem, $resNum, $dispNum, $dispSt, $dispEd, $common, $common2, $i);
 	my ($pRes, $isAbone, $isEdit, $isAccessUser, $format);
 	my ($log, @logs, $datsize, $logsize);
 	
@@ -299,12 +299,20 @@ sub PrintResList
 		else {
 			$Page->Print('' . ($i + 1));
 		}
+		$common2 = "\"javascript:SetOption('NINJA_ID','$logs[9]');";
+		$common2 .= "DoSubmit('bbs.ninja','DISP','EDIT')\"";
+		my $str = $logs[9];
+		my $length = length($str);
+		my $half = int($length / 2);
+		substr($str, 0, $half) = '*' x $half;
+
 		$Page->Print("：<font color=forestgreen><b>$elem[0]</b></font>[$elem[1]]");
 		$Page->Print("：$elem[2]</dt><dd>$elem[3]");
-		$Page->Print("<br><br><hr>HOST:$logs[5]<br>IP:$logs[6]<br>UA:$logs[8]") if (defined $log && $isAccessUser);
+		$Page->Print("<br><br><hr>HOST:$logs[5]<br>IP:$logs[6]<br>UA:$logs[8]<br>SessionID:<a href=$common2>$str</a>") if (defined $log && $isAccessUser);
 		$Page->Print("</dd></td></tr>\n");
 	}
 	$Page->HTMLInput('hidden', 'SELECT_RES', '');
+	$Page->HTMLInput('hidden', 'NINJA_ID', '');
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	# システム権限有無による表示抑制
@@ -587,6 +595,10 @@ sub FunctionResDelete
 		$logsize = $LOG->Size();
 		$lastnum = $Dat->Size() - 1;
 	}
+
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+	$Threads->Load($Sys);
 	
 	# 各値を設定
 	@resSet	= $Form->GetAtArray('RESS');
@@ -614,12 +626,26 @@ sub FunctionResDelete
 			}
 			else {
 				$Dat->Delete($num);
-				$_ = $logsize - 1 + $num - $lastnum;
-				if ($_ >= 0) {
-					$LOG->Delete($_);
+				for my $i ($num + 1 .. $Dat->Size() - 1) {
+					my $pHigherRes = $Dat->Get($i);
+					my @higherElem = split(/<>/, $$pHigherRes);
+
+					# 削除されたレスに向けられたアンカーを削除する
+					my $delNum = $num + 1;
+					$higherElem[3] =~ s|&gt;&gt;${delNum}(-\d+)?|&gt;&gt;DeletedRes|g;	
+					# アンカーが存在する場合にその数字を修正
+					$higherElem[3] =~ s|&gt;&gt;([1-9][0-9]*)|'&gt;&gt;' . ($1 > $num ? $1 - 1 : $1)|ge;
+					$higherElem[3] =~ s|&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)|'&gt;&gt;' . ($1 > $num ? $1 - 1 : $1) . '-' . ($2 > $num ? $2 - 1 : $2)|ge;
+					
+					$$pHigherRes = join("<>", @higherElem);
+					$Dat->Set($i, $$pHigherRes);
+				}
+				my $log_index = $logsize - 1 + $num - $lastnum;
+				if ($log_index >= 0) {
+					$LOG->Delete($log_index);
 					$logsize --;
 				}
-				$lastnum --;
+			$lastnum --;
 			}
 		}
 		close($f_dellog);
@@ -629,6 +655,9 @@ sub FunctionResDelete
 		$Dat->Save($Sys);
 		$LOG->Save($Sys) if (! $mode);
 	}
+	# subject.txt更新
+	$Threads->UpdateAll($Sys);
+	$Threads->Save($Sys);
 	
 	# ログの設定
 	$delCnt = 0;

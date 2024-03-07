@@ -87,6 +87,12 @@ sub DoPrint
 	elsif ($subMode eq 'SETLIMIT') {												# 制限設定画面
 		PrintLimitSetting($Page, $Sys, $Form);
 	}
+ 	elsif ($subMode eq 'SETCOMMAND') {												# ユーザーコマンド設定画面
+		PrintCommandSetting($Page, $Sys, $Form);
+	}
+	elsif ($subMode eq 'SETNINPOCHO') {												# 忍法帖設定画面
+		PrintNinpochoSetting($Page, $Sys, $Form);
+	}
 	elsif ($subMode eq 'SETOTHER') {												# その他設定画面
 		PrintOtherSetting($Page, $Sys, $Form);
 	}
@@ -145,6 +151,12 @@ sub DoFunction
 	elsif ($subMode eq 'SETLIMIT') {												# 制限設定
 		$err = FunctionLimitSetting($Sys, $Form, $this->{'LOG'});
 	}
+ 	elsif ($subMode eq 'SETCOMMAND') {												# ユーザーコマンド設定
+		$err = FunctionCommandSetting($Sys, $Form, $this->{'LOG'});
+	}
+	elsif ($subMode eq 'SETNINPOCHO') {												# 忍法帖設定
+		$err = FunctionNinpochoSetting($Sys, $Form, $this->{'LOG'});
+	}
 	elsif ($subMode eq 'SETOTHER') {												# その他設定
 		$err = FunctionOtherSetting($Sys, $Form, $this->{'LOG'});
 	}
@@ -189,6 +201,8 @@ sub SetMenuList
 		$Base->SetMenu('基本設定', "'bbs.setting','DISP','SETBASE'");
 		$Base->SetMenu('カラー設定', "'bbs.setting','DISP','SETCOLOR'");
 		$Base->SetMenu('制限・規制設定', "'bbs.setting','DISP','SETLIMIT'");
+  		$Base->SetMenu('ユーザーコマンド設定', "'bbs.setting','DISP','SETCOMMAND'");
+		$Base->SetMenu('忍法帖設定', "'bbs.setting','DISP','SETNINPOCHO'");
 		$Base->SetMenu('その他設定', "'bbs.setting','DISP','SETOTHER'");
 		$Base->SetMenu('<hr>', '');
 		$Base->SetMenu('設定インポート', "'bbs.setting','DISP','SETIMPORT'");
@@ -219,6 +233,7 @@ sub PrintSettingInfo
 	$Setting->Load($SYS);
 	
 	$Setting->GetKeySet(\@settingKeys);
+	@settingKeys = sort @settingKeys;
 	$keyNum = @settingKeys;
 	push @settingKeys, '';
 	
@@ -251,12 +266,33 @@ sub PrintSettingInfo
 sub PrintBaseSetting
 {
 	my ($Page, $Sys, $Form) = @_;
+	my (@threadList, $id);
+	my ($BBS, $Category, @bbsSet, @catSet, $name, $category);
+	my ($sCat, @belongBBS, $belongID);
 	
 	$Sys->Set('_TITLE', 'BBS Base Setting');
 	
 	require './module/setting.pl';
 	my $Setting = SETTING->new;
 	$Setting->Load($Sys);
+
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
+	$BBS->Load($Sys);
+	$Category->Load($Sys);
+
+	# ユーザ所属のBBS一覧を取得
+	$Sys->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($Sys->Get('ADMIN')->{'USER'}, $BBS, \@belongBBS);
+	
+	# 掲示板情報を取得
+	if ($sCat eq '' || $sCat eq 'ALL') {
+		$BBS->GetKeySet('ALL', '', \@bbsSet);
+	}
+	else {
+		$BBS->GetKeySet('CATEGORY', $sCat, \@bbsSet);
+	}
+	$Category->GetKeySet(\@catSet);
 	
 	my $setSubTitle		= $Setting->Get('BBS_SUBTITLE');
 	my $setKanban		= $Setting->Get('BBS_TITLE_PICTURE');
@@ -268,6 +304,10 @@ sub PrintBaseSetting
 	my $setCookiePath	= $Setting->Get('BBS_COOKIEPATH');
 	my $setRefCushion	= $Setting->Get('BBS_REFERER_CUSHION');
 	my $setFavicon  	= $Setting->Get('BBS_FAVICON');
+<<<<<<< HEAD
+=======
+	my $setKako		  	= $Setting->Get('BBS_KAKO');
+>>>>>>> main
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -292,6 +332,25 @@ sub PrintBaseSetting
 	$Page->Print("<input type=text size=80 name=BBS_COOKIEPATH value=\"$setCookiePath\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">リファラクッション</td><td>");
 	$Page->Print("<input type=text size=80 name=BBS_REFERER_CUSHION value=\"$setRefCushion\"></td></tr>");
+
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">DAT落ちスレッド保存先</td><td>");
+	$Page->Print("<select name=BBS_KAKO required>");
+	$Page->Print("<option value=\"\">プール(外部からのアクセス不可)");
+	foreach my $listid (@bbsSet) {
+		next if ($BBS->Get('DIR', $listid) eq $Sys->Get('BBS'));
+		$category	= $Category->Get('NAME', $BBS->Get('CATEGORY', $listid));
+		$Page->Print("<optgroup label=\"$category\">");
+		foreach $belongID (@belongBBS) {
+			if ($listid eq $belongID) {
+				my $selKako = $setKako eq $BBS->Get('DIR', $listid) ?  "selected" : "";
+				$name		= $BBS->Get('NAME', $listid);
+				$Page->Print("<option value=".$BBS->Get('DIR', $listid)." $selKako>$name</option>");
+			}
+		}
+	}
+	$Page->Print("</select></td></tr>");
+
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"　設定　\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETBASE');\"></td></tr></table>");
@@ -343,7 +402,7 @@ sub PrintColorSetting
 	$setCap			= $Setting->Get('BBS_CAP_COLOR');
 	$setPost		= $Setting->Get('BBS_POSTCOLOR');
 	$setType		= $Setting->Get('BBS_READTYPE');
-    $setHighlight   = $Setting->Get('BBS_HIGHLIGHT');
+ 	$setHighlight   = $Setting->Get('BBS_HIGHLIGHT');
 	
 	$selOri			= ($setType eq 'original' ? 'selected' : '');
 	$sel5ch			= ($setType eq '5ch' ? 'selected' : '');
@@ -481,11 +540,13 @@ sub PrintLimitSetting
 	require './module/setting.pl';
 	my $Setting = SETTING->new;
 	$Setting->Load($Sys);
-	my $DNSBL = $Sys->Get('SPAMHAUS');
-	$DNSBL += $Sys->Get('SPAMCOP');
-	$DNSBL += $Sys->Get('BARRACUDA');
-	my $setDNSBL = ($DNSBL?'':'disabled');
+	my $DNSBL = $Sys->Get('DNSBL_TOREXIT');
+	$DNSBL += $Sys->Get('DNSBL_S5H');
+	$DNSBL += $Sys->Get('DNSBL_DRONEBL');
+	my $isDNSBL = ($DNSBL?'':'disabled');
 	my $setInfo = ($DNSBL == 0 ? 'システム設定でDNSBLが選択されていません' : '有効');
+	my $isProxyApi = $Sys->Get('PROXYCHECK_APIKEY') ? '':'disabled';
+	my $setInfo2 = $isProxyApi eq 'disabled' ? 'システム設定でAPIキーが設定されていません' : '有効';
 	# 設定値を取得
 	my $setResMax		= $Setting->Get('BBS_RES_MAX');
 	my $setSubMax		= $Setting->Get('BBS_SUBJECT_MAX');		# 最大スレッド数
@@ -498,6 +559,7 @@ sub PrintLimitSetting
 	my $setContinueMax	= $Setting->Get('timecount')||0;
 	my $setNoName		= $Setting->Get('NANASHI_CHECK');
 	my $setProxy		= $Setting->Get('BBS_PROXY_CHECK');
+	my $setDNSBL		= $Setting->Get('BBS_DNSBL_CHECK');
 	my $setOverSea		= $Setting->Get('BBS_JP_CHECK');
 	my $setTomato		= $Setting->Get('BBS_RAWIP_CHECK');
 	
@@ -524,13 +586,17 @@ sub PrintLimitSetting
 	my $setSpamPoint	= $Setting->Get('BBS_SPAMKILLI_POINT');
 
 	# 改造版で追加
-	my $hCaptcha		= $Setting->Get('BBS_HCAPTCHA');
-	my $setCapInfo 		= (($Sys->Get('HCAPTCHA_SITEKEY') eq undef || $Sys->Get('HCAPTCHA_SECRETKEY') eq undef) ? 'hCaptchaのキーが設定されていません':'有効');
+	my $Captcha		= $Setting->Get('BBS_CAPTCHA');
+	my $setCapInfo 		= (($Sys->Get('CAPTCHA_SITEKEY') eq undef || $Sys->Get('CAPTCHA_SECRETKEY') eq undef) ? 'Captchaのキーが設定されていません':'有効');
 	my $setCap		= ($setCapInfo eq '有効' ? '' : 'style="opacity:0.5"');
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
 	my $setSameTitle	= $Setting->Get('BBS_SAMETHREAD');
+<<<<<<< HEAD
+=======
+	my $setReverse		= $Setting->Get('BBS_REVERSE_CHECK');
+>>>>>>> main
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -563,19 +629,32 @@ sub PrintLimitSetting
 	$Page->Print("<option value=none $selROnone>書き込み可能");
 	$Page->Print("</select></td>");
 	$Page->Print("<td class=\"DetailTitle\">DNSBLチェック</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK $setProxy value=on $setDNSBL>$setInfo</td></tr>");
+	$Page->Print("<input type=checkbox name=BBS_DNSBL_CHECK $setDNSBL value=on $isDNSBL>$setInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(キャップ)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADCAPONLY $setCapOnly value=on>キャップのみ可能\</td>");
 	$Page->Print("<td class=\"DetailTitle\">海外ホスト規制</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_JP_CHECK $setOverSea value=on>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(携帯)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>携帯から許可</td>");
+<<<<<<< HEAD
 	$Page->Print("<td class=\"DetailTitle\">hCaptcha</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_HCAPTCHA $hCaptcha value=on $setCap>$setCapInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"opacity:0.5\">マルチポスト制限</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_MULTIPOST value=on disabled></td></tr>");
+=======
+	$Page->Print("<td class=\"DetailTitle\">Captcha</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_CAPTCHA $Captcha value=on $setCap>$setCapInfo</td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
+	$Page->Print("<td class=\"DetailTitle\">逆引き不可のIPからの投稿を制限</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_REVERSE_CHECK value=on $setReverse></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">プロキシ規制</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK value=on $setProxy>$setInfo2</td>");
+	$Page->Print("<td class=\"DetailTitle\">???</td><td>");
+	$Page->Print("<input type=checkbox name= value=on disabled></td></tr>");
+>>>>>>> main
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -604,7 +683,7 @@ sub PrintLimitSetting
 	$Page->Print("全体で<input type=text size=5 name=BBS_TATESUGI_COUNT value=\"$setTateCount\" style=\"text-align: right\">スレッドまで立てられる");
 	$Page->Print("</td></tr>");
     
-    $Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
+    	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
 	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASCII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文のASCIIの割合が<input type=text size=3 name=BBS_SPAMKILL_MESSAGE value=\"$setAskiiMessage\" style=\"text-align: right\" maxlength=\"3\">％以上で");
@@ -620,6 +699,186 @@ sub PrintLimitSetting
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETLIMIT');\"></td></tr></table>");
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	コマンド設定画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintCommandSetting
+{
+	my ($Page, $Sys, $Form) = @_;
+	
+	$Sys->Set('_TITLE', 'BBS User Command Setting');
+	
+	require './module/setting.pl';
+	my $Setting = SETTING->new;
+	$Setting->Load($Sys);
+	
+	my $setBitMask = $Setting->Get('BBS_COMMAND');
+	
+	my $setpass = $setBitMask & 1 ? 'checked' : '';
+	my $setmaxres = $setBitMask & 2 ? 'checked' : '';
+	my $setsage = $setBitMask & 4 ? 'checked' : '';
+	my $setnoid = $setBitMask & 8 ? 'checked' : '';
+	my $setchangeid = $setBitMask & 16 ? 'checked' : '';
+	my $setforce774 = $setBitMask & 32 ? 'checked' : '';
+	my $setchange774 = $setBitMask & 64 ? 'checked' : '';
+	my $setstop = $setBitMask & 128 ? 'checked' : '';
+	my $setdelcmd = $setBitMask & 256 ? 'checked' : '';
+	my $setpool = $setBitMask & 512 ? 'checked' : '';
+	my $setlive = $setBitMask & 1024 ? 'checked' : '';
+	my $setslip = $setBitMask & 2048 ? 'checked' : '';
+	my $setban = $setBitMask & 4096 ? 'checked' : '';
+	my $setninLv = $setBitMask & 8192 ? 'checked' : '';
+	my $setchtt = $setBitMask & 16384 ? 'checked' : '';
+	my $sethidenusi = $setBitMask & 32768 ? 'checked' : '';
+	my $setadd = $setBitMask & 65536 ? 'checked' : '';
+	my $setfloat = $setBitMask & 131072 ? 'checked' : '';
+	my $setnopool = $setBitMask & 262144 ? 'checked' : '';
+	my $setdelete = $setBitMask & 524288 ? 'checked' : '';
+	
+	$Page->Print("<center><table cellspcing=2 width=100%>");
+	$Page->Print("<tr><td colspan=4>有効にしたいコマンドにチェックを入れ、[設定]ボタンを押してください。</td></tr>");
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	
+	$Page->Print("<td class=\"DetailTitle\">スレッドパスワード（メール欄!pass:[password]）</td><td>");
+	$Page->Print("<input type=checkbox name=PASS value=1 $setpass>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレッド最大レス（!maxres:[100-2000]）</td><td>");
+	$Page->Print("<input type=checkbox name=MAXRES value=2 $setmaxres>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">強制sage（!sage）</td><td>");
+	$Page->Print("<input type=checkbox name=SAGE value=4 $setsage>有効</tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">BBS_SLIP（!slip:[vvv/vvvv/vvvvv/vvvvvv]）</td><td>");
+	$Page->Print("<input type=checkbox name=SLIP value=2048 $setslip>有効</tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">ID無し（!noid）</td><td>");
+	$Page->Print("<input type=checkbox name=NOID value=8 $setnoid>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">ID変更（!changeid）</td><td>");
+	$Page->Print("<input type=checkbox name=CHID value=16 $setchangeid>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">名無し強制（!force774）</td><td>");
+	$Page->Print("<input type=checkbox name=FC774 value=32 $setforce774>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">名無し変更（!change774:[名無し]）</td><td>");
+	$Page->Print("<input type=checkbox name=CH774 value=64 $setchange774>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">書き込みが一時間なければ過去ログ送り（!live）</td><td>");
+	$Page->Print("<input type=checkbox name=LIVE value=1024 $setlive>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレ主表示無し（!hidenusi）</td><td>");
+	$Page->Print("<input type=checkbox name=NONUSI value=32768 $sethidenusi>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">強制age（!float）</td><td>");
+	$Page->Print("<input type=checkbox name=AGE value=131072 $setfloat>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">不落（!nopool）</td><td>");
+	$Page->Print("<input type=checkbox name=NOPOOL value=262144 $setnopool>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninLv:[レベル]）</td><td>");
+	$Page->Print("<input type=checkbox name=NINLV value=8192 $setninLv>有効</td></tr>");
+
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	$Page->Print("<tr><td colspan=4>スレッド中のみ</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレッドストップ（!stop）</td><td>");
+	$Page->Print("<input type=checkbox name=STOP value=128 $setstop>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">過去ログ送り（!pool）</td><td>");
+	$Page->Print("<input type=checkbox name=POOL value=512 $setpool>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\"w>コマンド取り消し（!delcmd:[command]）</td><td>");
+	$Page->Print("<input type=checkbox name=DELCMD value=256 $setdelcmd>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">アクセス禁止（!ban:[>>レス番]）</td><td>");
+	$Page->Print("<input type=checkbox name=BAN value=4096 $setban>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレタイ変更（!changetitle:[新スレタイ]）</td><td>");
+	$Page->Print("<input type=checkbox name=CHTT value=16384 $setchtt>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">追記（!add:[>>レス番]:[追記内容]）</td><td>");
+	$Page->Print("<input type=checkbox name=ADD value=65536 $setadd>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番] </td><td>");
+	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete>有効</td></tr>");
+	
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
+	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETCOMMAND');\"></td></tr></table>");
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	忍法帖設定画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintNinpochoSetting
+{
+	my ($Page, $Sys, $Form) = @_;
+	
+	$Sys->Set('_TITLE', 'BBS Ninpocho Setting');
+	
+	require './module/setting.pl';
+	my $Setting = SETTING->new;
+	$Setting->Load($Sys);
+
+	my $ninlstat = $Setting->Get('BBS_NINJA') ? '最大Lv：'.$Sys->Get('NINLVMAX') : '無効';
+	
+	my $setWrite		= $Setting->Get('NINJA_WRITE_MESSAGE');
+	my $setSage			= $Setting->Get('NINJA_FORCE_SAGE');
+
+	my ($setThread,$thcost)		= split(/-/,$Setting->Get('NINJA_MAKE_THREAD'));
+	my ($setCommand,$comcost)		= split(/-/,$Setting->Get('NINJA_USE_COMMAND'));
+	my ($setStop,$stopcost)			= split(/-/,$Setting->Get('NINJA_THREAD_STOP'));
+	my ($setBan,$bancost)			= split(/-/,$Setting->Get('NINJA_USER_BAN'));
+	my ($setDelete,$delcost)		= split(/-/,$Setting->Get('NINJA_RES_DELETE'));
+
+	
+	$Page->Print("<center><table cellspcing=2 width=100%>");
+	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
+	$Page->Print("<tr><td colspan=4><hr><font size=4>忍法帖 $ninlstat</font><hr></td></tr>");
+	
+	$Page->Print("<tr><td class=\"DetailTitle\">書き込み可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_WRITE_MESSAGE value=\"$setWrite\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">sageを強制するレベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_FORCE_SAGE value=\"$setSage\">まで</td>");
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">スレ立て可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_MAKE_THREAD value=\"$setThread\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_TH value=\"$thcost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">各種コマンド使用可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_USE_COMMAND value=\"$setCommand\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"opacity: 0.5;\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_COM value=\"$comcost\" disabled></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">スレスト可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_THREAD_STOP value=\"$setStop\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_STOP value=\"$stopcost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">BAN可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_USER_BAN value=\"$setBan\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_BAN value=\"$bancost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">レス削除可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_RES_DELETE value=\"$setDelete\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_DEL value=\"$delcost\"></td>");
+	
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
+	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETNINPOCHO');\"></td></tr></table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -653,6 +912,15 @@ sub PrintOtherSetting
 	my $selIDhost		= ($setIDHost eq 'checked' ? 'selected' : '');
 	my $selIDkarafuto	= ($setIDHost eq 'karafuto' ? 'selected' : '');
 	my $selIDsiberia	= ($setIDHost eq 'siberia' ? 'selected' : '');
+
+	my $selSlipNone		= ($setIPSave eq '' ? 'selected' : '');
+	my $selSlipChecked	= ($setIPSave eq 'checked' ? 'selected' : '');
+	my $selSlipFeature	= ($setIPSave eq 'feature' ? 'selected' : '');
+	#my $selSlipVerbose	= ($setIPSave eq 'verbose' ? 'selected' : '');
+	my $selSlipVVV		= ($setIPSave eq 'vvv' ? 'selected' : '');
+	my $selSlipVVVV		= ($setIPSave eq 'vvvv' ? 'selected' : '');
+	my $selSlipVVVVV	= ($setIPSave eq 'vvvvv' ? 'selected' : '');
+	my $selSlipVVVVVV	= ($setIPSave eq 'vvvvvv' ? 'selected' : '');
 	
 	my $setThreadNum	= $Setting->Get('BBS_THREAD_NUMBER');
 	my $setContentNum	= $Setting->Get('BBS_CONTENTS_NUMBER');
@@ -671,6 +939,9 @@ sub PrintOtherSetting
 	my $setMovie    	= $Setting->Get('BBS_MOVIE');
 	my $setURLtoTitle   = $Setting->Get('BBS_URL_TITLE');
 	my $setImage    	= $Sys->Get('IMGTAG');
+	my $setNinja		= $Setting->Get('BBS_NINJA');
+	my $setHideNusi		= $Setting->Get('BBS_HIDENUSI');
+	my $setTitleID		= $Setting->Get('BBS_TITLEID');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
@@ -682,16 +953,28 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">ID表示</td><td><select name=ID_DISP>");
-	$Page->Print("<option value=BBS_FORCE_ID $selIDforce>強制ID");
-	$Page->Print("<option value=BBS_ID_DISP $selIDdisp>任意ID");
-	$Page->Print("<option value=BBS_NO_ID $selIDnone>ID表示無し");
-	$Page->Print("<option value=BBS_DISP_IP1 $selIDhost>ホスト表\示");
-	$Page->Print("<option value=BBS_DISP_IP2 $selIDkarafuto>発信元表示(樺太)");
-	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>発信元表示(シベリア)");
+	$Page->Print("<option value=BBS_FORCE_ID $selIDforce>強制ID</option>");
+	$Page->Print("<option value=BBS_ID_DISP $selIDdisp>任意ID</option>");
+	$Page->Print("<option value=BBS_NO_ID $selIDnone>ID表示無し</option>");
+	$Page->Print("<option value=BBS_DISP_IP1 $selIDhost>ホスト表\示</option>");
+	$Page->Print("<option value=BBS_DISP_IP2 $selIDkarafuto>発信元表示(樺太)</option>");
+	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>発信元表示(シベリア)</option>");
 	$Page->Print("</select></td>");
-	$Page->Print("<td class=\"DetailTitle\">機種識別子(ID末尾)</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_SLIP $setIPSave value=on>付加する</td></tr>");
-	
+	$Page->Print("<td class=\"DetailTitle\">忍法帖</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_NINJA value=on $setNinja>有効</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">機種識別子(BBS_SLIP)</td><td><select name=BBS_SLIP>");
+	$Page->Print("<option value=\"\" $selSlipNone>なし</option>");
+	$Page->Print("<option value=checked $selSlipChecked>ID末尾簡易表示</option>");
+	$Page->Print("<option value=feature $selSlipFeature>ID末尾標準表示</option>");
+	#$Page->Print("<option value=verbose $selSlipVerbose>ID末尾詳細表示</option>");
+	$Page->Print("<option value=vvv $selSlipVVV>ﾜｯﾁｮｲ</option>");
+	$Page->Print("<option value=vvvv $selSlipVVVV>ﾜｯﾁｮｲ+IP</option>");
+	$Page->Print("<option value=vvvvv $selSlipVVVVV>ﾜｯﾁｮｲ+KOROKORO</option>");
+	$Page->Print("<option value=vvvvvv $selSlipVVVVVV>ﾜｯﾁｮｲ+KOROKORO+IP</option>");
+	$Page->Print("</select></td>");
+	$Page->Print("<td class=\"DetailTitle\">スレ主表示を隠す</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_HIDENUSI value=on $setHideNusi>有効</td>");
+
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
 	$Page->Print("<td class=\"DetailTitle\"><s>文字参照</s></td><td>");
@@ -718,7 +1001,7 @@ sub PrintOtherSetting
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
     
-    $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
+    $Page->Print("<tr><td rowspan=6 class=\"DetailTitle\"></td><td rowspan=6>");
 	$Page->Print("</td>");
 	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
@@ -726,7 +1009,7 @@ sub PrintOtherSetting
 	$Page->Print("<td class=\"DetailTitle\">Imgur 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on $setImgur>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">Twitter 埋め込み表示</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">X(旧Twitter) 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setTwitter>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">Youtube/niconico 埋め込み表示</td><td>");
@@ -734,6 +1017,9 @@ sub PrintOtherSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">本文中スレURLをスレタイに変換</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_URL_TITLE value=on $setURLtoTitle>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレタイにIDを付加</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_TITLEID value=on $setTitleID>有効</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
@@ -830,6 +1116,7 @@ sub FunctionBaseSetting
 	$Setting->Set('BBS_DELETE_NAME', $Form->Get('BBS_DELETE_NAME'));
 	$Setting->Set('BBS_COOKIEPATH', $Form->Get('BBS_COOKIEPATH'));
 	$Setting->Set('BBS_REFERER_CUSHION', $Form->Get('BBS_REFERER_CUSHION'));
+	$Setting->Set('BBS_KAKO', $Form->Get('BBS_KAKO'));
 	
 	$Setting->Save($Sys);
 	
@@ -913,9 +1200,9 @@ sub FunctionLimitSetting
 {
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting);
-	my $DNSBL = $Sys->Get('SPAMHAUS');
-	$DNSBL += $Sys->Get('SPAMCOP');
-	$DNSBL += $Sys->Get('BARRACUDA');
+	my $DNSBL = $Sys->Get('DNSBL_TOREXIT');
+	$DNSBL += $Sys->Get('DNSBL_S5H');
+	$DNSBL += $Sys->Get('DNSBL_DRONEBL');
 	# 権限チェック
 	{
 		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
@@ -969,8 +1256,11 @@ sub FunctionLimitSetting
 	$Setting->Set('timecount', $Form->Get('timecount'));
 	$Setting->Set('timeclose', $Form->Get('timeclose'));
 	$Setting->Set('NANASHI_CHECK', ($Form->Equal('NANASHI_CHECK', 'on') ? 'checked' : ''));
-	if($DNSBL != 0){
+	if($Sys->Get('PROXYCHECK_APIKEY')){
 	$Setting->Set('BBS_PROXY_CHECK', ($Form->Equal('BBS_PROXY_CHECK', 'on') ? 'checked' : ''));
+	}
+	if($DNSBL != 0){
+	$Setting->Set('BBS_DNSBL_CHECK', ($Form->Equal('BBS_DNSBL_CHECK', 'on') ? 'checked' : ''));
 	}
 	$Setting->Set('BBS_JP_CHECK', ($Form->Equal('BBS_JP_CHECK', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_RAWIP_CHECK', ($Form->Equal('BBS_RAWIP_CHECK', 'on') ? 'checked' : ''));
@@ -997,14 +1287,112 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_SPAMKILLI_POINT', $Form->Get('BBS_SPAMKILL_POINT'));
 
 	# 改造版で追加
+<<<<<<< HEAD
 	$Setting->Set('BBS_HCAPTCHA', ($Form->Equal('BBS_HCAPTCHA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
+=======
+	$Setting->Set('BBS_CAPTCHA', ($Form->Equal('BBS_CAPTCHA', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_REVERSE_CHECK', ($Form->Equal('BBS_REVERSE_CHECK', 'on') ? 'checked' : ''));
+>>>>>>> main
 
 	$Setting->Save($Sys);
 	
 	return 0;
 }
+#------------------------------------------------------------------------------------------------------------
+#
+#	コマンド設定
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionCommandSetting
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my ($Setting);
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_BBSSETTING, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	
+	require './module/setting.pl';
+	$Setting = SETTING->new;
+	$Setting->Load($Sys);
+	
+	my $commandSet = 0;
+	my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
+					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE);
 
+	foreach (@inList) {
+		# 入力チェック	
+		my $status = $Form->Get($_) ?  '有効' : '無効';
+		$commandSet |= $Form->Get($_);
+		push @$pLog, "「$_」を「" . $status. '」に設定';
+	}
+	
+	$Setting->Set('BBS_COMMAND', $commandSet);
+	$Setting->Save($Sys);
+	
+	return 0;
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	忍法帖設定
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionNinpochoSetting
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my ($Setting);
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_BBSSETTING, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	# 入力チェック
+	{
+		my @inList = qw(NINJA_WRITE_MESSAGE NINJA_FORCE_SAGE NINJA_MAKE_THREAD NINJA_USER_BAN
+		 NINJA_USE_COMMAND NINJA_THREAD_STOP NINJA_RES_DELETE);
+		foreach (@inList) {
+			push @$pLog, "「$_」を「" . $Form->Get($_) . '」に設定';
+		}
+	}
+	require './module/setting.pl';
+	$Setting = SETTING->new;
+	$Setting->Load($Sys);
+	
+	$Setting->Set('NINJA_WRITE_MESSAGE', $Form->Get('NINJA_WRITE_MESSAGE'));
+	$Setting->Set('NINJA_FORCE_SAGE', $Form->Get('NINJA_FORCE_SAGE'));
+	$Setting->Set('NINJA_MAKE_THREAD', $Form->Get('NINJA_MAKE_THREAD').'-'.$Form->Get('COST_TH'));
+	$Setting->Set('NINJA_USER_BAN', $Form->Get('NINJA_USER_BAN').'-'.$Form->Get('COST_BAN'));
+	$Setting->Set('NINJA_USE_COMMAND', $Form->Get('NINJA_USE_COMMAND').'-'.$Form->Get('COST_COM'));
+	$Setting->Set('NINJA_THREAD_STOP', $Form->Get('NINJA_THREAD_STOP').'-'.$Form->Get('COST_STOP'));
+	$Setting->Set('NINJA_RES_DELETE', $Form->Get('NINJA_RES_DELETE').'-'.$Form->Get('COST_DEL'));
+
+	$Setting->Save($Sys);
+	
+	return 0;
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	その他設定
@@ -1055,6 +1443,7 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_NEWSUBJECT', ($Form->Equal('BBS_NEWSUBJECT', 'on') ? '1' : ''));
 	$Setting->Set('BBS_YMD_WEEKS', $Form->Get('BBS_YMD_WEEKS'));
 	$Setting->Set('BBS_TRIPCOLUMN', $Form->Get('BBS_TRIPCOLUMN'));
+<<<<<<< HEAD
 	$Setting->Set('BBS_SLIP', ($Form->Equal('BBS_SLIP', 'on') ? 'checked' : ''));
 
     	$Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
@@ -1062,42 +1451,37 @@ sub FunctionOtherSetting
     	$Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
     	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
     	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
+=======
+	$Setting->Set('BBS_SLIP', $Form->Get('BBS_SLIP'));
+	$Setting->Set('BBS_NINJA', ($Form->Equal('BBS_NINJA', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_HIDENUSI', ($Form->Equal('BBS_HIDENUSI', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
+    $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
+    #$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
+>>>>>>> main
 	
 	# ID表示設定
-	# 酷いけど仕方ないね…
-	# HOST表示
-	if ( $Form->Equal('ID_DISP', 'BBS_DISP_IP1') ) {
-		$Setting->Set('BBS_DISP_IP', 'checked');
-		$Setting->Set('BBS_FORCE_ID', '');
-		$Setting->Set('BBS_NO_ID', '');
-	}
-	# karafuto
-	elsif ( $Form->Equal('ID_DISP', 'BBS_DISP_IP2') ) {
-		$Setting->Set('BBS_DISP_IP', 'karafuto');
-		$Setting->Set('BBS_FORCE_ID', '');
-		$Setting->Set('BBS_NO_ID', '');
-	}
-	# siberia
-	elsif ( $Form->Equal('ID_DISP', 'BBS_DISP_IP3') ) {
-		$Setting->Set('BBS_DISP_IP', 'siberia');
-		$Setting->Set('BBS_FORCE_ID', '');
-		$Setting->Set('BBS_NO_ID', '');
-	}
-	elsif ( $Form->Equal('ID_DISP', 'BBS_FORCE_ID') ) {
-		$Setting->Set('BBS_DISP_IP', '');
-		$Setting->Set('BBS_FORCE_ID', 'checked');
-		$Setting->Set('BBS_NO_ID', '');
-	}
-	elsif ( $Form->Equal('ID_DISP', 'BBS_NO_ID') ) {
-		$Setting->Set('BBS_DISP_IP', '');
-		$Setting->Set('BBS_FORCE_ID', '');
-		$Setting->Set('BBS_NO_ID', 'checked');
-	}
-	else {
+	my %settings_map = (
+    'BBS_DISP_IP1' => { 'BBS_DISP_IP' => 'checked', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#ホスト表示
+    'BBS_DISP_IP2' => { 'BBS_DISP_IP' => 'karafuto', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#発信元表示(樺太)
+    'BBS_DISP_IP3' => { 'BBS_DISP_IP' => 'siberia', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#発信元表示(シベリア)
+    'BBS_FORCE_ID' => { 'BBS_DISP_IP' => '', 'BBS_FORCE_ID' => 'checked', 'BBS_NO_ID' => '' },	#強制ID
+    'BBS_NO_ID'    => { 'BBS_DISP_IP' => '', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => 'checked' },	#ID表示なし
+	);
+
+	if (my $settings = $settings_map{$Form->Get('ID_DISP')}) {
+		while (my ($key, $value) = each %$settings) {
+			$Setting->Set($key, $value);
+		}
+	} else {
 		$Setting->Set('BBS_DISP_IP', '');
 		$Setting->Set('BBS_FORCE_ID', '');
 		$Setting->Set('BBS_NO_ID', '');
 	}
+	
 	
 	$Setting->Save($Sys);
 	

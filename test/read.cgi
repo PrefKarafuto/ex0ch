@@ -188,17 +188,42 @@ sub PrintReadHead
 	my $mascot = $Set->Get('BBS_MASCOT');
 	my $url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Sys->Get('KEY').'/';
 	my $favicon = $Set->Get('BBS_FAVICON');
+<<<<<<< HEAD
     my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $datone = $Dat->Get(0);
 	my @threadTop = split(/<>/,$$datone);
+=======
+	my $image = $Set->Get('BBS_TITLE_PICTURE');
+	my $bbsname = $Set->Get('BBS_TITLE');
+	my $bbspath = $Sys->Get('BBS');
+	my $datone = $Dat->Get(0);
+	my $description = 'ERROR:スレッドが存在しません。';
+	my $CSP = $Sys->Get('CSP');
+	
+	if (defined $datone && ref($datone) eq 'SCALAR') {
+    	my @threadTop = split(/<>/, $$datone);
+		$threadTop[3] =~ s/<br>/\n/g; 			#brタグをOGP用に改行コードに変換
+		my @topMessage = split(/(<|&lt;)/,$threadTop[3]);	#それ以外のHTMLタグが混入していた場合に直前で切る
+
+		$topMessage[0] =~ s/&/&amp;/g;			#一応サニタイズ
+		$topMessage[0] =~ s/>/&gt;/g;
+		$topMessage[0] =~ s/"/&quot;/g;
+		$description = $topMessage[0];
+	}
+	
+    	if($image !~ /^https?:\/\//){
+        	$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
+    	}
+>>>>>>> main
 	
     if($image !~ /^https?:\/\//){
         $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
     }
     
 	# HTMLヘッダの出力
-	$Page->Print("Content-type: text/html\n\n");
+  $Page->Print("Content-type: text/html\n");
+  $Page->Print("Cache-Control: max-age=0, s-maxage=1, stale-while-revalidate=2\n\n");
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja" prefix="og: http://ogp.me/ns#">
@@ -209,11 +234,16 @@ sub PrintReadHead
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
  <meta property="og:url" content="$url">
  <meta property="og:title" content="$title">
+<<<<<<< HEAD
  <meta property="og:description" content="$threadTop[3]">
+=======
+ <meta property="og:description" content="$description">
+>>>>>>> main
  <meta property="og:type" content="article">
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
  <meta name="twitter:card" content="summary">
+<<<<<<< HEAD
  <!-- read.cgiのtestへの階層には3つ上にいかないと到達できない -->
  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
  <link rel="icon" href="$favicon">
@@ -222,6 +252,19 @@ HTML
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
 	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Set->Get('BBS_HCAPTCHA'));
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($Set->Get('BBS_HCAPTCHA'));
+=======
+  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
+ <link rel="icon" href="../../../../$bbspath/$favicon">
+HTML
+	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
+	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
+	if($Set->Get('BBS_CAPTCHA')){
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
+	}
+	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
+>>>>>>> main
 
 	$Caption->Print($Page, undef);
 	
@@ -258,6 +301,9 @@ HTML
 sub PrintReadMenu
 {
 	my ($CGI, $Page) = @_;
+
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
 	
 	# 前準備
 	my $Sys = $CGI->{'SYS'};
@@ -314,7 +360,9 @@ sub PrintReadMenu
 	
 	# レス数限界警告表示
 	{
-		my $rmax = $Sys->Get('RESMAX');
+		$Threads->LoadAttr($Sys);
+		my $AttrMax = $Threads->GetAttr($key,'maxres');
+		my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 		
 		if ($resNum >= $rmax) {
 			$Page->Print("<div style=\"background-color:red;color:white;line-height:3em;margin:1px;padding:1px;\">\n");
@@ -338,7 +386,7 @@ sub PrintReadMenu
 		my $title = $Dat->GetSubject();
 		my $ttlCol = $Set->Get('BBS_SUBJECT_COLOR');
 		$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
-		$Page->Print("<h1 style=\"color:$ttlCol;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title</h1>\n\n");
+		$Page->Print("<h1 style=\"color:$ttlCol;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title ($resNum)</h1>\n\n");
 		$Page->Print("<dl class=\"thread\">\n");
 	}
 }
@@ -423,7 +471,16 @@ sub PrintReadFoot
 	my $datPath = $Conv->MakePath($Sys->Get('BBS_REL')."/dat/$key.dat");
 	my $datSize = int((stat $datPath)[7] / 1024);
 	my $cgipath = $Sys->Get('CGIPATH');
-	
+
+	require "./module/thread.pl";
+	my $Threads = THREAD->new;
+
+	$Threads->LoadAttr($Sys);
+	my $AttrMax = $Threads->GetAttr($key,'maxres');
+	my $threadStop = $Threads->GetAttr($key,'stop');
+	my $threadPool = $Threads->GetAttr($key,'pool');
+	$rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
+
 	# datファイルのサイズ表示
 	$Page->Print("</dl>\n\n<font color=\"red\" face=\"Arial\"><b>${datSize}KB</b></font>\n\n");
 	
@@ -470,7 +527,11 @@ sub PrintReadFoot
 	my $isstop = $permt == $perms;
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
+<<<<<<< HEAD
 	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop) {
+=======
+	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop &&!$threadStop &&!$threadPool) {
+>>>>>>> main
 		my $cookName = '';
 		my $cookMail = '';
 		my $tm = int(time);
@@ -491,11 +552,14 @@ sub PrintReadFoot
 			$cookName = &$sanitize($Cookie->Get('NAME', '', 'utf8'));
 			$cookMail = &$sanitize($Cookie->Get('MAIL', '', 'utf8'));
 		}
-		
+		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+		my $classname = $Sys->Get('CAPTCHA');
+		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
+
 		$Page->Print(<<HTML);
-<form method="POST" action="$cgipath/bbs.cgi?guid=ON">
+		<form method="POST" action="$cgipath/bbs.cgi">
 <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
-<input type="submit" value="書き込む"><br class="smartphone">
+$Captcha<input type="submit" value="書き込む"><br class="smartphone">
 名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">
 E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="$cookMail" size="19"><br>
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
@@ -509,10 +573,12 @@ HTML
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 </div>
 </div>
-
+<div id="overlay">
+    <img id="overlay-image">
+  </div>
 <style>
 /* スマホ用レイアウト */
 textarea {
@@ -520,8 +586,29 @@ width:95%;
 margin:0;
 }
 </style>
-
-
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const images = document.querySelectorAll('.post_image');
+    const overlay = document.getElementById('overlay');
+    const overlayImage = document.getElementById('overlay-image');
+  
+    images.forEach((image) => {
+      image.addEventListener('click', function() {
+        overlayImage.src = this.src;
+        overlayImage.onload = function() {
+          overlay.style.display = 'block';
+        };
+      });
+    });
+  
+    overlay.addEventListener('click', function(event) {
+      // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
+      if (event.target !== overlayImage) {
+        overlay.style.display = 'none';
+      }
+    });
+  });
+</script>
 </body>
 </html>
 HTML
@@ -558,14 +645,24 @@ sub PrintResponse
 	my $aa='';
 	
 	# URLと引用個所の適応
+<<<<<<< HEAD
     	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
     	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
+=======
+    $Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
+	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
+>>>>>>> main
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
-	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
 	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
+<<<<<<< HEAD
     	$Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
+=======
+	$Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
+	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
+
+>>>>>>> main
 	# メール欄有り
 	if ($elem[1] eq '') {
 		$Mail = "<font color=\"$nameCol\"><b>$elem[0]</b></font>";
@@ -680,7 +777,7 @@ sub PrintReadSearch
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $var<br>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/ex0ch/">EXぜろちゃんねる</a>
 </div>
 
 </body>
@@ -757,7 +854,7 @@ sub PrintReadSearch
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $var<br>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/ex0ch/">EXぜろちゃんねる</a>
 </div>
 
 </body>
@@ -783,8 +880,9 @@ sub PrintReadError
 	my $code = $CGI->{'CODE'};
 	
 	# HTMLヘッダの出力
-	$Page->Print("Content-type: text/html\n\n");
-	$Page->Print("<html><head><title>ＥＲＲＯＲ！！</title>\n");
+  $Page->Print("Content-type: text/html\n");
+  $Page->Print("Cache-Control: max-age=0, s-maxage=1, stale-while-revalidate=2\n\n");
+  $Page->Print("<html><head><title>ＥＲＲＯＲ！！</title>\n");
 	$Page->Print("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">");
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print('</head><!--nobanner-->');
@@ -860,7 +958,7 @@ sub PrintDiscovery
 
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/ex0ch/">EXぜろちゃんねる</a>
 </div>
 
 </body>

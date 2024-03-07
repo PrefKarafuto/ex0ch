@@ -1,4 +1,8 @@
+# EXぜろちゃんねる 
+HP: https://prefkarafuto.github.io/ExZeroChannel/
+GitHub: https://github.com/PrefKarafuto/ex0ch/
 
+<<<<<<< HEAD
 ぜろちゃんねるプラス Ver0.8.3
 https://github.com/PrefKarafuto/New_0ch_Plus/
 
@@ -105,79 +109,165 @@ zerochplus_0.8.2/
 	  ユーザ名とパスワードが固定なので、放置しておくと管理者以外に管理
 	  権限でログインされてしまう危険があります。
 -----------------------------------------------------------------------
+=======
+本スクリプトは、2002年に開発開始された「ぜろちゃんねる(http://0ch.mine.nu/)」スクリプトを２ちゃんねる仕様に改造するという目的で
+2010年はじまったプロジェクト「ぜろちゃんねるプラス(http://zerochplus.osdn.jp/)」がv0.7.4で開発停止したことを受けて、
+2023年に発足した「ぜろちゃんねるプラス再開発プロジェクト」が、ぜろちゃんねるプラスからフォークし開発を行っています。
+
+これまでのぜろちゃんねるプラスと同じく５ちゃんねる専用ブラウザでも書き込みと閲覧、またv0.7.4(v0.7.5)からのアップデートが可能です。
+>>>>>>> main
 
 
-■ライセンス
-　本スクリプトのライセンスは本家ぜろちゃんねると同じ扱いとします。以下は本家ぜろちゃんね
-る /readme/readme.txt からの引用です。
+## インストール
+
+システム要件:
+- suEXECでCGI動作が可能なApache HTTP Serverが入っており，Perl 5.22以上が動作するUNIX系もしくはLinux系のOS
+- 10MB以上のディスクスペース
+
+依存関係:
+- Digest::MD5
+- JSON
+- HTML::Entities
+- Net::DNS
+- LWP::UserAgent
+- XML::Simple
+
+同梱のモジュール:
+- CGI::Session
+- Digest::SHA::PurePerl
+- List::MoreUtils
+- Net::DNS::Lite
+
+インストール手順:
+1. GitHubレポジトリのReleasesから最新版をダウンロードし、ファイルを解凍してください。
+2. インストール先のサーバーの設定を確認し、必要に応じて各CGIファイルの先頭の"#!/usr/bin/perl"を変更してください。
+3. 必要なモジュールがサーバーに入っているか確認してください。無い場合はcpanm等でインストールします。
+4. FTP転送ソフトを使って、testフォルダごとサーバーにアップロードします。
+5. 各フォルダやファイルに、下記を参考にパーミッションを設定します。設定後にadmin.cgiにアクセスし本体の設定を行います。
+
+アップデート手順:
+1. 既存のtestフォルダを、ダウンロードしたtestフォルダで上書きしてください。
+2. 必要に応じて各CGIファイルの先頭の"#!/usr/bin/perl"を変更してください。
+
+パーミッション例:
+[701] 親ディレクトリ(設定できる場合)
+    [701] test/
+        [700] admin/
+            [600] *.pl
+            [604] index.html (403用) 
+        [701] datas/
+            [604] *.*
+            [604] index.html (403用) 
+        [700] info/
+            [700] .auth/
+                [604] index.html (403用)
+            [700] .ninpocho/
+                [604] index.html (403用)
+            [700] .session/
+                [604] index.html (403用) 
+            [700] .IP_List/
+                [604] index.html (403用) 
+            [600] index.html (403用) 
+        [700] module/
+            [600] *.pl
+            [604] index.html (403用) 
+        [700] plugin/
+            [600] 0ch_*_utf8.pl
+            [604] index.html (403用) 
+        [700] plugin_conf/
+            [600] 0ch_*.cgi
+            [604] index.html (403用) 
+        [700] perllib/
+            [700] */
+            [600] *.*
+            [604] index.html (403用) 
+        [700] *.cgi
+        [604] index.html (403用) 
+
+EXぜろちゃんねる初期設定：
+1. admin.cgiにアクセスし、ログイン画面でユーザ名：Administrator、初期パスワード：zerochを入力してログインします。
+2. 初期パスワードを変更します。ヘッダメニューの「ユーザー」→「Administrator」を選択し、任意のパスワードを設定してください。
+3. 一度ログオフし、先ほど設定したパスワードで再度ログインします。
+4. システム設定を行います。ヘッダメニューの「システム設定」→「基本設定」を選択し、各値を設定して設定ボタンを押してください。
+
+
+## 使用方法
+
+掲示板作成:
+1. トップ画面のヘッダメニュー「掲示板」→「掲示板作成」を選択してください。
+2. 各値を設定し、作成ボタンを押してください。
+3. 「掲示板」画面へ戻り、一覧に作成した掲示板が追加されていれば成功です。
+
+掲示板設定:
+1. 掲示板一覧に表示されている掲示板名をクリックして、掲示板個別画面に入ります。
+2. ヘッダメニューの「掲示板設定」を選択し、各値を設定してください。既存の設定をインポートする場合は「設定インポート」を選択してください。
+3. ヘッダメニューの「各種編集」から、掲示板のヘッダ画面の編集や規制ユーザー、NGワードなどの設定を行えます。
+   正規表現によるNGワード設定は、正規表現を十分理解した上で行ってください。
+
+
+## 新機能
+
+- 忍法帖
+かつて2chに存在した機能を追加しました。ユーザーの動向を保存し、セッションIDで紐付けられるようになります。詳細はWiki参照。
+- ワッチョイ
+ユーザーのIPやUAなどからコテハンを生成し名前に付加します。自演防止などに使用できます。なおコテハンのIDは一週間で変わります。
+- ユーザー認証
+Captcha認証により、スクリプトやBotによる荒らしをブロックします。忍法帖と併用した場合、認証は初回のみとなります。
+専ブラからの書き込みは非対応です。
+- ユーザーコマンド
+スレ主がコマンドを使えるようになりました。詳細はWiki参照。
+- DNSBL拡充
+Tor出口ノード遮断やVPN/Proxyの検出ができるようになりました。
+- 書き込み追認
+規制に引っかかった書き込みを、管理者が投稿追認できるようになりました。
+- BBSMenu作成機能
+bbsmenu.htmlとbbsmenu.jsonをボタン一つで作れるようになりました。専ブラからの一括登録にも対応しています。
+- スレッドのコピー／移動
+スレッドを他の掲示板へコピーしたり移動したりできます。
+- アンカー修正
+透過削除時にレスアンカーがズレなくなります。
+- その他色々
+
+
+## その他
+
+Wiki: https://github.com/PrefKarafuto/ex0ch/wiki
+
+
+## 不具合報告・改善要望について
+
+レポジトリのIssues→New issueから、イシューを作成してください。
+
+
+## ライセンス
+
+本スクリプトのライセンスは本家ぜろちゃんねると同じ扱いとします。
+以下は本家ぜろちゃんねる /readme/readme.txt からの引用です。
 
 > 本スクリプトは自由に改造・再配布してもらってかまいません。また、本スクリプトによって出
-力されるクレジット表示(バージョン表示)などの表示も消して使用してもらっても構いません。
+> 力されるクレジット表示(バージョン表示)などの表示も消して使用してもらっても構いません。
 > ただし、作者は本スクリプトと付属ファイルに関する著作権を放棄しません。また、作者は本ス
-クリプト使用に関して発生したいかなるトラブルにも責任を負いかねますのでご了承ください。
-
-　またremake.cgiの著作権･ライセンスは別の方にあり、remake.cgiの作者に著作権･ライセンスを
-帰属します。
+> クリプト使用に関して発生したいかなるトラブルにも責任を負いかねますのでご了承ください。
 
 以上引用
 
+<<<<<<< HEAD
 ■バージョンアップについて
   旧v0.7.x系列からのアップデートの際は、必ず事前にバックアップをとってください。
   testフォルダのうち、infoフォルダを除いたフォルダ・ファイルを既存のtestフォルダに上書き保存してください。
   （infoフォルダ中のerrmsg.cgiに限っては既存のファイルに上書きしてください）
   プラグインが入っていた場合、コードの書き換えを行って適宜プラグインの再設定を行う必要があります。
+=======
+>>>>>>> main
 
-■ヘルプ・サポート
-　基本的なことは変わっておりませんので、以下のページを参考にしてください。
-  ・ヘルプ - ぜろちゃんねるプラス
-    http://zerochplus.sourceforge.jp/help/
-  ・ぜろちゃんねるプラスWiki
-    http://sourceforge.jp/projects/zerochplus/wiki/
+## 連絡先
 
-  不具合報告などしていただける場合は以下のページからissueを作成してください。
-  ・サポート - ぜろちゃんねるプラス再開発プロジェクト
-    https://github.com/PrefKarafuto/New_0ch_Plus/issues
-    
-■謝辞
-　本家ぜろちゃんねる開発者「精神衰弱◆kwSzvOHE」氏並びにぜろちゃんねるプラス開発者「windyakin◆windyaking」氏を初めとする
-  両スクリプトの開発陣の方々、そして再開発に協力して頂いた皆様に心からの謝意を表します。
+樺太庁長官 ◆i5oJWq7F9Gmc
+- E-mail: karafuto@na-cat.com
+- 不具合報告・問い合わせ先: https://github.com/PrefKarafuto/ex0ch/issues
 
-■GitHub(公式)
-　https://github.com/PrefKarafuto/New_0ch_Plus/
 
-■同梱のPerlモジュール
-Digest-SHA-PurePerl
-Perl implementation of SHA-1/224/256/384/512
-    Version:    5.72
-    Released:   2012-09-24
-    Author:     Mark Shelor <mshelor@cpan.org>
-    License:    The Perl 5 License (Artistic 1 & GPL 1)
-    CPAN:       http://search.cpan.org/dist/Digest-SHA-PurePerl-5.72/
+## 謝辞
 
-Net-DNS-Lite
-a pure-perl DNS resolver with support for timeout
-    Version:    0.09
-    Released:   2012-06-20
-    Author:     Kazuho Oku <kazuhooku@gmail.com>
-    License:    The Perl 5 License (Artistic 1 & GPL 1)
-    CPAN:       http://search.cpan.org/dist/Net-DNS-Lite-0.09/
-
-List-MoreUtils
-Provide the stuff missing in List::Util
-    Version:    0.33
-    Released:   2011-08-04
-    Author:     Adam Kennedy <adamk@cpan.org>
-    License:    The Perl 5 License (Artistic 1 & GPL 1)
-    CPAN:       http://search.cpan.org/dist/List-MoreUtils-0.33/
-
-CGI-Session
-Persistent session data in CGI applications
-    Version:    4.48
-    Released:   2011-07-11
-    Author:     Mark Stosberg <mark@summersault.com>
-    License:    Artistic License 1.0
-    CPAN:       http://search.cpan.org/dist/CGI-Session-4.48/
-    
---------------------------------------------------------------------------------------
-2023 ぜろちゃんねるプラス再開発プロジェクト(https://github.com/PrefKarafuto/New_0ch_Plus/)
- by 樺太庁長官◆i5oJWq7F9Gmc
+本家ぜろちゃんねる開発者「精神衰弱 ◆kwSzvOHE」氏並びにぜろちゃんねるプラス開発者「windyakin ◆windyaking」氏
+を初めとする両スクリプトの開発陣の方々、そして再開発に協力して頂いた皆様に心からの謝意を表します。

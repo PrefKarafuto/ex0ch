@@ -77,9 +77,14 @@ sub Load
 	
 	# 状態が初期状態なら読み込み開始
 	if ($this->{'STAT'} == 0) {
+ 		require './module/thread.pl';
+		my $Threads = THREAD->new;
+		$Threads->LoadAttr($Sys);
+
+		my $AttrMax = $Threads->GetAttr($Sys->Get('KEY'),'maxres');
 		$this->{'RES'} = 0;
 		$this->{'LINE'} = [];
-		$this->{'MAX'} = $Sys->Get('RESMAX');
+		$this->{'MAX'} = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 		$this->{'PATH'} = $szPath;
 		$this->{'PERM'} = GetPermission($szPath);
 		$this->{'MODE'} = $readOnly;
@@ -302,12 +307,18 @@ sub Stop
 {
 	my $this = shift;
 	my ($Sys) = @_;
-	
+ 
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+	$Threads->LoadAttr($Sys);
+	my $AttrMax = $Threads->GetAttr($Sys->Get('KEY'),'maxres');
+	my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
+ 
 	# ↓スレスト文言
 	my $stopData = "停止しました。。。<>停止<>停止<>真・スレッドストッパー。。。（￣ー￣）ニヤリッ<>停止したよ。\n";
 	
 	# レス最大数超えてる場合はスレスト不可
-	if ($this->Size() <= $Sys->Get('RESMAX')) {
+	if ($this->Size() <= $rmax) {
 		# 停止状態じゃない場合のみ実行
 		if (! $this->IsStopped($Sys)) {
 			# 停止データを追加して強制的にセーブする

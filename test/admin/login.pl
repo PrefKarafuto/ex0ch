@@ -75,9 +75,10 @@ sub DoFunction
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
 	my ($host, $Security, $Mod);
+	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
 	
 	require './module/data_utils.pl';
-	$host = DATA_UTILS::GetRemoteHost();
+	$host = DATA_UTILS::reverse_lookup($ENV{'REMOTE_ADDR'});
 	
 	# ログイン情報を確認
 	if ($pSys->{'USER'}) {
@@ -135,8 +136,8 @@ $Page->Print(<<HTML);
     
     <div class="Sorce">
      <b>
-     <font face="Arial" size="3" color="red">0ch+ Administration Page</font><br>
-     <font face="Arial">Powered by 0ch/0ch+ script and 0ch/0ch+ modules 2002-2023</font>
+     <font face="Arial" size="3" color="red">Ex0ch Administration Page</font><br>
+     <font face="Arial">Powered by 0ch/0ch+/ex0ch script and 0ch/0ch+/ex0ch modules 2001-2024</font>
      </b>
     </div>
     

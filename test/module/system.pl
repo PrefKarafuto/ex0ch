@@ -89,7 +89,15 @@ sub Load
 	else {
 		$pSys->{'LIMTIME'} = 0;
 	}
-	
+
+	#セキュリティキーの設定
+	if (!$pSys->{'SECURITY_KEY'}){
+		use Digest::MD5;
+		my $md5 = Digest::MD5->new();
+		$md5->add($$,time(),rand(time));
+		$pSys->{'SECURITY_KEY'} = $md5->hexdigest();
+	}
+
 	if ($this->Get('CONFVER', '') ne $pSys->{'VERSION'}) {
 		$this->Save();
 	}
@@ -239,14 +247,15 @@ sub InitSystemValue
 	my ($pSys, $pKey) = @_;
 	
 	my %sys = (
-		'SYSFILE'	=> './info/system.cgi',								# システム設定ファイル
+		'SYSFILE'	=> './info/system.cgi',						# システム設定ファイル
 		'SERVER'	=> '',										# 設置サーバパス
 		'CGIPATH'	=> '/test',									# CGI設置パス
 		'INFO'		=> '/info',									# 管理データ設置パス
-		'DATA'		=> '/datas',									# 初期データ設置パス
+		'DATA'		=> '/datas',								# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
+		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> '0ch+ BBS 0.8.4 20230709',						# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS 0.9.0 20240308',				# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -267,8 +276,8 @@ sub InitSystemValue
 		'LINKST'	=> 23,										# リンク禁止開始時間
 		'LINKED'	=> 2,										# リンク禁止終了時間
 		'PATHKIND'	=> 0,										# 生成パスの種類
-		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',					# ヘッダ下部の表示文字列
-		'HEADURL'	=> '../test/search.cgi',							# ヘッダ下部のURL
+		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',	  # ヘッダ下部の表示文字列
+		'HEADURL'	=> '../test/search.cgi',					# ヘッダ下部のURL
 		'FASTMODE'	=> 0,										# 高速モード
 		
 		# ここからぜろプラオリジナル
@@ -278,8 +287,8 @@ sub InitSystemValue
 		'BANNER'	=> 1,										# read.cgi他の告知欄の表示
 		'KAKIKO'	=> 1,										# 2重かきこですか？？
 		'COUNTER'	=> '',										# 機能削除済につき未使用
-		'PRTEXT'	=> 'ぜろちゃんねるプラス再開発プロジェクト',					# PR欄の表示文字列
-		'PRLINK'	=> 'https://github.com/PrefKarafuto/New_0ch_Plus',				# PR欄のリンクURL
+		'PRTEXT'	=> 'EXぜろちゃんねる',						# PR欄の表示文字列
+		'PRLINK'	=> 'https://github.com/PrefKarafuto/ex0ch',	# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
 		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
@@ -287,13 +296,26 @@ sub InitSystemValue
 		'UPCHECK'	=> 0,										# 更新チェック間隔(日)
 		
 		# DNSBL設定
-		'SPAMHAUS'		=> 0,									# zen.spamhaus.org
-		'SPAMCOP'		=> 0,									# bl.spamcop.net
-		'BARRACUDA'	    	=> 0,									# b.barracudacentral.org
-		
-		'HCAPTCHA_SITEKEY'	=>'',									#hCaptchaサイトキー
-		'HCAPTCHA_SECRETKEY'	=>'',									#hCaptchaシークレットキー
-		'IMGTAG'		=> 0,									#画像リンクをIMGタグに変換
+		'DNSBL_TOREXIT'	=> 0,									# torexit.dan.me.uk
+		'DNSBL_S5H'	=> 0,										# all.s5h.net
+		'DNSBL_DRONEBL'	=> 0,									# dnsbl.dronebl.org
+
+		'SECURITY_KEY'	=> '',									# セキュリティキー（初回起動時に自動設定されます）
+		'LAST_FLUSH'	=> '',									# 定期的に動かす必要がある機能用
+
+		'CAPTCHA'		=> '',									# キャプチャの種類
+		'CAPTCHA_SITEKEY'		=> '',							# Captchaサイトキー
+		'CAPTCHA_SECRETKEY'	=> '',								# Captchaシークレットキー
+		'PROXYCHECK_APIKEY'		=> '',							# ProxyCheck.io APIキー
+
+		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換
+		'CSP'			=> 0,
+		'BANMAX'		=> 10,
+		'NINLVMAX'		=> 40,
+
+		'COOKIE_EXPIRY'	=> 30,									# Cookie期限
+		'NIN_EXPIRY'	=> 30,
+		'PASS_EXPIRY'	=> 365,
 		
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,

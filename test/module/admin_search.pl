@@ -79,7 +79,7 @@ sub Create
             next if (-e "$BBSpath/$dir/.0ch_hidden");
            
             $Sys->Set('BBS', $dir);
-            my $Threads = BILBO->new;
+            my $Threads = THREAD->new;
             $Threads->Load($Sys);
             my @threadSet = ();
             $Threads->GetKeySet('ALL', '', \@threadSet);
@@ -120,6 +120,10 @@ sub Create
         require './module/dat.pl';
         $this->{'DAT'} = DAT->new;
     }
+    if (! defined $this->{'LOG'}) {
+        require './module/manager_log.pl';
+        $this->{'LOG'} = MANAGER_LOG->new;
+    }
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -147,7 +151,23 @@ sub Run
     }
     return $this->{'RESULTSET'};
 }
- 
+
+sub Run_LogS
+{
+    my $this = shift;
+    my ($ip_addr, $host, $ua ,$sid, $f) = @_;
+    my $pSearchSet = $this->{'SEARCHSET'};
+    $this->{'RESULTSET'} = [] if ($f);
+   
+    foreach (@$pSearchSet) {
+        my ($bbsID, $bbs, $key) = split(/<>/, $_);
+        $this->{'SYS'}->Set('BBS_ID', $bbsID);
+        $this->{'SYS'}->Set('BBS', $bbs);
+        $this->{'SYS'}->Set('KEY', $key);
+        $this->LogSearch($ip_addr, $host, $ua ,$sid);
+    }
+    return $this->{'RESULTSET'};
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #   検索結果取得
@@ -228,7 +248,67 @@ sub Search
     }
     $DAT->Close();
 }
- 
+sub LogSearch
+{
+    my $this = shift;
+    my ($ip_addr,$host,$ua,$sid) = @_;
+   
+    my $bbsID = $this->{'SYS'}->Get('BBS_ID');
+    my $bbs = $this->{'SYS'}->Get('BBS');
+    my $key = $this->{'SYS'}->Get('KEY');
+    my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
+    my $DAT = $this->{'DAT'};
+    my $LOG = $this->{'LOG'};
+    my $Sys = $this->{'SYS'};
+
+    $LOG->Load($Sys,'WRT',$key);
+    if($LOG->Size()){
+        my $pResultSet = $this->{'RESULTSET'};
+        if($DAT->Load($this->{'SYS'}, $Path, 1)){
+            for (my $i = 0; $i < $LOG->Size(); $i++) {
+                my $match_count = 0;
+                my $condition_count = 0;
+                my @data = $LOG->Get($i);
+                my ($log_ip, $log_host, $log_ua, $log_sid) = ($data[6], $data[5], $data[8], $data[9]);
+
+                if ($ip_addr) {
+                    $condition_count++;
+                    if ($ip_addr eq $log_ip) {
+                        $match_count++;
+                    }
+                }
+                if ($host) {
+                    $condition_count++;
+                    if ($host eq $log_host) {
+                        $match_count++;
+                    }
+                }
+                if ($ua) {
+                    $condition_count++;
+                    if ($ua eq $log_ua) {
+                        $match_count++;
+                    }
+                }
+                if ($sid) {
+                    $condition_count++;
+                    if ($sid eq $log_sid) {
+                        $match_count++;
+                    }
+                }
+
+                if ($match_count == $condition_count) {
+                    my $SetStr = "$bbsID<>$key<>" . ($i + 1) . '<>';
+                    my $pDat = $DAT->Get($i);
+                    if(defined $pDat){
+                        $SetStr .= $$pDat;
+                        push @$pResultSet, $SetStr;
+                    }
+                }
+            }
+            $DAT->Close();
+        }
+    }
+}
 #============================================================================================================
 #   Module END
 #============================================================================================================

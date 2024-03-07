@@ -140,6 +140,9 @@ sub DoFunction
 	elsif ($subMode eq 'UPDATEBBS') {												# 掲示板更新
 		$err = FunctionBBSUpdate($Sys, $Form, $this->{'LOG'});
 	}
+	elsif ($subMode eq 'UPDATEBBSMENU') {											# BBEMENU更新
+		$err = FunctionBBSMenuUpdate($Sys, $Form, $this->{'LOG'});
+	}
 	
 	# 処理結果表示
 	if ($err) {
@@ -189,12 +192,13 @@ sub SetMenuList
 sub PrintBBSList
 {
 	my ($Page, $SYS, $Form) = @_;
-	my ($BBS, $Category, @bbsSet, @catSet, $id, $name, $category, $subject);
+	my ($BBS, $Category, @bbsSet, @catSet, $id, $name, $category, $subject, $state, $url);
 	my ($common1, $common2, $sCat, @belongBBS, $belongID, $isSysad);
 	
 	$SYS->Set('_TITLE', 'BBS List');
 	
 	require './module/bbs_info.pl';
+	require './module/data_utils.pl';
 	$BBS = BBS_INFO->new;
 	$Category = CATEGORY_INFO->new;
 	$BBS->Load($SYS);
@@ -218,7 +222,7 @@ sub PrintBBSList
 	$Category->GetKeySet(\@catSet);
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=4 align=right>カテゴリ");
+	$Page->Print("<tr><td colspan=5 align=right>カテゴリ");
 	$Page->Print("<select name=BBS_CATEGORY>");
 	$Page->Print("<option value=ALL>すべて</option>\n");
 	
@@ -238,7 +242,8 @@ sub PrintBBSList
 	# 掲示板リストを出力
 	$Page->Print("<tr><td style=\"width:20\">　</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">BBS Name</th>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Category</th>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:10\">URL</th>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:90\">Category</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">SubScription</th></tr>\n");
 	
 	foreach $id (@bbsSet) {
@@ -249,24 +254,27 @@ sub PrintBBSList
 				$subject	= $BBS->Get('SUBJECT', $id);
 				$category	= $BBS->Get('CATEGORY', $id);
 				$category	= $Category->Get('NAME', $category);
-				
+				$url		= $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', '')).'/'.$BBS->Get('DIR', $belongID);
+
 				$common1 = "\"javascript:SetOption('TARGET_BBS','$id');";
 				$common1 .= "DoSubmit('bbs.thread','DISP','LIST');\"";
 				
 				$Page->Print("<tr><td><input type=checkbox name=BBSS value=$id></td>");
-				$Page->Print("<td><a href=$common1>$name</a></td><td>$category</td>");
+				$Page->Print("<td><a href=$common1>$name</a></td><td><a href=$url target=_blank>[Jump]</a></td><td>$category</td>");
 				$Page->Print("<td>$subject</td></tr>\n");
 			}
 		}
 	}
 	$common1 = "onclick=\"DoSubmit('sys.bbs','FUNC'";
 	$common2 = "onclick=\"DoSubmit('sys.bbs','DISP'";
+	$state = -f "../bbsmenu.html" ? '更新':'作成';
 	
 	$Page->HTMLInput('hidden', 'TARGET_BBS', '');
-	$Page->Print("<tr><td colspan=4 align=left><hr>");
+	$Page->Print("<tr><td colspan=5 align=left><hr>");
 	$Page->Print("<input type=button value=\"カテゴリ変更\" $common2,'CATCHANGE')\"> ")	if (1);
 	$Page->Print("<input type=button value=\"情報更新\" $common1,'UPDATE')\"> ")		if ($isSysad);
 	$Page->Print("<input type=button value=\"index更新\" $common1,'UPDATEBBS')\"> ")	if (1);
+	$Page->Print("<input type=button value=\"bbsmenu$state\" $common1,'UPDATEBBSMENU')\"> ")	if (1);
 	$Page->Print("<input type=button value=\"　削除　\" $common2,'DELETE')\" class=\"delete\"> ")		if ($isSysad);
 	$Page->Print("</td></tr></table>\n");
 }
@@ -313,7 +321,7 @@ sub PrintBBSCreate
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板ディレクトリ</td><td>");
 	$Page->Print("<input type=text size=60 name=BBS_DIR value=\"[ディレクトリ名]\"></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板名称</td><td>");
-	$Page->Print("<input type=text size=60 name=BBS_NAME value=\"[掲示板名]＠0ch掲示板\"></td></tr>\n");
+	$Page->Print("<input type=text size=60 name=BBS_NAME value=\"[掲示板名]＠ex0ch掲示板\"></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">説明</td><td>");
 	$Page->Print("<input type=text size=60 name=BBS_EXPLANATION value=\"[説明]\"></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板設定継承</td>");
@@ -766,6 +774,152 @@ sub FunctionBBSUpdate
 		push @$pLog, "■掲示板「$name」を更新しました。";
 	}
 	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	BBSMENU情報の更新
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionBBSMenuUpdate
+{
+	my ($SYS, $Form, $pLog) = @_;
+	my ($BBS,$Page,$Category);
+	use JSON::PP;
+	require './module/buffer_output.pl';
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$Category = CATEGORY_INFO->new;
+	$Page = BUFFER_OUTPUT->new;
+	
+	my @time=localtime;
+	my $modifTime = time();
+	$time[5] += 1900;
+	$time[4] ++;
+	
+	my $bbsmenu = getbbsmenu($SYS,$BBS,$Category);
+	my $url = $SYS->Get('SERVER');
+	my $bbsname = $SYS->Get('SITENAME') ? $SYS->Get('SITENAME') : "EXぜろちゃんねる";
+
+	#bbsmenu.html生成
+	$Page->Print("<head>\n");
+	$Page->Print("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=Shift_JIS\">\n");
+	$Page->Print("<title>BBS MENU - $bbsname</title>\n");
+	$Page->Print("<base target=\"_blank\">\n");
+	$Page->Print("</head>\n");
+	
+	if (! defined $bbsmenu) {
+		$Page->Print("掲示板がありません。");
+		push @$pLog, '■BBSMENUに記載可能な掲示板がありません。';
+	}else{
+	
+		$Page->Print("<body text=\"#CC3300\" bgcolor=\"#FFFFFF\" link=\"#0000FF\" alink=\"#ff0000\" vlink=\"#660099\">\n");
+		$Page->Print("<b>$bbsname</b><br>\n");
+		$Page->Print("<font size=\"2\">\n");
+		foreach my $category (@$bbsmenu) {
+			$Page->Print("<br><b>$category->{name}</b><br>\n");
+			foreach my $bbs (@{$category->{list}}) {
+				$Page->Print("<a href=\"$bbs->{url}\">$bbs->{name}</a><br>\n");
+			}
+		}
+		$Page->Print("<br>更新日<br>$time[5]/$time[4]/$time[3]\n");
+		$Page->Print("</font></body>");
+		$Page->Flush(1, $SYS->Get('PM-TXT'), "../bbsmenu.html");
+
+		#bbsmenu.json生成
+		my @day_of_week = qw/Sun Mon Tue Wed Thu Fri Sat/;
+		my %bbsmenu_json = (
+			"last_modify" => $modifTime,
+			"last_modify_string" => "$time[5]/$time[4]/$time[3]($day_of_week[$time[6]]) $time[2]:$time[1]:$time[0]",
+			"description" => "$bbsname",
+			"menu_list" => [],
+		);
+		
+		my $catNum = 1;
+		foreach my $category (@$bbsmenu) {
+			my $category_json = {
+			    "category_total" => $#{$category->{list}}+1,
+				"category_name" => "$category->{name}",
+				"category_number" => "$catNum",
+				"category_content" => [],
+			};
+			push @{$bbsmenu_json{"menu_list"}}, $category_json;
+			
+			my $catOrder = 1;
+			foreach my $bbs (@{$category->{list}}) {
+				push @{$category_json->{"category_content"}}, {
+				    "board_name" => "$bbs->{name}",
+					"category_name" => "$category->{name}",
+					"directory_name" => "$bbs->{dir}",
+					"category" => $catNum,
+					"url" => "$bbs->{url}",
+					"category_order" => $catOrder,
+				}; 
+				$catOrder++;
+			}
+			$catNum++;
+		}
+		open my $fh, '>:raw', '../bbsmenu.json' or die "Could not open file: $!";
+		chmod $fh,$SYS->Get('PM-TXT');
+		my $json = JSON::PP->new->canonical(1);  # キーを辞書順にソート
+		my $json_text = $json->encode(\%bbsmenu_json);
+		print $fh $json_text;
+		close $fh;
+	
+		push @$pLog, '■BBSMENUの更新が正常に終了しました。';
+	}
+	
+	return 0;
+}
+sub getbbsmenu
+{
+	my($SYS,$BBS,$Category) = @_;
+	require "./module/data_utils.pl";
+	
+	my $basedir = $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', ''));
+	
+	$BBS->Load($SYS);
+	$Category->Load($SYS);
+	
+	my @catSet = ();
+	$Category->GetKeySet(\@catSet);
+	
+	my $bbsmenu = [];
+	
+	foreach my $catid (sort @catSet) {
+		my $catData = {};
+		
+		$catData->{name} = $Category->Get('NAME', $catid);
+		
+		my $bbslist = [];
+		$catData->{list} = $bbslist;
+		
+		my @bbsSet = ();
+		$BBS->GetKeySet('CATEGORY', $catid, \@bbsSet);
+		
+		foreach my $bbsid (sort @bbsSet) {
+			my $bbsData = {};
+			
+			$bbsData->{name} = $BBS->Get('NAME', $bbsid);
+			
+			my $bbsDir = $BBS->Get('DIR', $bbsid);
+			$bbsData->{dir} = $bbsDir;
+			$basedir =~ s/\/$//;
+			$bbsDir =~ s/^\///;
+			$bbsData->{url} = "$basedir/$bbsDir/";
+			
+			push @$bbslist, $bbsData;
+		}
+		
+		push @$bbsmenu, $catData;
+	}
+	
+	return $bbsmenu;
 }
 
 #------------------------------------------------------------------------------------------------------------

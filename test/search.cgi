@@ -105,6 +105,7 @@ sub PrintHead
 
  <meta http-equiv=Content-Type content="text/html;charset=Shift_JIS">
  <meta http-equiv="Content-Script-Type" content="text/css">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
  <title>検索＠0chPlus</title>
 
@@ -235,7 +236,7 @@ sub PrintFoot
 	$Page->Print(<<HTML);
 
 <div class="foot">
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 SEARCH.CGI - $ver
 </div>
 
@@ -408,7 +409,7 @@ sub PrintNoHit
 	
 	$Page->Print(<<HTML);
 <dt>
- 0 名前：<font color="forestgreen"><b>検索エンジソ\＠ぜろちゃんねるプラス</b></font>：No Hit
+ 0 名前：<font color="forestgreen"><b>検索エンジソ\＠EXぜろちゃんねる</b></font>：No Hit
 </dt>
 <dd>
  <br>
@@ -441,7 +442,7 @@ sub PrintSystemError
   <div class="title">
   <small><b>【ヒット数：0】</b></small><font size="+2" color="red">システムエラー</font>
   </div>
-   <dt>0 名前：<font color="forestgreen"><b>検索エンジソ\＠ぜろちゃんねるプラス</b></font>：System Error</dt>
+   <dt>0 名前：<font color="forestgreen"><b>検索エンジソ\＠EXぜろちゃんねる</b></font>：System Error</dt>
     <dd>
     <br>
     <br>

@@ -5,7 +5,7 @@
 #	---------------------------------------------------------------------------
 #	2004.07.17 start
 #
-#	ぜろちゃんねるプラス
+#	EXぜろちゃんねる
 #	2010.08.12 キャップ権限追加
 #
 #============================================================================================================
@@ -343,8 +343,13 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=C_SAMBA $authNum[17] value=on>Samba規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_PROXY $authNum[18] value=on>プロキシ規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_JPHOST $authNum[19] value=on>海外ホスト規制解除<br>");
+	$Page->Print("<input type=checkbox name=C_NOHOST $authNum[26] value=on>逆引き不可規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_NGUSER $authNum[20] value=on>ユーザー規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_NGWORD $authNum[21] value=on>NGワード規制解除<br>");
+	$Page->Print("<input type=checkbox name=C_COMMAND $authNum[24] value=on>コマンド使用可<br>");
+	$Page->Print("<input type=checkbox name=C_NOATTR $authNum[25] value=on>スレッド属性無効<br>");
+	$Page->Print("<input type=checkbox name=C_NONINJA $authNum[27] value=on>忍法帖無効<br>");
+	$Page->Print("<input type=checkbox name=C_NOCAPTCHA $authNum[28] value=on>Captcha無効<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示
@@ -547,6 +552,11 @@ sub FunctionGroupSetting
 	$authNum[21]	= $Form->Equal('C_NGWORD', 'on') ? 1 : 0;
 	$authNum[22]	= $Form->Equal('C_NOSLIP', 'on') ? 1 : 0;
 	$authNum[23]	= $Form->Equal('C_CUSTOMID', 'on') ? 1 : 0;
+	$authNum[24]	= $Form->Equal('C_COMMAND', 'on') ? 1 : 0;
+	$authNum[25]	= $Form->Equal('C_NOATTR', 'on') ? 1 : 0;
+	$authNum[26]	= $Form->Equal('C_NOHOST', 'on') ? 1 : 0;
+	$authNum[27]	= $Form->Equal('C_NONINJA', 'on') ? 1 : 0;
+	$authNum[28]	= $Form->Equal('C_NOCAPTCHA', 'on') ? 1 : 0;
 	
 	for ($i = 0 ; $i < $ZP::CAP_MAXNUM ; $i++) {
 		if ($authNum[$i]){

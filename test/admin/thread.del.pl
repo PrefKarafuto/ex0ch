@@ -401,6 +401,21 @@ sub FunctionResDelete
 		$Dat->Delete($num);
 	}
 	$Dat->Save($Sys);
+
+	# subject.txt更新
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+	$Threads->Load($Sys);
+	$Threads->UpdateAll($Sys);
+	$Threads->Save($Sys);
+		
+	#index.html&subback.html更新
+	require './module/bbs_service.pl';
+	my $BBSAid = BBS_SERVICE->new;
+	$Sys->Set('MODE', 'CREATE');
+    $BBSAid->Init($Sys, undef);
+    $BBSAid->CreateIndex();
+    $BBSAid->CreateSubback();
 	
 	# ログの設定
 	$delCnt = 0;

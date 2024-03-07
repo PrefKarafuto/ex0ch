@@ -10,6 +10,13 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use Encode;
+<<<<<<< HEAD
+=======
+use Socket qw(inet_pton inet_aton AF_INET6 AF_INET);
+use HTML::Entities;
+use JSON;
+use Storable;
+>>>>>>> main
 no warnings qw(once);
 
 #------------------------------------------------------------------------------------------------------------
@@ -159,8 +166,13 @@ sub ConvertURL
 	
 	my $server = $Sys->Get('SERVER');
 	my $cushion = $Set->Get('BBS_REFERER_CUSHION');
+<<<<<<< HEAD
 	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)};	# URL検索１
 	my $reg2 = q{<(?<!a href=")(?<!src=")(https?|ftp)::(([-\w.!~*'();/?:\@=+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
+=======
+	my $reg1 = q{(?<!a href=")(?<!src=")(https?|ftp)://(([-\w.!~*'();/?:\@=_+\$,%#]|&(?![lg]t;))+)};	# URL検索１
+	my $reg2 = q{<(https?|ftp)::(([-\w.!~*'();/?:\@=_+\$,%#]|&(?![lg]t;))+)>};	# URL検索２
+>>>>>>> main
 	
 	# 携帯から
 	if ($mode eq 'O') {
@@ -214,9 +226,15 @@ sub ConvertImgur
 	my $this = shift;
 	my ($text) = @_ ;
 	
+<<<<<<< HEAD
 	my $reg = '(?<!src=")(https://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
 	
 	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1"></a></blockquote>|g;
+=======
+	my $reg = '(?<!src=")(https?://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
+	
+	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1">$1</a></blockquote>|g;
+>>>>>>> main
 	
 	return $text;
 	
@@ -238,7 +256,11 @@ sub ConvertTweet
 	my $this = shift;
 	my ($text) = @_ ;
 	
+<<<<<<< HEAD
 	my $reg = '(?<!src=")(?<!a href=")(https://twitter\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
+=======
+	my $reg = '(?<!src=")(?<!a href=")(https?://(twitter|x)\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
+>>>>>>> main
 	
 	$$text =~ s|$reg|<a href="$1">$1</a><br><blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
 	
@@ -248,21 +270,26 @@ sub ConvertTweet
 #つべニコ動埋め込み
 sub ConvertMovie
 {
-	my $this = shift;
-	my ($text) = @_ ;
-	
-	my $reg1 = '(https://youtu\.be/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';             # YoutubeURL検索
-	my $reg2 = '(https://nico\.ms/([a-z]+)([0-9])+)';	                                    # ニコ動URL検索
-	my $reg3 = '(https://(www\.)?youtube\.com/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';  # YoutubeURL検索
-	my $reg4 = '(https://(www\.)?nicovideo\.jp/([a-z]+)/([a-z]+)([0-9])+/?)';	            # ニコ動URL検索
-	
-	$$text =~ s|$reg1|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-	$$text =~ s|$reg2|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-	$$text =~ s|$reg3|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-	$$text =~ s|$reg4|<div class="responsive"><iframe width="560" height="315" src="$1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div>|g;
-	
-	return $text;
-	
+    my $this = shift;
+    my ($text) = @_ ;
+
+    # Youtube URL patterns
+    my $youtube_pattern1 = qr{(https?://youtu\.be/([a-zA-Z0-9_-]+))};
+    my $youtube_pattern2 = qr{(https?://(www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+))};
+
+    # NicoNico URL patterns
+    my $nico_pattern1 = qr{(https?://nico\.ms/sm([0-9]+))};
+    my $nico_pattern2 = qr{(https?://(www\.)?nicovideo\.jp/watch/sm([0-9]+))};
+
+	my $reg1 = '<div class="video"><div class="video_iframe"><iframe width="560" height="315" src=';
+	my $reg2 = 'frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div></div>';
+
+    $$text =~ s|$youtube_pattern1|$reg1"https://www.youtube.com/embed/$2"$reg2|g;
+    $$text =~ s|$youtube_pattern2|$reg1"https://www.youtube.com/embed/$3"$reg2|g;
+    $$text =~ s|$nico_pattern1|$reg1"https://embed.nicovideo.jp/watch/sm$3"$reg2|g;
+	$$text =~ s|$nico_pattern2|$reg1"https://embed.nicovideo.jp/watch/sm$3"$reg2|g;
+
+    return $text;
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -305,62 +332,6 @@ sub ConvertQuotation
 		# URLベースを生成
 		my $buf = "<a class=reply_link href=\"";
 		$buf .= $pathCGI . '/read.cgi/';
-		$buf .= $Sys->Get('BBS') . '/' . $Sys->Get('KEY');
-		
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
-					{$buf/$1-$2n" target="_blank">>>$1-$2</a>}g;
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)-(?!0)}
-					{$buf/$1-" target="_blank">>>$1-</a>}g;
-		$$text =~ s{&gt;&gt;-([1-9][0-9]*)}
-					{$buf/-$1" target="_blank">>>-$1</a>}g;
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)}
-					{$buf/$1" target="_blank">>>$1</a>}g;
-	}
-	$$text	=~ s{>>(?=[1-9])}{&gt;&gt;}g;
-	
-	return $text;
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
-#	引用変換 - ConvertQuotation
-#	--------------------------------------------
-#	引　数：$Sys : SYSTEMオブジェクト
-#			$text : 変換テキスト
-#			$mode : エージェント
-#	戻り値：変換後のメッセージ
-#
-#------------------------------------------------------------------------------------------------------------
-sub ConvertQuotation
-{
-	my $this = shift;
-	my ($Sys, $text, $mode) = @_;
-	
-	# 時間による制限有り
-	return $text if ($Sys->Get('LIMTIME'));
-	
-	my $pathCGI = $Sys->Get('SERVER') . $Sys->Get('CGIPATH');
-	
-	if ($Sys->Get('PATHKIND')) {
-		# URLベースを生成
-		my $buf = '<a class=reply_link rel="noopener noreferrer" href="';
-		$buf .= $pathCGI . '/read.cgi';
-		$buf .= '?bbs=' . $Sys->Get('BBS') . '&key=' . $Sys->Get('KEY');
-		$buf .= '&nofirst=true';
-		
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
-					{$buf&st=$1&to=$2" target="_blank">>>$1-$2</a>}g;
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)-(?!0)}
-					{$buf&st=$1&to=-1" target="_blank">>>$1-</a>}g;
-		$$text =~ s{&gt;&gt;-([1-9][0-9]*)}
-					{$buf&st=1&to=$1" target="_blank">>>$1-</a>}g;
-		$$text =~ s{&gt;&gt;([1-9][0-9]*)}
-					{$buf&st=$1&to=$1" target="_blank">>>$1</a>}g;
-	}
-	else{
-		# URLベースを生成
-		my $buf = '<a class=reply_link rel="noopener noreferrer" href="';
-		$buf .= $pathCGI .  '/read.cgi/';
 		$buf .= $Sys->Get('BBS') . '/' . $Sys->Get('KEY');
 		
 		$$text =~ s{&gt;&gt;([1-9][0-9]*)-([1-9][0-9]*)}
@@ -488,18 +459,32 @@ sub ConvertImageTag
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
 		if ($index){
+<<<<<<< HEAD
 			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
 		}
 		else{
 			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
+=======
+			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" width=\"300px\" height=\"auto\">|g;
+		}
+		else{
+			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
+>>>>>>> main
 		}
 	}
 	else{
 		if ($index){
+<<<<<<< HEAD
 			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" width=\"65\" height=\"65\">|g;
 		}
 		else{
 			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img src=\"$1\" style=\"max-width:100%;height:auto;\">|g;
+=======
+			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" width=\"300px\" height=\"auto\">|g;
+		}
+		else{
+			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img sclass=\"post_image\" src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
+>>>>>>> main
 		}
 	}
 	return $text;
@@ -629,7 +614,7 @@ sub GetClient
 	
 	my $ua = $ENV{'HTTP_USER_AGENT'} || '';
 	my $host = $ENV{'REMOTE_HOST'};
-	my $addr = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+	my $addr = $ENV{'REMOTE_ADDR'};
 	my $client = 0;
 	
 	require './module/cidr_list.pl';
@@ -774,9 +759,9 @@ sub GetProductInfo
 	elsif ( $client & $ZP::C_P2 ) {
 		# $ENV{'HTTP_X_P2_CLIENT_IP'} - (発言者のIP)
 		# $ENV{'HTTP_X_P2_MOBILE_SERIAL_BBM'} - (発言者の固体識別番号)
-		$ENV{'REMOTE_P2'} = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
-		(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}) = $ENV{'HTTP_X_P2_CLIENT_IP'};
-		$ENV{'REMOTE_HOST'} = $this->GetRemoteHost(($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR});
+		$ENV{'REMOTE_P2'} = $ENV{'REMOTE_ADDR'};
+		($ENV{'REMOTE_ADDR'}) = $ENV{'HTTP_X_P2_CLIENT_IP'};
+		$ENV{'REMOTE_HOST'} = $this->reverse_lookup($ENV{'REMOTE_ADDR'});
 		if( $ENV{'HTTP_X_P2_MOBILE_SERIAL_BBM'} ne "" ) {
 			$product = $ENV{'HTTP_X_P2_MOBILE_SERIAL_BBM'};
 		}
@@ -804,7 +789,7 @@ sub GetRemoteHost
 {
 	my $this = shift;
 	
-	my $host = ($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};
+	my $host = $ENV{'REMOTE_ADDR'};
 	$host = gethostbyaddr(pack('C4', split(/\./, $host)), 2) || $host;
 	
 	return $host;
@@ -841,7 +826,7 @@ sub MakeID
 	}
 	else {
 		# IPを分解
-		my @nums = split(/\./, (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}));
+		my @nums = split(/\./, ($ENV{'REMOTE_ADDR'}));
 		# 上位3つの1桁目取得
 		$uid = substr($nums[3], -2) . substr($nums[2], -2) . substr($nums[1], -1);
 	}
@@ -860,26 +845,50 @@ sub MakeID
 	
 	return $ret;
 }
-sub MakeIDnew
-{
-	my $this = shift;
-	my ($Sys, $column) = @_;
-	
-	require Digest::SHA::PurePerl;
-	my $ctx = Digest::SHA::PurePerl->new;
-	$ctx->add('0ch+ ID Generation');
-	$ctx->add(':', $Sys->Get('SERVER'));
-	$ctx->add(':', $Sys->Get('BBS'));
-	$ctx->add(':', $Sys->Get('KOYUU'));
-	$ctx->add(':', join('-', (localtime)[3,4,5]));
-	#$ctx->add(':', $Sys->Get('KEY'));
-	
-	my $id = $ctx->b64digest;
-	$id = substr($id, 0, $column);
-	
-	return $id;
-}
+sub MakeIDnew {
+    my $this = shift;
+    my ($Sys, $column,$sid,$chid) = @_;
 
+    my $addr = $ENV{'REMOTE_ADDR'};
+    my @ip = ($addr =~ /:/) ? split(/:/,$addr) : split(/\./,$addr);
+    my $ua = $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
+
+    my $provider;
+    my $HOST = $ENV{'REMOTE_HOST'};
+
+	# プロバイダのドメインを取得
+	if ($HOST) {
+		$HOST =~ s/ne\.jp/nejp/g;
+		$HOST =~ s/ad\.jp/adjp/g;
+		$HOST =~ s/or\.jp/orjp/g;
+
+		my @d = split(/\./, $HOST);  # リモートホストからドメイン部分を取り出す
+		if (@d) {
+			my $c = scalar @d;
+			$provider = $d[$c - 2] . $d[$c - 1];
+		}
+	}
+
+    require Digest::MD5;
+    my $ctx = Digest::MD5->new;
+    $ctx->add('ex0ch ID Generation');
+    $ctx->add(':', $Sys->Get('SERVER'));
+    $ctx->add(':', $Sys->Get('BBS'));
+    # セッションIDが存在する場合はセッションIDを、存在しない場合はIP+UAを使ってIDを生成
+    if ($sid) {
+        $ctx->add(':', $sid);
+    } else {
+        $ctx->add(':', $ip[0].$ip[1].($#ip > 3 ? $ip[2].$ip[3]:'').$provider);
+		$ctx->add(':', $ua);
+    }
+    $ctx->add(':', join('-', (localtime)[3,4,5]));
+    $ctx->add(':', $chid);
+    
+    my $id = $ctx->b64digest;
+    $id = substr($id, 0, $column);
+
+    return $id;
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	トリップ作成関数 - ConvertTrip
@@ -1098,10 +1107,11 @@ sub CreatePath
 sub GetDate
 {
 	my $this = shift;
-	my ($Set, $msect) = @_;
+	my ($Set, $msect,$time) = @_;
 	
 	$ENV{'TZ'} = 'JST-9';
-	my @info = localtime time;
+	$time = $time ? $time : time;
+	my @info = localtime $time;
 	$info[5] += 1900;
 	$info[4] += 1;
 	
@@ -1189,11 +1199,11 @@ sub GetIDPart
 		} elsif ($type eq 'O') {
 			$str = "$koyuu $ENV{'REMOTE_HOST'}";
 		} elsif ($type eq 'P') {
-			$str = "$koyuu $ENV{'REMOTE_HOST'} (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};)";
+			$str = "$koyuu $ENV{'REMOTE_HOST'} ($ENV{'REMOTE_ADDR'};)";
 		} else {
 			$str = "$koyuu";
 		}
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && $Set->Get('BBS_SLIP')) {
 			$str .= " $type";
 		}
 		return "HOST:$str";
@@ -1207,9 +1217,9 @@ sub GetIDPart
 		} elsif ($type eq 'P') {
 			$str = "$ENV{'REMOTE_P2'}";
 		} else {
-			$str = "($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}";
+			$str = "$ENV{'REMOTE_ADDR'}";
 		}
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && $Set->Get('BBS_SLIP')) {
 			$str .= " $type";
 		}
 		return "発信元:$str";
@@ -1223,11 +1233,11 @@ sub GetIDPart
 		} elsif ($type eq 'P') {
 			$str = "$ENV{'HTTP_X_P2_CLIENT_IP'} ($koyuu)";
 		} elsif ($type eq 'O') {
-			$str = "($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR} ($koyuu)";
+			$str = "$ENV{'REMOTE_ADDR'} ($koyuu)";
 		} else {
-			$str = "($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR};";
+			$str = "$ENV{'REMOTE_ADDR'};";
 		}
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && $Set->Get('BBS_SLIP')) {
 			$str .= " $type";
 		}
 		return "発信元:$str";
@@ -1236,7 +1246,7 @@ sub GetIDPart
 	# 各キャップ専用ID
 	elsif ($customid && $Sec->Get($capID, 'CUSTOMID', 1) ne '') {
 		my $str = $Sec->Get($capID, 'CUSTOMID', 1);
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && $Set->Get('BBS_SLIP')) {
 			$str .= " $type";
 		}
 		return "ID:$str";
@@ -1254,7 +1264,7 @@ sub GetIDPart
 		} else {
 			$str = $id;
 		}
-		if (!$noslip && $Set->Equal('BBS_SLIP', 'checked')) {
+		if (!$noslip && $Set->Get('BBS_SLIP')) {
 			$str .= "$type";
 		}
 		return "ID:$str";
@@ -1298,6 +1308,10 @@ sub ConvertCharacter1
 	# all
 	$$data =~ s/</&lt;/g;
 	$$data =~ s/>/&gt;/g;
+	$$data =~ s/&#0*1[03];//gi;
+	$$data =~ s/&#[xX]0*[aAdD];//gi; 
+	$$data =~ s/&#0{0,}xd;?//gi;
+	$$data =~ s/&#0{0,}xa;?//gi;
 	
 	# mail
 	if ($mode == 1) {
@@ -1326,23 +1340,29 @@ sub ConvertCharacter1
 sub ConvertCharacter2
 {
 	my $this = shift;
-	my ($data, $mode) = @_;
+	my ($data_ref, $mode) = @_;
 	
-	$$data = '' if (!defined $$data);
-	
+	# 未定義なら空文字列に
+	$$data_ref = '' if (!defined $$data_ref);
+
 	# name mail
 	if ($mode == 0 || $mode == 1) {
-		$$data =~ s/★/☆/g;
-		$$data =~ s/◆/◇/g;
-		$$data =~ s/削除/”削除”/g;
+		$$data_ref =~ s/★/☆/g;
+		$$data_ref =~ s/◆/◇/g;
+		$$data_ref =~ s/&#0{0,}9733;/☆/g;
+		$$data_ref =~ s/&#0{0,}9670;/◇/g;
+		$$data_ref =~ s/&#x0{0,}2605;/☆/gi;
+		$$data_ref =~ s/&#x0{0,}25c6;/◇/gi;
+		$$data_ref =~ s/(削|&#0{0,}(21066|x524a);)(除|&#0{0,}(38500|x6994);)/”削除”/gi;
 	}
 	
 	# name
 	if ($mode == 0) {
-		$$data =~ s/管理/”管理”/g;
-		$$data =~ s/管直/”管直”/g;
-		$$data =~ s/復帰/”復帰”/g;
+		$$data_ref =~ s/(管|&#0{0,}(31649|x7ba1);)(理|&#0{0,}(29702|x7406);)/”管理”/gi;
+		$$data_ref =~ s/(管|&#0{0,}(31649|x7ba1);)(直|&#0{0,}(30452|x76f4);)/”管直”/gi;
+		$$data_ref =~ s/(復|&#0{0,}(24489|x5fa9);)(帰|&#0{0,}(24112|x5e30);)/”復帰”/gi;
 	}
+
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -1411,7 +1431,243 @@ sub IsReferer
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	プロクシチェック - IsProxy
+#	日本IPチェック - IsJPIP
+#	--------------------------------------
+#	引　数：$Sys   : SYSTEM
+#			$mode	: VPNフラグの設定
+#	戻り値：プロクシなら対象ポート番号
+#
+#------------------------------------------------------------------------------------------------------------
+sub IsJPIP {
+	my $this = shift;
+    my ($Sys) = @_;
+	my $ipAddr = $ENV{'REMOTE_ADDR'};
+	my $infoDir = $Sys->Get('INFO');
+
+	return 1 if $ENV{'REMOTE_HOST'} =~ /\.jp$/;
+
+    my $filename_ipv4 = "./$infoDir/IP_List/jp_ipv4.cgi";
+	my $filename_ipv6 = "./$infoDir/IP_List/jp_ipv6.cgi";
+
+	if(time - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
+		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
+	}
+
+	my $result = '';
+	if ($ipAddr =~ /\./){
+		$result = binary_search_ip_range($ipAddr,$filename_ipv4);
+	}else{
+		$result = binary_search_ip_range($ipAddr,$filename_ipv6);
+	}
+	return if $result == -1;
+
+	return $result;
+}
+# 日本IPリスト取得用
+sub GetApnicJPIPList {
+    my ($filename_ipv4, $filename_ipv6) = @_;
+    my $ua = LWP::UserAgent->new;
+	$ua->timeout(1);
+    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
+
+	my $response = $ua->get($url);
+    unless ($response->is_success) {
+        warn "データの取得に失敗: " . $response->status_line;
+        return 0; # 失敗時に0を返す
+    }
+	my $data = $response->decoded_content;
+	require Math::BigInt;
+
+    my @jp_ipv4_ranges;
+    my @jp_ipv6_ranges;
+    my $last_end_ipv4 = -1;
+    my $last_end_ipv6 = Math::BigInt->new(-1);
+
+    foreach my $line (split /\n/, $data) {
+        if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|.*$/) {
+            # IPv4の範囲処理
+            my $start_ip_num = ip_to_number($1);
+            my $end_ip_num = $start_ip_num + $2 - 1;
+
+            if ($start_ip_num == $last_end_ipv4 + 1) {
+                $jp_ipv4_ranges[-1]->{end} = $end_ip_num;
+            } else {
+                push @jp_ipv4_ranges, { start => $start_ip_num, end => $end_ip_num };
+            }
+            $last_end_ipv4 = $end_ip_num;
+        }
+        elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|.*$/) {
+            # IPv6の範囲処理
+            my $start_ip_num = ip_to_number($1);
+            my $end_ip_num = $start_ip_num + Math::BigInt->new(2)->bpow($2) - 1;
+
+            if ($start_ip_num == $last_end_ipv6 + 1) {
+                $jp_ipv6_ranges[-1]->{end} = $end_ip_num;
+            } else {
+                push @jp_ipv6_ranges, { start => $start_ip_num, end => $end_ip_num };
+            }
+            $last_end_ipv6 = $end_ip_num;
+        }
+    }
+
+	eval {
+        open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
+        foreach my $range (@jp_ipv4_ranges) {
+            print $file_ipv4 "$range->{start}-$range->{end}\n";
+        }
+        close $file_ipv4;
+        chmod 0600, $filename_ipv4;
+
+        open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
+        foreach my $range (@jp_ipv6_ranges) {
+            print $file_ipv6 "$range->{start}-$range->{end}\n";
+        }
+        close $file_ipv6;
+        chmod 0600, $filename_ipv6;
+    };
+    if ($@) {
+        warn "ファイル書き込みに失敗しました: $@";
+        return 0; # 失敗時に0を返す
+    }
+
+    return 1; # 成功時に1を返す
+}
+sub binary_search_ip_range {
+    my ($ipAddr, $filename) = @_;
+    my $ip_num = ip_to_number($ipAddr);
+    my $ranges = load_ip_ranges($filename);
+	return -1 unless $ranges;
+    my $low = 0;
+    my $high = @$ranges - 1;
+
+    while ($low <= $high) {
+        my $mid = int(($low + $high) / 2);
+        if ($ip_num < $ranges->[$mid]->{start}) {
+            $high = $mid - 1;
+        } elsif ($ip_num > $ranges->[$mid]->{end}) {
+            $low = $mid + 1;
+        } else {
+            return 1; # IPアドレスは範囲内にあります
+        }
+    }
+
+    return 0; # IPアドレスは範囲外です
+}
+sub load_ip_ranges {
+    my $filename = shift;
+    my @ranges;
+
+    # ファイルオープンと例外処理
+    open my $file, '<', $filename or do {
+        warn "ファイルを開けません: $filename";
+        return 0; # 失敗時に0を返す
+    };
+    
+    # ファイル読み込みと例外処理
+    eval {
+		require Math::BigInt;
+        while (my $line = <$file>) {
+            chomp $line;
+            my ($start, $end) = split /-/, $line;
+            push @ranges, {
+                start => Math::BigInt->new($start),
+                end => Math::BigInt->new($end)
+            };
+        }
+        close $file;
+    };
+    if ($@) {
+        warn "ファイル読み込み中にエラーが発生しました: $@";
+        return 0; # 失敗時に0を返す
+    }
+
+    return \@ranges; # 成功時にIP範囲の配列のリファレンスを返す
+}
+sub ip_to_number {
+    my $ip = shift;
+
+    if ($ip =~ /^\d{1,3}(?:\.\d{1,3}){3}$/) { # IPv4
+        return unpack("N", pack("C4", split(/\./, $ip)));
+    } elsif ($ip =~ /^[0-9a-f:]+$/i) { # IPv6
+        # 省略記法の処理
+        if ($ip =~ /::/) {
+            my $filler = ':' . ('0:' x (8 - (() = $ip =~ /:/g))) . '0';
+            $ip =~ s/::/$filler/;
+            $ip =~ s/^:/0:/; # 先頭が省略された場合
+            $ip =~ s/:$/:0/; # 末尾が省略された場合
+        }
+		require Math::BigInt;
+        my $bigint = Math::BigInt->new(0);
+        foreach my $part (split /:/, $ip) {
+            $bigint = ($bigint << 16) + hex($part);
+        }
+        return $bigint;
+    } else {
+        return undef;
+    }
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	プロクシチェック - IsProxyAPI
+#	--------------------------------------
+#	引　数：$Sys   : SYSTEM
+#			$mode	: VPNフラグの設定
+#	戻り値：プロクシなら対象ポート番号
+#
+#------------------------------------------------------------------------------------------------------------
+sub IsProxyAPI {
+	my $this = shift;
+    my ($Sys,$mode) = @_;
+
+	my $infoDir = $Sys->Get('INFO');
+	my $ipAddr = $ENV{'REMOTE_ADDR'};
+	my $checkKey = $Sys->Get('PROXYCHECK_APIKEY');
+
+	$mode //= 1;
+
+    my $file = "./$infoDir/IP_List/proxy_check.cgi";#結果のキャッシュ
+	my $proxy_list;
+    $proxy_list = retrieve($file) if -e $file;
+    $proxy_list = {} unless defined $proxy_list;
+
+	if($proxy_list->{$ipAddr}->{"time"} + 60*60*24*7 > time){
+		if($proxy_list->{$ipAddr}->{"flag"}){
+			return 1;
+		}else{
+			return 0;
+		}
+	}
+
+	if($checkKey){
+		my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=${mode}";
+		my $ua = LWP::UserAgent->new();
+		my $response = $ua->get($url);
+
+		if ($response->is_success) {
+			my $json = $response->decoded_content();
+			my $out = decode_json($json);
+			my $isProxy = $out->{$ipAddr}->{"proxy"};
+
+			if ($isProxy eq 'yes') {
+				$proxy_list->{$ipAddr}->{"flag"} = 1;
+				$proxy_list->{$ipAddr}->{"time"} = time;
+				store $proxy_list, $file;
+				chmod 0600, $file;
+				return 1;
+			}else{
+				$proxy_list->{$ipAddr}->{"flag"} = 0;
+				$proxy_list->{$ipAddr}->{"time"} = time;
+				store $proxy_list, $file;
+				chmod 0600, $file;
+				return 0;
+			}
+		}
+	}
+    return 0;
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	プロクシチェック - IsProxyDNSBL
 #	--------------------------------------
 #	引　数：$Sys   : SYSTEM
 #			$Form  : 
@@ -1420,24 +1676,22 @@ sub IsReferer
 #	戻り値：プロクシなら対象ポート番号
 #
 #------------------------------------------------------------------------------------------------------------
-sub IsProxy
+sub IsProxyDNSBL
 {
 	my $this = shift;
 	my ($Sys, $Form, $from, $mode) = @_;
 	
-	# 携帯, iPhone(3G回線) はプロキシ規制を回避する
-	return 0 if ($mode eq 'O' || $mode eq 'i');
-	
 	my @dnsbls = ();
-	push(@dnsbls, 'zen.spamhaus.org') if($Sys->Get('SPAMHAUS'));
-	push(@dnsbls, 'bl.spamcop.net') if($Sys->Get('SPAMCOP'));
-    push(@dnsbls, 'b.barracudacentral.org') if($Sys->Get('BARRACUDA'));
+	
+	push(@dnsbls, 'torexit.dan.me.uk') if($Sys->Get('DNSBL_TOREXIT'));# Tor検出用
+	push(@dnsbls, 'all.s5h.net') if($Sys->Get('DNSBL_S5H'));
+	push(@dnsbls, 'dnsbl.dronebl.org') if($Sys->Get('DNSBL_DRONEBL'));
 	
 	# DNSBL問い合わせ
-	my $addr = join('.', reverse( split(/\./, (($ENV{HTTP_CF_CONNECTING_IP}) ? $ENV{HTTP_CF_CONNECTING_IP} : $ENV{REMOTE_ADDR}))));
 	foreach my $dnsbl (@dnsbls) {
-		if (CheckDNSBL("$addr.$dnsbl") eq '127.0.0.2') {
+		if (CheckDNSBL($ENV{'REMOTE_ADDR'},$dnsbl)) {
 			$Form->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
+			$Sys->Set('ISPROXY','dnsbl');
 			return ($mode eq 'P' ? 0 : 1);
 		}
 	}
@@ -1449,47 +1703,37 @@ sub IsProxy
 #
 #	DNSBL正引き(timeout付き) - CheckDNSBL
 #	--------------------------------------
-#	引　数：$host : 正引きするHOST
-#	戻り値：プロキシであれば127.0.0.2
 #
 #------------------------------------------------------------------------------------------------------------
-sub CheckDNSBL
-{
-	my ($host) = @_;
-	
-	my $ret = eval {
-		require Net::DNS;
-		my $res = Net::DNS::Resolver->new;
-		$res->tcp_timeout(1);
-		$res->udp_timeout(1);
-		$res->retry(1);
-		
-		if ((my $query = $res->query($host))) {
-			my @ans = $query->answer;
-			
-			foreach (@ans) {
-				return $_->address;
-			}
+sub CheckDNSBL {
+	my $this = shift;
+    my ($ip, $DNSBL_host) = @_;
+    my $reversed_ip = '';
+	require Net::DNS;
+
+    if ($ip =~ /:/) {  # IPv6アドレスの場合
+        $ip =~ s/://g;
+        $reversed_ip = join('.', reverse(split('', $ip)));
+    } else {  # IPv4アドレスの場合
+        $reversed_ip = join('.', reverse(split(/\./, $ip)));
+    }
+
+    my $query_host = "$reversed_ip.$DNSBL_host";
+
+    my $res = Net::DNS::Resolver->new(
+        tcp_timeout => 1,  # TCPタイムアウトを1秒に設定
+        udp_timeout => 1,  # UDPタイムアウトを1秒に設定
+        retry       => 1,  # 再試行回数を1回に設定
+    );
+
+    my $query = $res->query($query_host, "A");
+
+	if ($query) {
+		foreach my $rr ($query->answer) {
+			return 1 if $rr->type eq "A";  # Aレコードが見つかったら1を返して終了
 		}
-		if ($res->errorstring eq 'query timed out') {
-			return '127.0.0.0';
-		}
-	};
-	
-	return $ret if (defined $ret);
-	
-	if ($@) {
-		require Net::DNS::Lite;
-		my $res = Net::DNS::Lite->new(
-			server => [ qw(8.8.4.4 8.8.8.8) ], # google public dns
-			timeout => [2, 3],
-		);
-		
-		my @ans = $res->resolve($host, 'a');
-		return $_->[4] foreach (@ans);
 	}
-	
-	return '127.0.0.1';
+    return 0;  # マッチしない場合は0を返す
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -1564,6 +1808,21 @@ sub MakePath
 	return $path3;
 }
 
+# 逆引き関数
+sub reverse_lookup {
+	my $this = shift;
+    my ($ip) = @_;
+
+    # IPv4とIPv6のアドレスを判断し、適切なSocket定数を使用
+	my $inet = $ip =~ /:/ ? AF_INET6 : AF_INET;
+    my $addr = inet_pton($inet, $ip);
+
+    # 逆引き実施
+    my $host = gethostbyaddr($addr, $inet);
+
+    # 逆引きが成功した場合はホスト名を、失敗した場合はIPアドレスを返す
+    return $host ? $host : $ip;
+}
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================

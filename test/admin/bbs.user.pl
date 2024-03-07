@@ -316,6 +316,7 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=A_USERGROUP $authNum[0] value=on>管理グループ設定<br>");
 	$Page->Print("<input type=checkbox name=A_CAPGROUP $authNum[1] value=on>キャップグループ設定<br>");
 	$Page->Print("<input type=checkbox name=A_LOGVIEW $authNum[14] value=on>ログの閲覧・削除<br>");
+	$Page->Print("<input type=checkbox name=A_NINJAEDIT $authNum[15] value=on>忍法帖編集<br>");
 	$Page->Print("<hr>");
 	$Page->Print("<input type=checkbox name=A_THREADSTOP $authNum[2] value=on>スレッド停止・再開<br>");
 	$Page->Print("<input type=checkbox name=A_THREADPOOL $authNum[3] value=on>スレッドdat落ち・復活<br>");
@@ -514,6 +515,7 @@ sub FunctionGroupSetting
 		'A_RESEDIT'		=> $ZP::AUTH_RESEDIT,
 		'A_BBSEDIT'		=> $ZP::AUTH_BBSEDIT,
 		'A_LOGVIEW'		=> $ZP::AUTH_LOGVIEW,
+		'A_NINJAEDIT'	=> $ZP::AUTH_NINJAEDIT,
 	);
 	my @auths = ();
 	foreach (keys %field2auth) {

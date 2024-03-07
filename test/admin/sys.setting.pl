@@ -5,7 +5,7 @@
 #	---------------------------------------------------------------------------
 #	2004.02.14 start
 #
-#	ぜろちゃんねるプラス
+#	EXぜろちゃんねる
 #	2010.08.12 設定項目追加による改変
 #
 #============================================================================================================
@@ -221,7 +221,7 @@ sub PrintSystemInfo
 {
 	my ($Page, $SYS, $Form) = @_;
 	
-	$SYS->Set('_TITLE', '0ch+ Administrator Information');
+	$SYS->Set('_TITLE', 'ex0ch Administrator Information');
 	
 	my $zerover = $SYS->Get('VERSION');
 	my $perlver = $];
@@ -239,12 +239,19 @@ sub PrintSystemInfo
 		CGI::Session
 		Storable
 		Digest::SHA::PurePerl
+		Digest::MD5
 		Net::DNS::Lite
 		List::MoreUtils
 		LWP::UserAgent
 		XML::Simple
 	), qw(
 		Net::DNS
+	), qw(
+		HTML::Entities
+		CGI::Carp
+		Net::Whois::Raw
+		Geo::IP
+		JSON
 	));
 	
 	my $core = {};
@@ -253,11 +260,11 @@ sub PrintSystemInfo
 		$core = $Module::CoreList::version{$perlver};
 	};
 	
-	$Page->Print("<br><b>0ch+ BBS - Administrator Script</b>");
+	$Page->Print("<br><b>ex0ch BBS - Administrator Script</b>");
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■0ch+ Information</td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■ex0ch Information</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Version</td><td>$zerover</td></tr>\n");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Perl Information</td></tr>\n");
@@ -275,12 +282,7 @@ sub PrintSystemInfo
 		$var = "<b>$var</b>" if (!defined $core->{$pkg} || $core->{$pkg} ne $var);
 		$Page->Print("<tr><td class=\"DetailTitle\">$pkg</td><td>$var</td></tr>\n");
 	}
-	
-	$Page->Print("<tr><td colspan=2></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\"></td><td></td></tr>\n");
-	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	
 	$Page->Print("</table>");
 	
 }
@@ -298,7 +300,7 @@ sub PrintSystemInfo
 sub PrintBasicSetting
 {
 	my ($Page, $SYS, $Form) = @_;
-	my ($server, $cgi, $bbs, $info, $data, $common);
+	my ($server, $cgi, $bbs, $info, $data, $common,$sitename);
 	
 	$SYS->Set('_TITLE', 'System Base Setting');
 	
@@ -307,6 +309,7 @@ sub PrintBasicSetting
 	$bbs	= $SYS->Get('BBSPATH');
 	$info	= $SYS->Get('INFO');
 	$data	= $SYS->Get('DATA');
+	$sitename	= $SYS->Get('SITENAME');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','BASIC');\"";
 	if ($server eq '') {
@@ -346,6 +349,11 @@ sub PrintBasicSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">システムデータディレクトリ(/ から始める)<br><span class=\"NormalStyle\">");
 	$Page->Print("　例1: .jp/test/info → <span class=\"UnderLine\">/datas</span><br>");
 	$Page->Print("<td><input type=text size=60 name=DATA value=\"$data\" ></td></tr>\n");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
+	$Page->Print("<tr><td class=\"DetailTitle\">サイトの名称(任意)<br><span class=\"WebSiteName\">");
+	$Page->Print("　例1: 6ちゃんねる<br>");
+	$Page->Print("　例2: 樺太庁のホームページ</span></td>");
+	$Page->Print("<td><input type=text size=60 name=SITENAME value=\"$sitename\" ></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
 	$Page->Print("<input type=button value=\"　設定　\" $common></td></tr>\n");
@@ -478,8 +486,8 @@ sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag);
-	my ($common);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp);
+	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
 	
@@ -493,6 +501,11 @@ sub PrintOtherSetting
 	$FastMode	= $SYS->Get('FASTMODE');
 	$BBSGET		= $SYS->Get('BBSGET');
 	$upCheck	= $SYS->Get('UPCHECK');
+	$CSP		= $SYS->Get('CSP');
+	$ninLvmax	= $SYS->Get('NINLVMAX');
+	$cookieExp	= $SYS->Get('COOKIE_EXPIRY');
+	$nin_exp	= $SYS->Get('NIN_EXPIRY');
+	$pass_exp	= $SYS->Get('PASS_EXPIRY');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
@@ -500,6 +513,7 @@ sub PrintOtherSetting
 	$pathInfo	= ($pathKind == 0 ? 'checked' : '');
 	$pathQuery	= ($pathKind == 1 ? 'checked' : '');
 	$bbsget		= ($BBSGET == 1 ? 'checked' : '');
+	$CSPSet		= ($CSP == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
 	
@@ -516,6 +530,8 @@ sub PrintOtherSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
 	$Page->Print("画像リンクをIMGタグに変換</td>");
+	$Page->Print("<tr><td colspan=2><input type=checkbox name=CSP $CSPSet value=on>");
+	$Page->Print("Youtube/niconico/Imgur埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=URLLINK $linkChk value=on>");
 	$Page->Print("本文中URLへの自動リンク</td>");
 	$Page->Print("<tr><td colspan=2><b>以下自動リンクOFF時のみ有効</b></td></tr>\n");
@@ -539,6 +555,18 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td>更新チェックの間隔　※開発移行につき無効</td>");
 	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\" disabled>日(0でチェック無効)</td></tr>\n");
 	
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Cookie関連</td></tr>\n");
+	$Page->Print("<tr><td>Cookie有効期限</td>");
+	$Page->Print("<td><input type=text size=2 name=COOKIE_EXPIRY value=\"$cookieExp\">日</td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">忍法帖関連</td></tr>\n");
+	$Page->Print("<tr><td>忍法帖データ保持日数</td>");
+	$Page->Print("<td>最終書き込みから<input type=text size=2 name=NIN_EXPIRY value=\"$nin_exp\">日</td></tr>\n");
+	$Page->Print("<tr><td>パスワード設定時の保持日数</td>");
+	$Page->Print("<td>最終書き込みから<input type=text size=2 name=PASS_EXPIRY value=\"$pass_exp\">日</td></tr>\n");
+	$Page->Print("<tr><td>忍法帖Lv上限</td>");
+	$Page->Print("<td><input type=text size=2 name=NINLVMAX value=\"$ninLvmax\"></td></tr>\n");
+	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
 	$Page->Print("<input type=button value=\"　設定　\" $common></td></tr>\n");
@@ -549,7 +577,7 @@ sub PrintOtherSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	表示設定画面の表示(ぜろちゃんねるプラスオリジナル)
+#	表示設定画面の表示(EXぜろちゃんねるオリジナル)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	ページコンテキスト
 #	@param	$SYS	システム変数
@@ -607,7 +635,7 @@ sub PrintPlusViewSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	規制設定画面の表示(ぜろちゃんねるプラスオリジナル)
+#	規制設定画面の表示(EXぜろちゃんねるオリジナル)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	ページコンテキスト
 #	@param	$SYS	システム変数
@@ -622,8 +650,8 @@ sub PrintPlusSecSetting
 {
 	
 	my ($Page, $SYS, $Form) = @_;
-	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $SPAMHAUS, $SPAMCOP, $BARRACUDA);
-	my ($kakiko, $trip12, $shaus, $scop ,$bc);
+	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha);
+	my ($kakiko, $trip12, $torexit, $s5h, $dronebl);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Regulation Setting');
@@ -633,18 +661,22 @@ sub PrintPlusSecSetting
 	$DefSamba	= $SYS->Get('DEFSAMBA');
 	$DefHoushi	= $SYS->Get('DEFHOUSHI');
 	$Trip12		= $SYS->Get('TRIP12');
-	$SPAMHAUS	= $SYS->Get('SPAMHAUS');
-	$SPAMCOP	= $SYS->Get('SPAMCOP');
-    	$BARRACUDA	= $SYS->Get('BARRACUDA');
+	$TOREXIT	= $SYS->Get('DNSBL_TOREXIT');
+	$Captcha	= $SYS->Get('CAPTCHA');
 	
-	my $hCaptcha_sitekey 	= $SYS->Get('HCAPTCHA_SITEKEY');
-	my $hCaptcha_secretkey  = $SYS->Get('HCAPTCHA_SECRETKEY');
+	my $noCapSet = $Captcha ? '':'selected';
+	my $hCapSet = $Captcha eq 'h-captcha' ? 'selected' : '';
+	my $reCapSet = $Captcha eq 'g-recaptcha' ? 'selected' : '';
+	my $TurnSet = $Captcha eq 'cf-turnstile' ? 'selected' : '';
+	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
+	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
+	my $Proxy_apikey  = $SYS->Get('PROXYCHECK_APIKEY');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
-	$shaus		= ($SPAMHAUS == 1 ? 'checked' : '');
-	$scop		= ($SPAMCOP == 1 ? 'checked' : '');
-    	$bc	        = ($BARRACUDA == 1 ? 'checked' : '');
+	$torexit	= ($TOREXIT == 1 ? 'checked' : '');
+	$s5h		= ($SYS->Get('DNSBL_S5H') == 1 ? 'checked' : '');
+	$dronebl	= ($SYS->Get('DNSBL_DRONEBL') == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -672,21 +704,30 @@ sub PrintPlusSecSetting
 	$Page->Print("<td><input type=checkbox name=TRIP12 $trip12 value=on></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">DNSBL設定</td></tr>\n");
-	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください<br>\n");
-	$Page->Print("<input type=checkbox name=SPAMHAUS $shaus value=on>");
-	$Page->Print("<a href=\"https://www.spamhaus.org/organization/dnsblusage/\" target=\"_blank\">Spamhaus</a>\n");
-	$Page->Print("<input type=checkbox name=SPAMCOP $scop value=on>");
-	$Page->Print("<a href=\"https://www.spamcop.net/fom-serve/cache/291.html\" target=\"_blank\">SpamCop</a>\n");
-	$Page->Print("<input type=checkbox name=BARRACUDA $bc value=on>");
-	$Page->Print("<a href=\"https://www.barracudacentral.org/rbl/how-to-use\" target=\"_blank\">BarracudaCentral</a>\n");
+	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください(規制を行う場合は各掲示板の設定で有効にしてください)<br>\n");
+	$Page->Print("<input type=checkbox name=DNSBL_TOREXIT $torexit value=on>");
+	$Page->Print("<a href=\"https://www.dan.me.uk/dnsbl\" target=\"_blank\">Dan.me.uk</a>(Tor出口ノード判定)\n");
+	$Page->Print("<input type=checkbox name=DNSBL_S5H $s5h value=on>");
+	$Page->Print("<a href=\"http://www.usenix.org.uk/content/rbl.html\" target=\"_blank\">S5H</a>\n");
+	$Page->Print("<input type=checkbox name=DNSBL_DRONEBL $dronebl value=on>");
+	$Page->Print("<a href=\"https://dronebl.org/\" target=\"_blank\">DroneBL</a>\n");
 	$Page->Print("</td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">hCaptcha設定</td></tr>\n");
-	$Page->Print("<tr><td>サイトキーを入力<br>");
-	$Page->Print("<td><input type=text size=60  name=HCAPTCHA_SITEKEY value=\"$hCaptcha_sitekey\"></td></tr>\n");
-	$Page->Print("<tr><td>シークレットキーを入力</td>");
-	$Page->Print("<td><input type=text size=60 name=HCAPTCHA_SECRETKEY value=\"$hCaptcha_secretkey\"></td></tr>\n");
-	
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">外部APIキー</td></tr>\n");
+	$Page->Print("<tr><td>Captcha種別<br><td>");
+	$Page->Print("<select name=CAPTCHA required>");
+	$Page->Print("<option value=\"\" $noCapSet>なし</option>");
+	$Page->Print("<option value=\"h-captcha\" $hCapSet>hCaptcha</option>");
+	$Page->Print("<option value=\"g-recaptcha\" $reCapSet>reCAPTCHA v2</option>");
+	$Page->Print("<option value=\"cf-turnstile\" $TurnSet>Turnstile</option>");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>Captchaサイトキー<br>");
+	$Page->Print("<td><input type=text size=60  name=CAPTCHA_SITEKEY value=\"$Captcha_sitekey\"></td></tr>\n");
+	$Page->Print("<tr><td>Captchaシークレットキー</td>");
+	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
+	$Page->Print("<tr><td><a href=\"https://proxycheck.io/api/\">ProxyCheck</a> APIキー</td>");
+	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"$Proxy_apikey\"></td></tr>\n");
+
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
 	$Page->Print("<input type=button value=\"　設定　\" $common></td></tr>\n");
@@ -942,6 +983,7 @@ sub FunctionBasicSetting
 	$SYSTEM->Set('BBSPATH', $Form->Get('BBSPATH'));
 	$SYSTEM->Set('INFO', $Form->Get('INFO'));
 	$SYSTEM->Set('DATA', $Form->Get('DATA'));
+	$SYSTEM->Set('SITENAME', $Form->Get('SITENAME'));
 	
 	$SYSTEM->Save();
 	
@@ -1103,6 +1145,11 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('FASTMODE', ($Form->Equal('FASTMODE', 'on') ? 1 : 0));
 	$SYSTEM->Set('BBSGET', ($Form->Equal('BBSGET', 'on') ? 1 : 0));
 	$SYSTEM->Set('UPCHECK', $Form->Get('UPCHECK'));
+	$SYSTEM->Set('NINLVMAX', $Form->Get('NINLVMAX'));
+	$SYSTEM->Set('NIN_EXPIRY', $Form->Get('NIN_EXPIRY'));
+	$SYSTEM->Set('PASS_EXPIRY', $Form->Get('PASS_EXPIRY'));
+	$SYSTEM->Set('COOKIE_EXPIRY', $Form->Get('COOKIE_EXPIRY'));
+	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
 	
 	$SYSTEM->Save();
 	
@@ -1118,6 +1165,10 @@ sub FunctionOtherSetting
 		push @$pLog, '　　　 PATH種別：' . $SYSTEM->Get('PATHKIND');
 		push @$pLog, '　　　 index.htmlを更新しない：' . $SYSTEM->Get('FASTMODE');
 		push @$pLog, '　　　 bbs.cgiのGETメソッド：' . $SYSTEM->Get('BBSGET');
+		push @$pLog, '　　　 Cookie有効期限：' . $SYSTEM->Get('COOKIE_EXPIRY');
+		push @$pLog, '　　　 忍法帖最大レベル：' . $SYSTEM->Get('NINLVMAX');
+		push @$pLog, '　　　 忍法帖データ保持期間：' . $SYSTEM->Get('NIN_EXPIRY');
+		push @$pLog, '　　　 パスワード設定時保持期間：' . $SYSTEM->Get('PASS_EXPIRY');
 		push @$pLog, '　　　 更新チェック間隔：' . $SYSTEM->Get('UPCHECK');
 	}
 	return 0;
@@ -1125,7 +1176,7 @@ sub FunctionOtherSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	表示設定(ぜろちゃんねるプラスオリジナル)
+#	表示設定(EXぜろちゃんねるオリジナル)
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	システム変数
 #	@param	$Form	フォーム変数
@@ -1176,7 +1227,7 @@ sub FunctionPlusViewSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	規制設定(ぜろちゃんねるプラスオリジナル)
+#	規制設定(EXぜろちゃんねるオリジナル)
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	システム変数
 #	@param	$Form	フォーム変数
@@ -1210,11 +1261,13 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('DEFSAMBA', $Form->Get('DEFSAMBA'));
 	$SYSTEM->Set('DEFHOUSHI', $Form->Get('DEFHOUSHI'));
 	$SYSTEM->Set('TRIP12', ($Form->Equal('TRIP12', 'on') ? 1 : 0));
-	$SYSTEM->Set('SPAMHAUS', ($Form->Equal('SPAMHAUS', 'on') ? 1 : 0));
-	$SYSTEM->Set('SPAMCOP', ($Form->Equal('SPAMCOP', 'on') ? 1 : 0));
-	$SYSTEM->Set('BARRACUDA', ($Form->Equal('BARRACUDA', 'on') ? 1 : 0));
-	$SYSTEM->Set('HCAPTCHA_SITEKEY', $Form->Get('HCAPTCHA_SITEKEY'));
-	$SYSTEM->Set('HCAPTCHA_SECRETKEY', $Form->Get('HCAPTCHA_SECRETKEY'));
+	$SYSTEM->Set('DNSBL_TOREXIT', ($Form->Equal('DNSBL_TOREXIT', 'on') ? 1 : 0));
+	$SYSTEM->Set('DNSBL_S5H', ($Form->Equal('DNSBL_S5H', 'on') ? 1 : 0));
+	$SYSTEM->Set('DNSBL_DRONEBL', ($Form->Equal('DNSBL_DRONEBL', 'on') ? 1 : 0));
+	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));
+	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
+	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));
+	$SYSTEM->Set('PROXYCHECK_APIKEY', $Form->Get('PROXYCHECK_APIKEY'));
 	$SYSTEM->Save();
 	
 	{
@@ -1223,11 +1276,10 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 Samba待機秒数：' . $SYSTEM->Get('DEFSAMBA');
 		push @$pLog, '　　　 Samba奉仕時間：' . $SYSTEM->Get('DEFHOUSHI');
 		push @$pLog, '　　　 12桁トリップ：' . $SYSTEM->Get('TRIP12');
-		push @$pLog, '　　　 Spamhaus：' . $SYSTEM->Get('SPAMHAUS');
-		push @$pLog, '　　　 SpamCop：' . $SYSTEM->Get('SPAMCOP');
-		push @$pLog, '　　　 Barracuda：' . $SYSTEM->Get('BARRACUDA');
-		push @$pLog, '　　　 hCaptchaサイトキー：' . $SYSTEM->Get('HCAPTCHA_SITEKEY');
-		push @$pLog, '　　　 hCaptchaシークレットキー：' . $SYSTEM->Get('HCAPTCHA_SECRETKEY');
+		push @$pLog, '　　　 Dan.me.uk：' . $SYSTEM->Get('DNSBL_TOREXIT');
+		push @$pLog, '　　　 Captchaサイトキー：' . $SYSTEM->Get('CAPTCHA_SITEKEY');
+		push @$pLog, '　　　 Captchaシークレットキー：' . $SYSTEM->Get('CAPTCHA_SECRETKEY');
+		push @$pLog, '　　　 ProxyChecker APIキー：' . $SYSTEM->Get('PROXYCHECK_APIKEY');
 	}
 	return 0;
 }

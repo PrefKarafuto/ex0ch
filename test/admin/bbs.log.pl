@@ -75,16 +75,20 @@ sub DoPrint
 		PrintLogsInfo($Page, $Sys, $Form);
 	}
 	elsif ($subMode eq 'THREADLOG') {												# スレッド作成ログ画面
-		PrintLogs($Page, $Sys, $Form, 0);
+		PrintLogs($Page, $Sys, $Form,$pSys, 0);
 	}
 	elsif ($subMode eq 'HOSTLOG') {													# ホストログ画面
-		PrintLogs($Page, $Sys, $Form, 1);
+		PrintLogs($Page, $Sys, $Form,$pSys, 1);
 	}
 	elsif ($subMode eq 'ERRORLOG') {												# エラーログ画面
-		PrintLogs($Page, $Sys, $Form, 2);
+		PrintLogs($Page, $Sys, $Form,$pSys, 2);
 	}
 	elsif ($subMode eq 'FAILURELOG') {												# 書き込み失敗ログ画面
+<<<<<<< HEAD
 		PrintLogs($Page, $Sys, $Form, 3);
+=======
+		PrintLogs($Page, $Sys, $Form, $pSys, 3);
+>>>>>>> main
 	}
 	elsif ($subMode eq 'COMPLETE') {												# 完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
@@ -137,9 +141,18 @@ sub DoFunction
 	elsif ($subMode eq 'REMOVE_ERRORLOG') {										# ログ削除
 		$err = FunctionLogDelete($Sys, $Form, 2, $this->{'LOG'});
 	}
+<<<<<<< HEAD
 	elsif ($subMode eq 'REMOVE_FAILURELOG') {										# ログ削除
 		$err = FunctionLogDelete($Sys, $Form, 3, $this->{'LOG'});
 	}
+=======
+	elsif ($subMode eq 'REMOVE_FAILURELOG') {									# ログ削除
+		$err = FunctionLogDelete($Sys, $Form, 3, $this->{'LOG'});
+	}
+	elsif ($subMode eq 'ALLOW') {												# 投稿許可
+		$err = FunctionAllowMessage($Sys, $Form, $this->{'LOG'});
+	}
+>>>>>>> main
 	
 	# 処理結果表示
 	if ($err) {
@@ -244,7 +257,11 @@ sub PrintLogsInfo
 #------------------------------------------------------------------------------------------------------------
 sub PrintLogs
 {
+<<<<<<< HEAD
 	my ($Page, $Sys, $Form, $mode) = @_;
+=======
+	my ($Page, $Sys, $Form, $pSys, $mode) = @_;
+>>>>>>> main
 	my ($Logger, $common, $logFile, $keyNum, $keySt, $Threads);
 	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isSysad, $data, $title, @elem);
 	
@@ -333,6 +350,7 @@ sub PrintLogs
 			}
 			elsif ($mode == 3){
 				$elem[1] .= ' (' . $Error->Get($elem[1], 'SUBJECT') . ')';
+<<<<<<< HEAD
 				if($elem[2] !~ /^\(New\)/){
 					$title = "<font color=red>".$Threads->Get('SUBJECT',$elem[2])."</font>";
 				}
@@ -340,6 +358,29 @@ sub PrintLogs
 					$title = "<font color=orange>".$elem[2]."</font>";
 				}
 				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>Title:$title<br>Name:$elem[3]<br>Mail:$elem[4]<br><hr size=1>$elem[5]</td><td>$elem[6]</td></tr>\n<td colspan=4><hr size=1></td>");
+=======
+				my $flag = 1;
+				if($elem[2] =~ /^\(New\)/){
+					$title = "<font color=orange>".$elem[2]."</font>";
+					$flag = 0;
+				}
+				else{
+					if($Threads->Get('SUBJECT',$elem[2])){
+						$title = "<font color=red>".$Threads->Get('SUBJECT',$elem[2])."</font>";
+					}else{
+						$title = "";
+						$flag = 0;
+					}
+				}
+				$Page->Print("<tr><td>$elem[0]</td><td>$elem[1]</td><td>Title:$title<br>Name:$elem[3]<br>Mail:$elem[4]<br><hr size=1>$elem[5]");
+				if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $Sys->Get('BBS'))){
+					my $num = $listNum - $i -1;
+					$common = "onclick=\"javascript:SetOption('ALLOW_INDEX',$num);";
+					$common .= "DoSubmit('bbs.log','FUNC'";
+					$Page->Print("<br><hr size=1><input type=button value=\"投稿許可\" $common,'ALLOW')\"> ") if $flag;
+				}
+				$Page->Print("</td><td>$elem[6]</td></tr>\n<td colspan=4><hr size=1></td>");
+>>>>>>> main
 			}
 			
 		}
@@ -348,13 +389,19 @@ sub PrintLogs
 		}
 	}
 	$common = "onclick=\"DoSubmit('bbs.log','FUNC'";
-	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=4 align=left>");
+<<<<<<< HEAD
 	$Page->Print("<input type=button value=\"　削除　\" $common,'REMOVE_" . $Form->Get('MODE_SUB') . "')\" class=\"delete\"> ");
+=======
+	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $Sys->Get('BBS'))){
+		$Page->Print("<input type=button value=\"　削除　\" $common,'REMOVE_" . $Form->Get('MODE_SUB') . "')\" class=\"delete\"> ");
+	}
+>>>>>>> main
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	$Page->HTMLInput('hidden', $keySt, '');
+	$Page->HTMLInput('hidden', 'ALLOW_INDEX', '');
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -408,6 +455,73 @@ sub FunctionLogDelete
 	return 0;
 }
 
+sub FunctionAllowMessage
+{
+	my ($Sys, $Form, $pLog) = @_;
+	
+	# 権限チェック
+	{
+		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_LOGVIEW, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	require './module/manager_log.pl';
+	my $Log = MANAGER_LOG->new;
+	$Log->Load($Sys, 'FLR');
+	my @elem = $Log->Get($Form->Get('ALLOW_INDEX'));
+
+	require './module/setting.pl';
+	my $Set = SETTING->new;
+	$Set->Load($Sys);
+	my $name = $Set->Get('BBS_NONAME_NAME');
+
+	my $key = $elem[2];
+	my $message = $elem[5];
+	
+	# 書き込みモードで読み直す
+	require './module/dat.pl';
+	my $basePath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
+	my $datPath = "$basePath/dat/$key.dat";
+
+	require './module/data_utils.pl';
+	my $Conv = DATA_UTILS->new;
+	my $message_date = $Conv->GetDate($Set,undef,$elem[0]);
+	my $allowed_date = $Conv->GetDate($Set,undef,undef);
+	my $data = "$name<><>$allowed_date Allowed($message_date)<>$message<>";
+
+	# ログ書き込み
+	if(-e $datPath){
+		# データの設定と保存
+		my $line = "$data\n";
+		unless (DAT::DirectAppend($Sys, $datPath, $line)){
+			$Log->Delete($Form->Get('ALLOW_INDEX'));
+			$Log->Save($Sys);
+
+			$Log->Load($Sys, 'WRT', $key);
+			$Log->Set($Set, length($message), $Sys->Get('VERSION'), undef, $data, undef,undef);
+			$Log->Save($Sys);
+
+			# subject.txt更新
+			require './module/thread.pl';
+			my $Threads = THREAD->new;
+			$Threads->Load($Sys);
+			$Threads->UpdateAll($Sys);
+			$Threads->Save($Sys);
+			
+			# ログの設定
+			push @$pLog, "スレッドキー:${key}に対して、メッセージの投稿を追認しました。";
+		}else{
+			return 9999;
+		}
+	}else{
+		return 9999;
+	}
+	
+	return 0;
+}
 #============================================================================================================
 #	Module END
 #============================================================================================================

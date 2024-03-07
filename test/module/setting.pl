@@ -100,7 +100,15 @@ sub Save
 		BBS_BE_TYPE2			BBS_NO_ID				BBS_JP_CHECK			BBS_VIP931
 		BBS_4WORLD				BBS_YMD_WEEKS			BBS_NINJA				
 	);
-	
+	# ５ちゃんねるで追加された項目
+	my @ch5setting = qw(
+		BBS_FORCE_NOID			BBS_FORCE_NOMAIL		BBS_FORCE_NONAME		BBS_ARR
+		EMOTICONS				BBS_DISABLE_NO			BBS_USE_VIPQ2			BBS_PHONE
+		BBS_COPIPE				BBS_NO_MADAKANA			BBS_FORIGN_PASS			BBS_BBX_PASS
+		BBS_OEKAKI				BBS_SOKO				BBS_BEICON				BBS_DISP_ORIG
+		BBS_TITLE_ORIG			BBS_FR_LEVEL			BBS_FR_SECOND			BBS_SAMBA24
+		BBS_ADD_THREAD			BBS_NOSUSU				BBS_FAKE_COUNTRY
+	);
 	my %orz = %{$this->{'SETTING'}};
 	
 	chmod($Sys->Get('PM-TXT'), $path);
@@ -282,13 +290,13 @@ sub InitSettingData
 	
 	my %set = (
 		# ２ちゃんねる互換設定項目
-		'BBS_TITLE'			=> '掲示板＠ぜろちゃんねるプラス',
+		'BBS_TITLE'			=> '掲示板＠EXぜろちゃんねる',
 		'BBS_TITLE_PICTURE'		=> 'kanban.gif',
 		'BBS_TITLE_COLOR'		=> '#000000',
-		'BBS_TITLE_LINK'		=> 'https://github.com/PrefKarafuto/New_0ch_Plus/',
+		'BBS_TITLE_LINK'		=> 'https://github.com/PrefKarafuto/ex0ch',
 		'BBS_BG_COLOR'			=> '#FFFFFF',
 		'BBS_BG_PICTURE'		=> 'ba.gif',
-		'BBS_NONAME_NAME'		=> '名無しさん＠ぜろちゃんねるプラス',
+		'BBS_NONAME_NAME'		=> '名無しさん＠EXぜろちゃんねる',
 		'BBS_MAKETHREAD_COLOR'		=> '#CCFFCC',
 		'BBS_MENU_COLOR'		=> '#CCFFCC',
 		'BBS_THREAD_COLOR'		=> '#EFEFEF',
@@ -319,6 +327,7 @@ sub InitSettingData
 		'timecount'			=> 7,
 		'timeclose'			=> 5,
 		'BBS_PROXY_CHECK'		=> '',
+		'BBS_DNSBL_CHECK'		=> '',
 		'BBS_OVERSEA_THREAD'		=> '',
 		'BBS_OVERSEA_PROXY'		=> '',
 		'BBS_RAWIP_CHECK'		=> '',
@@ -374,10 +383,25 @@ sub InitSettingData
         'BBS_OMIKUJI'           => '',
 		'BBS_FAVICON'           => 'icon.png',
 
-		'BBS_HCAPTCHA'			=> '',
+		'BBS_CAPTCHA'			=> '',
+		'BBS_AUTH'				=> '',
 		'BBS_READTYPE'			=> '5ch',
 		'BBS_POSTCOLOR'			=> '#FFFFFF',
-		'BBS_MASCOT'			=> ''	
+		'BBS_MASCOT'			=> '',
+		'BBS_KAKO'				=> '',
+		'BBS_TITLEID'			=> '',
+  		'BBS_COMMAND'			=> 0 ,
+		'BBS_HIDENUSI'			=> '',
+		'BBS_MAILFIELD'			=> 'checked',
+
+		#忍法帖関連(必要Lv-消費Lv)
+		'NINLA_WRITE_MESSAGE'	=> 0,
+		'NINJA_FORCE_SAGE'		=> 2,
+		'NINJA_MAKE_THREAD'		=> '2-0',
+		'NINJA_USE_COMMAND'		=> '5-0',
+		'NINJA_THREAD_STOP'		=> '10-1',
+		'NINJA_USER_BAN'		=> '10-2',
+		'NINJA_RES_DELETE'		=> '20-3',
 	);
 	
 	while (my ($key, $val) = each(%set)) {

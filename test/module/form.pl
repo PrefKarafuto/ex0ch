@@ -32,8 +32,10 @@ sub new
 		$form = $ENV{'QUERY_STRING'};
 	}
 	
-	my @SRC = split(/[&;]/, $form);
-	
+	#my @SRC = split(/[&;]/, $form);
+	#一部専ブラの不具合に応急的に対応。専ブラ側で修正され次第速やかに戻すことを推奨します。
+	my @SRC = split(/&/, $form);
+
 	my $obj = {
 		'FORM'	=> undef,
 		'SRC'	=> \@SRC,

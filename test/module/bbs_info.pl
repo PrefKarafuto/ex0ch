@@ -343,7 +343,7 @@ sub CreateContents
 	$Page->Print('<html><!--nobanner--><body><small><center><br>');
 	
 	# ここらへんに自分の掲示板の名前を入れる
-	$Page->Print('<b>0ch+ BBS<br>');
+	$Page->Print('<b>ex0ch BBS<br>');
 	$Page->Print("Contents</b><br><br><hr></center><br>\n");
 	
 	foreach my $cid (@catSet) {
@@ -421,6 +421,13 @@ sub Load
 	my ($Sys) = @_;
 	
 	my $path = '.' . $Sys->Get('INFO') . '/category.cgi';
+
+	unless(-f $path){
+		open (my $fh, '>', $path);
+		print $fh, "0000000001<>一般<>一般、もしくは未分類の掲示板\n";
+		chmod($Sys->Get('PM-ADM'), $path);
+		close $fh;
+	}
 	
 	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);

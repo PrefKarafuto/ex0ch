@@ -243,6 +243,7 @@ sub PrintIndexHead
 	my $title = $this->{'SET'}->Get('BBS_TITLE');
 	my $link = $this->{'SET'}->Get('BBS_TITLE_LINK');
 	my $image = $this->{'SET'}->Get('BBS_TITLE_PICTURE');
+	my $CSP = $this->{'SYS'}->Get('CSP');
 #	my $code = $this->{'CODE'};
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
@@ -262,15 +263,28 @@ sub PrintIndexHead
  <meta property="og:description" content="$bbsinfo">
  <meta property="og:type" content="website">
  <meta property="og:image" content="$image">
+<<<<<<< HEAD
  <meta property="og:site_name" content="ぜろちゃんねるプラス">
+=======
+ <meta property="og:site_name" content="EXぜろちゃんねる">
+>>>>>>> main
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
  <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
 	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));
+<<<<<<< HEAD
 	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
 	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>') if ($this->{'SET'}->Get('BBS_HCAPTCHA'));
+=======
+	if($this->{'SET'}->Get('BBS_CAPTCHA')){
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'cf-turnstile');
+	}
+	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
+>>>>>>> main
 	
 	$Caption->Print($Page, undef);
 	
@@ -317,7 +331,11 @@ HEAD
 	$Page->Print(<<HTML);
 <br>
  <center>
+<<<<<<< HEAD
   <a href="$cgipath/bbsmenu.cgi" style="color:inherit;text-decoration: none;">
+=======
+  <a href="../bbsmenu.html" style="color:inherit;text-decoration: none;">
+>>>>>>> main
    <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;">$title</div>
   </a>
  </center>
@@ -536,7 +554,7 @@ sub PrintIndexFoot
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
   <td>
-  <form method="POST" action="$cgipath/bbs.cgi?guid=ON" style="margin:1.2em 0;">
+  <form method="POST" action="$cgipath/bbs.cgi" style="margin:1.2em 0;">
   <input type="submit" value="新規スレッド作成画面へ"><br>
   <input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
@@ -548,13 +566,20 @@ FORM
 	}
 	# スレッド作成フォームはindexと同じ画面に表示
 	else {
+		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+		my $classname = $Sys->Get('CAPTCHA');
+		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 		$Page->Print(<<FORM);
-<form method="POST" action="$cgipath/bbs.cgi?guid=ON">
+<form method="POST" action="$cgipath/bbs.cgi">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td nowrap><div class ="reverse_order">
   <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
+<<<<<<< HEAD
   <span class = "order1"><input type="submit" value="新規スレッド作成"><br class="smartphone"></span></div>
+=======
+  <span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha<br class="smartphone"></span></div>
+>>>>>>> main
   名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
@@ -577,17 +602,22 @@ HTML
 	# footの表示
 	$Caption->Load($Sys, 'FOOT');
 	$Caption->Print($Page, $Set);
+	$Page->Print("<div align=\"center\"><a href=\"./SETTING.TXT\">SETTING.TXT</div>");
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
-<a href="https://github.com/PrefKarafuto/New_0ch_Plus/">ぜろちゃんねるプラス再開発プロジェクト</a>
+<a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 BBS.CGI - $ver (Perl)
-@{[ $Sys->Get('SPAMHAUS') ? '+Spamhaus' : '' ]}
-@{[ $Sys->Get('SPAMCOP') ? '+SpamCop' : '' ]}
-@{[ $Sys->Get('BARRACUDA') ? '+BarracudaCentral' : '' ]}
+@{[ $Sys->Get('DNSBL_TOREXIT') ? '+dan.me.uk' : '' ]}
+@{[ $Sys->Get('DNSBL_S5H') ? '+S5H' : '' ]}
+@{[ $Sys->Get('DNSBL_DRONEBL') ? '+DeoneBL' : '' ]}
+@{[ $Set->Get('BBS_NINJA') ? '+忍法帖' : '' ]}
+@{[ $Set->Get('BBS_AUTH') ? '+ユーザー認証' : '' ]}
 +Samba24=$samba<br>
 </div>
-
+<div id="overlay">
+    <img id="overlay-image">
+  </div>
 <style>
 /* スマホ用レイアウト */
 img {
@@ -599,6 +629,29 @@ max-width:95%;
 margin:0;
 }
 </style>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const images = document.querySelectorAll('.post_image');
+    const overlay = document.getElementById('overlay');
+    const overlayImage = document.getElementById('overlay-image');
+  
+    images.forEach((image) => {
+      image.addEventListener('click', function() {
+        overlayImage.src = this.src;
+        overlayImage.onload = function() {
+          overlay.style.display = 'block';
+        };
+      });
+    });
+  
+    overlay.addEventListener('click', function(event) {
+      // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
+      if (event.target !== overlayImage) {
+        overlay.style.display = 'none';
+      }
+    });
+  });
+</script>
 FOOT
 	
 	$Page->Print("</body>\n</html>\n");
@@ -628,11 +681,26 @@ sub PrintThreadPreviewOne
 	my $key = $Sys->Get('KEY');
 	my $tm = time;
  	my $bbsPath = $Sys->Get('BBSPATH');
+<<<<<<< HEAD
 	
 	my $permt = DAT::GetPermission("$bbsPath/$bbs/dat/$key.dat");
 	my $perms = $Sys->Get('PM-STOP');
 	my $isstop = $permt == $perms;
+=======
+>>>>>>> main
 	
+	my $permt = DAT::GetPermission("$bbsPath/$bbs/dat/$key.dat");
+	my $perms = $Sys->Get('PM-STOP');
+	my $isstop = $permt == $perms;
+ 
+	require "./module/thread.pl";
+	my $Threads = THREAD->new;
+
+	$Threads->LoadAttr($Sys);
+	my $AttrMax = $Threads->GetAttr($key,'maxres');
+	my $threadStop = $Threads->GetAttr($key,'stop');
+	my $threadPool = $Threads->GetAttr($key,'pool');
+	my $rmax = $AttrMax ? $AttrMax : $Sys->Get('RESMAX');
 	# 表示数の正規化
 	my ($start, $end) = $this->{'CONV'}->RegularDispNum($Sys, $Dat, 1, $contNum, $contNum);
 	$start++ if ($start == 1);
@@ -643,15 +711,27 @@ sub PrintThreadPreviewOne
 	for (my $i = $start; $i <= $end; $i++) {
 		PrintResponse($this, $Page, $Dat, $commands, $i);
 	}
+<<<<<<< HEAD
 	if($Sys->Get('RESMAX') > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop){
 	# 書き込みフォームの表示
 	$Page->Print(<<KAKIKO);
+=======
+	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
+		# 書き込みフォームの表示
+		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+		my $classname = $Sys->Get('CAPTCHA');
+		my $Captcha = $this->{'SET'}->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
+
+		$Page->Print(<<KAKIKO);
+>>>>>>> main
   </dl>
-  <form method="POST" action="$cgiPath/bbs.cgi?guid=ON">
+  <hr>
+  <form method="POST" action="$cgiPath/bbs.cgi">
    <blockquote>
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
+   $Captcha
    <input type="submit" value="書き込む" name="submit"><br class="smartphone">
    名前：<input type="text" name="FROM" size="19"><br class="smartphone">
    E-mail：<input type="text" name="mail" size="19"><br>
@@ -661,8 +741,13 @@ sub PrintThreadPreviewOne
 KAKIKO
 	}
 	else{
+<<<<<<< HEAD
 	$Page->Print("<hr>");
 	$Page->Print("<font size=4>READ ONLY</font><br><br>");
+=======
+		$Page->Print("<hr>");
+		$Page->Print("<font size=4>READ ONLY</font><br><br>");
+>>>>>>> main
 	}
 }
 
@@ -695,15 +780,23 @@ sub PrintResponse
 	my $nameCol = $this->{'SET'}->Get('BBS_NAME_COLOR');
 	my $dispLine = $this->{'SET'}->Get('BBS_INDEX_LINE_NUMBER');
 	my $aa='';
+<<<<<<< HEAD
+=======
+ 
+>>>>>>> main
 	# URLと引用個所の適応
 	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
-	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
 	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'),\$elem[3],1)if($Sys->Get('IMGTAG'));
+<<<<<<< HEAD
 	
+=======
+	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
+ 
+>>>>>>> main
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
 	$Sys->Set('_NUM_', $n);

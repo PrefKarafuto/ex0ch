@@ -2,9 +2,9 @@
 #
 #	定数モジュール(ZP)
 #
-#	by ぜろちゃんねるプラス
+#	by EXぜろちゃんねる
 #	http://zerochplus.sourceforge.jp/
-#   https://github.com/PrefKarafuto/New_0ch_Plus/
+#   https://github.com/PrefKarafuto/ex0ch
 #
 #============================================================================================================
 package	ZP;
@@ -61,6 +61,7 @@ our $E_FORM_NOSUBJECT		= 150;
 our $E_FORM_NOTEXT			= 151;
 our $E_FORM_NONAME			= 152;
 our $E_FORM_NOCAPTCHA		= 153;
+our $E_FORM_FAILEDCAPTCHA	= 154;
 #  制限に関するエラー
 our $E_LIMIT_STOPPEDTHREAD	= 200;
 our $E_LIMIT_OVERMAXRES		= 201;
@@ -87,7 +88,10 @@ our $E_REG_NGUSER			= 601;
 our $E_REG_SPAMKILL			= 602;
 our $E_REG_SAMETITLE		= 603;
 our $E_REG_NOTJPHOST		= 207;
+our $E_REG_NOHOST		    = 208;
 our $E_REG_DNSBL			= 997;
+our $E_REG_BAN              = 700;
+our $E_REG_NINLVLIMIT       = 701;
 #  BEに関するエラー
 our $E_BE_GETFAILED			= 890;
 our $E_BE_CONNECTFAILED		= 891;
@@ -112,6 +116,7 @@ our $E_READ_INVALIDBBS		= 2011; # 2ch errnum
 our $E_READ_INVALIDKEY		= 3001; # 2ch errnum
 #  システム・その他のエラー
 our $E_SYSTEM_ERROR			= 990;
+our $E_SYSTEM_CAPTCHAERROR	= 991;
 #  ページ表示用番号
 our $E_PAGE_FINDTHREAD		= $E_READ_FAILEDLOADDAT;
 our $E_PAGE_THREAD			= 9000;
@@ -145,7 +150,12 @@ our $CAP_REG_NGUSER				= 21; # ユーザー 規制解除
 our $CAP_REG_NGWORD				= 22; # NGワード 規制解除
 our $CAP_DISP_NOSLIP			= 23; # 端末識別子非表示
 our $CAP_DISP_CUSTOMID			= 24; # 専用ID許可
-our $CAP_MAXNUM					= 24;
+our $CAP_REG_COMMAND			= 25; # コマンド許可
+our $CAP_REG_NOATTR			    = 26; # スレッド属性による規制解除
+our $CAP_REG_NOHOST             = 27; # 逆引き不可規制解除
+our $CAP_REG_NONINJA            = 28; # 忍法帖規制解除
+our $CAP_REG_NOCAPTCHA          = 29; # キャプチャ規制解除
+our $CAP_MAXNUM					= 29;
 # USER AUTHORITY
 our $AUTH_SYSADMIN		=  0; # システム管理権限(形式的に)
 our $AUTH_USERGROUP		=  1; # 管理グループ設定
@@ -163,7 +173,8 @@ our $AUTH_RESDELETE		= 12; # レスあぼーん
 our $AUTH_RESEDIT		= 13; # レス編集
 our $AUTH_BBSEDIT		= 14; # 各種編集
 our $AUTH_LOGVIEW		= 15; # ログの閲覧・削除
-our $AUTH_MAXNUM		= 15;
+our $AUTH_NINJAEDIT		= 16; # 忍法帖の閲覧・編集
+our $AUTH_MAXNUM		= 16;
 
 
 # REGEXP

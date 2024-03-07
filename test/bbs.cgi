@@ -12,6 +12,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 no warnings 'once';
+use CGI::Cookie;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
@@ -139,8 +140,10 @@ sub Initialize
 	
 	# ホスト情報設定(DNS逆引き)
 	#変数初期化チェックを挿入。
+	#IPアドレスの設定とリモホ逆引き用
+	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
 	if(!defined $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq '') {
-		$ENV{'REMOTE_HOST'} = $Conv->GetRemoteHost();
+		$ENV{'REMOTE_HOST'} = $Conv->reverse_lookup($ENV{'REMOTE_ADDR'});
 	}
 	$Form->Set('HOST', $ENV{'REMOTE_HOST'});
 	
@@ -208,7 +211,36 @@ sub Initialize
 			}
 		}
 	}
-	
+
+	#cookieからセッションID取得
+    my $sid = $Cookie->Get('countsession');
+    my $sec = $Cookie->Get('securitykey');
+    my %cookies = fetch CGI::Cookie;
+    if (!$sid && exists $cookies{'countsession'}) {
+        $sid = $cookies{'countsession'}->value;
+        $sid =~ s/"//g;
+    }
+    if (!$sec && exists $cookies{'securitykey'}) {
+        $sec = $cookies{'securitykey'}->value;
+        $sec =~ s/"//g;
+    }
+
+    #改竄をチェック
+	if($sid && $sec){
+		my $ctx = Digest::MD5->new;
+		$ctx->add($Sys->Get('SECURITY_KEY'));
+		$ctx->add(':', $sid);
+		
+		if ($ctx->b64digest eq $sec){
+			$Sys->Set('SID',$sid);
+		}else{
+			#一致しなかったら改竄されている
+			return $ZP::E_PAGE_COOKIE;
+		}
+	}else{
+		$Sys->Set('SID',undef);
+	}
+
 	# subjectの読み込み
 	$Threads->Load($Sys);
 	
@@ -254,7 +286,11 @@ sub PrintBBSThreadCreate
 	$Caption->Print($Page, undef);
 	$Page->Print(" <title>$title</title>\n\n");
 	$Page->Print("<link rel=\"stylesheet\" type=\"text/css\" href=\"./datas/design.css\">\n");
-	$Page->Print("<script src='https://js.hcaptcha.com/1/api.js' async defer></script>\n");
+	if($Set->Get('BBS_CAPTCHA')){
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
+	}
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
 	# <body>タグ出力
@@ -298,21 +334,24 @@ sub PrintBBSThreadCreate
 		my $bbs = $Form->Get('bbs');
 		my $tm = int(time);
 		my $ver = $Sys->Get('VERSION');
-		
+		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+		my $classname = $Sys->Get('CAPTCHA');
+		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
+
 		$Page->Print(<<HTML);
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
   <td>
   <b>スレッド新規作成</b><br>
   <center>
-  <form method="POST" action="./bbs.cgi?guid=ON">
+  <form method="POST" action="./bbs.cgi">
   <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="time" value="$tm">
   <table border="0">
    <tr>
     <td align="left">
     <div class ="reverse_order">
     <span class = "order2">タイトル：<input type="text" name="subject" size="25"></span>
-    <span class = "order1"><input type="submit" value="新規スレッド作成"></span>
+    <span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha</span>
     </div>
     名前：<input type="text" name="FROM" size="19" value="$name"><br class="smartphone">
     E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
@@ -390,7 +429,7 @@ sub PrintBBSCookieConfirm
 	# cookie情報の出力
 	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
 	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
-	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * 30);
+	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
 	
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
@@ -439,7 +478,7 @@ HTML
 ・投稿者は、掲示板運営者が指定する第三者に対して、著作物の利用許諾を一切しないことを承諾します。<br>
 </div>
 
-<form method="POST" action="./bbs.cgi?guid=ON">
+<form method="POST" action="./bbs.cgi">
 HTML
 	
 	$msg =~ s/<br>/\n/g;
@@ -500,7 +539,7 @@ sub PrintBBSJump
 		
 	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
 	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
-	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * 30);
+	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
 		
 	$Page->Print("Content-type: text/html\n\n");
 	$Page->Print(<<HTML);
