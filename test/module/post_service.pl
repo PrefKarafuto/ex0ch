@@ -1517,7 +1517,7 @@ sub Certification_Captcha {
 			}
 		} else {
 			#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
-			return $ZP::E_SYSTEM_ERROR;
+			return $ZP::E_SYSTEM_CAPTCHAERROR;
 		}
 	}else{
 		return $ZP::E_FORM_NOCAPTCHA;

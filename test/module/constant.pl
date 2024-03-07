@@ -116,6 +116,7 @@ our $E_READ_INVALIDBBS		= 2011; # 2ch errnum
 our $E_READ_INVALIDKEY		= 3001; # 2ch errnum
 #  システム・その他のエラー
 our $E_SYSTEM_ERROR			= 990;
+our $E_SYSTEM_CAPTCHAERROR	= 991;
 #  ページ表示用番号
 our $E_PAGE_FINDTHREAD		= $E_READ_FAILEDLOADDAT;
 our $E_PAGE_THREAD			= 9000;
