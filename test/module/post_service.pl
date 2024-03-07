@@ -205,7 +205,7 @@ sub Write
 	# レベル制限
 	my $ninLv = $Ninja->Get('ninLv');
 	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
-	my $lvLim = $Threads->GetAttr($threadid,'ninLvlim');
+	my $lvLim = $Threads->GetAttr($threadid,'ninLv');
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
 	if($isNinja && !$noNinja){
 		if($Sys->Equal('MODE', 1)){
@@ -965,10 +965,15 @@ sub Command
 		#忍法帖レベル制限
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!ninlv:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 8192)){
 			my $lvmax = $Sys->Get('NINLVMAX');
+			my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
 			if($2 <= $lvmax){
-				$Threads->SetAttr($threadid, 'ninLvlim',$2);
-				$Threads->SaveAttr($Sys);
-				$Command .= "※忍法帖Lv$2未満は書き込み不可<br>";
+				if($2 >= $write_min){
+					$Threads->SetAttr($threadid, 'ninLv',$2);
+					$Threads->SaveAttr($Sys);
+					$Command .= "※忍法帖Lv$2未満は書き込み不可<br>";
+				}else{
+					$Command .= "※${write_min}未満は設定不可<br>";
+				}
 			}else{
 				$Command .= "※値高すぎ<br>";
 			}
