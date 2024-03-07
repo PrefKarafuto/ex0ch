@@ -110,7 +110,7 @@ sub Load
             $session->param('c_host',$ENV{'REMOTE_HOST'});
             $session->param('c_ua',$ENV{'HTTP_USER_AGENT'});
         }else{
-            if ($sid && $sid_before && $sid_before ne $sid_saved){
+            if ($sid && $sid_before){
                 #忍法帖ロード時に追加
                 my $load_count = $session->param('load_count') || 0;
                 $load_count++;
