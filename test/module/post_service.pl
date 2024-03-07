@@ -275,7 +275,7 @@ sub Write
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
-	unless ($Set->Get('BBS_HIDENUSI') || $Threads->GetAttr($threadid,'hidenusi') || $handle){
+	if (!$Set->Get('BBS_HIDENUSI') || !$Threads->GetAttr($threadid,'hidenusi') || !$handle){
 		$idpart .= '(主)' if (($sid eq $nusisid) || $Sys->Equal('MODE', 1));
 	}
 	$bepart = $Form->Get('BEID', '');
