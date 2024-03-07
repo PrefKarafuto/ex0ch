@@ -893,9 +893,11 @@ sub Command
 	}
 	#スレ主非表示
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!hidenusi(<br>|$)/ && ($setBitMask & 32768)){
-		$Threads->SetAttr($threadid, 'hidenusi',1);
-		$Threads->SaveAttr($Sys);
-		$Command .= '※スレ主非表示<br>';
+		if(!$Set->Get('BBS_HIDENUSI')){
+			$Threads->SetAttr($threadid, 'hidenusi',1);
+			$Threads->SaveAttr($Sys);
+			$Command .= '※スレ主非表示<br>';
+		}
 	}
 	#BAN
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 4096)){
