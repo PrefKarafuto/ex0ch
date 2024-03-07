@@ -1055,6 +1055,7 @@ sub FunctionThreadDelete
 	$BBSAid = BBS_SERVICE->new;
 	
 	$Threads->Load($Sys);
+	$Threads->LoadAttr($Sys);
 	
 	@threadList = $Form->GetAtArray('THREADS');
 	$bbs		= $Sys->Get('BBS');

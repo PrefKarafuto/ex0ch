@@ -499,6 +499,7 @@ sub FunctionThreadDelete
 	$Pools = POOL_THREAD->new;
 	
 	$Pools->Load($Sys);
+	$Pools->LoadAttr($Sys);
 	
 	@threadList = $Form->GetAtArray('THREADS');
 	$bbs		= $Sys->Get('BBS');
@@ -645,6 +646,7 @@ sub FunctionCreateLogs
 		require './module/thread.pl';
 		$Pools = POOL_THREAD->new;
 		$Pools->Load($Sys);
+		$Pools->LoadAttr($Sys);
 	}
 	
 	foreach my $key (@poolSet) {

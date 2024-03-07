@@ -1036,6 +1036,7 @@ sub process_thread {
 			FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
         }
 		$Threads->Delete($id);
+		$Threads->LoadAttr($Sys);
 		$Threads->DeleteAttr($id);
 		$Threads->SaveAttr($Sys);
     }
