@@ -1069,6 +1069,7 @@ sub FunctionThreadDelete
 		unlink "$path/log/$id.cgi";
 		unlink "$path/log/del_$id.cgi";
 	}
+	$Threads->SaveAttr($Sys);
 	#subject.txt更新
     $Threads->Load($Sys);
     $Threads->UpdateAll($Sys);
@@ -1082,8 +1083,6 @@ sub FunctionThreadDelete
     #$BBSAid->CreateIndex();
     #$BBSAid->CreateSubback();
 	#$Sys->Set('MODE',$originalMODE);
-
-	$Threads->Save($Sys);
 	
 	return 0;
 }

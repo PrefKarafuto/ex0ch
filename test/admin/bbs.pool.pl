@@ -513,6 +513,7 @@ sub FunctionThreadDelete
 		unlink "$path/log/$id.cgi";
 		unlink "$path/log/del_$id.cgi";
 	}
+	$Pools->SaveAttr($Sys);
 	$Pools->Save($Sys);
 	
 	return 0;
@@ -680,7 +681,10 @@ sub FunctionCreateLogs
 		}
 	}
 	
-	$Pools->Save($Sys) if ($isDelete);
+	if ($isDelete){
+		$Pools->SaveAttr($Sys);
+		$Pools->Save($Sys);
+	}
 	$Logs->UpdateIndex($Sys, $Page);
 	$Logs->Save($Sys);
 	
