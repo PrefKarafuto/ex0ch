@@ -206,10 +206,6 @@ sub PrintReadHead
 		$description = $topMessage[0];
 	}
 	
-    	if($image !~ /^https?:\/\//){
-        	$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
-    	}
-	
     if($image !~ /^https?:\/\//){
         $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
     }
