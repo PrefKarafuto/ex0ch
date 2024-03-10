@@ -31,7 +31,7 @@ sub new
 sub is_denied_ip {
     my ($ipAddr, $infoDir) = @_;
 
-    my $denyIP_file = "./$infoDir/IP_List/deny.cgi";
+    my $denyIP_file = ".$infoDir/IP_List/deny.cgi";
 
     # ファイルが存在しない場合はすぐに0を返す
     return 0 unless -e $denyIP_file;

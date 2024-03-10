@@ -60,7 +60,7 @@ sub Load
     my $Form = $Sys->Get('MainCGI')->{'FORM'};
     my $Set = $Sys->Get('MainCGI')->{'SET'};
 	my $infoDir = $Sys->Get('INFO');
-	my $ninDir = "./$infoDir/.ninpocho/";
+	my $ninDir = ".$infoDir/.ninpocho/";
 
     $this->{'ANON_FLAG'} = $isAnon eq '8' ? 1 : 0;
     $sid = $Sys->Get('SID');
@@ -144,7 +144,7 @@ sub LoadOnly {
     my $this = shift;
     my ($Sys,$sid) = @_;
     my $infoDir = $Sys->Get('INFO');
-    my $ninDir = "./$infoDir/.ninpocho/";
+    my $ninDir = ".$infoDir/.ninpocho/";
     my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
 
     # セッションの読み込みが失敗した場合、0を返す
@@ -214,7 +214,7 @@ sub Delete {
     my $this=shift;
     my ($Sys, $sid_array_ref) = @_;
     my $infoDir = $Sys->Get('INFO');
-    my $ninDir = "./$infoDir/.ninpocho/";
+    my $ninDir = ".$infoDir/.ninpocho/";
     my @file_list = (
         'hash/user_info.cgi',
         'hash/password.cgi',

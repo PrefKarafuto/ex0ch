@@ -1414,8 +1414,8 @@ sub IsJPIP {
 
 	return 1 if $ENV{'REMOTE_HOST'} =~ /\.jp$/;
 
-    my $filename_ipv4 = "./$infoDir/IP_List/jp_ipv4.cgi";
-	my $filename_ipv6 = "./$infoDir/IP_List/jp_ipv6.cgi";
+    my $filename_ipv4 = ".$infoDir/IP_List/jp_ipv4.cgi";
+	my $filename_ipv6 = ".$infoDir/IP_List/jp_ipv6.cgi";
 
 	if(time - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
 		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
@@ -1593,7 +1593,7 @@ sub IsProxyAPI {
 
 	$mode //= 1;
 
-    my $file = "./$infoDir/IP_List/proxy_check.cgi";#結果のキャッシュ
+    my $file = ".$infoDir/IP_List/proxy_check.cgi";#結果のキャッシュ
 	my $proxy_list;
     $proxy_list = retrieve($file) if -e $file;
     $proxy_list = {} unless defined $proxy_list;
