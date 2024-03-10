@@ -289,7 +289,7 @@ sub Save
         my $pass_hash = $ctx3->b64digest;
         # 既にpasswordが設定されていた場合、既存のパスワードを削除
         if($session->param('password')){
-            DeleteHash($session->param('password'),'hash/password.cgi');
+            DeleteHash($session->param('password'),$ninDir.'hash/password.cgi');
         }
         SetHash($pass_hash,$sid,time,$ninDir.'hash/password.cgi');
         $session->param('password',$pass_hash);
