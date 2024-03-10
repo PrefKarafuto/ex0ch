@@ -372,9 +372,8 @@ sub PrintBBSThreadCreate
 $ver
 </p>
 HTML
+
 	}
-
-
 # CSS
 $Page->Print(<<HTML);
 <style>
@@ -389,6 +388,7 @@ width:95%;
 margin:0;
 }
 </style>
+
 HTML
 
 	$Page->Print("\n</body>\n</html>\n");
@@ -428,6 +428,7 @@ sub PrintBBSCookieConfirm
 	my $msg = &$sanitize($Form->Get('MESSAGE'));
 	my $subject = &$sanitize($Form->Get('subject'));
 	my $key = &$sanitize($Form->Get('key'));
+	
 	
 	# cookie情報の出力
 	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
@@ -492,6 +493,12 @@ HTML
 	$Page->HTMLInput('hidden', 'MESSAGE', $msg);
 	$Page->HTMLInput('hidden', 'bbs', $bbs);
 	$Page->HTMLInput('hidden', 'time', $tm);
+
+	if($Sys->Get('CAPTCHA')){
+		my $capkind = $Sys->Get('CAPTCHA').'-response';
+		my $captcha = $Form->Get($capkind);
+		$Page->HTMLInput('hidden', $capkind, $captcha);
+	}
 	
 	# レス書き込みモードの場合はkeyを設定する
 	if ($Sys->Equal('MODE', 2)) {
@@ -537,6 +544,7 @@ sub PrintBBSJump
 	my $Cookie = $CGI->{'COOKIE'};
 	
 	my $bbsPath = $Conv->MakePath($Sys->Get('CGIPATH').'/read.cgi/'.$Form->Get('bbs').'/'.$Form->Get('key').'/l10');
+	$bbsPath =~ s/\/$//;
 	my $name = $Form->Get('NAME', '');
 	my $mail = $Form->Get('MAIL', '');
 	my $sid = $Sys->Get('SID');
