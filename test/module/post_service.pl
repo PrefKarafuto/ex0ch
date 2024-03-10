@@ -337,6 +337,9 @@ sub Write
 	}
 	
 	if ($err == $ZP::E_SUCCESS) {
+		# タイムラインへ追加
+		#AddTimeLine($Sys,$Set,$line) if $Set->Get('TL_RES_MAX');
+
 		# subject.txtの更新
 		# スレッド作成モードなら新規に追加する
 		if ($Sys->Equal('MODE', 1)) {
@@ -635,6 +638,16 @@ sub Command
 					$Command .= '値が過小<br>';
 				}
 			}
+			$Threads->SaveAttr($Sys);
+		}
+		#extendコマンド
+		if ($Form->Get('MESSAGE') =~ /^!extend:(|on|default|none|checked):(|none|default|checked|feature|verbose|v{3,6}):([1-9][0-9]*):([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 1048576)) {
+			my $resmin = 100;
+			my $resmax = 2000;
+			my $id = $1;
+			my $slip = $2;
+			my $line = $3;
+			my $size = $4;
 			$Threads->SaveAttr($Sys);
 		}
 	}
@@ -1524,7 +1537,8 @@ sub Certification_Captcha {
 				return $ZP::E_FORM_FAILEDCAPTCHA
 			}
 		} else {
-			#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
+			# HTTPS関連のエラーの疑いあり
+			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
 			return $ZP::E_SYSTEM_CAPTCHAERROR;
 		}
 	}else{
@@ -1774,6 +1788,36 @@ sub Ninpocho
 	$Form->Set('FROM', $name);
 
 	return 0;
+}
+sub AddTimeLine
+{
+	my $this=shift;
+	my ($Sys,$Set,$line) = @_;
+	require './module/dat.pl';
+	require './module/thread.pl';
+	require './module/data_utils.pl';
+	my $Dat = DAT->new;
+	my $Threads = THREAD->new;
+	my $Conv = DATA_UTILS->new;
+	$Threads->Load($Sys);
+
+	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/2147483647.dat';
+	
+	my @lines = split(/<>/,chomp($line));
+	my $title = $Threads->Get('SUBJECT',$Sys->Get('KEY'));
+	my $url = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), 'l10');
+	$lines[3] += "<hr><a href=\"$url\">$title</a>";
+	$lines[4] = "★タイムライン★\n";
+	$line = join('<>',@lines);
+	$Dat->DirectAppend($Sys,$TLpath,$line);
+	my $resNum = DAT::GetNumFromFile($TLpath);
+
+	if($resNum > $Set->Get('TL_RES_MAX')){
+		$Dat->Load($Sys,$TLpath,0);
+		$Dat->Delete(0);
+		$Dat->Save($Sys);
+	}
+
 }
 #SPAMBLOCK
 sub SpamBlock
