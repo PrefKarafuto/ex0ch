@@ -544,7 +544,6 @@ sub PrintBBSJump
 	my $Cookie = $CGI->{'COOKIE'};
 	
 	my $bbsPath = $Conv->MakePath($Sys->Get('CGIPATH').'/read.cgi/'.$Form->Get('bbs').'/'.$Form->Get('key').'/l10');
-	$bbsPath =~ s/\/$//;
 	my $name = $Form->Get('NAME', '');
 	my $mail = $Form->Get('MAIL', '');
 	my $sid = $Sys->Get('SID');
@@ -566,7 +565,7 @@ sub PrintBBSJump
 <head>
 	<title>書きこみました。</title>
 <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
-<meta http-equiv="Refresh" content="5;URL=$bbsPath/">
+<meta http-equiv="Refresh" content="5;URL=$bbsPath#bottom">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 </head>
 <!--nobanner-->
