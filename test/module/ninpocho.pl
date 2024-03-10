@@ -265,14 +265,6 @@ sub Save
     my $sid = $this->{'SID'};
     my $session = $this->{'SESSION'};
 
-    # セキュリティキー生成
-    my $ctx = Digest::MD5->new;
-    $ctx->add($Sys->Get('SECURITY_KEY'));
-    $ctx->add(':', $sid);
-    my $sec = $ctx->b64digest;
-    $Cookie->Set('securitykey', $sec);
-    $Cookie->Set('countsession', $sid);
-
     # Hashテーブルを設定
     if(!$this->{'ANON_FLAG'}){
         my $addr = $ENV{'REMOTE_ADDR'};

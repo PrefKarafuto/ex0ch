@@ -13,6 +13,7 @@ use open IO => ':encoding(cp932)';
 use warnings;
 no warnings 'once';
 use CGI::Cookie;
+use Digest::MD5;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 
@@ -212,6 +213,7 @@ sub Initialize
 		}
 	}
 
+	#セッションID設定
 	#cookieからセッションID取得
     my $sid = $Cookie->Get('countsession');
     my $sec = $Cookie->Get('securitykey');
@@ -233,6 +235,7 @@ sub Initialize
 		
 		if ($ctx->b64digest eq $sec){
 			$Sys->Set('SID',$sid);
+			$Sys->Set('SEC',$sec);
 		}else{
 			#一致しなかったら改竄されている
 			return $ZP::E_PAGE_COOKIE;
@@ -533,10 +536,18 @@ sub PrintBBSJump
 	my $Conv = $CGI->{'CONV'};
 	my $Cookie = $CGI->{'COOKIE'};
 	
-	my $bbsPath = $Conv->MakePath($Sys->Get('BBS_REL'));
+	my $bbsPath = $Conv->MakePath($Sys->Get('CGIPATH').'/read.cgi/'.$Form->Get('bbs').'/'.$Form->Get('key').'/l10');
 	my $name = $Form->Get('NAME', '');
 	my $mail = $Form->Get('MAIL', '');
+	my $sid = $Sys->Get('SID');
 		
+	# セキュリティキー生成
+	my $ctx = Digest::MD5->new;
+	$ctx->add($Sys->Get('SECURITY_KEY'));
+	$ctx->add(':', $sid);
+	my $sec = $ctx->b64digest;
+	$Cookie->Set('countsession', $sid);
+	$Cookie->Set('securitykey', $sec);
 	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
 	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
 	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));

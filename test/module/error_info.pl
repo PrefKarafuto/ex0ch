@@ -9,6 +9,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use Digest::MD5;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -225,6 +226,13 @@ sub Print
 		if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked')) {
 			$Cookie->Set('MAIL', $mail, 'utf8');
 		}
+		# セキュリティキー生成
+		my $ctx = Digest::MD5->new;
+		$ctx->add($Sys->Get('SECURITY_KEY'));
+		$ctx->add(':', $Sys->Get('SID'));
+		my $sec = $ctx->b64digest;
+		$Cookie->Set('countsession', $Sys->Get('SID'));
+		$Cookie->Set('securitykey', $sec);
 		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
 		
 		$Page->Print("Content-type: text/html\n\n");
