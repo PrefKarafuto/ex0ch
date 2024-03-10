@@ -246,12 +246,13 @@ sub PrintSystemInfo
 		XML::Simple
 	), qw(
 		Net::DNS
+		LWP::Protocol::https
+		Net::SSLeay
 	), qw(
 		HTML::Entities
 		CGI::Carp
-		Net::Whois::Raw
-		Geo::IP
 		JSON
+		FCGI
 	));
 	
 	my $core = {};
