@@ -186,16 +186,16 @@ sub Write
 	#忍法帖パス
 	my $password = '';
 	my $ninmail = $Form->Get('mail');
-	if($ninmail=~ /!load:(.){10,30}/ && $isNinja){
+	if($ninmail=~ /!load:(.{10,30})/ && $isNinja){
 		$password = $1;
-		$ninmail =~ s/!load:(.){10,30}//;
+		$ninmail =~ s/!load:(.{10,30})//;
 		$Form->Set('mail',$ninmail);
 		$sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
 		$password = '';
 	}
-	elsif($ninmail =~ /!save:(.){10,30}/ && $isNinja){
+	elsif($ninmail =~ /!save:(.{10,30})/ && $isNinja){
 		$password = $1;
-		$ninmail =~ s/!save:(.){10,30}//;
+		$ninmail =~ s/!save:(.{10,30})//;
 		$Form->Set('mail',$ninmail);
 	}
 	$Sys->Set('SID',$sid);
@@ -534,7 +534,7 @@ sub ReadyBeforeWrite
 			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,1);
 		}
 		else{
-			if($Form->Get('mail') =~ /!pass:(.){1,30}/){
+			if($Form->Get('mail') =~ /!pass:(.{1,30})/){
 				require Digest::SHA::PurePerl;
 				my $ctx = Digest::SHA::PurePerl->new;
 				$ctx->add(':', $Sys->Get('SERVER'));
@@ -546,7 +546,7 @@ sub ReadyBeforeWrite
 
 				#メール欄からpass削除
 				my $mail = $Form->Get('mail');
-				$mail =~ s/!pass:(.){1,30}//;
+				$mail =~ s/!pass:(.{1,30})//;
 				$Form->Set('mail',$mail);
 				
 				if($inputPass eq $threadPass){
@@ -608,7 +608,7 @@ sub Command
 	#スレ主用パス(メール欄)/スレ立て時専用処理
 	if($mode){
 		#passを取得・設定
-		if($Form->Get('mail') =~ /!pass:(.){1,30}/ && ($setBitMask & 1)){
+		if($Form->Get('mail') =~ /!pass:(.{1,30})/ && ($setBitMask & 1)){
 			require Digest::SHA::PurePerl;
 			my $ctx = Digest::SHA::PurePerl->new;
 			$ctx->add(':', $Sys->Get('SERVER'));
@@ -620,7 +620,7 @@ sub Command
 			$Threads->SaveAttr($Sys);
 
 			my $mail = $Form->Get('mail');
-			$mail =~ s/!pass:(.){1,30}//;
+			$mail =~ s/!pass:(.{1,30})//;
 			$Form->Set('mail',$mail);
 		}
 		#最大レス数変更
