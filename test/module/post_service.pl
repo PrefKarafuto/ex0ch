@@ -178,9 +178,19 @@ sub Write
 
 	my $sid = $Ninja->Load($Sys,$idEnd,undef);
 	# hCaptcha認証
-	if ($Set->Get('BBS_CAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) && !$noCaptcha){
-		$err = $this->Certification_Captcha($Sys,$Form);
-		return $err if $err;
+	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA')){
+		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')){
+			$err = $this->Certification_Captcha($Sys,$Form);
+			return $err if $err;
+
+			# 認証成功
+			$Ninja->Set('auth',1);
+			$Ninja->Set('auth_time',time);
+		}
+		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time) && $isNinja){
+			$Ninja->Set('auth',0);
+			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
+		}
 	}
 
 	#忍法帖パス
@@ -399,6 +409,7 @@ sub Write
 			$updown = $Sys->Get('updown', '');
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
+		# 忍法帖保存
 		$Ninja->Save($Sys,$password);
 	}
 	return $err;
@@ -1738,15 +1749,7 @@ sub Ninpocho
 		$Ninja->Set('last_message',substr($mes, 0, 30));
 		$Ninja->Set('last_bbsdir',$Sys->Get('BBS'));
         $Ninja->Set('last_threadkey',$Sys->Get('KEY'));
-		#認証
-		unless($Ninja->Get('auth')){
-			$Ninja->Set('auth',1);
-			$Ninja->Set('auth_time',time);
-		}
-		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
-			$Ninja->Set('auth',0);
-			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
-		}
+
 	}
 
 	# 名前欄取得
