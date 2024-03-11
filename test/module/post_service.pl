@@ -285,7 +285,7 @@ sub Write
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
-	if (!$Set->Get('BBS_HIDENUSI') || !$Threads->GetAttr($threadid,'hidenusi') || !$handle){
+	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
 		$idpart .= '(主)' if (($sid eq $nusisid) || $Sys->Equal('MODE', 1));
 	}
 	$bepart = $Form->Get('BEID', '');
@@ -784,7 +784,7 @@ sub Command
 								for($i = $target-1;$i <= $target2-1;$i++){
 									my $line = $Dat->Get($i);
 									$line = $$line;
-									if ((split(/<>/,$line))[4] eq ''){
+									if ((split(/<>/,chomp($line)))[4] eq ''){
 										if($line){
 											my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
 											$Dat->Set($i,$deleteMessage);
@@ -815,7 +815,7 @@ sub Command
 						if(($NinStat && $ninLv >= $min_level)||!$NinStat){
 							my $line = $Dat->Get($target-1);
 							$line = $$line;
-							if ((split(/<>/,$line))[4] eq ''){
+							if ((split(/<>/,chomp($line)))[4] eq ''){
 								if($line){
 								my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
 								$Dat->Set($target-1,$deleteMessage);
