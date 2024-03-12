@@ -97,9 +97,8 @@ sub Load
             }
         }
         #忍法帖が有効の場合
-        my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
-        if($session ->is_empty){
-            $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
+        my $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
+        if($session ->is_new()){
             $sid = $session->id();
             $this->{'CREATE_FLAG'} = 1;
             #新規作成時に追加
@@ -183,14 +182,10 @@ sub Get
     
     return $val;
 }
-sub GetObj
+sub is_new
 {
     my $this = shift;
-    my ($name) = @_;
-
-    my $val = $this->{$name};
-    
-    return $val;
+    return $this->{'CREATE_FLAG'};
 }
 #------------------------------------------------------------------------------------------------------------
 #

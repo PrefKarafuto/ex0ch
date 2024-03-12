@@ -611,4 +611,3 @@ sub PrintBBSError
 	
 	$Error->Print($CGI, $Page, $err, $CGI->{'SYS'}->Get('AGENT'));
 }
-

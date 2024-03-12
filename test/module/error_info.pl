@@ -172,8 +172,9 @@ sub Print
 	$Log->Save($Sys);
 
 	require './module/ninpocho.pl';
-	my $Ninja = NINPOCHO->new;
-	$Ninja->DeleteOnly() if ($Ninja->GetObj('CREATE_FLAG')); 
+	if(NINPOCHO::is_new()){
+		NINPOCHO::DeleteOnly();
+	}
     
     my $name = &$sanitize($Form->Get('NAME'));
 	my $mail = &$sanitize($Form->Get('MAIL'));
