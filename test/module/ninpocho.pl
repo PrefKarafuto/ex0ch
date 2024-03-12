@@ -101,6 +101,7 @@ sub Load
         if($session ->is_empty){
             $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
             $sid = $session->id();
+            $this->{'CREATE_FLAG'} = 1;
             #新規作成時に追加
             $session->param('new_message',substr($Form->Get('MESSAGE'), 0, 30));
             $session->param('c_bbsdir',$Sys->Get('BBS'));
@@ -112,6 +113,7 @@ sub Load
             if ($sid && $sid_before){
                 #忍法帖ロード時に追加
                 my $load_count = $session->param('load_count') || 0;
+                $this->{'LOAD_FLAG'} = 1;
                 $load_count++;
                 $session->param('load_count',$load_count);
                 $session->param('load_message',substr($Form->Get('MESSAGE'), 0, 30));
@@ -181,7 +183,15 @@ sub Get
     
     return $val;
 }
+sub GetObj
+{
+    my $this = shift;
+    my ($name) = @_;
 
+    my $val = $this->{$name};
+    
+    return $val;
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #   忍法帖情報設定
@@ -239,6 +249,13 @@ sub Delete {
     }
     return $count;
 }
+sub DeleteOnly
+{
+    my $this=shift;
+    $this->{'SESSION'}->delete();
+    $this->{'SESSION'}->flush();
+}
+
 # ID生成
 sub generate_id
 {

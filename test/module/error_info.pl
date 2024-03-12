@@ -170,6 +170,10 @@ sub Print
 	$Log->Load($Sys, 'ERR', '');
 	$Log->Set('', $err, $version, $koyuu, $mode);
 	$Log->Save($Sys);
+
+	require './module/ninpocho.pl';
+	my $Ninja = NINPOCHO->new;
+	$Ninja->DeleteOnly() if ($Ninja->GetObj('CREATE_FLAG')); 
     
     my $name = &$sanitize($Form->Get('NAME'));
 	my $mail = &$sanitize($Form->Get('MAIL'));
@@ -230,7 +234,7 @@ sub Print
 		my $ctx = Digest::MD5->new;
 		$ctx->add($Sys->Get('SECURITY_KEY'));
 		$ctx->add(':', $Sys->Get('SID'));
-		my $sec = $ctx->b64digest;
+		my $sec = $Sys->Get('SID') ? $ctx->b64digest : "";
 		$Cookie->Set('countsession', $Sys->Get('SID'));
 		$Cookie->Set('securitykey', $sec);
 		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
@@ -256,7 +260,7 @@ sub Print
 <font size="+1" color="#FF0000"><b>ＥＲＲＯＲ：$message</b></font>
 </div>
 
-<blockquote>
+<blockquote><br>[$mode]<br>
 ホスト<b>$koyuu</b><br>
 <br>
 名前： <b>$name</b><br>
