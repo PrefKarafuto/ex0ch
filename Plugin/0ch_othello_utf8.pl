@@ -135,7 +135,7 @@ sub execute
 		# 設定値取得
 		my $master_info = $Threads->GetAttr($threadid,'othello_master'); #スレ主の情報
 		my $opponent_info = $Threads->GetAttr($threadid,'othello_opp');  #対戦相手の情報
-		my $this_turn = $Threads->GetAttr($threadid,'othello_turn'); #このターンが0：白か1：黒か
+		my $this_turn = $Threads->GetAttr($threadid,'othello_turn'); #このターンが0：○か　1：●か
 
 		my $is_master = $sid eq $master_info ? 1 : 0 ;  #スレ主かどうか
 
@@ -157,12 +157,12 @@ sub execute
 		if(getOthelloCommand($message,'start') && $opponent_info && $is_master){ 
 			$Threads->SetAttr($threadid,'white_stone',$white_def);
 			$Threads->SetAttr($threadid,'black_stone',$black_def);
-			$Threads->SetAttr($threadid,'othello_turn',1);
+			$Threads->SetAttr($threadid,'othello_turn',1);          # スレ主＝黒が先攻
 
 			$form->Set('MESSAGE',$message.'<hr>ゲームスタート！<br>'
-			.print_board($white_def,$black_def).'<br>NEXT:○');		#黒が先攻
+			.print_board($white_def,$black_def).'<br>NEXT:●');
 
-			$form->Set('FROM',makeName($sys,$set,$form,0));
+			$form->Set('FROM',makeName($sys,$set,$form,1));
 			$Threads->SaveAttr($sys);
 			return 0;
 		}
@@ -183,8 +183,8 @@ sub execute
 			my $result = '';
 
 			if($totalNum <= 64){
-				my $thisStone = $this_turn ? '○' : '●';
-				my $nextStone = $this_turn ? '●' : '○';
+				my $thisStone = $this_turn ? '●' : '○';
+				my $nextStone = $this_turn ? '○' : '●';
 				my $moves;
 				if ($this_turn) {
 					$moves = valid_moves($black_stone, $white_stone);
@@ -198,7 +198,7 @@ sub execute
 					my $positionNum = convert_position($position);
 					
 					#指定位置に置けるか調べる
-					if($moves & (1 << $positionNum)){
+					if(is_move_possible($moves, $positionNum)){
 						#置けるなら置いてひっくり返す
 						if($this_turn){
 							($black_stone, $white_stone) = make_move($black_stone, $white_stone, $positionNum);
@@ -215,7 +215,7 @@ sub execute
 								$moves = valid_moves($white_stone, $black_stone);
 							}
 
-							if($moves & (1 << $positionLast)){
+							if(is_move_possible($moves, $positionLast)){
 								#相手が置けるなら置く
 								if($this_turn){
 									($black_stone, $white_stone) = make_move($black_stone, $white_stone, $positionNum);
@@ -229,7 +229,7 @@ sub execute
 								} else {
 									$moves = valid_moves($white_stone, $black_stone);
 								}
-								if($moves & (1 << $positionLast)){
+								if(is_move_possible($moves, $positionLast)){
 									#自分が置けるなら置く
 									if(!$this_turn){
 										($black_stone, $white_stone) = make_move($black_stone, $white_stone, $positionNum);
@@ -308,6 +308,7 @@ sub execute
 					$result = "現在の譜面<br>".print_board($white_stone, $black_stone)
 					."<br>". ${totalNum}."手／NEXT:${nextStone}<br>Score:●->$blackNum  ○->$whiteNum";
 				}
+                #ヒントを表示する場合
 				elsif(getOthelloCommand($message,'hint')){
 					if ($this_turn) {
 						$moves = valid_moves($black_stone, $white_stone);
@@ -365,7 +366,7 @@ sub GetOppInfo
 sub is_turn {
 	my ($turn, $is_master, $opponent) = @_;
 	
-	if (($is_master == 1 && $turn == 0) || ($opponent == 1 && $turn == 1)) {
+	if (($is_master && $turn) || ($opponent && !$turn)) {
 		return 1;  # 手番である
 	} else {
 		return 0;  # 手番ではない
@@ -404,19 +405,33 @@ sub makeName
 	return $yourName;
 }
 
-sub is_valid_move {
+sub is_move_possible {
+    my ($moves, $positionNum) = @_;
+    # BigIntでビットマスクを作成
+    my $mask = Math::BigInt->new(1)->blsft($positionNum);
+
+    # movesとmaskでAND演算を行い、結果がゼロかどうかをチェック
+    return $moves->band($mask)->is_zero() ? 0 : 1;
+}
+
+sub make_move {
     my ($player, $opponent, $pos) = @_;
     my $mask = Math::BigInt->new(1)->blsft($pos);
-    return 0 if ($player->bior($opponent))->band($mask)->is_zero();
 
     foreach my $dir (@directions) {
         if (check_direction($player, $opponent, $pos, $dir)) {
-            return 1;
+            my $tmp = $pos + $dir;
+            while ($opponent->band(Math::BigInt->new(1)->blsft($tmp))->is_zero() == 0) {
+                $player->bior(Math::BigInt->new(1)->blsft($tmp));
+                $opponent->band(Math::BigInt->new('0xFFFFFFFFFFFFFFFF')->bxor(Math::BigInt->new(1)->blsft($tmp)));  # 相手のビットをクリア
+                $tmp += $dir;
+            }
         }
     }
-    return 0;
-}
+    $player->bior($mask);
 
+    return ($player, $opponent);
+}
 sub check_direction {
     my ($player, $opponent, $pos, $dir) = @_;
     my $mask = Math::BigInt->new(1);
@@ -448,25 +463,6 @@ sub check_direction {
     return 0;
 }
 
-sub make_move {
-    my ($player, $opponent, $pos) = @_;
-    my $mask = Math::BigInt->new(1)->blsft($pos);
-
-    foreach my $dir (@directions) {
-        if (check_direction($player, $opponent, $pos, $dir)) {
-            my $tmp = $pos + $dir;
-            while ($opponent->band(Math::BigInt->new(1)->blsft($tmp))->is_zero() == 0) {
-                $player->bior(Math::BigInt->new(1)->blsft($tmp));
-                $opponent->band(Math::BigInt->new('0xFFFFFFFFFFFFFFFF')->bxor(Math::BigInt->new(1)->blsft($tmp)));  # 相手のビットをクリア
-                $tmp += $dir;
-            }
-        }
-    }
-    $player->bior($mask);
-
-    return ($player, $opponent);
-}
-
 sub valid_moves {
     my ($player, $opponent) = @_;
     my $moves = Math::BigInt->new(0);
@@ -477,6 +473,18 @@ sub valid_moves {
         }
     }
     return $moves;
+}
+sub is_valid_move {
+    my ($player, $opponent, $pos) = @_;
+    my $mask = Math::BigInt->new(1)->blsft($pos);
+    return 0 if ($player->bior($opponent))->band($mask)->is_zero();
+
+    foreach my $dir (@directions) {
+        if (check_direction($player, $opponent, $pos, $dir)) {
+            return 1;
+        }
+    }
+    return 0;
 }
 
 # グリッド名から数字に変換
