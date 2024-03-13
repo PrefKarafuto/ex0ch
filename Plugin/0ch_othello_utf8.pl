@@ -155,8 +155,8 @@ sub execute
 
 		#startコマンドで初期化
 		if(getOthelloCommand($message,'start') && $opponent_info && $is_master){ 
-			$Threads->SetAttr($threadid,'white_stone',$white_def);
-			$Threads->SetAttr($threadid,'black_stone',$black_def);
+			$Threads->SetAttr($threadid,'white_stone',$white_def->as_hex());
+			$Threads->SetAttr($threadid,'black_stone',$black_def->as_hex());
 			$Threads->SetAttr($threadid,'othello_turn',1);          # スレ主＝黒が先攻
 
 			$form->Set('MESSAGE',$message.'<hr>ゲームスタート！<br>'
@@ -166,8 +166,8 @@ sub execute
 			$Threads->SaveAttr($sys);
 			return 0;
 		}
-		my $white_stone = $Threads->GetAttr($threadid,'white_stone');   #白石の配置
-		my $black_stone = $Threads->GetAttr($threadid,'black_stone');   #黒石の配置	
+		my $white_stone = Math::BigInt->new($Threads->GetAttr($threadid,'white_stone'));   #白石の配置
+		my $black_stone = Math::BigInt->new($Threads->GetAttr($threadid,'black_stone'));   #黒石の配置	
 		my $whiteNum = popcount($white_stone);
 		my $blackNum = popcount($black_stone);
 		my $totalNum = $whiteNum + $blackNum - 4;
