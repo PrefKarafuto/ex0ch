@@ -256,7 +256,7 @@ sub Print
 <font size="+1" color="#FF0000"><b>ＥＲＲＯＲ：$message</b></font>
 </div>
 
-<blockquote><br>[$mode]<br>
+<blockquote><br><br>
 ホスト<b>$koyuu</b><br>
 <br>
 名前： <b>$name</b><br>
