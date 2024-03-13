@@ -54,7 +54,7 @@ sub Load
 {
 	my $this = shift;
 	my ($Sys,$isAnon,$password) = @_;
-    my ($sid,$sid_saved,$sid_before,$sec);
+    my ($sid,$sid_saved,$sid_before,$sec,$auth);
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $Form = $Sys->Get('MainCGI')->{'FORM'};
