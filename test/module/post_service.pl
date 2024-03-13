@@ -178,24 +178,34 @@ sub Write
 
 	my $sid = $Ninja->Load($Sys,$idEnd,undef);
 	# hCaptcha認証
-	if ($Set->Get('BBS_CAPTCHA') && (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) && !$noCaptcha){
-		$err = $this->Certification_Captcha($Sys,$Form);
-		return $err if $err;
+	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA')){
+		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')){
+			$err = $this->Certification_Captcha($Sys,$Form);
+			return $err if $err;
+
+			# 認証成功
+			$Ninja->Set('auth',1);
+			$Ninja->Set('auth_time',time);
+		}
+		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time) && $isNinja){
+			$Ninja->Set('auth',0);
+			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
+		}
 	}
 
 	#忍法帖パス
 	my $password = '';
 	my $ninmail = $Form->Get('mail');
-	if($ninmail=~ /!load:(.){10,30}/ && $isNinja){
+	if($ninmail=~ /!load:(.{10,30})/ && $isNinja){
 		$password = $1;
-		$ninmail =~ s/!load:(.){10,30}//;
+		$ninmail =~ s/!load:(.{10,30})//;
 		$Form->Set('mail',$ninmail);
 		$sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
 		$password = '';
 	}
-	elsif($ninmail =~ /!save:(.){10,30}/ && $isNinja){
+	elsif($ninmail =~ /!save:(.{10,30})/ && $isNinja){
 		$password = $1;
-		$ninmail =~ s/!save:(.){10,30}//;
+		$ninmail =~ s/!save:(.{10,30})//;
 		$Form->Set('mail',$ninmail);
 	}
 	$Sys->Set('SID',$sid);
@@ -275,7 +285,7 @@ sub Write
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
-	if (!$Set->Get('BBS_HIDENUSI') || !$Threads->GetAttr($threadid,'hidenusi') || !$handle){
+	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
 		$idpart .= '(主)' if (($sid eq $nusisid) || $Sys->Equal('MODE', 1));
 	}
 	$bepart = $Form->Get('BEID', '');
@@ -337,6 +347,9 @@ sub Write
 	}
 	
 	if ($err == $ZP::E_SUCCESS) {
+		# タイムラインへ追加
+		#AddTimeLine($Sys,$Set,$line) if $Set->Get('TL_RES_MAX');
+
 		# subject.txtの更新
 		# スレッド作成モードなら新規に追加する
 		if ($Sys->Equal('MODE', 1)) {
@@ -396,6 +409,7 @@ sub Write
 			$updown = $Sys->Get('updown', '');
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
+		# 忍法帖保存
 		$Ninja->Save($Sys,$password);
 	}
 	return $err;
@@ -531,7 +545,7 @@ sub ReadyBeforeWrite
 			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,1);
 		}
 		else{
-			if($Form->Get('mail') =~ /!pass:(.){1,30}/){
+			if($Form->Get('mail') =~ /!pass:(.{1,30})/){
 				require Digest::SHA::PurePerl;
 				my $ctx = Digest::SHA::PurePerl->new;
 				$ctx->add(':', $Sys->Get('SERVER'));
@@ -543,7 +557,7 @@ sub ReadyBeforeWrite
 
 				#メール欄からpass削除
 				my $mail = $Form->Get('mail');
-				$mail =~ s/!pass:(.){1,30}//;
+				$mail =~ s/!pass:(.{1,30})//;
 				$Form->Set('mail',$mail);
 				
 				if($inputPass eq $threadPass){
@@ -605,7 +619,7 @@ sub Command
 	#スレ主用パス(メール欄)/スレ立て時専用処理
 	if($mode){
 		#passを取得・設定
-		if($Form->Get('mail') =~ /!pass:(.){1,30}/ && ($setBitMask & 1)){
+		if($Form->Get('mail') =~ /!pass:(.{1,30})/ && ($setBitMask & 1)){
 			require Digest::SHA::PurePerl;
 			my $ctx = Digest::SHA::PurePerl->new;
 			$ctx->add(':', $Sys->Get('SERVER'));
@@ -617,7 +631,7 @@ sub Command
 			$Threads->SaveAttr($Sys);
 
 			my $mail = $Form->Get('mail');
-			$mail =~ s/!pass:(.){1,30}//;
+			$mail =~ s/!pass:(.{1,30})//;
 			$Form->Set('mail',$mail);
 		}
 		#最大レス数変更
@@ -635,6 +649,16 @@ sub Command
 					$Command .= '値が過小<br>';
 				}
 			}
+			$Threads->SaveAttr($Sys);
+		}
+		#extendコマンド
+		if ($Form->Get('MESSAGE') =~ /^!extend:(|on|default|none|checked):(|none|default|checked|feature|verbose|v{3,6}):([1-9][0-9]*):([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 1048576)) {
+			my $resmin = 100;
+			my $resmax = 2000;
+			my $id = $1;
+			my $slip = $2;
+			my $line = $3;
+			my $size = $4;
 			$Threads->SaveAttr($Sys);
 		}
 	}
@@ -760,7 +784,7 @@ sub Command
 								for($i = $target-1;$i <= $target2-1;$i++){
 									my $line = $Dat->Get($i);
 									$line = $$line;
-									if ((split(/<>/,$line))[4] eq ''){
+									if ((split(/<>/,chomp($line)))[4] eq ''){
 										if($line){
 											my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
 											$Dat->Set($i,$deleteMessage);
@@ -791,7 +815,7 @@ sub Command
 						if(($NinStat && $ninLv >= $min_level)||!$NinStat){
 							my $line = $Dat->Get($target-1);
 							$line = $$line;
-							if ((split(/<>/,$line))[4] eq ''){
+							if ((split(/<>/,chomp($line)))[4] eq ''){
 								if($line){
 								my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
 								$Dat->Set($target-1,$deleteMessage);
@@ -1524,7 +1548,8 @@ sub Certification_Captcha {
 				return $ZP::E_FORM_FAILEDCAPTCHA
 			}
 		} else {
-			#captchaを素通りする場合はHTTPS関連のエラーの疑いあり
+			# HTTPS関連のエラーの疑いあり
+			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
 			return $ZP::E_SYSTEM_CAPTCHAERROR;
 		}
 	}else{
@@ -1724,15 +1749,7 @@ sub Ninpocho
 		$Ninja->Set('last_message',substr($mes, 0, 30));
 		$Ninja->Set('last_bbsdir',$Sys->Get('BBS'));
         $Ninja->Set('last_threadkey',$Sys->Get('KEY'));
-		#認証
-		unless($Ninja->Get('auth')){
-			$Ninja->Set('auth',1);
-			$Ninja->Set('auth_time',time);
-		}
-		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
-			$Ninja->Set('auth',0);
-			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
-		}
+
 	}
 
 	# 名前欄取得
@@ -1774,6 +1791,36 @@ sub Ninpocho
 	$Form->Set('FROM', $name);
 
 	return 0;
+}
+sub AddTimeLine
+{
+	my $this=shift;
+	my ($Sys,$Set,$line) = @_;
+	require './module/dat.pl';
+	require './module/thread.pl';
+	require './module/data_utils.pl';
+	my $Dat = DAT->new;
+	my $Threads = THREAD->new;
+	my $Conv = DATA_UTILS->new;
+	$Threads->Load($Sys);
+
+	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/2147483647.dat';
+	
+	my @lines = split(/<>/,chomp($line));
+	my $title = $Threads->Get('SUBJECT',$Sys->Get('KEY'));
+	my $url = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), 'l10');
+	$lines[3] += "<hr><a href=\"$url\">$title</a>";
+	$lines[4] = "★タイムライン★\n";
+	$line = join('<>',@lines);
+	$Dat->DirectAppend($Sys,$TLpath,$line);
+	my $resNum = DAT::GetNumFromFile($TLpath);
+
+	if($resNum > $Set->Get('TL_RES_MAX')){
+		$Dat->Load($Sys,$TLpath,0);
+		$Dat->Delete(0);
+		$Dat->Save($Sys);
+	}
+
 }
 #SPAMBLOCK
 sub SpamBlock

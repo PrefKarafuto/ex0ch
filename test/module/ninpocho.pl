@@ -54,13 +54,13 @@ sub Load
 {
 	my $this = shift;
 	my ($Sys,$isAnon,$password) = @_;
-    my ($sid,$sid_saved,$sid_before,$sec);
+    my ($sid,$sid_saved,$sid_before,$sec,$auth);
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $Form = $Sys->Get('MainCGI')->{'FORM'};
     my $Set = $Sys->Get('MainCGI')->{'SET'};
 	my $infoDir = $Sys->Get('INFO');
-	my $ninDir = "./$infoDir/.ninpocho/";
+	my $ninDir = ".$infoDir/.ninpocho/";
 
     $this->{'ANON_FLAG'} = $isAnon eq '8' ? 1 : 0;
     $sid = $Sys->Get('SID');
@@ -97,10 +97,11 @@ sub Load
             }
         }
         #忍法帖が有効の場合
-        my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
-        if($session ->is_empty){
-            $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
+        my $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
+        if($session ->is_new()){
             $sid = $session->id();
+            $this->{'CREATE_FLAG'} = 1;
+
             #新規作成時に追加
             $session->param('new_message',substr($Form->Get('MESSAGE'), 0, 30));
             $session->param('c_bbsdir',$Sys->Get('BBS'));
@@ -112,6 +113,7 @@ sub Load
             if ($sid && $sid_before){
                 #忍法帖ロード時に追加
                 my $load_count = $session->param('load_count') || 0;
+                $this->{'LOAD_FLAG'} = 1;
                 $load_count++;
                 $session->param('load_count',$load_count);
                 $session->param('load_message',substr($Form->Get('MESSAGE'), 0, 30));
@@ -132,11 +134,25 @@ sub Load
         $this->{'SESSION'} = undef;
         #セッションIDのみ使う場合
         if(!$sid){
-            $this->{'SID'} = generate_id();
+            $sid = generate_id();
         }
     }
     $this->{'SID'} = $sid;
     $Sys->Set('SID',$sid);
+    # Hashテーブルを設定
+    if(!$this->{'ANON_FLAG'}){
+        my $addr = $ENV{'REMOTE_ADDR'};
+        my $ctx3 = Digest::MD5->new;
+        $ctx3->add('ex0ch ID Generation');
+        $ctx3->add(':', $Sys->Get('SERVER'));
+        $ctx3->add(':', $addr);
+        my $ip_hash = $ctx3->b64digest;
+        my $user = MakeUserInfo($Sys);
+
+        SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
+        SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
+    }
+
     return $sid;
 }
 # セッションIDから忍法帖を読み込む(admin.cgi用)
@@ -144,7 +160,7 @@ sub LoadOnly {
     my $this = shift;
     my ($Sys,$sid) = @_;
     my $infoDir = $Sys->Get('INFO');
-    my $ninDir = "./$infoDir/.ninpocho/";
+    my $ninDir = ".$infoDir/.ninpocho/";
     my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
 
     # セッションの読み込みが失敗した場合、0を返す
@@ -181,7 +197,6 @@ sub Get
     
     return $val;
 }
-
 #------------------------------------------------------------------------------------------------------------
 #
 #   忍法帖情報設定
@@ -214,7 +229,7 @@ sub Delete {
     my $this=shift;
     my ($Sys, $sid_array_ref) = @_;
     my $infoDir = $Sys->Get('INFO');
-    my $ninDir = "./$infoDir/.ninpocho/";
+    my $ninDir = ".$infoDir/.ninpocho/";
     my @file_list = (
         'hash/user_info.cgi',
         'hash/password.cgi',
@@ -239,6 +254,13 @@ sub Delete {
     }
     return $count;
 }
+sub DeleteOnly
+{
+    my $this=shift;
+    $this->{'SESSION'}->delete();
+    $this->{'SESSION'}->flush();
+}
+
 # ID生成
 sub generate_id
 {
@@ -265,28 +287,6 @@ sub Save
     my $sid = $this->{'SID'};
     my $session = $this->{'SESSION'};
 
-    # セキュリティキー生成
-    my $ctx = Digest::MD5->new;
-    $ctx->add($Sys->Get('SECURITY_KEY'));
-    $ctx->add(':', $sid);
-    my $sec = $ctx->b64digest;
-    $Cookie->Set('securitykey', $sec);
-    $Cookie->Set('countsession', $sid);
-
-    # Hashテーブルを設定
-    if(!$this->{'ANON_FLAG'}){
-        my $addr = $ENV{'REMOTE_ADDR'};
-        my $ctx2 = Digest::MD5->new;
-        $ctx2->add('ex0ch ID Generation');
-        $ctx2->add(':', $Sys->Get('SERVER'));
-        $ctx2->add(':', $addr);
-        my $ip_hash = $ctx2->b64digest;
-        my $user = MakeUserInfo($Sys);
-
-        SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
-        SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
-    }
-
     # 忍法帖を使わない場合
     return unless $session;
 
@@ -297,7 +297,7 @@ sub Save
         my $pass_hash = $ctx3->b64digest;
         # 既にpasswordが設定されていた場合、既存のパスワードを削除
         if($session->param('password')){
-            DeleteHash($session->param('password'),'hash/password.cgi');
+            DeleteHash($session->param('password'),$ninDir.'hash/password.cgi');
         }
         SetHash($pass_hash,$sid,time,$ninDir.'hash/password.cgi');
         $session->param('password',$pass_hash);
