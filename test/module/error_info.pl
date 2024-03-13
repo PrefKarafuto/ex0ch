@@ -170,11 +170,6 @@ sub Print
 	$Log->Load($Sys, 'ERR', '');
 	$Log->Set('', $err, $version, $koyuu, $mode);
 	$Log->Save($Sys);
-
-	require './module/ninpocho.pl';
-	if(NINPOCHO::is_new()){
-		NINPOCHO::DeleteOnly();
-	}
     
     my $name = &$sanitize($Form->Get('NAME'));
 	my $mail = &$sanitize($Form->Get('MAIL'));
