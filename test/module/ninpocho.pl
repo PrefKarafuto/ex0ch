@@ -101,6 +101,7 @@ sub Load
         if($session ->is_new()){
             $sid = $session->id();
             $this->{'CREATE_FLAG'} = 1;
+
             #新規作成時に追加
             $session->param('new_message',substr($Form->Get('MESSAGE'), 0, 30));
             $session->param('c_bbsdir',$Sys->Get('BBS'));
@@ -133,11 +134,25 @@ sub Load
         $this->{'SESSION'} = undef;
         #セッションIDのみ使う場合
         if(!$sid){
-            $this->{'SID'} = generate_id();
+            $sid = generate_id();
         }
     }
     $this->{'SID'} = $sid;
     $Sys->Set('SID',$sid);
+    # Hashテーブルを設定
+    if(!$this->{'ANON_FLAG'}){
+        my $addr = $ENV{'REMOTE_ADDR'};
+        my $ctx3 = Digest::MD5->new;
+        $ctx3->add('ex0ch ID Generation');
+        $ctx3->add(':', $Sys->Get('SERVER'));
+        $ctx3->add(':', $addr);
+        my $ip_hash = $ctx3->b64digest;
+        my $user = MakeUserInfo($Sys);
+
+        SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
+        SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
+    }
+
     return $sid;
 }
 # セッションIDから忍法帖を読み込む(admin.cgi用)
@@ -181,11 +196,6 @@ sub Get
     my $val = $this->{'SESSION'}->param($name);
     
     return $val;
-}
-sub is_new
-{
-    my $this = shift;
-    return $this->{'CREATE_FLAG'};
 }
 #------------------------------------------------------------------------------------------------------------
 #
@@ -276,20 +286,6 @@ sub Save
 	my $ninDir = ".$infoDir/.ninpocho/";
     my $sid = $this->{'SID'};
     my $session = $this->{'SESSION'};
-
-    # Hashテーブルを設定
-    if(!$this->{'ANON_FLAG'}){
-        my $addr = $ENV{'REMOTE_ADDR'};
-        my $ctx2 = Digest::MD5->new;
-        $ctx2->add('ex0ch ID Generation');
-        $ctx2->add(':', $Sys->Get('SERVER'));
-        $ctx2->add(':', $addr);
-        my $ip_hash = $ctx2->b64digest;
-        my $user = MakeUserInfo($Sys);
-
-        SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
-        SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
-    }
 
     # 忍法帖を使わない場合
     return unless $session;
