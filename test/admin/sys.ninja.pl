@@ -72,6 +72,9 @@ sub DoPrint
 	elsif ($subMode eq 'SEARCH') {													# 忍法帖検索
 		PrintNinjaSearch($Page, $Sys, $Form);
 	}
+	elsif ($subMode eq 'NIN_SEARCH') {													# 忍法帖検索
+		PrintNinjaSearchResult($Page, $Sys, $Form);
+	}
 	elsif ($subMode eq 'SID_SEARCH') {												# セッションID検索
 		PrintNinjaSidSearch($Page, $Sys, $Form);
 	}
@@ -403,12 +406,19 @@ sub PrintNinjaEdit
 	$Page->Print("</table><br>");
 
 }
+
+#------------------------------------------------------------------------------------------------------------
+#
+#   忍法帖検索画面 - PrintNinjaSearch
+#   ------------------------------------------------
+#   引　数：なし
+#   戻り値：なし
+#
+#------------------------------------------------------------------------------------------------------------
 sub PrintNinjaSearch
 {
     my ($Page, $SYS, $Form, $BBS) = @_;
-    my ($common);
-    my ($name, $dir);
-    my ($sMODE, $sBBS, $sKEY, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
+    my ($sKEY, $sWORD);
    
     my $sanitize = sub {
         $_ = shift;
@@ -419,16 +429,8 @@ sub PrintNinjaSearch
         return $_;
     };
    
-    $sMODE  = "BBS";#&$sanitize($Form->Get('SMODE', ''));
-    $sBBS = &$sanitize($Form->Get('SBBS', ''));
     $sKEY   = &$sanitize($Form->Get('KEY', ''));
     $sWORD  = &$sanitize($Form->Get('WORD'));
-    @sTYPE  = $Form->GetAtArray('TYPE', 0);
-    $id = $Form->Get('TARGET_BBS', '');
-    $types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0);
-    $cTYPE[0] = ($types & 1 ? 'checked' : '');
-    $cTYPE[1] = ($types & 2 ? 'checked' : '');
-    $cTYPE[2] = ($types & 4 ? 'checked' : '');
    
     $SYS->Set('_TITLE', 'Ninpocho Search');
    
@@ -438,26 +440,18 @@ sub PrintNinjaSearch
     $Page->Print("  <tr>\n");
     $Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
     $Page->Print("    <td class=\"DetailTitle\">条件設定値</td></tr>\n");
-    $Page->Print("</select></td></tr>\n");
-    $Page->Print("<input type=hidden name=SBBS value=$id>");
+    $Page->Print("</td></tr>\n");
     $Page->Print(<<HTML);
   <tr>
-    <td>検索ワード</td>
+    <td>検索キー</td>
     <td>
-HTML
-    $Page->Print("<input type=text disabled size=60 name=WORD onkeydown=\"go(event.keyCode);\" value=\"$sWORD\" accept-charset=\"Shift_JIS\">");
-   
-    $common = "DoSubmit('bbs.thread','DISP','AUTORESDEL')";
-   
-    $Page->Print(<<HTML);
+	<input type=text size=20 name=KEY onkeydown="go(event.keyCode);" value="$sKEY">
     </td>
   </tr>
   <tr>
-    <td>検索種別</td>
+    <td>検索ワード</td>
     <td>
-      <input type="checkbox" name="TYPE" value="2" $cTYPE[1] checked disabled >？？？<br>
-      <input type="checkbox" name="TYPE" value="1" $cTYPE[0] disabled>？？？<br>
-      <input type="checkbox" name="TYPE" value="4" $cTYPE[2] disabled>？？？<br>
+      <input type=text size=60 name=WORD onkeydown="go(event.keyCode);" value="$sWORD">
     </td>
   </tr>
   <tr>
@@ -465,7 +459,7 @@ HTML
   </tr>
   <tr>
     <td colspan=2 align=right>
-      <input type=button value="　検索　" onclick="$common" style="float: left;" disabled>
+      <input type=button value="　検索　" onclick="DoSubmit('sys.ninja','DISP','NIN_SEARCH')" style="float: left;">
     </td>
   </tr>
 </table>
@@ -477,13 +471,128 @@ HTML
     }
    
     $Page->Print("<script>function go(keyCode).
-	{if(keyCode==13) DoSubmit('sys.ninja','DISP','SEARCH');.
+	{if(keyCode==13) DoSubmit('sys.ninja','DISP','NIN_SEARCH');.
 	}</script>");
 
 }
+
 #------------------------------------------------------------------------------------------------------------
 #
-#   検索結果出力 - Search
+#   忍法帖検索結果出力 - PrintNinjaSearchResult
+#   ------------------------------------------------
+#   引　数：なし
+#   戻り値：なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintNinjaSearchResult
+{
+    my ($Page, $Sys, $Form) = @_;
+    my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $key);
+    my (@types, $Type);
+    my (@resList, %bbsCount, %threadCount);
+
+	$Sys->Set('_TITLE','Ninpocho Search');
+   
+	my $sanitize = sub {
+        $_ = shift;
+        s/&/&amp;/g;
+        s/</&lt;/g;
+        s/>/&gt;/g;
+        s/"/&#34;/g;#"
+        return $_;
+    };
+   
+    require './module/admin_search.pl';
+    $Search = ADMIN_SEARCH->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$BBS->Load($Sys);
+    $word   = &$sanitize($Form->Get('WORD'));
+	$key = &$sanitize($Form->Get('KEY'));
+	
+   
+    # 検索オブジェクトの設定と検索の実行
+    $Search->Create($Sys, 3);
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=3>Key:[$key] Word:[$word] の忍法帖検索結果</td></tr>");
+    if ($@ ne '') {
+        PrintSystemError($Page, $@);
+        return;
+    }
+
+	# 検索結果セット取得
+	$Result = $Search->NinSearch($Form->Get('KEY'),$Form->Get('WORD'),undef);
+    $n      = $Result ? @$Result : 0;
+	my $res = $Result->[0];
+    # 検索ヒットが1件以上あり
+    if ($n > 0) {
+		my $dispNum	= $Form->Get('DISPNUM', 10);
+		my $dispSt		= $Form->Get('DISPST', 0) || 0;
+		$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
+		my $infoDir = $Sys->Get('INFO');
+		my $ninDir = ".$infoDir/.ninpocho/"; 
+		my @session_files = @$Result;
+		my $dispEd		= (($dispSt + $dispNum) > $n ? $n : ($dispSt + $dispNum));
+		
+		# ヘッダ部分の表示
+		my $common = "DoSubmit('sys.ninja','DISP','NIN_SEARCH');";
+		
+		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+		$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
+		$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
+		$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
+		$Page->Print("</td><td colspan=2 align=right>");
+		$Page->Print("合計：$n");
+		$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
+		$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
+		$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
+		$Page->Print("<tr><th style=\"width:30px\"></th>");
+		$Page->Print("<td class=\"DetailTitle\" style=\"width:180px\">SessionID</td>");
+		$Page->Print("<td class=\"DetailTitle\" style=\"width:10px\">Size</td>");
+		$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">Last Update</td></tr>\n");
+
+		for (my $i = $dispSt ; $i < $dispEd ; $i++) {
+			my $id = $session_files[$i];
+			my $num = $i + 1;
+			my $file_name		= '.'.$Sys->Get('INFO').'/.ninpocho/cgisess_'.$id;
+			my $mtime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[9]);
+			my $size = (stat($file_name))[7];
+
+			$Page->Print("<tr>");
+			$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
+			$common = "\"javascript:SetOption('NINJA_ID','$id');";
+			$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
+			$Page->Print("<td>$num: <a href=$common>$id</a></td>");
+			$Page->Print("<td>$size</td><td>$mtime</td></tr>\n");
+		}
+    }
+    # 検索ヒット無し
+    else {
+        PrintNoHit($Page);
+        $Page->Print("</table>\n");
+        return;
+    }
+	$Page->HTMLInput('hidden', 'DISPST', '');
+	$Page->HTMLInput('hidden', 'NINJA_ID', '');
+	$Page->HTMLInput('hidden', 'KEY', $Form->Get('KEY'));
+	$Page->HTMLInput('hidden', 'WORD', $Form->Get('WORD'));
+    if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
+    	$Page->Print(<<HTML);
+  <tr>
+    <td colspan=4 align=right>
+	<hr>
+	<br>
+     <input type=button value="　削除　" disabled onclick="DoSubmit('sys.ninja','FUNC','DELNINJA')" class="delete">
+    </td>
+  </tr>
+HTML
+    }
+	$Page->Print("</table>\n");
+}
+ 
+#------------------------------------------------------------------------------------------------------------
+#
+#   書き込み履歴検索結果出力 - PrintNinjaSidSearch
 #   ------------------------------------------------
 #   引　数：なし
 #   戻り値：なし
