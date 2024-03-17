@@ -548,7 +548,9 @@ sub print_board {
     $result .= "─"."┼─" x 8 . "┤<br>";
 
     for my $row (0..7) {
-        $result .= ($row + 1) . "│";  # 数字を日本語の数字に変換しないで直接使用
+		my $str_row = $row + 1;
+		$str_row =~ tr/0-9/０-９/;
+        $result .= $str_row. "│";  # 数字を日本語の数字に変換しないで直接使用
         for my $col (0..7) {
             my $pos = $row * 8 + $col;
             my $mask = Math::BigInt->new(1)->blsft($pos);  # BigIntでビットマスクを作成
@@ -561,15 +563,14 @@ sub print_board {
                 if ($hint && $hint->band($mask)->is_zero() == 0) {
                     $result .= "可";
                 } else {
-                    $result .= "　";
+                    $result .= '　';
                 }
             }
+			$result .= "│";
         }
-        $result .= "│<br>";
-        $result .= "─"."┼─" x 8 . "┤<br>" unless $row == 7;
+        $result .= "<br>─"."┼─" x 8 . "┤<br>" unless $row == 7;
     }
-
-    $result .= "─"."┴─" x 8 . "┘<br>";
+    $result .= "<br>─"."┴─" x 8 . "┘<br>";
 
     return '<div class="aaview">'.$result.'</div>';
 }
@@ -627,7 +628,7 @@ sub explanation
 	$exp .= 'オセロ用コマンド一覧(スレ主専用)<br>';
 	$exp .= '!othello・・・スレ立て時にスレッドをオセロスレに設定します。スレの途中での変更はできません。<br>';
 	$exp .= '!othello:opp:&gt;&gt;[レス番号]・・・対戦相手をレス番で指定します。未来のレスは指定できません。<br>';
-	$exp .= '!othello:start・・・相手を指定したら、ゲームを開始します。この時先攻後攻がランダムに決定されます。名前欄に&#9898;か&#9899;が表示され、&#9899;が先攻です。<br><br>';
+	$exp .= '!othello:start・・・相手を指定したら、ゲームを開始します。名前欄に&#9898;か&#9899;が表示され、&#9899;(スレ主)が先攻です。<br><br>';
 	$exp .= '以下は対戦相手も使用可能です。<br>';
 	$exp .= '!othello:put:[A-H][1-8]・・・石を置く位置を指定します。8x8盤面の列を英字、行を数字で記入してください。<br>';
 	$exp .= '!othello:pass・・・石を置けない場合にパスします。どこかに置ける場所があると、パスはできません。<br>';
