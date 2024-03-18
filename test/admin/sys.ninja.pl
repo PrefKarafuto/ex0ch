@@ -521,7 +521,13 @@ sub PrintNinjaSearchResult
     }
 
 	# 検索結果セット取得
-	$Result = $Search->NinSearch($Form->Get('KEY'),$Form->Get('WORD'),undef);
+	if($key && $word){
+		$Result = $Search->NinSearch($Form->Get('KEY'),$Form->Get('WORD'),undef);
+	}elsif(!$key && $word =~ /[0-9a-f]{32}/){
+		$Result = $Search->NinSearch(undef,undef,$Form->Get('WORD'));
+	}else{
+	}
+	
     $n      = $Result ? @$Result : 0;
 	my $res = $Result->[0];
     # 検索ヒットが1件以上あり

@@ -328,7 +328,9 @@ sub NinSearch
     my $pResultSet = $this->{'RESULTSET'};
 
     if($sid){
-        @$pResultSet = glob($ninDir.'cgisess_'.$sid);
+        my $set = glob($ninDir.'cgisess_'.$sid);
+        $set =~ s/${ninDir}cgisess_//m;
+        @$pResultSet = $set;
     }else{
         my $allSid = [];
         @$allSid = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
