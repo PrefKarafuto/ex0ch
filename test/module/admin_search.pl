@@ -328,9 +328,20 @@ sub NinSearch
     my $pResultSet = $this->{'RESULTSET'};
 
     if($sid){
-        my $set = glob($ninDir.'cgisess_'.$sid);
-        $set =~ s/${ninDir}cgisess_//m;
-        @$pResultSet = $set;
+        if(length($sid) == 32){
+            my $set = glob($ninDir.'cgisess_'.$sid);
+            $set =~ s/${ninDir}cgisess_//m;
+            @$pResultSet = $set;            
+        }else{
+            my $allSid = [];
+            @$allSid = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
+            foreach my $id (@$allSid){
+                $id =~ s/${ninDir}cgisess_//m;
+                if(crypt($id,$id) eq $sid){
+                    push @$pResultSet,$id;
+                }
+            }
+        }
     }else{
         my $allSid = [];
         @$allSid = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
@@ -344,7 +355,6 @@ sub NinSearch
                     push @$pResultSet,$id;
                 }
             }
-            
         }
     }
     return $pResultSet;

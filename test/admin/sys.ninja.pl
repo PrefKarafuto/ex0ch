@@ -339,58 +339,58 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖を確認します。(${SESSION_ATIME}時点)</td></tr>");
 		$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 
-		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description</td></tr>\n");
-		$Page->Print("<tr><td>説明</td>");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description (Key)</td></tr>\n");
+		$Page->Print("<tr><td>説明　(user_desc)</td>");
 		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60></td></tr>\n");
 
-		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖Lv</td><td>$lv</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">前回LvUP日時</td><td>$lvuptime</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成日時</td><td>$SESSION_CTIME</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成時の書き込み</td><td>$newmes</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP</td><td>$c_addr</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST</td><td>$c_host</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA</td><td>$c_ua</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">ユーザー認証</td><td>$is_auth</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最終認証日時</td><td>$auth_time</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最終スレ立て日時</td><td>$last_makethread_time</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時</td><td>$last_wtime</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み</td><td>$last_message</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新IP</td><td>$last_addr</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新HOST</td><td>$last_host</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新UA</td><td>$last_ua</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">パスワード(Hash)</td><td>$password</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新ロード時刻</td><td>$load_time</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">ロード元の忍法帖ID</td><td>$load_from</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">ロード時の書き込み</td><td>$load_message</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードIP</td><td>$load_addr</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードHOST</td><td>$load_host</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA</td><td>$load_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information (Key)</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID　(ninID)</td><td>$ninID</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖Lv　(ninLv)</td><td>$lv</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">前回LvUP日時　(lvuptime)</td><td>$lvuptime</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成日時　(_SESSION_CTIME)</td><td>$SESSION_CTIME</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時の書き込み　(new_message)</td><td>$newmes</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP　(c_addr)</td><td>$c_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST　(c_host)</td><td>$c_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA　(c_ua)</td><td>$c_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ユーザー認証　(auth)</td><td>$is_auth</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最終認証日時　(auth_time)</td><td>$auth_time</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最終スレ立て日時　(last_mthread_time)</td><td>$last_makethread_time</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時　(last_wtime)</td><td>$last_wtime</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み　(last_message)</td><td>$last_message</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新IP　(last_addr)</td><td>$last_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新HOST　(last_host)</td><td>$last_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新UA　(last_ua)</td><td>$last_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">パスワードのハッシュ　(password)</td><td>$password</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロード時刻　(load_time)</td><td>$load_time</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ロード元の忍法帖ID　(load_from)</td><td>$load_from</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ロード時の書き込み　(load_message)</td><td>$load_message</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードIP　(load_addr)</td><td>$load_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードHOST　(load_host)</td><td>$load_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA　(load_ua)</td><td>$load_ua</td></tr>\n");
 
-		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">書き込み数</td><td>$count</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数</td><td>$thread_count</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数</td><td>$load_count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics (Key)</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">書き込み数　(count)</td><td>$count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数　(thread_count)</td><td>$thread_count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数　(load_count)</td><td>$load_count</td></tr>\n");
 
-		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
-		$Page->Print("<tr><td>書き込み禁止</td>");
+		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation (Key)</td></tr>\n");
+		$Page->Print("<tr><td>書き込み禁止　(ban)</td>");
 		$Page->Print("<td><select name=BAN>");
 		$Page->Print("<option value=\"\" $selBanNone>無効</option>");
 		$Page->Print("<option value=ban $selBanEnable>有効</option>");
 		$Page->Print("<option value=thread $selBanMakeThread>スレッド作成のみ禁止</option>");
 		$Page->Print("</select></td></tr>\n");
-		$Page->Print("<tr><td>コマンド禁止</td>");
+		$Page->Print("<tr><td>コマンド禁止　(ban_command)</td>");
 		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
-		$Page->Print("<tr><td>URL禁止</td>");
+		$Page->Print("<tr><td>URL禁止　(ban_url)</td>");
 		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
-		$Page->Print("<tr><td>強制sage</td>");
+		$Page->Print("<tr><td>強制sage　(force_sage)</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage></td></tr>\n");
-		$Page->Print("<tr><td>Captcha強制</td>");
+		$Page->Print("<tr><td>Captcha強制　(force_captcha)</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha></td></tr>\n");
-		$Page->Print("<tr><td>名無し強制</td>");
+		$Page->Print("<tr><td>名無し強制　(force_774)</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774></td></tr>\n");
-		$Page->Print("<tr><td>強制コテ<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
+		$Page->Print("<tr><td>強制コテ　(force_kote)<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
 		$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\"></td></tr>\n");
 	}else{
 		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖データは存在しません。</td></tr>");
@@ -521,11 +521,10 @@ sub PrintNinjaSearchResult
     }
 
 	# 検索結果セット取得
-	if($key && $word){
+	if($key ne 'ninID' && $word){
 		$Result = $Search->NinSearch($Form->Get('KEY'),$Form->Get('WORD'),undef);
-	}elsif(!$key && $word =~ /[0-9a-f]{32}/){
+	}elsif((!$key && $word =~ /[0-9a-f]{32}/) || ($key eq 'ninID' && length($word) == 13)){
 		$Result = $Search->NinSearch(undef,undef,$Form->Get('WORD'));
-	}else{
 	}
 	
     $n      = $Result ? @$Result : 0;
