@@ -632,7 +632,6 @@ sub Command
 			my $pass = $ctx->b64digest;
 
 			$Threads->SetAttr($threadid, 'pass',$pass);
-			$Threads->SaveAttr($Sys);
 
 			my $mail = $Form->Get('mail');
 			$mail =~ s/!pass:(.{1,30})//;
@@ -653,7 +652,6 @@ sub Command
 					$Command .= '値が過小<br>';
 				}
 			}
-			$Threads->SaveAttr($Sys);
 		}
 		#extendコマンド
 		if ($Form->Get('MESSAGE') =~ /^!extend:(|on|default|none|checked):(|none|default|checked|feature|verbose|v{3,6}):([1-9][0-9]*):([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 1048576)) {
@@ -663,7 +661,6 @@ sub Command
 			my $slip = $2;
 			my $line = $3;
 			my $size = $4;
-			$Threads->SaveAttr($Sys);
 		}
 	}
 
@@ -673,9 +670,9 @@ sub Command
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z&;]{4,20})(<br>|$)/ && ($setBitMask & 256)){
 			my $delCommand = $2;
 			$delCommand =~ s/^sage$/sagemode/;
-			#BAN取り消し用
 			if($Threads->GetAttr($threadid, $delCommand)){
 				if($delCommand =~ /ban&gt;&gt;([1-9][0-9]*)/ ){
+					#BAN取り消し用
 					my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
 					my $bannum = @banuserAttr;
 					my $bansid = GetSessionID($Sys,$threadid,$1);
@@ -700,7 +697,6 @@ sub Command
 				}
 				else{
 					$Threads->SetAttr($threadid, $delCommand,'');
-					$Threads->SaveAttr($Sys);
 					$delCommand =~ s/^sagemode$/sage/;
 					$Command .= '※'.$delCommand.'取り消し<br>';
 				}
@@ -716,7 +712,6 @@ sub Command
 			my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_THREAD_STOP'));
 			if(($NinStat && $ninLv >= $min_level)||!$NinStat){
 				$Threads->SetAttr($threadid, 'stop',1);
-				$Threads->SaveAttr($Sys);
 				$Command .= '※スレスト<br>';
 				$Ninja->Set('ninLv',$ninLv - $factor);
 			}else{
@@ -726,7 +721,6 @@ sub Command
 		#過去ログ送り
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!pool(<br>|$)/ && ($setBitMask & 512)){
 			$Threads->SetAttr($threadid, 'pool',1);
-			$Threads->SaveAttr($Sys);
 			$Command .= '※過去ログ送り<br>';;
 		}
 		#スレタイ変更
@@ -885,45 +879,38 @@ sub Command
 	#強制sage
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage(<br>|$)/ && ($setBitMask & 4)){
 		$Threads->SetAttr($threadid, 'sagemode',1);
-		$Threads->SaveAttr($Sys);
 		$Command .= '※強制sage<br>';
 	}
 	#強制age
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!float(<br>|$)/ && ($setBitMask & 131072)){
 		$Threads->SetAttr($threadid, 'float',1);
-		$Threads->SaveAttr($Sys);
 		$Command .= '※強制age<br>';
 	}
 	#不落
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool(<br>|$)/ && ($setBitMask & 262144)){
 		$Threads->SetAttr($threadid, 'nopool',1);
-		$Threads->SaveAttr($Sys);
 		$Command .= '※不落<br>';
 	}
 	#BBS_SLIP
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!slip:(v{3,6})(<br>|$)/ && ($setBitMask & 2048)){
 		$Threads->SetAttr($threadid, 'slip',$2);
-		$Threads->SaveAttr($Sys);
 		$Command .= '※BBS_SLIP='.$2.'<br>';
 	}
 	#名無し強制
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774(<br>|$)/ && ($setBitMask & 32)){
 		$Threads->SetAttr($threadid, 'force774',1);
-		$Threads->SaveAttr($Sys);
 		$Command .= '※強制名無し<br>';
 		#$Form->Set('FROM','');
 	}
 	#実況モード
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!live(<br>|$)/ && ($setBitMask & 1024)){
 		$Threads->SetAttr($threadid, 'live',1);
-		$Threads->SaveAttr($Sys);
 		$Command .= '※実況スレ<br>';
 	}
 	#スレ主非表示
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!hidenusi(<br>|$)/ && ($setBitMask & 32768)){
 		if(!$Set->Get('BBS_HIDENUSI')){
 			$Threads->SetAttr($threadid, 'hidenusi',1);
-			$Threads->SaveAttr($Sys);
 			$Command .= '※スレ主非表示<br>';
 		}
 	}
@@ -950,7 +937,6 @@ sub Command
 						push(@banuserAttr, $bansid); # 新しい要素を配列の末尾に追加
 						shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));
 						$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
-						$Threads->SaveAttr($Sys);
 						$Command .= "※BAN：&gt;&gt;$2<br>";
 						$Ninja->Set('ninLv',$ninLv - $factor);
 					}
@@ -972,7 +958,6 @@ sub Command
 			my $new774 = $1;
 			$new774 = HTML::Entities::encode_entities($new774);
 			$Threads->SetAttr($threadid, 'change774',$new774);
-			$Threads->SaveAttr($Sys);
 			$new774 = HTML::Entities::decode($new774);
 			$Command .= '※名無し：'.$new774.'<br>';
 		}else{
@@ -982,12 +967,10 @@ sub Command
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid(<br>|$)/ && ($setBitMask & 8)){
 		$Threads->SetAttr($threadid, 'noid',1);
-		$Threads->SaveAttr($Sys);
 		$Command .= '※ID無し<br>';
 	}
 	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid(<br>|$)/ && ($setBitMask & 16)){
 		$Threads->SetAttr($threadid, 'changeid',1);
-		$Threads->SaveAttr($Sys);
 		$Command .= '※ID変更<br>';
 	}
 
@@ -1000,7 +983,6 @@ sub Command
 			if($2 <= $lvmax){
 				if($2 >= $write_min){
 					$Threads->SetAttr($threadid, 'ninLv',$2);
-					$Threads->SaveAttr($Sys);
 					$Command .= "※忍法帖Lv$2未満は書き込み不可<br>";
 				}else{
 					$Command .= "※${write_min}未満は設定不可<br>";
@@ -1011,6 +993,7 @@ sub Command
 		}
 	}
 	if($Command){
+		$Threads->SaveAttr($Sys);
 		$Command =~ s/<br>$//;
 		$Form->Set('MESSAGE',$Form->Get('MESSAGE')."<hr><font color=\"red\">$Command</font>");
 	}
