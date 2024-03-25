@@ -262,8 +262,8 @@ sub Write
 	my $updown = 'top';
 	$updown = '' if ($Form->Contain('mail', 'sage'));
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
-	$updown = '' if ($Ninja->Get('force_sage'));
-	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $ninLv && $isNinja);
+	$updown = '' if ($Ninja->Get('force_sage') && !$noNinja);
+	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $ninLv && $isNinja && !$noNinja);
 	$Sys->Set('updown', $updown);
 	
 	# 書き込み直前処理
@@ -540,7 +540,11 @@ sub ReadyBeforeWrite
 
 	#スレ立て時用コマンド
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USE_COMMAND'));
-	if($com ne 'on' && (($Set->Get('BBS_NINJA') && $ninLv >= $min_level) || !$Set->Get('BBS_NINJA'))){
+	if($com ne 'on' && (($Set->Get('BBS_NINJA') && $ninLv >= $min_level) || !$Set->Get('BBS_NINJA') || $commandAuth)){
+
+		# Capの権限があった場合すべて許可
+		$CommandSet = oct("0b11111111111111111111111") if $commandAuth;
+
 		if($Sys->Equal('MODE', 1)){
 			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,1);
 		}
@@ -907,7 +911,7 @@ sub Command
 		$Threads->SetAttr($threadid, 'force774',1);
 		$Threads->SaveAttr($Sys);
 		$Command .= '※強制名無し<br>';
-		$Form->Set('FROM','');
+		#$Form->Set('FROM','');
 	}
 	#実況モード
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!live(<br>|$)/ && ($setBitMask & 1024)){
