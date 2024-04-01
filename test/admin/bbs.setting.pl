@@ -768,7 +768,7 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">不落（!nopool）</td><td>");
 	$Page->Print("<input type=checkbox name=NOPOOL value=262144 $setnopool>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninLv:[レベル]）</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninlv:[レベル]）</td><td>");
 	$Page->Print("<input type=checkbox name=NINLV value=8192 $setninLv>有効</td></tr>");
 
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
