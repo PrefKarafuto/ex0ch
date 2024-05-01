@@ -171,12 +171,29 @@ sub Write
 	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
 	my $noCaptcha = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOCAPTCHA, $Form->Get('bbs'));
 	
-	# BBS_SLIP付加とID末尾取得
+	# BBS_SLIPとID末尾取得
 	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
-	my ($slip_result,$idEnd) = $slip->BBS_SLIP($Sys, $bbsSlip, $chid) if (!$handle || !$noAttr);
+	my ($slip_nickname,$slip_aa,$slip_bb,$slip_cccc,$idEnd) = $slip->BBS_SLIP($Sys, $chid);
+
+	# slip文字列とID末尾
+	my $slip_result = '';
+	my $ipAddr = $ENV{'REMOTE_ADDR'};
+	if($bbsSlip eq 'vvv'){
+		$slip_result = ${slip_nickname};
+	}
+	elsif($bbsSlip eq 'vvvv'){
+		$slip_result = "${slip_nickname} [$ipAddr]";
+	}
+	elsif($bbsSlip eq 'vvvvv'){
+		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
+	}
+	elsif($bbsSlip eq 'vvvvvv'){
+		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ipAddr}]";
+	}
 	$idEnd = $Set->Get('BBS_SLIP') eq 'checked' ? $Sys->Get('AGENT') : $idEnd;
 
-	my $sid = $Ninja->Load($Sys,$idEnd,undef);
+	# 忍法帖関連
+	my $sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,undef);
 	# hCaptcha認証
 	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA')){
 		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')){
@@ -200,7 +217,7 @@ sub Write
 		$password = $1;
 		$ninmail =~ s/!load:(.{10,30})//;
 		$Form->Set('mail',$ninmail);
-		$sid = $Ninja->Load($Sys,$idEnd,$password);	#ロード
+		$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,$password);	#ロード
 		$password = '';
 	}
 	elsif($ninmail =~ /!save:(.{10,30})/ && $isNinja){
@@ -209,32 +226,10 @@ sub Write
 		$Form->Set('mail',$ninmail);
 	}
 	$Sys->Set('SID',$sid);
-	
+	my $ninLv = $Ninja->Get('ninLv');
+
 	#BANチェック
 	return $ZP::E_REG_BAN if(!$noNinja&&($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1))));
-	
-	# レベル制限
-	my $ninLv = $Ninja->Get('ninLv');
-	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
-	my $lvLim = $Threads->GetAttr($threadid,'ninLv');
-	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
-	if($isNinja && !$noNinja){
-		if($Sys->Equal('MODE', 1)){
-			# スレ立てモード
-			if($ninLv < $min_level){
-				return $ZP::E_REG_NINLVLIMIT;
-			}else{
-				$Ninja->Set('ninLv',$ninLv - $factor);
-			}
-		}else{
-			# 書き込みモード
-			if ($ninLv < $write_min){
-				return $ZP::E_REG_NINLVLIMIT;
-			}else{
-				return $ZP::E_REG_NINLVLIMIT if($ninLv < $lvLim && $write_min <= $lvLim && !$noAttr);
-			}
-		}
-	}
 
 	my $nusisid = GetSessionID($Sys,$threadid,1);
 	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
@@ -269,6 +264,29 @@ sub Write
 	# 書き込み直前処理
 	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja->Get('ban_command'),$Ninja,$ninLv);
 	return $err if ($err != $ZP::E_SUCCESS);
+
+	# レベル制限
+	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
+	my $lvLim = $Threads->GetAttr($threadid,'ninLv');
+	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
+	if($isNinja && !$noNinja){
+		if($Sys->Equal('MODE', 1)){
+			# スレ立てモード
+			if($ninLv < $min_level){
+				return $ZP::E_REG_NINLVLIMIT;
+			}else{
+				$Ninja->Set('ninLv',$ninLv - $factor);
+			}
+		}else{
+			# 書き込みモード
+			if ($ninLv < $write_min){
+				return $ZP::E_REG_NINLVLIMIT;
+			}else{
+				return $ZP::E_REG_NINLVLIMIT if($ninLv < $lvLim && $write_min <= $lvLim && !$noAttr);
+			}
+		}
+	}
+	
 	# 忍法帖
 	if($Set->Get('BBS_NINJA')){
 		my $ninerr = $this->Ninpocho($Sys,$Set,$Form,$Ninja,$sid);
@@ -281,7 +299,7 @@ sub Write
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
 	#SLIPがあった場合は付加する
-	$name .= "</b> (${slip_result})" if ($slip_result && !$noslip);
+	$name .= "</b> (${slip_result})" if (($slip_result && !$noslip) && (!$handle || !$noAttr));
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
@@ -410,7 +428,7 @@ sub Write
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
 		# 忍法帖保存
-		$Ninja->Save($Sys,$password);
+		$Ninja->Save($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$password);
 	}
 	return $err;
 }
@@ -537,6 +555,7 @@ sub ReadyBeforeWrite
 	my $threadid = $Sys->Get('KEY');
 	my $commandAuth = $Sec->IsAuthority($capID, $ZP::CAP_REG_COMMAND, $Form->Get('bbs'));
 	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
+	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
 
 	#スレ立て時用コマンド
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USE_COMMAND'));
@@ -546,7 +565,7 @@ sub ReadyBeforeWrite
 		$CommandSet = oct("0b11111111111111111111111") if $commandAuth;
 
 		if($Sys->Equal('MODE', 1)){
-			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,1);
+			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,1);
 		}
 		else{
 			if($Form->Get('mail') =~ /!pass:(.{1,30})/){
@@ -565,11 +584,11 @@ sub ReadyBeforeWrite
 				$Form->Set('mail',$mail);
 				
 				if($inputPass eq $threadPass){
-					Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,0);
+					Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,0);
 				}
 			}
 			elsif($commandAuth || GetSessionID($Sys,$threadid,1) eq $Sys->Get('SID')){
-				Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,0);
+				Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,0);
 			}
 		}
 	}
@@ -614,7 +633,7 @@ sub GetSessionID
 #ユーザーコマンド
 sub Command
 {
-	my ($Sys,$Form,$Set,$Threads,$Ninja,$setBitMask,$mode) = @_;
+	my ($Sys,$Form,$Set,$Threads,$Ninja,$setBitMask,$noNinja,$mode) = @_;
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
 	my $Command = '';
@@ -710,10 +729,10 @@ sub Command
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop(<br>|$)/ && ($setBitMask & 128)){
 			my $ninLv = $Ninja->Get('ninLv');
 			my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_THREAD_STOP'));
-			if(($NinStat && $ninLv >= $min_level)||!$NinStat){
+			if(($NinStat && $ninLv >= $min_level)||!$NinStat||$noNinja){
 				$Threads->SetAttr($threadid, 'stop',1);
 				$Command .= '※スレスト<br>';
-				$Ninja->Set('ninLv',$ninLv - $factor);
+				$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
 			}else{
 				$Command .= '※レベル不足<br>';
 			}
@@ -773,7 +792,7 @@ sub Command
 				if($Dat->Load($Sys,$Path,0)){
 					if($target2 && $target < $target2){
 						my $cost = $factor * ($target2 - $target + 1);
-						if(($NinStat && $ninLv >= $min_level && $ninLv - $min_level >= $cost) || !$NinStat){
+						if(($NinStat && $ninLv >= $min_level && $ninLv - $min_level >= $cost) || !$NinStat || $noNinja){
 							my $li = $Dat->Get($target2-1);
 							$li = $$li;
 							my $count = 0;
@@ -801,7 +820,7 @@ sub Command
 								}else{
 									$Command .= "※&gt;&gt;${target}-${target2}は削除済み<br>";
 								}
-								$Ninja->Set('ninLv',$ninLv - $factor*$count);
+								$Ninja->Set('ninLv',$ninLv - $factor*$count) unless $noNinja;
 							}else{
 								$Command .= "※範囲指定が変<br>";
 							}
@@ -810,7 +829,7 @@ sub Command
 						}
 
 					}else{
-						if(($NinStat && $ninLv >= $min_level)||!$NinStat){
+						if(($NinStat && $ninLv >= $min_level)||!$NinStat||$noNinja){
 							my $line = $Dat->Get($target-1);
 							$line = $$line;
 							if ((split(/<>/,chomp($line)))[4] eq ''){
@@ -820,7 +839,7 @@ sub Command
 								$Dat->Save($Sys);
 								$Command .= "※&gt;&gt;${target}を削除<br>";
 
-								$Ninja->Set('ninLv',$ninLv - $factor);
+								$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
 								}else{
 									$Command .= "※存在しません<br>";
 								}
@@ -924,7 +943,7 @@ sub Command
 		my $ninLv = $Ninja->Get('ninLv');
 		my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USER_BAN'));
 
-		if(($NinStat && $ninLv >= $min_level) || !$NinStat){
+		if(($NinStat && $ninLv >= $min_level) || !$NinStat ||$noNinja){
 			if($bansid){
 				if($bansid ne $nusisid){
 					# grepを使って$bansidが@banuserAttrに存在するかをチェック
@@ -938,7 +957,7 @@ sub Command
 						shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));
 						$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
 						$Command .= "※BAN：&gt;&gt;$2<br>";
-						$Ninja->Set('ninLv',$ninLv - $factor);
+						$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
 					}
 				} else {
 					$Command .= "※スレ主はBAN不可<br>";
@@ -1194,13 +1213,13 @@ sub IsRegulation
 			$Sys->Set('IPCOUNTRY','abroad');
 		}
 		# PROXYチェック
-		if ($this->{'CONV'}->IsProxyDNSBL($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {
+		if ($this->{'CONV'}->IsProxyDNSBL($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {			# DNSBLによるチェック
 			#$this->{'FORM'}->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_DNSBL_CHECK', 'checked')) {
 				return $ZP::E_REG_DNSBL;
 			}
 			$Sys->Set('ISPROXY','bl');
-		}elsif($this->{'CONV'}->IsProxyAPI($this->{'SYS'},1) && $Sys->Get('PROXYCHECK_APIKEY')){
+		}elsif($Sys->Get('PROXYCHECK_APIKEY') && $this->{'CONV'}->IsProxyAPI($this->{'SYS'},1)){	# DNSBLに引っかからなかった場合に、設定されていたらProxy.ioへ
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_PROXY_CHECK', 'checked')) {
 				return $ZP::E_REG_DNSBL;
 			}

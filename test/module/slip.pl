@@ -324,17 +324,14 @@ sub is_mobile {
 #------------------------------------------------------------------------------------------------------------
 #	BBS_SLIP生成
 #	-------------------------------------------------------------------------------------
-#	@param	$bbsslip	slip種別(/(undef)/vvv/vvvv/vvvvv/vvvvvv/)
-#	@param	$infoDir	infoディレクトリ
 #	@param	$chid		SLIP_ID変更用
-#	@param	$checkKey	プロキシチェックAPI問い合わせ用
 #	@return	$slip_result
 #	@return	$idEnd		ID末尾
 #------------------------------------------------------------------------------------------------------------
 sub BBS_SLIP
 {
 	my $this = shift;
-	my ($Sys, $bbsslip, $chid) = @_;
+	my ($Sys, $chid) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
 
 	my $ipAddr = $ENV{'REMOTE_ADDR'};
@@ -441,9 +438,15 @@ sub BBS_SLIP
 
 	# 串判定
 	if ($isProxy) {
-		$idEnd = '8';
-		$slip_nickname = 'ｸｼｻﾞｼ';	
-		$slip_nickname .= $fixed_nickname_end;
+		if($isProxy eq 'proxy'){
+			$idEnd = '8';
+			$slip_nickname = 'ｸｼｻﾞｼ';	
+			$slip_nickname .= $fixed_nickname_end;
+		}else{
+			$idEnd = '8';
+			$slip_nickname = 'ﾌﾞﾛｯｸ';	
+			$slip_nickname .= $fixed_nickname_end;
+		}
 	}else{
 		# 逆引き判定
 		if (!$slip_remoho || $ipAddr eq $remoho) { # 逆引きできない場合
@@ -547,22 +550,8 @@ sub BBS_SLIP
 		}
 	}
 
-	# slip文字列とID末尾
-	my $slip_result = '';
-	if($bbsslip eq 'vvv'){
-		$slip_result = ${slip_nickname};
-	}
-	elsif($bbsslip eq 'vvvv'){
-		$slip_result = "${slip_nickname} [${ipAddr}]";
-	}
-	elsif($bbsslip eq 'vvvvv'){
-		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
-	}
-	elsif($bbsslip eq 'vvvvvv'){
-		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ipAddr}]";
-	}
 	# 匿名環境の場合は末尾が"8"になる
-	return $slip_result,$idEnd;
+	return $slip_nickname,$slip_aa,$slip_bb,$slip_cccc,$idEnd;
 }
 
 # 旧式

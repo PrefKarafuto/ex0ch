@@ -53,7 +53,7 @@ sub new
 sub Load
 {
 	my $this = shift;
-	my ($Sys,$isAnon,$password) = @_;
+	my ($Sys,$slip,$isAnon,$password) = @_;
     my ($sid,$sid_saved,$sid_before,$sec,$auth);
 
     my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
@@ -69,14 +69,14 @@ sub Load
     if (!$sid && !$this->{'ANON_FLAG'}){
         my $addr = $ENV{'REMOTE_ADDR'};
         my $ctx = Digest::MD5->new;
-        my $expiry = 60*60*24;
+        my $expiry = 60*60*24;      # 紐付け有効期限は24h
         $ctx->add('ex0ch ID Generation');
         $ctx->add(':', $Sys->Get('SERVER'));
         $ctx->add(':', $addr);
 
         $sid = GetHash($ctx->b64digest,$expiry,$ninDir.'hash/ip_addr.cgi');
         if(!$sid) {
-            $sid = GetHash(MakeUserInfo($Sys),$expiry,$ninDir.'hash/user_info.cgi');
+            $sid = GetHash($slip,$expiry,$ninDir.'hash/user_info.cgi');
         }
     }
     
@@ -147,10 +147,9 @@ sub Load
         $ctx3->add(':', $Sys->Get('SERVER'));
         $ctx3->add(':', $addr);
         my $ip_hash = $ctx3->b64digest;
-        my $user = MakeUserInfo($Sys);
 
         SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
-        SetHash($user,$sid,time,$ninDir.'hash/user_info.cgi');
+        SetHash($slip,$sid,time,$ninDir.'hash/user_info.cgi');
     }
 
     return $sid;
@@ -273,6 +272,7 @@ sub generate_id
 #	忍法帖情報保存
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
+#	@param	$slip	BBS_SLIP文字列
 #	@param	$password	あればパスワードで忍法帖をセーブ。無ければ通常セーブ
 #	@return	なし
 #
@@ -280,7 +280,7 @@ sub generate_id
 sub Save
 {
 	my $this = shift;
-	my ($Sys,$password) = @_;
+	my ($Sys,$slip,$password) = @_;
 	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/";
@@ -396,37 +396,6 @@ sub DeleteHashValue {
     }
 }
 
-sub MakeUserInfo
-{
-    my $Sys = shift;
-    my $addr = $ENV{'REMOTE_ADDR'};
-    my @ip = split(/\./,$addr);
-    my $ua = $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
-
-    my $provider;
-    my $HOST = $ENV{'HTTP_HOST'};
-
-    # プロバイダのドメインを取得
-    if ($HOST) {
-        $HOST =~ s/ne\.jp/nejp/g;
-        $HOST =~ s/ad\.jp/adjp/g;
-        $HOST =~ s/or\.jp/orjp/g;
-
-        my @d = split(/\./, $HOST);  # リモートホストからドメイン部分を取り出す
-        if (@d) {
-            my $c = scalar @d;
-            $provider = $d[$c - 2] . $d[$c - 1];
-        }
-    }
-    my $ctx = Digest::MD5->new;
-    $ctx->add('ex0ch ID Generation');
-    $ctx->add(':', $Sys->Get('SERVER'));
-    $ctx->add(':', $ip[0].$ip[1].$provider);
-    $ctx->add(':', $ua);
-    my $user = $ctx->b64digest;
-
-    return $user;
-}
 #============================================================================================================
 #	Module END
 #============================================================================================================
