@@ -333,7 +333,7 @@ sub PrintBaseSetting
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">DAT落ちスレッド保存先</td><td>");
 	$Page->Print("<select name=BBS_KAKO required>");
-	$Page->Print("<option value=\"\">プール(外部からのアクセス不可)");
+	$Page->Print("<option value=\"\">プール(外部からのアクセス不可)</option>");
 	foreach my $listid (@bbsSet) {
 		next if ($BBS->Get('DIR', $listid) eq $Sys->Get('BBS'));
 		$category	= $Category->Get('NAME', $BBS->Get('CATEGORY', $listid));
@@ -618,9 +618,9 @@ sub PrintLimitSetting
 	$Page->Print("<input type=text size=10 name=BBS_RES_MAX value=\"$setResMax\"></td></tr>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板書き込み制限</td><td><select name=BBS_READONLY>");
-	$Page->Print("<option value=on $selROon>読取専用");
-	$Page->Print("<option value=caps $selROcaps>キャップのみ可能");
-	$Page->Print("<option value=none $selROnone>書き込み可能");
+	$Page->Print("<option value=on $selROon>読取専用</option>");
+	$Page->Print("<option value=caps $selROcaps>キャップのみ可能</option>");
+	$Page->Print("<option value=none $selROnone>書き込み可能</option>");
 	$Page->Print("</select></td>");
 	$Page->Print("<td class=\"DetailTitle\">DNSBLチェック</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_DNSBL_CHECK $setDNSBL value=on $isDNSBL>$setInfo</td></tr>");

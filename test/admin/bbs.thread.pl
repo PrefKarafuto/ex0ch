@@ -368,13 +368,13 @@ sub PrintThreadList
 	
 	if ($isStop) {
 		$Page->Print("属性: <select name=ATTR>");
-		$Page->Print("<option value=float>浮上");
-		$Page->Print("<option value=nopool>不落");
-		$Page->Print("<option value=sagemode>sage進行");
-		$Page->Print("<option value=noid>ID無し");
-		$Page->Print("<option value=changeid>ID変更");
-		$Page->Print("<option value=force774>名無し強制");
-		$Page->Print("<option value=live>実況モード");
+		$Page->Print("<option value=float>浮上</option>");
+		$Page->Print("<option value=nopool>不落</option>");
+		$Page->Print("<option value=sagemode>sage進行</option>");
+		$Page->Print("<option value=noid>ID無し</option>");
+		$Page->Print("<option value=changeid>ID変更</option>");
+		$Page->Print("<option value=force774>名無し強制</option>");
+		$Page->Print("<option value=live>実況モード</option>");
 		$Page->Print("</select> ");
 		$Page->Print("<input type=button value=\"付加\" $common,'ATTR')\"> ");
 		$Page->Print("<input type=button value=\"解除\" $common,'DEATTR')\"> ");
@@ -463,10 +463,10 @@ sub PrintThreadCopy
 
 	$Page->Print("$text\先: <select name=TOBBS required $status>");
 	if(@bbsSet <= 1){
-		$Page->Print("<option value=\"\" selected disabled>選択可能な掲示板がありません");
+		$Page->Print("<option value=\"\" selected disabled>選択可能な掲示板がありません</option>");
 		$Page->Print("</select> ");
 	}else{
-		$Page->Print("<option value=\"\" disabled>選択してください");
+		$Page->Print("<option value=\"\" disabled>選択してください</option>");
 		foreach my $listid (@bbsSet) {
 			next if ($BBS->Get('DIR', $listid) eq $SYS->Get('BBS'));
 			$category	= $Category->Get('NAME', $BBS->Get('CATEGORY', $listid));
@@ -474,7 +474,7 @@ sub PrintThreadCopy
 			foreach $belongID (@belongBBS) {
 				if ($listid eq $belongID) {
 					$name		= $BBS->Get('NAME', $listid);
-					$Page->Print("<option value=$listid>$name");
+					$Page->Print("<option value=$listid>$name</option>");
 				}
 			}
 		}
