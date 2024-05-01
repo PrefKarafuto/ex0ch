@@ -43,10 +43,9 @@ sub new
 #	忍法帖ロード
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
+#	@param	$slip    	slip文字列
 #	@param	$isAnon 	匿名化されてるかどうか
 #	@param	$password	あればパスワードで忍法帖をロード。無ければ通常ロード
-#	@param	$sid	あればセッションIDで忍法帖をロード。無ければ通常ロード
-#	@param	$mode	1なら忍法帖を作らない（セッションIDのみ利用したい場合）
 #	@return	パスワードがあり、かつセッションIDが見つからない場合0
 #
 #------------------------------------------------------------------------------------------------------------
@@ -65,18 +64,24 @@ sub Load
     $this->{'ANON_FLAG'} = $isAnon eq '8' ? 1 : 0;
     $sid = $Sys->Get('SID');
 
+    my $addr = $ENV{'REMOTE_ADDR'};
+    my $ctx3 = Digest::MD5->new;
+    $ctx3->add('ex0ch ID Generation');
+    $ctx3->add(':', $Sys->Get('SERVER'));
+    $ctx3->add(':', $addr);
+    my $ip_hash = $ctx3->b64digest;
+    my $ctx = Digest::MD5->new;
+    $ctx->add('ex0ch ID Generation');
+    $ctx->add(':', $Sys->Get('SERVER'));
+    $ctx->add(':', $slip);
+    my $slip_hash = $ctx->b64digest;
+
     #cookieにsessionIDが保存されていない場合
     if (!$sid && !$this->{'ANON_FLAG'}){
-        my $addr = $ENV{'REMOTE_ADDR'};
-        my $ctx = Digest::MD5->new;
         my $expiry = 60*60*24;      # 紐付け有効期限は24h
-        $ctx->add('ex0ch ID Generation');
-        $ctx->add(':', $Sys->Get('SERVER'));
-        $ctx->add(':', $addr);
-
-        $sid = GetHash($ctx->b64digest,$expiry,$ninDir.'hash/ip_addr.cgi');
+        $sid = GetHash($ip_hash,$expiry,$ninDir.'hash/ip_addr.cgi');
         if(!$sid) {
-            $sid = GetHash($slip,$expiry,$ninDir.'hash/user_info.cgi');
+            $sid = GetHash($slip_hash,$expiry,$ninDir.'hash/user_info.cgi');
         }
     }
     
@@ -141,15 +146,8 @@ sub Load
     $Sys->Set('SID',$sid);
     # Hashテーブルを設定
     if(!$this->{'ANON_FLAG'}){
-        my $addr = $ENV{'REMOTE_ADDR'};
-        my $ctx3 = Digest::MD5->new;
-        $ctx3->add('ex0ch ID Generation');
-        $ctx3->add(':', $Sys->Get('SERVER'));
-        $ctx3->add(':', $addr);
-        my $ip_hash = $ctx3->b64digest;
-
         SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
-        SetHash($slip,$sid,time,$ninDir.'hash/user_info.cgi');
+        SetHash($slip_hash,$sid,time,$ninDir.'hash/user_info.cgi');
     }
 
     return $sid;
@@ -272,7 +270,6 @@ sub generate_id
 #	忍法帖情報保存
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
-#	@param	$slip	BBS_SLIP文字列
 #	@param	$password	あればパスワードで忍法帖をセーブ。無ければ通常セーブ
 #	@return	なし
 #
@@ -280,7 +277,7 @@ sub generate_id
 sub Save
 {
 	my $this = shift;
-	my ($Sys,$slip,$password) = @_;
+	my ($Sys,$password) = @_;
 	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
     my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/";

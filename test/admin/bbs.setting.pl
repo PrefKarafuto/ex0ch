@@ -635,11 +635,11 @@ sub PrintLimitSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
 	$Page->Print("<td class=\"DetailTitle\">逆引き不可のIPからの投稿を制限</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_REVERSE_CHECK value=on $setReverse></td></tr>");
+	$Page->Print("<input type=checkbox name=BBS_REVERSE_CHECK value=on $setReverse>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">プロキシ規制</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK value=on $setProxy>$setInfo2</td>");
 	$Page->Print("<td class=\"DetailTitle\">???</td><td>");
-	$Page->Print("<input type=checkbox name= value=on disabled></td></tr>");
+	$Page->Print("<input type=checkbox name= value=on disabled>有効</td></tr>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");

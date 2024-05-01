@@ -195,7 +195,7 @@ sub Write
 	# 忍法帖関連
 	my $sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,undef);
 	# hCaptcha認証
-	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA')){
+	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA')){
 		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')){
 			$err = $this->Certification_Captcha($Sys,$Form);
 			return $err if $err;
@@ -428,7 +428,7 @@ sub Write
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
 		# 忍法帖保存
-		$Ninja->Save($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$password);
+		$Ninja->Save($Sys,$password);
 	}
 	return $err;
 }
