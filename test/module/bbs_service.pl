@@ -269,7 +269,6 @@ sub PrintIndexHead
  <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
-	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_IMGUR'));
 	if($this->{'SET'}->Get('BBS_CAPTCHA')){
 		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'h-captcha');
 		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'g-recaptcha');
@@ -747,7 +746,6 @@ sub PrintResponse
 	my $aa='';
  
 	# URLと引用個所の適応
-	$Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');

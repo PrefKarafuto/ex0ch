@@ -919,7 +919,6 @@ sub PrintOtherSetting
 	my $setConfirm		= $Setting->Get('BBS_NEWSUBJECT');
 	my $setWeek			= $Setting->Get('BBS_YMD_WEEKS');
 	my $setTripColumn	= $Setting->Get('BBS_TRIPCOLUMN');
-	my $setImgur    	= $Setting->Get('BBS_IMGUR');
 	my $setTwitter    	= $Setting->Get('BBS_TWITTER');
 	my $setMovie    	= $Setting->Get('BBS_MOVIE');
 	my $setURLtoTitle   = $Setting->Get('BBS_URL_TITLE');
@@ -986,13 +985,10 @@ sub PrintOtherSetting
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
     
-    $Page->Print("<tr><td rowspan=6 class=\"DetailTitle\"></td><td rowspan=6>");
+    $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("</td>");
 	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
-	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">Imgur 埋め込み表示</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on $setImgur>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">X(旧Twitter) 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setTwitter>有効</td></tr>");
@@ -1426,7 +1422,6 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_SLIP', $Form->Get('BBS_SLIP'));
 	$Setting->Set('BBS_NINJA', ($Form->Equal('BBS_NINJA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_HIDENUSI', ($Form->Equal('BBS_HIDENUSI', 'on') ? 'checked' : ''));
-    $Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));

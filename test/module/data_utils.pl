@@ -212,19 +212,6 @@ sub ConvertURL
 	}
 	return $text;
 }
-#Imgur埋め込み
-sub ConvertImgur
-{
-	my $this = shift;
-	my ($text) = @_ ;
-	
-	my $reg = '(?<!src=")(https?://i\.imgur\.com/[A-Za-z0-9_]+\.(bmp|png|jpe?g))';	 # ImgurURL検索
-	
-	$$text =~ s|$reg|<blockquote class="imgur-embed-pub" lang="ja" data-id="a/$2"><a href="$1">$1</a></blockquote>|g;
-	
-	return $text;
-	
-}
 =pod
 sub ConvertVideo
 {
