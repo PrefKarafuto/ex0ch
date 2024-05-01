@@ -463,7 +463,8 @@ sub PrintThreadCopy
 
 	$Page->Print("$text\先: <select name=TOBBS required $status>");
 	if(@bbsSet <= 1){
-		$Page->Print("<option value=\"\" disabled>選択可能な掲示板がありません");
+		$Page->Print("<option value=\"\" selected disabled>選択可能な掲示板がありません");
+		$Page->Print("</select> ");
 	}else{
 		$Page->Print("<option value=\"\" disabled>選択してください");
 		foreach my $listid (@bbsSet) {
@@ -477,10 +478,10 @@ sub PrintThreadCopy
 				}
 			}
 		}
+		$Page->Print("</select> ");
+		$Page->Print("<input type=checkbox value=on name=RENAME $status>同名のファイルがあればリネーム");
+		$Page->Print('<input type=button value="　' . $text . "　\" onclick=\"$common;\" $status> ");
 	}
-	$Page->Print("</select> ");
-	$Page->Print("<input type=checkbox value=on name=RENAME $status>同名のファイルがあればリネーム");
-	$Page->Print('<input type=button value="　' . $text . "　\" onclick=\"$common;\" $status> ");
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 }
@@ -864,9 +865,6 @@ sub FunctionThreadCopy
 	
 	$Threads->Load($Sys);
 	$Info->Load($Sys);
-	
-	@threadList = $Form->GetAtArray('THREADS');
-	return 1 if (!@threadList);
 
 	$tobbs 		= $Form->Get('TOBBS');
 	$rename		= $Form->Get('RENAME');
@@ -874,6 +872,9 @@ sub FunctionThreadCopy
 	$bbs		= $Sys->Get('BBS');
 	$path		= $Sys->Get('BBSPATH') . "/$bbs";
 	$topath		= $Sys->Get('BBSPATH') . "/".$Info->Get('DIR',$tobbs);
+
+	@threadList = $Form->GetAtArray('THREADS');
+	return 1 if (!@threadList || !$tobbs);
 
 	my $text = $mode ? 'コピー':'移動';
 	

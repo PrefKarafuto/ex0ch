@@ -435,7 +435,7 @@ sub PrintNinjaSearch
     $SYS->Set('_TITLE', 'Ninpocho Search');
    
     $Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
-    $Page->Print("  <tr><td colspan=2>以下の各条件に当てはまる忍法帖を検索します。</td></tr>\n");
+    $Page->Print("  <tr><td colspan=2>以下の条件に当てはまる忍法帖を検索します。</td></tr>\n");
     $Page->Print("  <tr><td colspan=2><hr></td></tr>\n");
     $Page->Print("  <tr>\n");
     $Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
