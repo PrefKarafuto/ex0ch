@@ -367,9 +367,13 @@ sub BBS_SLIP
 	# slip_ip生成
 	my $fo = '';
 	my $so = '';
-	$ipAddr =~ /^(\d{1,4})\.(\d{1,4})/;
-	$fo = $1 + $chnum1 + $chid;
-	$so = $2 + $chnum2 + $chid;
+	if ($ipAddr =~ /^(\d{1,3})\.(\d{1,3})/) {
+		$fo = $1 + $chnum1 + $chid;
+		$so = $2 + $chnum2 + $chid;
+	} elsif ($ipAddr =~ /^([\da-fA-F]{1,4}):([\da-fA-F]{1,4}):([\da-fA-F]{1,4}):([\da-fA-F]{1,4})/) {
+		$fo = hex($1) + hex($2) + $chnum1 + $chid;
+		$so = hex($3) + hex($4) + $chnum2 + $chid;
+	}
 
 	my $ip_char1 = $slip_chars[$fo % 64];
 	my $ip_char2 = $slip_chars[$so % 64];
@@ -547,6 +551,15 @@ sub BBS_SLIP
 					$special_idx++;
 				}
 			}
+		}
+
+		# ローカル環境
+		if ($ipAddr eq '127.0.0.1'){
+			$slip_id = 'lc';
+			$idEnd = 'l';
+			$slip_nickname = "ﾛｰｶﾙ${fixed_nickname_end}";
+			$slip_aa = $slip_id;
+			$slip_bb = $slip_ip;
 		}
 	}
 

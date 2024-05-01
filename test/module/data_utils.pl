@@ -1778,6 +1778,31 @@ sub reverse_lookup {
     # 逆引きが成功した場合はホスト名を、失敗した場合はIPアドレスを返す
     return $host ? $host : $ip;
 }
+
+# IPv6展開
+sub expand_ipv6 {
+	my $this = shift;
+    my ($ip) = @_;
+    # "::" が含まれているか確認し、省略部分を展開する
+    if ($ip =~ /::/) {
+        my ($left, $right) = split /::/, $ip, 2;
+        my @left_parts = split /:/, $left;
+        my @right_parts = split /:/, $right;
+        my $left_size = scalar @left_parts;
+        my $right_size = scalar @right_parts;
+        my $missing = 8 - ($left_size + $right_size);  # 展開すべき0のブロック数
+        my $expanded = join(':', (@left_parts, ('0') x $missing, @right_parts));
+        $ip = $expanded;
+    }
+    # 各ブロックを4桁に展開する
+    my @blocks = split /:/, $ip;
+    foreach my $i (0 .. $#blocks) {
+        $blocks[$i] = sprintf("%04s", $blocks[$i]);
+        $blocks[$i] =~ s/ /0/g;  # 空白を0で埋める
+    }
+    return join(':', @blocks);
+}
+
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================

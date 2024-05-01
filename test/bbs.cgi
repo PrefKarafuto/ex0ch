@@ -146,6 +146,9 @@ sub Initialize
 	if(!defined $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq '') {
 		$ENV{'REMOTE_HOST'} = $Conv->reverse_lookup($ENV{'REMOTE_ADDR'});
 	}
+	if($ENV{'REMOTE_ADDR'} =~ /:/){
+		$ENV{'REMOTE_ADDR'} = $Conv->expand_ipv6($ENV{'REMOTE_ADDR'});
+	}
 	$Form->Set('HOST', $ENV{'REMOTE_HOST'});
 	
 	my $client = $Conv->GetClient();
