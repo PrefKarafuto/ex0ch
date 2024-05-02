@@ -13,6 +13,7 @@ use open IO => ':encoding(cp932)';
 use warnings;
 no warnings 'once';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+use JSON;
 
 
 # CGIの実行結果を終了コードとする
@@ -29,6 +30,11 @@ exit(AdminCGI());
 sub AdminCGI
 {
 	require './module/constant.pl';
+
+	# IP
+	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
+	require './module/data_utils.pl';
+	$ENV{'REMOTE_HOST'}  = DATA_UTILS::reverse_lookup($ENV{'REMOTE_ADDR'});
 	
 	# システム初期設定
 	my $CGI = {};
@@ -58,9 +64,12 @@ sub AdminCGI
 	my $sid = $Form->Get('SessionID', '');
 	$Form->Set('PassWord', '');
 	#$Form->Set('SessionID', '');
+	my $capt = Certification_Captcha($Sys,$Form) if ($pass && $Sys->Get('ADMINCAP'));
 	my ($userID, $SID) = $CGI->{'SECINFO'}->IsLogin($name, $pass, $sid);
-	$CGI->{'USER'} = $userID;
-	$Form->Set('SessionID', $SID);
+	unless($capt){
+		$CGI->{'USER'} = $userID;
+		$Form->Set('SessionID', $SID);
+	}
 	
 	# バージョンチェック
 	my $upcheck = $Sys->Get('UPCHECK', 1) - 0;
@@ -93,6 +102,60 @@ sub AdminCGI
 	$CGI->{'LOGGER'}->Write();
 	
 	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	Captcha検証
+#	-------------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------------------------------------
+sub Certification_Captcha {
+    my ($Sys,$Form) = @_;
+	my ($captcha_response,$url);
+
+	my $captcha_kind = $Sys->Get('CAPTCHA');
+    my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	if($captcha_kind eq 'h-captcha'){
+		$captcha_response = $Form->Get('h-captcha-response');
+    	$url = 'https://api.hcaptcha.com/siteverify';
+	}elsif($captcha_kind eq 'g-recaptcha'){
+		$captcha_response = $Form->Get('g-recaptcha-response');
+    	$url = 'https://www.google.com/recaptcha/api/siteverify';
+	}elsif($captcha_kind eq 'cf-turnstile'){
+		$captcha_response = $Form->Get('cf-turnstile-response');
+    	$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+	}else{
+		return 0;
+	}
+
+	if($captcha_response){
+		my $ua = LWP::UserAgent->new();
+		my $response = $ua->post($url,{
+			secret => $secretkey,
+			response => $captcha_response,
+			remoteip => $ENV{'REMOTE_ADDR'},
+        });
+		
+		if ($response->is_success()) {
+			my $json_text = $response->decoded_content();
+			
+			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
+			my $out = decode_json($json_text);
+			
+			if ($out->{success} eq 'true') {
+				return 0;
+			}else{
+				return 1;
+			}
+		} else {
+			# HTTPS関連のエラーの疑いあり
+			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
+			return 0;
+		}
+	}else{
+		return 1;
+	}
 }
 
 #------------------------------------------------------------------------------------------------------------

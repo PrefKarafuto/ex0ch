@@ -55,7 +55,7 @@ sub DoPrint
 	
 	$Page = $BASE->Create($Sys, $Form);
 	
-	PrintLogin($Page, $Form);
+	PrintLogin($Sys, $Page, $Form);
 	
 	$BASE->PrintNoList('LOGIN', 0);
 }
@@ -75,10 +75,6 @@ sub DoFunction
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
 	my ($host, $Security, $Mod);
-	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
-	
-	require './module/data_utils.pl';
-	$host = DATA_UTILS::reverse_lookup($ENV{'REMOTE_ADDR'});
 	
 	# ログイン情報を確認
 	if ($pSys->{'USER'}) {
@@ -107,7 +103,12 @@ sub DoFunction
 #------------------------------------------------------------------------------------------------------------
 sub PrintLogin
 {
-	my ($Page, $Form) = @_;
+	my ($Sys, $Page, $Form) = @_;
+
+	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+	my $classname = $Sys->Get('CAPTCHA');
+	my $Captcha = $Sys->Get('ADMINCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+	my $text = $sitekey && $classname && $Captcha ? 'Captcha認証に失敗したか、' : "" ;
 	
 $Page->Print(<<HTML);
   <center>
@@ -115,7 +116,7 @@ $Page->Print(<<HTML);
 HTML
 	
 	if ($Form->Get('FALSE') == 1) {
-		$Page->Print("    <div class=\"xExcuted\">ユーザ名もしくはパスワードが間違っています。</div>\n");
+		$Page->Print("    <div class=\"xExcuted\">${text}ユーザ名もしくはパスワードが間違っています。</div>\n");
 	}
 	
 $Page->Print(<<HTML);
@@ -129,6 +130,7 @@ $Page->Print(<<HTML);
      <tr>
       <td colspan="2" align="center">
       <hr>
+	  $Captcha
       <input type="submit" value="　ログイン　">
       </td>
      </tr>
