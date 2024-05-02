@@ -195,7 +195,7 @@ sub Write
 	# 忍法帖関連
 	my $sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,undef);
 	# hCaptcha認証
-	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA')){
+	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY')){
 		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')){
 			$err = $this->Certification_Captcha($Sys,$Form);
 			return $err if $err;
@@ -1560,8 +1560,9 @@ sub Certification_Captcha {
 				return $ZP::E_FORM_FAILEDCAPTCHA
 			}
 		} else {
-			# HTTPS関連のエラーの疑いあり
+			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
 			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
+			# このエラーの場合、スルーしてログインする
 			return $ZP::E_SYSTEM_CAPTCHAERROR;
 		}
 	}else{
