@@ -564,7 +564,7 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td>admin.cgi</td>");
 	$Page->Print("<td><input type=checkbox name=ADMINCAP $admCap value=on></td></tr>\n");
 	$Page->Print("<tr><td>search.cgi</td>");
-	$Page->Print("<td><input type=checkbox name=SEARCHCAP $srcCap value=on disabled></td></tr>\n");
+	$Page->Print("<td><input type=checkbox name=SEARCHCAP $srcCap value=on></td></tr>\n");
 	$Page->Print("<tr><td>bbs.cgi</td>");
 	$Page->Print("<td>各掲示板の設定で有効化してください</td></tr>\n");
 	
