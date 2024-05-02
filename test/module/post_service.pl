@@ -799,7 +799,8 @@ sub Command
 								for($i = $target-1;$i <= $target2-1;$i++){
 									my $line = $Dat->Get($i);
 									$line = $$line;
-									if ((split(/<>/,chomp($line)))[4] eq ''){
+									chomp($line);
+									if ((split(/<>/,$line))[4] eq ''){
 										if($line){
 											my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
 											$Dat->Set($i,$deleteMessage);
@@ -830,14 +831,15 @@ sub Command
 						if(($NinStat && $ninLv >= $min_level)||!$NinStat||$noNinja){
 							my $line = $Dat->Get($target-1);
 							$line = $$line;
-							if ((split(/<>/,chomp($line)))[4] eq ''){
+							chomp($line);
+							if ((split(/<>/,$line))[4] eq ''){
 								if($line){
-								my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
-								$Dat->Set($target-1,$deleteMessage);
-								$Dat->Save($Sys);
-								$Command .= "※&gt;&gt;${target}を削除<br>";
+									my $deleteMessage = "$del<>$del<>$del<>$del<>$del\n";
+									$Dat->Set($target-1,$deleteMessage);
+									$Dat->Save($Sys);
+									$Command .= "※&gt;&gt;${target}を削除<br>";
 
-								$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
+									$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
 								}else{
 									$Command .= "※存在しません<br>";
 								}
@@ -1798,7 +1800,7 @@ sub Ninpocho
 }
 sub AddTimeLine
 {
-	my $this=shift;
+	my $this = shift;
 	my ($Sys,$Set,$line) = @_;
 	require './module/dat.pl';
 	require './module/thread.pl';
@@ -1809,14 +1811,16 @@ sub AddTimeLine
 	$Threads->Load($Sys);
 
 	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/2147483647.dat';
-	
-	my @lines = split(/<>/,chomp($line));
 	my $title = $Threads->Get('SUBJECT',$Sys->Get('KEY'));
 	my $url = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), 'l10');
-	$lines[3] += "<hr><a href=\"$url\">$title</a>";
+	
+	chomp($line);
+	my @lines = split(/<>/, $line);
+	$lines[3] .= "<hr><a href=\"$url\">$title</a>";
 	$lines[4] = "★タイムライン★\n";
 	$line = join('<>',@lines);
-	$Dat->DirectAppend($Sys,$TLpath,$line);
+
+	my $err = $Dat->DirectAppend($Sys,$TLpath,$line);
 	my $resNum = DAT::GetNumFromFile($TLpath);
 
 	if($resNum > $Set->Get('TL_RES_MAX')){
@@ -1824,7 +1828,7 @@ sub AddTimeLine
 		$Dat->Delete(0);
 		$Dat->Save($Sys);
 	}
-
+	return $err;
 }
 #SPAMBLOCK
 sub SpamBlock
