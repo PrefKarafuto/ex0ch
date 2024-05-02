@@ -231,7 +231,7 @@ sub Initialize
     }
 
     #改竄をチェック
-	if($sid && $sec){
+	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
 		my $ctx = Digest::MD5->new;
 		$ctx->add($Sys->Get('SECURITY_KEY'));
 		$ctx->add(':', $sid);
