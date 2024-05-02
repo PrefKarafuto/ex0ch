@@ -129,32 +129,30 @@ sub Certification_Captcha {
 		return 0;
 	}
 
-	if($captcha_response){
-		my $ua = LWP::UserAgent->new();
-		my $response = $ua->post($url,{
-			secret => $secretkey,
-			response => $captcha_response,
-			remoteip => $ENV{'REMOTE_ADDR'},
-        });
-
-		if ($response->is_success()) {
-			my $json_text = $response->decoded_content();
-			
-			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
-			my $out = decode_json($json_text);
-			
-			if ($out->{success} eq 'true') {
-				return 0;
-			}else{
-				return 1;
-			}
-		} else {
-			# HTTPS関連のエラーの疑いあり
-			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
+	my $ua = LWP::UserAgent->new();
+	my $response = $ua->post($url,{
+		secret => $secretkey,
+		response => $captcha_response,
+		remoteip => $ENV{'REMOTE_ADDR'},
+    });
+	
+	if ($response->is_success()) {
+		my $json_text = $response->decoded_content();
+		my $out = decode_json($json_text);
+		
+		if ($out->{success} eq 'true') {
 			return 0;
+		}elsif ($out->{error_codes} =~ /(missing-input-secret|invalid-input-secret|sitekey-secret-mismatch)/){
+			# 管理者側の設定ミス
+			return 0;
+		}else{
+			return 1;
 		}
-	}else{
-		return 1;
+	} else {
+		# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
+		# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
+		# このエラーの場合、スルーしてログインする
+		return 0;
 	}
 }
 
