@@ -14,7 +14,7 @@ use warnings;
 no warnings 'once';
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use JSON;
-
+use LWP::UserAgent;
 
 # CGIの実行結果を終了コードとする
 exit(AdminCGI());
@@ -136,7 +136,7 @@ sub Certification_Captcha {
 			response => $captcha_response,
 			remoteip => $ENV{'REMOTE_ADDR'},
         });
-		
+
 		if ($response->is_success()) {
 			my $json_text = $response->decoded_content();
 			
