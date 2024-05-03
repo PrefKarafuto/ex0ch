@@ -16,6 +16,8 @@ use open IO => ':encoding(cp932)';
 use warnings;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
+use JSON;
+use LWP::UserAgent;
 
 BEGIN { use lib './perllib'; }
 
