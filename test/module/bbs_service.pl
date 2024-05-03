@@ -589,7 +589,8 @@ HTML
 	my ($sec,$min,$hour,$day,$mon,$year) = localtime($Sys->Get('LASTMOD'));
 	$mon ++;
 	$year += 1900;
-	$Page->Print("<div align=\"center\" style=\"font-size: 0.8em; color: #933;\">Last modified:$year/$mon/$day $hour:$min:$sec</div>");
+	my $lastMod = sprintf("Last modified : %d/%02d/%02d %02d:%02d:%02d",$year,$mon,$day,$hour,$min,$sec);
+	$Page->Print("<div align=\"center\" style=\"font-size: 0.8em; color: #933;\">$lastMod</div>");
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
