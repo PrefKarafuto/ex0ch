@@ -69,6 +69,9 @@ sub AdminCGI
 	unless($capt){
 		$CGI->{'USER'} = $userID;
 		$Form->Set('SessionID', $SID);
+		if ($CGI->{'SECINFO'}->IsAuthority($userID,$ZP::AUTH_SYSADMIN,'*')){
+			$Sys->Set('LASTMOD',time);
+		}
 	}
 	
 	# バージョンチェック

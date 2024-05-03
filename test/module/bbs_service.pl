@@ -585,6 +585,11 @@ HTML
 	$Caption->Load($Sys, 'FOOT');
 	$Caption->Print($Page, $Set);
 	$Page->Print("<div align=\"center\"><a href=\"./SETTING.TXT\">SETTING.TXT</div>");
+
+	my ($sec,$min,$hour,$day,$mon,$year) = localtime($Sys->Get('LASTMOD'));
+	$mon ++;
+	$year += 1900;
+	$Page->Print("<div align=\"center\" style=\"font-size: 0.8em; color: #933;\">Last modified:$year/$mon/$day $hour:$min:$sec</div>");
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
