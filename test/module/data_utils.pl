@@ -734,72 +734,11 @@ sub GetProductInfo
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	リモートホスト(IP)取得関数 - GetRemoteHost
-#	---------------------------------------------
-#	引　数：なし
-#	戻り値：IP、リモホス
-#
-#------------------------------------------------------------------------------------------------------------
-sub GetRemoteHost
-{
-	my $this = shift;
-	
-	my $host = $ENV{'REMOTE_ADDR'};
-	$host = gethostbyaddr(pack('C4', split(/\./, $host)), 2) || $host;
-	
-	return $host;
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
-#	ID作成関数 - MakeID
+#	ID作成関数 - MakeIDnew
 #	--------------------------------------
-#	引　数：$server : サーバー名
-#			$client : 端末
-#			$koyuu  : 端末固有識別子
-#			$bbs    : 板名
-#			$column : ID桁数
 #	戻り値：ID
 #
 #------------------------------------------------------------------------------------------------------------
-sub MakeID
-{
-	my $this = shift;
-	my ($server, $client, $koyuu, $bbs, $column) = @_;
-	
-	# 種の生成
-	my $uid;
-	if ($client & ($ZP::C_P2 | $ZP::C_MOBILE)) {
-		# 端末番号 もしくは p2-user-hash の上位3文字を取得
-		#$uid = main::GetProductInfo($this, $ENV{'HTTP_USER_AGENT'}, $ENV{'REMOTE_HOST'});
-		if (length($koyuu) > 8) {
-			$uid = substr($koyuu, 0, 2) . substr($koyuu, -6, 3);
-		}
-		else {
-			$uid = substr($koyuu, 0, 5);
-		}
-	}
-	else {
-		# IPを分解
-		my @nums = split(/\./, ($ENV{'REMOTE_ADDR'}));
-		# 上位3つの1桁目取得
-		$uid = substr($nums[3], -2) . substr($nums[2], -2) . substr($nums[1], -1);
-	}
-	
-	my @times = localtime time;
-	
-	# サーバー名・板名を結合する
-	$uid .= substr(crypt($server, $times[4]), 2, 1) . substr(crypt($bbs, $times[4]), 2, 2);
-	
-	# 桁を設定
-	$column *= -1;
-	
-	# IDの生成
-	my $ret = substr(crypt(crypt($uid, $times[5]), $times[3] + 31), $column);
-	$ret =~ s/\./+/g;
-	
-	return $ret;
-}
 sub MakeIDnew {
     my $this = shift;
     my ($Sys, $column,$sid,$chid) = @_;
