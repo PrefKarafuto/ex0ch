@@ -507,8 +507,6 @@ sub PrintOtherSetting
 	$cookieExp	= $SYS->Get('COOKIE_EXPIRY');
 	$nin_exp	= $SYS->Get('NIN_EXPIRY');
 	$pass_exp	= $SYS->Get('PASS_EXPIRY');
-	$admCap		= $SYS->Get('ADMINCAP');
-	$srcCap		= $SYS->Get('SEARCHCAP');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
@@ -517,8 +515,6 @@ sub PrintOtherSetting
 	$pathQuery	= ($pathKind == 1 ? 'checked' : '');
 	$bbsget		= ($BBSGET == 1 ? 'checked' : '');
 	$CSPSet		= ($CSP == 1 ? 'checked' : '');
-	$admCap		= ($admCap == 1 ? 'checked' : '');
-	$srcCap		= ($srcCap == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
 	
@@ -559,14 +555,6 @@ sub PrintOtherSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック関連</td></tr>\n");
 	$Page->Print("<tr><td>更新チェックの間隔　※開発移行につき無効</td>");
 	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\" disabled>日(0でチェック無効)</td></tr>\n");
-
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Captchaを課すCGI</td></tr>\n");
-	$Page->Print("<tr><td>admin.cgi</td>");
-	$Page->Print("<td><input type=checkbox name=ADMINCAP $admCap value=on></td></tr>\n");
-	$Page->Print("<tr><td>search.cgi</td>");
-	$Page->Print("<td><input type=checkbox name=SEARCHCAP $srcCap value=on></td></tr>\n");
-	$Page->Print("<tr><td>bbs.cgi</td>");
-	$Page->Print("<td>各掲示板の設定で有効化してください</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Cookie関連</td></tr>\n");
 	$Page->Print("<tr><td>Cookie有効期限</td>");
@@ -684,12 +672,16 @@ sub PrintPlusSecSetting
 	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
 	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
 	my $Proxy_apikey  = $SYS->Get('PROXYCHECK_APIKEY');
+	my $admCap		= $SYS->Get('ADMINCAP');
+	my $srcCap		= $SYS->Get('SEARCHCAP');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
 	$torexit	= ($TOREXIT == 1 ? 'checked' : '');
 	$s5h		= ($SYS->Get('DNSBL_S5H') == 1 ? 'checked' : '');
 	$dronebl	= ($SYS->Get('DNSBL_DRONEBL') == 1 ? 'checked' : '');
+	$admCap		= ($admCap == 1 ? 'checked' : '');
+	$srcCap		= ($srcCap == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -740,6 +732,14 @@ sub PrintPlusSecSetting
 	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
 	$Page->Print("<tr><td><a href=\"https://proxycheck.io/api/\">ProxyCheck</a> APIキー</td>");
 	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"$Proxy_apikey\"></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Captchaを課すCGI</td></tr>\n");
+	$Page->Print("<tr><td>admin.cgi</td>");
+	$Page->Print("<td><input type=checkbox name=ADMINCAP $admCap value=on></td></tr>\n");
+	$Page->Print("<tr><td>search.cgi</td>");
+	$Page->Print("<td><input type=checkbox name=SEARCHCAP $srcCap value=on></td></tr>\n");
+	$Page->Print("<tr><td>bbs.cgi</td>");
+	$Page->Print("<td>各掲示板の設定で有効化してください</td></tr>\n");
 
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -1163,8 +1163,6 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('PASS_EXPIRY', $Form->Get('PASS_EXPIRY'));
 	$SYSTEM->Set('COOKIE_EXPIRY', $Form->Get('COOKIE_EXPIRY'));
 	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
-	$SYSTEM->Set('ADMINCAP', ($Form->Equal('ADMINCAP', 'on') ? 1 : 0));
-	$SYSTEM->Set('SEARCHCAP', ($Form->Equal('SEARCHCAP', 'on') ? 1 : 0));
 	
 	$SYSTEM->Save();
 	
@@ -1283,6 +1281,8 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
 	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));
 	$SYSTEM->Set('PROXYCHECK_APIKEY', $Form->Get('PROXYCHECK_APIKEY'));
+	$SYSTEM->Set('ADMINCAP', ($Form->Equal('ADMINCAP', 'on') ? 1 : 0));
+	$SYSTEM->Set('SEARCHCAP', ($Form->Equal('SEARCHCAP', 'on') ? 1 : 0));
 	$SYSTEM->Save();
 	
 	{
@@ -1295,6 +1295,8 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 Captchaサイトキー：' . $SYSTEM->Get('CAPTCHA_SITEKEY');
 		push @$pLog, '　　　 Captchaシークレットキー：' . $SYSTEM->Get('CAPTCHA_SECRETKEY');
 		push @$pLog, '　　　 ProxyChecker APIキー：' . $SYSTEM->Get('PROXYCHECK_APIKEY');
+		push @$pLog, '　　　 admin.cgiへのCaptcha：' . $SYSTEM->Get('ADMINCAP');
+		push @$pLog, '　　　 search.cgiへのCaptcha：' . $SYSTEM->Get('SEARCHCAP');
 	}
 	return 0;
 }
