@@ -1725,6 +1725,7 @@ sub Ninpocho
 
 	# セッションから書き込み数を取得
 	my $count = $Ninja->Get('count') || 0;
+	my $today_count = $Ninja->Get('today_count') || 0;
 	my $thread = $Ninja->Get('thread_count') || 0; 
 
     # 書き込んだ時間を取得
@@ -1734,21 +1735,27 @@ sub Ninpocho
 	# セッションから前回レベルアップしたときの時間を取得
 	my $lvUpTime = $Ninja->Get('lvuptime') || $time23h;
 
-    # 書き込み数をカウント
-	$count++;
-
 	# レベルの上限
 	my $lvLim = $Sys->Get('NINLVMAX');
 
     # 前回のレベルアップから23時間以上経過していればレベルアップ
-    if ($resTime >= $lvUpTime && $ninLv < $lvLim) {
+    if ($resTime >= $lvUpTime && $ninLv < $lvLim) {		# && $ninLv == $today_count
       $ninLv++;
       $lvUpTime = $time23h;
     }
 
+	# 書き込み数をカウント
+	$count++;
+	unless(int(time/(60*60*24)) - int($Ninja->Get('last_wtime')/(60*60*24))){
+		$today_count++;
+	}else{
+		$today_count = 1;
+	}
+
 	# セッションに記録
 	if ($Ninja) {
 		$Ninja->Set('count', $count);
+		$Ninja->Set('today_count', $today_count);
 		$Ninja->Set('ninLv', $ninLv);
 		$Ninja->Set('lvuptime', $lvUpTime);
 
