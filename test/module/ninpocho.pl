@@ -194,6 +194,16 @@ sub Get
     
     return $val;
 }
+sub isNew
+{
+    my $this = shift;
+    return $this->{'CREATE_FLAG'};
+}
+sub isLoad
+{
+    my $this = shift;
+    return $this->{'LOAD_FLAG'};
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #   忍法帖情報設定
