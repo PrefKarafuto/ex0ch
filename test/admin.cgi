@@ -34,7 +34,9 @@ sub AdminCGI
 	# IP
 	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
 	require './module/data_utils.pl';
-	$ENV{'REMOTE_HOST'}  = DATA_UTILS::reverse_lookup($ENV{'REMOTE_ADDR'});
+	if(!defined $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq '') {
+		$ENV{'REMOTE_HOST'} = DATA_UTILS->new->reverse_lookup($ENV{'REMOTE_ADDR'});
+	}
 	
 	# システム初期設定
 	my $CGI = {};
