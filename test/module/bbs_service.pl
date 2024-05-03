@@ -584,7 +584,7 @@ HTML
 	# footの表示
 	$Caption->Load($Sys, 'FOOT');
 	$Caption->Print($Page, $Set);
-	$Page->Print("<div align=\"center\"><a href=\"./SETTING.TXT\">SETTING.TXT</div>");
+	$Page->Print("<div align=\"center\"><a href=\"./SETTING.TXT\">SETTING.TXT</a></div>");
 
 	my ($sec,$min,$hour,$day,$mon,$year) = localtime($Sys->Get('LASTMOD'));
 	$mon ++;
