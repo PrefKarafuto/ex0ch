@@ -373,7 +373,6 @@ sub InitSettingData
 		'BBS_SPAMKILLI_POINT'	=> 10,
 
         'BBS_IMGTAG'            => '',
-        'BBS_IMGUR'             => '',
         'BBS_TWITTER'           => '',
         'BBS_MOVIE'             => '',
         'BBS_URL_TITLE'         => '',

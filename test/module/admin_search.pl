@@ -152,6 +152,7 @@ sub Run
     return $this->{'RESULTSET'};
 }
 
+# セッションIDから書き込み検索
 sub Run_LogS
 {
     my $this = shift;
@@ -166,6 +167,16 @@ sub Run_LogS
         $this->{'SYS'}->Set('KEY', $key);
         $this->LogSearch($ip_addr, $host, $ua ,$sid);
     }
+    return $this->{'RESULTSET'};
+}
+
+# キーとワードから忍法帖検索
+sub Run_LogN
+{
+    my $this = shift;
+    my ($key,$word,$f) = @_;
+    $this->{'RESULTSET'} = [] if ($f);
+    $this->NinSearch($key, $word,);
     return $this->{'RESULTSET'};
 }
 #------------------------------------------------------------------------------------------------------------
@@ -308,6 +319,45 @@ sub LogSearch
             $DAT->Close();
         }
     }
+}
+sub NinSearch
+{
+    my $this = shift;
+    my ($key, $word, $sid) = @_;
+    my $ninDir = ".".$this->{'SYS'}->Get('INFO')."/.ninpocho/";
+    my $pResultSet = $this->{'RESULTSET'};
+
+    if($sid){
+        if(length($sid) == 32){
+            my $set = glob($ninDir.'cgisess_'.$sid);
+            $set =~ s/${ninDir}cgisess_//m;
+            @$pResultSet = $set;            
+        }else{
+            my $allSid = [];
+            @$allSid = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
+            foreach my $id (@$allSid){
+                $id =~ s/${ninDir}cgisess_//m;
+                if(crypt($id,$id) eq $sid){
+                    push @$pResultSet,$id;
+                }
+            }
+        }
+    }else{
+        my $allSid = [];
+        @$allSid = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
+        if($key){
+            require './module/ninpocho.pl';
+            my $Ninja = NINPOCHO->new;
+            foreach my $id (@$allSid){
+                $id =~ s/${ninDir}cgisess_//m;
+                $Ninja->LoadOnly($this->{'SYS'},$id);
+                if($Ninja->Get($key) =~ /\Q$word\E/i){
+                    push @$pResultSet,$id;
+                }
+            }
+        }
+    }
+    return $pResultSet;
 }
 #============================================================================================================
 #   Module END

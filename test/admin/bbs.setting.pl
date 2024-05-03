@@ -333,7 +333,7 @@ sub PrintBaseSetting
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">DAT落ちスレッド保存先</td><td>");
 	$Page->Print("<select name=BBS_KAKO required>");
-	$Page->Print("<option value=\"\">プール(外部からのアクセス不可)");
+	$Page->Print("<option value=\"\">プール(外部からのアクセス不可)</option>");
 	foreach my $listid (@bbsSet) {
 		next if ($BBS->Get('DIR', $listid) eq $Sys->Get('BBS'));
 		$category	= $Category->Get('NAME', $BBS->Get('CATEGORY', $listid));
@@ -618,9 +618,9 @@ sub PrintLimitSetting
 	$Page->Print("<input type=text size=10 name=BBS_RES_MAX value=\"$setResMax\"></td></tr>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">掲示板書き込み制限</td><td><select name=BBS_READONLY>");
-	$Page->Print("<option value=on $selROon>読取専用");
-	$Page->Print("<option value=caps $selROcaps>キャップのみ可能");
-	$Page->Print("<option value=none $selROnone>書き込み可能");
+	$Page->Print("<option value=on $selROon>読取専用</option>");
+	$Page->Print("<option value=caps $selROcaps>キャップのみ可能</option>");
+	$Page->Print("<option value=none $selROnone>書き込み可能</option>");
 	$Page->Print("</select></td>");
 	$Page->Print("<td class=\"DetailTitle\">DNSBLチェック</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_DNSBL_CHECK $setDNSBL value=on $isDNSBL>$setInfo</td></tr>");
@@ -635,11 +635,11 @@ sub PrintLimitSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
 	$Page->Print("<td class=\"DetailTitle\">逆引き不可のIPからの投稿を制限</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_REVERSE_CHECK value=on $setReverse></td></tr>");
+	$Page->Print("<input type=checkbox name=BBS_REVERSE_CHECK value=on $setReverse>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">プロキシ規制</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK value=on $setProxy>$setInfo2</td>");
 	$Page->Print("<td class=\"DetailTitle\">???</td><td>");
-	$Page->Print("<input type=checkbox name= value=on disabled></td></tr>");
+	$Page->Print("<input type=checkbox name= value=on disabled>有効</td></tr>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -768,7 +768,7 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">不落（!nopool）</td><td>");
 	$Page->Print("<input type=checkbox name=NOPOOL value=262144 $setnopool>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninLv:[レベル]）</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninlv:[レベル]）</td><td>");
 	$Page->Print("<input type=checkbox name=NINLV value=8192 $setninLv>有効</td></tr>");
 
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -919,7 +919,6 @@ sub PrintOtherSetting
 	my $setConfirm		= $Setting->Get('BBS_NEWSUBJECT');
 	my $setWeek			= $Setting->Get('BBS_YMD_WEEKS');
 	my $setTripColumn	= $Setting->Get('BBS_TRIPCOLUMN');
-	my $setImgur    	= $Setting->Get('BBS_IMGUR');
 	my $setTwitter    	= $Setting->Get('BBS_TWITTER');
 	my $setMovie    	= $Setting->Get('BBS_MOVIE');
 	my $setURLtoTitle   = $Setting->Get('BBS_URL_TITLE');
@@ -986,13 +985,10 @@ sub PrintOtherSetting
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
     
-    $Page->Print("<tr><td rowspan=6 class=\"DetailTitle\"></td><td rowspan=6>");
+    $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("</td>");
 	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
-	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">Imgur 埋め込み表示</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_IMGUR value=on $setImgur>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">X(旧Twitter) 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setTwitter>有効</td></tr>");
@@ -1426,7 +1422,6 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_SLIP', $Form->Get('BBS_SLIP'));
 	$Setting->Set('BBS_NINJA', ($Form->Equal('BBS_NINJA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_HIDENUSI', ($Form->Equal('BBS_HIDENUSI', 'on') ? 'checked' : ''));
-    $Setting->Set('BBS_IMGUR', ($Form->Equal('BBS_IMGUR', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
     $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));

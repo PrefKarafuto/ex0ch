@@ -232,7 +232,6 @@ sub PrintReadHead
  <link rel="icon" href="../../../../$bbspath/$favicon">
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
-	$Page->Print('<script src="//s.imgur.com/min/embed.js" charset="utf-8"></script>') if ($Set->Get('BBS_IMGUR'));
 	if($Set->Get('BBS_CAPTCHA')){
 		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
 		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
@@ -616,7 +615,6 @@ sub PrintResponse
 	my $aa='';
 	
 	# URLと引用個所の適応
-    $Conv->ConvertImgur(\$elem[3])if($Set->Get('BBS_IMGUR') eq 'checked');
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
@@ -669,83 +667,6 @@ HTML
 	$Page->Print("：$elem[2]</dt>\n");
 	$Page->Print("  <dd $aa>$elem[3]<br><br></dd>\n");
 	}
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
-#	read.cgi探索画面表示
-#	-------------------------------------------------------------------------------------
-#	@param	$CGI
-#	@param	$Page
-#	@return	なし
-#
-#------------------------------------------------------------------------------------------------------------
-sub PrintReadSearch
-{
-	my ($CGI, $Page) = @_;
-	
-	return if (PrintDiscovery($CGI, $Page));
-	
-	my $Sys = $CGI->{'SYS'};
-	my $Set = $CGI->{'SET'};
-	my $Conv = $CGI->{'CONV'};
-	my $Dat = $CGI->{'DAT'};
-	
-	my $nameCol = $Set->Get('BBS_NAME_COLOR');
-	my $var = $Sys->Get('VERSION');
-	my $cgipath = $Sys->Get('CGIPATH');
-	my $bbs = $Sys->Get('BBS_ABS') . '/';
-	my $server = $Sys->Get('SERVER');
-	
-	# エラー用datの読み込み
-	$Dat->Load($Sys, $Conv->MakePath('.'.$Sys->Get('DATA').'/2000000000.dat'), 1);
-	my $size = $Dat->Size();
-	
-	# 存在しないので404を返す。
-	$Page->Print("Status: 404 Not Found\n");
-	
-	PrintReadHead($CGI, $Page);
-	
-	$Page->Print("\n<div style=\"margin-top:1em;\">\n");
-	$Page->Print(" <a href=\"$bbs\">■掲示板に戻る■</a>\n");
-	$Page->Print("</div>\n");
-	
-	$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
-	$Page->Print("<h1 style=\"color:red;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">指定されたスレッドは存在しません</h1>\n\n");
-	
-	$Page->Print("\n<dl class=\"thread\">\n");
-	
-	for my $i (0 .. $size - 1) {
-		my $pDat = $Dat->Get($i);
-		my @elem = split(/<>/, $$pDat);
-		$Page->Print(' <dt>' . ($i + 1) . ' ：');
-		
-		# メール欄有り
-		if ($elem[1] eq '') {
-			$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
-		}
-		# メール欄無し
-		else {
-			$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
-		}
-		$Page->Print("：$elem[2]</dt>\n  <dd>$elem[3]<br><br></dd>\n");
-	}
-	$Page->Print("</dl>\n\n");
-	
-	$Dat->Close();
-	
-	$Page->Print("<hr>\n\n");
-	
-	$Page->Print(<<HTML);
-<div style="margin-top:4em;">
-READ.CGI - $var<br>
-<a href="https://github.com/PrefKarafuto/ex0ch/">EXぜろちゃんねる</a>
-</div>
-
-</body>
-</html>
-HTML
-	
 }
 
 #------------------------------------------------------------------------------------------------------------

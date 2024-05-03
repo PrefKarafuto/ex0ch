@@ -43,10 +43,9 @@ sub is_denied_ip {
     return exists $denied_ips->{$ipAddr} ? 1 : 0;
 }
 
-
 # 匿名化判定
 sub is_anonymous {
-    my ($isFwifi, $country, $remoho, $ipAddr, $infoDir) = @_;
+    my ($isFwifi, $country, $remoho, $ipAddr) = @_;
     my $isAnon = 0;
 
     if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
@@ -96,7 +95,6 @@ sub is_public_wifi {
 
     return $isFwifi;
 }
-
 
 # モバイル判定
 sub is_mobile {
@@ -324,17 +322,14 @@ sub is_mobile {
 #------------------------------------------------------------------------------------------------------------
 #	BBS_SLIP生成
 #	-------------------------------------------------------------------------------------
-#	@param	$bbsslip	slip種別(/(undef)/vvv/vvvv/vvvvv/vvvvvv/)
-#	@param	$infoDir	infoディレクトリ
 #	@param	$chid		SLIP_ID変更用
-#	@param	$checkKey	プロキシチェックAPI問い合わせ用
 #	@return	$slip_result
 #	@return	$idEnd		ID末尾
 #------------------------------------------------------------------------------------------------------------
 sub BBS_SLIP
 {
 	my $this = shift;
-	my ($Sys, $bbsslip, $chid) = @_;
+	my ($Sys, $chid) = @_;
 	my ($slip_ip, $slip_remoho, $slip_ua);
 
 	my $ipAddr = $ENV{'REMOTE_ADDR'};
@@ -343,17 +338,18 @@ sub BBS_SLIP
 	my $infoDir = $Sys->Get('INFO');
 
 	# 各種判定
-	my $country = $Sys->Get('IPCOUNTRY') ne 'abroad' ? 'JP': 'ｶﾞｲｺｰｸ';
-	my $ismobile = is_mobile($country,$ipAddr,$remoho);
-	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);
-	my $isProxy = $Sys->Get('ISPROXY');
-	my $isAnon = is_anonymous($isFwifi,$country,$ipAddr,$remoho,$infoDir);
+	my $country = $Sys->Get('IPCOUNTRY') ne 'abroad' ? 'JP': 'ｶﾞｲｺｰｸ';		# post_service側での判定を流用
+	my $isProxy = $Sys->Get('ISPROXY');										# post_service側での判定を流用
+	my $ismobile = is_mobile($country,$ipAddr,$remoho);						# モバイル判定
+	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);					# 公衆wifi判定
+	my $isAnon = is_anonymous($isFwifi,$country,$ipAddr,$remoho);			# 匿名化判定
+	#my $isDenied = is_denied_ip($ipAddr,$infoDir);							# 拒否IP判定
 
 	# bbs_slipに使用する文字
 	my @slip_chars = (0..9, 'a'..'z', 'A'..'Z', '.', '/');
 
 	# 一週間で文字列変更
-	my $week_number = int((time + 172800) / (60 * 60 * 24 * 7));# 水曜9時に
+	my $week_number = int((time + 172800) / (60 * 60 * 24 * 7));	# 水曜9時に変わる
 	my ($chnum1,$chnum2,$chnum3,$chnum4);
 	srand($week_number);
 	$chnum1 = int(rand(1000000));
@@ -370,9 +366,13 @@ sub BBS_SLIP
 	# slip_ip生成
 	my $fo = '';
 	my $so = '';
-	$ipAddr =~ /^(\d{1,4})\.(\d{1,4})/;
-	$fo = $1 + $chnum1 + $chid;
-	$so = $2 + $chnum2 + $chid;
+	if ($ipAddr =~ /^(\d{1,3})\.(\d{1,3})/) {
+		$fo = $1 + $chnum1 + $chid;
+		$so = $2 + $chnum2 + $chid;
+	} elsif ($ipAddr =~ /^([\da-fA-F]{1,4}):([\da-fA-F]{1,4}):([\da-fA-F]{1,4}):([\da-fA-F]{1,4})/) {
+		$fo = hex($1) + hex($2) + $chnum1 + $chid;
+		$so = hex($3) + hex($4) + $chnum2 + $chid;
+	}
 
 	my $ip_char1 = $slip_chars[$fo % 64];
 	my $ip_char2 = $slip_chars[$so % 64];
@@ -441,9 +441,15 @@ sub BBS_SLIP
 
 	# 串判定
 	if ($isProxy) {
-		$idEnd = '8';
-		$slip_nickname = 'ｸｼｻﾞｼ';	
-		$slip_nickname .= $fixed_nickname_end;
+		if($isProxy eq 'proxy'){
+			$idEnd = '8';
+			$slip_nickname = 'ｸｼｻﾞｼ';	
+			$slip_nickname .= $fixed_nickname_end;
+		}else{
+			$idEnd = '8';
+			$slip_nickname = 'ﾌﾞﾛｯｸ';	
+			$slip_nickname .= $fixed_nickname_end;
+		}
 	}else{
 		# 逆引き判定
 		if (!$slip_remoho || $ipAddr eq $remoho) { # 逆引きできない場合
@@ -545,352 +551,21 @@ sub BBS_SLIP
 				}
 			}
 		}
-	}
 
-	# slip文字列とID末尾
-	my $slip_result = '';
-	if($bbsslip eq 'vvv'){
-		$slip_result = ${slip_nickname};
-	}
-	elsif($bbsslip eq 'vvvv'){
-		$slip_result = "${slip_nickname} [${ipAddr}]";
-	}
-	elsif($bbsslip eq 'vvvvv'){
-		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
-	}
-	elsif($bbsslip eq 'vvvvvv'){
-		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ipAddr}]";
-	}
-	# 匿名環境の場合は末尾が"8"になる
-	return $slip_result,$idEnd;
-}
-
-# 旧式
-sub BBS_SLIP_OLD
-{
-	my ($ip_addr, $remoho, $ua, $bbsslip) = @_;
-	my ($slip_ip, $slip_remoho, $slip_ua);
-
-	#bbs_slipに使用する文字
-	my @slip_char = (0..9, "a".."z", "A".."Z", ".", "/");
-	#slip_ip生成
-	$ip_addr =~ /^(\d{1,4})\.(\d{1,4})/;
-	my $ip_char1 = $slip_char[$1 % 64];
-	my $ip_char2 = $slip_char[$2 % 64];
-	$slip_ip = $ip_char1 . $ip_char2;
-
-	#slip_remoho生成
-	if ($remoho eq "") {
-		$slip_remoho = "none";
-	}else {
-		$remoho =~ /^([a-zA-Z]+)[\d\-\.]*([a-zA-Z][a-zA-Z\d\.\-]+)$/;
-		my $remoho_name = "$1 $2";
-		my $remoho_dig = md5_hex($remoho_name);
-		$remoho_dig =~ /^(.{2})(.{2})/;
-		my $remoho_char1 = $slip_char[hex($1) % 64];
-		my $remoho_char2 = $slip_char[hex($2) % 64];
-		$slip_remoho = $remoho_char1 . $remoho_char2;
-	}
-
-	#slip_ua生成
-	my $ua_dig = md5_hex($ua);
-	$ua_dig =~ /^(.{2})(.{2})(.{2})(.{2})/;
-	my $ua_char1 = $slip_char[hex($1) % 64];
-	my $ua_char2 = $slip_char[hex($2) % 64];
-	my $ua_char3 = $slip_char[hex($3) % 64];
-	my $ua_char4 = $slip_char[hex($4) % 64];
-	$slip_ua = $ua_char1 . $ua_char2 . $ua_char3 . $ua_char4;
-
-
-	#スマホ・タブレット判定
-	my $fixed_nickname_end = "";
-	my $mobile_nickname_end = "";
-	if ($ua =~ /.*(iphone|ipad|android|mobile).*/i) {
-		$fixed_nickname_end = "W";
-		$mobile_nickname_end = "M";
-	}else {
-		$mobile_nickname_end = "T";
-	}
-
-
-	#bbs_slipの初期設定
-	my $slip_id = "";
-	my $slip_nickname = "ﾜｯﾁｮｲ${fixed_nickname_end}";
-	my $slip_aa = $slip_ip;
-	my $slip_bb = $slip_remoho;
-	my $slip_cccc = $slip_ua;
-
-
-	#モバイル回線判定用のリモホ・事業者名・IP
-	my @mobile_remoho = (
-		".*\\.openmobile\\.ne\\.jp",
-		".*\\.panda-world\\.ne\\.jp",
-		"KD027.*\\.au-net\\.ne\\.jp",
-		"KD036.*\\.au-net\\.ne\\.jp",
-		"KD106.*\\.au-net\\.ne\\.jp",
-		"KD111.*\\.au-net\\.ne\\.jp",
-		"KD119.*\\.au-net\\.ne\\.jp",
-		"KD182.*\\.au-net\\.ne\\.jp",
-		".*\\.msa\\.spmode\\.ne\\.jp",
-		".*\\.msb\\.spmode\\.ne\\.jp",
-		".*\\.msc\\.spmode\\.ne\\.jp",
-		".*\\.msd\\.spmode\\.ne\\.jp",
-		".*\\.mse\\.spmode\\.ne\\.jp",
-		".*\\.msf\\.spmode\\.ne\\.jp",
-		".*\\.fix\\.mopera\\.net",
-		".*\\.air\\.mopera\\.net",
-		".*\\.vmobile\\.jp",
-		".*\\.bmobile\\.ne\\.jp",
-		".*\\.mineo\\.jp",
-		".*omed01\\.tokyo\\.ocn\\.ne\\.jp",
-		".*omed01\\.osaka\\.ocn\\.ne\\.jp",
-		".*mobac01\\.tokyo\\.ocn\\.ne\\.jp",
-		".*mobac01\\.osaka\\.ocn\\.ne\\.jp",
-		".*\\.mvno\\.rakuten\\.jp",
-		".*\\.nttpc\\.ne\\.jp",
-		"UQ.*au-net\\.ne\\.jp",
-		"dcm\\d(?:-\\d+){4}\\.tky\\.mesh\\.ad\\.jp",
-		"neoau\\d(?:-\\d+){4}\\.tky\\.mesh\\.ad\\.jp",
-		".*\\.ap\\.dream\\.jp",
-		".*\\.ap\\.mvno\\.net",
-		"fenics\\d+\\.wlan\\.ppp\\.infoweb\\.ne\\.jp"
-	);
-	my @mobile_whois = (
-		"Plus One marketing",
-		"LogicLinks",
-		"SORASIM"
-	);
-	my @rakuten_mno_ip = (
-		"101\\.102\\.(?:\\d|[1-5]\\d|6[0-3])\\.\\d{1,3}",
-		"103\\.124\\.[0-3]\\.\\d{1,3}",
-		"110\\.165\\.(?:1(?:2[89]|[3-9]\\d)|2\\d{2})\\.\\d{1,3}",
-		"119\\.30\\.(?:19[2-9]|2\\d{2})\\.\\d{1,3}",
-		"119\\.31\\.1(?:2[89]|[3-5]\\d)\\.\\d{1,3}",
-		"133\\.106\\.(?:1(?:2[89]|[3-9]\\d)|2\\d{2})\\.\\d{1,3}",
-		"133\\.106\\.(?:1[6-9]|2\\d|3[01])\\.\\d{1,3}",
-		"133\\.106\\.(?:3[2-9]|[45]\\d|6[0-3])\\.\\d{1,3}",
-		"133\\.106\\.(?:6[4-9]|[7-9]\\d|1(?:[01]\\d|2[0-7]))\\.\\d{1,3}",
-		"133\\.106\\.(?:[89]|1[0-5])\\.\\d{1,3}",
-		"157\\.192(?:\\.\\d{1,3}){2}",
-		"193\\.114\\.(?:19[2-9]|2\\d{2})\\.\\d{1,3}",
-		"193\\.114\\.(?:3[2-9]|[45]\\d|6[0-3])\\.\\d{1,3}",
-		"193\\.114\\.(?:6[4-9]|[78]\\d|9[0-5])\\.\\d{1,3}",
-		"193\\.115\\.(?:\\d|[12]\\d|3[01])\\.\\d{1,3}",
-		"193\\.117\\.(?:[9][6-9]|1(?:[01]\\d|2[0-7]))\\.\\d{1,3}",
-		"193\\.118\\.(?:\\d|[12]\\d|3[01])\\.\\d{1,3}",
-		"193\\.118\\.(?:6[4-9]|[78]\\d|9[0-5])\\.\\d{1,3}",
-		"193\\.119\\.(?:1(?:2[89]|[3-9]\\d)|2\\d{2})\\.\\d{1,3}",
-		"193\\.82\\.1(?:[6-8]\\d|9[01])\\.\\d{1,3}",
-		"194\\.193\\.2(?:2[4-9]|[34]\\d|5[0-5])\\.\\d{1,3}",
-		"194\\.193\\.(?:6[4-9]|[78]\\d|9[0-5])\\.\\d{1,3}",
-		"194\\.223\\.(?:[9][6-9]|1(?:[01]\\d|2[0-7]))\\.\\d{1,3}",
-		"202\\.176\\.(?:1[6-9]|2\\d|3[01])\\.\\d{1,3}",
-		"202\\.216\\.(?:\\d|1[0-5])\\.\\d{1,3}",
-		"210\\.157\\.(?:19[2-9]|2(?:[01]\\d|2[0-3]))\\.\\d{1,3}",
-		"211\\.133\\.(?:[6-8]\\d|9[01])\\.\\d{1,3}",
-		"211\\.7\\.(?:[9][6-9]|1(?:[01]\\d|2[0-7]))\\.\\d{1,3}",
-		"219\\.105\\.1(?:4[4-9]|5\\d)\\.\\d{1,3}",
-		"219\\.105\\.(?:19[2-9]|2\\d{2})\\.\\d{1,3}",
-		"219\\.106\\.(?:\\d{1,2}|1(?:[01]\\d|2[0-7]))\\.\\d{1,3}"
-	);
-
-	#モバイル回線のslip_id
-	my @mobile_ids = (
-		"Sr",
-		"Sp",
-		"Sa",
-		"Sd",
-		"SD",
-		"MM"
-	);
-
-	#モバイル回線のニックネーム
-	my @mobile_nicknames = (
-		"ｵｯﾍﾟｹ${mobile_nickname_end}",
-		"ｻｻｸｯﾃﾛ${mobile_nickname_end}",
-		"ｱｳｱｳｱｰ${mobile_nickname_end}",
-		"ｱｳｱｳｲｰ${mobile_nickname_end}",
-		"ｱｳｱｳｳｰ${mobile_nickname_end}",
-		"ｱｳｱｳｴｰ${mobile_nickname_end}",
-		"ｱｳｱｳｵｰ${mobile_nickname_end}",
-		"ｱｳｱｳｶｰ${mobile_nickname_end}",
-		"ｽﾌﾟｰ${mobile_nickname_end}",
-		"ｽﾌﾟｯｯ${mobile_nickname_end}",
-		"ｽｯﾌﾟ${mobile_nickname_end}",
-		"ｽｯｯﾌﾟ${mobile_nickname_end}",
-		"ｽﾌﾟﾌﾟ${mobile_nickname_end}",
-		"ｽﾌｯ${mobile_nickname_end}",
-		"ﾍﾟﾗﾍﾟﾗ${mobile_nickname_end}",
-		"ｴｱﾍﾟﾗ${mobile_nickname_end}",
-		"ﾌﾞｰｲﾓ${mobile_nickname_end}",
-		"ﾍﾞｰｲﾓ${mobile_nickname_end}",
-		"ｵｲｺﾗﾐﾈｵ${mobile_nickname_end}",
-		"ﾜﾝﾄﾝｷﾝ${mobile_nickname_end}",
-		"ﾜﾝﾐﾝｸﾞｸ${mobile_nickname_end}",
-		"ﾊﾞｯﾄﾝｷﾝ${mobile_nickname_end}",
-		"ﾊﾞｯﾐﾝｸﾞｸ${mobile_nickname_end}",
-		"ﾗｸｯﾍﾟﾍﾟ${mobile_nickname_end}",
-		"ﾗｸﾗｯﾍﾟ${mobile_nickname_end}",
-		"ｱｳｱｳｸｰ${mobile_nickname_end}",
-		"ﾄﾞｺｸﾞﾛ${mobile_nickname_end}",
-		"ﾄﾞﾅﾄﾞﾅｰ${mobile_nickname_end}",
-		"ﾄﾝﾓｰ${mobile_nickname_end}",
-		"ｱﾒ${mobile_nickname_end}",
-		"ﾆｬﾌﾆｬ${mobile_nickname_end}",
-		"ｲﾙｸﾝ${mobile_nickname_end}",
-		"ｹﾞﾏｰ${mobile_nickname_end}",
-		"ﾌﾘｯﾃﾙ${mobile_nickname_end}"
-	);
-
-	#公衆Wi-Fiのリモホ・ネットワーク名・IP
-	my @fwifi_remoho = (
-		".*\\.m-zone\\.jp",
-		"\\d+\\.wi-fi\\.kddi\\.com",
-		".*\\.wi-fi\\.wi2\\.ne\\.jp",
-		".*\\.family-wifi\\.jp"
-	);
-	my @fwifi_whois = (
-		"INPLUS-FWIFI",
-		"FON"
-	);
-	my $lawson_ip = "210\\.227\\.19\\.[67]\\d\$";
-	#公衆Wi-FiのID
-	my $fwifi_id = "FF";
-	#公衆Wi-Fiのニックネーム
-	my @fwifi_nicknames = (
-		"ｴﾑｿﾞﾈ${fixed_nickname_end}[公衆]",
-		"ｱｳｳｨﾌ${fixed_nickname_end}[公衆]",
-		"ﾜｲｰﾜ2${fixed_nickname_end}[公衆]",
-		"ﾌｧﾐﾏ${fixed_nickname_end}[公衆]",
-		"ﾌｫﾝﾌｫﾝ${fixed_nickname_end}[公衆]",
-		"ﾏｸﾄﾞ${fixed_nickname_end}[公衆]"
-	);
-
-	#逆引き判定
-	if ($slip_remoho eq "none") { #逆引きできない場合
-		my $isunknown = "yes";
-		my $res = whois($ip_addr);
-
-		#モバイル回線判定
-		my $mobile_nickname_idx = -1;
-		for my $name (@mobile_whois) {
-			if ($res =~ /.*${name}.*/) {
-				$slip_id = "MM";
-				$slip_nickname = $mobile_nicknames[$mobile_nickname_idx];
-				$slip_aa = $slip_id;
-				$slip_bb = $slip_ip;
-				$isunknown = "no";
-				last;
-			}
-			$mobile_nickname_idx--;
-		}
-		#楽天モバイル(MNO)判定
-		if ($isunknown eq "yes") {
-			for my $name (@rakuten_mno_ip) {
-				if ($ip_addr =~ /${name}/) {
-					$slip_id = "MM";
-					$slip_nickname = "ﾃﾃﾝﾃﾝﾃﾝM";
-					$slip_aa = $slip_id;
-					$slip_bb = $slip_ip;
-					$isunknown = "no";
-					last;
-				}
-			}
-		}
-
-		#公衆判定
-		if ($isunknown eq "yes") {
-			my $fwifi_nickname_idx = -1;
-			for my $name (@fwifi_whois) {
-				if ($res =~ /.*${name}.*/) {
-					$slip_id = $fwifi_id;
-					$slip_nickname = $fwifi_nicknames[$fwifi_nickname_idx];
-					$slip_aa = $slip_id;
-					$slip_bb = $slip_ip;
-					$isunknown = "no";
-					last;
-				}
-				$fwifi_nickname_idx--;
-			}
-		}
-		#ローソン判定
-		if ($isunknown eq "yes") {
-			if ($ip_addr =~ /${lawson_ip}/) {
-				$slip_id = "FF";
-				$slip_nickname = "ﾛｰｿﾝ${fixed_nickname_end}[公衆]";
-				$slip_aa = $slip_id;
-				$slip_bb = $slip_ip;
-				$isunknown = "no";
-			}
-		}
-
-		#逆引き不可能 ｱﾝﾀﾀﾞﾚ
-		if ($isunknown eq "yes") {
-			$slip_id = "Un";
-			$slip_nickname = "ｱﾝﾀﾀﾞﾚ${fixed_nickname_end}";
+		# ローカル環境
+		if ($ipAddr eq '127.0.0.1'){
+			$slip_id = 'lc';
+			$idEnd = 'l';
+			$slip_nickname = "ﾛｰｶﾙ${fixed_nickname_end}";
 			$slip_aa = $slip_id;
 			$slip_bb = $slip_ip;
 		}
-	}else{ #逆引きできる場合
-		my $ismobile = 0;
-		#モバイル回線判定
-		my $mobile_id_idx = 0;
-		my $mobile_nickname_idx = 0;
-		for my $name (@mobile_remoho) {
-			if ($remoho =~ /^${name}$/) {
-				$slip_id = $mobile_ids[$mobile_id_idx];
-				$slip_nickname = $mobile_nicknames[$mobile_nickname_idx];
-				$slip_aa = $slip_id;
-				$slip_bb = $slip_ip;
-				$ismobile = 1;
-				last;
-			}
-			if ($mobile_id_idx < 2 || $mobile_nickname_idx =~ /^(7|9|15)$/) {
-				$mobile_id_idx++;
-			}
-			$mobile_nickname_idx++;
-		}
-
-		#公衆判定
-		if ($ismobile == 0) {
-			my $fwifi_nickname_idx = 0;
-			for my $name (@fwifi_remoho) {
-				if ($remoho =~ /^${name}$/) {
-					$slip_id = $fwifi_id;
-					$slip_nickname = $fwifi_nicknames[$fwifi_nickname_idx];
-					$slip_aa = $slip_id;
-					$slip_bb = $slip_ip;
-					last;
-				}
-				$fwifi_nickname_idx++;
-			}
-		}
-
-  #社畜判定
-  if ($ismobile == 0) {
-    if ($remoho =~ /^.+\.co\.jp$/) {
-      $slip_nickname = "ｼｬﾁｰｸ${fixed_nickname_end}";
-    }
-  }
 	}
 
-	#bbs_slipを生成
-	my $slip_result = '';
-	if($bbsslip eq 'vvv'){
-		$slip_result = ${slip_nickname};
-	}
-	elsif($bbsslip eq 'vvvv'){
-		$slip_result = "${slip_nickname} [${ip_addr}]";
-	}
-	elsif($bbsslip eq 'vvvvv'){
-		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
-	}
-	elsif($bbsslip eq 'vvvvvv'){
-		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ip_addr}]";
-	}
-
-	return $slip_result;
+	# 匿名環境の場合は末尾が"8"になる
+	return $slip_nickname,$slip_aa,$slip_bb,$slip_cccc,$idEnd;
 }
+
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================

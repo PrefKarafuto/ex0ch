@@ -16,6 +16,8 @@ use open IO => ':encoding(cp932)';
 use warnings;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
+use JSON;
+use LWP::UserAgent;
 
 BEGIN { use lib './perllib'; }
 
@@ -32,7 +34,7 @@ exit(SearchCGI());
 #------------------------------------------------------------------------------------------------------------
 sub SearchCGI
 {
-	my ($Sys, $Page, $Form, $BBS);
+	my ($Sys, $Page, $Form, $BBS, $capt);
 	
 	require './module/system.pl';
 	require './module/buffer_output.pl';
@@ -46,10 +48,11 @@ sub SearchCGI
 	$Form->DecodeForm(1);
 	$Sys->Init();
 	$BBS->Load($Sys);
+	$capt = Certification_Captcha($Sys,$Form) if $Sys->Get('SEARCHCAP');
 	PrintHead($Sys, $Page, $BBS, $Form);
 	
 	# 検索ワードがある場合は検索を実行する
-	if ($Form->Get('WORD', '') ne '') {
+	if ($Form->Get('WORD', '') ne '' && !$capt) {
 		Search($Sys, $Form, $Page, $BBS);
 	}
 	PrintFoot($Sys, $Page);
@@ -110,7 +113,18 @@ sub PrintHead
  <title>検索＠0chPlus</title>
 
  <link rel="stylesheet" type="text/css" href="./datas/search.css">
+HTML
 
+	if($Sys->Get('SEARCHCAP')){
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
+	}
+	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+	my $classname = $Sys->Get('CAPTCHA');
+	my $Captcha = $Sys->Get('SEARCHCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+
+	$Page->Print(<<HTML);
 </head>
 <!--nobanner-->
 <body>
@@ -202,6 +216,7 @@ HTML
    <tr>
     <td colspan="2" align="right">
     <hr>
+	$Captcha
     <input type="submit" value="検索" style="width:150px;">
     </td>
    </tr>
@@ -455,4 +470,62 @@ sub PrintSystemError
  </tr>
 </table>
 HTML
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	改造版で追加
+#	Captchaの認証
+#	-------------------------------------------------------------------------------------
+#	@param	なし
+#	@return	規制通過なら0を返す
+#			規制チェックにかかったらエラーコードを返す
+#
+#------------------------------------------------------------------------------------------------------------
+sub Certification_Captcha {
+    my ($Sys,$Form) = @_;
+	my ($captcha_response,$url);
+
+	my $captcha_kind = $Sys->Get('CAPTCHA');
+    my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	if($captcha_kind eq 'h-captcha'){
+		$captcha_response = $Form->Get('h-captcha-response');
+    	$url = 'https://api.hcaptcha.com/siteverify';
+	}elsif($captcha_kind eq 'g-recaptcha'){
+		$captcha_response = $Form->Get('g-recaptcha-response');
+    	$url = 'https://www.google.com/recaptcha/api/siteverify';
+	}elsif($captcha_kind eq 'cf-turnstile'){
+		$captcha_response = $Form->Get('cf-turnstile-response');
+    	$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+	}else{
+		return 0;
+	}
+
+	if($captcha_response){
+		my $ua = LWP::UserAgent->new();
+		my $response = $ua->post($url,{
+			secret => $secretkey,
+			response => $captcha_response,
+			remoteip => $ENV{'REMOTE_ADDR'},
+           });
+		if ($response->is_success()) {
+			my $json_text = $response->decoded_content();
+			
+			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
+			my $out = decode_json($json_text);
+			
+			if ($out->{success} eq 'true') {
+				return 0;
+			}else{
+				return 1;
+			}
+		} else {
+			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
+			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
+			# このエラーの場合、スルー
+			return 0;
+		}
+	}else{
+		return 1;
+	}
 }

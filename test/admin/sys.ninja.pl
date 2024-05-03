@@ -72,6 +72,9 @@ sub DoPrint
 	elsif ($subMode eq 'SEARCH') {													# 忍法帖検索
 		PrintNinjaSearch($Page, $Sys, $Form);
 	}
+	elsif ($subMode eq 'NIN_SEARCH') {													# 忍法帖検索
+		PrintNinjaSearchResult($Page, $Sys, $Form);
+	}
 	elsif ($subMode eq 'SID_SEARCH') {												# セッションID検索
 		PrintNinjaSidSearch($Page, $Sys, $Form);
 	}
@@ -336,58 +339,58 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖を確認します。(${SESSION_ATIME}時点)</td></tr>");
 		$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 
-		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description</td></tr>\n");
-		$Page->Print("<tr><td>説明</td>");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description (Key)</td></tr>\n");
+		$Page->Print("<tr><td>説明　(user_desc)</td>");
 		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60></td></tr>\n");
 
-		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖Lv</td><td>$lv</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">前回LvUP日時</td><td>$lvuptime</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成日時</td><td>$SESSION_CTIME</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成時の書き込み</td><td>$newmes</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP</td><td>$c_addr</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST</td><td>$c_host</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA</td><td>$c_ua</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">ユーザー認証</td><td>$is_auth</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最終認証日時</td><td>$auth_time</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最終スレ立て日時</td><td>$last_makethread_time</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時</td><td>$last_wtime</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み</td><td>$last_message</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新IP</td><td>$last_addr</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新HOST</td><td>$last_host</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新UA</td><td>$last_ua</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">パスワード(Hash)</td><td>$password</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新ロード時刻</td><td>$load_time</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">ロード元の忍法帖ID</td><td>$load_from</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">ロード時の書き込み</td><td>$load_message</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードIP</td><td>$load_addr</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードHOST</td><td>$load_host</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA</td><td>$load_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information (Key)</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID　(ninID)</td><td>$ninID</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖Lv　(ninLv)</td><td>$lv</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">前回LvUP日時　(lvuptime)</td><td>$lvuptime</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成日時　(_SESSION_CTIME)</td><td>$SESSION_CTIME</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時の書き込み　(new_message)</td><td>$newmes</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP　(c_addr)</td><td>$c_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST　(c_host)</td><td>$c_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA　(c_ua)</td><td>$c_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ユーザー認証　(auth)</td><td>$is_auth</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最終認証日時　(auth_time)</td><td>$auth_time</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最終スレ立て日時　(last_mthread_time)</td><td>$last_makethread_time</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時　(last_wtime)</td><td>$last_wtime</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み　(last_message)</td><td>$last_message</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新IP　(last_addr)</td><td>$last_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新HOST　(last_host)</td><td>$last_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新UA　(last_ua)</td><td>$last_ua</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">パスワードのハッシュ　(password)</td><td>$password</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロード時刻　(load_time)</td><td>$load_time</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ロード元の忍法帖ID　(load_from)</td><td>$load_from</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">ロード時の書き込み　(load_message)</td><td>$load_message</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードIP　(load_addr)</td><td>$load_addr</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードHOST　(load_host)</td><td>$load_host</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA　(load_ua)</td><td>$load_ua</td></tr>\n");
 
-		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">書き込み数</td><td>$count</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数</td><td>$thread_count</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数</td><td>$load_count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics (Key)</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">書き込み数　(count)</td><td>$count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数　(thread_count)</td><td>$thread_count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数　(load_count)</td><td>$load_count</td></tr>\n");
 
-		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
-		$Page->Print("<tr><td>書き込み禁止</td>");
+		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation (Key)</td></tr>\n");
+		$Page->Print("<tr><td>書き込み禁止　(ban)</td>");
 		$Page->Print("<td><select name=BAN>");
 		$Page->Print("<option value=\"\" $selBanNone>無効</option>");
 		$Page->Print("<option value=ban $selBanEnable>有効</option>");
 		$Page->Print("<option value=thread $selBanMakeThread>スレッド作成のみ禁止</option>");
 		$Page->Print("</select></td></tr>\n");
-		$Page->Print("<tr><td>コマンド禁止</td>");
+		$Page->Print("<tr><td>コマンド禁止　(ban_command)</td>");
 		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
-		$Page->Print("<tr><td>URL禁止</td>");
+		$Page->Print("<tr><td>URL禁止　(ban_url)</td>");
 		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
-		$Page->Print("<tr><td>強制sage</td>");
+		$Page->Print("<tr><td>強制sage　(force_sage)</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage></td></tr>\n");
-		$Page->Print("<tr><td>Captcha強制</td>");
+		$Page->Print("<tr><td>Captcha強制　(force_captcha)</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha></td></tr>\n");
-		$Page->Print("<tr><td>名無し強制</td>");
+		$Page->Print("<tr><td>名無し強制　(force_774)</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774></td></tr>\n");
-		$Page->Print("<tr><td>強制コテ<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
+		$Page->Print("<tr><td>強制コテ　(force_kote)<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
 		$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\"></td></tr>\n");
 	}else{
 		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖データは存在しません。</td></tr>");
@@ -403,12 +406,19 @@ sub PrintNinjaEdit
 	$Page->Print("</table><br>");
 
 }
+
+#------------------------------------------------------------------------------------------------------------
+#
+#   忍法帖検索画面 - PrintNinjaSearch
+#   ------------------------------------------------
+#   引　数：なし
+#   戻り値：なし
+#
+#------------------------------------------------------------------------------------------------------------
 sub PrintNinjaSearch
 {
     my ($Page, $SYS, $Form, $BBS) = @_;
-    my ($common);
-    my ($name, $dir);
-    my ($sMODE, $sBBS, $sKEY, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
+    my ($sKEY, $sWORD);
    
     my $sanitize = sub {
         $_ = shift;
@@ -419,45 +429,29 @@ sub PrintNinjaSearch
         return $_;
     };
    
-    $sMODE  = "BBS";#&$sanitize($Form->Get('SMODE', ''));
-    $sBBS = &$sanitize($Form->Get('SBBS', ''));
     $sKEY   = &$sanitize($Form->Get('KEY', ''));
     $sWORD  = &$sanitize($Form->Get('WORD'));
-    @sTYPE  = $Form->GetAtArray('TYPE', 0);
-    $id = $Form->Get('TARGET_BBS', '');
-    $types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0);
-    $cTYPE[0] = ($types & 1 ? 'checked' : '');
-    $cTYPE[1] = ($types & 2 ? 'checked' : '');
-    $cTYPE[2] = ($types & 4 ? 'checked' : '');
    
     $SYS->Set('_TITLE', 'Ninpocho Search');
    
     $Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
-    $Page->Print("  <tr><td colspan=2>以下の各条件に当てはまる忍法帖を検索します。</td></tr>\n");
+    $Page->Print("  <tr><td colspan=2>以下の条件に当てはまる忍法帖を検索します。</td></tr>\n");
     $Page->Print("  <tr><td colspan=2><hr></td></tr>\n");
     $Page->Print("  <tr>\n");
     $Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
     $Page->Print("    <td class=\"DetailTitle\">条件設定値</td></tr>\n");
-    $Page->Print("</select></td></tr>\n");
-    $Page->Print("<input type=hidden name=SBBS value=$id>");
+    $Page->Print("</td></tr>\n");
     $Page->Print(<<HTML);
   <tr>
-    <td>検索ワード</td>
+    <td>検索キー</td>
     <td>
-HTML
-    $Page->Print("<input type=text disabled size=60 name=WORD onkeydown=\"go(event.keyCode);\" value=\"$sWORD\" accept-charset=\"Shift_JIS\">");
-   
-    $common = "DoSubmit('bbs.thread','DISP','AUTORESDEL')";
-   
-    $Page->Print(<<HTML);
+	<input type=text size=20 name=KEY onkeydown="go(event.keyCode);" value="$sKEY">
     </td>
   </tr>
   <tr>
-    <td>検索種別</td>
+    <td>検索ワード</td>
     <td>
-      <input type="checkbox" name="TYPE" value="2" $cTYPE[1] checked disabled >？？？<br>
-      <input type="checkbox" name="TYPE" value="1" $cTYPE[0] disabled>？？？<br>
-      <input type="checkbox" name="TYPE" value="4" $cTYPE[2] disabled>？？？<br>
+      <input type=text size=60 name=WORD onkeydown="go(event.keyCode);" value="$sWORD">
     </td>
   </tr>
   <tr>
@@ -465,7 +459,7 @@ HTML
   </tr>
   <tr>
     <td colspan=2 align=right>
-      <input type=button value="　検索　" onclick="$common" style="float: left;" disabled>
+      <input type=button value="　検索　" onclick="DoSubmit('sys.ninja','DISP','NIN_SEARCH')" style="float: left;">
     </td>
   </tr>
 </table>
@@ -477,13 +471,133 @@ HTML
     }
    
     $Page->Print("<script>function go(keyCode).
-	{if(keyCode==13) DoSubmit('sys.ninja','DISP','SEARCH');.
+	{if(keyCode==13) DoSubmit('sys.ninja','DISP','NIN_SEARCH');.
 	}</script>");
 
 }
+
 #------------------------------------------------------------------------------------------------------------
 #
-#   検索結果出力 - Search
+#   忍法帖検索結果出力 - PrintNinjaSearchResult
+#   ------------------------------------------------
+#   引　数：なし
+#   戻り値：なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintNinjaSearchResult
+{
+    my ($Page, $Sys, $Form) = @_;
+    my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $key);
+    my (@types, $Type);
+    my (@resList, %bbsCount, %threadCount);
+
+	$Sys->Set('_TITLE','Ninpocho Search');
+   
+	my $sanitize = sub {
+        $_ = shift;
+        s/&/&amp;/g;
+        s/</&lt;/g;
+        s/>/&gt;/g;
+        s/"/&#34;/g;#"
+        return $_;
+    };
+   
+    require './module/admin_search.pl';
+    $Search = ADMIN_SEARCH->new;
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
+	$BBS->Load($Sys);
+    $word   = &$sanitize($Form->Get('WORD'));
+	$key = &$sanitize($Form->Get('KEY'));
+	
+   
+    # 検索オブジェクトの設定と検索の実行
+    $Search->Create($Sys, 3);
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=3>Key:[$key] Word:[$word] の忍法帖検索結果</td></tr>");
+    if ($@ ne '') {
+        PrintSystemError($Page, $@);
+        return;
+    }
+
+	# 検索結果セット取得
+	if($key ne 'ninID' && $word){
+		$Result = $Search->NinSearch($Form->Get('KEY'),$Form->Get('WORD'),undef);
+	}elsif((!$key && $word =~ /[0-9a-f]{32}/) || ($key eq 'ninID' && length($word) == 13)){
+		$Result = $Search->NinSearch(undef,undef,$Form->Get('WORD'));
+	}
+	
+    $n      = $Result ? @$Result : 0;
+	my $res = $Result->[0];
+    # 検索ヒットが1件以上あり
+    if ($n > 0) {
+		my $dispNum	= $Form->Get('DISPNUM', 10);
+		my $dispSt		= $Form->Get('DISPST', 0) || 0;
+		$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
+		my $infoDir = $Sys->Get('INFO');
+		my $ninDir = ".$infoDir/.ninpocho/"; 
+		my @session_files = @$Result;
+		my $dispEd		= (($dispSt + $dispNum) > $n ? $n : ($dispSt + $dispNum));
+		
+		# ヘッダ部分の表示
+		my $common = "DoSubmit('sys.ninja','DISP','NIN_SEARCH');";
+		
+		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+		$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
+		$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
+		$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
+		$Page->Print("</td><td colspan=2 align=right>");
+		$Page->Print("合計：$n");
+		$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
+		$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
+		$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
+		$Page->Print("<tr><th style=\"width:30px\"></th>");
+		$Page->Print("<td class=\"DetailTitle\" style=\"width:180px\">SessionID</td>");
+		$Page->Print("<td class=\"DetailTitle\" style=\"width:10px\">Size</td>");
+		$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">Last Update</td></tr>\n");
+
+		for (my $i = $dispSt ; $i < $dispEd ; $i++) {
+			my $id = $session_files[$i];
+			my $num = $i + 1;
+			my $file_name		= '.'.$Sys->Get('INFO').'/.ninpocho/cgisess_'.$id;
+			my $mtime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[9]);
+			my $size = (stat($file_name))[7];
+
+			$Page->Print("<tr>");
+			$Page->Print("<td><input type=checkbox name=NINPOCHO value=$id></td>");
+			$common = "\"javascript:SetOption('NINJA_ID','$id');";
+			$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
+			$Page->Print("<td>$num: <a href=$common>$id</a></td>");
+			$Page->Print("<td>$size</td><td>$mtime</td></tr>\n");
+		}
+    }
+    # 検索ヒット無し
+    else {
+        PrintNoHit($Page);
+        $Page->Print("</table>\n");
+        return;
+    }
+	$Page->HTMLInput('hidden', 'DISPST', '');
+	$Page->HTMLInput('hidden', 'NINJA_ID', '');
+	$Page->HTMLInput('hidden', 'KEY', $Form->Get('KEY'));
+	$Page->HTMLInput('hidden', 'WORD', $Form->Get('WORD'));
+    if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
+    	$Page->Print(<<HTML);
+  <tr>
+    <td colspan=4 align=right>
+	<hr>
+	<br>
+     <input type=button value="　削除　" disabled onclick="DoSubmit('sys.ninja','FUNC','DELNINJA')" class="delete">
+    </td>
+  </tr>
+HTML
+    }
+	$Page->Print("</table>\n");
+}
+ 
+#------------------------------------------------------------------------------------------------------------
+#
+#   書き込み履歴検索結果出力 - PrintNinjaSidSearch
 #   ------------------------------------------------
 #   引　数：なし
 #   戻り値：なし
