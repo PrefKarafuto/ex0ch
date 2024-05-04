@@ -16,9 +16,19 @@ use CGI::Cookie;
 use Digest::MD5;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
+# 実行時間の計測開始 (デバッグ用)
+# ./admin/sys.tpo.plのSetMenuList関数でコメントアウトを解除すると管理画面からログが閲覧できます
+#use Time::HiRes qw(gettimeofday tv_interval);
+#my $start_time = [gettimeofday];
+
+# BBSCGI実行
+my ($exit, $log, $bbs) = BBSCGI();
+
+# ログに保存 (デバッグ用)
+#CGIExecutionTime($start_time, 100);
 
 # CGIの実行結果を終了コードとする
-exit(BBSCGI());
+exit($exit);
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -37,6 +47,7 @@ sub BBSCGI
 	
 	my $CGI = {};
 	my $err = $ZP::E_SUCCESS;
+	my $log = $ZP::E_SUCCESS;
 	
 	$err = Initialize($CGI, $Page);
 	# 初期化に成功したら書き込み処理を開始
@@ -66,29 +77,33 @@ sub BBSCGI
 		}
 		else {
 			PrintBBSError($CGI, $Page, $err);
+			$log = $err;
 		}
 	}
 	else {
 		# スレッド作成画面表示
 		if ($err == $ZP::E_PAGE_THREAD) {
 			PrintBBSThreadCreate($CGI, $Page);
+			$log = $err;
 			$err = $ZP::E_SUCCESS;
 		}
 		# cookie確認画面表示
 		elsif ($err == $ZP::E_PAGE_COOKIE) {
 			PrintBBSCookieConfirm($CGI, $Page);
+			$log = $err;
 			$err = $ZP::E_SUCCESS;
 		}
 		# エラー画面表示
 		else {
 			PrintBBSError($CGI, $Page, $err);
+			$log = $err;
 		}
 	}
 	
 	# 結果の表示
 	$Page->Flush('', 0, 0);
 	
-	return $err;
+	return $err,$log,$CGI->{'SYS'}->Get('BBS');
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -614,4 +629,47 @@ sub PrintBBSError
 	$Error->Load($CGI->{'SYS'});
 	
 	$Error->Print($CGI, $Page, $err, $CGI->{'SYS'}->Get('AGENT'));
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	bbs.cgi実行時間ログ	(デバッグ用)
+#	-------------------------------------------------------------------------------------
+#	@param	$start_time		計測開始時間
+#	@param	$logMax			最大ログ数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub CGIExecutionTime
+{
+	my ($start_time, $logMax) = @_;
+
+	# 実行時間の計測終了
+	my $elapsed = tv_interval($start_time);
+	my $time = time;
+
+	# ログファイルに追記
+	my $log_file = './info/execution_time.cgi';
+	open my $fh, '>>', $log_file or die "Cannot open log file: $!";
+	print $fh "$time<>$elapsed<>$bbs<>$log\n";
+	close $fh;
+
+	# ファイルパーミッションの設定
+	chmod 0600, $log_file;
+
+	# ログファイルを読み込んで行数を確認
+	open $fh, '<', $log_file or die "Cannot open log file: $!";
+	my @lines = <$fh>;
+	close $fh;
+
+	# 行数が100行を超えている場合、超過分を削除
+	if (scalar @lines > $logMax) {
+		@lines = @lines[-$logMax..-1];  # 最後の100行だけを保持
+	}
+
+	# ファイルに内容を書き戻す
+	open my $fh_out, '>', $log_file or die "Cannot open file: $!";
+	print $fh_out @lines;
+	close $fh_out;
+
 }

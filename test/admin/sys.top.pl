@@ -71,6 +71,9 @@ sub DoPrint
 	elsif ($subMode eq 'ADMINLOG') {												# ログ閲覧画面
 		PrintAdminLog($Page, $Sys, $Form, $pSys->{'LOGGER'});
 	}
+	elsif ($subMode eq 'EXTIMELOG') {												# BBS.CGI実行時間ログ閲覧画面
+		PrintExecutionTimeLog($Page, $Sys, $Form);
+	}
 	elsif ($subMode eq 'COMPLETE') {												# 設定完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
 		$BASE->PrintComplete('ユーザ通知処理', $this->{'LOG'});
@@ -146,6 +149,8 @@ sub SetMenuList
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_SYSADMIN, '*')) {
 		$Base->SetMenu('<hr>', '');
 		$Base->SetMenu('操作ログ閲覧', "'sys.top','DISP','ADMINLOG'");
+		# デバッグ用
+		#$Base->SetMenu('BBS.CGI実行時間ログ閲覧', "'sys.top','DISP','EXTIMELOG'");
 	}
 }
 
@@ -434,6 +439,96 @@ HTML
 	
 }
 
+#------------------------------------------------------------------------------------------------------------
+#
+#	BBS.CGI実行時間計測ログ閲覧画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintExecutionTimeLog
+{
+	my ($Page, $Sys, $Form) = @_;
+	my ($common);
+	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isSysad, $data, @elem);
+	my ($orz, $or2);
+	
+	$Sys->Set('_TITLE', 'Execution Time Log');
+	$isSysad = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_SYSADMIN, '*');
+	
+	# 表示数の設定
+	require './module/log.pl';
+	my $exLog = LOG->new;
+	$exLog->Open('.'.$Sys->Get('INFO').'/execution_time', 0, 1 | 2);
+	$listNum	= $exLog->Size();
+	$dispNum	= ($Form->Get('DISPNUM_LOG') eq '' ? 10 : $Form->Get('DISPNUM_LOG'));
+	$dispSt		= ($Form->Get('DISPST_LOG') eq '' ? 0 : $Form->Get('DISPST_LOG'));
+	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
+	$dispEd		= (($dispSt + $dispNum) > $listNum ? $listNum : ($dispSt + $dispNum));
+	$common		= "DoSubmit('sys.top','DISP','EXTIMELOG');";
+	
+	$orz		= $dispSt - $dispNum;
+	$or2		= $dispSt + $dispNum;
+	
+$Page->Print(<<HTML);
+  <table border="0" cellspacing="2" width="100%">
+   <tr>
+    <td colspan="2">
+    <a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
+    <a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
+    </td>
+    <td align="right" colspan="2">
+    表\示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
+    <input type="button" value="　表\示　" onclick="$common">
+    </td>
+   </tr>
+   <tr>
+    <td class="DetailTitle">Date</td>
+    <td class="DetailTitle">ExecutionTime [msec]</td>
+    <td class="DetailTitle">BBS</td>
+    <td class="DetailTitle">Result</td>
+   </tr>
+HTML
+	
+	require './module/data_utils.pl';
+	
+	# ログ一覧を出力
+	for ($i = $dispSt ; $i < $dispEd ; $i++) {
+		$data = $exLog->Get($listNum - $i - 1);
+		@elem = split(/<>/, $data);
+		if (1) {
+			my ($s,$m,$h,$d,$t,$y) = localtime($elem[0]);
+			$y += 1900;
+			$t++;
+			my $result = $elem[3] ? $elem[3] : 'Success';
+			my $msec = $elem[1] * 1000;
+			my $date = sprintf("%d/%02d/%02d %02d:%02d:%02d",$y,$t,$d,$h,$m,$s);
+			$Page->Print("   <tr><td>$date</td><td>$msec</td><td>$elem[2]</td><td>$result</td></tr>\n");
+		}
+		else {
+			$dispEd++ if ($dispEd + 1 < $listNum);
+		}
+	}
+	
+$Page->Print(<<HTML);
+   <tr>
+    <td colspan="4"><hr></td>
+   </tr>
+   <tr>
+    <td colspan="4" align="right">
+	サーバーの管理画面で直接ログファイルを削除してください。
+    </td>
+   </tr>
+  </table>
+  
+  <input type="hidden" name="DISPST_LOG" value="">
+  
+HTML
+	
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	ユーザ通知作成
