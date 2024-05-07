@@ -571,7 +571,7 @@ sub PrintOtherSetting
 
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">その他</td></tr>\n");
 	$Page->Print("<tr><td>管理画面からの自動ログアウト時間</td>");
-	$Page->Print("<td><input type=text size=2 name=LOGOUT value=\"$logout\">分間操作なしでログアウト</td></tr>\n");
+	$Page->Print("<td><input type=text size=2 name=LOGOUT value=\"$logout\">分間操作なしでログアウト(無記入または0で三十分)</td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
