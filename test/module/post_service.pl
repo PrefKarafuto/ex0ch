@@ -1739,13 +1739,14 @@ sub Ninpocho
 	my $lvLim = $Sys->Get('NINLVMAX');
 
     # 前回のレベルアップから23時間以上経過していればレベルアップ
-    if ($resTime >= $lvUpTime && $ninLv < $lvLim) {		# && $ninLv == $today_count
+    if ($resTime >= $lvUpTime && $ninLv < $lvLim) {		# && $ninLv == $today_count # レベルnのとき、一日にn回以上の書き込みでLvUP
       $ninLv++;
       $lvUpTime = $time23h;
     }
 
 	# 書き込み数をカウント
 	$count++;
+	# 一日の書き込み数カウント
 	unless(int(time/(60*60*24)) - int($Ninja->Get('last_wtime')/(60*60*24))){
 		$today_count++;
 	}else{
