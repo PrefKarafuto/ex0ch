@@ -14,6 +14,25 @@ use open IO => ':encoding(cp932)';
 use warnings;
 use HTML::Entities;
 
+# 共通スレッド属性情報
+my %threadAttr = (
+    'sagemode'  => { 'name' => 'sage進行', 'type' => 'checkbox' },
+    'float'     => { 'name' => '浮上', 'type' => 'checkbox' },
+    'pass'      => { 'name' => 'パスワード', 'type' => 'text' },
+    'maxres'    => { 'name' => '最大レス数', 'type' => 'number' },
+    'slip'      => { 'name' => 'BBS_SLIP', 'type' => 'slip' },
+    'noid'      => { 'name' => 'IDなし', 'type' => 'checkbox' },
+    'changeid'  => { 'name' => '独自ID', 'type' => 'checkbox' },
+    'force774'  => { 'name' => '強制名無し', 'type' => 'checkbox' },
+    'change774' => { 'name' => '名無し変更', 'type' => 'text' },
+    'live'      => { 'name' => '実況モード', 'type' => 'checkbox' },
+    'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'checkbox' },
+    'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
+    'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
+	'stop'     	=> { 'name' => 'スレスト', 'type' => 'checkbox' },
+    'ban'       => { 'name' => 'アクセス禁止<small>(対象SessionIDをカンマで区切る)</small>', 'type' => 'text' },
+);
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	コンストラクタ
@@ -91,9 +110,6 @@ sub DoPrint
 	}
 	elsif ($subMode eq 'ATTR') {													# 属性付加確認画面
 		PrintThreadAttr($Page, $Sys, $Form, 1);
-	}
-	elsif ($subMode eq 'DEATTR') {													# 属性解除確認画面
-		PrintThreadAttr($Page, $Sys, $Form, 0);
 	}
 	elsif ($subMode eq 'POOL') {													# スレッドDAT落ち確認画面
 		PrintThreadPooling($Page, $Sys, $Form);
@@ -174,6 +190,12 @@ sub DoFunction
 	}
 	elsif ($subMode eq 'DEATTR') {													# 属性解除
 		$err = FunctionThreadAttr($Sys, $Form, $this->{'LOG'}, 0);
+	}
+	elsif ($subMode eq 'DETAILATTR') {													# 属性解除
+		$err = FunctionThreadDetailAttr($Sys, $Form, $this->{'LOG'},0);
+	}
+	elsif ($subMode eq 'DETAILATTRDELETE') {													# 属性解除
+		$err = FunctionThreadDetailAttr($Sys, $Form, $this->{'LOG'},1);
 	}
 	elsif ($subMode eq 'POOL') {													# DAT落ち
 		$err = FunctionThreadPooling($Sys, $Form, $this->{'LOG'});
@@ -351,7 +373,15 @@ sub PrintThreadList
 		push @attrstr, 'スレ主表示なし' if ($Threads->GetAttr($id, 'hidenusi'));
 		push @attrstr, "レベル制限:$ninLv" if ($ninLv && $Set->Get('BBS_NINJA'));
 		push @attrstr, "名無し->$is774" if ($is774);
-		$Page->Print("<td>@attrstr</td></tr>\n");
+
+		$common = "\"javascript:SetOption('TARGET_THREAD','$id');";
+		$common .= "DoSubmit('bbs.thread','DISP','ATTR')\"";
+		if(@attrstr){
+			$Page->Print("<td><a href=$common>@attrstr</td></tr>\n");
+		}else{
+			$Page->Print("<td><a href=$common>属性追加</a></td></tr>\n");
+		}
+		
 	}
 	$common		= "onclick=\"DoSubmit('bbs.thread','DISP'";
 	$common2	= "onclick=\"DoSubmit('bbs.thread','FUNC'";
@@ -365,20 +395,6 @@ sub PrintThreadList
 	$Page->Print("<input type=button value=\"　停止　\" $common,'STOP')\"> ")				if ($isStop);
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
 	$Page->Print("<input type=button value=\"DAT落ち\" $common,'POOL')\"> ")				if ($isPool);
-	
-	if ($isStop) {
-		$Page->Print("属性: <select name=ATTR>");
-		$Page->Print("<option value=float>浮上</option>");
-		$Page->Print("<option value=nopool>不落</option>");
-		$Page->Print("<option value=sagemode>sage進行</option>");
-		$Page->Print("<option value=noid>ID無し</option>");
-		$Page->Print("<option value=changeid>ID変更</option>");
-		$Page->Print("<option value=force774>名無し強制</option>");
-		$Page->Print("<option value=live>実況モード</option>");
-		$Page->Print("</select> ");
-		$Page->Print("<input type=button value=\"付加\" $common,'ATTR')\"> ");
-		$Page->Print("<input type=button value=\"解除\" $common,'DEATTR')\"> ");
-	}
 	
 	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")				if ($isDelete);
 	$Page->Print("</td></tr>\n");
@@ -552,6 +568,71 @@ sub PrintThreadStop
 #
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadAttr
+{
+	my ($Page, $Sys, $Form) = @_;
+	
+	$Sys->Set('_TITLE', 'Thread Add Attribute');
+	my $isStop = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_THREADSTOP, $Sys->Get('BBS'));
+	my $disabled = $isStop ? '' : 'disabled';
+	my $target_thread = $Form->Get('TARGET_THREAD');
+
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+	$Threads->LoadAttr($Sys);
+
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=3>スレッドに属性を付加します。</td></tr>");
+	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:50\">Attribute Name</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:50\">Key</td>\n");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Value</td>");
+	
+	foreach my $attrkey (sort keys %threadAttr) {
+		my $attr = $Threads->GetAttr($target_thread,$attrkey);
+		my $name = $threadAttr{$attrkey}->{'name'};
+		my $type = $threadAttr{$attrkey}->{'type'};
+		my $checked = $type eq 'checkbox' && $attr ? 'checked' : '';
+		
+		my $min = $type eq 'number' ? 'min=0' : '';
+		my $size = $type eq 'text' ? 'size=60' : '';
+
+		$Page->Print("<tr><td>$name</td><td>$attrkey</td>");
+		if($type eq 'checkbox'){
+			$Page->Print("<td><input name=\"$attrkey\" type=checkbox value=1 $checked $disabled></td></tr>\n");
+		}
+		elsif($type eq 'slip'){
+			my $none = $attr eq '' ? 'selected' : '';
+			my $vvv = $attr eq 'vvv' ? 'selected' : '';
+			my $vvvv = $attr eq 'vvvv' ? 'selected' : '';
+			my $vvvvv = $attr eq 'vvvvv' ? 'selected' : '';
+			my $vvvvvv = $attr eq 'vvvvvv' ? 'selected' : '';
+			$Page->Print("<td><select name=\"slip\" $disabled>\n");
+			$Page->Print("<option value=\"\" $none></option>\n");
+			$Page->Print("<option value=\"vvv\" $vvv>vvv</option>\n");
+			$Page->Print("<option value=\"vvvv\" $vvvv>vvvv</option>\n");
+			$Page->Print("<option value=\"vvvvv\" $vvvvv>vvvvv</option>\n");
+			$Page->Print("<option value=\"vvvvvv\" $vvvvvv>vvvvvv</option>\n");
+			$Page->Print("</select></td></tr>\n");
+		}
+		else{
+			$Page->Print("<td><input name=\"$attrkey\" type=\"$type\" value=\"$attr\" $min $size $disabled></td></tr>\n");
+		}
+	}
+	my $common = "DoSubmit('bbs.thread','FUNC'";
+	
+	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
+	
+	$Page->Print("<tr><td colspan=3 align=left>");
+	$Page->HTMLInput('hidden', 'TARGET_THREAD', $target_thread);
+	if($isStop){
+		$Page->Print("<input type=button value=\"　保存　\" onclick=\"$common,'DETAILATTR');\"> ");
+		$Page->Print("<input type=button value=\"　一括削除　\" onclick=\"$common,'DETAILATTRDELETE');\" class=\"delete\"> ");
+	}
+	$Page->Print("</td></tr>\n");
+	$Page->Print("</table><br>");
+}
+sub PrintThreadAttrOld
 {
 	my ($Page, $Sys, $Form, $mode) = @_;
 	
@@ -975,6 +1056,54 @@ sub FunctionThreadAttr
 	return 0;
 }
 
+sub FunctionThreadDetailAttr
+{
+	my ($Sys, $Form, $pLog, $mode) = @_;
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_THREADSTOP, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+
+	require './module/thread.pl';
+	
+	my $Threads	= THREAD->new;
+	$Threads->LoadAttr($Sys);
+	my $target_thread = $Form->Get('TARGET_THREAD');
+
+	if($mode){
+		$Threads->DeleteAttr($target_thread);
+		push @$pLog, "属性を一括削除しました。";
+	}else{
+		foreach my $attrkey (sort keys %threadAttr) {
+			my $defAttr = $Threads->GetAttr($target_thread,$attrkey);
+			my $attr = $Form->Get($attrkey);
+			my $name = $threadAttr{$attrkey}->{'name'};
+			my $type = $threadAttr{$attrkey}->{'type'};
+
+			return 1002 if ($attr && ($type eq 'number' && $attr !~ /[0-9]*/));
+			if($attrkey eq 'pass' && $attr ne $defAttr && $attr){
+				require Digest::SHA::PurePerl;
+				my $ctx = Digest::SHA::PurePerl->new;
+				$ctx->add(':', $Sys->Get('SERVER'));
+				$ctx->add(':', $target_thread);
+				$ctx->add(':', $attr);
+				$attr = $ctx->b64digest;
+			}
+
+			$Threads->SetAttr($target_thread,$attrkey,$attr) if ($defAttr || $attr);
+			push @$pLog, "[$attrkey]属性を".($attr?'付加':'解除');
+		}
+	}
+	$Threads->SaveAttr($Sys);
+	
+	return 0;
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	スレッドdat落ち
