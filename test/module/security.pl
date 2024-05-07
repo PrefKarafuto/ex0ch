@@ -626,8 +626,9 @@ sub Init
 		$this->{'USER'}->Load($Sys);
 		
 		my $infopath = $Sys->Get('INFO');
+		my $logout = $Sys->Get('LOGOUT') || 30;
 		$this->{'SOPT'} = {
-			'min'		=> 30,
+			'min'		=> $logout,
 			'driver'	=> 'driver:file;serializer:default',
 			'option'	=> { Directory => ".$infopath/.session/" },
 		};

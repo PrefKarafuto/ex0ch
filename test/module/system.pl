@@ -312,6 +312,7 @@ sub InitSystemValue
 		'SEARCHCAP'		=> '',
 
 		'LASTMOD'		=> '',
+		'LOGOUT'		=> 30,									# 無操作状態で管理画面から自動ログアウトするまでの時間
 
 		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換
 		'CSP'			=> 0,
