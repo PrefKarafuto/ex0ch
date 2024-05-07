@@ -246,6 +246,7 @@ sub Initialize
     }
 
     #改竄をチェック
+	$Sys->Set('SID',undef);
 	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
 		my $ctx = Digest::MD5->new;
 		$ctx->add($Sys->Get('SECURITY_KEY'));
@@ -253,13 +254,10 @@ sub Initialize
 		
 		if ($ctx->b64digest eq $sec){
 			$Sys->Set('SID',$sid);
-			$Sys->Set('SEC',$sec);
 		}else{
 			#一致しなかったら改竄されている
 			return $ZP::E_PAGE_COOKIE;
 		}
-	}else{
-		$Sys->Set('SID',undef);
 	}
 
 	# subjectの読み込み

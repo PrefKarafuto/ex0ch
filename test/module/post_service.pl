@@ -581,7 +581,7 @@ sub ReadyBeforeWrite
 				$mail =~ s/!pass:(.{1,30})//;
 				$Form->Set('mail',$mail);
 				
-				if($inputPass eq $threadPass){
+				if($inputPass eq $threadPass && $threadPass){
 					Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,0);
 				}
 			}
