@@ -29,7 +29,6 @@ my %threadAttr = (
     'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'checkbox' },
     'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
     'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
-	'stop'     	=> { 'name' => 'スレスト', 'type' => 'checkbox' },
     'ban'       => { 'name' => 'アクセス禁止<small>(対象SessionIDをカンマで区切る)</small>', 'type' => 'text' },
 );
 
