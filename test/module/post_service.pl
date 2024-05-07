@@ -1812,6 +1812,7 @@ sub Ninpocho
 	$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|;
 	$name =~ s|!lv|</b>【忍法帖Lv.$ninLv】<b>|;
 	$name =~ s|!total|</b>【総カキコ数:$count】<b>|;
+	$name =~ s|!donguri|</b> 忍法帖[Lv.$ninLv][団栗]<b>|;
 
 	# 名前欄再設定
 	$Form->Set('FROM', $name);
