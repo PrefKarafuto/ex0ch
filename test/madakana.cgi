@@ -131,7 +131,7 @@ sub PrintMadaHead
 	$HOST	= $Sys->{'FORM'}->Get('HOST');
 	$ADDR	= ($ENV{'REMOTE_ADDR'});
 	
-	$Page->Print("Content-type: text/html\n\n");
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
@@ -300,7 +300,7 @@ sub PrintMadaError
 	$code = 'Shift_JIS';
 	
 	# HTMLヘッダの出力
-	$Page->Print("Content-type: text/html\n\n");
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print('<html><head><title>ＥＲＲＯＲ！！</title>');
 	$Page->Print("<meta http-equiv=Content-Type content=\"text/html;charset=$code\">");
 	$Page->Print('</head><!--nobanner-->');

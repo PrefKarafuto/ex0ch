@@ -19,13 +19,27 @@ use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 # 実行時間の計測開始 (デバッグ用)
 # ./admin/sys.tpo.plのSetMenuList関数でコメントアウトを解除すると管理画面からログが閲覧できます
 #use Time::HiRes qw(gettimeofday tv_interval);
-#my $start_time = [gettimeofday];
+my ($exit, $log, $bbs);
 
 # BBSCGI実行
-my ($exit, $log, $bbs) = BBSCGI();
-
-# ログに保存 (デバッグ用)
-#CGIExecutionTime($start_time, 100);
+if(exists $ENV{'FCGI_ROLE'}){
+	use FCGI;
+	my $request = FCGI::Request();
+	# my $count = 0;
+	while($request->Accept() >= 0){
+		#my $start_time = [gettimeofday];
+		($exit, $log, $bbs) = BBSCGI();
+		# ログに保存 (デバッグ用)
+		#CGIExecutionTime($start_time, $log, $bbs.":$count", 100);
+		#$count++;
+		$request->Finish();
+	}
+}else{
+	#my $start_time = [gettimeofday];
+	($exit, $log, $bbs) = BBSCGI();
+	# ログに保存 (デバッグ用)
+	#CGIExecutionTime($start_time, $log, $bbs, 100);
+}
 
 # CGIの実行結果を終了コードとする
 exit($exit);
@@ -295,7 +309,7 @@ sub PrintBBSThreadCreate
 	my $cgipath = $Sys->Get('CGIPATH');
 	
 	# HTMLヘッダの出力
-	$Page->Print("Content-type: text/html\n\n");
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n");
 	$Page->Print("<html lang=\"ja\">\n");
 	$Page->Print("<head>\n");
@@ -451,7 +465,7 @@ sub PrintBBSCookieConfirm
 	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
 	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
 	
-	$Page->Print("Content-type: text/html\n\n");
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -576,7 +590,7 @@ sub PrintBBSJump
 	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
 	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
 		
-	$Page->Print("Content-type: text/html\n\n");
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print(<<HTML);
 <html>
 <head>
@@ -640,7 +654,7 @@ sub PrintBBSError
 #------------------------------------------------------------------------------------------------------------
 sub CGIExecutionTime
 {
-	my ($start_time, $logMax) = @_;
+	my ($start_time, $log, $bbs, $logMax) = @_;
 
 	# 実行時間の計測終了
 	my $elapsed = tv_interval($start_time);
