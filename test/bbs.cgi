@@ -23,7 +23,7 @@ my ($exit, $log, $bbs);
 
 # BBSCGI実行
 if(exists $ENV{'FCGI_ROLE'}){
-	use FCGI;
+	require FCGI;
 	my $request = FCGI::Request();
 	# my $count = 0;
 	while($request->Accept() >= 0){
