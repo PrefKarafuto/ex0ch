@@ -22,23 +22,25 @@ use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 my ($exit, $log, $bbs);
 
 # BBSCGI実行
-if(exists $ENV{'FCGI_ROLE'}){
-	require FCGI;
-	my $request = FCGI::Request();
-	# my $count = 0;
-	while($request->Accept() >= 0){
-		#my $start_time = [gettimeofday];
-		($exit, $log, $bbs) = BBSCGI();
-		# ログに保存 (デバッグ用)
-		#CGIExecutionTime($start_time, $log, $bbs.":$count", 100);
-		#$count++;
-		$request->Finish();
-	}
-}else{
-	#my $start_time = [gettimeofday];
-	($exit, $log, $bbs) = BBSCGI();
-	# ログに保存 (デバッグ用)
-	#CGIExecutionTime($start_time, $log, $bbs, 100);
+eval 'require FCGI;'; 
+if (! $@) {
+	# FastCGI
+    my $request = FCGI::Request();
+    #my $count = 0;
+    while($request->Accept() >= 0){
+        #my $start_time = [gettimeofday];
+        ($exit, $log, $bbs) = BBSCGI();
+        # ログに保存 (デバッグ用)
+        #CGIExecutionTime($start_time, $log, $bbs.":$count", 100);
+        #$count++;
+        $request->Finish();
+    }
+} else {
+    # 通常
+    #my $start_time = [gettimeofday];
+    ($exit, $log, $bbs) = BBSCGI();
+    # ログに保存 (デバッグ用)
+    #CGIExecutionTime($start_time, $log, $bbs, 100);
 }
 
 # CGIの実行結果を終了コードとする
