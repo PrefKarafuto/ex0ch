@@ -266,7 +266,7 @@ sub Write
 	return $err if ($err != $ZP::E_SUCCESS);
 
 	# レベル制限
-	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
+	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE') // '';
 	my $lvLim = $Threads->GetAttr($threadid,'ninLv');
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
 	if($isNinja && !$noNinja){
@@ -1806,7 +1806,7 @@ sub Ninpocho
 	my $B = (split(/-/, $Set->Get('NINJA_USER_BAN')))[0] <= $ninLv ? 'B':'x';		# BAN可
 	my $C = (split(/-/, $Set->Get('NINJA_USE_COMMAND')))[0] <= $ninLv ? 'C':'x';	# コマンド可
 	my $D = (split(/-/, $Set->Get('NINJA_RES_DELETE')))[0] <= $ninLv ? 'D':'x';		# レス削除可
-	my $P = $Set->Get('NINJA_WRITE_MESSAGE') <= $ninLv ? 'P': 'x';					# レス可
+	my $P = 'P';					# レス可
 	my $T = (split(/-/, $Set->Get('NINJA_MAKE_THREAD')))[0] <= $ninLv ? 'T':'x';	# スレたて可
 
 	$name =~ s|!ninja|</b> 忍法帖【Lv=$ninLv,$B$C$D$P$T,ID:$ninID】<b>|;
