@@ -12,7 +12,7 @@ GitHub: https://github.com/PrefKarafuto/ex0ch/
 ## インストール
 
 システム要件:
-- suEXECでCGI動作が可能なApache HTTP Serverが入っており，Perl 5.22以上が動作するUNIX系もしくはLinux系のOS
+- suEXECでCGI動作が可能なApache HTTP Serverが入っており，Perl 5.16以上が動作するUNIX系もしくはLinux系のOS
 - 10MB以上のディスクスペース
 
 依存関係:
