@@ -1732,25 +1732,26 @@ sub Ninpocho
     # 書き込んだ時間を取得
 	my $resTime = time();
     # 書き込んだ時間の23時間後を取得
-	my $time23h = time() + 82800;
+	my $time23h = $resTime + 82800;
 	# セッションから前回レベルアップしたときの時間を取得
 	my $lvUpTime = $Ninja->Get('lvuptime') || $time23h;
 
 	# レベルの上限
 	my $lvLim = $Sys->Get('NINLVMAX');
 
-    # 前回のレベルアップから23時間以上経過していればレベルアップ
-    if ($resTime >= $lvUpTime && $ninLv < $lvLim) {		# && $ninLv == $today_count # レベルnのとき、一日にn回以上の書き込みでLvUP
-      $ninLv++;
-      $lvUpTime = $time23h;
+    # 一日の書き込み数が現在のレベル以上で、前回のレベルアップから23時間以上経過していればレベルアップ
+	if ($today_count >= $ninLv && $resTime >= $lvUpTime && $ninLv < $lvLim) {
+		$ninLv++;
+		$lvUpTime = $time23h;
     }
 
 	# 書き込み数をカウント
 	$count++;
 	# 一日の書き込み数カウント
-	unless(int(time/(60*60*24)) - int($Ninja->Get('last_wtime')/(60*60*24))){
+	my $last_wtime = $Ninja->Get('last_wtime') || $resTime;
+	if (int($resTime / (60 * 60 * 24)) == int($last_wtime / (60 * 60 * 24))) {
 		$today_count++;
-	}else{
+	} else {
 		$today_count = 1;
 	}
 
@@ -1764,7 +1765,7 @@ sub Ninpocho
 		$Ninja->Set('last_addr',$ENV{'REMOTE_ADDR'});
 		$Ninja->Set('last_host',$ENV{'REMOTE_HOST'});
 		$Ninja->Set('last_ua',$ENV{'HTTP_USER_AGENT'});
-		$Ninja->Set('last_wtime',time);
+		$Ninja->Set('last_wtime',$resTime);
 		if($Sys->Equal('MODE', 1)){
 			$thread++;
 			$Ninja->Set('thread_count',$thread);
@@ -1782,11 +1783,8 @@ sub Ninpocho
 
 	# 名前欄取得
 	my $name = $Form->Get('FROM');
-
-	# 現在の時刻を取得
-	my $currentTime = time();
 	# 現在の時刻と$lvUpTimeとの差を計算
-	my $timeDiff = $lvUpTime - $currentTime;
+	my $timeDiff = $lvUpTime - $resTime;
 	# 差分を時間単位と分単位で計算
 	my $hoursDiff = int($timeDiff / 3600); # 1時間 = 3600秒
 	my $minutesDiff = int(($timeDiff % 3600) / 60); # 残りの秒数を分に変換
