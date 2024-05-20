@@ -184,13 +184,15 @@ sub SaveOnly
 #   @return 忍法帖の要素の情報
 #
 #------------------------------------------------------------------------------------------------------------
-sub Get
-{
+sub Get {
     my $this = shift;
     my ($name) = @_;
 
-    return unless $this->{'SESSION'};
-    my $val = $this->{'SESSION'}->param($name);
+    # セッションが存在しない場合は空文字列を返す
+    return '' unless $this->{'SESSION'};
+
+    # パラメータの値を取得し、未初期化の場合は空文字列を返す
+    my $val = $this->{'SESSION'}->param($name) // '';
     
     return $val;
 }

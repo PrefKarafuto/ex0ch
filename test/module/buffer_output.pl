@@ -97,7 +97,14 @@ sub Flush
 	}
 	# 標準出力に出力
 	else {
-		print @{$this->{'BUFF'}};
+		if (exists $ENV{'FCGI_ROLE'}) {
+			my $enc = Encode::find_encoding('cp932');
+			foreach (@{$this->{'BUFF'}}) {
+				print $enc->encode($_);
+			}
+		} else {
+			print @{$this->{'BUFF'}};
+		}
 	}
 }
 

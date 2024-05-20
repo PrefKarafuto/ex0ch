@@ -487,7 +487,7 @@ sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $admCap, $srcCap);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $admCap, $srcCap, $logout);
 	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -507,6 +507,7 @@ sub PrintOtherSetting
 	$cookieExp	= $SYS->Get('COOKIE_EXPIRY');
 	$nin_exp	= $SYS->Get('NIN_EXPIRY');
 	$pass_exp	= $SYS->Get('PASS_EXPIRY');
+	$logout		= $SYS->Get('LOGOUT');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
@@ -567,6 +568,10 @@ sub PrintOtherSetting
 	$Page->Print("<td>最終書き込みから<input type=text size=2 name=PASS_EXPIRY value=\"$pass_exp\">日</td></tr>\n");
 	$Page->Print("<tr><td>忍法帖Lv上限</td>");
 	$Page->Print("<td><input type=text size=2 name=NINLVMAX value=\"$ninLvmax\"></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">その他</td></tr>\n");
+	$Page->Print("<tr><td>管理画面からの自動ログアウト時間</td>");
+	$Page->Print("<td><input type=text size=2 name=LOGOUT value=\"$logout\">分間操作なしでログアウト(無記入または0で三十分)</td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -1162,6 +1167,7 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('NIN_EXPIRY', $Form->Get('NIN_EXPIRY'));
 	$SYSTEM->Set('PASS_EXPIRY', $Form->Get('PASS_EXPIRY'));
 	$SYSTEM->Set('COOKIE_EXPIRY', $Form->Get('COOKIE_EXPIRY'));
+	$SYSTEM->Set('LOGOUT', $Form->Get('LOGOUT'));
 	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
 	
 	$SYSTEM->Save();

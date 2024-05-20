@@ -204,7 +204,7 @@ sub Print
 	
 	if ($mode eq 'O') {
 		my $subject = $this->{'SUBJECT'}->{$err};
-		$Page->Print("Content-type: text/html\n\n");
+		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 		$Page->Print("<html><head><title>");
 		$Page->Print("ＥＲＲＯＲ！</title></head><!--nobanner-->\n");
 		$Page->Print("<body><font color=red>ERROR:$subject</font><hr>");
@@ -235,7 +235,7 @@ sub Print
 		$Cookie->Set('securitykey', $sec);
 		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
 		
-		$Page->Print("Content-type: text/html\n\n");
+		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 		
 		if ($err < $ZP::E_REG_SAMBA_CAUTION || $err > $ZP::E_REG_SAMBA_STILL) {
 			$Page->Print(<<HTML);

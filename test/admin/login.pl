@@ -75,6 +75,7 @@ sub DoFunction
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
 	my ($host, $Security, $Mod);
+	$host = $ENV{'REMOTE_HOST'};
 	
 	# ログイン情報を確認
 	if ($pSys->{'USER'}) {

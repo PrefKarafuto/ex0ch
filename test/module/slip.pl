@@ -337,8 +337,11 @@ sub BBS_SLIP
 	my $ua = $ENV{'HTTP_USER_AGENT'};
 	my $infoDir = $Sys->Get('INFO');
 
+	$chid = hex($chid);
+
 	# 各種判定
-	my $country = $Sys->Get('IPCOUNTRY') ne 'abroad' ? 'JP': 'ｶﾞｲｺｰｸ';		# post_service側での判定を流用
+	my $ip_country = $Sys->Get('IPCOUNTRY') // '';
+	my $country = $ip_country ne 'abroad' ? 'JP': 'ｶﾞｲｺｰｸ';					# post_service側での判定を流用
 	my $isProxy = $Sys->Get('ISPROXY');										# post_service側での判定を流用
 	my $ismobile = is_mobile($country,$ipAddr,$remoho);						# モバイル判定
 	my $isFwifi = is_public_wifi($country,$ipAddr,$remoho);					# 公衆wifi判定

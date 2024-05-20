@@ -351,7 +351,7 @@ sub PrintResEdit
 	$elem[3] =~ s/^ //;
 	$elem[3] =~ s/ $//;
 	$elem[3] =~ s/ ?<br> ?/\n/g;
-	foreach (0 .. 3) {
+	foreach (0 .. 4) {
 		$elem[$_] =~ s/&/&amp;/g;
 		$elem[$_] =~ s/"/&quot;/g;
 		$elem[$_] =~ s/</&lt;/g;
@@ -359,6 +359,12 @@ sub PrintResEdit
 	}
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	if($Form->Get('SELECT_RES') == 0){
+		chomp $elem[4];
+		$Page->Print("<tr><td colspan=2><hr></td></tr>");
+		$Page->Print("<tr><td class=\"DetailTitle\">スレッドタイトル</td><td>");
+		$Page->Print("<input type=text size=50 value=\"$elem[4]\" name=subject></td></tr>");
+	}
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
 	$Page->Print("<input type=text size=50 value=\"$elem[0]\" name=FROM></td></tr>");
@@ -532,6 +538,17 @@ sub FunctionResEdit
 	$elem[1] = $Form->Get('mail');
 	$elem[2] = $Form->Get('_DATE_');
 	$elem[3] = $Form->Get('MESSAGE');
+	if($Form->Get('SELECT_RES') == 0){
+		$elem[4] = $Form->Get('subject');
+		if(!$elem[4]){
+			return 1001;
+		}else{
+			$elem[4] =~ s/\r\n|\r|\n//g;
+			$elem[4] =~ s/</&lt;/g;
+			$elem[4] =~ s/>/&gt;/g;
+			$elem[4] .= "\n";
+		}
+	}
 	
 	# 改行・禁則文字の変換
 	$elem[3] =~ s/\r\n|\r|\n/ <br> /g;
@@ -544,6 +561,15 @@ sub FunctionResEdit
 	# データの設定と保存
 	$Dat->Set($Form->Get('SELECT_RES'), $data);
 	$Dat->Save($Sys);
+
+	# subject.txt更新
+	if($Form->Get('SELECT_RES') == 0){
+		require './module/thread.pl';
+		my $Threads = THREAD->new;
+		$Threads->Load($Sys);
+		$Threads->UpdateAll($Sys);
+		$Threads->Save($Sys);
+	}
 	
 	# ログの設定
 	push @$pLog, '番号[' . $Form->Get('SELECT_RES') . ']のレスを以下のように変更しました。';

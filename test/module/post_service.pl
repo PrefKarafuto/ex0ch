@@ -266,7 +266,7 @@ sub Write
 	return $err if ($err != $ZP::E_SUCCESS);
 
 	# レベル制限
-	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
+	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE') // '';
 	my $lvLim = $Threads->GetAttr($threadid,'ninLv');
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
 	if($isNinja && !$noNinja){
@@ -581,7 +581,7 @@ sub ReadyBeforeWrite
 				$mail =~ s/!pass:(.{1,30})//;
 				$Form->Set('mail',$mail);
 				
-				if($inputPass eq $threadPass){
+				if($inputPass eq $threadPass && $threadPass){
 					Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,0);
 				}
 			}
@@ -623,8 +623,9 @@ sub GetSessionID
 	$resnum--;
 	$Logger->Open($logPath, 0, 1 | 2);
 
-	# レス番が存在しない場合はundefが返る
-	my $sid = (split(/<>/,$Logger->Get($resnum)))[9];
+	# レス番が存在しない場合は空文字が返る
+	my $log_entry = $Logger->Get($resnum) // '';
+	my $sid = (split(/<>/, $log_entry))[9];
 
 	return $sid;
 }
@@ -1731,24 +1732,26 @@ sub Ninpocho
     # 書き込んだ時間を取得
 	my $resTime = time();
     # 書き込んだ時間の23時間後を取得
-	my $time23h = time() + 82800;
+	my $time23h = $resTime + 82800;
 	# セッションから前回レベルアップしたときの時間を取得
 	my $lvUpTime = $Ninja->Get('lvuptime') || $time23h;
 
 	# レベルの上限
 	my $lvLim = $Sys->Get('NINLVMAX');
 
-    # 前回のレベルアップから23時間以上経過していればレベルアップ
-    if ($resTime >= $lvUpTime && $ninLv < $lvLim) {		# && $ninLv == $today_count
-      $ninLv++;
-      $lvUpTime = $time23h;
+    # 一日の書き込み数が現在のレベル以上で、前回のレベルアップから23時間以上経過していればレベルアップ
+	if ($today_count >= $ninLv && $resTime >= $lvUpTime && $ninLv < $lvLim) {
+		$ninLv++;
+		$lvUpTime = $time23h;
     }
 
 	# 書き込み数をカウント
 	$count++;
-	unless(int(time/(60*60*24)) - int($Ninja->Get('last_wtime')/(60*60*24))){
+	# 一日の書き込み数カウント
+	my $last_wtime = $Ninja->Get('last_wtime') || $resTime;
+	if (int($resTime / (60 * 60 * 24)) == int($last_wtime / (60 * 60 * 24))) {
 		$today_count++;
-	}else{
+	} else {
 		$today_count = 1;
 	}
 
@@ -1762,7 +1765,7 @@ sub Ninpocho
 		$Ninja->Set('last_addr',$ENV{'REMOTE_ADDR'});
 		$Ninja->Set('last_host',$ENV{'REMOTE_HOST'});
 		$Ninja->Set('last_ua',$ENV{'HTTP_USER_AGENT'});
-		$Ninja->Set('last_wtime',time);
+		$Ninja->Set('last_wtime',$resTime);
 		if($Sys->Equal('MODE', 1)){
 			$thread++;
 			$Ninja->Set('thread_count',$thread);
@@ -1780,11 +1783,8 @@ sub Ninpocho
 
 	# 名前欄取得
 	my $name = $Form->Get('FROM');
-
-	# 現在の時刻を取得
-	my $currentTime = time();
 	# 現在の時刻と$lvUpTimeとの差を計算
-	my $timeDiff = $lvUpTime - $currentTime;
+	my $timeDiff = $lvUpTime - $resTime;
 	# 差分を時間単位と分単位で計算
 	my $hoursDiff = int($timeDiff / 3600); # 1時間 = 3600秒
 	my $minutesDiff = int(($timeDiff % 3600) / 60); # 残りの秒数を分に変換
@@ -1804,7 +1804,7 @@ sub Ninpocho
 	my $B = (split(/-/, $Set->Get('NINJA_USER_BAN')))[0] <= $ninLv ? 'B':'x';		# BAN可
 	my $C = (split(/-/, $Set->Get('NINJA_USE_COMMAND')))[0] <= $ninLv ? 'C':'x';	# コマンド可
 	my $D = (split(/-/, $Set->Get('NINJA_RES_DELETE')))[0] <= $ninLv ? 'D':'x';		# レス削除可
-	my $P = $Set->Get('NINJA_WRITE_MESSAGE') <= $ninLv ? 'P': 'x';					# レス可
+	my $P = 'P';					# レス可
 	my $T = (split(/-/, $Set->Get('NINJA_MAKE_THREAD')))[0] <= $ninLv ? 'T':'x';	# スレたて可
 
 	$name =~ s|!ninja|</b> 忍法帖【Lv=$ninLv,$B$C$D$P$T,ID:$ninID】<b>|;
@@ -1812,6 +1812,7 @@ sub Ninpocho
 	$name =~ s|!time|</b>【LvUPまで${timeDisplay}】<b>|;
 	$name =~ s|!lv|</b>【忍法帖Lv.$ninLv】<b>|;
 	$name =~ s|!total|</b>【総カキコ数:$count】<b>|;
+	$name =~ s|!donguri|</b> 忍法帖[Lv.$ninLv][団栗]<b>|;
 
 	# 名前欄再設定
 	$Form->Set('FROM', $name);

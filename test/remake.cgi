@@ -147,7 +147,7 @@ sub PrintBBSJump
 	
 	my $oSET = $Sys->{'SET'};
 	
-	$Page->Print("Content-type: text/html\n\n<html><head><title>");
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n<html><head><title>");
 	$Page->Print('indexを更新しました。</title><!--nobanner-->');
 	$Page->Print('<meta http-equiv="Content-Type" content="text/html; ');
 	$Page->Print("charset=Shift_JIS\"><meta content=0;URL=$bbsPath/ ");
