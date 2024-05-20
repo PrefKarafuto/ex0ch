@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS dev-r152 20240519',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r153 20240520',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -276,8 +276,8 @@ sub InitSystemValue
 		'LINKST'	=> 23,										# リンク禁止開始時間
 		'LINKED'	=> 2,										# リンク禁止終了時間
 		'PATHKIND'	=> 0,										# 生成パスの種類
-		'HEADTEXT'	=> '<small>■<b>レス検索</b>■</small>',	  # ヘッダ下部の表示文字列
-		'HEADURL'	=> '../test/search.cgi',					# ヘッダ下部のURL
+		'HEADTEXT'	=> '<small>■<b>トップ</b>■</small>',	  # ヘッダ下部の表示文字列
+		'HEADURL'	=> '../',									# ヘッダ下部のURL
 		'FASTMODE'	=> 0,										# 高速モード
 		
 		# ここからぜろプラオリジナル
