@@ -591,11 +591,13 @@ HTML
 	$year += 1900;
 	my $lastMod = sprintf("Last modified : %d/%02d/%02d %02d:%02d:%02d",$year,$mon,$day,$hour,$min,$sec);
 	$Page->Print("<div align=\"center\" style=\"font-size: 0.8em; color: #933;\">$lastMod</div>");
+
+	my $is_fcgi = $ENV{'FCGI_ROLE'} ? '/FastCGI' : '';
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
 <a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
-BBS.CGI - $ver (Perl)
+BBS.CGI - $ver (Perl$is_fcgi)
 @{[ $Sys->Get('DNSBL_TOREXIT') ? '+dan.me.uk' : '' ]}
 @{[ $Sys->Get('DNSBL_S5H') ? '+S5H' : '' ]}
 @{[ $Sys->Get('DNSBL_DRONEBL') ? '+DeoneBL' : '' ]}
