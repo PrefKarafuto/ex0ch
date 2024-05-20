@@ -623,8 +623,9 @@ sub GetSessionID
 	$resnum--;
 	$Logger->Open($logPath, 0, 1 | 2);
 
-	# レス番が存在しない場合はundefが返る
-	my $sid = (split(/<>/,$Logger->Get($resnum)))[9];
+	# レス番が存在しない場合は空文字が返る
+	my $log_entry = $Logger->Get($resnum) // '';
+	my $sid = (split(/<>/, $log_entry))[9];
 
 	return $sid;
 }
