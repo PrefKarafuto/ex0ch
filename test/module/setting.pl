@@ -394,7 +394,7 @@ sub InitSettingData
 		'BBS_MAILFIELD'			=> 'checked',
 
 		#忍法帖関連(必要Lv-消費Lv)
-		'NINLA_WRITE_MESSAGE'	=> 0,
+		'NINJA_WRITE_MESSAGE'	=> 0,
 		'NINJA_FORCE_SAGE'		=> 2,
 		'NINJA_MAKE_THREAD'		=> '2-0',
 		'NINJA_USE_COMMAND'		=> '5-0',
