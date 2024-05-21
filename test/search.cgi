@@ -338,7 +338,7 @@ sub Search
 		$n = 1;
 		foreach (@$Result) {
 			@elem = split(/<>/);
-			PrintResult($Page, $BBS, $Conv, $n, $base, \@elem);
+			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
 			$n++;
 		}
 	}
@@ -386,14 +386,16 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResult
 {
-	my ($Page, $BBS, $Conv, $n, $base, $pResult) = @_;
+	my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
 	my ($name, @bbsSet);
 	
 	$BBS->GetKeySet('DIR', $$pResult[0], \@bbsSet);
-	
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+
 	if (@bbsSet > 0) {
 		$name = $BBS->Get('NAME', $bbsSet[0]);
-		
+
 		$Page->Print("   <dt>$n 名前：<b>");
 		if ($$pResult[4] eq '') {
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
@@ -402,15 +404,19 @@ sub PrintResult
 			$Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
 		}
 		
-	$Page->Print(<<HTML);
+		$Sys->Set('BBS',$$pResult[0]);
+		$Threads->Load($Sys);
+		my $threadName = $Threads->Get('SUBJECT',$$pResult[1]);
+
+		$Page->Print(<<HTML);
  </b>：$$pResult[5]</dt>
     <dd>
     $$pResult[6]
     <br>
     <hr>
     <a target="_blank" href="$base/$$pResult[0]/">【$name】</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">【スレッド】</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">【レス &gt;&gt;$$pResult[2]】</a>
+    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">【$threadName】</a>
+    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">【&gt;&gt;$$pResult[2]】</a>
     <br>
     <br>
     </dd>
