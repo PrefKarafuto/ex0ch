@@ -111,7 +111,7 @@ sub PrintHead
  <meta http-equiv="Content-Script-Type" content="text/css">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
- <title>検索＠0chPlus</title>
+ <title>検索＠Ex0ch</title>
 
  <link rel="stylesheet" type="text/css" href="./datas/search.css">
 HTML
@@ -133,7 +133,7 @@ HTML
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#ccffcc" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>
-  <font size="+1"><b>検索＠0chPlus</b></font>
+  <font size="+1"><b>検索＠Ex0ch</b></font>
   
   <div align="center" style="margin:1.2em 0;">
   <form action="./search.cgi" method="POST">
