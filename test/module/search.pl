@@ -209,48 +209,37 @@ sub Search {
         my $pResultSet = $this->{'RESULTSET'};
         my $type = $this->{'TYPE'} || 0x15;
 
-        # 検索パターンをループの外でコンパイルする
-        my @patterns;
-        if ($type & 0x1) { push @patterns, quotemeta($word); }
-        if ($type & 0x2) { push @patterns, quotemeta($word); }
-        if ($type & 0x4) { push @patterns, quotemeta($word); }
-		if ($type & 0x8) { push @patterns, quotemeta($word); }
-        my $pattern = join('|', @patterns);
-        my $re = qr/$pattern/;
-
         # すべてのレス数でループ
         for (my $i = 0; $i < $DAT->Size(); $i++) {
             my $bFind = 0;
             my $pDat = $DAT->Get($i);
-            my $data = $$pDat;
-            my @elem = split(/<>/, $data, -1);
+            my @elem = split(/<>/, $$pDat, -1);
 
-            # 正規表現を使用せずに検索を実行する
-            if ($type & 0x1) {
-                if (index($elem[0], $word) != -1) {
-                    $elem[0] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
-                    $bFind = 1;
-                }
-            }
-            if ($type & 0x2) {
-                if (index($elem[3], $word) != -1) {
-                    $elem[3] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
-                    $bFind = 1;
-                }
-            }
-            if ($type & 0x4) {
-                if (index($elem[2], $word) != -1) {
-                    $elem[2] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
-                    $bFind = 1;
-                }
-            }
+            # 名前検索
+			if ($type & 0x1) {
+				if ($elem[0] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+					$bFind = 1;
+				}
+			}
+			# 本文検索
+			if ($type & 0x2) {
+				if ($elem[3] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+					$bFind = 1;
+				}
+			}
+			# ID or 日付検索
+			if ($type & 0x4) {
+				if ($elem[2] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+					$bFind = 1;
+				}
+			}
+			# スレタイ検索
 			if ($type & 0x8) {
-                if (index($elem[4], $word) != -1) {
-                    $elem[4] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
-                    $bFind = 1;
-                }
+				if ($elem[4] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+					$bFind = 1;
+				}
 				last if ($type == 0x8 && $i);
-            }
+			}
 
             if ($bFind) {
                 my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
