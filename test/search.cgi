@@ -88,10 +88,11 @@ sub PrintHead
 	$sWORD	= &$sanitize($Form->Get('WORD'));
 	@sTYPE	= $Form->GetAtArray('TYPE', 0);
 	
-	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0);
+	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0) | ($sTYPE[3] || 0);
 	$cTYPE[0] = ($types & 1 ? 'checked' : '');
 	$cTYPE[1] = ($types & 2 ? 'checked' : '');
 	$cTYPE[2] = ($types & 4 ? 'checked' : '');
+	$cTYPE[3] = ($types & 8 ? 'checked' : '');
 	
 	$BBSpath = $Sys->Get('BBSPATH');
 	
@@ -230,6 +231,7 @@ HTML
    </tr>
    <tr>
     <td>検索種別<br>
+	<input type="checkbox" name="TYPE" value="8" $cTYPE[3]>スレタイ検索<br>
     <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
     <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
     <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>

@@ -207,13 +207,14 @@ sub Search {
 
     if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
         my $pResultSet = $this->{'RESULTSET'};
-        my $type = $this->{'TYPE'} || 0x7;
+        my $type = $this->{'TYPE'} || 0x15;
 
         # 検索パターンをループの外でコンパイルする
         my @patterns;
         if ($type & 0x1) { push @patterns, quotemeta($word); }
         if ($type & 0x2) { push @patterns, quotemeta($word); }
         if ($type & 0x4) { push @patterns, quotemeta($word); }
+		if ($type & 0x8) { push @patterns, quotemeta($word); }
         my $pattern = join('|', @patterns);
         my $re = qr/$pattern/;
 
@@ -242,6 +243,13 @@ sub Search {
                     $elem[2] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
                     $bFind = 1;
                 }
+            }
+			if ($type & 0x8) {
+                if (index($elem[4], $word) != -1) {
+                    $elem[4] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
+                    $bFind = 1;
+                }
+				last if $i;
             }
 
             if ($bFind) {
