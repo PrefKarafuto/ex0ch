@@ -363,6 +363,7 @@ sub PrintResultHead
 	my ($Page, $n) = @_;
 	
 	$Page->Print(<<HTML);
+<br>
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#efefef" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>

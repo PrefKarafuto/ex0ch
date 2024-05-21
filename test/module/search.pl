@@ -249,7 +249,7 @@ sub Search {
                     $elem[4] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
                     $bFind = 1;
                 }
-				last if $i;
+				last if ($type == 0x8 && $i);
             }
 
             if ($bFind) {
