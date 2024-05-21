@@ -227,7 +227,7 @@ HTML
     </td>
    </tr>
    <tr>
-    <td>検索ワード<br><input type="text" size="40" name="WORD" value="$sWORD"></td>
+    <td>検索ワード<br><input type="text" size="30" name="WORD" value="$sWORD"></td>
    </tr>
    <tr>
     <td>検索種別<br>
