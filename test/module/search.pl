@@ -197,25 +197,26 @@ sub GetResultSet
 #
 #------------------------------------------------------------------------------------------------------------
 sub Search {
-    my $this = shift;
-    my ($word) = @_;
+	my $this = shift;
+	my ($word) = @_;
 
-    my $bbs = $this->{'SYS'}->Get('BBS');
-    my $key = $this->{'SYS'}->Get('KEY');
-    my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
-    my $DAT = $this->{'DAT'};
+	my $bbs = $this->{'SYS'}->Get('BBS');
+	my $key = $this->{'SYS'}->Get('KEY');
+	my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
+	my $DAT = $this->{'DAT'};
 
-    if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
-        my $pResultSet = $this->{'RESULTSET'};
-        my $type = $this->{'TYPE'} || 0x15;
+	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
+		my $pResultSet = $this->{'RESULTSET'};
+		my $type = $this->{'TYPE'} || 0x15;
 
-        # すべてのレス数でループ
-        for (my $i = 0; $i < $DAT->Size(); $i++) {
-            my $bFind = 0;
-            my $pDat = $DAT->Get($i);
-            my @elem = split(/<>/, $$pDat, -1);
+		# すべてのレス数でループ
+		for (my $i = 0; $i < $DAT->Size(); $i++) {
+			last if ($type == 0x8 && $i);
+			my $bFind = 0;
+			my $pDat = $DAT->Get($i);
+			my @elem = split(/<>/, $$pDat, -1);
 
-            # 名前検索
+			# 名前検索
 			if ($type & 0x1) {
 				if ($elem[0] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
 					$bFind = 1;
@@ -238,17 +239,16 @@ sub Search {
 				if ($elem[4] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
 					$bFind = 1;
 				}
-				last if ($type == 0x8 && $i);
 			}
 
-            if ($bFind) {
-                my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
-                $SetStr .= join('<>', @elem);
-                push @$pResultSet, $SetStr;
-            }
-        }
-    }
-    $DAT->Close();
+			if ($bFind) {
+				my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
+				$SetStr .= join('<>', @elem);
+				push @$pResultSet, $SetStr;
+			}
+		}
+	}
+	$DAT->Close();
 }
 
 #============================================================================================================

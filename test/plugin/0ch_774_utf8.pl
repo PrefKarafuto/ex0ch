@@ -128,22 +128,22 @@ sub getConfig
 	
 	%config = (
 		'強制名無し'	=> {
-		    'default'		=> 0,
+			'default'		=> 0,
 			'valuetype'		=> 3,
 			'description'	=> '強制的に名無しにします。',
 		},
 		'名無し太字'	=> {
-		    'default'		=> 1,
+			'default'		=> 1,
 			'valuetype'		=> 3,
 			'description'	=> '名無しを太字で表示します。',
 		},
 		'IPに紐付け'	=> {
-		    'default'		=> 1,
+			'default'		=> 1,
 			'valuetype'		=> 3,
 			'description'	=> '名無しを日替わりでIPに紐付けます。無効にすると毎回ランダムになります。',
 		},
 		'掲示板ごとに名無しリストを使う'	=> {
-		    'default'		=> 1,
+			'default'		=> 1,
 			'valuetype'		=> 3,
 			'description'	=> '掲示板ごとに用意された名無しリストを使用します。リストはデフォルトでbbs.cgiから見て../[掲示板ディレクトリ名]/info/774list.cgiです。リストに何も載っていない場合はデフォルトの名前になります。無効にした場合、内部のリストが使用されます。',
 		}
@@ -172,9 +172,9 @@ sub execute
 	my $change_nanashi = $this->GetConf('IPに紐付け');
   my $location_nanashi = sprintf("../%s/info/774list.cgi",$bbs);  #名無しリストはUTF8で保存すること
 
-    open (NANASHILISTFILE,">>", $location_nanashi);
-    chmod (0600,$location_nanashi);
-    close NANASHILISTFILE;
+	open (NANASHILISTFILE,">>", $location_nanashi);
+	chmod (0600,$location_nanashi);
+	close NANASHILISTFILE;
 
 	if ($type eq 16 and $sys->Get('ZPL_774_true') and $form->Get('FROM') !~ /(★)/) {
 		my $i = 0;
@@ -193,7 +193,7 @@ sub execute
 			}
 			close NANASHILISTFILE;
 		}
-        if ($i == 0){return 0;}
+		if ($i == 0){return 0;}
 		if ($change_nanashi) {
 			my (undef, undef, undef, $day, $mon, undef, $wday) = localtime;
 			my (undef, undef, undef, $ipaddr) = split(/\./, (defined($ENV{'HTTP_CF_CONNECTING_IP'})?$ENV{'HTTP_CF_CONNECTING_IP'}:$ENV{'REMOTE_ADDR'}));
@@ -206,7 +206,7 @@ sub execute
 		else {
 			$randout_nanashi = $nanashi[int(rand(scalar @nanashi))];
 		}
-        from_to($randout_nanashi,'UTF-8','Shift_JIS');
+		from_to($randout_nanashi,'UTF-8','Shift_JIS');
 		if ($bold_nanashi) {
 			$form->Set('FROM',$randout_nanashi);
 		}

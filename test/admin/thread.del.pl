@@ -413,9 +413,9 @@ sub FunctionResDelete
 	require './module/bbs_service.pl';
 	my $BBSAid = BBS_SERVICE->new;
 	$Sys->Set('MODE', 'CREATE');
-    $BBSAid->Init($Sys, undef);
-    $BBSAid->CreateIndex();
-    $BBSAid->CreateSubback();
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
 	
 	# ログの設定
 	$delCnt = 0;

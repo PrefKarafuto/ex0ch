@@ -42,11 +42,11 @@ sub new
 #
 #------------------------------------------------------------------------------------------------------------
 sub Load {
-    my $this = shift;
+	my $this = shift;
 
-    $this->{'ERR'} = undef;
+	$this->{'ERR'} = undef;
 
-    my $messages = {
+	my $messages = {
 		'100' => { SUBJECT => 'サブジェクト長すぎ', MESSAGE => 'サブジェクトが長すぎます！' },
 		'101' => { SUBJECT => '名前長すぎ', MESSAGE => '名前が長すぎます！' },
 		'102' => { SUBJECT => 'メール長すぎ', MESSAGE => 'メールアドレスが長すぎます！' },
@@ -97,13 +97,13 @@ sub Load {
 		'999' => { SUBJECT => 'ブラウザ変ですよん', MESSAGE => 'フォーム情報が正しく読めないです。' },
 		'990' => { SUBJECT => 'システムエラー', MESSAGE => 'システムが変です。サポートで聞いたほうがいいかも。。' },
 		'991' => { SUBJECT => 'システムエラー', MESSAGE => 'Captchaの設定が変です。管理者に連絡してくらはい。。' }
-    };
+	};
 
-    # メッセージデータをオブジェクトに格納
-    foreach my $id (keys %{$messages}) {
+	# メッセージデータをオブジェクトに格納
+	foreach my $id (keys %{$messages}) {
 		$this->{'SUBJECT'}->{$id} = $messages->{$id}->{SUBJECT};
 		$this->{'MESSAGE'}->{$id} = $messages->{$id}->{MESSAGE};
-    }
+	}
 }
 
 
@@ -170,11 +170,11 @@ sub Print
 	$Log->Load($Sys, 'ERR', '');
 	$Log->Set('', $err, $version, $koyuu, $mode);
 	$Log->Save($Sys);
-    
-    my $name = &$sanitize($Form->Get('NAME'));
+	
+	my $name = &$sanitize($Form->Get('NAME'));
 	my $mail = &$sanitize($Form->Get('MAIL'));
-    my $key = $Form->Get('key');
-    my $t = &$sanitize($Form->Get('subject',''));
+	my $key = $Form->Get('key');
+	my $t = &$sanitize($Form->Get('subject',''));
 	my $msg = $Form->Get('MESSAGE');
 
 	#超過対策

@@ -297,7 +297,7 @@ $Page->Print(<<HTML);
   <td valign="top" class="Content">
   <table width="95%" cellspacing="0">
    <tr>
-    <td class="FunctionList">
+	<td class="FunctionList">
 HTML
 	
 	for ($i = 0 ; $i < $n ; $i++) {
@@ -316,7 +316,7 @@ HTML
 	}
 	
 $Page->Print(<<HTML);
-    </td>
+	</td>
    </tr>
   </table>
   </td>
@@ -424,15 +424,15 @@ sub PrintComplete
 $Page->Print(<<HTML);
   <table border="0" cellspacing="0" cellpadding="0" width="100%" align="center">
    <tr>
-    <td>
-    
-    <div class="oExcuted">
-     $processName\を正常に完了しました。
-    </div>
+	<td>
+	
+	<div class="oExcuted">
+	 $processName\を正常に完了しました。
+	</div>
    
-    <div class="LogExport">処理ログ</div>
-    <hr>
-    <blockquote class="LogExport">
+	<div class="LogExport">処理ログ</div>
+	<hr>
+	<blockquote class="LogExport">
 HTML
 	
 	# ログの表示
@@ -441,9 +441,9 @@ HTML
 	}
 	
 $Page->Print(<<HTML);
-    </blockquote>
-    <hr>
-    </td>
+	</blockquote>
+	<hr>
+	</td>
    </tr>
   </table>
 HTML
@@ -472,9 +472,9 @@ sub PrintError
 $Page->Print(<<HTML);
   <table border="0" cellspacing="0" cellpadding="0" width="100%" align="center">
    <tr>
-    <td>
-    
-    <div class="xExcuted">
+	<td>
+	
+	<div class="xExcuted">
 HTML
 	
 	if ($ecode == 1000) {
@@ -507,8 +507,8 @@ HTML
 	}
 	
 $Page->Print(<<HTML);
-    </div>
-    
+	</div>
+	
 HTML
 
 	# エラーログがあれば出力する
@@ -523,7 +523,7 @@ HTML
 	}
 	
 $Page->Print(<<HTML);
-    </td>
+	</td>
    </tr>
   </table>
 HTML

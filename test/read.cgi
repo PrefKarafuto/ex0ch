@@ -196,7 +196,7 @@ sub PrintReadHead
 	my $CSP = $Sys->Get('CSP');
 	
 	if (defined $datone && ref($datone) eq 'SCALAR') {
-    	my @threadTop = split(/<>/, $$datone);
+		my @threadTop = split(/<>/, $$datone);
 		$threadTop[3] =~ s/<br>/\n/g; 			#brタグをOGP用に改行コードに変換
 		my @topMessage = split(/(<|&lt;)/,$threadTop[3]);	#それ以外のHTMLタグが混入していた場合に直前で切る
 
@@ -206,9 +206,9 @@ sub PrintReadHead
 		$description = $topMessage[0];
 	}
 	
-    	if($image !~ /^https?:\/\//){
-        	$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
-    	}
+	if($image !~ /^https?:\/\//){
+		$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
+	}
 	
 	# HTMLヘッダの出力
   $Page->Print("Content-type: text/html;charset=Shift_JIS\n");
@@ -547,7 +547,7 @@ READ.CGI - $ver<br>
 </div>
 </div>
 <div id="overlay">
-    <img id="overlay-image">
+	<img id="overlay-image">
   </div>
 <style>
 /* スマホ用レイアウト */
@@ -558,25 +558,25 @@ margin:0;
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const images = document.querySelectorAll('.post_image');
-    const overlay = document.getElementById('overlay');
-    const overlayImage = document.getElementById('overlay-image');
+	const images = document.querySelectorAll('.post_image');
+	const overlay = document.getElementById('overlay');
+	const overlayImage = document.getElementById('overlay-image');
   
-    images.forEach((image) => {
-      image.addEventListener('click', function() {
-        overlayImage.src = this.src;
-        overlayImage.onload = function() {
-          overlay.style.display = 'block';
-        };
-      });
-    });
+	images.forEach((image) => {
+	  image.addEventListener('click', function() {
+		overlayImage.src = this.src;
+		overlayImage.onload = function() {
+		  overlay.style.display = 'block';
+		};
+	  });
+	});
   
-    overlay.addEventListener('click', function(event) {
-      // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
-      if (event.target !== overlayImage) {
-        overlay.style.display = 'none';
-      }
-    });
+	overlay.addEventListener('click', function(event) {
+	  // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
+	  if (event.target !== overlayImage) {
+		overlay.style.display = 'none';
+	  }
+	});
   });
 </script>
 </body>
@@ -597,7 +597,7 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResponse
 {
-    my ($CGI, $Page, $commands, $n) = @_;
+	my ($CGI, $Page, $commands, $n) = @_;
 	
 	# 前準備
 	my $Sys = $CGI->{'SYS'};
@@ -611,7 +611,7 @@ sub PrintResponse
 	my $nameCol	= $Set->Get('BBS_NAME_COLOR');
 	my $type = $Set->Get('BBS_READTYPE');
 	my $color = $Set->Get('BBS_POSTCOLOR');
-    	my $limit =$Sys->Get('LIMTIME');
+		my $limit =$Sys->Get('LIMTIME');
 	my $aa='';
 	
 	# URLと引用個所の適応
@@ -658,12 +658,12 @@ HTML
 }
 	else{
 	$Page->Print(" <dt>$n ：");
-	    if ($elem[1] eq '') {
-		    $Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
-	    }
-	    else {
-		    $Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
-	    }
+		if ($elem[1] eq '') {
+			$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
+		}
+		else {
+			$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
+		}
 	$Page->Print("：$elem[2]</dt>\n");
 	$Page->Print("  <dd $aa>$elem[3]<br><br></dd>\n");
 	}

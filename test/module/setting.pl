@@ -372,14 +372,14 @@ sub InitSettingData
 		'BBS_SPAMKILLI_DOMAIN'	=> 'jp,com,net,org=2;*=3',
 		'BBS_SPAMKILLI_POINT'	=> 10,
 
-        'BBS_IMGTAG'            => '',
-        'BBS_TWITTER'           => '',
-        'BBS_MOVIE'             => '',
-        'BBS_URL_TITLE'         => '',
-        'BBS_HIGHLIGHT'         => 'checked',
+		'BBS_IMGTAG'            => '',
+		'BBS_TWITTER'           => '',
+		'BBS_MOVIE'             => '',
+		'BBS_URL_TITLE'         => '',
+		'BBS_HIGHLIGHT'         => 'checked',
 
-        'BBS_TASUKERUYO'        => '',
-        'BBS_OMIKUJI'           => '',
+		'BBS_TASUKERUYO'        => '',
+		'BBS_OMIKUJI'           => '',
 		'BBS_FAVICON'           => 'icon.png',
 
 		'BBS_CAPTCHA'			=> '',

@@ -29,76 +29,76 @@ sub new
 #------------------------------------------------------------------------------------------------------------
 # 拒否IP
 sub is_denied_ip {
-    my ($ipAddr, $infoDir) = @_;
+	my ($ipAddr, $infoDir) = @_;
 
-    my $denyIP_file = ".$infoDir/IP_List/deny.cgi";
+	my $denyIP_file = ".$infoDir/IP_List/deny.cgi";
 
-    # ファイルが存在しない場合はすぐに0を返す
-    return 0 unless -e $denyIP_file;
+	# ファイルが存在しない場合はすぐに0を返す
+	return 0 unless -e $denyIP_file;
 
-    # ファイルからハッシュテーブルを読み込む
-    my $denied_ips = retrieve($denyIP_file);
+	# ファイルからハッシュテーブルを読み込む
+	my $denied_ips = retrieve($denyIP_file);
 
-    # IPアドレスがハッシュテーブルに存在するかチェック
-    return exists $denied_ips->{$ipAddr} ? 1 : 0;
+	# IPアドレスがハッシュテーブルに存在するかチェック
+	return exists $denied_ips->{$ipAddr} ? 1 : 0;
 }
 
 # 匿名化判定
 sub is_anonymous {
-    my ($isFwifi, $country, $remoho, $ipAddr) = @_;
-    my $isAnon = 0;
+	my ($isFwifi, $country, $remoho, $ipAddr) = @_;
+	my $isAnon = 0;
 
-    if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
-        my @anon_remoho = (
-            '^.*\\.(vpngate\\.v4\\.open\\.ad\\.jp|opengw\\.net)$',
+	if (!$isFwifi && $country eq 'JP' && $remoho ne $ipAddr) {
+		my @anon_remoho = (
+			'^.*\\.(vpngate\\.v4\\.open\\.ad\\.jp|opengw\\.net)$',
 			'(vpn|tor|proxy|onion)',
-            '^.*\\.(?:ablenetvps\\.ne\\.jp|amazonaws\\.com|arena\\.ne\\.jp|akamaitechnologies\\.com|cdn77\\.com|cnode\\.io|datapacket\\.com|digita-vm\\.com|googleusercontent\\.com|hmk-temp\\.com||kagoya\\.net|linodeusercontent\\.com|sakura\\.ne\\.jp|vultrusercontent\\.com|xtom\\.com)$',
-            '^.*\\.(?:tsc-soft\\.com|53ja\\.net)$'
-        );
+			'^.*\\.(?:ablenetvps\\.ne\\.jp|amazonaws\\.com|arena\\.ne\\.jp|akamaitechnologies\\.com|cdn77\\.com|cnode\\.io|datapacket\\.com|digita-vm\\.com|googleusercontent\\.com|hmk-temp\\.com||kagoya\\.net|linodeusercontent\\.com|sakura\\.ne\\.jp|vultrusercontent\\.com|xtom\\.com)$',
+			'^.*\\.(?:tsc-soft\\.com|53ja\\.net)$'
+		);
 
-        for my $name (@anon_remoho) {
-            if ($remoho =~ /(?:${name})/i) {
-                $isAnon = 1;
-                last;
-            }
-        }
-    }
+		for my $name (@anon_remoho) {
+			if ($remoho =~ /(?:${name})/i) {
+				$isAnon = 1;
+				last;
+			}
+		}
+	}
 
-    return $isAnon;
+	return $isAnon;
 }
 
 # 公衆Wifi判定
 sub is_public_wifi {
-    my ($country, $ipAddr, $remoho) = @_;
-    my $isFwifi = '';
+	my ($country, $ipAddr, $remoho) = @_;
+	my $isFwifi = '';
 
-    if ($country eq 'JP' && $remoho ne $ipAddr) {
-        my @fwifi_remoho = (
-            '.*\\.m-zone\\.jp',
-            '\\d+\\.wi-fi\\.kddi\\.com',
-            '.*\\.wi-fi\\.wi2\\.ne\\.jp',
-            '.*\\.ec-userreverse\\.dion\\.ne\\.jp',
-            '210\\.227\\.19\\.[67]\\d',
-            '222-229-49-202.saitama.fdn.vectant.ne.jp'
-        );
-        my @fwifi_nicknames = ("mz", "auw", "wi2", "dion", "lson", "vectant");
+	if ($country eq 'JP' && $remoho ne $ipAddr) {
+		my @fwifi_remoho = (
+			'.*\\.m-zone\\.jp',
+			'\\d+\\.wi-fi\\.kddi\\.com',
+			'.*\\.wi-fi\\.wi2\\.ne\\.jp',
+			'.*\\.ec-userreverse\\.dion\\.ne\\.jp',
+			'210\\.227\\.19\\.[67]\\d',
+			'222-229-49-202.saitama.fdn.vectant.ne.jp'
+		);
+		my @fwifi_nicknames = ("mz", "auw", "wi2", "dion", "lson", "vectant");
 
-        my $isFwifi_nickname_idx = 0;
-        for my $name (@fwifi_remoho) {
-            if ($remoho =~ /^${name}$/) {
-                $isFwifi = $fwifi_nicknames[$isFwifi_nickname_idx];
-                last;
-            }
-            $isFwifi_nickname_idx++;
-        }
-    }
+		my $isFwifi_nickname_idx = 0;
+		for my $name (@fwifi_remoho) {
+			if ($remoho =~ /^${name}$/) {
+				$isFwifi = $fwifi_nicknames[$isFwifi_nickname_idx];
+				last;
+			}
+			$isFwifi_nickname_idx++;
+		}
+	}
 
-    return $isFwifi;
+	return $isFwifi;
 }
 
 # モバイル判定
 sub is_mobile {
-    my ($country, $ipAddr, $remoho) = @_;
+	my ($country, $ipAddr, $remoho) = @_;
 
 	my $ismobile = '';
 	if ($country eq 'JP') {
@@ -316,7 +316,7 @@ sub is_mobile {
 		}
 	}
 
-    return $ismobile;
+	return $ismobile;
 }
 
 #------------------------------------------------------------------------------------------------------------

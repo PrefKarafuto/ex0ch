@@ -205,8 +205,8 @@ $version
 <style>
 /* スマホ用レイアウト */
 img {
-    max-width: 100%;
-    height:auto;
+	max-width: 100%;
+	height:auto;
 }
 
 textarea {
@@ -377,17 +377,17 @@ MENU
 		
 		# プレビュースレッドの場合はプレビューへのリンクを貼る
 		if ($i <= $prevNum) {
-                        $Page->Print("<font size=3>");
+						$Page->Print("<font size=3>");
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i:</a> ");
 			$Page->Print("<a href=\"#$i\">$name($res)</a>　</font>\n");
-                        $Page->Print("<hr>") if $i == $prevNum;
+						$Page->Print("<hr>") if $i == $prevNum;
 		}
 		else {
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i: $name($res)</a>　\n");
 		}
 	}
-        my $threadNum = @threadSet;
-        $Page->Print("（全部で$threadNum\のスレッドがあります）");
+		my $threadNum = @threadSet;
+		$Page->Print("（全部で$threadNum\のスレッドがあります）");
 	$Page->Print(<<MENU);
   </small>
   <br><br><div align="left"><font size=3><b><a href="./kako">過去ログ倉庫</a>／<a href="./subback.html">スレッド一覧はこちら</a>／<a href="./">リロード</a></b></font></div>
@@ -487,14 +487,14 @@ THREAD
 		my $lastPath = $Conv->CreatePath($this->{'SYS'}, 0, $this->{'SYS'}->Get('BBS'), $key, 'l50');
 		my $numPath = $Conv->CreatePath($this->{'SYS'}, 0, $this->{'SYS'}->Get('BBS'), $key, '1-100');
 		$Page->Print(<<KAKIKO);
-    <div style="font-weight:bold;">
-     <a href="$allPath">全部読む</a>
-     <a href="$lastPath">最新50</a>
-     <a href="$numPath">1-100</a><br class="smartphone">
-     <a href="#top">板のトップ</a>
-     <a href="./">リロード</a>
-    </div>
-    </span>
+	<div style="font-weight:bold;">
+	 <a href="$allPath">全部読む</a>
+	 <a href="$lastPath">最新50</a>
+	 <a href="$numPath">1-100</a><br class="smartphone">
+	 <a href="#top">板のトップ</a>
+	 <a href="./">リロード</a>
+	</div>
+	</span>
    </blockquote>
   </form>
   </td>
@@ -566,7 +566,7 @@ FORM
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
 FORM
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
 	<input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
 </td>
@@ -606,13 +606,13 @@ BBS.CGI - $ver (Perl$is_fcgi)
 +Samba24=$samba<br>
 </div>
 <div id="overlay">
-    <img id="overlay-image">
+	<img id="overlay-image">
   </div>
 <style>
 /* スマホ用レイアウト */
 img {
-    max-width: 100%;
-    height:auto;
+	max-width: 100%;
+	height:auto;
 }
 textarea {
 max-width:95%;
@@ -621,25 +621,25 @@ margin:0;
 </style>
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    const images = document.querySelectorAll('.post_image');
-    const overlay = document.getElementById('overlay');
-    const overlayImage = document.getElementById('overlay-image');
+	const images = document.querySelectorAll('.post_image');
+	const overlay = document.getElementById('overlay');
+	const overlayImage = document.getElementById('overlay-image');
   
-    images.forEach((image) => {
-      image.addEventListener('click', function() {
-        overlayImage.src = this.src;
-        overlayImage.onload = function() {
-          overlay.style.display = 'block';
-        };
-      });
-    });
+	images.forEach((image) => {
+	  image.addEventListener('click', function() {
+		overlayImage.src = this.src;
+		overlayImage.onload = function() {
+		  overlay.style.display = 'block';
+		};
+	  });
+	});
   
-    overlay.addEventListener('click', function(event) {
-      // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
-      if (event.target !== overlayImage) {
-        overlay.style.display = 'none';
-      }
-    });
+	overlay.addEventListener('click', function(event) {
+	  // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
+	  if (event.target !== overlayImage) {
+		overlay.style.display = 'none';
+	  }
+	});
   });
 </script>
 FOOT
@@ -713,8 +713,8 @@ sub PrintThreadPreviewOne
    名前：<input type="text" name="FROM" size="19"><br class="smartphone">
    E-mail：<input type="text" name="mail" size="19"><br>
 	<div class ="bbs_service_textarea">
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
-    </div>
+	<textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
+	</div>
 KAKIKO
 	}
 	else{

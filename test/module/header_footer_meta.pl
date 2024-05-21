@@ -163,11 +163,11 @@ sub Print
   <td colspan="3">
   <table border="0" width="100%">
    <tr>
-    <td><font size="+1"><b>$bbs</b></font></td>
-    <td align="right"><a href="#menu">■</a> <a href="#1">▼</a></td>
+	<td><font size="+1"><b>$bbs</b></font></td>
+	<td align="right"><a href="#menu">■</a> <a href="#1">▼</a></td>
    </tr>
    <tr>
-    <td colspan="2">
+	<td colspan="2">
 HEAD
 		
 		foreach (@{$this->{'HEAD'}}) {

@@ -1027,86 +1027,86 @@ sub Command
 
 # 過去ログの移動や保存を行う
 sub ToKakoLog {
-    my ($Sys, $Set, $Threads) = @_;
-    
-    require './module/file_utils.pl';
-    require './module/bbs_service.pl';  # 一度だけ読み込む
-    my $Pools = POOL_THREAD->new;
-    my $BBSAid = BBS_SERVICE->new;  # 一度だけインスタンス化
+	my ($Sys, $Set, $Threads) = @_;
+	
+	require './module/file_utils.pl';
+	require './module/bbs_service.pl';  # 一度だけ読み込む
+	my $Pools = POOL_THREAD->new;
+	my $BBSAid = BBS_SERVICE->new;  # 一度だけインスタンス化
 
-    my $elapsed = 60 * 60;  # 1時間
-    my $nowtime = time;
-    
-    my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
-    my $BBSname = $Set->Get('BBS_KAKO');
-    my $otherBBSpath = $Sys->Get('BBSPATH') . '/' . $BBSname;
-    
-    my @threadList = ();
-    my $isUpdate = '';  # 更新が必要な場合
-    
-    $Threads->GetKeySet('ALL', '', \@threadList);
-    $Threads->LoadAttr($Sys);
+	my $elapsed = 60 * 60;  # 1時間
+	my $nowtime = time;
+	
+	my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
+	my $BBSname = $Set->Get('BBS_KAKO');
+	my $otherBBSpath = $Sys->Get('BBSPATH') . '/' . $BBSname;
+	
+	my @threadList = ();
+	my $isUpdate = '';  # 更新が必要な場合
+	
+	$Threads->GetKeySet('ALL', '', \@threadList);
+	$Threads->LoadAttr($Sys);
 
-    foreach my $id (@threadList) {
-        my $need_update = process_thread($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $nowtime, $elapsed, $BBSname);
-        $isUpdate = 1 if $need_update;  # 更新が必要ならフラグをたてる
-    }
+	foreach my $id (@threadList) {
+		my $need_update = process_thread($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $nowtime, $elapsed, $BBSname);
+		$isUpdate = 1 if $need_update;  # 更新が必要ならフラグをたてる
+	}
 
-    if ($isUpdate && $BBSname) {
-    	update_board($Sys, $Threads, $BBSAid,undef);
+	if ($isUpdate && $BBSname) {
+		update_board($Sys, $Threads, $BBSAid,undef);
 		update_board($Sys, $Threads, $BBSAid,$BBSname)
-    }
+	}
 
-    $Pools->Save($Sys);
-    $Threads->Save($Sys);
+	$Pools->Save($Sys);
+	$Threads->Save($Sys);
 }
 
 # 各スレッドに対する処理
 # 更新が必要な場合は1を、そうでない場合は0を返す
 sub process_thread {
-    my ($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $nowtime, $elapsed, $BBSname) = @_;
-    
-    my $need_update = 0;
+	my ($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $nowtime, $elapsed, $BBSname) = @_;
+	
+	my $need_update = 0;
 
-    my $attrLive = $Threads->GetAttr($id, 'live');
-    my $attrPool = $Threads->GetAttr($id, 'pool');
-    my $lastmodif = (stat "$path/dat/$id.dat")[9];
-    
-    if (($attrLive && ($nowtime - $lastmodif > $elapsed)) || $attrPool) {
-        $need_update = 1;
+	my $attrLive = $Threads->GetAttr($id, 'live');
+	my $attrPool = $Threads->GetAttr($id, 'pool');
+	my $lastmodif = (stat "$path/dat/$id.dat")[9];
+	
+	if (($attrLive && ($nowtime - $lastmodif > $elapsed)) || $attrPool) {
+		$need_update = 1;
 
-        if ($BBSname) {
-            FILE_UTILS::Move("$path/dat/$id.dat", "$otherBBSpath/dat/$id.dat");
-        } else {
-            $Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
+		if ($BBSname) {
+			FILE_UTILS::Move("$path/dat/$id.dat", "$otherBBSpath/dat/$id.dat");
+		} else {
+			$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
 			FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
-        }
+		}
 		$Threads->Delete($id);
 		$Threads->LoadAttr($Sys);
 		$Threads->DeleteAttr($id);
 		$Threads->SaveAttr($Sys);
-    }
-    return $need_update;
+	}
+	return $need_update;
 }
 
 # 掲示板を更新
 sub update_board {
-    my ($Sys, $Threads, $BBSAid,$BBSname) = @_;
-    
-    $Sys->Set('BBS', $BBSname) if $BBSname;
+	my ($Sys, $Threads, $BBSAid,$BBSname) = @_;
 	
-    #subject.txt更新
-    $Threads->Load($Sys);
-    $Threads->UpdateAll($Sys);
-    $Threads->Save($Sys);
-    
+	$Sys->Set('BBS', $BBSname) if $BBSname;
+	
+	#subject.txt更新
+	$Threads->Load($Sys);
+	$Threads->UpdateAll($Sys);
+	$Threads->Save($Sys);
+	
 	#index.html&subback.html更新
 	if(!$BBSname){
 	$Sys->Set('MODE', 'CREATE');
-    $BBSAid->Init($Sys, undef);
-    $BBSAid->CreateIndex();
-    $BBSAid->CreateSubback();
-    }
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
+	}
 	return 0;
 }
 
@@ -1440,7 +1440,7 @@ sub NormalizationNameMail
 	# プラグイン実行 フォーム情報再取得
 	$this->ExecutePlugin($Sys->Get('MODE'));
 	return $ZP::E_REG_SPAMKILL if($this->SpamBlock($Set,$Form));
-    
+	
 	$name = $Form->Get('FROM', '');
 	$mail = $Form->Get('mail', '');
 	$subject = $Form->Get('subject', '');
@@ -1523,21 +1523,21 @@ sub NormalizationNameMail
 #
 #------------------------------------------------------------------------------------------------------------
 sub Certification_Captcha {
-    my $this = shift;
-    my ($Sys,$Form) = @_;
+	my $this = shift;
+	my ($Sys,$Form) = @_;
 	my ($captcha_response,$url);
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
-    my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
 	if($captcha_kind eq 'h-captcha'){
 		$captcha_response = $Form->Get('h-captcha-response');
-    	$url = 'https://api.hcaptcha.com/siteverify';
+		$url = 'https://api.hcaptcha.com/siteverify';
 	}elsif($captcha_kind eq 'g-recaptcha'){
 		$captcha_response = $Form->Get('g-recaptcha-response');
-    	$url = 'https://www.google.com/recaptcha/api/siteverify';
+		$url = 'https://www.google.com/recaptcha/api/siteverify';
 	}elsif($captcha_kind eq 'cf-turnstile'){
 		$captcha_response = $Form->Get('cf-turnstile-response');
-    	$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 	}else{
 		return 0;
 	}
@@ -1548,7 +1548,7 @@ sub Certification_Captcha {
 			secret => $secretkey,
 			response => $captcha_response,
 			remoteip => $ENV{'REMOTE_ADDR'},
-           });
+		   });
 		if ($response->is_success()) {
 			my $json_text = $response->decoded_content();
 			
@@ -1721,17 +1721,17 @@ sub Ninpocho
 	my $this = shift;
 	my ($Sys, $Set, $Form, $Ninja, $sid) = @_;
 
-    # セッションから忍法帖Lvを取得
-    my $ninLv = $Ninja->Get('ninLv') || 1;
+	# セッションから忍法帖Lvを取得
+	my $ninLv = $Ninja->Get('ninLv') || 1;
 
 	# セッションから書き込み数を取得
 	my $count = $Ninja->Get('count') || 0;
 	my $today_count = $Ninja->Get('today_count') || 0;
 	my $thread = $Ninja->Get('thread_count') || 0; 
 
-    # 書き込んだ時間を取得
+	# 書き込んだ時間を取得
 	my $resTime = time();
-    # 書き込んだ時間の23時間後を取得
+	# 書き込んだ時間の23時間後を取得
 	my $time23h = $resTime + 82800;
 	# セッションから前回レベルアップしたときの時間を取得
 	my $lvUpTime = $Ninja->Get('lvuptime') || $time23h;
@@ -1739,11 +1739,11 @@ sub Ninpocho
 	# レベルの上限
 	my $lvLim = $Sys->Get('NINLVMAX');
 
-    # 一日の書き込み数が現在のレベル以上で、前回のレベルアップから23時間以上経過していればレベルアップ
+	# 一日の書き込み数が現在のレベル以上で、前回のレベルアップから23時間以上経過していればレベルアップ
 	if ($today_count >= $ninLv && $resTime >= $lvUpTime && $ninLv < $lvLim) {
 		$ninLv++;
 		$lvUpTime = $time23h;
-    }
+	}
 
 	# 書き込み数をカウント
 	$count++;
@@ -1777,7 +1777,7 @@ sub Ninpocho
 		$mes =~ s/<(b|h)r>//g;
 		$Ninja->Set('last_message',substr($mes, 0, 30));
 		$Ninja->Set('last_bbsdir',$Sys->Get('BBS'));
-        $Ninja->Set('last_threadkey',$Sys->Get('KEY'));
+		$Ninja->Set('last_threadkey',$Sys->Get('KEY'));
 
 	}
 

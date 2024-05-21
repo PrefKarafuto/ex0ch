@@ -200,20 +200,20 @@ sub PrintNoticeList
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
    <tr>
-    <td>
-    </td>
-    <td>
-    <a href="javascript:SetOption('DISPST_NOTICE', $orz);$common">&lt;&lt; PREV</a> |
-    <a href="javascript:SetOption('DISPST_NOTICE', $or2);$common">NEXT &gt;&gt;</a>
-    </td>
-    <td align=right colspan="2">
-    表\示数 <input type=text name="DISPNUM_NOTICE" size="4" value="$dispNum">
-    <input type=button value="　表\示　" onclick="$common">
-    </td>
+	<td>
+	</td>
+	<td>
+	<a href="javascript:SetOption('DISPST_NOTICE', $orz);$common">&lt;&lt; PREV</a> |
+	<a href="javascript:SetOption('DISPST_NOTICE', $or2);$common">NEXT &gt;&gt;</a>
+	</td>
+	<td align=right colspan="2">
+	表\示数 <input type=text name="DISPNUM_NOTICE" size="4" value="$dispNum">
+	<input type=button value="　表\示　" onclick="$common">
+	</td>
    </tr>
    <tr>
-    <td style="width:30px;"><br></td>
-    <td colspan="3" class="DetailTitle">Notification</td>
+	<td style="width:30px;"><br></td>
+	<td colspan="3" class="DetailTitle">Notification</td>
    </tr>
 HTML
 	
@@ -236,15 +236,15 @@ HTML
 			
 $Page->Print(<<HTML);
    <tr>
-    <td><input type=checkbox name="NOTICES" value="$id"></td>
-    <td class="Response" colspan="3">
-    <dl style="margin:0px;">
-     <dt><b>$subj</b> <font color="blue">From：$from</font> $date</dt>
-      <dd>
-      $text<br>
-      <br></dd>
-    </dl>
-    </td>
+	<td><input type=checkbox name="NOTICES" value="$id"></td>
+	<td class="Response" colspan="3">
+	<dl style="margin:0px;">
+	 <dt><b>$subj</b> <font color="blue">From：$from</font> $date</dt>
+	  <dd>
+	  $text<br>
+	  <br></dd>
+	</dl>
+	</td>
    </tr>
 HTML
 
@@ -256,9 +256,9 @@ HTML
 	
 $Page->Print(<<HTML);
    <tr>
-    <td colspan="4" align="left">
-    <input type="button" class="delete" value="　削除　" onclick="DoSubmit('sys.top','FUNC','DELETE')">
-    </td>
+	<td colspan="4" align="left">
+	<input type="button" class="delete" value="　削除　" onclick="DoSubmit('sys.top','FUNC','DELETE')">
+	</td>
    </tr>
   </table>
   <input type="hidden" name="DISPST_NOTICE" value="">
@@ -289,47 +289,47 @@ sub PrintNoticeCreate
 	
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
-    <tr>
-    <td class="DetailTitle">タイトル</td>
-    <td><input type="text" size="60" name="NOTICE_TITLE"></td>
+	<tr>
+	<td class="DetailTitle">タイトル</td>
+	<td><input type="text" size="60" name="NOTICE_TITLE"></td>
    </tr>
    <tr>
-    <td class="DetailTitle">本文</td>
-    <td>
-    <textarea rows="10" cols="70" name="NOTICE_CONTENT"></textarea>
-    </td>
+	<td class="DetailTitle">本文</td>
+	<td>
+	<textarea rows="10" cols="70" name="NOTICE_CONTENT"></textarea>
+	</td>
    </tr>
    <tr>
-    <td class="DetailTitle">通知先ユーザ</td>
-    <td>
-    <table width="100%" cellspacing="2">
+	<td class="DetailTitle">通知先ユーザ</td>
+	<td>
+	<table width="100%" cellspacing="2">
 HTML
 	
 	if ($isSysad) {
 		
 $Page->Print(<<HTML);
-     <tr>
-      <td class="DetailTitle">
-      <input type="radio" name="NOTICE_KIND" value="ALL">全体通知
-      </td>
-      <td>
-      有効期限：<input type="text" name="NOTICE_LIMIT" size="10" value="30">日
-      </td>
-     </tr>
-     <tr>
-      <td class="DetailTitle">
-      <input type="radio" name="NOTICE_KIND" value="ONE" checked>個別通知
-      </td>
-      <td>
+	 <tr>
+	  <td class="DetailTitle">
+	  <input type="radio" name="NOTICE_KIND" value="ALL">全体通知
+	  </td>
+	  <td>
+	  有効期限：<input type="text" name="NOTICE_LIMIT" size="10" value="30">日
+	  </td>
+	 </tr>
+	 <tr>
+	  <td class="DetailTitle">
+	  <input type="radio" name="NOTICE_KIND" value="ONE" checked>個別通知
+	  </td>
+	  <td>
 HTML
 	}
 	else {
 $Page->Print(<<HTML);
-     <tr>
-      <td class="DetailTitle">
-      <input type="radio" name="NOTICE_KIND" value="ONE" checked>個別通知
-      </td>
-      <td>
+	 <tr>
+	  <td class="DetailTitle">
+	  <input type="radio" name="NOTICE_KIND" value="ONE" checked>個別通知
+	  </td>
+	  <td>
 HTML
 	}
 	
@@ -341,15 +341,15 @@ HTML
 	}
 	
 $Page->Print(<<HTML);
-      </td>
-     </tr>
-    </table>
-    </td>
+	  </td>
+	 </tr>
+	</table>
+	</td>
    </tr>
    <tr>
-    <td colspan="2" align="left">
-    <input type="button" value="　送信　" onclick="DoSubmit('sys.top','FUNC','CREATE')">
-    </td>
+	<td colspan="2" align="left">
+	<input type="button" value="　送信　" onclick="DoSubmit('sys.top','FUNC','CREATE')">
+	</td>
    </tr>
   </table>
 HTML
@@ -389,20 +389,20 @@ sub PrintAdminLog
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
    <tr>
-    <td colspan="2">
-    <a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
-    <a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
-    </td>
-    <td align="right" colspan="2">
-    表\示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
-    <input type="button" value="　表\示　" onclick="$common">
-    </td>
+	<td colspan="2">
+	<a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
+	<a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
+	</td>
+	<td align="right" colspan="2">
+	表\示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
+	<input type="button" value="　表\示　" onclick="$common">
+	</td>
    </tr>
    <tr>
-    <td class="DetailTitle">Date</td>
-    <td class="DetailTitle">User</td>
-    <td class="DetailTitle">Operation</td>
-    <td class="DetailTitle">Result</td>
+	<td class="DetailTitle">Date</td>
+	<td class="DetailTitle">User</td>
+	<td class="DetailTitle">Operation</td>
+	<td class="DetailTitle">Result</td>
    </tr>
 HTML
 	
@@ -424,12 +424,12 @@ HTML
 	
 $Page->Print(<<HTML);
    <tr>
-    <td colspan="4"><hr></td>
+	<td colspan="4"><hr></td>
    </tr>
    <tr>
-    <td colspan="4" align="right">
-    <input type="button" value="ログの削除" onclick="DoSubmit('sys.top','FUNC','LOG_REMOVE')" class=\"delete\">
-    </td>
+	<td colspan="4" align="right">
+	<input type="button" value="ログの削除" onclick="DoSubmit('sys.top','FUNC','LOG_REMOVE')" class=\"delete\">
+	</td>
    </tr>
   </table>
   
@@ -476,20 +476,20 @@ sub PrintExecutionTimeLog
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
    <tr>
-    <td colspan="2">
-    <a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
-    <a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
-    </td>
-    <td align="right" colspan="2">
-    表\示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
-    <input type="button" value="　表\示　" onclick="$common">
-    </td>
+	<td colspan="2">
+	<a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
+	<a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
+	</td>
+	<td align="right" colspan="2">
+	表\示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
+	<input type="button" value="　表\示　" onclick="$common">
+	</td>
    </tr>
    <tr>
-    <td class="DetailTitle">Date</td>
-    <td class="DetailTitle">ExecutionTime [msec]</td>
-    <td class="DetailTitle">BBS</td>
-    <td class="DetailTitle">Result</td>
+	<td class="DetailTitle">Date</td>
+	<td class="DetailTitle">ExecutionTime [msec]</td>
+	<td class="DetailTitle">BBS</td>
+	<td class="DetailTitle">Result</td>
    </tr>
 HTML
 	
@@ -515,12 +515,12 @@ HTML
 	
 $Page->Print(<<HTML);
    <tr>
-    <td colspan="4"><hr></td>
+	<td colspan="4"><hr></td>
    </tr>
    <tr>
-    <td colspan="4" align="right">
+	<td colspan="4" align="right">
 	サーバーの管理画面で直接ログファイルを削除してください。
-    </td>
+	</td>
    </tr>
   </table>
   

@@ -25,22 +25,22 @@ my ($exit, $log, $bbs);
 eval 'require FCGI;'; 
 if (! $@) {
 	# FastCGI
-    my $request = FCGI::Request();
-    #my $count = 0;
-    while($request->Accept() >= 0){
-        #my $start_time = [gettimeofday];
-        ($exit, $log, $bbs) = BBSCGI();
-        # ログに保存 (デバッグ用)
-        #CGIExecutionTime($start_time, $log, $bbs.":$count", 100);
-        #$count++;
-        $request->Finish();
-    }
+	my $request = FCGI::Request();
+	#my $count = 0;
+	while($request->Accept() >= 0){
+		#my $start_time = [gettimeofday];
+		($exit, $log, $bbs) = BBSCGI();
+		# ログに保存 (デバッグ用)
+		#CGIExecutionTime($start_time, $log, $bbs.":$count", 100);
+		#$count++;
+		$request->Finish();
+	}
 } else {
-    # 通常
-    #my $start_time = [gettimeofday];
-    ($exit, $log, $bbs) = BBSCGI();
-    # ログに保存 (デバッグ用)
-    #CGIExecutionTime($start_time, $log, $bbs, 100);
+	# 通常
+	#my $start_time = [gettimeofday];
+	($exit, $log, $bbs) = BBSCGI();
+	# ログに保存 (デバッグ用)
+	#CGIExecutionTime($start_time, $log, $bbs, 100);
 }
 
 # CGIの実行結果を終了コードとする
@@ -249,19 +249,19 @@ sub Initialize
 
 	#セッションID設定
 	#cookieからセッションID取得
-    my $sid = $Cookie->Get('countsession');
-    my $sec = $Cookie->Get('securitykey');
-    my %cookies = fetch CGI::Cookie;
-    if (!$sid && exists $cookies{'countsession'}) {
-        $sid = $cookies{'countsession'}->value;
-        $sid =~ s/"//g;
-    }
-    if (!$sec && exists $cookies{'securitykey'}) {
-        $sec = $cookies{'securitykey'}->value;
-        $sec =~ s/"//g;
-    }
+	my $sid = $Cookie->Get('countsession');
+	my $sec = $Cookie->Get('securitykey');
+	my %cookies = fetch CGI::Cookie;
+	if (!$sid && exists $cookies{'countsession'}) {
+		$sid = $cookies{'countsession'}->value;
+		$sid =~ s/"//g;
+	}
+	if (!$sec && exists $cookies{'securitykey'}) {
+		$sec = $cookies{'securitykey'}->value;
+		$sec =~ s/"//g;
+	}
 
-    #改竄をチェック
+	#改竄をチェック
 	$Sys->Set('SID',undef);
 	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
 		my $ctx = Digest::MD5->new;
@@ -383,15 +383,15 @@ sub PrintBBSThreadCreate
   <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="time" value="$tm">
   <table border="0">
    <tr>
-    <td align="left">
-    <div class ="reverse_order">
-    <span class = "order2">タイトル：<input type="text" name="subject" size="25"></span>
-    <span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha</span>
-    </div>
-    名前：<input type="text" name="FROM" size="19" value="$name"><br class="smartphone">
-    E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
-    </td>
+	<td align="left">
+	<div class ="reverse_order">
+	<span class = "order2">タイトル：<input type="text" name="subject" size="25"></span>
+	<span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha</span>
+	</div>
+	名前：<input type="text" name="FROM" size="19" value="$name"><br class="smartphone">
+	E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
+	<textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
+	</td>
    </tr>
   </table>
   </form>
@@ -411,8 +411,8 @@ $Page->Print(<<HTML);
 <style>
 /* スマホ用レイアウト */
 img {
-    max-width: 100%;
-    height:auto;
+	max-width: 100%;
+	height:auto;
 }
 
 textarea {

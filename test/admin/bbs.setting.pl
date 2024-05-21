@@ -449,7 +449,7 @@ sub PrintColorSetting
 	$Page->Print("<select name=\"BBS_READTYPE\"><option value=\"original\" $selOri>オリジナル</option><option value=\"5ch\" $sel5ch>5ch風</option></select>");
 	$Page->Print("<td class=\"DetailTitle\">レス背景色</td><td>");
 	$Page->Print("<input type=$selectType size=10 name=BBS_POSTCOLOR value=\"$setPost\">");
-    $Page->Print("<td class=\"DetailTitle\">#と＞を強調</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">#と＞を強調</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_HIGHLIGHT value=on $setHighlight>有効</td>");
 	$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	
@@ -471,14 +471,14 @@ sub PrintColorSetting
 		$Page->Print("　<font color=$setText>本文テキスト</font><br>");
 		$Page->Print("　<font color=$setLink><u>http://---</u></font><br>");
 		$Page->Print("　<font color=$setLinkV><u>http://---</u></font><br><br>");
-        if($setHighlight eq 'checked'){
-		    $Page->Print("　<font color=green>#ハッシュタグ</font><br>");
-		    $Page->Print("　<font color=gray>＞引用</font><br>");
-        }
-        else{
-            $Page->Print("  <font color=$setText>#ハッシュタグ</font><br>");
-            $Page->Print("  <font color=$setText>＞引用</font><br>");
-        }
+		if($setHighlight eq 'checked'){
+			$Page->Print("　<font color=green>#ハッシュタグ</font><br>");
+			$Page->Print("　<font color=gray>＞引用</font><br>");
+		}
+		else{
+			$Page->Print("  <font color=$setText>#ハッシュタグ</font><br>");
+			$Page->Print("  <font color=$setText>＞引用</font><br>");
+		}
 		$Page->Print("</td></tr>");
 		$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	}
@@ -500,13 +500,13 @@ sub PrintColorSetting
 		$Page->Print("　<font color=$setLink><u>http://---</u></font><br>");
 		$Page->Print("　<font color=$setLinkV><u>http://---</u></font><br><br>");
 		if($setHighlight eq 'checked'){
-		    $Page->Print("　<font color=green>#ハッシュタグ</font><br>");
-		    $Page->Print("　<font color=gray>＞引用</font><br>");
-        }
-        else{
-            $Page->Print("  <font color=$setText>#ハッシュタグ</font><br>");
-            $Page->Print("  <font color=$setText>＞引用</font><br>");
-        }
+			$Page->Print("　<font color=green>#ハッシュタグ</font><br>");
+			$Page->Print("　<font color=gray>＞引用</font><br>");
+		}
+		else{
+			$Page->Print("  <font color=$setText>#ハッシュタグ</font><br>");
+			$Page->Print("  <font color=$setText>＞引用</font><br>");
+		}
 		$Page->Print("</td></tr>");
 		$Page->Print("<tr><td colspan=6><hr></td></tr>");
 	}
@@ -667,8 +667,8 @@ sub PrintLimitSetting
 	$Page->Print("<input type=text size=5 name=BBS_TATESUGI_HOUR value=\"$setTateHour\" style=\"text-align: right\">時間(0で無効)に");
 	$Page->Print("全体で<input type=text size=5 name=BBS_TATESUGI_COUNT value=\"$setTateCount\" style=\"text-align: right\">スレッドまで立てられる");
 	$Page->Print("</td></tr>");
-    
-    	$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
+	
+		$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
 	$Page->Print("<tr><td colspan=4>");
 	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASCII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文のASCIIの割合が<input type=text size=3 name=BBS_SPAMKILL_MESSAGE value=\"$setAskiiMessage\" style=\"text-align: right\" maxlength=\"3\">％以上で");
@@ -680,7 +680,7 @@ sub PrintLimitSetting
 	$Page->Print("（↑が0の時のみ）本文中リンクのTLドメインの種類<input type=text size=30 name=BBS_SPAMKILL_DOMAIN value=\"$setDomain\" style=\"text-align: right\">でポイント加点<br>");
 	$Page->Print("合計<input type=text size=3 name=BBS_SPAMKILL_POINT value=\"$setSpamPoint\" style=\"text-align: right\" maxlength=\"3\">ポイントでスパムと判定");
 	$Page->Print("</td></tr>");
-    
+	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETLIMIT');\"></td></tr></table>");
@@ -984,8 +984,8 @@ sub PrintOtherSetting
 	$Page->Print("<input type=text size=8 name=BBS_MAX_MENU_THREAD value=\"$setThreadMenu\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
-    
-    $Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
+	
+	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("</td>");
 	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
@@ -1160,7 +1160,7 @@ sub FunctionColorSetting
 	$Setting->Set('BBS_CAP_COLOR', $capColor);
 	$Setting->Set('BBS_READTYPE', $Form->Get('BBS_READTYPE'));
 	$Setting->Set('BBS_POSTCOLOR', $Form->Get('BBS_POSTCOLOR'));
-    $Setting->Set('BBS_HIGHLIGHT', ($Form->Equal('BBS_HIGHLIGHT', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_HIGHLIGHT', ($Form->Equal('BBS_HIGHLIGHT', 'on') ? 'checked' : ''));
 	
 	$Setting->Save($Sys);
 	
@@ -1422,19 +1422,19 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_SLIP', $Form->Get('BBS_SLIP'));
 	$Setting->Set('BBS_NINJA', ($Form->Equal('BBS_NINJA', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_HIDENUSI', ($Form->Equal('BBS_HIDENUSI', 'on') ? 'checked' : ''));
-    $Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
-    $Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
-    $Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_MOVIE', ($Form->Equal('BBS_MOVIE', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
-    #$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
+	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	
 	# ID表示設定
 	my %settings_map = (
-    'BBS_DISP_IP1' => { 'BBS_DISP_IP' => 'checked', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#ホスト表示
-    'BBS_DISP_IP2' => { 'BBS_DISP_IP' => 'karafuto', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#発信元表示(樺太)
-    'BBS_DISP_IP3' => { 'BBS_DISP_IP' => 'siberia', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#発信元表示(シベリア)
-    'BBS_FORCE_ID' => { 'BBS_DISP_IP' => '', 'BBS_FORCE_ID' => 'checked', 'BBS_NO_ID' => '' },	#強制ID
-    'BBS_NO_ID'    => { 'BBS_DISP_IP' => '', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => 'checked' },	#ID表示なし
+	'BBS_DISP_IP1' => { 'BBS_DISP_IP' => 'checked', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#ホスト表示
+	'BBS_DISP_IP2' => { 'BBS_DISP_IP' => 'karafuto', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#発信元表示(樺太)
+	'BBS_DISP_IP3' => { 'BBS_DISP_IP' => 'siberia', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => '' },	#発信元表示(シベリア)
+	'BBS_FORCE_ID' => { 'BBS_DISP_IP' => '', 'BBS_FORCE_ID' => 'checked', 'BBS_NO_ID' => '' },	#強制ID
+	'BBS_NO_ID'    => { 'BBS_DISP_IP' => '', 'BBS_FORCE_ID' => '', 'BBS_NO_ID' => 'checked' },	#ID表示なし
 	);
 
 	if (my $settings = $settings_map{$Form->Get('ID_DISP')}) {

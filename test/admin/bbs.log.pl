@@ -176,7 +176,7 @@ sub SetMenuList
 	
 	# ログ閲覧権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_LOGVIEW, $bbs)) {
-        $Base->SetMenu('<hr>', '');
+		$Base->SetMenu('<hr>', '');
 		$Base->SetMenu('スレッド作成ログ', "'bbs.log','DISP','THREADLOG'");
 		$Base->SetMenu('ホストログ', "'bbs.log','DISP','HOSTLOG'");
 		$Base->SetMenu('エラーログ', "'bbs.log','DISP','ERRORLOG'");

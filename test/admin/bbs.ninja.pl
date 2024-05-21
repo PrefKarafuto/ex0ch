@@ -78,8 +78,8 @@ sub DoPrint
 		$BASE->PrintError($this->{'LOG'});
 	}
 	elsif ($subMode eq 'DELETE') {                                             # 忍法帖削除画面
-        PrintNinjaDelete($Page, $Sys, $Form);
-    }
+		PrintNinjaDelete($Page, $Sys, $Form);
+	}
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 	$BASE->Print($Sys->Get('_TITLE'), 4);
@@ -167,7 +167,7 @@ sub PrintNinjaEdit
 	require './module/ninpocho.pl';
 	$Ninja = NINPOCHO->new;
 
-    my $sid = $Form->Get('NINJA_ID');
+	my $sid = $Form->Get('NINJA_ID');
 	$Ninja->LoadOnly($SYS,$sid);
 
 	#既定で保存されるセッション情報
@@ -288,7 +288,7 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖データは存在しません。</td></tr>");
 	}
 
-    $Page->HTMLInput('hidden', 'SID', $sid);
+	$Page->HTMLInput('hidden', 'SID', $sid);
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
@@ -310,80 +310,80 @@ sub PrintNinjaEdit
 #------------------------------------------------------------------------------------------------------------
 sub PrintNinjaSidSearch
 {
-    my ($Page, $Sys, $Form) = @_;
-    my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $sid, $dir);
-    my (@types, $Type);
-    my (@resList, %bbsCount, %threadCount);
+	my ($Page, $Sys, $Form) = @_;
+	my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $sid, $dir);
+	my (@types, $Type);
+	my (@resList, %bbsCount, %threadCount);
    
-    require './module/admin_search.pl';
-    $Search = ADMIN_SEARCH->new;
+	require './module/admin_search.pl';
+	$Search = ADMIN_SEARCH->new;
 	require './module/bbs_info.pl';
 	$BBS = BBS_INFO->new;
 	$BBS->Load($Sys);
 	$Sys->Set('_TITLE','BBS User Writing History - '.$BBS->Get('NAME', $Form->Get('TARGET_BBS')));
 	
-    $sid = $Form->Get('SID');
+	$sid = $Form->Get('SID');
    
-    # 検索オブジェクトの設定と検索の実行
-    my $bbsid = $Form->Get('TARGET_BBS');
+	# 検索オブジェクトの設定と検索の実行
+	my $bbsid = $Form->Get('TARGET_BBS');
 	my $bbsdir = $BBS->Get('DIR',$bbsid);
-    $Search->Create($Sys, 1,undef,$bbsid,$bbsdir);
-    $Search->Run_LogS(undef,undef,undef,$sid);
+	$Search->Create($Sys, 1,undef,$bbsid,$bbsdir);
+	$Search->Run_LogS(undef,undef,undef,$sid);
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>この掲示板内での、SessionID:$sid\のユーザーの書き込み履歴を表示します。</td></tr>");
    
-    if ($@ ne '') {
-        PrintSystemError($Page, $@);
-        return;
-    }
+	if ($@ ne '') {
+		PrintSystemError($Page, $@);
+		return;
+	}
    
-    # 検索結果セット取得
-    $Result = $Search->GetResultSet();
-    $n      = $Result ? @$Result : 0;
-    $base   = $Sys->Get('BBSPATH');
-    $word   = $Form->Get('WORD');
+	# 検索結果セット取得
+	$Result = $Search->GetResultSet();
+	$n      = $Result ? @$Result : 0;
+	$base   = $Sys->Get('BBSPATH');
+	$word   = $Form->Get('WORD');
    
-    PrintResultHead($Page, $n);
+	PrintResultHead($Page, $n);
    
-    # 検索ヒットが1件以上あり
-    if ($n > 0) {
-        require './module/data_utils.pl';
-        my $Conv = DATA_UTILS->new;
-        $n = 1;
-        # スレッドごとにソート
-        @resList = ();
-        #threadCount
-        foreach (@$Result) {
-            @elem = split(/<>/);
-            push @resList, [$elem[1], $_];
-        }
-       
-        foreach (@$Result) {
-            @elem = split(/<>/);
+	# 検索ヒットが1件以上あり
+	if ($n > 0) {
+		require './module/data_utils.pl';
+		my $Conv = DATA_UTILS->new;
+		$n = 1;
+		# スレッドごとにソート
+		@resList = ();
+		#threadCount
+		foreach (@$Result) {
+			@elem = split(/<>/);
+			push @resList, [$elem[1], $_];
+		}
+	   
+		foreach (@$Result) {
+			@elem = split(/<>/);
  
-            # Print BBS Header
-            if (!$bbsCount{$elem[0]}++) {
-                PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem);
-                %threadCount = ();
-            }
-            PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem) if !$bbsCount{$elem[0]}++;
-            PrintThreadHeader($Page, $Sys, $BBS, $Conv, $n, $base, \@elem) if !$threadCount{$elem[1]}++;
-            PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
-            $n++;
-        }
-    }
-    # 検索ヒット無し
-    else {
-        PrintNoHit($Page);
-        $Page->Print("</table>\n");
-        return;
-    }
-    if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
-        PrintResultFoot($Page);
-    }
-    else{
-        $Page->Print("</table>\n");
-    }
+			# Print BBS Header
+			if (!$bbsCount{$elem[0]}++) {
+				PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem);
+				%threadCount = ();
+			}
+			PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem) if !$bbsCount{$elem[0]}++;
+			PrintThreadHeader($Page, $Sys, $BBS, $Conv, $n, $base, \@elem) if !$threadCount{$elem[1]}++;
+			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
+			$n++;
+		}
+	}
+	# 検索ヒット無し
+	else {
+		PrintNoHit($Page);
+		$Page->Print("</table>\n");
+		return;
+	}
+	if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
+		PrintResultFoot($Page);
+	}
+	else{
+		$Page->Print("</table>\n");
+	}
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -396,12 +396,12 @@ sub PrintNinjaSidSearch
 #------------------------------------------------------------------------------------------------------------
 sub PrintResultHead
 {
-    my ($Page, $n) = @_;
+	my ($Page, $n) = @_;
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
 <style>
 .res{   background-color: yellow;
-        font-weight : bold;
+		font-weight : bold;
 }
 </style>
 <table border=0 cellspacing=2 width=100% align="center">
@@ -428,13 +428,13 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSHeader
 {
-    my ($Page, $BBS, $Conv, $n, $base, $pResult) = @_;
-    my ($name, @bbsSet);
+	my ($Page, $BBS, $Conv, $n, $base, $pResult) = @_;
+	my ($name, @bbsSet);
    
-    $BBS->GetKeySet('DIR', $$pResult[0], \@bbsSet);
-    $name = $BBS->Get('NAME', $$pResult[0]);
+	$BBS->GetKeySet('DIR', $$pResult[0], \@bbsSet);
+	$name = $BBS->Get('NAME', $$pResult[0]);
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
  <tr>
    <td colspan=2>
    </td>
@@ -452,25 +452,25 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadHeader
 {
-    my ($Page, $SYS, $BBS, $Conv, $n, $base, $pResult) = @_;
-    my ($Threads, $dir, $subj);
+	my ($Page, $SYS, $BBS, $Conv, $n, $base, $pResult) = @_;
+	my ($Threads, $dir, $subj);
    
-    require './module/thread.pl';
-    $Threads = THREAD->new;
-    $dir = $BBS->Get('DIR', $$pResult[0]);
-    $SYS->Set('BBS', $dir);
-    $Threads->Load($SYS);
+	require './module/thread.pl';
+	$Threads = THREAD->new;
+	$dir = $BBS->Get('DIR', $$pResult[0]);
+	$SYS->Set('BBS', $dir);
+	$Threads->Load($SYS);
    
-    $subj = $Threads->Get('SUBJECT', $$pResult[1]);
-    if (! ($subj =~ /[^\s　]/) || $subj eq '') {
-        $subj = '(空欄もしくは空白のみ)';
-        #$subj = $$pResult[1];
-    }
+	$subj = $Threads->Get('SUBJECT', $$pResult[1]);
+	if (! ($subj =~ /[^\s　]/) || $subj eq '') {
+		$subj = '(空欄もしくは空白のみ)';
+		#$subj = $$pResult[1];
+	}
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
  <tr>
    <td colspan=2>
-     <h1 style="color:#FF0000;font-size:larger;font-weight:normal;background-color:#efefef">$subj</h1>
+	 <h1 style="color:#FF0000;font-size:larger;font-weight:normal;background-color:#efefef">$subj</h1>
    </td>
  </tr>
 HTML
@@ -486,43 +486,43 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResult
 {
-    my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
-    my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
-    $isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
-    $bbsID = $$pResult[0];
-    $bbsDir = $BBS->Get('DIR', $bbsID);
-    $bbsName = $BBS->Get('NAME', $bbsID);
-    
-    $Page->Print("<tr><td class=Response valign=top>");
-    if ($bbsID) {
-    #$name = $BBS->Get('NAME', $bbsSet[0]);
-    $value = "$bbsID/$$pResult[1]/$$pResult[2]";
-        if($isAbone && $$pResult[2]!=1){
-        	$Page->Print("<input type=checkbox name=RESS value=\"$value\" disabled>");
-        }
-    $Page->Print(<<HTML);
-    </td>
-    <td class=Response >
-    <dt>
-    <a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
+	my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
+	my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
+	$isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
+	$bbsID = $$pResult[0];
+	$bbsDir = $BBS->Get('DIR', $bbsID);
+	$bbsName = $BBS->Get('NAME', $bbsID);
+	
+	$Page->Print("<tr><td class=Response valign=top>");
+	if ($bbsID) {
+	#$name = $BBS->Get('NAME', $bbsSet[0]);
+	$value = "$bbsID/$$pResult[1]/$$pResult[2]";
+		if($isAbone && $$pResult[2]!=1){
+			$Page->Print("<input type=checkbox name=RESS value=\"$value\" disabled>");
+		}
+	$Page->Print(<<HTML);
+	</td>
+	<td class=Response >
+	<dt>
+	<a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
 HTML
-        if ($$pResult[4] eq '') {
-            $Page->Print("<font color=\"green\">$$pResult[3]</font>");
-        }
-        else {
-            $Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
-        }
-       
-    $Page->Print(<<HTML);
+		if ($$pResult[4] eq '') {
+			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
+		}
+		else {
+			$Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
+		}
+	   
+	$Page->Print(<<HTML);
  </b>：$$pResult[5]</dt>
-    <dd>
-    $$pResult[6]
-    <br>
-    </dd>
+	<dd>
+	$$pResult[6]
+	<br>
+	</dd>
   </td>
 </tr>
 HTML
-    }
+	}
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -535,22 +535,22 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResultFoot
 {
-    my ($Page) = @_;
-    my ($common);
+	my ($Page) = @_;
+	my ($common);
    
-    $common = "onclick=\"DoSubmit('bbs.thread','DISP'"; #,'ABONELUMPRES')\"";
+	$common = "onclick=\"DoSubmit('bbs.thread','DISP'"; #,'ABONELUMPRES')\"";
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
   <tr>
-    <td colspan=2 align=right>
+	<td colspan=2 align=right>
 	<hr>
 	<br>
-      <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
-     <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
-    </td>
+	  <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
+	 <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
+	</td>
   </tr>
 HTML
-    $Page->Print("</table>\n");
+	$Page->Print("</table>\n");
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -563,9 +563,9 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintNoHit
 {
-    my ($Page) = @_;
+	my ($Page) = @_;
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
 <dd>
  <br>
  <br>

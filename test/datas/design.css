@@ -4,36 +4,36 @@
 */
 
 @media screen and (max-width:768px) {
-    .bbs_service_textarea textarea {
-    resize: vertical;
-    width:95%;
-    margin:0;
-    }
+	.bbs_service_textarea textarea {
+	resize: vertical;
+	width:95%;
+	margin:0;
+	}
 }
 
 /*PCでは無効（改行しない）*/
 .smartphone{
-    display: none;
+	display: none;
 }
 /*スマートフォンでは有効（改行する）*/
 @media screen and (max-width:768px) {
-    .smartphone{
-        display: block;
-    }
+	.smartphone{
+		display: block;
+	}
 }
 
 /* bbs.cgiでスレッド作成のボタンをスマホだと一番上にする */
 @media screen and (max-width:768px) {
-    .reverse_order{
-     display: flex;
-     flex-direction: column;
-    }
+	.reverse_order{
+	 display: flex;
+	 flex-direction: column;
+	}
 }
 .order1 {
-    order: 1;
+	order: 1;
 }
 .order2 {
-    order: 2;
+	order: 2;
 }
 .post {
   border-width: 1px;
@@ -55,16 +55,16 @@
  overflow-wrap:break-word;
 }
 .backmascot {
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position-x: calc(100% - 250px);
-    background-position-y: bottom;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position-x: calc(100% - 250px);
+	background-position-y: bottom;
 }
 .aaview{
-    font-family:MS Gothic;
-    font-size: 16px;
-    line-height:1;
-    white-space:nowrap;
+	font-family:MS Gothic;
+	font-size: 16px;
+	line-height:1;
+	white-space:nowrap;
 }
 /*
 埋め込み画像や動画のレスポンシブ化
@@ -72,17 +72,17 @@ https://akros-ac.jp/8277/
 */
 /* https://web-de-asobo.net/2022/10/06/html-dl-dt-dd/ */
 @media screen and (max-width:768px) {
-    dd {
-    margin-inline-start: 0;
-    }
+	dd {
+	margin-inline-start: 0;
+	}
 }
 
 .responsive{
-    position:relative;
-    padding-bottom: 56.25%; /* 16:9 */
-    height: 0;
-    overflow: hidden;
-    max-width: 300px
+	position:relative;
+	padding-bottom: 56.25%; /* 16:9 */
+	height: 0;
+	overflow: hidden;
+	max-width: 300px
 }
 .responsive iframe{
 position:absolute;
@@ -93,56 +93,56 @@ height:100%;
 }
 
 @media screen and (max-width:768px) {
-    blockquote{
-        margin-block-start: 0em;
-        margin-block-end: 0em;
-        margin-inline-start: 0px;
-        margin-inline-end: 0px;
-    }
+	blockquote{
+		margin-block-start: 0em;
+		margin-block-end: 0em;
+		margin-inline-start: 0px;
+		margin-inline-end: 0px;
+	}
 }
 .video {
-    width: 100%;
-    max-width: 560px;
+	width: 100%;
+	max-width: 560px;
   }
 .video_iframe {
-    position: relative;
-    width: 100%;
-    padding-top: 56.25%;
-    margin-bottom: 50px;
+	position: relative;
+	width: 100%;
+	padding-top: 56.25%;
+	margin-bottom: 50px;
   }
 .video_iframe iframe {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 100%;
+	height: 100%;
   }
   #overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 999;
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7);
+	z-index: 999;
   }
   
   #overlay img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 90%;
-    max-height: 90%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 90%;
+	max-height: 90%;
   }
   
   #close-button {
-    position: absolute;
-    bottom: 10%;
-    right: 10%;
-    cursor: pointer;
-    color: white;
-    font-size: 24px;
+	position: absolute;
+	bottom: 10%;
+	right: 10%;
+	cursor: pointer;
+	color: white;
+	font-size: 24px;
   }
   

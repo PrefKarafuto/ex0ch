@@ -87,8 +87,8 @@ sub DoPrint
 		$BASE->PrintError($this->{'LOG'});
 	}
 	elsif ($subMode eq 'DELETE') {                                             # 忍法帖削除画面
-        PrintNinjaDelete($Page, $Sys, $Form);
-    }
+		PrintNinjaDelete($Page, $Sys, $Form);
+	}
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 	$BASE->Print($Sys->Get('_TITLE'), 1);
@@ -183,9 +183,9 @@ sub PrintNinjaList
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	my $infoDir = $SYS->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/"; 
-    my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
-    my $sessnum = @session_files;
-    $dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));
+	my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
+	my $sessnum = @session_files;
+	$dispEd		= (($dispSt + $dispNum) > $sessnum ? $sessnum : ($dispSt + $dispNum));
 	
 	
 	# 権限取得
@@ -207,13 +207,13 @@ sub PrintNinjaList
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:180px\">SessionID</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:10px\">Size</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:80px\">Last Update</td></tr>\n");
-    
+	
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$n		= $i + 1;
 		$file_name		= $session_files[$i];
 		$file_name	=~ /cgisess_([0-9a-f]+)/;
-        my $id = $1;
-        $mtime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[9]);
+		my $id = $1;
+		$mtime = strftime "%Y-%m-%d %H:%M:%S", localtime((stat($file_name))[9]);
 		my $size = (stat($file_name))[7];
 		
 		$Page->Print("<tr bgcolor=$bgColor>");
@@ -275,7 +275,7 @@ sub PrintNinjaEdit
 	require './module/ninpocho.pl';
 	$Ninja = NINPOCHO->new;
 	
-    my $sid = $Form->Get('NINJA_ID');
+	my $sid = $Form->Get('NINJA_ID');
 	$Ninja->LoadOnly($SYS,$sid);
 
 	#既定で保存されるセッション情報
@@ -396,7 +396,7 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖データは存在しません。</td></tr>");
 	}
 
-    $Page->HTMLInput('hidden', 'SID', $sid);
+	$Page->HTMLInput('hidden', 'SID', $sid);
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3>");
@@ -417,60 +417,60 @@ sub PrintNinjaEdit
 #------------------------------------------------------------------------------------------------------------
 sub PrintNinjaSearch
 {
-    my ($Page, $SYS, $Form, $BBS) = @_;
-    my ($sKEY, $sWORD);
+	my ($Page, $SYS, $Form, $BBS) = @_;
+	my ($sKEY, $sWORD);
    
-    my $sanitize = sub {
-        $_ = shift;
-        s/&/&amp;/g;
-        s/</&lt;/g;
-        s/>/&gt;/g;
-        s/"/&#34;/g;#"
-        return $_;
-    };
+	my $sanitize = sub {
+		$_ = shift;
+		s/&/&amp;/g;
+		s/</&lt;/g;
+		s/>/&gt;/g;
+		s/"/&#34;/g;#"
+		return $_;
+	};
    
-    $sKEY   = &$sanitize($Form->Get('KEY', ''));
-    $sWORD  = &$sanitize($Form->Get('WORD'));
+	$sKEY   = &$sanitize($Form->Get('KEY', ''));
+	$sWORD  = &$sanitize($Form->Get('WORD'));
    
-    $SYS->Set('_TITLE', 'Ninpocho Search');
+	$SYS->Set('_TITLE', 'Ninpocho Search');
    
-    $Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
-    $Page->Print("  <tr><td colspan=2>以下の条件に当てはまる忍法帖を検索します。</td></tr>\n");
-    $Page->Print("  <tr><td colspan=2><hr></td></tr>\n");
-    $Page->Print("  <tr>\n");
-    $Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
-    $Page->Print("    <td class=\"DetailTitle\">条件設定値</td></tr>\n");
-    $Page->Print("</td></tr>\n");
-    $Page->Print(<<HTML);
+	$Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
+	$Page->Print("  <tr><td colspan=2>以下の条件に当てはまる忍法帖を検索します。</td></tr>\n");
+	$Page->Print("  <tr><td colspan=2><hr></td></tr>\n");
+	$Page->Print("  <tr>\n");
+	$Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
+	$Page->Print("    <td class=\"DetailTitle\">条件設定値</td></tr>\n");
+	$Page->Print("</td></tr>\n");
+	$Page->Print(<<HTML);
   <tr>
-    <td>検索キー</td>
-    <td>
+	<td>検索キー</td>
+	<td>
 	<input type=text size=20 name=KEY onkeydown="go(event.keyCode);" value="$sKEY">
-    </td>
+	</td>
   </tr>
   <tr>
-    <td>検索ワード</td>
-    <td>
-      <input type=text size=60 name=WORD onkeydown="go(event.keyCode);" value="$sWORD">
-    </td>
+	<td>検索ワード</td>
+	<td>
+	  <input type=text size=60 name=WORD onkeydown="go(event.keyCode);" value="$sWORD">
+	</td>
   </tr>
   <tr>
-    <td colspan=2><hr></td>
+	<td colspan=2><hr></td>
   </tr>
   <tr>
-    <td colspan=2 align=right>
-      <input type=button value="　検索　" onclick="DoSubmit('sys.ninja','DISP','NIN_SEARCH')" style="float: left;">
-    </td>
+	<td colspan=2 align=right>
+	  <input type=button value="　検索　" onclick="DoSubmit('sys.ninja','DISP','NIN_SEARCH')" style="float: left;">
+	</td>
   </tr>
 </table>
 HTML
    
-    # 検索ワードがある場合は検索を実行する
-    if ($Form->Get('WORD', '') ne '') {
-        #Search($SYS, $Form, $Page,$BBS); #ここを実装する
-    }
+	# 検索ワードがある場合は検索を実行する
+	if ($Form->Get('WORD', '') ne '') {
+		#Search($SYS, $Form, $Page,$BBS); #ここを実装する
+	}
    
-    $Page->Print("<script>function go(keyCode).
+	$Page->Print("<script>function go(keyCode).
 	{if(keyCode==13) DoSubmit('sys.ninja','DISP','NIN_SEARCH');.
 	}</script>");
 
@@ -486,39 +486,39 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintNinjaSearchResult
 {
-    my ($Page, $Sys, $Form) = @_;
-    my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $key);
-    my (@types, $Type);
-    my (@resList, %bbsCount, %threadCount);
+	my ($Page, $Sys, $Form) = @_;
+	my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $key);
+	my (@types, $Type);
+	my (@resList, %bbsCount, %threadCount);
 
 	$Sys->Set('_TITLE','Ninpocho Search');
    
 	my $sanitize = sub {
-        $_ = shift;
-        s/&/&amp;/g;
-        s/</&lt;/g;
-        s/>/&gt;/g;
-        s/"/&#34;/g;#"
-        return $_;
-    };
+		$_ = shift;
+		s/&/&amp;/g;
+		s/</&lt;/g;
+		s/>/&gt;/g;
+		s/"/&#34;/g;#"
+		return $_;
+	};
    
-    require './module/admin_search.pl';
-    $Search = ADMIN_SEARCH->new;
+	require './module/admin_search.pl';
+	$Search = ADMIN_SEARCH->new;
 	require './module/bbs_info.pl';
 	$BBS = BBS_INFO->new;
 	$BBS->Load($Sys);
-    $word   = &$sanitize($Form->Get('WORD'));
+	$word   = &$sanitize($Form->Get('WORD'));
 	$key = &$sanitize($Form->Get('KEY'));
 	
    
-    # 検索オブジェクトの設定と検索の実行
-    $Search->Create($Sys, 3);
+	# 検索オブジェクトの設定と検索の実行
+	$Search->Create($Sys, 3);
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>Key:[$key] Word:[$word] の忍法帖検索結果</td></tr>");
-    if ($@ ne '') {
-        PrintSystemError($Page, $@);
-        return;
-    }
+	if ($@ ne '') {
+		PrintSystemError($Page, $@);
+		return;
+	}
 
 	# 検索結果セット取得
 	if($key ne 'ninID' && $word){
@@ -527,10 +527,10 @@ sub PrintNinjaSearchResult
 		$Result = $Search->NinSearch(undef,undef,$Form->Get('WORD'));
 	}
 	
-    $n      = $Result ? @$Result : 0;
+	$n      = $Result ? @$Result : 0;
 	my $res = $Result->[0];
-    # 検索ヒットが1件以上あり
-    if ($n > 0) {
+	# 検索ヒットが1件以上あり
+	if ($n > 0) {
 		my $dispNum	= $Form->Get('DISPNUM', 10);
 		my $dispSt		= $Form->Get('DISPST', 0) || 0;
 		$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
@@ -570,28 +570,28 @@ sub PrintNinjaSearchResult
 			$Page->Print("<td>$num: <a href=$common>$id</a></td>");
 			$Page->Print("<td>$size</td><td>$mtime</td></tr>\n");
 		}
-    }
-    # 検索ヒット無し
-    else {
-        PrintNoHit($Page);
-        $Page->Print("</table>\n");
-        return;
-    }
+	}
+	# 検索ヒット無し
+	else {
+		PrintNoHit($Page);
+		$Page->Print("</table>\n");
+		return;
+	}
 	$Page->HTMLInput('hidden', 'DISPST', '');
 	$Page->HTMLInput('hidden', 'NINJA_ID', '');
 	$Page->HTMLInput('hidden', 'KEY', $Form->Get('KEY'));
 	$Page->HTMLInput('hidden', 'WORD', $Form->Get('WORD'));
-    if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
-    	$Page->Print(<<HTML);
+	if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
+		$Page->Print(<<HTML);
   <tr>
-    <td colspan=4 align=right>
+	<td colspan=4 align=right>
 	<hr>
 	<br>
-     <input type=button value="　削除　" disabled onclick="DoSubmit('sys.ninja','FUNC','DELNINJA')" class="delete">
-    </td>
+	 <input type=button value="　削除　" disabled onclick="DoSubmit('sys.ninja','FUNC','DELNINJA')" class="delete">
+	</td>
   </tr>
 HTML
-    }
+	}
 	$Page->Print("</table>\n");
 }
  
@@ -605,79 +605,79 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintNinjaSidSearch
 {
-    my ($Page, $Sys, $Form) = @_;
-    my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $sid, $dir);
-    my (@types, $Type);
-    my (@resList, %bbsCount, %threadCount);
+	my ($Page, $Sys, $Form) = @_;
+	my ($Search, $Mode, $Result, @elem, $BBS, $n, $base, $word, $id, $sid, $dir);
+	my (@types, $Type);
+	my (@resList, %bbsCount, %threadCount);
 
 	$Sys->Set('_TITLE','User Writing History');
    
-    require './module/admin_search.pl';
-    $Search = ADMIN_SEARCH->new;
+	require './module/admin_search.pl';
+	$Search = ADMIN_SEARCH->new;
 	require './module/bbs_info.pl';
 	$BBS = BBS_INFO->new;
 	$BBS->Load($Sys);
 	
-    $sid = $Form->Get('SID');
+	$sid = $Form->Get('SID');
    
-    # 検索オブジェクトの設定と検索の実行
-    $Search->Create($Sys, 0);
-    $Search->Run_LogS(undef,undef,undef,$sid);
+	# 検索オブジェクトの設定と検索の実行
+	$Search->Create($Sys, 0);
+	$Search->Run_LogS(undef,undef,undef,$sid);
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>SessionID:$sid\のユーザーの書き込み履歴を表示します。</td></tr>");
    
-    if ($@ ne '') {
-        PrintSystemError($Page, $@);
-        return;
-    }
+	if ($@ ne '') {
+		PrintSystemError($Page, $@);
+		return;
+	}
    
-    # 検索結果セット取得
-    $Result = $Search->GetResultSet();
-    $n      = $Result ? @$Result : 0;
-    $base   = $Sys->Get('BBSPATH');
-    $word   = $Form->Get('WORD');
+	# 検索結果セット取得
+	$Result = $Search->GetResultSet();
+	$n      = $Result ? @$Result : 0;
+	$base   = $Sys->Get('BBSPATH');
+	$word   = $Form->Get('WORD');
    
-    PrintResultHead($Page, $n);
+	PrintResultHead($Page, $n);
    
-    # 検索ヒットが1件以上あり
-    if ($n > 0) {
-        require './module/data_utils.pl';
-        my $Conv = DATA_UTILS->new;
-        $n = 1;
-        # スレッドごとにソート
-        @resList = ();
-        #threadCount
-        foreach (@$Result) {
-            @elem = split(/<>/);
-            push @resList, [$elem[1], $_];
-        }
-       
-        foreach (@$Result) {
-            @elem = split(/<>/);
+	# 検索ヒットが1件以上あり
+	if ($n > 0) {
+		require './module/data_utils.pl';
+		my $Conv = DATA_UTILS->new;
+		$n = 1;
+		# スレッドごとにソート
+		@resList = ();
+		#threadCount
+		foreach (@$Result) {
+			@elem = split(/<>/);
+			push @resList, [$elem[1], $_];
+		}
+	   
+		foreach (@$Result) {
+			@elem = split(/<>/);
  
-            # Print BBS Header
-            if (!$bbsCount{$elem[0]}++) {
-                PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem);
-                %threadCount = ();
-            }
-            PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem) if !$bbsCount{$elem[0]}++;
-            PrintThreadHeader($Page, $Sys, $BBS, $Conv, $n, $base, \@elem) if !$threadCount{$elem[1]}++;
-            PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
-            $n++;
-        }
-    }
-    # 検索ヒット無し
-    else {
-        PrintNoHit($Page);
-        $Page->Print("</table>\n");
-        return;
-    }
-    if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
-        PrintResultFoot($Page);
-    }
-    else{
-        $Page->Print("</table>\n");
-    }
+			# Print BBS Header
+			if (!$bbsCount{$elem[0]}++) {
+				PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem);
+				%threadCount = ();
+			}
+			PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem) if !$bbsCount{$elem[0]}++;
+			PrintThreadHeader($Page, $Sys, $BBS, $Conv, $n, $base, \@elem) if !$threadCount{$elem[1]}++;
+			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
+			$n++;
+		}
+	}
+	# 検索ヒット無し
+	else {
+		PrintNoHit($Page);
+		$Page->Print("</table>\n");
+		return;
+	}
+	if($Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))){
+		PrintResultFoot($Page);
+	}
+	else{
+		$Page->Print("</table>\n");
+	}
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -690,12 +690,12 @@ sub PrintNinjaSidSearch
 #------------------------------------------------------------------------------------------------------------
 sub PrintResultHead
 {
-    my ($Page, $n) = @_;
+	my ($Page, $n) = @_;
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
 <style>
 .res{   background-color: yellow;
-        font-weight : bold;
+		font-weight : bold;
 }
 </style>
 <table border=0 cellspacing=2 width=100% align="center">
@@ -722,13 +722,13 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintBBSHeader
 {
-    my ($Page, $BBS, $Conv, $n, $base, $pResult) = @_;
-    my ($name, @bbsSet);
+	my ($Page, $BBS, $Conv, $n, $base, $pResult) = @_;
+	my ($name, @bbsSet);
    
-    $BBS->GetKeySet('DIR', $$pResult[0], \@bbsSet);
-    $name = $BBS->Get('NAME', $$pResult[0]);
+	$BBS->GetKeySet('DIR', $$pResult[0], \@bbsSet);
+	$name = $BBS->Get('NAME', $$pResult[0]);
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
  <tr>
    <td colspan=2>
    </td>
@@ -746,25 +746,25 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadHeader
 {
-    my ($Page, $SYS, $BBS, $Conv, $n, $base, $pResult) = @_;
-    my ($Threads, $dir, $subj);
+	my ($Page, $SYS, $BBS, $Conv, $n, $base, $pResult) = @_;
+	my ($Threads, $dir, $subj);
    
-    require './module/thread.pl';
-    $Threads = THREAD->new;
-    $dir = $BBS->Get('DIR', $$pResult[0]);
-    $SYS->Set('BBS', $dir);
-    $Threads->Load($SYS);
+	require './module/thread.pl';
+	$Threads = THREAD->new;
+	$dir = $BBS->Get('DIR', $$pResult[0]);
+	$SYS->Set('BBS', $dir);
+	$Threads->Load($SYS);
    
-    $subj = $Threads->Get('SUBJECT', $$pResult[1]);
-    if (! ($subj =~ /[^\s　]/) || $subj eq '') {
-        $subj = '(空欄もしくは空白のみ)';
-        #$subj = $$pResult[1];
-    }
+	$subj = $Threads->Get('SUBJECT', $$pResult[1]);
+	if (! ($subj =~ /[^\s　]/) || $subj eq '') {
+		$subj = '(空欄もしくは空白のみ)';
+		#$subj = $$pResult[1];
+	}
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
  <tr>
    <td colspan=2>
-     <h1 style="color:#FF0000;font-size:larger;font-weight:normal;background-color:#efefef">$subj</h1>
+	 <h1 style="color:#FF0000;font-size:larger;font-weight:normal;background-color:#efefef">$subj</h1>
    </td>
  </tr>
 HTML
@@ -780,43 +780,43 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResult
 {
-    my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
-    my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
-    $isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
-    $bbsID = $$pResult[0];
-    $bbsDir = $BBS->Get('DIR', $bbsID);
-    $bbsName = $BBS->Get('NAME', $bbsID);
-    
-    $Page->Print("<tr><td class=Response valign=top>");
-    if ($bbsID) {
-    #$name = $BBS->Get('NAME', $bbsSet[0]);
-    $value = "$bbsID/$$pResult[1]/$$pResult[2]";
-        if($isAbone && $$pResult[2]!=1){
-        	$Page->Print("<input type=checkbox name=RESS value=\"$value\" disabled>");
-        }
-    $Page->Print(<<HTML);
-    </td>
-    <td class=Response >
-    <dt>
-    <a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
+	my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
+	my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
+	$isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
+	$bbsID = $$pResult[0];
+	$bbsDir = $BBS->Get('DIR', $bbsID);
+	$bbsName = $BBS->Get('NAME', $bbsID);
+	
+	$Page->Print("<tr><td class=Response valign=top>");
+	if ($bbsID) {
+	#$name = $BBS->Get('NAME', $bbsSet[0]);
+	$value = "$bbsID/$$pResult[1]/$$pResult[2]";
+		if($isAbone && $$pResult[2]!=1){
+			$Page->Print("<input type=checkbox name=RESS value=\"$value\" disabled>");
+		}
+	$Page->Print(<<HTML);
+	</td>
+	<td class=Response >
+	<dt>
+	<a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
 HTML
-        if ($$pResult[4] eq '') {
-            $Page->Print("<font color=\"green\">$$pResult[3]</font>");
-        }
-        else {
-            $Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
-        }
-       
-    $Page->Print(<<HTML);
+		if ($$pResult[4] eq '') {
+			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
+		}
+		else {
+			$Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
+		}
+	   
+	$Page->Print(<<HTML);
  </b>：$$pResult[5]</dt>
-    <dd>
-    $$pResult[6]
-    <br>
-    </dd>
+	<dd>
+	$$pResult[6]
+	<br>
+	</dd>
   </td>
 </tr>
 HTML
-    }
+	}
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -829,22 +829,22 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResultFoot
 {
-    my ($Page) = @_;
-    my ($common);
+	my ($Page) = @_;
+	my ($common);
    
-    $common = "onclick=\"DoSubmit('bbs.thread','DISP'"; #,'ABONELUMPRES')\"";
+	$common = "onclick=\"DoSubmit('bbs.thread','DISP'"; #,'ABONELUMPRES')\"";
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
   <tr>
-    <td colspan=2 align=right>
+	<td colspan=2 align=right>
 	<hr>
 	<br>
-      <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
-     <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
-    </td>
+	  <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
+	 <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
+	</td>
   </tr>
 HTML
-    $Page->Print("</table>\n");
+	$Page->Print("</table>\n");
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -857,9 +857,9 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintNoHit
 {
-    my ($Page) = @_;
+	my ($Page) = @_;
    
-    $Page->Print(<<HTML);
+	$Page->Print(<<HTML);
 <dd>
  <br>
  <br>
@@ -886,7 +886,7 @@ sub FunctionNinjaDelete
 	my $Ninja = NINPOCHO->new;
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/"; 
-    my @ninList = $Form->GetAtArray('NINPOCHO');
+	my @ninList = $Form->GetAtArray('NINPOCHO');
 	my $count = @ninList;
 
 	my $result = $Ninja->Delete($Sys,\@ninList);
@@ -902,8 +902,8 @@ sub FunctionNinjaLimDelete
 	my $Ninja = NINPOCHO->new;
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/"; 
-    my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
-    my $sessnum = @session_files;
+	my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
+	my $sessnum = @session_files;
 	my $count = 0;
 
 	foreach my $sid(@session_files){

@@ -117,20 +117,20 @@ sub AdminCGI
 #
 #------------------------------------------------------------------------------------------------------------
 sub Certification_Captcha {
-    my ($Sys,$Form) = @_;
+	my ($Sys,$Form) = @_;
 	my ($captcha_response,$url);
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
-    my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
 	if($captcha_kind eq 'h-captcha'){
 		$captcha_response = $Form->Get('h-captcha-response');
-    	$url = 'https://api.hcaptcha.com/siteverify';
+		$url = 'https://api.hcaptcha.com/siteverify';
 	}elsif($captcha_kind eq 'g-recaptcha'){
 		$captcha_response = $Form->Get('g-recaptcha-response');
-    	$url = 'https://www.google.com/recaptcha/api/siteverify';
+		$url = 'https://www.google.com/recaptcha/api/siteverify';
 	}elsif($captcha_kind eq 'cf-turnstile'){
 		$captcha_response = $Form->Get('cf-turnstile-response');
-    	$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 	}else{
 		return 0;
 	}
@@ -140,7 +140,7 @@ sub Certification_Captcha {
 		secret => $secretkey,
 		response => $captcha_response,
 		remoteip => $ENV{'REMOTE_ADDR'},
-    });
+	});
 	
 	if ($response->is_success()) {
 		my $json_text = $response->decoded_content();

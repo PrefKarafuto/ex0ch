@@ -139,38 +139,38 @@ HTML
   <form action="./search.cgi" method="POST">
   <table border="0">
    <tr>
-    <td>検索モード<br>
-    <select name="MODE">
+	<td>検索モード<br>
+	<select name="MODE">
 HTML
 
 	if ($sMODE eq 'ALL') {
 		$Page->Print(<<HTML);
-     <option value="ALL" selected>鯖内全検索</option>
+	 <option value="ALL" selected>鯖内全検索</option>
 	 <option value="CATEGORY">カテゴリー指定全検索</option>
-     <option value="BBS">BBS指定全検索</option>
+	 <option value="BBS">BBS指定全検索</option>
 HTML
 	}
 	elsif ($sMODE eq 'CATEGORY') {
 		$Page->Print(<<HTML);
-     <option value="ALL">鯖内全検索</option>
+	 <option value="ALL">鯖内全検索</option>
 	 <option value="CATEGORY" selected>カテゴリー指定全検索</option>
-     <option value="BBS">BBS指定全検索</option>
+	 <option value="BBS">BBS指定全検索</option>
 HTML
 	}
 	elsif ($sMODE eq 'BBS' || $sMODE eq '') {
 		$Page->Print(<<HTML);
-     <option value="ALL">鯖内全検索</option>
+	 <option value="ALL">鯖内全検索</option>
 	 <option value="CATEGORY">カテゴリー指定全検索</option>
-     <option value="BBS" selected>BBS指定全検索</option>
+	 <option value="BBS" selected>BBS指定全検索</option>
 HTML
 	}
 	$Page->Print(<<HTML);
-    </select>
-    </td>
+	</select>
+	</td>
    </tr>
    <tr>
-    <td>指定カテゴリー<small>（カテゴリー指定検索用）</small><br>
-    <select name="CATEGORY">
+	<td>指定カテゴリー<small>（カテゴリー指定検索用）</small><br>
+	<select name="CATEGORY">
 HTML
 
 	# カテゴリーの取得
@@ -200,12 +200,12 @@ HTML
 		}
 	}
 	$Page->Print(<<HTML);
-    </select>
-    </td>
+	</select>
+	</td>
    </tr>
    <tr>
-    <td>指定BBS<small>（BBS指定検索用）</small><br>
-    <select name="BBS">
+	<td>指定BBS<small>（BBS指定検索用）</small><br>
+	<select name="BBS">
 HTML
 	
 	foreach $id (@bbsSet) {
@@ -223,26 +223,26 @@ HTML
 		}
 	}
 	$Page->Print(<<HTML);
-    </select>
-    </td>
+	</select>
+	</td>
    </tr>
    <tr>
-    <td>検索ワード<br><input type="text" size="30" name="WORD" value="$sWORD"></td>
+	<td>検索ワード<br><input type="text" size="30" name="WORD" value="$sWORD"></td>
    </tr>
    <tr>
-    <td>検索種別<br>
+	<td>検索種別<br>
 	<input type="checkbox" name="TYPE" value="8" $cTYPE[3]>スレタイ検索<br>
-    <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
-    <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
-    <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>
-    </td>
+	<input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
+	<input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
+	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>
+	</td>
    </tr>
    <tr>
-    <td colspan="2" align="right">
-    <hr>
+	<td colspan="2" align="right">
+	<hr>
 	$Captcha
-    <input type="submit" value="検索" style="width:150px;">
-    </td>
+	<input type="submit" value="検索" style="width:150px;">
+	</td>
    </tr>
   </table>
   </form>
@@ -411,17 +411,17 @@ sub PrintResult
 
 		$Page->Print(<<HTML);
  </b>：$$pResult[5]</dt>
-    <dd>
-    $$pResult[6]
-    <br>
-    <hr>
-    <a target="_blank" href="$base/$$pResult[0]/">【$name】</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">【$threadName】</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">【&gt;&gt;$$pResult[2]】</a>
-    <br>
-    <br>
-    </dd>
-    
+	<dd>
+	$$pResult[6]
+	<br>
+	<hr>
+	<a target="_blank" href="$base/$$pResult[0]/">【$name】</a>
+	<a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">【$threadName】</a>
+	<a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">【&gt;&gt;$$pResult[2]】</a>
+	<br>
+	<br>
+	</dd>
+	
 HTML
 	}
 }
@@ -489,13 +489,13 @@ sub PrintSystemError
   <small><b>【ヒット数：0】</b></small><font size="+2" color="red">システムエラー</font>
   </div>
    <dt>0 名前：<font color="forestgreen"><b>検索エンジソ\＠EXぜろちゃんねる</b></font>：System Error</dt>
-    <dd>
-    <br>
-    <br>
-    $msg<br>
-    <br>
-    <br>
-    </dd>
+	<dd>
+	<br>
+	<br>
+	$msg<br>
+	<br>
+	<br>
+	</dd>
   </dl>
   </td>
  </tr>
@@ -514,20 +514,20 @@ HTML
 #
 #------------------------------------------------------------------------------------------------------------
 sub Certification_Captcha {
-    my ($Sys,$Form) = @_;
+	my ($Sys,$Form) = @_;
 	my ($captcha_response,$url);
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
-    my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
 	if($captcha_kind eq 'h-captcha'){
 		$captcha_response = $Form->Get('h-captcha-response');
-    	$url = 'https://api.hcaptcha.com/siteverify';
+		$url = 'https://api.hcaptcha.com/siteverify';
 	}elsif($captcha_kind eq 'g-recaptcha'){
 		$captcha_response = $Form->Get('g-recaptcha-response');
-    	$url = 'https://www.google.com/recaptcha/api/siteverify';
+		$url = 'https://www.google.com/recaptcha/api/siteverify';
 	}elsif($captcha_kind eq 'cf-turnstile'){
 		$captcha_response = $Form->Get('cf-turnstile-response');
-    	$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 	}else{
 		return 0;
 	}
@@ -538,7 +538,7 @@ sub Certification_Captcha {
 			secret => $secretkey,
 			response => $captcha_response,
 			remoteip => $ENV{'REMOTE_ADDR'},
-           });
+		});
 		if ($response->is_success()) {
 			my $json_text = $response->decoded_content();
 			
