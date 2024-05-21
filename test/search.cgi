@@ -168,7 +168,7 @@ HTML
     </td>
    </tr>
    <tr>
-    <td>指定カテゴリー<small>（カテゴリー指定検索時）</small><br>
+    <td>指定カテゴリー<small>（カテゴリー指定検索用）</small><br>
     <select name="CATEGORY">
 HTML
 
@@ -178,10 +178,19 @@ HTML
 	$Category->Load($Sys);
 	my @catSet = ();
 	$Category->GetKeySet(\@catSet);
+
+	# BBSセットの取得
+	$BBS->GetKeySet('ALL', '', \@bbsSet);
 	
 	foreach my $catid (@catSet) {
 		$catname = $Category->Get('NAME', $catid);
-		
+		my $count = 0;
+		foreach my $id(@bbsSet){
+			$count++ if $catid eq $BBS->Get('CATEGORY', $id);
+		}
+		next if !$count;
+		$catname .= " ($count)";
+
 		if ($sCAT eq $catid) {
 			$Page->Print("     <option value=\"$catid\" selected>$catname</option>\n");
 		}
@@ -194,12 +203,9 @@ HTML
     </td>
    </tr>
    <tr>
-    <td>指定BBS<small>（BBS指定検索時）</small><br>
+    <td>指定BBS<small>（BBS指定検索用）</small><br>
     <select name="BBS">
 HTML
-
-	# BBSセットの取得
-	$BBS->GetKeySet('ALL', '', \@bbsSet);
 	
 	foreach $id (@bbsSet) {
 		$name = $BBS->Get('NAME', $id);
