@@ -70,8 +70,8 @@ sub SearchCGI
 sub PrintHead
 {
 	my ($Sys, $Page, $BBS, $Form) = @_;
-	my ($pBBS, $bbs, $name, $dir, $Banner);
-	my ($sMODE, $sBBS, $sKEY, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
+	my ($pBBS, $bbs, $name, $catname, $dir, $Banner);
+	my ($sMODE, $sBBS, $sCAT, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
 	
 	my $sanitize = sub {
 		$_ = shift;
@@ -84,7 +84,7 @@ sub PrintHead
 	
 	$sMODE	= &$sanitize($Form->Get('MODE', ''));
 	$sBBS	= &$sanitize($Form->Get('BBS', ''));
-	$sKEY	= &$sanitize($Form->Get('KEY', ''));
+	$sCAT	= &$sanitize($Form->Get('CATEGORY', ''));
 	$sWORD	= &$sanitize($Form->Get('WORD'));
 	@sTYPE	= $Form->GetAtArray('TYPE', 0);
 	
@@ -145,22 +145,22 @@ HTML
 	if ($sMODE eq 'ALL') {
 		$Page->Print(<<HTML);
      <option value="ALL" selected>鯖内全検索</option>
+	 <option value="CATEGORY">カテゴリー指定全検索</option>
      <option value="BBS">BBS指定全検索</option>
-     <option value="THREAD">スレッド指定全検索</option>
+HTML
+	}
+	elsif ($sMODE eq 'CATEGORY') {
+		$Page->Print(<<HTML);
+     <option value="ALL">鯖内全検索</option>
+	 <option value="CATEGORY" selected>カテゴリー指定全検索</option>
+     <option value="BBS">BBS指定全検索</option>
 HTML
 	}
 	elsif ($sMODE eq 'BBS' || $sMODE eq '') {
 		$Page->Print(<<HTML);
      <option value="ALL">鯖内全検索</option>
+	 <option value="CATEGORY">カテゴリー指定全検索</option>
      <option value="BBS" selected>BBS指定全検索</option>
-     <option value="THREAD">スレッド指定全検索</option>
-HTML
-	}
-	elsif ($sMODE eq 'THREAD') {
-		$Page->Print(<<HTML);
-     <option value="ALL">鯖内全検索</option>
-     <option value="BBS">BBS指定全検索</option>
-     <option value="THREAD" selected>スレッド指定全検索</option>
 HTML
 	}
 	$Page->Print(<<HTML);
@@ -168,7 +168,33 @@ HTML
     </td>
    </tr>
    <tr>
-    <td>指定BBS<br>
+    <td>指定カテゴリー<small>（カテゴリー指定検索時）</small><br>
+    <select name="CATEGORY">
+HTML
+
+	# カテゴリーの取得
+	require './module/bbs_info.pl';
+	my $Category = CATEGORY_INFO->new;
+	$Category->Load($Sys);
+	my @catSet = ();
+	$Category->GetKeySet(\@catSet);
+	
+	foreach my $catid (@catSet) {
+		$catname = $Category->Get('NAME', $catid);
+		
+		if ($sCAT eq $catid) {
+			$Page->Print("     <option value=\"$catid\" selected>$catname</option>\n");
+		}
+		else {
+			$Page->Print("     <option value=\"$catid\">$catname</option>\n");
+		}
+	}
+	$Page->Print(<<HTML);
+    </select>
+    </td>
+   </tr>
+   <tr>
+    <td>指定BBS<small>（BBS指定検索時）</small><br>
     <select name="BBS">
 HTML
 
@@ -191,11 +217,6 @@ HTML
 	}
 	$Page->Print(<<HTML);
     </select>
-    </td>
-   </tr>
-   <tr>
-    <td>指定スレッドキー<br>
-    <input type="text" size="20" name="KEY" value="$sKEY">
     </td>
    </tr>
    <tr>
@@ -272,7 +293,7 @@ sub Search
 	
 	$Mode = 0 if ($Form->Equal('MODE', 'ALL'));
 	$Mode = 1 if ($Form->Equal('MODE', 'BBS'));
-	$Mode = 2 if ($Form->Equal('MODE', 'THREAD'));
+	$Mode = 2 if ($Form->Equal('MODE', 'CATEGORY'));
 	
 	@types = $Form->GetAtArray('TYPE', 0);
 	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0);
@@ -286,7 +307,7 @@ sub Search
 	};
 	
 	# 検索オブジェクトの設定と検索の実行
-	$Search->Create($Sys, $Mode, $Type, $Form->Get('BBS', ''), $Form->Get('KEY', ''));
+	$Search->Create($Sys, $Mode, $Type, $Form->Get('BBS', ''), $Form->Get('CATEGORY', ''));
 	$Search->Run(&$sanitize($Form->Get('WORD')));
 	
 	if ($@ ne '') {
@@ -381,7 +402,7 @@ sub PrintResult
     <hr>
     <a target="_blank" href="$base/$$pResult[0]/">【$name】</a>
     <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">【スレッド】</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">【レス】</a>
+    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">【レス &gt;&gt;$$pResult[2]】</a>
     <br>
     <br>
     </dd>

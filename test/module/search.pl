@@ -50,7 +50,7 @@ sub new
 sub Create
 {
 	my $this = shift;
-	my ($Sys, $mode, $type, $bbs, $thread) = @_;
+	my ($Sys, $mode, $type, $bbs, $cat) = @_;
 	
 	$this->{'SYS'} = $Sys;
 	$this->{'TYPE'} = $type;
@@ -104,10 +104,36 @@ sub Create
 			push @$pSearchSet, $set;
 		}
 	}
-	# スレッド内全検索
+	# カテゴリー内全検索
 	elsif ($mode == 2) {
-		my $set = "$bbs<>$thread";
-		push @$pSearchSet, $set;
+		require './module/thread.pl';
+		require './module/bbs_info.pl';
+		my $BBSs = BBS_INFO->new;
+		
+		$BBSs->Load($Sys);
+		my @bbsSet = ();
+		$BBSs->GetKeySet('ALL', '', \@bbsSet);
+		
+		my $BBSpath = $Sys->Get('BBSPATH');
+		
+		foreach my $bbsID (@bbsSet) {
+			my $dir = $BBSs->Get('DIR', $bbsID);
+			
+			# 板ディレクトリに.0ch_hiddenというファイルがあれば読み飛ばす
+			next if (-e "$BBSpath/$dir/.0ch_hidden");
+			next if ($cat ne $BBSs->Get('CATEGORY', $bbsID));
+			
+			$Sys->Set('BBS', $dir);
+			my $Threads = THREAD->new;
+			$Threads->Load($Sys);
+			my @threadSet = ();
+			$Threads->GetKeySet('ALL', '', \@threadSet);
+			
+			foreach my $threadID (@threadSet) {
+				my $set = "$dir<>$threadID";
+				push @$pSearchSet, $set;
+			}
+		}
 	}
 	# 指定がおかすぃ
 	else {
