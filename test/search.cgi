@@ -138,8 +138,7 @@ HTML
   <form action="./search.cgi" method="POST">
   <table border="0">
    <tr>
-    <td>検索モード</td>
-    <td>
+    <td>検索モード<br>
     <select name="MODE">
 HTML
 
@@ -169,8 +168,7 @@ HTML
     </td>
    </tr>
    <tr>
-    <td>指定BBS</td>
-    <td>
+    <td>指定BBS<br>
     <select name="BBS">
 HTML
 
@@ -196,18 +194,15 @@ HTML
     </td>
    </tr>
    <tr>
-    <td>指定スレッドキー</td>
-    <td>
+    <td>指定スレッドキー<br>
     <input type="text" size="20" name="KEY" value="$sKEY">
     </td>
    </tr>
    <tr>
-    <td>検索ワード</td>
-    <td><input type="text" size="40" name="WORD" value="$sWORD"></td>
+    <td>検索ワード<br><input type="text" size="40" name="WORD" value="$sWORD"></td>
    </tr>
    <tr>
-    <td>検索種別</td>
-    <td>
+    <td>検索種別<br>
     <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
     <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
     <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>
