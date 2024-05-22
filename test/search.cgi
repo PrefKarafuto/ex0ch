@@ -18,6 +18,7 @@ use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
 use JSON;
 use LWP::UserAgent;
+use Time::Local;
 
 BEGIN { use lib './perllib'; }
 
@@ -72,6 +73,7 @@ sub PrintHead
 	my ($Sys, $Page, $BBS, $Form) = @_;
 	my ($pBBS, $bbs, $name, $catname, $dir, $Banner);
 	my ($sMODE, $sBBS, $sCAT, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
+	my ($dFROM, $dTO);
 	
 	my $sanitize = sub {
 		$_ = shift;
@@ -82,10 +84,11 @@ sub PrintHead
 		return $_;
 	};
 	
-	$sMODE	= &$sanitize($Form->Get('MODE', ''));
 	$sBBS	= &$sanitize($Form->Get('BBS', ''));
 	$sCAT	= &$sanitize($Form->Get('CATEGORY', ''));
 	$sWORD	= &$sanitize($Form->Get('WORD'));
+	$dFROM	= $Form->Get('FROM');
+	$dTO	= $Form->Get('TO');
 	@sTYPE	= $Form->GetAtArray('TYPE', 0);
 	
 	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0) | ($sTYPE[3] || 0);
@@ -139,37 +142,7 @@ HTML
   <form action="./search.cgi" method="POST">
   <table border="0">
    <tr>
-	<td>検索モード<br>
-	<select name="MODE">
-HTML
-
-	if ($sMODE eq 'ALL') {
-		$Page->Print(<<HTML);
-	 <option value="ALL" selected>鯖内全検索</option>
-	 <option value="CATEGORY">カテゴリー指定全検索</option>
-	 <option value="BBS">BBS指定全検索</option>
-HTML
-	}
-	elsif ($sMODE eq 'CATEGORY') {
-		$Page->Print(<<HTML);
-	 <option value="ALL">鯖内全検索</option>
-	 <option value="CATEGORY" selected>カテゴリー指定全検索</option>
-	 <option value="BBS">BBS指定全検索</option>
-HTML
-	}
-	elsif ($sMODE eq 'BBS' || $sMODE eq '') {
-		$Page->Print(<<HTML);
-	 <option value="ALL">鯖内全検索</option>
-	 <option value="CATEGORY">カテゴリー指定全検索</option>
-	 <option value="BBS" selected>BBS指定全検索</option>
-HTML
-	}
-	$Page->Print(<<HTML);
-	</select>
-	</td>
-   </tr>
-   <tr>
-	<td>指定カテゴリー<small>（カテゴリー指定検索用）</small><br>
+	<td>対象カテゴリー<br>
 	<select name="CATEGORY">
 HTML
 
@@ -192,6 +165,7 @@ HTML
 		next if !$count;
 		$catname .= " ($count)";
 
+		$Page->Print("     <option value=\"\">指定しない</option>\n");
 		if ($sCAT eq $catid) {
 			$Page->Print("     <option value=\"$catid\" selected>$catname</option>\n");
 		}
@@ -204,17 +178,18 @@ HTML
 	</td>
    </tr>
    <tr>
-	<td>指定BBS<small>（BBS指定検索用）</small><br>
+	<td>対象BBS<br>
 	<select name="BBS">
 HTML
-	
+
+	$Page->Print("     <option value=\"\">すべて</option>\n");
 	foreach $id (@bbsSet) {
 		$name = $BBS->Get('NAME', $id);
 		$dir = $BBS->Get('DIR', $id);
 		
 		# 板ディレクトリに.0ch_hiddenというファイルがあれば読み飛ばす
 		next if ( -e "$BBSpath/$dir/.0ch_hidden" && $sBBS ne $dir );
-		
+
 		if ($sBBS eq $dir) {
 			$Page->Print("     <option value=\"$dir\" selected>$name</option>\n");
 		}
@@ -227,14 +202,19 @@ HTML
 	</td>
    </tr>
    <tr>
-	<td>検索ワード<br><input type="text" size="30" name="WORD" value="$sWORD"></td>
+	<td>検索ワード<br><input type="text" size="35" name="WORD" value="$sWORD"></td>
+   </tr>
+   <tr>
+	<td>検索範囲<br>
+	<input type="date" name="FROM" value="$dFROM">から<input type="date" name="TO" value="$dTO">まで<br>
+	</td>
    </tr>
    <tr>
 	<td>検索種別<br>
 	<input type="checkbox" name="TYPE" value="8" $cTYPE[3]>スレタイ検索<br>
 	<input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
-	<input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
-	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>
+	<input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID検索<br>
+	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]>全文検索<br>
 	</td>
    </tr>
    <tr>
@@ -292,17 +272,23 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub Search
 {
-	my ($Sys, $Form, $Page, $BBS) = @_;;
+	my ($Sys, $Form, $Page, $BBS) = @_;
 	my ($Search, $Mode, $Result, @elem, $n, $base, $word);
 	my (@types, $Type);
 	
 	require './module/search.pl';
 	$Search = new SEARCH;
+	my $bbs = $Form->Get('BBS', '');
+	my $cat = $Form->Get('CATEGORY', '');
+	my @dFROM	= split(/-/,$Form->Get('FROM', ''));
+	my $FROM = $Form->Get('FROM', '') ? timelocal(0,0,0,$dFROM[2],$dFROM[1]-1,$dFROM[0]) : 0;
+	my @dTO	= split(/-/,$Form->Get('TO', ''));
+	my $TO = $Form->Get('TO', '') ? timelocal(0,0,0,$dTO[2]+1,$dTO[1]-1,$dTO[0]) - 1 : 0;
 	
-	$Mode = 0 if ($Form->Equal('MODE', 'ALL'));
-	$Mode = 1 if ($Form->Equal('MODE', 'BBS'));
-	$Mode = 2 if ($Form->Equal('MODE', 'CATEGORY'));
-	
+	$Mode = 2 if ($cat);
+	$Mode = 1 if ($bbs);
+	$Mode = 0 if (!$bbs && !$cat);
+
 	@types = $Form->GetAtArray('TYPE', 0);
 	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0) | ($types[3] || 0);
 	
@@ -315,7 +301,7 @@ sub Search
 	};
 	
 	# 検索オブジェクトの設定と検索の実行
-	$Search->Create($Sys, $Mode, $Type, $Form->Get('BBS', ''), $Form->Get('CATEGORY', ''));
+	$Search->Create($Sys, $Mode, $Type, $bbs, $cat, $FROM, $TO);
 	$Search->Run(&$sanitize($Form->Get('WORD')));
 	
 	if ($@ ne '') {
