@@ -206,15 +206,16 @@ HTML
    </tr>
    <tr>
 	<td>検索範囲<br>
-	<input type="date" name="FROM" value="$dFROM">から<input type="date" name="TO" value="$dTO">まで<br>
+	<input type="date" name="FROM" value="$dFROM"><small>から</small>
+	<input type="date" name="TO" value="$dTO"><small>まで</small><br>
 	</td>
    </tr>
    <tr>
 	<td>検索種別<br>
-	<input type="checkbox" name="TYPE" value="8" $cTYPE[3]>スレタイ検索<br>
-	<input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
-	<input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID検索<br>
-	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]>全文検索<br>
+	<input type="checkbox" name="TYPE" value="1" $cTYPE[0]><small>名前検索</small><br>
+	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]><small>全文検索</small><br>
+	<input type="checkbox" name="TYPE" value="4" $cTYPE[2]><small>ID検索</small><br>
+	<input type="checkbox" name="TYPE" value="8" $cTYPE[3]><small>スレタイ検索</small><br>
 	</td>
    </tr>
    <tr>
