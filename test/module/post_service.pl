@@ -196,6 +196,8 @@ sub Write
 	my $sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,undef);
 	# hCaptcha認証
 	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY')){
+		my $is_auth = $this->Auth($Sys,$Form,$Ninja,1);
+		return $is_auth if $is_auth;
 		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')){
 			$err = $this->Certification_Captcha($Sys,$Form);
 			return $err if $err;
@@ -208,6 +210,9 @@ sub Write
 			$Ninja->Set('auth',0);
 			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
 		}
+		$is_auth = $this->Auth($Sys,$Form,$Ninja,0);
+		return $is_auth if $is_auth;
+		$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
 	}
 
 	#忍法帖パス
@@ -1798,14 +1803,16 @@ sub Ninpocho
 
 	# 名前欄書き換え
 	my $ninID = crypt($sid,$sid);
+	my $BitMask = $Set->Get('BBS_COMMAND');
+	my $MakeThread = $Set->Get('BBS_THREADCAPONLY');
 	$name = $Ninja->Get('force_kote') if $Ninja->Get('force_kote');
 	$name = $Set->Get('BBS_NONAME_NAME') if $Ninja->Get('force_774');
 
-	my $B = (split(/-/, $Set->Get('NINJA_USER_BAN')))[0] <= $ninLv ? 'B':'x';		# BAN可
-	my $C = (split(/-/, $Set->Get('NINJA_USE_COMMAND')))[0] <= $ninLv ? 'C':'x';	# コマンド可
-	my $D = (split(/-/, $Set->Get('NINJA_RES_DELETE')))[0] <= $ninLv ? 'D':'x';		# レス削除可
+	my $B = (split(/-/, $Set->Get('NINJA_USER_BAN')))[0] <= $ninLv && ($BitMask & 4096) ? 'B':'x';		# BAN可
+	my $C = (split(/-/, $Set->Get('NINJA_USE_COMMAND')))[0] <= $ninLv && $BitMask ? 'C':'x';	# コマンド可
+	my $D = (split(/-/, $Set->Get('NINJA_RES_DELETE')))[0] <= $ninLv && ($BitMask & 524288)? 'D':'x';		# レス削除可
 	my $P = 'P';					# レス可
-	my $T = (split(/-/, $Set->Get('NINJA_MAKE_THREAD')))[0] <= $ninLv ? 'T':'x';	# スレたて可
+	my $T = (split(/-/, $Set->Get('NINJA_MAKE_THREAD')))[0] <= $ninLv && !$MakeThread ? 'T':'x';	# スレたて可
 
 	$name =~ s|!ninja|</b> 忍法帖【Lv=$ninLv,$B$C$D$P$T,ID:$ninID】<b>|;
 	$name =~ s|!id|</b>【忍法帖ID:$ninID】<b>|;
@@ -2004,6 +2011,46 @@ sub OMIKUJI
 		$Form->Set('FROM', $name);
 	}
 	
+	return 0;
+}
+# 一時パスワードによる認証
+sub Auth
+{
+	my $this = shift;
+	my ($Sys, $Form, undef, $Flag) = @_;
+
+	require './module/ninpocho.pl';
+	my $Ninja = NINPOCHO -> new;
+	
+	my $name = $Form->Get('mail');
+	my $del_name = $name;
+	$del_name =~ s/!auth(:[0-9a-fA-F]{8})?//g;
+	$Form->Set('FROM', $del_name);
+	my $passDir = ".".$Sys->Get('INFO')."/.auth/onetime_pass.cgi";
+	
+	if ($name =~ /^!auth$/ && $Flag) {
+		
+		my $board = $Sys->Get('BBS');
+		
+		my $ctx = Digest::MD5->new;
+		$ctx->add('auth');
+		$ctx->add($board);
+		$ctx->add(time);
+		$ctx->add($ENV{'REMOTE_ADDR'});
+		my $pass = substr($ctx->hexdigest, 0, 8);
+	warn "filename:$passDir\n";
+		$Ninja->SetHash($pass,$Sys->Get('SID'),time,$passDir);
+		$Sys->Set('PASSWORD',$pass);
+		return $ZP::E_FORM_AUTHCOMMAND;
+		
+	}elsif($name =~ /^!auth:([a-fA-F0-9]{8})$/ && !$Flag){
+		my $sid = $Ninja->GetHash($1,60*3,$passDir);
+		if ($sid){
+			$Sys->Set('SID',$sid);
+		}else{
+			return $ZP::E_FORM_FAILEDAUTH;
+		}
+	}
 	return 0;
 }
 #スレッド乱立防止

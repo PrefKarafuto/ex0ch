@@ -59,6 +59,8 @@ sub Load {
 		'152' => { SUBJECT => '名前が無い', MESSAGE => '名前いれてちょ。' },
 		'153' => { SUBJECT => '認証されてない', MESSAGE => 'Captcha認証をしてください。<br>専ブラからの場合は、一度通常ブラウザから認証して書き込みをした後、専ブラのCookieを削除してもう一度書き込んでください。' },
 		'154' => { SUBJECT => '認証失敗', MESSAGE => 'Captcha認証に失敗しました。' },
+		'155' => { SUBJECT => 'ユーザー認証失敗', MESSAGE => 'ユーザー認証に失敗しました。' },
+		'159' => { SUBJECT => '認証用ワンタイムパスワード発行', MESSAGE => 'パスワードは<br><br>!auth:{!PASSWORD!}<br><br>です。この書き込みから3分以内に、メール欄にこのパスワードを入力して書き込んでください。' },
 		'200' => { SUBJECT => 'スレッド停止', MESSAGE => 'このスレッドは停止されてます。もう書けない。。。' },
 		'201' => { SUBJECT => '書き込み限界', MESSAGE => '{!RESMAX!}を超えてます。このスレッドにはもう書けない。。。' },
 		'202' => { SUBJECT => 'スレッド移転', MESSAGE => 'このスレッドは移転されたようです。詳しくは（略' },
@@ -147,6 +149,7 @@ sub Print
 	my $Set = $CGI->{'SET'};
 	my $version = $Sys->Get('VERSION');
 	my $bbsPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
+	my $threadPath = $Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Form->Get('key').'/l10#bottom';
 	my $message = $this->{'MESSAGE'}->{$err};
 	
 	# エラーメッセージの置換
@@ -202,7 +205,7 @@ sub Print
 	
 	#$Page->Print("Status: 412 Precondition Failed\n");
 	
-	if ($mode eq 'O') {
+	if (0) {
 		my $subject = $this->{'SUBJECT'}->{$err};
 		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 		$Page->Print("<html><head><title>");
@@ -214,6 +217,7 @@ sub Print
 	else {
 		my $Cookie = $CGI->{'COOKIE'};
 		my $Set = $CGI->{'SET'};
+		my $subject = $this->{'SUBJECT'}->{$err};
 		
 		my $name = &$sanitize($Form->Get('NAME'));
 		my $mail = &$sanitize($Form->Get('MAIL'));
@@ -253,9 +257,11 @@ sub Print
 <body>
 <!-- 2ch_X:error -->
 <div style="margin-bottom:2em;">
-<font size="+1" color="#FF0000"><b>ＥＲＲＯＲ：$message</b></font>
+<font size="+1" color="#FF0000"><b>ＥＲＲＯＲ：$subject</b></font>
 </div>
-
+<blockquote>
+<div>$message</div>
+</blockquote>
 <blockquote><br><br>
 ホスト<b>$koyuu</b><br>
 <br>
@@ -267,7 +273,23 @@ $msg
 <br>
 </blockquote>
 <hr>
-<div class="reload">こちらでリロードしてください。<a href="$bbsPath/">&nbsp;GO!</a></div>
+<div class="reload">こちらでリロードしてください。&nbsp;<a href="$bbsPath/">&lt;&lt;掲示板に戻る</a>
+HTML
+		if(!$Sys->Equal('MODE', 1)){
+			$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
+		}elsif($Set->Get('BBS_PASSWORD_CHECK')){
+			my $tm = time;
+			my $bbs = $Sys->Get('BBS');
+			$Page->Print("<form method=\"POST\" action=\"./bbs.cgi\" style=\"display: inline;\">");
+			$Page->Print("<input type=\"submit\" value=\"スレッド作成画面に戻る&gt;&gt;\" ");
+			$Page->Print("style=\"background: none; color: blue; border: none; padding: 0;");
+			$Page->Print("text-decoration: underline; cursor: pointer;\"><br>");
+			$Page->Print("<input type=\"hidden\" name=\"bbs\" value=\"$bbs\">");
+			$Page->Print("<input type=\"hidden\" name=\"time\" value=\"$tm\">");
+			$Page->Print("</form>");
+		}
+			
+$Page->Print(<<HTML);
 <div align="right">$version</div>
 </body>
 </html>
