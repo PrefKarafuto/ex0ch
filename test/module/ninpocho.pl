@@ -324,7 +324,7 @@ sub Save
 
 # ハッシュテーブルをファイルから読み込む関数
 sub GetHash {
-	my $this = shift;
+	#my $this = shift;
 	my ($key, $expiry,$filename) = @_;
 	my $hash_table = {};
 
@@ -354,25 +354,26 @@ sub GetHash {
 
 # パラメータをハッシュテーブルに保存し、ファイルに保存する関数
 sub SetHash {
-	my $this = shift;
+	#my $this = shift;
 	my ($key, $value, $time ,$filename) = @_;
 	my $hash_table = {};
 
 	if (-e $filename) {
 		$hash_table = retrieve($filename);
-	}
+	}else {
+        $hash_table = {};
+    }
 
 	$hash_table->{$key} = {
 		value => $value,
 		time => $time,
 	};
-	warn "filename:$key, $value, $time ,$filename\n";
 	store $hash_table, $filename;
 	chmod 0600,$filename,
 }
 sub DeleteHash
 {
-	my $this = shift;
+	#my $this = shift;
 	my ($key, $filename) = @_;
 	my $hash_table = {};
 
@@ -390,7 +391,7 @@ sub DeleteHash
 
 sub DeleteHashValue 
 {
-	my $this = shift;
+	#my $this = shift;
 	my ($target_value, $filename) = @_;
 	my $hash_table = {};
 

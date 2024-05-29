@@ -194,24 +194,52 @@ sub Write
 
 	# 忍法帖関連
 	my $sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,undef);
+
 	# hCaptcha認証
 	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY')){
-		my $is_auth = $this->Auth($Sys,$Form,$Ninja,1);
-		return $is_auth if $is_auth;
-		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')){
-			$err = $this->Certification_Captcha($Sys,$Form);
-			return $err if $err;
+
+		# ワンタイムパス認証
+		my $auth_code = "";
+		my $is_com = 0;
+		my $in_mail = $Form->Get('mail');
+		if ($in_mail =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
+			$auth_code = $2 // '';
+			$in_mail =~ s/^!auth(:([0-9a-fA-F]{8}))?$//g;
+			$Form->Set('mail', $in_mail);
+			$is_com = 1;
+		}
+
+		# 認証処理
+		my $err = $this->Certification_Captcha($Sys, $Form);  # 成功で0
+		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) {
+			# 認証処理
+			if ($is_com && !$auth_code) {
+				# Captcha認証が成功した場合のみパスワードの発行
+				if ($err == 0) {
+					my $is_auth = $this->Auth($Sys, undef);  # 発行
+					return $is_auth if $is_auth;
+				} else {
+					$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
+					return $err;  # Captcha認証失敗時のエラー
+				}
+			} elsif ($auth_code) {
+				# Captcha認証の成功失敗を問わずパスワードの照合
+				my $is_auth = $this->Auth($Sys, $auth_code);
+				return $is_auth if $is_auth;
+			} else {
+				return $err if $err;
+			}
 
 			# 認証成功
-			$Ninja->Set('auth',1);
-			$Ninja->Set('auth_time',time);
+			$Ninja->Set('auth', 1);
+			$Ninja->Set('auth_time', time);
 		}
+
 		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time) && $isNinja){
 			$Ninja->Set('auth',0);
 			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
 		}
-		$is_auth = $this->Auth($Sys,$Form,$Ninja,0);
-		return $is_auth if $is_auth;
+		
 		$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
 	}
 
@@ -1563,7 +1591,7 @@ sub Certification_Captcha {
 			if ($out->{success} eq 'true') {
 				return 0;
 			}else{
-				return $ZP::E_FORM_FAILEDCAPTCHA
+				return $ZP::E_FORM_FAILEDCAPTCHA;
 			}
 		} else {
 			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
@@ -2014,45 +2042,38 @@ sub OMIKUJI
 	return 0;
 }
 # 一時パスワードによる認証
-sub Auth
-{
-	my $this = shift;
-	my ($Sys, $Form, undef, $Flag) = @_;
+sub Auth {
+    my $this = shift;
+    my ($Sys, $auth_code) = @_;
 
 	require './module/ninpocho.pl';
-	my $Ninja = NINPOCHO -> new;
-	
-	my $name = $Form->Get('mail');
-	my $del_name = $name;
-	$del_name =~ s/!auth(:[0-9a-fA-F]{8})?//g;
-	$Form->Set('FROM', $del_name);
-	my $passDir = ".".$Sys->Get('INFO')."/.auth/onetime_pass.cgi";
-	
-	if ($name =~ /^!auth$/ && $Flag) {
-		
+    my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
+
+    if ($auth_code) {
+         my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
+        if ($sid) {
+            $Sys->Set('SID', $sid);
+			return 0;
+        } else {
+            return $ZP::E_FORM_FAILEDAUTH;
+        }
+    } else{
 		my $board = $Sys->Get('BBS');
-		
-		my $ctx = Digest::MD5->new;
-		$ctx->add('auth');
-		$ctx->add($board);
-		$ctx->add(time);
-		$ctx->add($ENV{'REMOTE_ADDR'});
-		my $pass = substr($ctx->hexdigest, 0, 8);
-	warn "filename:$passDir\n";
-		$Ninja->SetHash($pass,$Sys->Get('SID'),time,$passDir);
-		$Sys->Set('PASSWORD',$pass);
-		return $ZP::E_FORM_AUTHCOMMAND;
-		
-	}elsif($name =~ /^!auth:([a-fA-F0-9]{8})$/ && !$Flag){
-		my $sid = $Ninja->GetHash($1,60*3,$passDir);
-		if ($sid){
-			$Sys->Set('SID',$sid);
-		}else{
-			return $ZP::E_FORM_FAILEDAUTH;
-		}
-	}
-	return 0;
+        my $ctx = Digest::MD5->new;
+
+        $ctx->add('auth');
+        $ctx->add($board);
+        $ctx->add(time);
+        $ctx->add($ENV{'REMOTE_ADDR'});
+        my $pass = substr($ctx->hexdigest, 0, 8);
+
+        NINPOCHO::SetHash($pass, $Sys->Get('SID'), time(), $passDir);
+        $Sys->Set('PASSWORD', $pass);
+
+        return $ZP::E_FORM_AUTHCOMMAND;
+    }
 }
+
 #スレッド乱立防止
 sub SameTitleCheck
 {
