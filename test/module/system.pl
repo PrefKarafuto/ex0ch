@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS dev-r155 20240530',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r156 20240531',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -294,6 +294,7 @@ sub InitSystemValue
 		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
 		'CONFVER'	=> '',										# システム設定ファイルのバージョン
 		'UPCHECK'	=> 0,										# 更新チェック間隔(日)
+		'LASTCHECK'	=> 0,										# 前回チェック時刻
 		
 		# DNSBL設定
 		'DNSBL_TOREXIT'	=> 0,									# torexit.dan.me.uk

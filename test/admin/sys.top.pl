@@ -693,24 +693,29 @@ sub CheckVersionUpdate
 	
 	if ( $nr->Get('Update') eq 1) {
 		my $newver = $nr->Get('Ver');
-		my $reldate = $nr->Get('Date');
+		my $date = $nr->Get('Date');
 		
 		# ユーザ通知 準備
 		require './module/notice.pl';
 		my $Notice = NOTICE->new;
 		$Notice->Load($Sys);
 		my $nid = 'verupnotif';
-		
-		# 通知時刻
-		use Time::Local;
-		$_ = [split /\./, $reldate];
-		my $date = timelocal(0, 0, 0, $_->[2], $_->[1] - 1, $_->[0]);
 		my $limit = 0;
 		
 		# 通知内容
-		my $note = join('<br>', @{$nr->Get('Detail')});
+		my $note = $nr->Get('Detail');
+		$note =~ s/\r\n/<br>/g;
 		my $subject = "ex0ch New Version $newver is Released.";
 		my $content = "<!-- \*Ver=$newver\* --> $note";
+
+		# 既に通知があった場合、通知を行わない
+		my @noticeSet;
+		$Notice->GetKeySet('ALL', '', \@noticeSet);
+		@noticeSet = sort @noticeSet;
+		@noticeSet = reverse @noticeSet;
+		foreach my $noticeKey(@noticeSet){
+			return 0 if ($Notice->Get('FROM', $noticeKey) eq '0000000000'&& $Notice->Get('SUBJECT', $noticeKey) eq $subject);
+		}
 		
 		# 通知者 ex0ch管理システム
 		my $from = '0000000000';

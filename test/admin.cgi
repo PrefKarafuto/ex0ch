@@ -83,6 +83,8 @@ sub AdminCGI
 	if ($upcheck) {
 		$CGI->{'UPDATE_NOTICE'}->Set('Interval', 24*60*60*$upcheck);
 		$CGI->{'UPDATE_NOTICE'}->Check;
+		$Sys->Set('LASTCHECK',time);
+		$Sys->Save();
 	}
 	
 	# 処理モジュールオブジェクトの生成
