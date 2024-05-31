@@ -211,36 +211,39 @@ sub Write
 
 		# 認証処理
 		my $err = $this->Certification_Captcha($Sys, $Form);  # 成功で0
-		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) {
-			# 認証処理
-			if ($is_com && !$auth_code) {
+		if($isNinja){
+			if($is_com && !$auth_code){
 				# Captcha認証が成功した場合のみパスワードの発行
 				if ($err == 0) {
-					my $is_auth = $this->Auth($Sys, undef);  # 発行
-					return $is_auth if $is_auth;
+					$err = $this->Auth($Sys, undef);  # 発行
 				} else {
 					$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
-					return $err;  # Captcha認証失敗時のエラー
 				}
-			} elsif ($auth_code) {
-				# Captcha認証の成功失敗を問わずパスワードの照合
-				my $is_auth = $this->Auth($Sys, $auth_code);
-				return $is_auth if $is_auth;
-			} else {
-				return $err if $err;
 			}
 
-			# 認証成功
-			$Ninja->Set('auth', 1);
-			$Ninja->Set('auth_time', time);
-		}
+			if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) {
+				if ($auth_code) {
+					# Captcha認証の成功失敗を問わずパスワードの照合
+					$err = $this->Auth($Sys, $auth_code);
+				}
 
-		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time) && $isNinja){
-			$Ninja->Set('auth',0);
-			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
+				if ($err){
+					return $err;
+				}else{
+					# 認証成功
+					$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
+					$Ninja->Set('auth', 1);
+					$Ninja->Set('auth_time', time);
+				}
+			}
+
+			if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
+				$Ninja->Set('auth',0);
+				$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
+			}
+		}else{
+			return $err if $err;
 		}
-		
-		$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
 	}
 
 	#忍法帖パス
@@ -258,7 +261,6 @@ sub Write
 		$ninmail =~ s/!save:(.{10,30})//;
 		$Form->Set('mail',$ninmail);
 	}
-	$Sys->Set('SID',$sid);
 	my $ninLv = $Ninja->Get('ninLv');
 
 	#BANチェック
