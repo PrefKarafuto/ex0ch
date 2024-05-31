@@ -789,6 +789,7 @@ sub PrintDiscovery
 	my ($CGI, $Page) = @_;
 	
 	my $Sys = $CGI->{'SYS'};
+	my $Set = $CGI->{'SET'};
 	my $Conv = $CGI->{'CONV'};
 	
 	my $cgipath = $Sys->Get('CGIPATH');
@@ -798,8 +799,9 @@ sub PrintDiscovery
 	my $kh = substr($key, 0, 4) . '/' . substr($key, 0, 5);
 	my $ver = $Sys->Get('VERSION');
 	my $server = $Sys->Get('SERVER');
+	my $kako = $Set->Get('BBS_KAKO');
 	
-	# 過去ログにあり
+	# 過去ログ倉庫にあり
 	if (-e $Conv->MakePath("$spath/kako/$kh/$key.html")) {
 		my $path = $Conv->MakePath("$lpath/kako/$kh/$key");
 		
@@ -813,6 +815,22 @@ sub PrintDiscovery
 		$Page->Print("\n<blockquote>\n");
 		$Page->Print("隊長! 過去ログ倉庫で、スレッド <a href=\"$path.html\">$server$path.html</a>");
 		$Page->Print(" <a href=\"$path.dat\">.dat</a> を発見しました。");
+		$Page->Print("</blockquote>\n");
+		
+	}
+	# 過去ログ用掲示板にあり
+	elsif (-e "../$kako/dat/$key.dat" && $kako) {
+		my $allPath = $Conv->CreatePath($Sys, 0, $kako, $key, '');
+		
+		my $title = "隊長！過去ログ掲示板に";
+		PrintReadHead($CGI, $Page, $title);
+		$Page->Print("\n<div style=\"margin-top:1em;\">\n");
+		$Page->Print(" <a href=\"$lpath/\">■掲示板に戻る■</a>\n");
+		$Page->Print("</div>\n\n");
+		$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
+		$Page->Print("<h1 style=\"color:red;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title</h1>\n\n");
+		$Page->Print("\n<blockquote>\n");
+		$Page->Print("隊長! 過去ログ掲示板[$kako]で、スレッド <a href=\"$allPath\">$key</a>を発見しました。");
 		$Page->Print("</blockquote>\n");
 		
 	}
