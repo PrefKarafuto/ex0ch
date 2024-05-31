@@ -694,6 +694,7 @@ sub CheckVersionUpdate
 	if ( $nr->Get('Update') eq 1) {
 		my $newver = $nr->Get('Ver');
 		my $date = $nr->Get('Date');
+		my $url = $nr->Get('URL');
 		
 		# ユーザ通知 準備
 		require './module/notice.pl';
@@ -706,7 +707,7 @@ sub CheckVersionUpdate
 		my $note = $nr->Get('Detail');
 		$note =~ s/\r\n/<br>/g;
 		my $subject = "ex0ch New Version $newver is Released.";
-		my $content = "<!-- \*Ver=$newver\* --> $note";
+		my $content = "<!-- \*Ver=$newver\* --> $note<br><br>GitHub:<a href=\"$url\" target=\"_blank\">$newver</a>";
 
 		# 既に通知があった場合、通知を行わない
 		my @noticeSet;
