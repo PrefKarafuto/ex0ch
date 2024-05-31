@@ -319,13 +319,14 @@ HEAD
 	my $cgipath = $this->{'SYS'}->Get('CGIPATH');
 	
 	$Page->Print(<<HTML);
-<br>
- <center>
+<table cellspacing="7" cellpadding="3" width="95%" style="margin:1.2em auto;" align="center">
+<tbody><tr><td>
   <a href="../bbsmenu.html" style="color:inherit;text-decoration: none;">
-   <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;">$title</div>
+   <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;" align="center">$title</div>
   </a>
- </center>
-<br>
+  </td></tr>
+  </tbody>
+ </table>
 HTML
 	# ヘッダテーブルの表示
 	$Caption->Load($this->{'SYS'}, 'HEAD');
@@ -779,7 +780,8 @@ sub PrintResponse
 		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
 	}
 	if($elem[1] =~ /!aafont/){
-		$aa = 'class="aaview"';
+		# レイアウトが崩れるのでCO
+		#$aa = 'class="aaview"';
 	}
 	# 表示行数内ならすべて表示する
 	if ($contLine <= $dispLine || $n == 1) {

@@ -632,7 +632,8 @@ sub PrintResponse
 		$Mail = "<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>";
 	}
 	if ($elem[1] =~ /!aafont/){
-		$aa = 'aaview';
+		# レイアウトが崩れるのでCO
+		#$aa = 'aaview';
 	}
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
