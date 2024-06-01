@@ -76,8 +76,9 @@ sub Check {
 	my $url = $hash->{'CheckURL'};
 	my $interval = $hash->{'Interval'};
 	my $lastcheck = $hash->{'LastCheck'};
+	my $version = $hash->{'RawVer'};
 
-	my $rawver = (split(/ /, $hash->{'RawVer'}))[2];
+	my $rawver = (split(/ /, $version))[2];
 	my $ver = "";
 	my $dev = "";
 	if ($rawver =~ /^(\d+\.\d+\.\d+)$/) {
@@ -90,7 +91,7 @@ sub Check {
 	my ($latest_release, $release_url, $release_date, $release_note);
 	if (time - $lastcheck > $interval) {
 		my $ua = LWP::UserAgent->new;
-		$ua->agent("Mozilla/5.0");
+		$ua->agent("$version");
 
 		# APIリクエストの送信
 		my $response = $ua->get($url);
