@@ -66,7 +66,7 @@ sub AdminCGI
 	my $sid = $Form->Get('SessionID', '');
 	$Form->Set('PassWord', '');
 	#$Form->Set('SessionID', '');
-	my $capt = Certification_Captcha($Sys,$Form) if ($pass && $Sys->Get('ADMINCAP'));
+	my $capt = Certification_Captcha($Sys,$Form) if ($pass && $Sys->Get('ADMINCAP') && $Sys->Get('CAPTCHA_SITEKEY') && $Sys->Get('CAPTCHA'));
 	my ($userID, $SID) = $CGI->{'SECINFO'}->IsLogin($name, $pass, $sid);
 	unless($capt){
 		$CGI->{'USER'} = $userID;

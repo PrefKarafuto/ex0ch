@@ -523,7 +523,7 @@ sub PrintReadFoot
 		}
 		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 		my $classname = $Sys->Get('CAPTCHA');
-		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
+		my $Captcha = $Set->Get('BBS_CAPTCHA') && $classname && $sitekey ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<HTML);
 <a id="bottom"></a>

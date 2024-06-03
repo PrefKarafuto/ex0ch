@@ -108,7 +108,7 @@ sub PrintLogin
 
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
-	my $Captcha = $Sys->Get('ADMINCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+	my $Captcha = $sitekey && $classname && $Sys->Get('ADMINCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
 	my $text = $sitekey && $classname && $Captcha ? 'Captcha認証に失敗したか、' : "" ;
 	
 $Page->Print(<<HTML);

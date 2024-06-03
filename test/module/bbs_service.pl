@@ -555,7 +555,7 @@ FORM
 	else {
 		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 		my $classname = $Sys->Get('CAPTCHA');
-		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
+		my $Captcha = $Set->Get('BBS_CAPTCHA') && $classname && $sitekey ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 		$Page->Print(<<FORM);
 <form method="POST" action="$cgipath/bbs.cgi">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
@@ -699,7 +699,7 @@ sub PrintThreadPreviewOne
 		# 書き込みフォームの表示
 		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 		my $classname = $Sys->Get('CAPTCHA');
-		my $Captcha = $this->{'SET'}->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
+		my $Captcha = $this->{'SET'}->Get('BBS_CAPTCHA') && $classname && $sitekey ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<KAKIKO);
   </dl>
