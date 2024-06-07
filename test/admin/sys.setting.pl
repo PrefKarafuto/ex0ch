@@ -524,9 +524,9 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ヘッダ関連</td></tr>\n");
-	$Page->Print("<tr><td>ヘッダ下部に表\示するテキスト</td>");
+	$Page->Print("<tr><td>ヘッダ下部に表示するテキスト</td>");
 	$Page->Print("<td><input type=text size=60 name=HEADTEXT value=\"$headText\" ></td></tr>\n");
-	$Page->Print("<tr><td>上記テキストに貼\るリンクのURL</td>");
+	$Page->Print("<tr><td>上記テキストに貼るリンクのURL</td>");
 	$Page->Print("<td><input type=text size=60 name=HEADURL value=\"$headUrl\" ></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
@@ -549,8 +549,8 @@ sub PrintOtherSetting
 	#$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
 	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgiのGETメソ\ッド</td></tr>\n");
-	$Page->Print("<tr><td>bbs.cgiでGETメソ\ッドを使用する</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgiのGETメソッド</td></tr>\n");
+	$Page->Print("<tr><td>bbs.cgiでGETメソッドを使用する</td>");
 	$Page->Print("<td><input type=checkbox name=BBSGET $bbsget value=on></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック関連</td></tr>\n");
@@ -605,10 +605,12 @@ sub PrintPlusViewSetting
 	my $Prtext		= $SYS->Get('PRTEXT');
 	my $Prlink		= $SYS->Get('PRLINK');
 	my $Msec		= $SYS->Get('MSEC');
+	my $hide_hits	= $SYS->Get('HIDE_HITS');
 	
 	my $bannerindex	= ($Banner & 3 ? 'checked' : '');
 	my $banner		= ($Banner & 5 ? 'checked' : '');
 	my $msec		= ($Msec == 1 ? 'checked' : '');
+	my $hide		= ($hide_hits == 0 ? 'checked' : '');
 	
 	my $common = "onclick=\"DoSubmit('sys.setting','FUNC','VIEW');\"";
 	
@@ -617,20 +619,24 @@ sub PrintPlusViewSetting
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Read.cgi関連</td></tr>\n");
-	$Page->Print("<tr><td>PR欄の表\示文字列 <small>(未入力でPR欄非表\示)</small></td>");
+	$Page->Print("<tr><td>PR欄の表示文字列 <small>(未入力でPR欄非表示)</small></td>");
 	$Page->Print("<td><input type=text size=60 name=PRTEXT value=\"$Prtext\"></td></tr>\n");
 	$Page->Print("<tr><td>PR欄のリンクURL</td>");
 	$Page->Print("<td><input type=text size=60 name=PRLINK value=\"$Prlink\"></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">告知欄表\示</td></tr>\n");
-	$Page->Print("<tr><td>index.htmlの告知欄を表\示する</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">告知欄表示</td></tr>\n");
+	$Page->Print("<tr><td>index.htmlの告知欄を表示する</td>");
 	$Page->Print("<td><input type=checkbox name=BANNERINDEX $bannerindex value=on></td></tr>\n");
-	$Page->Print("<tr><td>index.html以外の告知欄を表\示する</td>");
+	$Page->Print("<tr><td>index.html以外の告知欄を表示する</td>");
 	$Page->Print("<td><input type=checkbox name=BANNER $banner value=on></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">msec表\示</td></tr>\n");
-	$Page->Print("<tr><td>ミリ秒まで表\示する</small></td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">msec表示</td></tr>\n");
+	$Page->Print("<tr><td>ミリ秒まで表示する</td>");
 	$Page->Print("<td><input type=checkbox name=MSEC $msec value=on></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">規制情報公開</td></tr>\n");
+	$Page->Print("<tr><td>規制ユーザーの情報を公開する <br><small>(madakana.cgi、ユーザー規制のエラー画面)</small></td>");
+	$Page->Print("<td><input type=checkbox name=HIDE_HITS $hide value=on></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -797,7 +803,7 @@ sub PrintPluginSetting
 		my ($id, $file, $class, $name, $expl, $valid);
 		
 		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-		$Page->Print("<tr><td colspan=5>有効にする機能\にチェックを入れてください。<br>");
+		$Page->Print("<tr><td colspan=5>有効にする機能にチェックを入れてください。<br>");
 		$Page->Print("<br>※0.7.5以前のプラグイン及び旧ぜろちゃんねる用プラグインは使用できません。詳細はリリースノートを参照してください。</td></tr>\n");
 		$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 		$Page->Print("<tr>");
@@ -1246,16 +1252,18 @@ sub FunctionPlusViewSetting
 	my $banner = ($Form->Equal('BANNERINDEX', 'on')?2:0) | ($Form->Equal('BANNER', 'on')?4:0);
 	$SYSTEM->Set('BANNER', $banner);
 	$SYSTEM->Set('MSEC', ($Form->Equal('MSEC', 'on') ? 1 : 0));
+	$SYSTEM->Set('HIDE_HITS', ($Form->Equal('HIDE_HITS', 'on') ? 0 : 1));
 	
 	$SYSTEM->Save();
 	
 	# ログの設定
 	{
 		push @$pLog, '　　　 カウンターアカウント：' . $SYSTEM->Get('COUNTER');
-		push @$pLog, '　　　 PR欄表\示文字列：' . $SYSTEM->Get('PRTEXT');
+		push @$pLog, '　　　 PR欄表示文字列：' . $SYSTEM->Get('PRTEXT');
 		push @$pLog, '　　　 PR欄リンクURL：' . $SYSTEM->Get('PRLINK');
-		push @$pLog, '　　　 バナー表\示：' . $SYSTEM->Get('BANNER');
+		push @$pLog, '　　　 バナー表示：' . $SYSTEM->Get('BANNER');
 		push @$pLog, '　　　 ミリ秒表示：' . $SYSTEM->Get('MSEC');
+		push @$pLog, '　　　 規制情報公開：' . $SYSTEM->Get('HIDE_HITS');
 	}
 	return 0;
 }

@@ -320,9 +320,11 @@ sub InitSystemValue
 		'CSP'			=> 0,
 		'BANMAX'		=> 10,
 		'NINLVMAX'		=> 40,
+		'HIDE_HITS'		=> 1,									# 規制ユーザー非公開
 
 		'COOKIE_EXPIRY'	=> 30,									# Cookie期限
 		'NIN_EXPIRY'	=> 30,
+		'AUTH_EXPIRY'	=> 30,
 		'PASS_EXPIRY'	=> 365,
 		
 		'PERM_EXEC'		=> 0700,

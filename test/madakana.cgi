@@ -92,7 +92,9 @@ sub Initialize
 	
 	# システム初期化
 	$oSYS->Init();
-	
+
+	# 規制非公開
+	return 1 if $oSYS->Get('HIDE_HITS');
 	
 	# 夢が広がりんぐ
 	$oSYS->{'MainCGI'} = $pSYS;
@@ -153,7 +155,7 @@ HTML
 	
 	$Page->Print(<<HTML);
 <div style="color:navy;">
-<h1 style="font-size:1em;font-weight:normal;margin:0;">まだかな、まだかな、まなかな(規制一覧表\)</h1>
+<h1 style="font-size:1em;font-weight:normal;margin:0;">まだかな、まだかな、まなかな(規制一覧表)</h1>
 <p style="margin:0;">
 あなたのリモホ[<span style="color:red;font-weight:bold;">$HOST</span>]
 </p>

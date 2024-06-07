@@ -178,85 +178,122 @@ sub Set
 #	戻り値：登録ユーザ:1,未登録ユーザ:0
 #
 #------------------------------------------------------------------------------------------------------------
-sub Check
-{
-	my $this = shift;
-	my ($host, $addr, $koyuu) = @_;
-	
-	my $Sys = $this->{'SYS'};
-	my $addrb = unpack('B32', pack('C*', split(/\./, $addr)));
-	my $flag = 0;
-	my $adex = '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}';
-	
-	foreach my $line (@{$this->{'USER'}}) {
-		next if ($line =~ /^[#;]|^$/);
-		
-		# IPアドレス/CIDR
-		if ($line =~ m|^($adex)(?:/([0-9]+))?$|) {
-			my $leng = $2 || 32;
-			my $a = unpack("B$leng", pack('C*', split(/\./, $1)));
-			if (substr($addrb, 0, $leng) eq $a) {
-				$flag = 1;
-				$Sys->Set('HITS', $line);
-				last;
-			}
-		}
-		# IPアドレス範囲指定
-		elsif ($line =~ m|^($adex)-($adex)$|) {
-			my $a = unpack('B32', pack('C*', split(/\./, $1)));
-			my $b = unpack('B32', pack('C*', split(/\./, $2)));
-			($b, $a) = ($a, $b) if ($a gt $b);
-			if ($addrb ge $a && $addrb le $b) {
-				$flag = 1;
-				$Sys->Set('HITS', $line);
-				last;
-			}
-		}
-		# 端末固有識別子
-		elsif (defined $koyuu && $koyuu =~ /^\Q$line\E$/) {
-			$flag = 1;
-			$Sys->Set('HITS', $line);
-			last;
-		}
-		# ホスト名(正規表現)
-		elsif ($host =~ /$line/) {
-			$flag = 1;
-			$Sys->Set('HITS', $line);
-			last;
-		}
-	}
-	
-	# 規制ユーザ
-	if ($flag && $this->{'TYPE'} eq 'disable') {
-		if ($this->{'METHOD'} eq 'disable') {
-			# 処理：書き込み不可
-			return 4;
-		}
-		elsif ($this->{'METHOD'} eq 'host') {
-			# 処理：ホスト表示
-			return 2;
-		}
-		else {
-			return 4;
-		}
-	}
-	# 限定ユーザ以外
-	elsif (! $flag && $this->{'TYPE'} eq 'enable') {
-		if ($this->{'METHOD'} eq 'disable') {
-			# 処理：書き込み不可
-			return 4;
-		}
-		elsif ($this->{'METHOD'} eq 'host') {
-			# 処理：ホスト表示
-			return 2;
-		}
-		else {
-			return 4;
-		}
-	}
-	return 0;
+sub ip_to_bin {
+    my $ip = shift;
+    return unpack("B*", pack("H*", join('', map { sprintf('%04x', hex($_)) } split(/:/, $ip))));
 }
 
+sub Check {
+    my $this = shift;
+    my ($host, $addr, $koyuu, $ua, $sid) = @_;
+
+    my $Sys = $this->{'SYS'};
+    my $flag = 0;
+    my $adex_ipv4 = '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}';
+    my $adex_ipv6 = '([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4}';
+    my $adex = qr/$adex_ipv4|$adex_ipv6/;
+    my $sid_regex = qr/^[0-9a-fA-F]{32}$/;
+
+    my $addrb;
+    if ($addr =~ /:/) {
+        $addrb = ip_to_bin(expand_ipv6($addr));
+    } else {
+        $addrb = unpack('B32', pack('C*', split(/\./, $addr)));
+    }
+
+    foreach my $line (@{$this->{'USER'}}) {
+        next if ($line =~ /^[#;]|^$/);	#コメント・空行はスキップ
+
+        # IPアドレス/CIDR
+        if ($line =~ m|^($adex)(?:/([0-9]+))?$|) {
+            my ($ip_check, $length) = ($1, $2);
+            $length ||= ($ip_check =~ /:/) ? 128 : 32;
+            my $bin_check;
+            if ($ip_check =~ /:/) {
+                $bin_check = substr(ip_to_bin(expand_ipv6($ip_check)), 0, $length);
+            } else {
+                $bin_check = substr(unpack("B32", pack('C*', split(/\./, $ip_check))), 0, $length);
+            }
+            if (substr($addrb, 0, $length) eq $bin_check) {
+                $flag = 1;
+                $Sys->Set('HITS', $line);
+                last;
+            }
+        }
+        # IPアドレス範囲指定
+        elsif ($line =~ m|^($adex)-($adex)$|) {
+            my ($ip_start, $ip_end) = ($1, $2);
+            my ($bin_start, $bin_end);
+            if ($ip_start =~ /:/ && $ip_end =~ /:/) {
+                $bin_start = ip_to_bin(expand_ipv6($ip_start));
+                $bin_end = ip_to_bin(expand_ipv6($ip_end));
+            } else {
+                $bin_start = unpack('B32', pack('C*', split(/\./, $ip_start)));
+                $bin_end = unpack('B32', pack('C*', split(/\./, $ip_end)));
+            }
+            ($bin_start, $bin_end) = ($bin_end, $bin_start) if $bin_start gt $bin_end;
+            if ($addrb ge $bin_start && $addrb le $bin_end) {
+                $flag = 1;
+                $Sys->Set('HITS', $line);
+                last;
+            }
+        }
+        # 端末固有識別子
+        elsif (defined $koyuu && $koyuu =~ /^\Q$line\E$/) {
+            $flag = 1;
+            $Sys->Set('HITS', $line);
+            last;
+        }
+        # ホスト名(正規表現)
+        elsif ($host =~ /$line/) {
+            $flag = 1;
+            $Sys->Set('HITS', $line);
+            last;
+        }
+        # ユーザーエージェント(正規表現)
+        elsif (defined $ua && $line =~ /^Mo(na)?zilla/ && $ua =~ /$line/) {
+            $flag = 1;
+            $Sys->Set('HITS', $line);
+            last;
+        }
+        # セッションID
+        elsif (defined $sid && $line=~ $sid_regex && $sid =~ /^\Q$line\E$/) {
+            $flag = 1;
+            $Sys->Set('HITS', $line);
+            last;
+        }
+    }
+
+    # 規制ユーザ
+    if ($flag && $this->{'TYPE'} eq 'disable') {
+        if ($this->{'METHOD'} eq 'disable') {
+            # 処理：書き込み不可
+            return 4;
+        }
+        elsif ($this->{'METHOD'} eq 'host') {
+            # 処理：ホスト表示
+            return 2;
+        }
+        else {
+            return 4;
+        }
+    }
+    # 限定ユーザ以外
+    elsif (! $flag && $this->{'TYPE'} eq 'enable') {
+        if ($this->{'METHOD'} eq 'disable') {
+            # 処理：書き込み不可
+            return 4;
+        }
+        elsif ($this->{'METHOD'} eq 'host') {
+            # 処理：ホスト表示
+            return 2;
+        }
+        else {
+            return 4;
+        }
+    }
+    return 0;
+}
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================

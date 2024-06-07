@@ -530,12 +530,14 @@ sub ReadyBeforeWrite
 	my $Form = $this->{'FORM'};
 	my $Sec = $this->{'SECURITY'};
 	my $capID = $Sys->Get('CAPID', '');
+	my $sessionID = $Sys->Get('SID');
 	my $bbs = $Form->Get('bbs');
 	my $from = $Form->Get('FROM');
 	my $koyuu = $Sys->Get('KOYUU');
 	my $client = $Sys->Get('CLIENT');
 	my $host = $ENV{'REMOTE_HOST'};
 	my $addr = $ENV{'REMOTE_ADDR'};
+	my $ua = $ENV{'HTTP_USER_AGENT'};
 	my $Threads = $this->{'THREADS'};
 	
 	# 規制ユーザ・NGワードチェック
@@ -547,7 +549,8 @@ sub ReadyBeforeWrite
 			$vUser->Load($Sys);
 			
 			my $koyuu2 = ($client & $ZP::C_MOBILE_IDGET & ~$ZP::C_P2 ? $koyuu : undef);
-			my $check = $vUser->Check($host, $addr, $koyuu2);
+			my $check = $vUser->Check($host, $addr, $koyuu2,$ua, $sessionID);
+			$Sys->Set('HITS', '´・ω・｀') if $Sys->Get('HIDE_HITS');
 			if ($check == 4) {
 				return $ZP::E_REG_NGUSER;
 			}
