@@ -209,41 +209,42 @@ sub Write
 			$is_com = 1;
 		}
 
+		my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
+		my $is_auth = NINPOCHO::GetHash($sid,60*60*24*30,$sidDir);
+
 		# 認証処理
-		my $err = $this->Certification_Captcha($Sys, $Form);  # 成功で0
-		if($isNinja){
-			if($is_com && !$auth_code){
-				# Captcha認証が成功した場合のみパスワードの発行
-				if ($err == 0) {
-					$err = $this->Auth($Sys, undef);  # 発行
-				} else {
-					$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
-				}
+		my $err = $is_auth ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
+		if($is_com && !$auth_code){	# !authのみ
+			# Captcha認証が成功した場合のみパスワードの発行
+			if ($err == 0) {
+				$err = $this->Auth($Sys, undef);  # 発行
+			} else {
+				$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
 			}
-
-			if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) {
-				if ($auth_code) {
-					# Captcha認証の成功失敗を問わずパスワードの照合
-					$err = $this->Auth($Sys, $auth_code);
-				}
-
-				if ($err){
-					return $err;
-				}else{
-					# 認証成功
-					$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
-					$Ninja->Set('auth', 1);
-					$Ninja->Set('auth_time', time);
-				}
-			}
-
-			if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
-				$Ninja->Set('auth',0);
-				$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
-			}
-		}else{
-			return $err if $err;
 		}
+
+		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) {	# 忍法帖が設定されてないor忍法帖に認証情報が無いorキャプチャ強制
+			if ($auth_code) {
+				# Captcha認証の成功失敗を問わずパスワードの照合
+				$err = $this->Auth($Sys, $auth_code);
+			}
+
+			if ($err){
+				return $err;
+			}else{
+				# 認証成功
+				$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
+				$Ninja->Set('auth', 1);
+				$Ninja->Set('auth_time', time);
+			}
+		}
+
+		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
+			$Ninja->Set('auth',0);
+			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
+		}
+		
+		return $err if $err;
 	}
 
 	#忍法帖パス
@@ -2050,10 +2051,12 @@ sub Auth {
 
 	require './module/ninpocho.pl';
     my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
+	my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
 
     if ($auth_code) {
          my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
         if ($sid) {
+			NINPOCHO::SetHash($sid, 1, time, $sidDir);
             $Sys->Set('SID', $sid);
 			return 0;
         } else {
