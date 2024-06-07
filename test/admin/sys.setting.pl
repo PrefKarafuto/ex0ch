@@ -677,6 +677,13 @@ sub PrintPlusSecSetting
 	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
 	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
 	my $Proxy_apikey  = $SYS->Get('PROXYCHECK_APIKEY');
+	my $Proxy_api		= $SYS->Get('PROXYCHECK_API');
+	my $noApiSet = $Proxy_api ? '':'selected';
+	my $pApiSet = $Proxy_api eq 'proxycheck.io' ? 'selected' : '';
+	my $IP2ApiSet = $Proxy_api eq 'ip2location' ? 'selected' : '';
+	my $IPApiSet = $Proxy_api eq 'ipqualityscore' ? 'selected' : '';
+	my $AApiSet = $Proxy_api eq 'abstract' ? 'selected' : '';
+	my $IPDApiSet = $Proxy_api eq 'ipdata' ? 'selected' : '';
 	my $admCap		= $SYS->Get('ADMINCAP');
 	my $srcCap		= $SYS->Get('SEARCHCAP');
 
@@ -735,7 +742,16 @@ sub PrintPlusSecSetting
 	$Page->Print("<td><input type=text size=60  name=CAPTCHA_SITEKEY value=\"$Captcha_sitekey\"></td></tr>\n");
 	$Page->Print("<tr><td>Captchaシークレットキー</td>");
 	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
-	$Page->Print("<tr><td><a href=\"https://proxycheck.io/api/\">ProxyCheck</a> APIキー</td>");
+	$Page->Print("<tr><td>プロキシチェックAPI種別<br><td>");
+	$Page->Print("<select name=PROXYCHECK_API required>");
+	$Page->Print("<option value=\"\" $noApiSet>なし</option>");
+	$Page->Print("<option value=\"proxycheck.io\" $pApiSet>ProxyCheck.io</option>");
+	$Page->Print("<option value=\"ipqualityscore\" $IPApiSet>IPQS</option>");
+	$Page->Print("<option value=\"ip2location\" $IP2ApiSet>IP2LOCATION.IO</option>");
+	$Page->Print("<option value=\"abstract\" $AApiSet>Abstract</option>");
+	$Page->Print("<option value=\"ipdata\" $IPDApiSet>ipdata</option>");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>APIキー</td>");
 	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"$Proxy_apikey\"></td></tr>\n");
 
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Captchaを課すCGI</td></tr>\n");
@@ -1286,6 +1302,7 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));
 	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
 	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));
+	$SYSTEM->Set('PROXYCHECK_API', $Form->Get('PROXYCHECK_API'));
 	$SYSTEM->Set('PROXYCHECK_APIKEY', $Form->Get('PROXYCHECK_APIKEY'));
 	$SYSTEM->Set('ADMINCAP', ($Form->Equal('ADMINCAP', 'on') ? 1 : 0));
 	$SYSTEM->Set('SEARCHCAP', ($Form->Equal('SEARCHCAP', 'on') ? 1 : 0));

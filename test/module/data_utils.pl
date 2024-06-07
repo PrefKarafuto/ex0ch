@@ -1510,54 +1510,52 @@ sub ip_to_number {
 #
 #------------------------------------------------------------------------------------------------------------
 sub IsProxyAPI {
-	my $this = shift;
-	my ($Sys,$mode) = @_;
+    my $this = shift;
+    my ($Sys, $mode) = @_;
 
-	my $infoDir = $Sys->Get('INFO');
-	my $ipAddr = $ENV{'REMOTE_ADDR'};
-	my $checkKey = $Sys->Get('PROXYCHECK_APIKEY');
+    my $infoDir = $Sys->Get('INFO');
+    my $ipAddr = $ENV{'REMOTE_ADDR'};
+    my $api_key = $Sys->Get('PROXYCHECK_APIKEY');
+	my $api_name = $Sys->Get('PROXYCHECK_API');
+	my $cache_day = 7;		# キャッシュの有効期間
 
-	$mode //= 1;
+    $mode //= 1;  # デフォルト値を設定
 
-	my $file = ".$infoDir/IP_List/proxy_check.cgi";#結果のキャッシュ
-	my $proxy_list;
-	$proxy_list = retrieve($file) if -e $file;
-	$proxy_list = {} unless defined $proxy_list;
+    my $cacheFile = "$infoDir/IP_List/proxy_check.cgi"; # 結果のキャッシュファイル
+    my $proxy_list = -e $cacheFile ? retrieve($cacheFile) : {};
 
-	if($proxy_list->{$ipAddr}->{"time"} + 60*60*24*7 > time){
-		if($proxy_list->{$ipAddr}->{"flag"}){
-			return 1;
-		}else{
-			return 0;
-		}
-	}
+    if (defined $proxy_list->{$ipAddr} && $proxy_list->{$ipAddr}->{"time"} + 60*60*24*$cache_day > time) {
+        return $proxy_list->{$ipAddr}->{"flag"};
+    }
+	
+	# APIリクエスト
+	# 'サービス名'	=> {url => "エンドポイントURL", json_key => 'API返答に含まれるプロキシ判定のキー', json_value => 'プロキシ判定が真であることを意味する値'},
+	my $api_req = {
+		'proxycheck.io'	=> {url => "https://proxycheck.io/v2/${ipAddr}?key=${$api_key}&vpn=${mode}", json_key => 'proxy', json_value => 'yes'},
+		'ipqualityscore'=> {url => "https://ipqualityscore.com/api/json/ip/${$api_key}/${ipAddr}", json_key => 'proxy', json_value => 'true'},
+		'ip2location'	=> {url => "https://api.ip2location.io/?key=${$api_key}&ip=${ipAddr}&format=json", json_key => 'is_proxy', json_value => 'true'},
+		'abstract'		=> {url => "https://ipgeolocation.abstractapi.com/v1/?api_key=${$api_key}&ip_address=${ipAddr}", json_key => 'is_vpn', json_value => 'true'},
+		'ipdata'		=> {url => "https://api.ipdata.co/${ipAddr}/threat?api-key=${$api_key}", json_key => 'is_anonymous', json_value => 'true'},
+	};
 
-	if($checkKey){
-		my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=${mode}";
-		my $ua = LWP::UserAgent->new();
-		my $response = $ua->get($url);
+    if ($api_key && $api_name) {
+        my $ua = LWP::UserAgent->new();
+        my $response = $ua->get($api_req->{$api_name}{url});
 
-		if ($response->is_success) {
-			my $json = $response->decoded_content();
-			my $out = decode_json($json);
-			my $isProxy = $out->{$ipAddr}->{"proxy"};
+        if ($response->is_success) {
+            my $json = $response->decoded_content();
+            my $out = decode_json($json);
+            my $isProxy = $out->{$ipAddr}->{$api_req->{$api_name}{json_key}};
 
-			if ($isProxy eq 'yes') {
-				$proxy_list->{$ipAddr}->{"flag"} = 1;
-				$proxy_list->{$ipAddr}->{"time"} = time;
-				store $proxy_list, $file;
-				chmod 0600, $file;
-				return 1;
-			}else{
-				$proxy_list->{$ipAddr}->{"flag"} = 0;
-				$proxy_list->{$ipAddr}->{"time"} = time;
-				store $proxy_list, $file;
-				chmod 0600, $file;
-				return 0;
-			}
-		}
-	}
-	return 0;
+            $proxy_list->{$ipAddr}->{"flag"} = $isProxy eq $api_req->{$api_name}{json_value} ? 1 : 0;
+            $proxy_list->{$ipAddr}->{"time"} = time;
+            store $proxy_list, $cacheFile;
+            chmod 0600, $cacheFile;
+
+            return $proxy_list->{$ipAddr}->{"flag"};
+        }
+    }
+    return 0;
 }
 #------------------------------------------------------------------------------------------------------------
 #

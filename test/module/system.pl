@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS dev-r156 20240531',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r157 20240607',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -307,7 +307,8 @@ sub InitSystemValue
 		'CAPTCHA'			=> '',								# キャプチャの種類
 		'CAPTCHA_SITEKEY'	=> '',								# Captchaサイトキー
 		'CAPTCHA_SECRETKEY'	=> '',								# Captchaシークレットキー
-		'PROXYCHECK_APIKEY'	=> '',								# ProxyCheck.io APIキー
+		'PROXYCHECK_API'	=> '',								# プロキシ判定API
+		'PROXYCHECK_APIKEY'	=> '',								# APIキー
 
 		'ADMINCAP'		=> '',
 		'SEARCHCAP'		=> '',
