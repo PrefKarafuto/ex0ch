@@ -65,7 +65,7 @@ sub PrintResAutoDelete
 	<td><input type=text size=20 name=KEY value="$sKEY"></td>
   </tr>-->
   <tr>
-	<td>検索ワード(正規表\現)</td>
+	<td>検索ワード(正規表現)</td>
 	<td>
 HTML
 	$Page->Print("<input type=text size=60 name=WORD onkeydown=\"go(event.keyCode);\" value=\"$sWORD\" accept-charset=\"Shift_JIS\">");

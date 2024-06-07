@@ -207,8 +207,8 @@ $Page->Print(<<HTML);
 	<a href="javascript:SetOption('DISPST_NOTICE', $or2);$common">NEXT &gt;&gt;</a>
 	</td>
 	<td align=right colspan="2">
-	表\示数 <input type=text name="DISPNUM_NOTICE" size="4" value="$dispNum">
-	<input type=button value="　表\示　" onclick="$common">
+	表示数 <input type=text name="DISPNUM_NOTICE" size="4" value="$dispNum">
+	<input type=button value="　表示　" onclick="$common">
 	</td>
    </tr>
    <tr>
@@ -394,8 +394,8 @@ $Page->Print(<<HTML);
 	<a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
 	</td>
 	<td align="right" colspan="2">
-	表\示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
-	<input type="button" value="　表\示　" onclick="$common">
+	表示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
+	<input type="button" value="　表示　" onclick="$common">
 	</td>
    </tr>
    <tr>
@@ -481,8 +481,8 @@ $Page->Print(<<HTML);
 	<a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
 	</td>
 	<td align="right" colspan="2">
-	表\示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
-	<input type="button" value="　表\示　" onclick="$common">
+	表示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
+	<input type="button" value="　表示　" onclick="$common">
 	</td>
    </tr>
    <tr>

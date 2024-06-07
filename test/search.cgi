@@ -442,7 +442,7 @@ sub PrintNoHit
 	
 	$Page->Print(<<HTML);
 <dt>
- 0 名前：<font color="forestgreen"><b>検索エンジソ\＠EXぜろちゃんねる</b></font>：No Hit
+ 0 名前：<font color="forestgreen"><b>検索エンジソ＠EXぜろちゃんねる</b></font>：No Hit
 </dt>
 <dd>
  <br>
@@ -475,7 +475,7 @@ sub PrintSystemError
   <div class="title">
   <small><b>【ヒット数：0】</b></small><font size="+2" color="red">システムエラー</font>
   </div>
-   <dt>0 名前：<font color="forestgreen"><b>検索エンジソ\＠EXぜろちゃんねる</b></font>：System Error</dt>
+   <dt>0 名前：<font color="forestgreen"><b>検索エンジソ＠EXぜろちゃんねる</b></font>：System Error</dt>
 	<dd>
 	<br>
 	<br>

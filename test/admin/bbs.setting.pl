@@ -608,7 +608,7 @@ sub PrintLimitSetting
 	$Page->Print("<input type=text size=10 name=BBS_COLUMN_NUMBER value=\"$setLineLength\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">datファイル最大サイズ（KB）</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_DATMAX value=\"$setDatMax\"></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">書き込み可能\行数(偶数行)</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">書き込み可能行数(偶数行)</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_LINE_NUMBER value=\"$setLineMax\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">最大スレッド数(無記入=".$Sys->Get('SUBMAX').")</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_SUBJECT_MAX value=\"$setSubMax\"></td></tr>");
@@ -625,7 +625,7 @@ sub PrintLimitSetting
 	$Page->Print("<td class=\"DetailTitle\">DNSBLチェック</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_DNSBL_CHECK $setDNSBL value=on $isDNSBL>$setInfo</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(キャップ)</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_THREADCAPONLY $setCapOnly value=on>キャップのみ可能\</td>");
+	$Page->Print("<input type=checkbox name=BBS_THREADCAPONLY $setCapOnly value=on>キャップのみ可能</td>");
 	$Page->Print("<td class=\"DetailTitle\">海外ホスト規制</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_JP_CHECK $setOverSea value=on>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(携帯)</td><td>");
@@ -940,7 +940,7 @@ sub PrintOtherSetting
 	$Page->Print("<option value=BBS_FORCE_ID $selIDforce>強制ID</option>");
 	$Page->Print("<option value=BBS_ID_DISP $selIDdisp>任意ID</option>");
 	$Page->Print("<option value=BBS_NO_ID $selIDnone>ID表示無し</option>");
-	$Page->Print("<option value=BBS_DISP_IP1 $selIDhost>ホスト表\示</option>");
+	$Page->Print("<option value=BBS_DISP_IP1 $selIDhost>ホスト表示</option>");
 	$Page->Print("<option value=BBS_DISP_IP2 $selIDkarafuto>発信元表示(樺太)</option>");
 	$Page->Print("<option value=BBS_DISP_IP3 $selIDsiberia>発信元表示(シベリア)</option>");
 	$Page->Print("</select></td>");
@@ -962,7 +962,7 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
 	$Page->Print("<td class=\"DetailTitle\"><s>文字参照</s></td><td>");
-	$Page->Print("<input type=checkbox name=BBS_UNICODE $setUnicode value=on>使用可能\</td>");
+	$Page->Print("<input type=checkbox name=BBS_UNICODE $setUnicode value=on>使用可能</td>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">トリップ桁数</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_TRIPCOLUMN value=\"$setTripColumn\"></td>");
@@ -976,7 +976,7 @@ sub PrintOtherSetting
 	$Page->Print("<input type=text size=8 name=BBS_CONTENTS_NUMBER value=\"$setContentNum\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">　　メールcookie保存</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_MAILCOOKIE_CHECK $setMailCookie value=on>保存</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">indexレス内容表\示行数(注)</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">indexレス内容表示行数(注)</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_INDEX_LINE_NUMBER value=\"$setContentLine\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_PASSWORD_CHECK $setNewThread value=on>別画面</td></tr>");

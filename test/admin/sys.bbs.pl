@@ -236,7 +236,7 @@ sub PrintBBSList
 			$Page->Print("<option value=\"$id\">$name</option>\n");
 		}
 	}
-	$Page->Print("</select><input type=button value=\"　表\示　\" onclick=");
+	$Page->Print("</select><input type=button value=\"　表示　\" onclick=");
 	$Page->Print("\"DoSubmit('sys.bbs','DISP','LIST')\"></td></tr>\n");
 	
 	# 掲示板リストを出力

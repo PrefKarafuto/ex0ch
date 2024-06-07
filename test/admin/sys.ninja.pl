@@ -200,7 +200,7 @@ sub PrintNinjaList
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("忍法帖総数：$sessnum　");
-	$Page->Print("表\示数<input type=text name=DISPNUM size=4 value=$dispNum>");
+	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30px\"></th>");

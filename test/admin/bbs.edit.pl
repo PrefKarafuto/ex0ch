@@ -431,7 +431,7 @@ sub PrintValidUserEdit
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">記法</td><td style=\"font-size: 14px\">");
-	$Page->Print("・ホスト名(正規表\現)<br>");
+	$Page->Print("・ホスト名(正規表現)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">\\.host\\d+\\.jp\$</b><br>");
 	$Page->Print("・IPアドレス(範囲指定あり)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.0.123</b><br>");
@@ -466,7 +466,7 @@ sub PrintValidUserEdit
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">規制方法</td><td>");
 	$Page->Print("<select name=VALID_METHOD>");
-	$Page->Print("<option value=host $kind[2]>ホスト表\示</option>");
+	$Page->Print("<option value=host $kind[2]>ホスト表示</option>");
 	$Page->Print("<option value=disable $kind[3]>書き込み不可</option>");
 	$Page->Print("</select></td></tr>\n");
 	
@@ -538,7 +538,7 @@ sub PrintNGWordsEdit
 	$Page->Print("<tr><td class=\"DetailTitle\">NGワード処理</td><td>");
 	$Page->Print("<select name=NG_METHOD>");
 	$Page->Print("<option value=disable $kind[0]>書き込み不可</option>");
-	$Page->Print("<option value=host $kind[1]>ホスト表\示</option>");
+	$Page->Print("<option value=host $kind[1]>ホスト表示</option>");
 	$Page->Print("<option value=delete $kind[2]>NGワード削除</option>");
 	$Page->Print("<option value=substitute $kind[3]>NGワード置換</option>");
 	$Page->Print("</select></td></tr>\n");

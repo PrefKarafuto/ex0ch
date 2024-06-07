@@ -478,7 +478,7 @@ $Page->Print(<<HTML);
 HTML
 	
 	if ($ecode == 1000) {
-		$Page->Print("     ERROR:$ecode - 本機能\の処理を実行する権限がありません。\n");
+		$Page->Print("     ERROR:$ecode - 本機能の処理を実行する権限がありません。\n");
 	}
 	elsif ($ecode == 1001) {
 		$Page->Print("     ERROR:$ecode - 入力必須項目が空欄になっています。\n");
@@ -494,7 +494,7 @@ HTML
 		$Page->Print("     ERROR:$ecode - SETTING.TXTの生成に失敗しました。\n");
 	}
 	elsif ($ecode == 2002) {
-		$Page->Print("     ERROR:$ecode - 掲示板構\成要素の生成に失敗しました。\n");
+		$Page->Print("     ERROR:$ecode - 掲示板構成要素の生成に失敗しました。\n");
 	}
 	elsif ($ecode == 2003) {
 		$Page->Print("     ERROR:$ecode - 過去ログ初期情報の生成に失敗しました。\n");
