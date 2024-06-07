@@ -3,6 +3,9 @@
   
 バグ報告・機能要望・その他サポート用のDiscordはこちら  
 https://discord.gg/jXCUpTZgbE
+
+Wikiページ
+https://github.com/PrefKarafuto/ex0ch/wiki  
   
 ## 今後の開発予定機能   
 - [ ] 過去ログ周りを整備
@@ -33,7 +36,7 @@ Shift_JISからUTF-8への書き換えに伴い、旧来の0ch/0ch+用プラグ�
 
 ------------
 ## testフォルダのディレクトリ構成
- + test/                      - ぜろちゃんねるプラス動作ディレクトリ  
+ + test/                      - EXぜろちゃんねる動作ディレクトリ  
     + *.cgi                   - 基本動作用CGI  
     + datas/                  - 初期データ・固定データ格納用  
     |  + 1000.txt  
@@ -45,13 +48,13 @@ Shift_JISからUTF-8への書き換えに伴い、旧来の0ch/0ch+用プラグ�
     |  + .session/            - セッション情報保存ディレクトリ
     |  + IP_List/             - IPリスト保存ディレクトリ  
     + module/  
-    |  + *.pl                 - ぜろちゃんねるモジュール  
+    |  + *.pl                 - EXぜろちゃんねるモジュール  
     + admin/  
     |  + *.pl                 - 管理CGI用モジュール  
     + plugin/  
     |  + 0ch_*.pl             - プラグインスクリプト  
     + perllib/  
-       \+ \*                    - ぜろちゃんねるプラスに必要なパッケージ  
+       \+ \*                    - EXぜろちゃんねるに必要なパッケージ  
          
 ------------
 ## Special Thanks  
