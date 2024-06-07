@@ -9,6 +9,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use Time::Local qw(timelocal);
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -189,6 +190,7 @@ sub Check {
 
     my $Sys = $this->{'SYS'};
     my $flag = 0;
+	my $method = $this->{'METHOD'};
     my $adex_ipv4 = '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}';
     my $adex_ipv6 = '([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4}';
     my $adex = qr/$adex_ipv4|$adex_ipv6/;
@@ -203,6 +205,29 @@ sub Check {
 
     foreach my $line (@{$this->{'USER'}}) {
         next if ($line =~ /^[#;]|^$/);	#コメント・空行はスキップ
+		next unless ($line =~ s/^!exdeny:(.*?)!\s*//);
+		
+		my %opt;
+		foreach (split(/&/, $1)) {
+			my ($key, $val) = split(/=/, $_, 2);
+			$opt{$key} = $val;
+		}
+		
+		# スレ立て規制 !exdeny:tate=1!\.example\.jp$
+		if ($opt{'tate'} && !$Sys->Equal('MODE', 1)) {
+			next;
+		}
+		
+		# 有効期限 !exdeny:expires=2013/07/29 00:00:00!\.example\.jp$
+		if ($opt{'expires'} && $opt{'expires'} =~ m|^([0-9]+)/([0-9]+)/([0-9]+) ([0-9]+):([0-9]+):([0-9]+)$|) {
+			my $expires = timelocal($6, $5, $4, $3, $2-1, $1);
+			next if (time >= $expires);
+		}
+		
+		# 規制方法指定
+		if ($opt{'method'} && grep { $_ eq $opt{'method'} } qw(disable host)) {
+			$method = $opt{'method'};
+		}
 
         # IPアドレス/CIDR
         if ($line =~ m|^($adex)(?:/([0-9]+))?$|) {
@@ -251,7 +276,7 @@ sub Check {
             last;
         }
         # ユーザーエージェント(正規表現)
-        elsif (defined $ua && $line =~ /^Mo(na)?zilla/ && $ua =~ /$line/) {
+        elsif (defined $ua && $line =~ /Mo(na)?zilla/ && $ua =~ /$line/) {
             $flag = 1;
             $Sys->Set('HITS', $line);
             last;

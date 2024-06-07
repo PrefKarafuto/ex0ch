@@ -426,9 +426,11 @@ sub PrintValidUserEdit
 	$kind[1] = $vUsers->Get('TYPE') eq 'enable' ? '' : 'selected';
 	$kind[2] = $vUsers->Get('METHOD') eq 'disable' ? '' : 'selected';
 	$kind[3] = $vUsers->Get('METHOD') eq 'host' ? '' : 'selected';
+
+	my $status = $SYS->Get('HIDE_HITS') ? "非公開です。" : "ユーザーに公開されます。";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
+	$Page->Print("<tr><td colspan=2><hr>規制情報は$status<hr></td></tr>\n");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">記法</td><td style=\"font-size: 14px\">");
 	$Page->Print("・ホスト名(正規表現)<br>");
@@ -440,10 +442,19 @@ sub PrintValidUserEdit
 	$Page->Print("・端末固有番号<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">12345678901234_xx</b> (au)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">AbCd123</b> (docomo)<br>");
-	$Page->Print("<span style=\"margin-left: 20px\">その他</span><br>");
+	$Page->Print("・ユーザーエージェント<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">Mozilla/5.0 ([UA文字列])</b> (通常ブラウザ)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">Monazilla/1.0 ([UA文字列])</b> (専ブラ)<br>");
+	$Page->Print("・セッションID<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">fb665de3cfa1857555532696ea0c1539</b> (十六進数32桁)<br>");
+	$Page->Print("<br>・拡張コマンド<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:expires=2013/07/29 00:00:00!\.example\.jp</b> (期限付き規制)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:tate=1!\.example\.jp</b> (スレ立て限定規制)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:method=disable!\.example\.jp</b> (書込み禁止)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:method=host!\.example\.jp</b> (host表示)<br>");
 	$Page->Print("</td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">対象ホスト・<br>端末識別子一覧</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">規制対象一覧</td><td>");
 	$Page->Print("<textarea name=VALID_USERS rows=10 cols=70 wrap=off>");
 	
 	my $sanitize = sub {
