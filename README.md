@@ -4,7 +4,7 @@
 バグ報告・機能要望・その他サポート用のDiscordはこちら  
 https://discord.gg/jXCUpTZgbE
 
-Wikiページ
+Wikiページ  
 https://github.com/PrefKarafuto/ex0ch/wiki  
   
 ## 今後の開発予定機能   
