@@ -463,50 +463,40 @@ sub PrintError
 	my $this = shift;
 	my ($pLog) = @_;
 	my ($Page, $ecode);
-	
+
 	$Page = $this->{'INN'};
-	
+
 	# エラーコードの抽出
 	$ecode = pop @$pLog;
-	
-$Page->Print(<<HTML);
+
+	# エラーメッセージ
+	my %error_messages = (
+		1000 => "本機能の処理を実行する権限がありません。",
+		1001 => "入力必須項目が空欄になっています。",
+		1002 => "設定項目に規定外の文字が使用されています。",
+		2000 => "掲示板ディレクトリの作成に失敗しました。<br>パーミッション、または既に同名の掲示板が作成されていないかを確認してください。",
+		2001 => "SETTING.TXTの生成に失敗しました。",
+		2002 => "掲示板構成要素の生成に失敗しました。",
+		2003 => "過去ログ初期情報の生成に失敗しました。",
+		2004 => "掲示板情報の更新に失敗しました。",
+	);
+
+	$Page->Print(<<HTML);
   <table border="0" cellspacing="0" cellpadding="0" width="100%" align="center">
    <tr>
 	<td>
 	
 	<div class="xExcuted">
 HTML
-	
-	if ($ecode == 1000) {
-		$Page->Print("     ERROR:$ecode - 本機能の処理を実行する権限がありません。\n");
-	}
-	elsif ($ecode == 1001) {
-		$Page->Print("     ERROR:$ecode - 入力必須項目が空欄になっています。\n");
-	}
-	elsif ($ecode == 1002) {
-		$Page->Print("     ERROR:$ecode - 設定項目に規定外の文字が使用されています。\n");
-	}
-	elsif ($ecode == 2000) {
-		$Page->Print("     ERROR:$ecode - 掲示板ディレクトリの作成に失敗しました。<br>\n");
-		$Page->Print("     パーミッション、または既に同名の掲示板が作成されていないかを確認してください。\n");
-	}
-	elsif ($ecode == 2001) {
-		$Page->Print("     ERROR:$ecode - SETTING.TXTの生成に失敗しました。\n");
-	}
-	elsif ($ecode == 2002) {
-		$Page->Print("     ERROR:$ecode - 掲示板構成要素の生成に失敗しました。\n");
-	}
-	elsif ($ecode == 2003) {
-		$Page->Print("     ERROR:$ecode - 過去ログ初期情報の生成に失敗しました。\n");
-	}
-	elsif ($ecode == 2004) {
-		$Page->Print("     ERROR:$ecode - 掲示板情報の更新に失敗しました。\n");
-	}
-	else {
+
+	# エラーメッセージの出力
+	if (exists $error_messages{$ecode}) {
+		$Page->Print("     ERROR:$ecode - $error_messages{$ecode}\n");
+	} else {
 		$Page->Print("     ERROR:$ecode - 不明なエラーが発生しました。\n");
 	}
-	
-$Page->Print(<<HTML);
+
+	$Page->Print(<<HTML);
 	</div>
 	
 HTML
@@ -521,14 +511,15 @@ HTML
 		$Page->Print("    </blockquote>");
 		$Page->Print('<hr>');
 	}
-	
-$Page->Print(<<HTML);
+
+	$Page->Print(<<HTML);
 	</td>
    </tr>
   </table>
 HTML
-	
+
 }
+
 
 #============================================================================================================
 #	モジュール終端
