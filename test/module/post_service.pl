@@ -210,33 +210,52 @@ sub Write
 		}
 
 		my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
+		my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
 		my $is_auth = NINPOCHO::GetHash($sid,60*60*24*30,$sidDir);
 
 		# 認証処理
 		my $err = $is_auth ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
 		if($is_com && !$auth_code){	# !authのみ
-			# Captcha認証が成功した場合のみパスワードの発行
 			if ($err == 0) {
-				$err = $this->Auth($Sys, undef);  # 発行
+				# Captcha認証が成功した場合のみパスワードの発行
+				my $ctx = Digest::MD5->new;
+
+				$ctx->add('auth');
+				$ctx->add($Sys->Get('BBS'));
+				$ctx->add(time);
+				$ctx->add($ENV{'REMOTE_ADDR'});
+				my $pass = substr($ctx->hexdigest, 0, 8);
+
+				NINPOCHO::SetHash($pass, $sid, time(), $passDir);
+				$Sys->Set('PASSWORD', $pass);
+
+				$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
 			} else {
+				# Captcha認証失敗
 				$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
 			}
 		}
 
-		if (!$Ninja->Get('auth') || $Ninja->Get('force_captcha')) {	# 忍法帖が設定されてないor忍法帖に認証情報が無いorキャプチャ強制
-			if ($auth_code) {
-				# Captcha認証の成功失敗を問わずパスワードの照合
-				$err = $this->Auth($Sys, $auth_code);
-			}
-
-			if ($err){
-				return $err;
+		if ($auth_code) {
+			# Captcha認証の成功失敗を問わずパスワードの照合
+			my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
+			if ($sid) {
+				# パスワード合致
+				NINPOCHO::SetHash($sid, $auth_code, time, $sidDir);			# 認証済み設定
+				NINPOCHO::SetHash($auth_code, $sid, time - 60*3, $passDir); # ワンタイムパス無効化
+				$Sys->Set('SID', $sid);
+				$err = 0;
 			}else{
-				# 認証成功
-				$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
-				$Ninja->Set('auth', 1);
-				$Ninja->Set('auth_time', time);
+				# パスワード不一致
+				$err = $ZP::E_FORM_FAILEDAUTH;
 			}
+		}
+
+		if (!$err){
+			# 認証成功
+			$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
+			$Ninja->Set('auth', 1);
+			$Ninja->Set('auth_time', time);
 		}
 
 		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
@@ -2046,40 +2065,6 @@ sub OMIKUJI
 	}
 	
 	return 0;
-}
-# 一時パスワードによる認証
-sub Auth {
-    my $this = shift;
-    my ($Sys, $auth_code) = @_;
-
-	require './module/ninpocho.pl';
-    my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
-	my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
-
-    if ($auth_code) {
-         my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
-        if ($sid) {
-			NINPOCHO::SetHash($sid, 1, time, $sidDir);
-            $Sys->Set('SID', $sid);
-			return 0;
-        } else {
-            return $ZP::E_FORM_FAILEDAUTH;
-        }
-    } else{
-		my $board = $Sys->Get('BBS');
-        my $ctx = Digest::MD5->new;
-
-        $ctx->add('auth');
-        $ctx->add($board);
-        $ctx->add(time);
-        $ctx->add($ENV{'REMOTE_ADDR'});
-        my $pass = substr($ctx->hexdigest, 0, 8);
-
-        NINPOCHO::SetHash($pass, $Sys->Get('SID'), time(), $passDir);
-        $Sys->Set('PASSWORD', $pass);
-
-        return $ZP::E_FORM_AUTHCOMMAND;
-    }
 }
 
 #スレッド乱立防止
