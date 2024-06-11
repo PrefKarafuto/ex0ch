@@ -268,7 +268,7 @@ sub PrintBaseSetting
 	my ($Page, $Sys, $Form) = @_;
 	my (@threadList, $id);
 	my ($BBS, $Category, @bbsSet, @catSet, $name, $category);
-	my ($sCat, @belongBBS, $belongID);
+	my (@belongBBS, $belongID);
 	
 	$Sys->Set('_TITLE', 'BBS Base Setting');
 	
@@ -286,12 +286,7 @@ sub PrintBaseSetting
 	$Sys->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($Sys->Get('ADMIN')->{'USER'}, $BBS, \@belongBBS);
 	
 	# 掲示板情報を取得
-	if ($sCat eq '' || $sCat eq 'ALL') {
-		$BBS->GetKeySet('ALL', '', \@bbsSet);
-	}
-	else {
-		$BBS->GetKeySet('CATEGORY', $sCat, \@bbsSet);
-	}
+	$BBS->GetKeySet('ALL', '', \@bbsSet);
 	$Category->GetKeySet(\@catSet);
 	
 	my $setSubTitle		= $Setting->Get('BBS_SUBTITLE');
@@ -345,6 +340,7 @@ sub PrintBaseSetting
 				$Page->Print("<option value=".$BBS->Get('DIR', $listid)." $selKako>$name</option>");
 			}
 		}
+		$Page->Print("</optgroup>");
 	}
 	$Page->Print("</select></td></tr>");
 

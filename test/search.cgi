@@ -72,7 +72,7 @@ sub PrintHead
 {
 	my ($Sys, $Page, $BBS, $Form) = @_;
 	my ($pBBS, $bbs, $name, $catname, $dir, $Banner);
-	my ($sMODE, $sBBS, $sCAT, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
+	my ($sMODE, $sBBS, $sCAT, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id, $isSelC, $isSelB);
 	my ($dFROM, $dTO);
 	
 	my $sanitize = sub {
@@ -144,6 +144,7 @@ HTML
    <tr>
 	<td>対象カテゴリー<br>
 	<select name="CATEGORY">
+	<option value="">指定しない</option>
 HTML
 
 	# カテゴリーの取得
@@ -164,14 +165,9 @@ HTML
 		}
 		next if !$count;
 		$catname .= " ($count)";
+		$isSelC = $sCAT eq $catid ? "selected" : "";
 
-		$Page->Print("     <option value=\"\">指定しない</option>\n");
-		if ($sCAT eq $catid) {
-			$Page->Print("     <option value=\"$catid\" selected>$catname</option>\n");
-		}
-		else {
-			$Page->Print("     <option value=\"$catid\">$catname</option>\n");
-		}
+		$Page->Print("<option value=\"$catid\" $isSelC>$catname</option>\n");
 	}
 	$Page->Print(<<HTML);
 	</select>
@@ -182,21 +178,24 @@ HTML
 	<select name="BBS">
 HTML
 
-	$Page->Print("     <option value=\"\">すべて</option>\n");
-	foreach $id (@bbsSet) {
-		$name = $BBS->Get('NAME', $id);
-		$dir = $BBS->Get('DIR', $id);
-		
-		# 板ディレクトリに.0ch_hiddenというファイルがあれば読み飛ばす
-		next if ( -e "$BBSpath/$dir/.0ch_hidden" && $sBBS ne $dir );
+	$Page->Print("<option value=\"\">すべて</option>\n");
+	foreach my $catid (@catSet) {
+		$catname = $Category->Get('NAME', $catid);
+		$Page->Print("<optgroup label=\"$catname\">");
+		foreach $id (@bbsSet) {
+			$name = $BBS->Get('NAME', $id);
+			$dir = $BBS->Get('DIR', $id);
+			
+			# 板ディレクトリに.0ch_hiddenというファイルがあれば読み飛ばす
+			next if ( -e "$BBSpath/$dir/.0ch_hidden" && $sBBS ne $dir );
 
-		if ($sBBS eq $dir) {
-			$Page->Print("     <option value=\"$dir\" selected>$name</option>\n");
+			# 選択肢
+			$isSelC = $sBBS eq $dir ? "selected" : "";
+			$Page->Print("<option value=\"$dir\" $isSelB>$name</option>\n") if $catid eq $BBS->Get('CATEGORY', $id);
 		}
-		else {
-			$Page->Print("     <option value=\"$dir\">$name</option>\n");
-		}
+		$Page->Print("</optgroup>");
 	}
+
 	$Page->Print(<<HTML);
 	</select>
 	</td>
@@ -213,7 +212,7 @@ HTML
    <tr>
 	<td>検索種別<br>
 	<input type="checkbox" name="TYPE" value="1" $cTYPE[0]><small>名前検索</small><br>
-	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]><small>全文検索</small><br>
+	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]><small>本文検索</small><br>
 	<input type="checkbox" name="TYPE" value="4" $cTYPE[2]><small>ID検索</small><br>
 	<input type="checkbox" name="TYPE" value="8" $cTYPE[3]><small>スレタイ検索</small><br>
 	</td>
@@ -442,7 +441,7 @@ sub PrintNoHit
 	
 	$Page->Print(<<HTML);
 <dt>
- 0 名前：<font color="forestgreen"><b>検索エンジソ＠EXぜろちゃんねる</b></font>：No Hit
+ 0 名前：<font color="forestgreen"><b>検索エンジン＠EXぜろちゃんねる</b></font>：No Hit
 </dt>
 <dd>
  <br>
@@ -475,7 +474,7 @@ sub PrintSystemError
   <div class="title">
   <small><b>【ヒット数：0】</b></small><font size="+2" color="red">システムエラー</font>
   </div>
-   <dt>0 名前：<font color="forestgreen"><b>検索エンジソ＠EXぜろちゃんねる</b></font>：System Error</dt>
+   <dt>0 名前：<font color="forestgreen"><b>検索エンジン＠EXぜろちゃんねる</b></font>：System Error</dt>
 	<dd>
 	<br>
 	<br>
