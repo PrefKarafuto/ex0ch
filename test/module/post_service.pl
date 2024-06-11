@@ -228,7 +228,8 @@ sub Write
 
 		my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
 		my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
-		my $is_auth = NINPOCHO::GetHash($sid,60*60*24*30,$sidDir) || ($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) >= time));
+		my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
+		my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir) || ($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) >= time));
 
 		# 認証処理
 		my $err = $is_auth ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
@@ -275,7 +276,7 @@ sub Write
 			$Ninja->Set('auth_time', time);
 		}
 
-		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) < time)){
+		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) < time)){
 			$Ninja->Set('auth',0);
 			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
 		}
