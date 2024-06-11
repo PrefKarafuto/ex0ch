@@ -359,7 +359,7 @@ sub PrintReadMenu
 		my $title = $Dat->GetSubject();
 		my $ttlCol = $Set->Get('BBS_SUBJECT_COLOR');
 		$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
-		$Page->Print("<h1 style=\"color:$ttlCol;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title ($resNum)</h1>\n\n");
+		$Page->Print("<h1 style=\"color:$ttlCol;font-size:larger;margin:-.5em 0 0;\"><b>$title </b>($resNum)</h1>\n\n");
 		$Page->Print("<dl class=\"thread\">\n");
 	}
 }

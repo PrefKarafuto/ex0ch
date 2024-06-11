@@ -194,6 +194,23 @@ sub Write
 
 	# 忍法帖関連
 	my $sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,undef);
+	
+	# 忍法帖パスがあったらロード
+	my $password = '';
+	my $ninmail = $Form->Get('mail');
+	if($ninmail=~ /!load:(.{10,30})/ && $isNinja){
+		$password = $1;
+		$ninmail =~ s/!load:(.{10,30})//;
+		$Form->Set('mail',$ninmail);
+		$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,$password);	#ロード
+		$password = '';
+	}
+	elsif($ninmail =~ /!save:(.{10,30})/ && $isNinja){
+		$password = $1;
+		$ninmail =~ s/!save:(.{10,30})//;
+		$Form->Set('mail',$ninmail);
+		# 後でセーブするときに$passwordを使う
+	}
 
 	# hCaptcha認証
 	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY')){
@@ -211,7 +228,7 @@ sub Write
 
 		my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
 		my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
-		my $is_auth = NINPOCHO::GetHash($sid,60*60*24*30,$sidDir);
+		my $is_auth = NINPOCHO::GetHash($sid,60*60*24*30,$sidDir) || ($Ninja->Get('auth') && ($Ninja->Get('auth_time') + (60*60*24*30) >= time));
 
 		# 認証処理
 		my $err = $is_auth ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
@@ -266,21 +283,6 @@ sub Write
 		return $err if $err;
 	}
 
-	#忍法帖パス
-	my $password = '';
-	my $ninmail = $Form->Get('mail');
-	if($ninmail=~ /!load:(.{10,30})/ && $isNinja){
-		$password = $1;
-		$ninmail =~ s/!load:(.{10,30})//;
-		$Form->Set('mail',$ninmail);
-		$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,$password);	#ロード
-		$password = '';
-	}
-	elsif($ninmail =~ /!save:(.{10,30})/ && $isNinja){
-		$password = $1;
-		$ninmail =~ s/!save:(.{10,30})//;
-		$Form->Set('mail',$ninmail);
-	}
 	my $ninLv = $Ninja->Get('ninLv');
 
 	#BANチェック
@@ -309,6 +311,7 @@ sub Write
 	#$Form->Set('BEID', ''); # type=1|2
 	$Form->Set('extrapart', $extrapart);
 	
+	# age/sage
 	my $updown = 'top';
 	$updown = '' if ($Form->Contain('mail', 'sage'));
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
@@ -346,6 +349,8 @@ sub Write
 	if($Set->Get('BBS_NINJA')){
 		my $ninerr = $this->Ninpocho($Sys,$Set,$Form,$Ninja,$sid);
 		return $ninerr if ($ninerr != $ZP::E_SUCCESS);
+		# 忍法帖保存
+		$Ninja->Save($Sys,$password);
 	}
 	
 	# レス要素の取得
@@ -372,16 +377,14 @@ sub Write
 		# スレ立て時にスレタイにID付加
 		if($handle){
 			my $capName = $Sec->Get($Sys->Get('CAPID'), 'NAME', 1, '');
-			$subject = $subject." [$capName★]";
+			$subject = $subject."</b> [$capName★]<b>";
 		}else{
-			$subject = $subject." [$id★]";
+			$subject = $subject."</b> [$id★]<b>";
 		}
 	}
 	
 	my $data = "$name<>$mail<>$info<>$text<>$subject";
 	my $line = "$data\n";
-	
-	my $datPath = $Sys->Get('DATPATH');
 	
 	# ログ書き込み
 	require './module/manager_log.pl';
@@ -395,6 +398,7 @@ sub Write
 	
 	# datファイルへ直接書き込み
 	my $resNum = 0;
+	my $datPath = $Sys->Get('DATPATH');
 	my $err2 = DAT::DirectAppend($Sys, $datPath, $line);
 	my $AttrResMax = $Threads->GetAttr($threadid,'maxres');
 	if ($err2 == 0) {
@@ -480,8 +484,6 @@ sub Write
 			$updown = $Sys->Get('updown', '');
 			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
 		}
-		# 忍法帖保存
-		$Ninja->Save($Sys,$password);
 	}
 	return $err;
 }
@@ -672,6 +674,7 @@ sub ReadyBeforeWrite
 
 	return 0;
 }
+# ログからセッションID取得
 sub GetSessionID
 {
 	my ($Sys,$threadid,$resnum) = @_;

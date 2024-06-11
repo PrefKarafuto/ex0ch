@@ -472,7 +472,7 @@ sub PrintIndexPreview
   <td>
   <a name="$cnt"></a>
   <div align="right"><a href="#menu">■</a><a href="#$prevT">▲</a><a href="#$nextT">▼</a></div>
-  <div style="font-weight:bold;margin-bottom:0.2em;">【$cnt:$res】<font size="+2" color="$ttlCol">$subject</font></div>
+  <div style="margin-bottom:0.2em;"><b>【$cnt:$res】</b><font size="+2" color="$ttlCol"><b>$subject</b></font></div>
   <dl class="post" style="margin-top:0px; border-style:none none none none;">
 THREAD
 		
