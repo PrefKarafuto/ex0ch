@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS dev-r158 20240611',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r159 20240612',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -316,7 +316,7 @@ sub InitSystemValue
 		'LASTMOD'		=> '',
 		'LOGOUT'		=> 30,									# 無操作状態で管理画面から自動ログアウトするまでの時間
 
-		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換 => Imgur以外の画像URLもIMGタグに変換
+		'IMGTAG'		=> 1,									# 画像リンクをIMGタグに変換 => Imgur以外の画像URLもIMGタグに変換
 		'CSP'			=> 0,
 		'BANMAX'		=> 10,
 		'NINLVMAX'		=> 40,
