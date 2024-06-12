@@ -437,7 +437,7 @@ sub ConvertImageTag
 	}
 	else{
 		$reg2 = $reg4 if $type;
-		$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img sclass=\"post_image\" src=\"$1\" style=\"max-width:250px;max-height:250px;\">|g;
+		$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" style=\"max-width:250px;max-height:250px;\">|g;
 	}
 	return $text;
 }
