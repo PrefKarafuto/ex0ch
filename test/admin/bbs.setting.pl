@@ -926,7 +926,6 @@ sub PrintOtherSetting
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
 	$setConfirm			= ($setConfirm eq '1' ? 'checked' : '');
-	$setImage			= ($setImage eq '1' ? 'checked' : '');
 
 	my $type = $Sys->Get('IMGTAG') ? 'Imgur' : '一般' ;
 	
