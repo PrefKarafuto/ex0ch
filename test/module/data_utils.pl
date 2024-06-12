@@ -421,26 +421,23 @@ sub GetThreadTitle
 sub ConvertImageTag
 {
 	my $this = shift;
-	my ($Sys,$limit, $text,$index) = @_;
+	my ($Sys,$limit,$text) = @_;
 
-	my $reg1 = q{(?<!src="?)https?://.*?\.(jpe?g|gif|bmp|png)};
-	my $reg2 = q{<a.*?>(.*?\.(jpe?g|gif|bmp|png))};
+	my $type = $Sys->Get('IMGTAG');
+
+	my $reg_img = q{(jpe?g|gif|bmp|a?png|tiff?|xcf|webp)};
+	my $reg1 = qq{(?<!src="?)https?://.*?\.$reg_img};
+	my $reg2 = qq{<a.*?>(.*?\.$reg_img)};
+	my $reg3 = qq{(?<!src="?)https?://i\.imgur\.com/[a-zA-Z0-9]{7}\.$reg_img};
+	my $reg4 = qq{<a.*?>(https?://i\.imgur\.com/[a-zA-Z0-9]{7}\.$reg_img)};
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
-		if ($index){
-			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" width=\"300px\" height=\"auto\">|g;
-		}
-		else{
-			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
-		}
+		$reg1 = $reg3 if $type;
+		$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" style=\"max-width:250px;max-height:250px;\">|g;
 	}
 	else{
-		if ($index){
-			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" width=\"300px\" height=\"auto\">|g;
-		}
-		else{
-			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img sclass=\"post_image\" src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
-		}
+		$reg2 = $reg4 if $type;
+		$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img sclass=\"post_image\" src=\"$1\" style=\"max-width:250px;max-height:250px;\">|g;
 	}
 	return $text;
 }

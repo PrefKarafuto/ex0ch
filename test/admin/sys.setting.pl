@@ -531,9 +531,9 @@ sub PrintOtherSetting
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
-	$Page->Print("画像リンクをIMGタグに変換</td>");
+	$Page->Print("Imgur画像のみIMGタグ変換を許可</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=CSP $CSPSet value=on>");
-	$Page->Print("Youtube/niconico/Imgur埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</td>");
+	$Page->Print("Youtube/niconico埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=URLLINK $linkChk value=on>");
 	$Page->Print("本文中URLへの自動リンク</td>");
 	$Page->Print("<tr><td colspan=2><b>以下自動リンクOFF時のみ有効</b></td></tr>\n");
@@ -1199,7 +1199,7 @@ sub FunctionOtherSetting
 		push @$pLog, '■ その他設定';
 		push @$pLog, '　　　 ヘッダテキスト：' . $SYSTEM->Get('HEADTEXT');
 		push @$pLog, '　　　 ヘッダURL：' . $SYSTEM->Get('HEADURL');
-		push @$pLog, '　　　 IMGタグ変換：' . $SYSTEM->Get('IMGTAG');
+		push @$pLog, '　　　 Imgurのみ変換許可：' . $SYSTEM->Get('IMGTAG');
 		push @$pLog, '　　　 URL自動リンク：' . $SYSTEM->Get('URLLINK');
 		push @$pLog, '　　　 　開始時間：' . $SYSTEM->Get('LINKST');
 		push @$pLog, '　　　 　終了時間：' . $SYSTEM->Get('LINKED');

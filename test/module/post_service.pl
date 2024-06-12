@@ -621,7 +621,7 @@ sub ReadyBeforeWrite
 	if($com ne 'on' && (($Set->Get('BBS_NINJA') && $ninLv >= $min_level) || !$Set->Get('BBS_NINJA') || $commandAuth)){
 
 		# Capの権限があった場合すべて許可
-		$CommandSet = oct("0b11111111111111111111111") if $commandAuth;
+		$CommandSet = oct("0b11111111111111111111111") if $commandAuth;		# 2^20
 
 		if($Sys->Equal('MODE', 1)){
 			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,1);
@@ -709,7 +709,7 @@ sub Command
 	#スレ主用パス(メール欄)/スレ立て時専用処理
 	if($mode){
 		#passを取得・設定
-		if($Form->Get('mail') =~ /!pass:(.{1,30})/ && ($setBitMask & 1)){
+		if($Form->Get('mail') =~ /!pass:(.{1,30})/ && ($setBitMask & 2 ** 0)){
 			require Digest::SHA::PurePerl;
 			my $ctx = Digest::SHA::PurePerl->new;
 			$ctx->add(':', $Sys->Get('SERVER'));
@@ -724,7 +724,7 @@ sub Command
 			$Form->Set('mail',$mail);
 		}
 		#最大レス数変更
-		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2)) {
+		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 1)) {
 			my $resmin = 100;
 			my $resmax = 2000;
 			if ($2 && $2 >= $resmin && $2 <= $resmax) {
@@ -740,7 +740,7 @@ sub Command
 			}
 		}
 		#extendコマンド
-		if ($Form->Get('MESSAGE') =~ /^!extend:(|on|default|none|checked):(|none|default|checked|feature|verbose|v{3,6}):([1-9][0-9]*):([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 1048576)) {
+		if ($Form->Get('MESSAGE') =~ /^!extend:(|on|default|none|checked):(|none|default|checked|feature|verbose|v{3,6}):([1-9][0-9]*):([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 20)) {
 			my $resmin = 100;
 			my $resmax = 2000;
 			my $id = $1;
@@ -753,7 +753,7 @@ sub Command
 	##スレ中パスワード保持者のみ
 	if(!$mode){
 		#コマンド取り消し
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z&;]{4,20})(<br>|$)/ && ($setBitMask & 256)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z&;]{4,20})(<br>|$)/ && ($setBitMask & 2 ** 8)){
 			my $delCommand = $2;
 			$delCommand =~ s/^sage$/sagemode/;
 			if($Threads->GetAttr($threadid, $delCommand)){
@@ -793,7 +793,7 @@ sub Command
 			}
 		}
 		#スレスト
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop(<br>|$)/ && ($setBitMask & 128)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop(<br>|$)/ && ($setBitMask & 2 ** 7)){
 			my $ninLv = $Ninja->Get('ninLv');
 			my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_THREAD_STOP'));
 			if(($NinStat && $ninLv >= $min_level)||!$NinStat||$noNinja){
@@ -805,12 +805,12 @@ sub Command
 			}
 		}
 		#過去ログ送り
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!pool(<br>|$)/ && ($setBitMask & 512)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!pool(<br>|$)/ && ($setBitMask & 2 ** 9)){
 			$Threads->SetAttr($threadid, 'pool',1);
 			$Command .= '※過去ログ送り<br>';;
 		}
 		#スレタイ変更
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.+)(<br>|$)/ && ($setBitMask & 16384)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.+)(<br>|$)/ && ($setBitMask & 2 ** 14)){
 			my $newTitle = $2;
 			if($Set->Get('BBS_SUBJECT_COUNT') >= length($newTitle) && $newTitle){
 				require './module/dat.pl';
@@ -844,7 +844,7 @@ sub Command
 			}
 		}
 		#レス削除
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!delete:&gt;&gt;([1-9][0-9]*)-?([1-9][0-9]*)?(<br>|$)/ && ($setBitMask & 524288)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!delete:&gt;&gt;([1-9][0-9]*)-?([1-9][0-9]*)?(<br>|$)/ && ($setBitMask & 2 ** 19)){
 			my $target = $2;
 			my $target2 = $3;
 			my $del = 'ユーザー削除';
@@ -926,7 +926,7 @@ sub Command
 			}
 		}
 		#追記
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!add:&gt;&gt;([1-9][0-9]*):?(.*)(<br>|$)/ && ($setBitMask & 65536)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!add:&gt;&gt;([1-9][0-9]*):?(.*)(<br>|$)/ && ($setBitMask & 2 ** 16)){
 			my $addMessage = $3;
 			my $targetNum = $2 - 1;
 			if($addMessage && $targetNum + 1){
@@ -965,45 +965,45 @@ sub Command
 
 	##スレ立て時＆スレ中パスワード保持者のみ
 	#強制sage
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage(<br>|$)/ && ($setBitMask & 4)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!sage(<br>|$)/ && ($setBitMask & 2 ** 2)){
 		$Threads->SetAttr($threadid, 'sagemode',1);
 		$Command .= '※強制sage<br>';
 	}
 	#強制age
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!float(<br>|$)/ && ($setBitMask & 131072)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!float(<br>|$)/ && ($setBitMask & 2 ** 17)){
 		$Threads->SetAttr($threadid, 'float',1);
 		$Command .= '※強制age<br>';
 	}
 	#不落
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool(<br>|$)/ && ($setBitMask & 262144)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!nopool(<br>|$)/ && ($setBitMask & 2 ** 18)){
 		$Threads->SetAttr($threadid, 'nopool',1);
 		$Command .= '※不落<br>';
 	}
 	#BBS_SLIP
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!slip:(v{3,6})(<br>|$)/ && ($setBitMask & 2048)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!slip:(v{3,6})(<br>|$)/ && ($setBitMask & 2 ** 11)){
 		$Threads->SetAttr($threadid, 'slip',$2);
 		$Command .= '※BBS_SLIP='.$2.'<br>';
 	}
 	#名無し強制
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774(<br>|$)/ && ($setBitMask & 32)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!force774(<br>|$)/ && ($setBitMask & 2 ** 5)){
 		$Threads->SetAttr($threadid, 'force774',1);
 		$Command .= '※強制名無し<br>';
 		#$Form->Set('FROM','');
 	}
 	#実況モード
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!live(<br>|$)/ && ($setBitMask & 1024)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!live(<br>|$)/ && ($setBitMask & 2 ** 10)){
 		$Threads->SetAttr($threadid, 'live',1);
 		$Command .= '※実況スレ<br>';
 	}
 	#スレ主非表示
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!hidenusi(<br>|$)/ && ($setBitMask & 32768)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!hidenusi(<br>|$)/ && ($setBitMask & 2 ** 15)){
 		if(!$Set->Get('BBS_HIDENUSI')){
 			$Threads->SetAttr($threadid, 'hidenusi',1);
 			$Command .= '※スレ主非表示<br>';
 		}
 	}
 	#BAN
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 4096)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 12)){
 		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
 		my $bannum = @banuserAttr;
 		my $bansid = GetSessionID($Sys,$threadid,$2);
@@ -1039,7 +1039,7 @@ sub Command
 		}
 	}
 	#名無し変更
-	if($Form->Get('MESSAGE') =~ /(?:^|<br>\s*)!change774:(\S.*?\S|\S)\s*(?=<br>|$)/ && ($setBitMask & 64)){
+	if($Form->Get('MESSAGE') =~ /(?:^|<br>\s*)!change774:(\S.*?\S|\S)\s*(?=<br>|$)/ && ($setBitMask & 2 ** 6)){
 		my $new774 = $1;
 		if($Set->Get('BBS_NAME_COUNT') => length($new774)){
 			require HTML::Entities;
@@ -1053,11 +1053,11 @@ sub Command
 		}
 	}
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid(<br>|$)/ && ($setBitMask & 8)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!noid(<br>|$)/ && ($setBitMask & 2 ** 3)){
 		$Threads->SetAttr($threadid, 'noid',1);
 		$Command .= '※ID無し<br>';
 	}
-	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid(<br>|$)/ && ($setBitMask & 16)){
+	if(!$Threads->GetAttr($threadid, 'noid') && $Form->Get('MESSAGE') =~ /(^|<br>)!changeid(<br>|$)/ && ($setBitMask & 2 ** 4)){
 		$Threads->SetAttr($threadid, 'changeid',1);
 		$Command .= '※ID変更<br>';
 	}
@@ -1065,7 +1065,7 @@ sub Command
 	#忍法帖があった場合
 	if($Set->Get('BBS_NINJA')){
 		#忍法帖レベル制限
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!ninlv:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 8192)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!ninlv:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 13)){
 			my $lvmax = $Sys->Get('NINLVMAX');
 			my $write_min = $Set->Get('NINJA_WRITE_MESSAGE');
 			if($2 <= $lvmax){

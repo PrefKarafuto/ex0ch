@@ -316,7 +316,7 @@ sub InitSystemValue
 		'LASTMOD'		=> '',
 		'LOGOUT'		=> 30,									# 無操作状態で管理画面から自動ログアウトするまでの時間
 
-		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換
+		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換 => Imgur以外の画像URLもIMGタグに変換
 		'CSP'			=> 0,
 		'BANMAX'		=> 10,
 		'NINLVMAX'		=> 40,

@@ -619,7 +619,7 @@ sub PrintResponse
 	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
-	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
+	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Set->Get('BBS_IMGTAG'));
 	$Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 

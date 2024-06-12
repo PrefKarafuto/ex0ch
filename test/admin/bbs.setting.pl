@@ -918,7 +918,7 @@ sub PrintOtherSetting
 	my $setTwitter    	= $Setting->Get('BBS_TWITTER');
 	my $setMovie    	= $Setting->Get('BBS_MOVIE');
 	my $setURLtoTitle   = $Setting->Get('BBS_URL_TITLE');
-	my $setImage    	= $Sys->Get('IMGTAG');
+	my $setImage    	= $Setting->Get('BBS_IMGTAG');
 	my $setNinja		= $Setting->Get('BBS_NINJA');
 	my $setHideNusi		= $Setting->Get('BBS_HIDENUSI');
 	my $setTitleID		= $Setting->Get('BBS_TITLEID');
@@ -927,6 +927,8 @@ sub PrintOtherSetting
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
 	$setConfirm			= ($setConfirm eq '1' ? 'checked' : '');
 	$setImage			= ($setImage eq '1' ? 'checked' : '');
+
+	my $type = $Sys->Get('IMGTAG') ? 'Imgur' : '一般' ;
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>各設定値を入力して[設定]ボタンを押してください。</td></tr>");
@@ -983,8 +985,8 @@ sub PrintOtherSetting
 	
 	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("</td>");
-	$Page->Print("<td class=\"DetailTitle\">一般画像埋め込み表示</td><td>");
-	$Page->Print("<input type=checkbox name=IMGTAG value=on disabled $setImage>システム設定に依存</tr>");
+	$Page->Print("<td class=\"DetailTitle\">${type}画像埋め込み表示</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_IMGTAG value=on $setImage>有効</tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">X(旧Twitter) 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setTwitter>有効</td></tr>");
@@ -1422,6 +1424,7 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_TWITTER', ($Form->Equal('BBS_TWITTER', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_IMGTAG', ($Form->Equal('BBS_IMGTAG', 'on') ? 'checked' : ''));
 	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	
 	# ID表示設定
