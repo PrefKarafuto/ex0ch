@@ -15,7 +15,10 @@ chmod 604 $ROOT_DIR/test/datas/*
 chmod 600 $ROOT_DIR/test/datas/index.html
 
 chmod 707 $ROOT_DIR/test/info/
-chmod 707 $ROOT_DIR/test/info/.session/
+chmod 604 $ROOT_DIR/test/info/.auth/*
+chmod 604 $ROOT_DIR/test/info/.ninpocho/*
+chmod 604 $ROOT_DIR/test/info/.session/*
+chmod 604 $ROOT_DIR/test/info/IP_List/*
 chmod 606 $ROOT_DIR/test/info/*cgi
 chmod 600 $ROOT_DIR/test/info/index.html
 
