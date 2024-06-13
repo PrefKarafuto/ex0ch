@@ -43,8 +43,6 @@ sub new
 #	忍法帖ロード
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
-#	@param	$slip    	slip文字列
-#	@param	$isAnon 	匿名化されてるかどうか
 #	@param	$password	あればパスワードで忍法帖をロード。無ければ通常ロード
 #	@return	パスワードがあり、かつセッションIDが見つからない場合0
 #
@@ -52,7 +50,7 @@ sub new
 sub Load
 {
 	my $this = shift;
-	my ($Sys,$slip,$isAnon,$password) = @_;
+	my ($Sys,$password) = @_;
 	my ($sid,$sid_saved,$sid_before,$sec,$auth);
 
 	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
@@ -60,29 +58,19 @@ sub Load
 	my $Set = $Sys->Get('MainCGI')->{'SET'};
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/";
-
-	$this->{'ANON_FLAG'} = $isAnon eq '8' ? 1 : 0;
 	$sid = $Sys->Get('SID');
 
 	my $addr = $ENV{'REMOTE_ADDR'};
+	my $host = $ENV{'REMOTE_HOST'};
 	my $ctx3 = Digest::MD5->new;
-	$ctx3->add('ex0ch ID Generation');
 	$ctx3->add(':', $Sys->Get('SERVER'));
 	$ctx3->add(':', $addr);
 	my $ip_hash = $ctx3->b64digest;
-	my $ctx = Digest::MD5->new;
-	$ctx->add('ex0ch ID Generation');
-	$ctx->add(':', $Sys->Get('SERVER'));
-	$ctx->add(':', $slip);
-	my $slip_hash = $ctx->b64digest;
 
 	#cookieにsessionIDが保存されていない場合
-	if (!$sid && !$this->{'ANON_FLAG'}){
-		my $expiry = 60*60*24;      # 紐付け有効期限は24h
+	if (!$sid && $host =~/\.jp$/){
+		my $expiry = 60*30;      # 紐付け有効期限は30m
 		$sid = GetHash($ip_hash,$expiry,$ninDir.'hash/ip_addr.cgi');
-		if(!$sid) {
-			$sid = GetHash($slip_hash,$expiry,$ninDir.'hash/user_info.cgi');
-		}
 	}
 	
 	if($Set->Get('BBS_NINJA')){
@@ -99,6 +87,9 @@ sub Load
 			if($sid_saved && $sid_saved ne $sid){
 				$sid_before = $sid;
 				$sid = $sid_saved;
+			}else{
+				# 無かったらロードしない
+				return undef;
 			}
 		}
 		#忍法帖が有効の場合
@@ -144,11 +135,9 @@ sub Load
 	}
 	$this->{'SID'} = $sid;
 	$Sys->Set('SID',$sid);
+
 	# Hashテーブルを設定
-	if(!$this->{'ANON_FLAG'}){
-		SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi');
-		SetHash($slip_hash,$sid,time,$ninDir.'hash/user_info.cgi');
-	}
+	SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi') if $host =~/\.jp$/;
 
 	return $sid;
 }

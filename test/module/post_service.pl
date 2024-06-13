@@ -193,7 +193,7 @@ sub Write
 	$idEnd = $Set->Get('BBS_SLIP') eq 'checked' ? $Sys->Get('AGENT') : $idEnd;
 
 	# 忍法帖関連
-	my $sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,undef);
+	my $sid = $Ninja->Load($Sys,undef);
 	
 	# 忍法帖パスがあったらロード
 	my $password = '';
@@ -202,7 +202,7 @@ sub Write
 		$password = $1;
 		$ninmail =~ s/!load:(.{10,30})//;
 		$Form->Set('mail',$ninmail);
-		$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,$password);	#ロード
+		$sid = $Ninja->Load($Sys,$password);	#ロード
 		$password = '';
 	}
 	elsif($ninmail =~ /!save:(.{10,30})/ && $isNinja){
@@ -269,14 +269,15 @@ sub Write
 			}
 		}
 
-		if (!$err){
+		if (!$err && $isNinja){
 			# 認証成功
-			$sid = $Ninja->Load($Sys,${slip_aa}.${slip_bb}.${slip_cccc},$idEnd,);
+			$sid = $Ninja->Load($Sys,undef);
 			$Ninja->Set('auth', 1);
 			$Ninja->Set('auth_time', time);
 		}
 
 		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) < time)){
+			# 忍法帖で認証が切れた場合
 			$Ninja->Set('auth',0);
 			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
 		}
