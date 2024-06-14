@@ -340,7 +340,7 @@ sub BBS_SLIP
 	$chid = hex($chid);
 
 	# 各種判定
-	my $ip_country = $Sys->Get('IPCOUNTRY') // '';
+	my $ip_country = $Sys->Get('IPCOUNTRY') // $remoho =~ /\.jp$/ ? 'JP':'abroad';
 	my $country = $ip_country ne 'abroad' ? 'JP': 'ｶﾞｲｺｰｸ';					# post_service側での判定を流用
 	my $isProxy = $Sys->Get('ISPROXY');										# post_service側での判定を流用
 	my $ismobile = is_mobile($country,$ipAddr,$remoho);						# モバイル判定
