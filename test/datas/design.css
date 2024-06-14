@@ -42,7 +42,7 @@
   border-color: #ddd;
   margin-bottom: 8px;
   padding: 8px;
-  word-break: break-all;
+  word-break: break-word;
 }
 .meta {
   font-size: 14px;
