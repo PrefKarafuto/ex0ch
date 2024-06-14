@@ -152,7 +152,7 @@ sub PrintUnionInfo
 {
 	my ($Page, $SYS, $Form) = @_;
 	
-	$SYS->Set('_TITLE', 'ex0ch BBS Union Information');
+	$SYS->Set('_TITLE', 'BBS Union');
 	
 	$Page->Print('Coming far...');
 	

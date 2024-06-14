@@ -152,7 +152,7 @@ sub PrintGalleryInfo
 {
 	my ($Page, $SYS, $Form) = @_;
 	
-	$SYS->Set('_TITLE', 'ex0ch Photo Gallery');
+	$SYS->Set('_TITLE', 'Photo Gallery');
 	
 	$Page->Print('Coming far...');
 	
