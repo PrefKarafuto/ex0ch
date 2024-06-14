@@ -554,7 +554,8 @@ sub PrintLimitSetting
 	my $setProxy		= $Setting->Get('BBS_PROXY_CHECK');
 	my $setDNSBL		= $Setting->Get('BBS_DNSBL_CHECK');
 	my $setOverSea		= $Setting->Get('BBS_JP_CHECK');
-	my $setTomato		= $Setting->Get('BBS_RAWIP_CHECK');
+	my $setTomato		= $Setting->Get('BBS_RAWIP_CHECK');		# 使ってない
+	my $setFall			= $Setting->Get('BBS_AUTOFALL');
 	
 	my $setDatMax		= $Setting->Get('BBS_DATMAX');
 	my $setLineLength	= $Setting->Get('BBS_COLUMN_NUMBER');
@@ -634,8 +635,8 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_REVERSE_CHECK value=on $setReverse>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">プロキシ規制</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_PROXY_CHECK value=on $setProxy>$setInfo2</td>");
-	$Page->Print("<td class=\"DetailTitle\">???</td><td>");
-	$Page->Print("<input type=checkbox name= value=on disabled>有効</td></tr>");
+	$Page->Print("<td class=\"DetailTitle\">完走したスレッドを落とす</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_AUTOFALL value=on $setFall>有効</td></tr>");
 	$Page->Print("</tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
@@ -959,7 +960,7 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
 	$Page->Print("<td class=\"DetailTitle\"><s>文字参照</s></td><td>");
-	$Page->Print("<input type=checkbox name=BBS_UNICODE $setUnicode value=on>使用可能</td>");
+	$Page->Print("<input type=checkbox name=BBS_UNICODE checked value=on disabled>使用可能</td>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">トリップ桁数</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_TRIPCOLUMN value=\"$setTripColumn\"></td>");
@@ -1242,6 +1243,7 @@ sub FunctionLimitSetting
 	}
 	$Setting->Set('BBS_JP_CHECK', ($Form->Equal('BBS_JP_CHECK', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_RAWIP_CHECK', ($Form->Equal('BBS_RAWIP_CHECK', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_AUTOFALL', ($Form->Equal('BBS_AUTOFALL', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_DATMAX', $Form->Get('BBS_DATMAX'));
 	$Setting->Set('BBS_COLUMN_NUMBER', $Form->Get('BBS_COLUMN_NUMBER'));
 	$Setting->Set('BBS_READONLY', $Form->Get('BBS_READONLY'));
