@@ -94,7 +94,7 @@ sub Initialize
 	$oSYS->Init();
 
 	# 規制非公開
-	return 1 if $oSYS->Get('HIDE_HITS');
+	return "Hidden data" if $oSYS->Get('HIDE_HITS');
 	
 	# 夢が広がりんぐ
 	$oSYS->{'MainCGI'} = $pSYS;
