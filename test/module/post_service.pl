@@ -127,301 +127,68 @@ sub Write
 	my $Conv = $this->{'CONV'};
 	my $Threads = $this->{'THREADS'};
 	my $Sec = $this->{'SECURITY'};
+
 	# 管理モジュールを用意
 	require './module/ninpocho.pl';
-	require './module/slip.pl';
-	my $slip = SLIP->new;
 	my $Ninja = NINPOCHO->new;
-	
+
+	# 停止チェック
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
- 	my $idSet = $Threads->GetAttr($threadid,'noid');
  	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
 	return $ZP::E_LIMIT_MOVEDTHREAD if ($Threads->GetAttr($threadid,'pool'));
 	
-	#コマンドによる過去ログ送り用（猶予のため）
-	ToKakoLog($Sys,$Set,$Threads);
-
-	#忍法帖が設定されていたら
-	my $isNinja = $Set->Get('BBS_NINJA');
+	#コマンドによる過去ログ送り用
+	$this->ToKakoLog($Sys,$Set,$Threads);
 
 	# SLIP
-	$Form->Get('FROM') =~ /(^|<br>)!slip:(v){3,6}(<br>|$)/;
-	my $comSlip = $2;	# ユーザーコマンドで設定されたSLIP
-	my $threadSlip = $Threads->GetAttr($threadid,'slip');	# スレッド属性で設定されたSLIP
-	my $bbsSlip = $Set->Get('BBS_SLIP');	# 掲示板設定のSLIP
-	$bbsSlip =~ s/checked/v/;
-	$bbsSlip =~ s/feature/vv/;
-	#$bbsSlip =~ s/verbose/vv/;
-	if($threadSlip){
-		if(length($bbsSlip) < length($threadSlip)){
-			$bbsSlip = $threadSlip;
-		}
-	}
-	if($comSlip){
-		if(length($bbsSlip) < length($comSlip)){
-			$bbsSlip = $comSlip;
-		}
-	}
+	my ($slip_result,$idEnd) = $this->MakeSlip($Sys,$Form,$Set,$Threads);
 
-	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
-	my $handle = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_HANLDLE, $Form->Get('bbs'));
-	my $noslip = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_NOSLIP, $Form->Get('bbs'));
-	my $noid = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_NOID, $Form->Get('bbs'));
-	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
-	my $noCaptcha = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOCAPTCHA, $Form->Get('bbs'));
-	
-	# BBS_SLIPとID末尾取得
-	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
-	my ($slip_nickname,$slip_aa,$slip_bb,$slip_cccc,$idEnd) = $slip->BBS_SLIP($Sys, $chid);
-
-	# slip文字列とID末尾
-	my $slip_result = '';
-	my $ipAddr = $ENV{'REMOTE_ADDR'};
-	if($bbsSlip eq 'vvv'){
-		$slip_result = ${slip_nickname};
-	}
-	elsif($bbsSlip eq 'vvvv'){
-		$slip_result = "${slip_nickname} [$ipAddr]";
-	}
-	elsif($bbsSlip eq 'vvvvv'){
-		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
-	}
-	elsif($bbsSlip eq 'vvvvvv'){
-		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ipAddr}]";
-	}
-	$idEnd = $Set->Get('BBS_SLIP') eq 'checked' ? $Sys->Get('AGENT') : $idEnd;
-
-	# 忍法帖関連
-	my $sid = $Ninja->Load($Sys,undef);
-	
-	# 忍法帖パスがあったらロード
+	# 忍法帖前処理
 	my $password = '';
-	my $ninmail = $Form->Get('mail');
-	if($ninmail=~ /!load:(.{10,30})/ && $isNinja){
-		$password = $1;
-		$ninmail =~ s/!load:(.{10,30})//;
-		$Form->Set('mail',$ninmail);
-		$sid = $Ninja->Load($Sys,$password);	#ロード
-		$password = '';
-	}
-	elsif($ninmail =~ /!save:(.{10,30})/ && $isNinja){
-		$password = $1;
-		$ninmail =~ s/!save:(.{10,30})//;
-		$Form->Set('mail',$ninmail);
-		# 後でセーブするときに$passwordを使う
+	if ($Set->Get('BBS_NINJA')){
+		$password = $this->LoadNinpocho($Sys, $Form, $Ninja);
 	}
 
-	# hCaptcha認証
+	# Captchaユーザー認証
+	my $noCaptcha = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOCAPTCHA, $Form->Get('bbs'));
 	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY')){
-
-		# ワンタイムパス認証
-		my $auth_code = "";
-		my $is_com = 0;
-		my $in_mail = $Form->Get('mail');
-		if ($in_mail =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
-			$auth_code = $2 // '';
-			$in_mail =~ s/^!auth(:([0-9a-fA-F]{8}))?$//g;
-			$Form->Set('mail', $in_mail);
-			$is_com = 1;
-		}
-
-		my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
-		my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
-		my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
-		my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir) || ($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) >= time));
-
-		# 認証処理
-		my $err = $is_auth ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
-		if($is_com && !$auth_code){	# !authのみ
-			if ($err == 0) {
-				# Captcha認証が成功した場合のみパスワードの発行
-				my $ctx = Digest::MD5->new;
-
-				$ctx->add('auth');
-				$ctx->add($Sys->Get('BBS'));
-				$ctx->add(time);
-				$ctx->add($ENV{'REMOTE_ADDR'});
-				my $pass = substr($ctx->hexdigest, 0, 8);
-
-				NINPOCHO::SetHash($pass, $sid, time(), $passDir);
-				$Sys->Set('PASSWORD', $pass);
-
-				$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
-			} else {
-				# Captcha認証失敗
-				$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
-			}
-		}
-
-		if ($auth_code) {
-			# Captcha認証の成功失敗を問わずパスワードの照合
-			my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
-			if ($sid) {
-				# パスワード合致
-				NINPOCHO::SetHash($sid, $auth_code, time, $sidDir);			# 認証済み設定
-				NINPOCHO::SetHash($auth_code, $sid, time - 60*3, $passDir); # ワンタイムパス無効化
-				$Sys->Set('SID', $sid);
-				$err = 0;
-			}else{
-				# パスワード不一致
-				$err = $ZP::E_FORM_FAILEDAUTH;
-			}
-		}
-
-		if (!$err && $isNinja){
-			# 認証成功
-			$sid = $Ninja->Load($Sys,undef);
-			$Ninja->Set('auth', 1);
-			$Ninja->Set('auth_time', time);
-		}
-
-		if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) < time)){
-			# 忍法帖で認証が切れた場合
-			$Ninja->Set('auth',0);
-			$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
-		}
-		
+		$err = $this->CaptchaAuthentication($Sys,$Form, $Set, $Ninja);
 		return $err if $err;
 	}
 
-	my $ninLv = $Ninja->Get('ninLv');
-
 	#BANチェック
-	return $ZP::E_REG_BAN if(!$noNinja&&($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1))));
-
-	my $nusisid = GetSessionID($Sys,$threadid,1);
-	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
-		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
-		foreach my $userlist(@banuserAttr){
-			return $ZP::E_REG_BAN if($sid eq $userlist);
-		}
-	}
-	
-	# 情報欄
- 	my $idpart = 'ID:???';
-	my $threadkey = $Threads->GetAttr($threadid,'changeid') ? $threadid : '';
-	my $id = $Conv->MakeIDnew($Sys, 8, undef, $threadkey);
-	if (!$idSet){
-		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $idEnd);
-	}
-	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
-	my $bepart = '';
-	my $extrapart = '';
-	$Form->Set('datepart', $datepart);
-	$Form->Set('idpart', $idpart);
-	#$Form->Set('BEID', ''); # type=1|2
-	$Form->Set('extrapart', $extrapart);
-	
-	# age/sage
-	my $updown = 'top';
-	$updown = '' if ($Form->Contain('mail', 'sage'));
-	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
-	$updown = '' if ($Ninja->Get('force_sage') && !$noNinja);
-	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $ninLv && $isNinja && !$noNinja);
-	$Sys->Set('updown', $updown);
+	$err = $this->BanCheck($Sys, $Form, $Threads, $Ninja, $Sec);
+	return $err if $err;
 	
 	# 書き込み直前処理
-	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja->Get('ban_command'),$Ninja,$ninLv);
-	return $err if ($err != $ZP::E_SUCCESS);
+	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja);
+	return $err if $err;
 
-	# レベル制限
-	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE') // '';
-	my $lvLim = $Threads->GetAttr($threadid,'ninLv');
-	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
-	if($isNinja && !$noNinja){
-		if($Sys->Equal('MODE', 1)){
-			# スレ立てモード
-			if($ninLv < $min_level){
-				return $ZP::E_REG_NINLVLIMIT;
-			}else{
-				$Ninja->Set('ninLv',$ninLv - $factor);
-			}
-		}else{
-			# 書き込みモード
-			if ($ninLv < $write_min){
-				return $ZP::E_REG_NINLVLIMIT;
-			}else{
-				return $ZP::E_REG_NINLVLIMIT if($ninLv < $lvLim && $write_min <= $lvLim && !$noAttr);
-			}
-		}
-	}
-	
 	# 忍法帖
 	if($Set->Get('BBS_NINJA')){
-		my $ninerr = $this->Ninpocho($Sys,$Set,$Form,$Ninja,$sid);
-		return $ninerr if ($ninerr != $ZP::E_SUCCESS);
+		# レベル制限
+		$err = $this->LevelLimit($Sys, $Set, $Form, $Threads, $Ninja, $Sec);
+		return $err if $err;
+
+		# 本処理
+		$this->Ninpocho($Sys,$Set,$Form,$Ninja);
+
 		# 忍法帖保存
 		$Ninja->Save($Sys,$password);
 	}
-	
-	# レス要素の取得
-	my $subject = $Form->Get('subject', '');
-	my $name = $Form->Get('FROM', '');
-	my $mail = $Form->Get('mail', '');
-	my $text = $Form->Get('MESSAGE', '');
-	#SLIPがあった場合は付加する
-	$name .= "</b> (${slip_result})" if (($slip_result && !$noslip) && (!$handle || !$noAttr));
 
-	$datepart = $Form->Get('datepart', '');
-	$idpart = $Form->Get('idpart', '');
-	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
-		$idpart .= '(主)' if (($sid eq $nusisid) || $Sys->Equal('MODE', 1));
-	}
-	$bepart = $Form->Get('BEID', '');
-	$extrapart = $Form->Get('extrapart', '');
-	my $info = $datepart;
-	$info .= " $idpart" if ($idpart ne '');
-	$info .= " $bepart" if ($bepart ne '');
-	$info .= " $extrapart" if ($extrapart ne '');
-
-	if($subject && $Set->Get('BBS_TITLEID') && $Sys->Equal('MODE', 1) && !$noid){
-		# スレ立て時にスレタイにID付加
-		if($handle){
-			my $capName = $Sec->Get($Sys->Get('CAPID'), 'NAME', 1, '');
-			$subject = $subject."</b> [$capName★]<b>";
-		}else{
-			$subject = $subject."</b> [$id★]<b>";
-		}
-	}
-	
-	my $data = "$name<>$mail<>$info<>$text<>$subject";
+	my $data = $this->MakeDatLine($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result);
 	my $line = "$data\n";
-	
+
 	# ログ書き込み
-	require './module/manager_log.pl';
-	my $Log = MANAGER_LOG->new;
-	$Log->Load($Sys, 'WRT', $threadid);
-	$Log->Set($Set, length($Form->Get('MESSAGE')), $Sys->Get('VERSION'), $Sys->Get('KOYUU'), $data, $Sys->Get('AGENT', 0),$sid);
-	$Log->Save($Sys);
+	$this->AddLog($Sys,$Set,$Form,$data);
 	
 	# リモートホスト保存(SETTING.TXT変更により、常に保存)
 	SaveHost($Sys, $Form);
 	
 	# datファイルへ直接書き込み
-	my $resNum = 0;
-	my $datPath = $Sys->Get('DATPATH');
-	my $err2 = DAT::DirectAppend($Sys, $datPath, $line);
-	my $AttrResMax = $Threads->GetAttr($threadid,'maxres');
-	if ($err2 == 0) {
-		# レス数が最大数を超えたらover設定をする
-		$resNum = DAT::GetNumFromFile($datPath);
-		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
-		if ($resNum >= $MAXRES) {
-			# datにOVERスレッドレスを書き込む
-			Get1001Data($Sys, \$line,$MAXRES);
-			DAT::DirectAppend($Sys, $datPath, $line);
-			$resNum++;
-		}
-		$err = $ZP::E_SUCCESS;
-	}
-	# datファイル追記失敗
-	elsif ($err2 == 1) {
-		$err = $ZP::E_POST_NOTEXISTDAT;
-	}
-	elsif ($err2 == 2) {
-		$err = $ZP::E_LIMIT_STOPPEDTHREAD;
-	}
+	($err,my $resNum) = $this->AddDatFile($Sys,$Threads,$line);
 	
 	if ($err == $ZP::E_SUCCESS) {
 		# タイムラインへ追加
@@ -430,64 +197,16 @@ sub Write
 		# subject.txtの更新
 		# スレッド作成モードなら新規に追加する
 		if ($Sys->Equal('MODE', 1)) {
-			require './module/file_utils.pl';
-			my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
-			my $Pools = POOL_THREAD->new;
-			$Pools->Load($Sys);
-			$Threads->Add($threadid, $subject, 1);
-			
-			# スレッド数限界によるdat落ち処理
-			my $submax = $Sys->Get('SUBMAX');
-			my @tlist;
-			$Threads->GetKeySet('ALL', undef, \@tlist);
-			foreach my $lid (reverse @tlist) {
-				last if ($Threads->GetNum() <= $submax);
-				
-				# 不落属性あり
-				next if ($Threads->GetAttr($lid, 'nopool'));
-				if(!$Set->Get('BBS_KAKO')){
-					$Pools->Add($lid, $Threads->Get('SUBJECT', $lid), $Threads->Get('RES', $lid));
-					FILE_UTILS::Copy("$path/dat/$lid.dat", "$path/pool/$lid.cgi");
-					$Threads->Delete($lid);
-				}
-				#別の掲示板に移す場合
-				else{
-					FILE_UTILS::Move("$path/dat/$lid.dat", $Set->Get('BBS_KAKO')."/dat/$lid.dat");	
-					require './module/bbs_service.pl';
-					my $BBSAid = BBS_SERVICE -> new;
-
-					#$Sysで指すBBS名を一時変更するため保存
-					my $originalBBSname = $Sys->Get('BBS');
-					my $originalMODE = $Sys->Get('MODE');
-					$Sys->Set('BBS', $Set->Get('BBS_KAKO'));
-					$Sys->Set('MODE','CREATE');
-
-					# subject.txt更新
-					$Threads->Load($Sys);
-					$Threads->UpdateAll($Sys);
-					$Threads->Save($Sys);
-					# index.html更新
-					#$BBSAid->Init($Sys,undef);
-					#$BBSAid->CreateIndex();
-					#$BBSAid->CreateSubback();
-
-					#$Sysの内容を元に戻す
-					$Sys->Set('BBS', $originalBBSname);
-					$Sys->Set('MODE',$originalMODE);
-				}
-				unlink "$path/dat/$lid.dat";
-			}
-			
-			$Pools->Save($Sys);
-			$Threads->Save($Sys);
+			$this->AddSubjectNewThread($Sys,$Set,$Form,$Threads,$line);
 		}
 		# 書き込みモードならレス数の更新
 		else {
-			$updown = $Sys->Get('updown', '');
-			$Threads->OnDemand($Sys, $threadid, $resNum, $updown);
+			$Threads->OnDemand($Sys, $threadid, $resNum, $Sys->Get('updown', ''));
 		}
 	}
+	
 	return $err;
+
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -546,7 +265,7 @@ sub ReadyBeforeCheck
 sub ReadyBeforeWrite
 {
 	my $this = shift;
-	my ($res,$com,$Ninja,$ninLv) = @_;
+	my ($res,$Ninja) = @_;
 	
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
@@ -617,17 +336,19 @@ sub ReadyBeforeWrite
 	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
 
-	#スレ立て時用コマンド
+	# コマンド
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USE_COMMAND'));
-	if($com ne 'on' && (($Set->Get('BBS_NINJA') && $ninLv >= $min_level) || !$Set->Get('BBS_NINJA') || $commandAuth)){
+	if($Ninja->Get('ban_command') ne 'on' && (($Set->Get('BBS_NINJA') && $Ninja->Get('ninLv') >= $min_level) || !$Set->Get('BBS_NINJA') || $commandAuth)){
 
 		# Capの権限があった場合すべて許可
 		$CommandSet = oct("0b11111111111111111111111") if $commandAuth;		# 2^20
 
 		if($Sys->Equal('MODE', 1)){
-			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,1);
+			# スレ立て
+			Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 		}
 		else{
+			# レス
 			if($Form->Get('mail') =~ /!pass:(.{1,30})/){
 				require Digest::SHA::PurePerl;
 				my $ctx = Digest::SHA::PurePerl->new;
@@ -644,11 +365,11 @@ sub ReadyBeforeWrite
 				$Form->Set('mail',$mail);
 				
 				if($inputPass eq $threadPass && $threadPass){
-					Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,0);
+					Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 				}
 			}
 			elsif($commandAuth || GetSessionID($Sys,$threadid,1) eq $Sys->Get('SID')){
-				Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja,0);
+				Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 			}
 		}
 	}
@@ -701,14 +422,14 @@ sub GetSessionID
 #------------------------------------------------------------------------------------------------------------
 sub Command
 {
-	my ($Sys,$Form,$Set,$Threads,$Ninja,$setBitMask,$noNinja,$mode) = @_;
+	my ($Sys,$Form,$Set,$Threads,$Ninja,$setBitMask,$noNinja) = @_;
 	$Threads->LoadAttr($Sys);
 	my $threadid = $Sys->Get('KEY');
 	my $Command = '';
 	my $NinStat = $Set->Get('BBS_NINJA');
 
 	#スレ主用パス(メール欄)/スレ立て時専用処理
-	if($mode){
+	if($Sys->Equal('MODE', 1)){
 		#passを取得・設定
 		if($Form->Get('mail') =~ /!pass:(.{1,30})/ && ($setBitMask & 2 ** 0)){
 			require Digest::SHA::PurePerl;
@@ -752,7 +473,7 @@ sub Command
 	}
 
 	##スレ中パスワード保持者のみ
-	if(!$mode){
+	if(!$Sys->Equal('MODE', 1)){
 		#コマンド取り消し
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z&;]{4,20})(<br>|$)/ && ($setBitMask & 2 ** 8)){
 			my $delCommand = $2;
@@ -1090,6 +811,7 @@ sub Command
 
 # 過去ログの移動や保存を行う
 sub ToKakoLog {
+	my $this = shift;
 	my ($Sys, $Set, $Threads) = @_;
 	
 	require './module/file_utils.pl';
@@ -1098,7 +820,6 @@ sub ToKakoLog {
 	my $BBSAid = BBS_SERVICE->new;  # 一度だけインスタンス化
 
 	my $elapsed = 60 * 60;  # 1時間
-	my $nowtime = time;
 	
 	my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
 	my $BBSname = $Set->Get('BBS_KAKO');
@@ -1111,7 +832,7 @@ sub ToKakoLog {
 	$Threads->LoadAttr($Sys);
 
 	foreach my $id (@threadList) {
-		my $need_update = process_thread($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $nowtime, $elapsed, $BBSname);
+		my $need_update = process_thread($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $elapsed, $BBSname);
 		$isUpdate = 1 if $need_update;  # 更新が必要ならフラグをたてる
 	}
 
@@ -1125,26 +846,35 @@ sub ToKakoLog {
 }
 
 # 各スレッドに対する処理
-# 更新が必要な場合は1を、そうでない場合は0を返す
+# 移動を行った場合は1を、そうでない場合は0を返す
 sub process_thread {
-	my ($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $nowtime, $elapsed, $BBSname) = @_;
+	my ($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $elapsed, $BBSname) = @_;
 	
 	my $need_update = 0;
 
 	my $attrLive = $Threads->GetAttr($id, 'live');
 	my $attrPool = $Threads->GetAttr($id, 'pool');
-	my $lastmodif = (stat "$path/dat/$id.dat")[9];
-	
-	if (($attrLive && ($nowtime - $lastmodif > $elapsed)) || $attrPool) {
-		$need_update = 1;
+	my $datPath = "$path/dat/$id.dat";
+	my $lastmodif = (stat $datPath)[9];
 
+	my $AttrResMax = $Threads->GetAttr($Sys->Get('KEY'),'maxres');
+	my $resNum = DAT::GetNumFromFile($datPath);
+	my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
+
+	# poolコマンドが入力された場合　or　実況モード/スレッド完走且つ最終更新から一時間以上経っていた場合、落とす
+	if ((($attrLive || ($resNum > $MAXRES && $Set->Get('BBS_AUTOFALL'))) && (time - $lastmodif > $elapsed)) || $attrPool)  {
+		$need_update = 1;
 		if ($BBSname) {
-			FILE_UTILS::Move("$path/dat/$id.dat", "$otherBBSpath/dat/$id.dat");
+			# 過去ログ保管先として掲示板を設定
+			FILE_UTILS::Move($datPath, "$otherBBSpath/dat/$id.dat");
 		} else {
+			# 過去ログ保管先がプール
 			$Pools->Add($id, $Threads->Get('SUBJECT', $id), $Threads->Get('RES', $id));
-			FILE_UTILS::Move("$path/dat/$id.dat", "$path/pool/$id.cgi");
+			FILE_UTILS::Move($datPath, "$path/pool/$id.cgi");
 		}
+		# subjectから除外
 		$Threads->Delete($id);
+		# 属性削除
 		$Threads->LoadAttr($Sys);
 		$Threads->DeleteAttr($id);
 		$Threads->SaveAttr($Sys);
@@ -1633,6 +1363,385 @@ sub Certification_Captcha {
 		return $ZP::E_FORM_NOCAPTCHA;
 	}
 }
+
+# SLIP生成
+sub MakeSlip
+{
+	my $this = shift;
+	my ($Sys,$Form,$Set,$Threads) = @_;
+	require './module/slip.pl';
+	my $slip = SLIP->new;
+
+	$Form->Get('FROM') =~ /(^|<br>)!slip:(v){3,6}(<br>|$)/;
+	my $comSlip = $2;	# ユーザーコマンドで設定されたSLIP
+	my $threadSlip = $Threads->GetAttr($Sys->Get('KEY'),'slip');	# スレッド属性で設定されたSLIP
+	my $bbsSlip = $Set->Get('BBS_SLIP');	# 掲示板設定のSLIP
+	$bbsSlip =~ s/checked/v/;
+	$bbsSlip =~ s/feature/vv/;
+	#$bbsSlip =~ s/verbose/vv/;
+
+	if($threadSlip){
+		if(length($bbsSlip) < length($threadSlip)){
+			$bbsSlip = $threadSlip;
+		}
+	}
+	if($comSlip){
+		if(length($bbsSlip) < length($comSlip)){
+			$bbsSlip = $comSlip;
+		}
+	}
+	
+	# BBS_SLIPとID末尾取得
+	my $chid = substr($Sys->Get('SECURITY_KEY'),0,8);
+	my ($slip_nickname,$slip_aa,$slip_bb,$slip_cccc,$idEnd) = $slip->BBS_SLIP($Sys, $chid);
+
+	# slip文字列とID末尾
+	my $slip_result = '';
+	my $ipAddr = $ENV{'REMOTE_ADDR'};
+	if($bbsSlip eq 'vvv'){
+		$slip_result = ${slip_nickname};
+	}
+	elsif($bbsSlip eq 'vvvv'){
+		$slip_result = "${slip_nickname} [$ipAddr]";
+	}
+	elsif($bbsSlip eq 'vvvvv'){
+		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc}";
+	}
+	elsif($bbsSlip eq 'vvvvvv'){
+		$slip_result = "${slip_nickname} ${slip_aa}${slip_bb}-${slip_cccc} [${ipAddr}]";
+	}
+	$idEnd = $Set->Get('BBS_SLIP') eq 'checked' ? $Sys->Get('AGENT') : $idEnd;
+
+	return ($slip_result,$idEnd);
+}
+sub LoadNinpocho
+{
+	my $this = shift;
+	my ($Sys,$Form,$Ninja) = @_;
+	my $password = "";
+
+	$Ninja->Load($Sys,undef);
+
+	# 忍法帖パスがあったらロード
+	my $ninmail = $Form->Get('mail');
+	if($ninmail=~ /!load:(.{10,30})/){
+		$password = $1;
+		$ninmail =~ s/!load:(.{10,30})//;
+		$Form->Set('mail',$ninmail);
+		$Ninja->Load($Sys,$password);	#ロード
+		$password = '';
+	}
+	elsif($ninmail =~ /!save:(.{10,30})/){
+		$password = $1;
+		$ninmail =~ s/!save:(.{10,30})//;
+		$Form->Set('mail',$ninmail);
+		# 後でセーブするときに$passwordを使う
+	}
+	return $password;
+}
+
+# Captchaユーザー認証
+sub CaptchaAuthentication
+{
+	my $this = shift;
+	my ($Sys,$Form,$Set,$Ninja) = @_;
+
+	my $sid = $Sys->Get('SID');
+	# ワンタイムパス認証
+	my $auth_code = "";
+	my $is_com = 0;
+	my $in_mail = $Form->Get('mail');
+	if ($in_mail =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
+		$auth_code = $2 // '';
+		$in_mail =~ s/^!auth(:([0-9a-fA-F]{8}))?$//g;
+		$Form->Set('mail', $in_mail);
+		$is_com = 1;
+	}
+
+	my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
+	my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
+	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
+	my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir) || ($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) >= time));
+
+	# 認証処理
+	my $err = $is_auth ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
+	if($is_com && !$auth_code){	# !authのみ
+		if ($err == 0) {
+			# Captcha認証が成功した場合のみパスワードの発行
+			my $ctx = Digest::MD5->new;
+
+			$ctx->add('auth');
+			$ctx->add($Sys->Get('BBS'));
+			$ctx->add(time);
+			$ctx->add($ENV{'REMOTE_ADDR'});
+			my $pass = substr($ctx->hexdigest, 0, 8);
+
+			NINPOCHO::SetHash($pass, $sid, time(), $passDir);
+			$Sys->Set('PASSWORD', $pass);
+
+			$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
+		} else {
+			# Captcha認証失敗
+			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
+		}
+	}
+
+	if ($auth_code) {
+		# Captcha認証の成功失敗を問わずパスワードの照合
+		my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
+		if ($sid) {
+			# パスワード合致
+			NINPOCHO::SetHash($sid, $auth_code, time, $sidDir);			# 認証済み設定
+			NINPOCHO::SetHash($auth_code, $sid, time - 60*3, $passDir); # ワンタイムパス無効化
+			$Sys->Set('SID', $sid);
+			$err = 0;
+		}else{
+			# パスワード不一致
+			$err = $ZP::E_FORM_FAILEDAUTH;
+		}
+	}
+
+	if (!$err && $Set->Get('BBS_NINJA')){
+		# 認証成功
+		$sid = $Ninja->Load($Sys,undef);
+		$Ninja->Set('auth', 1);
+		$Ninja->Set('auth_time', time);
+	}
+
+	if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) < time)){
+		# 忍法帖で認証が切れた場合
+		$Ninja->Set('auth',0);
+		$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
+	}
+	
+	return $err;
+}
+
+# BANチェック
+sub BanCheck
+{
+	my $this = shift;
+	my ($Sys, $Form,$Threads, $Ninja, $Sec) = @_;
+
+	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
+	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
+
+	my $threadid = $Sys->Get('KEY');
+	my $sid = $Sys->Get('SID');
+	return $ZP::E_REG_BAN if(!$noNinja&&($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1))));
+
+	my $nusisid = GetSessionID($Sys,$threadid,1);
+	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
+		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
+		foreach my $userlist(@banuserAttr){
+			return $ZP::E_REG_BAN if($sid eq $userlist);
+		}
+	}
+}
+
+# レベル制限
+sub LevelLimit
+{
+	my $this = shift;
+	my ($Sys, $Set, $Form, $Threads, $Ninja, $Sec) = @_;
+
+	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
+	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
+
+	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE') // '';
+	my $lvLim = $Threads->GetAttr($Sys->Get('KEY'),'ninLv');
+	my $ninLv = $Ninja->Get('ninLv');
+
+	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
+	if(!$noNinja){
+		if($Sys->Equal('MODE', 1)){
+			# スレ立てモード
+			if($ninLv < $min_level){
+				return $ZP::E_REG_NINLVLIMIT;
+			}else{
+				$Ninja->Set('ninLv',$ninLv - $factor);
+			}
+		}else{
+			# 書き込みモード
+			if ($ninLv < $write_min){
+				return $ZP::E_REG_NINLVLIMIT;
+			}else{
+				return $ZP::E_REG_NINLVLIMIT if($ninLv < $lvLim && $write_min <= $lvLim && !$noAttr);
+			}
+		}
+	}
+}
+
+sub MakeDatLine
+{
+	my $this = shift;
+	my ($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result) = @_;
+
+	my $threadid = $Sys->Get('KEY');
+	my $sid = $Sys->Get('SID');
+
+	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
+	my $handle = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_HANLDLE, $Form->Get('bbs'));
+	my $noslip = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_NOSLIP, $Form->Get('bbs'));
+	my $noid = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_DISP_NOID, $Form->Get('bbs'));
+	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
+
+	my $idpart = 'ID:???';
+	my $threadkey = $Threads->GetAttr($threadid,'changeid') ? $threadid : '';
+	my $id = $Conv->MakeIDnew($Sys, 8, undef, $threadkey);
+	if ($Threads->GetAttr($threadid,'noid')){
+		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $idEnd);
+	}
+	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
+	my $bepart = '';
+	my $extrapart = '';
+	$Form->Set('datepart', $datepart);
+	$Form->Set('idpart', $idpart);
+	#$Form->Set('BEID', ''); # type=1|2
+	$Form->Set('extrapart', $extrapart);
+	
+	# age/sage
+	my $updown = 'top';
+	$updown = '' if ($Form->Contain('mail', 'sage'));
+	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
+	$updown = '' if ($Ninja->Get('force_sage') && !$noNinja);
+	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && $Set->Get('BBS_NINJA') && !$noNinja);
+	$Sys->Set('updown', $updown);
+
+	# レス要素の取得
+	my $subject = $Form->Get('subject', '');
+	my $name = $Form->Get('FROM', '');
+	my $mail = $Form->Get('mail', '');
+	my $text = $Form->Get('MESSAGE', '');
+	#SLIPがあった場合は付加する
+	$name .= "</b> (${slip_result})" if (($slip_result && !$noslip) && (!$handle || !$noAttr));
+
+	$datepart = $Form->Get('datepart', '');
+	$idpart = $Form->Get('idpart', '');
+	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
+		$idpart .= '(主)' if (($sid eq GetSessionID($Sys,$threadid,1)) || $Sys->Equal('MODE', 1));
+	}
+
+	$bepart = $Form->Get('BEID', '');
+	$extrapart = $Form->Get('extrapart', '');
+	my $info = $datepart;
+	$info .= " $idpart" if ($idpart ne '');
+	$info .= " $bepart" if ($bepart ne '');
+	$info .= " $extrapart" if ($extrapart ne '');
+
+	if($subject && $Set->Get('BBS_TITLEID') && $Sys->Equal('MODE', 1) && !$noid){
+		# スレ立て時にスレタイにID付加
+		if($handle){
+			my $capName = $Sec->Get($Sys->Get('CAPID'), 'NAME', 1, '');
+			$subject = $subject."</b> [$capName★]<b>";
+		}else{
+			$subject = $subject."</b> [$id★]<b>";
+		}
+	}
+	
+	return "$name<>$mail<>$info<>$text<>$subject";
+}
+
+sub AddDatFile
+{
+	my $this = shift;
+	my ($Sys,$Threads,$line) = @_;
+
+	my $resNum = 0;
+	my $err = 0;
+	my $datPath = $Sys->Get('DATPATH');
+	my $err2 = DAT::DirectAppend($Sys, $datPath, $line);
+	my $AttrResMax = $Threads->GetAttr($Sys->Get('KEY'),'maxres');
+	if ($err2 == 0) {
+		# レス数が最大数を超えたらover設定をする
+		$resNum = DAT::GetNumFromFile($datPath);
+		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
+		if ($resNum >= $MAXRES) {
+			# datにOVERスレッドレスを書き込む
+			Get1001Data($Sys, \$line,$MAXRES);
+			DAT::DirectAppend($Sys, $datPath, $line);
+			$resNum++;
+		}
+		$err = $ZP::E_SUCCESS;
+	}
+	# datファイル追記失敗
+	elsif ($err2 == 1) {
+		$err = $ZP::E_POST_NOTEXISTDAT;
+	}
+	elsif ($err2 == 2) {
+		$err = $ZP::E_LIMIT_STOPPEDTHREAD;
+	}
+	
+	return ($err,$resNum);
+}
+
+sub AddLog
+{
+	my $this = shift;
+	my ($Sys,$Set,$Form,$data) = @_;
+
+	require './module/manager_log.pl';
+	my $Log = MANAGER_LOG->new;
+	$Log->Load($Sys, 'WRT', $Sys->Get('KEY'));
+	$Log->Set($Set, length($Form->Get('MESSAGE')), $Sys->Get('VERSION'), $Sys->Get('KOYUU'), $data, $Sys->Get('AGENT', 0),$Sys->Get('SID'));
+	$Log->Save($Sys);
+}
+
+sub AddSubjectNewThread
+{
+	my $this = shift;
+	my ($Sys,$Set,$Form,$Threads,$line) = @_;
+
+	require './module/file_utils.pl';
+	my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
+	my $Pools = POOL_THREAD->new;
+	$Pools->Load($Sys);
+	$Threads->Add($Sys->Get('KEY'), $Form->Get('subject', ''), 1);
+	
+	# スレッド数限界によるdat落ち処理
+	my $submax = $Sys->Get('SUBMAX');
+	my @tlist;
+	$Threads->GetKeySet('ALL', undef, \@tlist);
+	foreach my $lid (reverse @tlist) {
+		last if ($Threads->GetNum() <= $submax);
+		
+		# 不落属性あり
+		next if ($Threads->GetAttr($lid, 'nopool'));
+		if(!$Set->Get('BBS_KAKO')){
+			$Pools->Add($lid, $Threads->Get('SUBJECT', $lid), $Threads->Get('RES', $lid));
+			FILE_UTILS::Copy("$path/dat/$lid.dat", "$path/pool/$lid.cgi");
+			$Threads->Delete($lid);
+		}
+		#別の掲示板に移す場合
+		else{
+			FILE_UTILS::Move("$path/dat/$lid.dat", $Set->Get('BBS_KAKO')."/dat/$lid.dat");	
+			require './module/bbs_service.pl';
+			my $BBSAid = BBS_SERVICE -> new;
+
+			#$Sysで指すBBS名を一時変更するため保存
+			my $originalBBSname = $Sys->Get('BBS');
+			my $originalMODE = $Sys->Get('MODE');
+			$Sys->Set('BBS', $Set->Get('BBS_KAKO'));
+			$Sys->Set('MODE','CREATE');
+
+			# subject.txt更新
+			$Threads->Load($Sys);
+			$Threads->UpdateAll($Sys);
+			$Threads->Save($Sys);
+			# index.html更新
+			#$BBSAid->Init($Sys,undef);
+			#$BBSAid->CreateIndex();
+			#$BBSAid->CreateSubback();
+
+			#$Sysの内容を元に戻す
+			$Sys->Set('BBS', $originalBBSname);
+			$Sys->Set('MODE',$originalMODE);
+		}
+		unlink "$path/dat/$lid.dat";
+	}
+	$Pools->Save($Sys);
+	$Threads->Save($Sys);
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	テキスト欄の正規化
@@ -1782,7 +1891,9 @@ sub SaveHost
 sub Ninpocho
 {
 	my $this = shift;
-	my ($Sys, $Set, $Form, $Ninja, $sid) = @_;
+	my ($Sys, $Set, $Form, $Ninja) = @_;
+
+	my $sid = $Sys->Get('SID');
 
 	# セッションから忍法帖Lvを取得
 	my $ninLv = $Ninja->Get('ninLv') || 1;
