@@ -232,13 +232,14 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('sys.top','DISP','NOTICE');">トップ</a> |
  <a href="javascript:DoSubmit('sys.bbs','DISP','LIST');">掲示板</a> |
  <a href="javascript:DoSubmit('sys.ninja','DISP','LIST');">忍法帖</a> |
+ <a href="javascript:DoSubmit('sys.gallery','DISP','LIST');">ギャラリー</a> |
  <a href="javascript:DoSubmit('sys.user','DISP','LIST');">ユーザー</a> |
  <a href="javascript:DoSubmit('sys.cap','DISP','LIST');">キャップ</a> |
  <a href="javascript:DoSubmit('sys.capg','DISP','LIST');">共通キャップグループ</a> |
  <a href="javascript:DoSubmit('sys.setting','DISP','INFO');">システム設定</a> |
+ <a href="javascript:DoSubmit('sys.union','DISP','INFO');">掲示板連合</a> |
  <a href="javascript:DoSubmit('sys.edit','DISP','BANNER_PC');">共通告知欄の編集</a> |
 HTML
-#<a href="javascript:DoSubmit('sys.union','DISP','INFO');">掲示板サーバー連合設定</a> |
 	}
 	# 掲示板管理メニュー
 	elsif ($mode == 2) {
@@ -253,8 +254,6 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('bbs.cap','DISP','LIST');">キャップグループ</a> |
  <a href="javascript:DoSubmit('bbs.log','DISP','INFO');">ログ閲覧</a> |
 HTML
-#
-#<a href="javascript:DoSubmit('bbs.command','DISP','SETINFO');">各種コマンド設定</a> |
 	}
 	# スレッド管理メニュー
 	elsif ($mode == 3) {

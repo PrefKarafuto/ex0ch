@@ -81,11 +81,6 @@ sub DoPrint
 	elsif ($subMode eq 'OTHER') {													# その他設定画面
 		PrintOtherSetting($Page, $Sys, $Form);
 	}
-=pod
-	elsif ($subMode eq 'PLUS') {													# ぜろプラスオリジナル
-		PrintPlusSetting($Page, $Sys, $Form);
-	}
-=cut
 	elsif ($subMode eq 'VIEW') {													# 表示設定
 		PrintPlusViewSetting($Page, $Sys, $Form);
 	}
@@ -144,11 +139,6 @@ sub DoFunction
 	elsif ($subMode eq 'OTHER') {													# その他設定
 		$err = FunctionOtherSetting($Sys, $Form, $this->{'LOG'});
 	}
-=pod
-	elsif ($subMode eq 'PLUS') {													# ぜろプラスオリジナル
-		$err = FunctionPlusSetting($Sys, $Form, $this->{'LOG'});
-	}
-=cut
 	elsif ($subMode eq 'VIEW') {													# 表示設定
 		$err = FunctionPlusViewSetting($Sys, $Form, $this->{'LOG'});
 	}
