@@ -425,11 +425,11 @@ sub ConvertImageTag
 
 	my $type = $Sys->Get('IMGTAG');
 
-	my $reg_img = q{(jpe?g|gif|bmp|a?png|tiff?|xcf|webp)};
+	my $reg_img = qq{(jpe?g|gif|bmp|a?png|tiff?|xcf|webp)};
 	my $reg1 = qq{(?<!src="?)https?://.*?\.$reg_img};
 	my $reg2 = qq{<a.*?>(.*?\.$reg_img)};
-	my $reg3 = qq{(?<!src="?)https?://i\.imgur\.com/[a-zA-Z0-9]{7}\.$reg_img};
-	my $reg4 = qq{<a.*?>(https?://i\.imgur\.com/[a-zA-Z0-9]{7}\.$reg_img)};
+	my $reg3 = qq{(?<!src="?)https?://(i\.imgur\.com/[a-zA-Z0-9]{7}|pbs\.twimg\.com/media/[a-zA-Z0-9]{15})\.$reg_img};
+	my $reg4 = qq{<a.*?>(https?://(i\.imgur\.com/[a-zA-Z0-9]{7}|pbs\.twimg\.com/media/[a-zA-Z0-9]{15})\.$reg_img)};
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
 		$reg1 = $reg3 if $type;
