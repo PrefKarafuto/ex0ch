@@ -521,7 +521,7 @@ sub PrintOtherSetting
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
-	$Page->Print("Imgur画像のみIMGタグ変換を許可</td>");
+	$Page->Print("imgur/twimg画像のみIMGタグ変換を許可</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=CSP $CSPSet value=on>");
 	$Page->Print("Youtube/niconico埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=URLLINK $linkChk value=on>");
