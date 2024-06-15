@@ -742,7 +742,7 @@ sub PrintCommandSetting
 	$Page->Print("<input type=checkbox name=MAXRES value=2 $setmaxres>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">extendコマンド（本文行頭!extend:[id]:[slip]:[maxres]:[maxsize]）</td><td>");
-	$Page->Print("<input type=checkbox name=EXTEND value=2 $setextend>有効</td></tr>");
+	$Page->Print("<input type=checkbox name=EXTEND value=1048576 $setextend>有効</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 
 	$Page->Print("<tr><td colspan=4>いつでも</td></tr>");
