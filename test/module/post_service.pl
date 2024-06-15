@@ -447,8 +447,8 @@ sub Command
 		}
 		#最大レス数変更
 		if ($Form->Get('MESSAGE') =~ /(^|<br>)!maxres:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 1)) {
-			my $resmin = 100;
-			my $resmax = 2000;
+			my $resmin = 10;
+			my $resmax = $Sys->Get('RESMAX') * 2;
 			if ($2 && $2 >= $resmin && $2 <= $resmax) {
 				$Threads->SetAttr($threadid, 'maxres', int $2);
 				my $maxres = $Threads->GetAttr($threadid, 'maxres');
@@ -462,13 +462,36 @@ sub Command
 			}
 		}
 		#extendコマンド
-		if ($Form->Get('MESSAGE') =~ /^!extend:(|on|default|none|checked):(|none|default|checked|feature|verbose|v{3,6}):([1-9][0-9]*):([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 20)) {
-			my $resmin = 100;
-			my $resmax = 2000;
+		if ($Form->Get('MESSAGE') =~ /^!extend:(|on|default|none|checked):(|v{3,6}):([1-9][0-9]*):([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 20)) {
+			my $resmin = 10;
+			my $resmax = $Sys->Get('RESMAX') * 2;
+			my $sizemin = 1;
+			my $sizemax = $Set->Get('BBS_DATMAX') * 2;
+
 			my $id = $1;
 			my $slip = $2;
 			my $line = $3;
 			my $size = $4;
+
+			my ($a,$b,$c,$d) = {'-','-','-','-'};
+
+			if($id){
+				$Threads->SetAttr($threadid, 'id', $id);
+				#$a = '+';
+			}
+			if($slip){
+				$Threads->SetAttr($threadid, 'slip',$slip);
+				$b = '+';
+			}
+			if($line && $line >= $resmin && $line <= $resmax){
+				$Threads->SetAttr($threadid, 'maxres', int $line);
+				$c = '+';
+			}
+			if($size){
+				$Threads->SetAttr($threadid, 'maxsize', int $size);
+				#$d = '+';
+			}
+			$Command .= "VIPQ2_EXTDAT: $id:$slip:$line:$size:$a$b$c$d: EXT was configured<br>";
 		}
 	}
 

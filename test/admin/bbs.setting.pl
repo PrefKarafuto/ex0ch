@@ -704,36 +704,47 @@ sub PrintCommandSetting
 	
 	my $setBitMask = $Setting->Get('BBS_COMMAND');
 	
-	my $setpass = $setBitMask & 1 ? 'checked' : '';
-	my $setmaxres = $setBitMask & 2 ? 'checked' : '';
-	my $setsage = $setBitMask & 4 ? 'checked' : '';
-	my $setnoid = $setBitMask & 8 ? 'checked' : '';
-	my $setchangeid = $setBitMask & 16 ? 'checked' : '';
-	my $setforce774 = $setBitMask & 32 ? 'checked' : '';
-	my $setchange774 = $setBitMask & 64 ? 'checked' : '';
-	my $setstop = $setBitMask & 128 ? 'checked' : '';
-	my $setdelcmd = $setBitMask & 256 ? 'checked' : '';
-	my $setpool = $setBitMask & 512 ? 'checked' : '';
-	my $setlive = $setBitMask & 1024 ? 'checked' : '';
-	my $setslip = $setBitMask & 2048 ? 'checked' : '';
-	my $setban = $setBitMask & 4096 ? 'checked' : '';
-	my $setninLv = $setBitMask & 8192 ? 'checked' : '';
-	my $setchtt = $setBitMask & 16384 ? 'checked' : '';
-	my $sethidenusi = $setBitMask & 32768 ? 'checked' : '';
-	my $setadd = $setBitMask & 65536 ? 'checked' : '';
-	my $setfloat = $setBitMask & 131072 ? 'checked' : '';
-	my $setnopool = $setBitMask & 262144 ? 'checked' : '';
-	my $setdelete = $setBitMask & 524288 ? 'checked' : '';
+	my $setpass 	= $setBitMask & 2 ** 0 ? 'checked' : '';
+	my $setmaxres	= $setBitMask & 2 ** 1 ? 'checked' : '';
+	my $setsage		= $setBitMask & 2 ** 2 ? 'checked' : '';
+	my $setnoid		= $setBitMask & 2 ** 3 ? 'checked' : '';
+	my $setchangeid	= $setBitMask & 2 ** 4 ? 'checked' : '';
+	my $setforce774	= $setBitMask & 2 ** 5 ? 'checked' : '';
+	my $setchange774= $setBitMask & 2 ** 6 ? 'checked' : '';
+	my $setstop		= $setBitMask & 2 ** 7 ? 'checked' : '';
+	my $setdelcmd	= $setBitMask & 2 ** 8 ? 'checked' : '';
+	my $setpool		= $setBitMask & 2 ** 9 ? 'checked' : '';
+	my $setlive		= $setBitMask & 2 ** 10 ? 'checked' : '';
+	my $setslip		= $setBitMask & 2 ** 11 ? 'checked' : '';
+	my $setban		= $setBitMask & 2 ** 12 ? 'checked' : '';
+	my $setninLv	= $setBitMask & 2 ** 13 ? 'checked' : '';
+	my $setchtt		= $setBitMask & 2 ** 14 ? 'checked' : '';
+	my $sethidenusi = $setBitMask & 2 ** 15 ? 'checked' : '';
+	my $setadd		= $setBitMask & 2 ** 16 ? 'checked' : '';
+	my $setfloat	= $setBitMask & 2 ** 17 ? 'checked' : '';
+	my $setnopool	= $setBitMask & 2 ** 18 ? 'checked' : '';
+	my $setdelete	= $setBitMask & 2 ** 19 ? 'checked' : '';
+	my $setextend	= $setBitMask & 2 ** 20 ? 'checked' : '';
+
+	my $resmax = Setting->Get('BBS_MAX_RES') || $$Sys->Get('RESMAX');
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>有効にしたいコマンドにチェックを入れ、[設定]ボタンを押してください。</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	
+	$Page->Print("<tr><td colspan=4>スレ立て時のみ</td></tr>");
+	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">スレッドパスワード（メール欄!pass:[password]）</td><td>");
 	$Page->Print("<input type=checkbox name=PASS value=1 $setpass>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">スレッド最大レス（!maxres:[100-2000]）</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">スレッド最大レス（!maxres:[10-$resmax]）</td><td>");
 	$Page->Print("<input type=checkbox name=MAXRES value=2 $setmaxres>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">extendコマンド（本文行頭!extend:[id]:[slip]:[maxres]:[maxsize]）</td><td>");
+	$Page->Print("<input type=checkbox name=EXTEND value=2 $setextend>有効</td></tr>");
+	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+
+	$Page->Print("<tr><td colspan=4>いつでも</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">強制sage（!sage）</td><td>");
 	$Page->Print("<input type=checkbox name=SAGE value=4 $setsage>有効</tr>");
@@ -767,8 +778,8 @@ sub PrintCommandSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">忍法帖レベル制限 ※要忍法帖（!ninlv:[レベル]）</td><td>");
 	$Page->Print("<input type=checkbox name=NINLV value=8192 $setninLv>有効</td></tr>");
-
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
+
 	$Page->Print("<tr><td colspan=4>スレッド中のみ</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">スレッドストップ（!stop）</td><td>");
@@ -1306,7 +1317,7 @@ sub FunctionCommandSetting
 	
 	my $commandSet = 0;
 	my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
-					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE);
+					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND);
 
 	foreach (@inList) {
 		# 入力チェック	
