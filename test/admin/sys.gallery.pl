@@ -63,7 +63,7 @@ sub DoPrint
 	SetMenuList($BASE, $pSys);
 	
 	if ($subMode eq 'LIST') {														# 情報画面
-		PrintGalleryList($Page, $Sys, $Form);
+		PrintGallery($Page, $Sys, $Form);
 	}
 	elsif ($subMode eq 'BASIC') {													# 基本設定画面
 		PrintBasicSetting($Page, $Sys, $Form);
@@ -148,7 +148,7 @@ sub SetMenuList
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
-sub PrintGalleryInfo
+sub PrintGallery
 {
 	my ($Page, $SYS, $Form) = @_;
 	

@@ -157,3 +157,5 @@ sub PrintUnionInfo
 	$Page->Print('Coming far...');
 	
 }
+
+1;
