@@ -17,30 +17,30 @@ use Digest::MD5;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 # 実行時間の計測開始 (デバッグ用)
-# ./admin/sys.tpo.plのSetMenuList関数でコメントアウトを解除すると管理画面からログが閲覧できます
-#use Time::HiRes qw(gettimeofday tv_interval);
+# sys.top.plのSetMenuList関数でコメントアウトを解除すると管理画面からログが閲覧できます
+use Time::HiRes qw(gettimeofday tv_interval);
 my ($exit, $log, $bbs);
 
 # BBSCGI実行
 eval 'require FCGI;'; 
 if (! $@) {
-	# FastCGI
+	# FastCGIモード
 	my $request = FCGI::Request();
-	#my $count = 0;
+	my $count = 0;
 	while($request->Accept() >= 0){
-		#my $start_time = [gettimeofday];
+		my $start_time = [gettimeofday];
 		($exit, $log, $bbs) = BBSCGI();
 		# ログに保存 (デバッグ用)
-		#CGIExecutionTime($start_time, $log, $bbs.":$count", 100);
-		#$count++;
+		CGIExecutionTime($start_time, $log, $bbs.":$count", 100);
+		$count++;
 		$request->Finish();
 	}
 } else {
 	# 通常
-	#my $start_time = [gettimeofday];
+	my $start_time = [gettimeofday];
 	($exit, $log, $bbs) = BBSCGI();
 	# ログに保存 (デバッグ用)
-	#CGIExecutionTime($start_time, $log, $bbs, 100);
+	CGIExecutionTime($start_time, $log, $bbs, 100);
 }
 
 # CGIの実行結果を終了コードとする

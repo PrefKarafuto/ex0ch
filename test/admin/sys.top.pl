@@ -150,7 +150,7 @@ sub SetMenuList
 		$Base->SetMenu('<hr>', '');
 		$Base->SetMenu('操作ログ閲覧', "'sys.top','DISP','ADMINLOG'");
 		# デバッグ用
-		#$Base->SetMenu('BBS.CGI実行時間ログ閲覧', "'sys.top','DISP','EXTIMELOG'");
+		$Base->SetMenu('BBS.CGI実行時間ログ閲覧', "'sys.top','DISP','EXTIMELOG'");
 	}
 }
 
@@ -488,7 +488,7 @@ $Page->Print(<<HTML);
    <tr>
 	<td class="DetailTitle">Date</td>
 	<td class="DetailTitle">ExecutionTime [msec]</td>
-	<td class="DetailTitle">BBS</td>
+	<td class="DetailTitle">BBS (:FastCGI count)</td>
 	<td class="DetailTitle">Result</td>
    </tr>
 HTML
