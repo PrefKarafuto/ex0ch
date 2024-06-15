@@ -249,46 +249,7 @@ sub Initialize
 
 	#セッションID設定
 	#cookieからセッションID取得
-	my $sid = $Cookie->Get('countsession');
-	my $sec = $Cookie->Get('securitykey');
-	my %cookies = fetch CGI::Cookie;
-	if (!$sid && exists $cookies{'countsession'}) {
-		$sid = $cookies{'countsession'}->value;
-		$sid =~ s/"//g;
-	}
-	if (!$sec && exists $cookies{'securitykey'}) {
-		$sec = $cookies{'securitykey'}->value;
-		$sec =~ s/"//g;
-	}
-
-	#改竄をチェック
-	my $ctx = Digest::MD5->new;
-	$ctx->add(':', $Sys->Get('SERVER'));
-	$ctx->add(':', $ENV{'REMOTE_ADDR'});
-	my $infoDir = $Sys->Get('INFO');
-	my $ipFile = ".$infoDir/.ninpocho/hash/ip_addr.cgi";
-
-	require './module/ninpocho.pl';
-	my $ipHash = $ctx->b64digest;
-	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
-		my $ctx = Digest::MD5->new;
-		$ctx->add($Sys->Get('SECURITY_KEY'));
-		$ctx->add(':', $sid);
-		
-		if ($ctx->b64digest ne $sec){
-			#一致しなかったら改竄されている
-			return $ZP::E_PAGE_COOKIE;
-		}
-	}elsif($ENV{'REMOTE_HOST'} =~ /\.jp$/){
-		# IPに紐付けられているかチェック
-		my $expiry = 60*60*24;
-		$sid = NINPOCHO::GetHash($ipHash,$expiry,$ipFile);
-	}
-	unless($sid){
-		# 新規ID発行
-		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
-	}
-	NINPOCHO::SetHash($ipHash,$sid,time,$ipFile);
+	my $sid = LoadSessionID($Sys, $Cookie, $Conv);
 	$Sys->Set('SID',$sid);
 
 	# subjectの読み込み
@@ -701,4 +662,53 @@ sub CGIExecutionTime
 	print $fh_out @lines;
 	close $fh_out;
 
+}
+
+# SessionIDの取得
+sub LoadSessionID
+{
+	my ($Sys, $Cookie, $Conv) = @_;
+	require './module/ninpocho.pl';
+
+	my $sid = $Cookie->Get('countsession');
+	my $sec = $Cookie->Get('securitykey');
+	my %cookies = fetch CGI::Cookie;
+	if (!$sid && exists $cookies{'countsession'}) {
+		$sid = $cookies{'countsession'}->value;
+		$sid =~ s/"//g;
+	}
+	if (!$sec && exists $cookies{'securitykey'}) {
+		$sec = $cookies{'securitykey'}->value;
+		$sec =~ s/"//g;
+	}
+
+	#改竄をチェック
+	my $ctx = Digest::MD5->new;
+	$ctx->add(':', $Sys->Get('SERVER'));
+	$ctx->add(':', $ENV{'REMOTE_ADDR'});
+	my $infoDir = $Sys->Get('INFO');
+	my $ipFile = ".$infoDir/.ninpocho/hash/ip_addr.cgi";
+	my $ipHash = $ctx->b64digest;
+
+	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
+		my $ctx = Digest::MD5->new;
+		$ctx->add($Sys->Get('SECURITY_KEY'));
+		$ctx->add(':', $sid);
+		
+		if ($ctx->b64digest ne $sec){
+			#一致しなかったら改竄されている
+			return $ZP::E_PAGE_COOKIE;
+		}
+	}elsif($Conv->IsJPIP($Sys)){
+		# IPに紐付けられているかチェック
+		my $expiry = 60*60*24;
+		$sid = NINPOCHO::GetHash($ipHash,$expiry,$ipFile);
+	}
+	unless($sid){
+		# 新規ID発行
+		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
+	}
+	NINPOCHO::SetHash($ipHash,$sid,time,$ipFile);
+
+	return $sid;
 }

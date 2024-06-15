@@ -1340,7 +1340,7 @@ sub IsJPIP {
 	my $filename_ipv4 = ".$infoDir/IP_List/jp_ipv4.cgi";
 	my $filename_ipv6 = ".$infoDir/IP_List/jp_ipv6.cgi";
 
-	if(time - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
+	if(time - (stat($filename_ipv4))[9] > 60*60*24*30 || !(-e $filename_ipv4)){
 		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
 	}
 
