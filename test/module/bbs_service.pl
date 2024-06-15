@@ -756,8 +756,8 @@ sub PrintResponse
  
 	# URLと引用個所の適応
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
-	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
+	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
 	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'),\$elem[3])if($Set->Get('BBS_IMGTAG'));
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
