@@ -51,7 +51,7 @@ sub Load
 {
 	my $this = shift;
 	my ($Sys,$password) = @_;
-	my ($sid,$sid_saved,$sid_before,$sec,$auth);
+	my ($sid,$sid_saved,$sid_before);
 
 	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
 	my $Form = $Sys->Get('MainCGI')->{'FORM'};
@@ -59,85 +59,63 @@ sub Load
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/";
 	$sid = $Sys->Get('SID');
-
-	my $addr = $ENV{'REMOTE_ADDR'};
-	my $host = $ENV{'REMOTE_HOST'};
-	my $ctx3 = Digest::MD5->new;
-	$ctx3->add(':', $Sys->Get('SERVER'));
-	$ctx3->add(':', $addr);
-	my $ip_hash = $ctx3->b64digest;
-
-	#cookieにsessionIDが保存されていない場合
-	if (!$sid && $host =~/\.jp$/){
-		my $expiry = 60*30;      # 紐付け有効期限は30m
-		$sid = GetHash($ip_hash,$expiry,$ninDir.'hash/ip_addr.cgi');
-	}
 	
-	if($Set->Get('BBS_NINJA')){
-		#パスワードがあった場合
-		if($password){
-			my $ctx2 = Digest::MD5->new;
-			my $exp = $Sys->Get('PASS_EXPITY');
-			my $long_expiry = 60*60*24*$exp;
-			
-			$ctx2->add($Sys->Get('SECURITY_KEY'));
-			$ctx2->add(':', $password);
+	#パスワードがあった場合
+	if($password){
+		my $ctx2 = Digest::MD5->new;
+		my $exp = $Sys->Get('PASS_EXPITY');
+		my $long_expiry = 60*60*24*$exp;
+		
+		$ctx2->add($Sys->Get('SECURITY_KEY'));
+		$ctx2->add(':', $password);
 
-			$sid_saved = GetHash($ctx2->b64digest,$long_expiry,$ninDir.'hash/password.cgi');
-			if($sid_saved && $sid_saved ne $sid){
-				$sid_before = $sid;
-				$sid = $sid_saved;
-			}else{
-				# 無かったらロードしない
-				return undef;
-			}
-		}
-		#忍法帖が有効の場合
-		my $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
-		if($session ->is_new()){
-			$sid = $session->id();
-			$this->{'CREATE_FLAG'} = 1;
-
-			#新規作成時に追加
-			$session->param('new_message',substr($Form->Get('MESSAGE'), 0, 30));
-			$session->param('c_bbsdir',$Sys->Get('BBS'));
-			$session->param('c_threadkey',$Sys->Get('KEY'));
-			$session->param('c_addr',$ENV{'REMOTE_ADDR'});
-			$session->param('c_host',$ENV{'REMOTE_HOST'});
-			$session->param('c_ua',$ENV{'HTTP_USER_AGENT'});
+		$sid_saved = GetHash($ctx2->b64digest,$long_expiry,$ninDir.'hash/password.cgi');
+		if($sid_saved && $sid_saved ne $sid){
+			$sid_before = $sid;
+			$sid = $sid_saved;
 		}else{
-			if ($sid && $sid_before){
-				#忍法帖ロード時に追加
-				my $load_count = $session->param('load_count') || 0;
-				$this->{'LOAD_FLAG'} = 1;
-				$load_count++;
-				$session->param('load_count',$load_count);
-				$session->param('load_message',substr($Form->Get('MESSAGE'), 0, 30));
-				$session->param('load_from',$sid_before);
-				$session->param('load_time',time);
-				$session->param('load_bbsdir',$Sys->Get('BBS'));
-				$session->param('load_threadkey',$Sys->Get('KEY'));
-				$session->param('load_addr',$ENV{'REMOTE_ADDR'});
-				$session->param('load_host',$ENV{'REMOTE_HOST'});
-				$session->param('load_ua',$ENV{'HTTP_USER_AGENT'});
-			}else{
-				# 通常時処理
-				# ninpocho.plでは行わない
-			}
-		}
-		$this->{'SESSION'} = $session;
-	}else{
-		$this->{'SESSION'} = undef;
-		#セッションIDのみ使う場合
-		if(!$sid){
-			$sid = generate_id();
+			# 無かったらロードしない
+			return undef;
 		}
 	}
+
+	# セッションデータのロードもしくは新規作成
+	my $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
+	if($session ->is_new()){
+		$sid = $session->id();
+		$this->{'CREATE_FLAG'} = 1;
+
+		#新規作成時に追加
+		$session->param('new_message',substr($Form->Get('MESSAGE'), 0, 30));
+		$session->param('c_bbsdir',$Sys->Get('BBS'));
+		$session->param('c_threadkey',$Sys->Get('KEY'));
+		$session->param('c_addr',$ENV{'REMOTE_ADDR'});
+		$session->param('c_host',$ENV{'REMOTE_HOST'});
+		$session->param('c_ua',$ENV{'HTTP_USER_AGENT'});
+	}else{
+		if ($sid && $sid_before){
+			#忍法帖ロード時に追加
+			my $load_count = $session->param('load_count') || 0;
+			$this->{'LOAD_FLAG'} = 1;
+			$load_count++;
+			$session->param('load_count',$load_count);
+			$session->param('load_message',substr($Form->Get('MESSAGE'), 0, 30));
+			$session->param('load_from',$sid_before);
+			$session->param('load_time',time);
+			$session->param('load_bbsdir',$Sys->Get('BBS'));
+			$session->param('load_threadkey',$Sys->Get('KEY'));
+			$session->param('load_addr',$ENV{'REMOTE_ADDR'});
+			$session->param('load_host',$ENV{'REMOTE_HOST'});
+			$session->param('load_ua',$ENV{'HTTP_USER_AGENT'});
+		}else{
+			# 通常時処理
+			# ninpocho.plでは行わない
+		}
+	}
+	$this->{'SESSION'} = $session;
+
 	$this->{'SID'} = $sid;
 	$Sys->Set('SID',$sid);
-
-	# Hashテーブルを設定
-	SetHash($ip_hash,$sid,time,$ninDir.'hash/ip_addr.cgi') if $host =~/\.jp$/;
 
 	return $sid;
 }
@@ -259,13 +237,6 @@ sub DeleteOnly
 	$this->{'SESSION'}->flush();
 }
 
-# ID生成
-sub generate_id
-{
-	my $md5 = Digest::MD5->new();
-	$md5->add($$,time(),rand(time));
-	return $md5->hexdigest();
-}
 #------------------------------------------------------------------------------------------------------------
 #
 #	忍法帖情報保存

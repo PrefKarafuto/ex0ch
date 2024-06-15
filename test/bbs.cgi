@@ -262,19 +262,37 @@ sub Initialize
 	}
 
 	#改竄をチェック
-	$Sys->Set('SID',undef);
 	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
 		my $ctx = Digest::MD5->new;
 		$ctx->add($Sys->Get('SECURITY_KEY'));
 		$ctx->add(':', $sid);
 		
-		if ($ctx->b64digest eq $sec){
-			$Sys->Set('SID',$sid);
-		}else{
+		if ($ctx->b64digest ne $sec){
 			#一致しなかったら改竄されている
 			return $ZP::E_PAGE_COOKIE;
 		}
+	}elsif($ENV{'REMOTE_HOST'} =~ /\.jp$/){
+		# IPに紐付けられているかチェック
+		require './module/ninpocho.pl';
+		my $expiry = 60*60*24;
+
+		my $ctx = Digest::MD5->new;
+		$ctx->add(':', $Sys->Get('SERVER'));
+		$ctx->add(':', $ENV{'REMOTE_ADDR'});
+		my $infoDir = $Sys->Get('INFO');
+		my $ipFile = ".$infoDir/.ninpocho/hash/ip_addr.cgi";
+
+		my $ipHash = $ctx->b64digest;
+
+		# ロード
+		$sid = NINPOCHO::GetHash($ipHash,$expiry,$ipFile);
+		NINPOCHO::SetHash($ipHash,$sid,time,$ipFile) if $sid;
 	}
+	unless($sid){
+		# 新規ID発行
+		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
+	}
+	$Sys->Set('SID',$sid);
 
 	# subjectの読み込み
 	$Threads->Load($Sys);
