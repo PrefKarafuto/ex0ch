@@ -477,7 +477,7 @@ sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $admCap, $srcCap, $logout);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout);
 	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -495,6 +495,7 @@ sub PrintOtherSetting
 	$CSP		= $SYS->Get('CSP');
 	$ninLvmax	= $SYS->Get('NINLVMAX');
 	$cookieExp	= $SYS->Get('COOKIE_EXPIRY');
+	$authExp	= $SYS->Get('AUTH_EXPIRY');
 	$nin_exp	= $SYS->Get('NIN_EXPIRY');
 	$pass_exp	= $SYS->Get('PASS_EXPIRY');
 	$logout		= $SYS->Get('LOGOUT');
@@ -543,13 +544,17 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td>bbs.cgiでGETメソッドを使用する</td>");
 	$Page->Print("<td><input type=checkbox name=BBSGET $bbsget value=on></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック関連</td></tr>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック</td></tr>\n");
 	$Page->Print("<tr><td>更新チェックの間隔</td>");
 	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\">日(0でチェック無効)</td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Cookie関連</td></tr>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Cookie</td></tr>\n");
 	$Page->Print("<tr><td>Cookie有効期限</td>");
 	$Page->Print("<td><input type=text size=2 name=COOKIE_EXPIRY value=\"$cookieExp\">日</td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ユーザー認証</td></tr>\n");
+	$Page->Print("<tr><td>認証有効期限</td>");
+	$Page->Print("<td><input type=text size=2 name=AUTH_EXPIRY value=\"$authExp\">日</td></tr>\n");
 
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">忍法帖関連</td></tr>\n");
 	$Page->Print("<tr><td>忍法帖データ保持日数</td>");
@@ -1179,6 +1184,7 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('NIN_EXPIRY', $Form->Get('NIN_EXPIRY'));
 	$SYSTEM->Set('PASS_EXPIRY', $Form->Get('PASS_EXPIRY'));
 	$SYSTEM->Set('COOKIE_EXPIRY', $Form->Get('COOKIE_EXPIRY'));
+	$SYSTEM->Set('AUTH_EXPIRY', $Form->Get('AUTH_EXPIRY'));
 	$SYSTEM->Set('LOGOUT', $Form->Get('LOGOUT'));
 	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
 	
@@ -1197,6 +1203,7 @@ sub FunctionOtherSetting
 		push @$pLog, '　　　 index.htmlを更新しない：' . $SYSTEM->Get('FASTMODE');
 		push @$pLog, '　　　 bbs.cgiのGETメソッド：' . $SYSTEM->Get('BBSGET');
 		push @$pLog, '　　　 Cookie有効期限：' . $SYSTEM->Get('COOKIE_EXPIRY');
+		push @$pLog, '　　　 認証有効期限：' . $SYSTEM->Get('AUTH_EXPIRY');
 		push @$pLog, '　　　 忍法帖最大レベル：' . $SYSTEM->Get('NINLVMAX');
 		push @$pLog, '　　　 忍法帖データ保持期間：' . $SYSTEM->Get('NIN_EXPIRY');
 		push @$pLog, '　　　 パスワード設定時保持期間：' . $SYSTEM->Get('PASS_EXPIRY');

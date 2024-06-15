@@ -144,7 +144,7 @@ sub Write
 	# SLIP
 	my ($slip_result,$idEnd) = $this->MakeSlip($Sys,$Form,$Set,$Threads);
 
-	# 忍法帖前処理
+	# 忍法帖ロード
 	my $password = '';
 	if ($Set->Get('BBS_NINJA')){
 		$password = $this->LoadNinpocho($Sys, $Form, $Ninja);
@@ -1461,7 +1461,7 @@ sub CaptchaAuthentication
 	my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
 	my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
 	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
-	my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir) || ($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) >= time));
+	my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir);
 
 	# 認証処理
 	my $err = $is_auth ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
@@ -1503,15 +1503,7 @@ sub CaptchaAuthentication
 
 	if (!$err && $Set->Get('BBS_NINJA')){
 		# 認証成功
-		$sid = $Ninja->Load($Sys,undef);
-		$Ninja->Set('auth', 1);
-		$Ninja->Set('auth_time', time);
-	}
-
-	if($Ninja->Get('auth') && ($Ninja->Get('auth_time') + ($auth_expiry) < time)){
-		# 忍法帖で認証が切れた場合
-		$Ninja->Set('auth',0);
-		$Form->Set('FROM',Form->Get('FROM').' 認証有効期限切れ');
+		$Ninja->Load($Sys,undef);
 	}
 	
 	return $err;

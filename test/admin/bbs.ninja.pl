@@ -244,8 +244,8 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td class=\"DetailTitle\">作成時のIP</td><td>$c_addr</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">作成時のHOST</td><td>$c_host</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">作成時のUA</td><td>$c_ua</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">ユーザー認証</td><td>$is_auth</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">最終認証日時</td><td>$auth_time</td></tr>\n");
+		#$Page->Print("<tr><td class=\"DetailTitle\">ユーザー認証</td><td>$is_auth</td></tr>\n");
+		#$Page->Print("<tr><td class=\"DetailTitle\">最終認証日時</td><td>$auth_time</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">最終スレ立て日時</td><td>$last_makethread_time</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み日時</td><td>$last_wtime</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">最新書き込み</td><td>$last_message</td></tr>\n");
