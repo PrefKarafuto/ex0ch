@@ -262,6 +262,14 @@ sub Initialize
 	}
 
 	#改竄をチェック
+	my $ctx = Digest::MD5->new;
+	$ctx->add(':', $Sys->Get('SERVER'));
+	$ctx->add(':', $ENV{'REMOTE_ADDR'});
+	my $infoDir = $Sys->Get('INFO');
+	my $ipFile = ".$infoDir/.ninpocho/hash/ip_addr.cgi";
+
+	require './module/ninpocho.pl';
+	my $ipHash = $ctx->b64digest;
 	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
 		my $ctx = Digest::MD5->new;
 		$ctx->add($Sys->Get('SECURITY_KEY'));
@@ -273,25 +281,14 @@ sub Initialize
 		}
 	}elsif($ENV{'REMOTE_HOST'} =~ /\.jp$/){
 		# IPに紐付けられているかチェック
-		require './module/ninpocho.pl';
 		my $expiry = 60*60*24;
-
-		my $ctx = Digest::MD5->new;
-		$ctx->add(':', $Sys->Get('SERVER'));
-		$ctx->add(':', $ENV{'REMOTE_ADDR'});
-		my $infoDir = $Sys->Get('INFO');
-		my $ipFile = ".$infoDir/.ninpocho/hash/ip_addr.cgi";
-
-		my $ipHash = $ctx->b64digest;
-
-		# ロード
 		$sid = NINPOCHO::GetHash($ipHash,$expiry,$ipFile);
-		NINPOCHO::SetHash($ipHash,$sid,time,$ipFile) if $sid;
 	}
 	unless($sid){
 		# 新規ID発行
 		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
 	}
+	NINPOCHO::SetHash($ipHash,$sid,time,$ipFile);
 	$Sys->Set('SID',$sid);
 
 	# subjectの読み込み
