@@ -727,6 +727,7 @@ sub PrintCommandSetting
 	my $setextend	= $setBitMask & 2 ** 20 ? 'checked' : '';
 
 	my $resmax = $Setting->Get('BBS_MAX_RES') || $Sys->Get('RESMAX');
+	$resmax *= 2;
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=4>有効にしたいコマンドにチェックを入れ、[設定]ボタンを押してください。</td></tr>");
