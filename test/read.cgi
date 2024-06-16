@@ -191,6 +191,7 @@ sub PrintReadHead
 	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $bbspath = $Sys->Get('BBS');
+	my $data = $Sys->Get('DATA');
 	my $datone = $Dat->Get(0);
 	my $description = 'ERROR:スレッドが存在しません。';
 	my $CSP = $Sys->Get('CSP');
@@ -228,8 +229,10 @@ sub PrintReadHead
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
  <meta name="twitter:card" content="summary">
-  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
+  <link rel="stylesheet" type="text/css" href="../../..$data/design.css">
  <link rel="icon" href="../../../../$bbspath/$favicon">
+ <script language="javascript" src="../../..$data/script.js"></script>
+
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
 	if($Set->Get('BBS_CAPTCHA')){
@@ -556,29 +559,6 @@ width:95%;
 margin:0;
 }
 </style>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-	const images = document.querySelectorAll('.post_image');
-	const overlay = document.getElementById('overlay');
-	const overlayImage = document.getElementById('overlay-image');
-  
-	images.forEach((image) => {
-	  image.addEventListener('click', function() {
-		overlayImage.src = this.src;
-		overlayImage.onload = function() {
-		  overlay.style.display = 'block';
-		};
-	  });
-	});
-  
-	overlay.addEventListener('click', function(event) {
-	  // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
-	  if (event.target !== overlayImage) {
-		overlay.style.display = 'none';
-	  }
-	});
-  });
-</script>
 </body>
 </html>
 HTML

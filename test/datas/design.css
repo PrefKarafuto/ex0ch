@@ -154,7 +154,6 @@ height:100%;
     left: 0;
     top: 0;
     background-color: #333;
-    padding-top: 20px;
     display: block;
     overflow-y: auto; /* 縦スクロールを有効にする */
 }
@@ -183,7 +182,7 @@ height:100%;
 
 /* タイトルとカテゴリのスタイリング */
 .menu-title {
-    font-size: 1.2em;
+    font-size: 0.8em;
     font-weight: bold;
     color: #ffffff;
     background-color: #444444;
@@ -192,7 +191,7 @@ height:100%;
 }
 
 .category-title {
-    font-size: 1.1em;
+    font-size: 0.8em;
     font-weight: bold;
     color: #dddddd;
     padding: 8px 10px;
@@ -271,7 +270,7 @@ height:100%;
 
 /* スマホ用タイトルとカテゴリのスタイリング */
 .dropdown-content .menu-title {
-    font-size: 1.2em;
+    font-size: 0.8em;
     font-weight: bold;
     color: #ffffff;
     background-color: #444444;
@@ -279,7 +278,7 @@ height:100%;
 }
 
 .dropdown-content .category-title {
-    font-size: 1.1em;
+    font-size: 0.8em;
     font-weight: bold;
     color: #dddddd;
     background-color: #555555;

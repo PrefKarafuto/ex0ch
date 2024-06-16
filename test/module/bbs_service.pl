@@ -266,6 +266,7 @@ sub PrintIndexHead
  <meta property="og:site_name" content="EXぜろちゃんねる">
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
+ <script language="javascript" src="../test/datas/script.js"></script>
  <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
@@ -318,6 +319,10 @@ HEAD
 	# PC用メニューバー
 	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
 	$Page->Print("<li class=\"menu-title\">$sitename</li>\n");
+	$Page->Print("<li><a href=\"../test/search.cgi\">検索</a></li>\n");
+	$Page->Print("<li><a href=\"../bbsmenu.html\">BBS MENU</a></li>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
 	foreach my $catid (@catSet) {
 		my $catname = $Category->Get('NAME', $catid);
 		$Page->Print("<li class=\"category-title\">$catname</li>\n");
@@ -337,6 +342,10 @@ HEAD
 	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\"><span class=\"sitename\">$sitename</span>\n");
 	$Page->Print("<div class=\"hamburger-icon\"><span></span><span></span><span></span></div></button>");
 	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
+	$Page->Print("<a href=\"../test/search.cgi\">検索</a>\n");
+	$Page->Print("<a href=\"../bbsmenu.html\">BBS MENU</a>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
 	foreach my $catid (@catSet) {
 		my $catname = $Category->Get('NAME', $catid);
 		$Page->Print("<span class=\"category-title\">$catname</span>\n");
@@ -679,47 +688,6 @@ textarea {
     resize: vertical; /* ユーザーが垂直方向にサイズを変更できるようにする */
 }
 </style>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-	const images = document.querySelectorAll('.post_image');
-	const overlay = document.getElementById('overlay');
-	const overlayImage = document.getElementById('overlay-image');
-  
-	images.forEach((image) => {
-	  image.addEventListener('click', function() {
-		overlayImage.src = this.src;
-		overlayImage.onload = function() {
-		  overlay.style.display = 'block';
-		};
-	  });
-	});
-  
-	overlay.addEventListener('click', function(event) {
-	  // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
-	  if (event.target !== overlayImage) {
-		overlay.style.display = 'none';
-	  }
-	});
-  });
-</script>
-<script>
-        function toggleDropdown() {
-            var content = document.getElementById("dropdown-content");
-            if (content.style.display === "block") {
-                content.style.display = "none";
-            } else {
-                content.style.display = "block";
-            }
-        }
-		// メニュー以外をクリックしたときにメニューを閉じる
-        document.addEventListener('click', function(event) {
-            var dropdown = document.getElementById("dropdown-content");
-            var dropbtn = document.querySelector(".dropbtn");
-            if (dropdown.style.display === "block" && !dropbtn.contains(event.target) && !dropdown.contains(event.target)) {
-                dropdown.style.display = "none";
-            }
-        });
-</script>
 FOOT
 	
 	$Page->Print("</body>\n</html>\n");

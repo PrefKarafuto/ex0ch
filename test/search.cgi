@@ -104,6 +104,8 @@ sub PrintHead
 	$Banner = new BANNER;
 	$Banner->Load($Sys);
 
+	my $data = $Sys->Get('DATA');
+
 	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -116,7 +118,10 @@ sub PrintHead
 
  <title>検索＠Ex0ch</title>
 
- <link rel="stylesheet" type="text/css" href="./datas/search.css">
+ <link rel="stylesheet" type="text/css" href=".$data/search.css">
+ <link rel="stylesheet" type="text/css" href=".$data/design.css">
+ <script language="javascript" src=".$data/script.js"></script>
+
 HTML
 
 	if($Sys->Get('SEARCHCAP')){
@@ -128,12 +133,62 @@ HTML
 	my $classname = $Sys->Get('CAPTCHA');
 	my $Captcha = $sitekey && $classname && $Sys->Get('SEARCHCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
 
-	$Page->Print(<<HTML);
-</head>
-<!--nobanner-->
-<body>
+	$Page->Print("</head>\n<!--nobanner-->\n<body>\n");
 
-<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#ccffcc" style="margin-bottom:1.2em;" align="center">
+	# サイドメニュー
+	require './module/bbs_info.pl';
+	my $Category = CATEGORY_INFO->new;
+	$Category->Load($Sys);
+	$BBS->Load($Sys);
+	my @catSet;
+	$Category->GetKeySet(\@catSet);
+	$BBS->GetKeySet('ALL', '', \@bbsSet);
+
+	my $sitename = $Sys->Get('SITENAME') || 'EXぜろちゃんねる';
+
+	# PC用メニューバー
+	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
+	$Page->Print("<li class=\"menu-title\">$sitename</li>\n");
+	$Page->Print("<li><a class=\"active\" href=\"../test/search.cgi\">検索</a></li>\n");
+	$Page->Print("<li><a href=\"../bbsmenu.html\">BBS MENU</a></li>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
+	foreach my $catid (@catSet) {
+		my $catname = $Category->Get('NAME', $catid);
+		$Page->Print("<li class=\"category-title\">$catname</li>\n");
+		foreach my $id (@bbsSet) {
+			my $name = $BBS->Get('NAME', $id);
+			my $dir = $BBS->Get('DIR', $id);
+			$Page->Print("<li><a href=\"../$dir/\">$name</a></li>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+		}
+	}
+	
+	$Page->Print("</ul></nav>\n");
+
+	# スマホ用メニューバー
+	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\"><span class=\"sitename\">$sitename</span>\n");
+	$Page->Print("<div class=\"hamburger-icon\"><span></span><span></span><span></span></div></button>");
+	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
+	$Page->Print("<a class=\"active\" href=\"../test/search.cgi\">検索</a>\n");
+	$Page->Print("<a href=\"../bbsmenu.html\">BBS MENU</a>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
+	foreach my $catid (@catSet) {
+		my $catname = $Category->Get('NAME', $catid);
+		$Page->Print("<span class=\"category-title\">$catname</span>\n");
+		foreach my $id (@bbsSet) {
+			my $name = $BBS->Get('NAME', $id);
+			my $dir = $BBS->Get('DIR', $id);
+			$Page->Print("<a href=\"../$dir/\">$name</a>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+		}
+	}
+	$Page->Print("</div></nav>\n");
+
+	$Page->Print("<main class=\"content\">\n");
+	$Page->Print(<<HTML);
+
+<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#ccffcc" style="margin-bottom:1.2em; word-break:break-all;" align="center">
  <tr>
   <td>
   <font size="+1"><b>検索＠Ex0ch</b></font>
@@ -145,17 +200,9 @@ HTML
 	<td>対象カテゴリー<br>
 	<select name="CATEGORY">
 	<option value="">指定しない</option>
+
 HTML
 
-	# カテゴリーの取得
-	require './module/bbs_info.pl';
-	my $Category = CATEGORY_INFO->new;
-	$Category->Load($Sys);
-	my @catSet = ();
-	$Category->GetKeySet(\@catSet);
-
-	# BBSセットの取得
-	$BBS->GetKeySet('ALL', '', \@bbsSet);
 	
 	foreach my $catid (@catSet) {
 		$catname = $Category->Get('NAME', $catid);
