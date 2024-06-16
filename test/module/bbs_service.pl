@@ -314,7 +314,7 @@ HEAD
 	$Category->GetKeySet(\@catSet);
 	$BBS->GetKeySet('ALL', '', \@bbsSet);
 
-	my $sitename = $this->{'SYS'}->Get('SITENAME') || '掲示板一覧';
+	my $sitename = $this->{'SYS'}->Get('SITENAME') || 'EXぜろちゃんねる';
 
 	# PC用メニューバー
 	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
