@@ -676,17 +676,6 @@ img {
 	max-width: 100%;
 	height:auto;
 }
-textarea {
-    width: 100%;
-    max-width: 100%;
-    margin: auto;
-    display: block;
-    box-sizing: border-box; /* パディングとボーダーを含む幅を考慮 */
-    border: 1px solid #ccc; /* ボーダーのスタイリング */
-    border-radius: 4px; /* 角を丸くする */
-    font-size: 16px; /* フォントサイズを設定 */
-    resize: vertical; /* ユーザーが垂直方向にサイズを変更できるようにする */
-}
 </style>
 FOOT
 	
