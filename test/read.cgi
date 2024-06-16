@@ -263,8 +263,6 @@ HTML
 
 	# メニュー
 	my $bbs = $Sys->Get('BBS_ABS');
-	my $str_max = 20;
-	$title = substr($title, 0, $str_max) . "..." if (length($title) > $str_max);
 	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
 	$Page->Print("<li class=\"menu-title\">$title</li>\n");
 	$Page->Print("<li><a href=\"./#top\">ページのトップ</a></li>\n");

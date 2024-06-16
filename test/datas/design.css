@@ -233,6 +233,13 @@ height:100%;
     box-sizing: border-box; /* パディングを含む幅を考慮 */
 }
 
+.sitename {
+    max-width: calc(100% - 60px); /* ハンバーガーメニューアイコンの幅を考慮 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .hamburger-icon {
     display: flex;
     flex-direction: column;
