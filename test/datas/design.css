@@ -184,6 +184,7 @@ height:100%;
     display: none;
     position: fixed;
     top: 0;
+    left: 0; /* 左端に配置 */
     width: 100%;
     background-color: #333;
     z-index: 1;
@@ -197,31 +198,71 @@ height:100%;
     border: none;
     cursor: pointer;
     width: 100%;
-    text-align: left;
+    display: flex; /* フレックスボックスを使用 */
+    justify-content: space-between; /* 左右に配置 */
+    align-items: center; /* 垂直方向に中央揃え */
+    box-sizing: border-box; /* パディングを含む幅を考慮 */
 }
 
+.hamburger-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 24px;
+    height: 24px;
+}
+
+.hamburger-icon span {
+    display: block;
+    width: 24px;
+    height: 3px;
+    background-color: white;
+}
+
+/* ドロップダウンメニューのスタイル */
 .dropdown-content {
     display: none;
     position: fixed;
     top: 50px; /* メニューボタンの高さ分下げる */
+    left: 0; /* 左端に配置 */
     width: 100%;
     max-height: calc(100vh - 50px); /* 画面高さからメニューボタンの高さを引いた分 */
     background-color: #333;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     z-index: 1;
     overflow-y: auto; /* 縦スクロールを有効にする */
+    box-sizing: border-box; /* パディングを含む幅を考慮 */
 }
 
-.dropdown-content a {
-    color: white;
+.dropdown-content a, .dropdown-content span {
+    display: block;
     padding: 12px 16px;
     text-decoration: none;
-    display: block;
+    color: white;
+    box-sizing: border-box; /* パディングを含む幅を考慮 */
 }
 
 .dropdown-content a:hover {
     background-color: #575757;
 }
+
+/* スマホ用タイトルとカテゴリのスタイリング */
+.dropdown-content .menu-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #444444;
+    padding: 10px;
+}
+
+.dropdown-content .category-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #dddddd;
+    background-color: #555555;
+    padding: 8px 10px;
+}
+
 
 /* メインコンテンツ */
 .content {

@@ -331,7 +331,8 @@ HEAD
 
 	# スマホ用メニューバー
 	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
-	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\">$sitename</button>\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\"><span class=\"sitename\">$sitename</span>\n");
+	$Page->Print("<div class=\"hamburger-icon\"><span></span><span></span><span></span></div></button>");
 	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
 	foreach my $catid (@catSet) {
 		my $catname = $Category->Get('NAME', $catid);
