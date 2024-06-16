@@ -711,6 +711,14 @@ document.addEventListener("DOMContentLoaded", function() {
                 content.style.display = "block";
             }
         }
+		// メニュー以外をクリックしたときにメニューを閉じる
+        document.addEventListener('click', function(event) {
+            var dropdown = document.getElementById("dropdown-content");
+            var dropbtn = document.querySelector(".dropbtn");
+            if (dropdown.style.display === "block" && !dropbtn.contains(event.target) && !dropdown.contains(event.target)) {
+                dropdown.style.display = "none";
+            }
+        });
 </script>
 FOOT
 	
