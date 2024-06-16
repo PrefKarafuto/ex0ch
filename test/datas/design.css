@@ -268,6 +268,7 @@ height:100%;
     z-index: 1;
     overflow-y: auto; /* 縦スクロールを有効にする */
     box-sizing: border-box; /* パディングを含む幅を考慮 */
+    opacity: 0.95;
 }
 
 .dropdown-content a, .dropdown-content span {

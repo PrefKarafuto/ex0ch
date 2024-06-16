@@ -279,7 +279,6 @@ HTML
 	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
 	$Page->Print("<a href=\"./#top\">ページのトップ</a>\n");
 	$Page->Print("<a href=\"./#bottom\">書き込みフォーム</a>\n");
-	$Page->Print("<a href=\"./\">書き込みフォーム</a>\n");
 	$Page->Print("<hr>\n");
 	$Page->Print("<a href=\"$bbs\">掲示板に戻る</a>\n");
 	$Page->Print("</div></nav>\n");

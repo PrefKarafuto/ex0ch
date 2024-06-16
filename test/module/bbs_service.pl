@@ -321,6 +321,7 @@ HEAD
 	$Page->Print("<li class=\"menu-title\">$sitename</li>\n");
 	$Page->Print("<li><a href=\"../test/search.cgi\">検索</a></li>\n");
 	$Page->Print("<li><a href=\"../bbsmenu.html\">BBS MENU</a></li>\n") if -e '../bbsmenu.html';
+	$Page->Print("<li><a href=\"./#new_thread\">スレッド作成</a></li>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
 	foreach my $catid (@catSet) {
@@ -344,6 +345,7 @@ HEAD
 	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
 	$Page->Print("<a href=\"../test/search.cgi\">検索</a>\n");
 	$Page->Print("<a href=\"../bbsmenu.html\">BBS MENU</a>\n") if -e '../bbsmenu.html';
+	$Page->Print("<a href=\"./#new_thread\">スレッド作成</a>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
 	foreach my $catid (@catSet) {
@@ -595,14 +597,15 @@ sub PrintIndexFoot
 					? $Sys->Get('DEFSAMBA') : $Set->Get('BBS_SAMBATIME'));
 	my $tm = time;
 	if ($Set->Get('BBS_READONLY') ne 'on'){
+	$Page->Print("<a id=\"new_thread\"></a>\n");
 	# スレッド作成画面を別画面で表示
 	if ($Set->Equal('BBS_PASSWORD_CHECK', 'checked')) {
 		$Page->Print(<<FORM);
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
-  <td>
+  <td align="center">
   <form method="POST" action="$cgipath/bbs.cgi" style="margin:1.2em 0;">
-  <input type="submit" value="新規スレッド作成画面へ"><br>
+  <input type="submit" value="新規スレッド作成画面へ" style="font-size: 1.4em;"><br>
   <input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
   </form>
