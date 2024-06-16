@@ -305,7 +305,7 @@ sub PrintFoot
 <a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 SEARCH.CGI - $ver
 </div>
-
+</main>
 HTML
 }
 
