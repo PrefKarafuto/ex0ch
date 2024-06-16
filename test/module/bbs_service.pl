@@ -313,9 +313,11 @@ HEAD
 	$Category->GetKeySet(\@catSet);
 	$BBS->GetKeySet('ALL', '', \@bbsSet);
 
+	my $sitename = $this->{'SYS'}->Get('SITENAME') || '掲示板一覧';
+
 	# PC用メニューバー
 	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
-	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
+	$Page->Print("<li class=\"menu-title\">$sitename</li>\n");
 	foreach my $catid (@catSet) {
 		my $catname = $Category->Get('NAME', $catid);
 		$Page->Print("<li class=\"category-title\">$catname</li>\n");
@@ -329,7 +331,7 @@ HEAD
 
 	# スマホ用メニューバー
 	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
-	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\">掲示板一覧</button>\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\">$sitename</button>\n");
 	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
 	foreach my $catid (@catSet) {
 		my $catname = $Category->Get('NAME', $catid);
