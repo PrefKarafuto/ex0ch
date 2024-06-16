@@ -289,9 +289,9 @@ height:100%;
 
 /* メインコンテンツ */
 .content {
-    margin-left: 220px; /* サイドメニューの幅 + マージン */
+    margin-left: 200px; /* サイドメニューの幅 + マージン */
     box-sizing: border-box; /* ボックスサイズをコンテンツ＋パディング＋ボーダーに含める */
-    max-width: calc(100% - 220px); /* サイドメニューの幅を引いた分の最大幅 */
+    max-width: calc(100% - 200px); /* サイドメニューの幅を引いた分の最大幅 */
 }
 
 @media screen and (max-width: 768px) {
