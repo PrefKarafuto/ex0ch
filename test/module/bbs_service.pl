@@ -324,9 +324,12 @@ HEAD
 		foreach my $id (@bbsSet) {
 			my $name = $BBS->Get('NAME', $id);
 			my $dir = $BBS->Get('DIR', $id);
-			$Page->Print("<li><a href=\"../$dir/\">$name</a></li>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+			my $is_active = 'class="active"' if $this->{'SYS'}->Get('BBS') eq $dir;
+			$Page->Print("<li><a $is_active href=\"../$dir/\">$name</a></li>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+			$is_active = "";
 		}
 	}
+	
 	$Page->Print("</ul></nav>\n");
 
 	# スマホ用メニューバー
@@ -340,7 +343,9 @@ HEAD
 		foreach my $id (@bbsSet) {
 			my $name = $BBS->Get('NAME', $id);
 			my $dir = $BBS->Get('DIR', $id);
-			$Page->Print("<a href=\"../$dir/\">$name</a>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+			my $is_active = 'class="active"' if $this->{'SYS'}->Get('BBS') eq $dir;
+			$Page->Print("<a $is_active href=\"../$dir/\">$name</a>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+			$is_active = "";
 		}
 	}
 	$Page->Print("</div></nav>\n");

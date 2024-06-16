@@ -175,8 +175,10 @@ height:100%;
     display: block;
 }
 
-.sidebar ul li a:hover {
+.sidebar ul li a:hover,
+.sidebar ul li a.active { /* アクティブなリンクのスタイル */
     background-color: #575757;
+    font-weight: bold;
 }
 
 /* スマホ用プルダウンメニューバー */
@@ -242,8 +244,10 @@ height:100%;
     box-sizing: border-box; /* パディングを含む幅を考慮 */
 }
 
-.dropdown-content a:hover {
+.dropdown-content a:hover,
+.dropdown-content a.active { /* アクティブなリンクのスタイル */
     background-color: #575757;
+    font-weight: bold;
 }
 
 /* スマホ用タイトルとカテゴリのスタイリング */
