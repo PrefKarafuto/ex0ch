@@ -442,7 +442,7 @@ MENU
 		$Page->Print("（全部で$threadNum\のスレッドがあります）");
 	$Page->Print(<<MENU);
   </small>
-  <br><br><div align="left"><font size=3><b><a href="./kako">過去ログ倉庫</a>／<a href="./subback.html">スレッド一覧はこちら</a>／<a href="./">リロード</a></b></font></div>
+  <br><br><div align="left"><font size=3><b><a href="./kako">過去ログ倉庫</a>／<a href="./subback.html">スレッド一覧</a>／<a href="./">リロード</a></b></font></div>
   </td>
  </tr>
 </table>
