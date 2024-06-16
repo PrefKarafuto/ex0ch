@@ -268,6 +268,7 @@ HTML
 	$Page->Print("<li><a href=\"./#top\">ページのトップ</a></li>\n");
 	$Page->Print("<li><a href=\"./#bottom\">書き込みフォーム</a></li>\n");
 	$Page->Print("<hr>\n");
+	$Page->Print("<li><a href=\"$bbs/subback.html\">スレッド一覧に戻る</a></li>\n");
 	$Page->Print("<li><a href=\"$bbs\">掲示板に戻る</a></li>\n");
 	
 	$Page->Print("</ul></nav>\n");
@@ -280,6 +281,7 @@ HTML
 	$Page->Print("<a href=\"./#top\">ページのトップ</a>\n");
 	$Page->Print("<a href=\"./#bottom\">書き込みフォーム</a>\n");
 	$Page->Print("<hr>\n");
+	$Page->Print("<a href=\"$bbs/subback.html\">スレッド一覧に戻る</a>\n");
 	$Page->Print("<a href=\"$bbs\">掲示板に戻る</a>\n");
 	$Page->Print("</div></nav>\n");
 

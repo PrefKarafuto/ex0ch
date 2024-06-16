@@ -148,6 +148,8 @@ sub CreateSubback
 
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
+ <script language="javascript" src="../test/datas/script.js"></script>
 
 HTML
 	
@@ -155,6 +157,22 @@ HTML
 	
 	$Page->Print(" <title>$title - スレッド一覧</title>\n\n");
 	$Page->Print("</head>\n<body>\n\n");
+
+	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
+	$Page->Print("<li class=\"menu-title\">$title</li>\n");
+	$Page->Print("<li><a href=\"./\">掲示板に戻る</a></li>\n");
+	
+	$Page->Print("</ul></nav>\n");
+
+	# スマホ用メニューバー
+	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\"><span class=\"sitename\">$title</span>\n");
+	$Page->Print("<div class=\"hamburger-icon\"><span></span><span></span><span></span></div></button>");
+	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
+	$Page->Print("<a href=\"./\">掲示板に戻る</a>\n");
+	$Page->Print("</div></nav>\n");
+
+	$Page->Print("<main class=\"content\">\n");
 	
 	# バナー表示
 	if ($Sys->Get('BANNER') & 5) {
@@ -181,7 +199,7 @@ HTML
 		my $res = $Threads->Get('RES', $key);
 		my $path = $Conv->CreatePath($Sys, 0, $bbs, $key, 'l50');
 		
-		$Page->Print("&nbsp;&nbsp;$i: <a href=\"$path\" target=\"_blank\">$name($res)</a><br>\n");
+		$Page->Print("&nbsp;&nbsp;$i: <a href=\"$path\">$name($res)</a><br>\n");
 	}
 	
 	# フッタ部分の出力
@@ -201,7 +219,7 @@ HTML
 $version
 </div>
 
-
+</main>
 <style>
 /* スマホ用レイアウト */
 img {
@@ -315,12 +333,17 @@ HEAD
 	$BBS->GetKeySet('ALL', '', \@bbsSet);
 
 	my $sitename = $this->{'SYS'}->Get('SITENAME') || 'EXぜろちゃんねる';
+	my $kako = $this->{'SET'}->Get('BBS_KAKO') ?  '../'.$this->{'SET'}->Get('BBS_KAKO') : './kako';
 
 	# PC用メニューバー
 	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
 	$Page->Print("<li class=\"menu-title\">$sitename</li>\n");
 	$Page->Print("<li><a href=\"../test/search.cgi\">検索</a></li>\n");
 	$Page->Print("<li><a href=\"../bbsmenu.html\">BBS MENU</a></li>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"category-title\">$title</li>\n");
+	$Page->Print("<li><a href=\"./subback.html\">スレッド一覧</a></li>\n");
+	$Page->Print("<li><a href=\"$kako\">過去ログ倉庫</a></li>\n");
 	$Page->Print("<li><a href=\"./#new_thread\">スレッド作成</a></li>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
@@ -345,6 +368,10 @@ HEAD
 	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
 	$Page->Print("<a href=\"../test/search.cgi\">検索</a>\n");
 	$Page->Print("<a href=\"../bbsmenu.html\">BBS MENU</a>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<span class=\"category-title\">$title</span>\n");
+	$Page->Print("<a href=\"./subback.html\">スレッド一覧</a>\n");
+	$Page->Print("<a href=\"$kako\">過去ログ倉庫</a>\n");
 	$Page->Print("<a href=\"./#new_thread\">スレッド作成</a>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
