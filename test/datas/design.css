@@ -181,6 +181,25 @@ height:100%;
     font-weight: bold;
 }
 
+/* タイトルとカテゴリのスタイリング */
+.menu-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #444444;
+    padding: 10px;
+    text-align: center;
+}
+
+.category-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #dddddd;
+    padding: 8px 10px;
+    background-color: #555555;
+    text-align: left;
+}
+
 /* スマホ用プルダウンメニューバー */
 .dropdown {
     display: none;
