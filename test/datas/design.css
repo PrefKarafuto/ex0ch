@@ -145,4 +145,102 @@ height:100%;
 	color: white;
 	font-size: 24px;
   }
-  
+
+/* PC用サイドメニューバー */
+.sidebar {
+    width: 200px;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: #333;
+    padding-top: 20px;
+    display: block;
+    overflow-y: auto; /* 縦スクロールを有効にする */
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 8px;
+    text-align: center;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.sidebar ul li a:hover {
+    background-color: #575757;
+}
+
+/* スマホ用プルダウンメニューバー */
+.dropdown {
+    display: none;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #333;
+    z-index: 1;
+}
+
+.dropbtn {
+    background-color: #333;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+}
+
+.dropdown-content {
+    display: none;
+    position: fixed;
+    top: 50px; /* メニューボタンの高さ分下げる */
+    width: 100%;
+    max-height: calc(100vh - 50px); /* 画面高さからメニューボタンの高さを引いた分 */
+    background-color: #333;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    overflow-y: auto; /* 縦スクロールを有効にする */
+}
+
+.dropdown-content a {
+    color: white;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {
+    background-color: #575757;
+}
+
+/* メインコンテンツ */
+.content {
+    margin-left: 220px; /* サイドメニューの幅 + マージン */
+    padding: 20px;
+    box-sizing: border-box; /* ボックスサイズをコンテンツ＋パディング＋ボーダーに含める */
+    max-width: calc(100% - 220px); /* サイドメニューの幅を引いた分の最大幅 */
+}
+
+@media screen and (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    .dropdown {
+        display: block;
+    }
+    .content {
+        margin-left: 0;
+        padding-top: 70px; /* ドロップダウンメニューの高さ分 */
+        max-width: 100%; /* スマホ用メニュー表示時の最大幅を100%に設定 */
+    }
+}

@@ -301,6 +301,49 @@ HEAD
 		$Page->Print("alink=\"$work[3]\" vlink=\"$work[4]\" background=\"$work[5]\">\n");
 
 	}
+
+	# サイドメニュー
+	require './module/bbs_info.pl';
+	my $Category = CATEGORY_INFO->new;
+	my $BBS = BBS_INFO ->new;
+	$Category->Load($this->{'SYS'});
+	$BBS->Load($this->{'SYS'});
+	my @catSet;
+	my @bbsSet;
+	$Category->GetKeySet(\@catSet);
+	$BBS->GetKeySet('ALL', '', \@bbsSet);
+
+	# PC用メニューバー
+	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
+	foreach my $catid (@catSet) {
+		my $catname = $Category->Get('NAME', $catid);
+		$Page->Print("<li class=\"category-title\">$catname</li>\n");
+		foreach my $id (@bbsSet) {
+			my $name = $BBS->Get('NAME', $id);
+			my $dir = $BBS->Get('DIR', $id);
+			$Page->Print("<li><a href=\"../$dir/\">$name</a></li>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+		}
+	}
+	$Page->Print("</ul></nav>\n");
+
+	# スマホ用メニューバー
+	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\">掲示板一覧</button>\n");
+	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
+	foreach my $catid (@catSet) {
+		my $catname = $Category->Get('NAME', $catid);
+		$Page->Print("<span class=\"category-title\">$catname</span>\n");
+		foreach my $id (@bbsSet) {
+			my $name = $BBS->Get('NAME', $id);
+			my $dir = $BBS->Get('DIR', $id);
+			$Page->Print("<a href=\"../$dir/\">$name</a>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+		}
+	}
+	$Page->Print("</div></nav>\n");
+
+
+	$Page->Print("<main class=\"content\">\n");
 	$Page->Print("<a name=\"top\"></a>\n");
 	
 	# 看板画像表示あり
@@ -606,6 +649,7 @@ BBS.CGI - $ver (Perl$is_fcgi)
 @{[ $Set->Get('BBS_AUTH') ? '+ユーザー認証' : '' ]}
 +Samba24=$samba<br>
 </div>
+</main>
 <div id="overlay">
 	<img id="overlay-image">
   </div>
@@ -616,8 +660,15 @@ img {
 	height:auto;
 }
 textarea {
-max-width:95%;
-margin:0;
+    width: 100%;
+    max-width: 100%;
+    margin: auto;
+    display: block;
+    box-sizing: border-box; /* パディングとボーダーを含む幅を考慮 */
+    border: 1px solid #ccc; /* ボーダーのスタイリング */
+    border-radius: 4px; /* 角を丸くする */
+    font-size: 16px; /* フォントサイズを設定 */
+    resize: vertical; /* ユーザーが垂直方向にサイズを変更できるようにする */
 }
 </style>
 <script>
@@ -642,6 +693,16 @@ document.addEventListener("DOMContentLoaded", function() {
 	  }
 	});
   });
+</script>
+<script>
+        function toggleDropdown() {
+            var content = document.getElementById("dropdown-content");
+            if (content.style.display === "block") {
+                content.style.display = "none";
+            } else {
+                content.style.display = "block";
+            }
+        }
 </script>
 FOOT
 	
