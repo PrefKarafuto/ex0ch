@@ -346,6 +346,7 @@ HEAD
 	$Page->Print("<li class=\"category-title\">$title</li>\n");
 	$Page->Print("<li><a href=\"./subback.html\">スレッド一覧</a></li>\n");
 	$Page->Print("<li><a href=\"$kako\">過去ログ倉庫</a></li>\n");
+	$Page->Print("<li><a href=\"./#top\">ページトップ</a></li>\n");
 	$Page->Print("<li><a href=\"./#new_thread\">スレッド作成</a></li>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
@@ -374,6 +375,7 @@ HEAD
 	$Page->Print("<span class=\"category-title\">$title</span>\n");
 	$Page->Print("<a href=\"./subback.html\">スレッド一覧</a>\n");
 	$Page->Print("<a href=\"$kako\">過去ログ倉庫</a>\n");
+	$Page->Print("<a href=\"./#top\">ページトップ</a>\n");
 	$Page->Print("<a href=\"./#new_thread\">スレッド作成</a>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
@@ -626,9 +628,10 @@ sub PrintIndexFoot
 					? $Sys->Get('DEFSAMBA') : $Set->Get('BBS_SAMBATIME'));
 	my $tm = time;
 	if ($Set->Get('BBS_READONLY') ne 'on'){
-	$Page->Print("<a id=\"new_thread\"></a>\n");
 	# スレッド作成画面を別画面で表示
-	if ($Set->Equal('BBS_PASSWORD_CHECK', 'checked')) {
+	if (0) {
+		# 廃止
+=pod
 		$Page->Print(<<FORM);
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
@@ -642,6 +645,7 @@ sub PrintIndexFoot
  </tr>
 </table>
 FORM
+=cut
 	}
 	# スレッド作成フォームはindexと同じ画面に表示
 	else {
@@ -649,24 +653,27 @@ FORM
 		my $classname = $Sys->Get('CAPTCHA');
 		my $Captcha = $Set->Get('BBS_CAPTCHA') && $classname && $sitekey ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 		$Page->Print(<<FORM);
+
 <form method="POST" action="$cgipath/bbs.cgi">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
-  <td nowrap><div class ="reverse_order">
-  <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
-  <span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha<br class="smartphone"></span></div>
+  <td>
+  <span><b>新規スレッド作成</b></span>
+  <hr><a id=\"new_thread\"></a>
+  <div class ="reverse_order">
+  <span class = "order2">タイトル：<input type="text" name="subject" size="25"></span><br class="smartphone">
+  </div>$Captcha<br class="smartphone"><input type="submit" value="新規スレッド作成"><br class="smartphone">
   名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
-FORM
-	$Page->Print(<<HTML);
+   </span>
 	<input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
 </td>
  </tr>
 </table>
 </form>
-HTML
+FORM
 	}
 }
 	else{
