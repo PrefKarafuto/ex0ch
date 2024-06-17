@@ -102,14 +102,8 @@ sub BBSCGI
 		}
 	}
 	else {
-		# スレッド作成画面表示
-		if ($err == $ZP::E_PAGE_THREAD) {
-			PrintBBSThreadCreate($CGI, $Page);
-			$log = $err;
-			$err = $ZP::E_SUCCESS;
-		}
 		# cookie確認画面表示
-		elsif ($err == $ZP::E_PAGE_COOKIE) {
+		if ($err == $ZP::E_PAGE_COOKIE) {
 			PrintBBSCookieConfirm($CGI, $Page);
 			$log = $err;
 			$err = $ZP::E_SUCCESS;
@@ -225,12 +219,11 @@ sub Initialize
 	else						{ $Sys->Set('MODE', 1); }
 	
 	# スレッド作成モードでMESSAGEが無い：スレッド作成画面
+	# 廃止
 	if ($Sys->Equal('MODE', 1)) {
 		if (!$Form->IsExist('MESSAGE')) {
-			return $ZP::E_PAGE_THREAD;
+			return $ZP::E_FORM_NOTEXT
 		}
-		$Form->Set('key', int(time));
-		$Sys->Set('KEY', $Form->Get('key'));
 	}
 	
 	# cookieの存在チェック(PCのみ)
@@ -261,142 +254,6 @@ sub Initialize
 	$Threads->Load($Sys);
 	
 	return $ZP::E_SUCCESS;
-}
-
-#------------------------------------------------------------------------------------------------------------
-#
-#	bbs.cgiスレッド作成ページ表示
-#	-------------------------------------------------------------------------------------
-#	@param	$CGI
-#	@param	$Page
-#	@return	なし
-#
-#------------------------------------------------------------------------------------------------------------
-sub PrintBBSThreadCreate
-{
-	my ($CGI, $Page) = @_;
-	
-	my $Sys = $CGI->{'SYS'};
-	my $Set = $CGI->{'SET'};
-	my $Form = $CGI->{'FORM'};
-	my $Cookie = $CGI->{'COOKIE'};
-	
-	require './module/header_footer_meta.pl';
-	my $Caption = HEADER_FOOTER_META->new;
-	$Caption->Load($Sys, 'META');
-	
-	my $title = $Set->Get('BBS_TITLE');
-	my $link = $Set->Get('BBS_TITLE_LINK');
-	my $image = $Set->Get('BBS_TITLE_PICTURE');
-	my $code = $Sys->Get('ENCODE');
-	my $cgipath = $Sys->Get('CGIPATH');
-	
-	# HTMLヘッダの出力
-	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
-	$Page->Print("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n");
-	$Page->Print("<html lang=\"ja\">\n");
-	$Page->Print("<head>\n");
-	$Page->Print(' <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">'."\n\n");
-	$Page->Print("<meta name=\"viewport\" content=\"width=device-width,initial-scale=1.0\">"."\n");
-	$Page->Print('<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>'."\n");
-	$Caption->Print($Page, undef);
-	$Page->Print(" <title>$title</title>\n\n");
-	$Page->Print("<link rel=\"stylesheet\" type=\"text/css\" href=\"./datas/design.css\">\n");
-	$Page->Print("</head>\n<!--nobanner-->\n");
-	
-	# <body>タグ出力
-	{
-		my @work;
-		$work[0] = $Set->Get('BBS_BG_COLOR');
-		$work[1] = $Set->Get('BBS_TEXT_COLOR');
-		$work[2] = $Set->Get('BBS_LINK_COLOR');
-		$work[3] = $Set->Get('BBS_ALINK_COLOR');
-		$work[4] = $Set->Get('BBS_VLINK_COLOR');
-		$work[5] = $Set->Get('BBS_BG_PICTURE');
-		
-		$Page->Print("<body bgcolor=\"$work[0]\" text=\"$work[1]\" link=\"$work[2]\" ");
-		$Page->Print("alink=\"$work[3]\" vlink=\"$work[4]\" ");
-		$Page->Print("background=\"$work[5]\">\n");
-	}
-
-	$Page->Print("<div align=\"center\">");
-	# 看板画像表示あり
-	if ($image ne '') {
-		# 看板画像からのリンクあり
-		if ($link ne '') {
-			$Page->Print("<a href=\"$link\"><img src=\"$image\" border=\"0\" alt=\"$image\"></a><br>");
-		}
-		# 看板画像にリンクはなし
-		else {
-			$Page->Print("<img src=\"$image\" border=\"0\"><br>");
-		}
-	}
-	$Page->Print("</div>");
-
-	# ヘッダテーブルの表示
-	$Caption->Load($Sys, 'HEAD');
-	$Caption->Print($Page, $Set);
-	
-	# スレッド作成フォームの表示
-	{
-		my $tblCol = $Set->Get('BBS_MAKETHREAD_COLOR');
-		my $name = $Cookie->Get('NAME', '', 'utf8');
-		my $mail = $Cookie->Get('MAIL', '', 'utf8');
-		my $bbs = $Form->Get('bbs');
-		my $tm = int(time);
-		my $ver = $Sys->Get('VERSION');
-
-		$Page->Print(<<HTML);
-<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
- <tr>
-  <td>
-  <b>スレッド新規作成</b><br>
-  <center>
-  <form method="POST" action="./bbs.cgi">
-  <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="time" value="$tm">
-  <table border="0">
-   <tr>
-	<td align="left">
-	<div class ="reverse_order">
-	<span class = "order2">タイトル：<input type="text" name="subject" size="25"></span>
-	<span class = "order1"><input type="submit" value="新規スレッド作成"></span>
-	</div>
-	名前：<input type="text" name="FROM" size="19" value="$name"><br class="smartphone">
-	E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
-	<textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
-	</td>
-   </tr>
-  </table>
-  </form>
-  </center>
-  </td>
- </tr>
-</table>
-
-<p>
-$ver
-</p>
-HTML
-
-	}
-# CSS
-$Page->Print(<<HTML);
-<style>
-/* スマホ用レイアウト */
-img {
-	max-width: 100%;
-	height:auto;
-}
-
-textarea {
-width:95%;
-margin:0;
-}
-</style>
-
-HTML
-
-	$Page->Print("\n</body>\n</html>\n");
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -605,10 +462,13 @@ HTML
 	
 	$Page->Print(<<HTML);
 <font size="4" color="#FF0000"><b>Captcha認証</b></font>
-
+<br>
 <div style="font-weight:bold;">
-Captcha認証をしてください。<br>
-専ブラからの場合は、通常ブラウザから書き込んでください。<br>
+専用ブラウザから投稿する場合<br>
+・ユーザー認証が必要です。<br>
+・一度通常ブラウザから書き込んでCaptcha認証を行い、メール欄に<br>
+!auth<br>
+と入れて書込みをしてください。ワンタイムパスワードを発行します。<br>
 </div>
 
 <form method="POST" action="./bbs.cgi">
@@ -634,7 +494,12 @@ HTML
 </form>
 
 <p>
-現在、荒らし対策でCaptcha認証していないと書きこみできないようにしています。<br>
+変更する場合は戻るボタンで戻って書き直して下さい。<br>
+</p>
+
+<p>
+現在、荒らし対策でCaptchaをクリアしないと書きこみできないようにしています。<br>
+<font size="2">(ユーザー認証をすればこの画面は出なくなります。)</font><br>
 </p>
 
 </body>

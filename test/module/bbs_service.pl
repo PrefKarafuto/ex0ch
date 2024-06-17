@@ -656,7 +656,7 @@ FORM
   <hr><a id=\"new_thread\"></a>
   <div class ="reverse_order">
   <span class = "order2">タイトル：<input type="text" name="subject" size="25"></span><br class="smartphone">
-  </div>Captcha<br class="smartphone"><input type="submit" value="新規スレッド作成"><br class="smartphone">
+  </div><br class="smartphone"><input type="submit" value="新規スレッド作成"><br class="smartphone">
   名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
@@ -772,7 +772,6 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
-
    <input type="submit" value="書き込む" name="submit"><br class="smartphone">
    名前：<input type="text" name="FROM" size="19"><br class="smartphone">
    E-mail：<input type="text" name="mail" size="19"><br>
