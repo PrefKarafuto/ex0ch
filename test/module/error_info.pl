@@ -278,16 +278,8 @@ $msg
 HTML
 		if(!$Sys->Equal('MODE', 1)){
 			$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
-		}elsif($Set->Get('BBS_PASSWORD_CHECK')){
-			my $tm = time;
-			my $bbs = $Sys->Get('BBS');
-			$Page->Print("<form method=\"POST\" action=\"./bbs.cgi\" style=\"display: inline;\">");
-			$Page->Print("<input type=\"submit\" value=\"スレッド作成画面に戻る&gt;&gt;\" ");
-			$Page->Print("style=\"background: none; color: blue; border: none; padding: 0;");
-			$Page->Print("text-decoration: underline; cursor: pointer;\"><br>");
-			$Page->Print("<input type=\"hidden\" name=\"bbs\" value=\"$bbs\">");
-			$Page->Print("<input type=\"hidden\" name=\"time\" value=\"$tm\">");
-			$Page->Print("</form>");
+		}else{
+			$Page->Print("<a href=\"$bbsPath/#\">スレッド作成フォームに戻る&gt;&gt;</a></div>");
 		}
 			
 $Page->Print(<<HTML);

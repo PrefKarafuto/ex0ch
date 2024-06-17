@@ -989,11 +989,11 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">indexレス内容表示行数(注)</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_INDEX_LINE_NUMBER value=\"$setContentLine\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成画面</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_PASSWORD_CHECK $setNewThread value=on>別画面</td></tr>");
+	$Page->Print("<input type=checkbox name=BBS_PASSWORD_CHECK $setNewThread value=on disabled>別画面</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">indexメニュー数</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_MAX_MENU_THREAD value=\"$setThreadMenu\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on>確認あり</td></tr>");
+	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on disabled>確認あり</td></tr>");
 	
 	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("</td>");
