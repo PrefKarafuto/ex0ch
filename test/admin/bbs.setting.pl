@@ -581,8 +581,7 @@ sub PrintLimitSetting
 
 	# 改造版で追加
 	my $Captcha			= $Setting->Get('BBS_CAPTCHA');
-	my $setCapInfo 		= ((!$Sys->Get('CAPTCHA_SITEKEY') || !$Sys->Get('CAPTCHA_SECRETKEY') || !$Sys->Get('CAPTCHA')) ? 
-	'システムでCaptchaが設定されていません':'なし');
+	my $setCapInfo 		= ((!$Sys->Get('CAPTCHA_SITEKEY') || !$Sys->Get('CAPTCHA_SECRETKEY') || !$Sys->Get('CAPTCHA')) ? '未設定':'なし');
 	my $setCap			= ($setCapInfo eq 'なし' ? '' : 'disabled');
 	my $selCAnone		= ($Captcha eq '' ? 'selected' : '');
 	my $selCAchecked	= ($Captcha eq 'checked' ? 'selected' : '');
