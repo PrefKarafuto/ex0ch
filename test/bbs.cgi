@@ -109,6 +109,12 @@ sub BBSCGI
 			$log = $err;
 			$err = $ZP::E_SUCCESS;
 		}
+		# Captcha認証画面表示
+		elsif ($err == $ZP::E_PAGE_CAPTCHA) {
+			PrintBBSCaptcha($CGI, $Page);
+			$log = $err;
+			$err = $ZP::E_SUCCESS;
+		}
 		# エラー画面表示
 		else {
 			PrintBBSError($CGI, $Page, $err);
@@ -532,6 +538,110 @@ HTML
 HTML
 }
 
+#------------------------------------------------------------------------------------------------------------
+#
+#	bbs.cgi Captcha認証ページ表示
+#	-------------------------------------------------------------------------------------
+#	@param	$CGI	
+#	@param	$Page	BUFFER_OUTPUT
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintBBSCaptcha
+{
+	my ($CGI, $Page) = @_;
+	
+	my $Sys = $CGI->{'SYS'};
+	my $Form = $CGI->{'FORM'};
+	my $Set = $CGI->{'SET'};
+	my $Cookie = $CGI->{'COOKIE'};
+	
+	my $code = $Sys->Get('ENCODE');
+	my $bbs = $Form->Get('bbs');
+	my $tm = int(time);
+	my $name = $Form->Get('FROM');
+	my $mail = $Form->Get('mail');
+	my $msg = $Form->Get('MESSAGE');
+	my $subject = $Form->Get('subject');
+	my $key = $Form->Get('key');
+	
+	
+	# cookie情報の出力
+	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
+	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
+	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
+	
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
+	$Page->Print(<<HTML);
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- 2ch_X:cookie -->
+<head>
+
+ <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+ <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+ <title>■ Captcha認証 ■</title>
+HTML
+	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
+	my $classname = $Sys->Get('CAPTCHA');
+
+	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($classname eq 'h-captcha');
+	$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($classname eq 'g-recaptcha');
+	$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($classname eq 'cf-turnstile');
+	
+	$Page->Print("</head>\n<!--nobanner-->\n");
+	
+	# <body>タグ出力
+	{
+		my @work;
+		$work[0] = $Set->Get('BBS_THREAD_COLOR');
+		$work[1] = $Set->Get('BBS_TEXT_COLOR');
+		$work[2] = $Set->Get('BBS_LINK_COLOR');
+		$work[3] = $Set->Get('BBS_ALINK_COLOR');
+		$work[4] = $Set->Get('BBS_VLINK_COLOR');
+		
+		$Page->Print("<body bgcolor=\"$work[0]\" text=\"$work[1]\" link=\"$work[2]\" ");
+		$Page->Print("alink=\"$work[3]\" vlink=\"$work[4]\">\n");
+	}
+	
+	$Page->Print(<<HTML);
+<font size="4" color="#FF0000"><b>Captcha認証</b></font>
+
+<div style="font-weight:bold;">
+Captcha認証をしてください。<br>
+専ブラからの場合は、通常ブラウザから書き込んでください。<br>
+</div>
+
+<form method="POST" action="./bbs.cgi">
+HTML
+	
+	$Page->HTMLInput('hidden', 'subject', $subject);
+	$Page->HTMLInput('hidden', 'FROM', $name);
+	$Page->HTMLInput('hidden', 'mail', $mail);
+	$Page->HTMLInput('hidden', 'MESSAGE', $msg);
+	$Page->HTMLInput('hidden', 'bbs', $bbs);
+	$Page->HTMLInput('hidden', 'time', $tm);
+	$Page->HTMLInput('hidden', $classname.'-response', $Form->Get($classname.'-response'));
+	
+	# レス書き込みモードの場合はkeyを設定する
+	if ($Sys->Equal('MODE', 2)) {
+		$Page->HTMLInput('hidden', 'key', $key);
+	}
+
+	$Page->Print(<<HTML);
+<div class="$classname" data-sitekey="$sitekey"></div>
+<input type="submit" value="　認証する　"><br>
+</form>
+
+<p>
+現在、荒らし対策でCaptcha認証していないと書きこみできないようにしています。<br>
+</p>
+
+</body>
+</html>
+HTML
+}
 
 #------------------------------------------------------------------------------------------------------------
 #

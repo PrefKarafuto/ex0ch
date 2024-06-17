@@ -1383,7 +1383,7 @@ sub Certification_Captcha {
 			return $ZP::E_SYSTEM_CAPTCHAERROR;
 		}
 	}else{
-		return $ZP::E_FORM_NOCAPTCHA;
+		return $ZP::E_PAGE_CAPTCHA;
 	}
 }
 
