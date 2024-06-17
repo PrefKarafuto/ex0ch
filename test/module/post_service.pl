@@ -1345,6 +1345,8 @@ sub Certification_Captcha {
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
 	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	my $page = $Form->Get('page');
+	
 	if($captcha_kind eq 'h-captcha'){
 		$captcha_response = $Form->Get('h-captcha-response');
 		$url = 'https://api.hcaptcha.com/siteverify';
@@ -1358,7 +1360,7 @@ sub Certification_Captcha {
 		return 0;
 	}
 
-	if($captcha_response){
+	if($page eq 'captcha' && $captcha_response){
 		my $ua = LWP::UserAgent->new();
 		my $response = $ua->post($url,{
 			secret => $secretkey,
@@ -1382,9 +1384,15 @@ sub Certification_Captcha {
 			# このエラーの場合、スルーしてログインする
 			return $ZP::E_SYSTEM_CAPTCHAERROR;
 		}
-	}else{
+	}elsif($page ne 'captcha'){
+		# Captchaページ以外から来た場合
+		# 認証ページへ
 		return $ZP::E_PAGE_CAPTCHA;
+	}else{
+		# Captchaページから来て、Captcha認証してない場合(専ブラ等)
+		return $ZP::E_FORM_NOCAPTCHA;
 	}
+	
 }
 
 # SLIP生成
@@ -1487,7 +1495,7 @@ sub CaptchaAuthentication
 	my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir);
 
 	# 認証処理
-	my $err = $is_auth ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
+	my $err = $is_auth && !$Ninja->Get('force_captcha') ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
 	if($is_com && !$auth_code){	# !authのみ
 		if ($err == 0) {
 			# Captcha認証が成功した場合のみパスワードの発行

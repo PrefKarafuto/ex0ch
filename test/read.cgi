@@ -236,11 +236,6 @@ sub PrintReadHead
 
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
-	if($Set->Get('BBS_CAPTCHA')){
-		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
-		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
-		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
-	}
 	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
 
 	$Caption->Print($Page, undef);
@@ -551,15 +546,12 @@ sub PrintReadFoot
 			$cookName = &$sanitize($Cookie->Get('NAME', '', 'utf8'));
 			$cookMail = &$sanitize($Cookie->Get('MAIL', '', 'utf8'));
 		}
-		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
-		my $classname = $Sys->Get('CAPTCHA');
-		my $Captcha = $Set->Get('BBS_CAPTCHA') && $classname && $sitekey ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<HTML);
 <a id="bottom"></a>
 <form method="POST" action="$cgipath/bbs.cgi">
 <input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
-$Captcha<input type="submit" value="書き込む"><br class="smartphone">
+<input type="submit" value="書き込む"><br class="smartphone">
 名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">
 E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="$cookMail" size="19"><br>
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>

@@ -91,6 +91,11 @@ sub BBSCGI
 			}
 			PrintBBSJump($CGI, $Page);
 		}
+		# Captcha認証画面表示
+		elsif ($err == $ZP::E_PAGE_CAPTCHA) {
+			PrintBBSCaptcha($CGI, $Page);
+			$log = $err;
+		}
 		else {
 			PrintBBSError($CGI, $Page, $err);
 			$log = $err;
@@ -106,12 +111,6 @@ sub BBSCGI
 		# cookie確認画面表示
 		elsif ($err == $ZP::E_PAGE_COOKIE) {
 			PrintBBSCookieConfirm($CGI, $Page);
-			$log = $err;
-			$err = $ZP::E_SUCCESS;
-		}
-		# Captcha認証画面表示
-		elsif ($err == $ZP::E_PAGE_CAPTCHA) {
-			PrintBBSCaptcha($CGI, $Page);
 			$log = $err;
 			$err = $ZP::E_SUCCESS;
 		}
@@ -303,11 +302,6 @@ sub PrintBBSThreadCreate
 	$Caption->Print($Page, undef);
 	$Page->Print(" <title>$title</title>\n\n");
 	$Page->Print("<link rel=\"stylesheet\" type=\"text/css\" href=\"./datas/design.css\">\n");
-	if($Set->Get('BBS_CAPTCHA')){
-		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
-		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
-		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
-	}
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
 	# <body>タグ出力
@@ -351,9 +345,6 @@ sub PrintBBSThreadCreate
 		my $bbs = $Form->Get('bbs');
 		my $tm = int(time);
 		my $ver = $Sys->Get('VERSION');
-		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
-		my $classname = $Sys->Get('CAPTCHA');
-		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<HTML);
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
@@ -368,7 +359,7 @@ sub PrintBBSThreadCreate
 	<td align="left">
 	<div class ="reverse_order">
 	<span class = "order2">タイトル：<input type="text" name="subject" size="25"></span>
-	<span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha</span>
+	<span class = "order1"><input type="submit" value="新規スレッド作成"></span>
 	</div>
 	名前：<input type="text" name="FROM" size="19" value="$name"><br class="smartphone">
 	E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" size="19" value="$mail"><br>
@@ -556,15 +547,22 @@ sub PrintBBSCaptcha
 	my $Set = $CGI->{'SET'};
 	my $Cookie = $CGI->{'COOKIE'};
 	
+	my $sanitize = sub {
+		$_ = shift;
+		s/&/&amp;/g;
+		s/</&lt;/g;
+		s/>/&gt;/g;
+		s/"/&#34;/g;
+		return $_;
+	};
 	my $code = $Sys->Get('ENCODE');
-	my $bbs = $Form->Get('bbs');
+	my $bbs = &$sanitize($Form->Get('bbs'));
 	my $tm = int(time);
-	my $name = $Form->Get('FROM');
-	my $mail = $Form->Get('mail');
-	my $msg = $Form->Get('MESSAGE');
-	my $subject = $Form->Get('subject');
-	my $key = $Form->Get('key');
-	
+	my $name = &$sanitize($Form->Get('FROM'));
+	my $mail = &$sanitize($Form->Get('mail'));
+	my $msg = &$sanitize($Form->Get('MESSAGE'));
+	my $subject = &$sanitize($Form->Get('subject'));
+	my $key = &$sanitize($Form->Get('key'));
 	
 	# cookie情報の出力
 	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
@@ -622,6 +620,7 @@ HTML
 	$Page->HTMLInput('hidden', 'MESSAGE', $msg);
 	$Page->HTMLInput('hidden', 'bbs', $bbs);
 	$Page->HTMLInput('hidden', 'time', $tm);
+	$Page->HTMLInput('hidden', 'page', 'captcha');
 	$Page->HTMLInput('hidden', $classname.'-response', $Form->Get($classname.'-response'));
 	
 	# レス書き込みモードの場合はkeyを設定する
