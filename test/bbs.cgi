@@ -215,8 +215,8 @@ sub Initialize
 	$Sys->Set('RESMAX', $resmax);
 	
 	# form情報にkeyが存在したらレス書き込み
-	if ($Form->IsExist('key'))	{ $Sys->Set('MODE', 2); }
-	else						{ $Sys->Set('MODE', 1); }
+	if ($Form->IsExist('key'))	{ $Sys->Set('MODE', 2);}
+	else						{ $Sys->Set('MODE', 1);}
 	
 	# スレッド作成モードでMESSAGEが無い：スレッド作成画面
 	# 廃止
@@ -224,6 +224,8 @@ sub Initialize
 		if (!$Form->IsExist('MESSAGE')) {
 			return $ZP::E_FORM_NOTEXT;
 		}
+		$Form->Set('key', int(time));
+		$Sys->Set('KEY', $Form->Get('key'));
 	}
 	
 	# cookieの存在チェック(PCのみ)
@@ -482,11 +484,7 @@ HTML
 	$Page->HTMLInput('hidden', 'time', $tm);
 	$Page->HTMLInput('hidden', 'page', 'captcha');
 	$Page->HTMLInput('hidden', $classname.'-response', $Form->Get($classname.'-response'));
-	
-	# レス書き込みモードの場合はkeyを設定する
-	if ($Sys->Equal('MODE', 2)) {
-		$Page->HTMLInput('hidden', 'key', $key);
-	}
+	$Page->HTMLInput('hidden', 'key', $key);
 
 	$Page->Print(<<HTML);
 <div class="$classname" data-sitekey="$sitekey"></div>
