@@ -222,7 +222,7 @@ sub Initialize
 	# 廃止
 	if ($Sys->Equal('MODE', 1)) {
 		if (!$Form->IsExist('MESSAGE')) {
-			return $ZP::E_FORM_NOTEXT
+			return $ZP::E_FORM_NOTEXT;
 		}
 	}
 	
