@@ -726,7 +726,6 @@ sub CaptchaAuthentication
 	my $auth_code = "";
 	my $is_com = 0;
 	my $in_mail = $Form->Get('mail');
-	return $in_mail;
 	if ($in_mail =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
 		$auth_code = $2 // '';
 		$is_com = 1;
@@ -739,7 +738,18 @@ sub CaptchaAuthentication
 	my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir);
 
 	# 認証処理
-	my $err = $is_auth && $Set->Get('BBS_CAPTCHA') ne 'force' ? 0 : Certification_Captcha($Sys, $Form);  # 成功で0
+	my $err = 0;
+	if($Set->Get('BBS_CAPTCHA') eq 'force'){
+		# 強制Captcha
+		$err = Certification_Captcha($Sys, $Form);
+	}elsif($is_auth && !$auth_code && $is_com){
+		# 認証情報があるが認証コード発行コマンドがある
+		$err = Certification_Captcha($Sys, $Form);
+	}elsif(!$is_auth && !$is_com){
+		# 認証情報もコマンドもない
+		$err = Certification_Captcha($Sys, $Form);
+	}
+
 	if($is_com && !$auth_code){	# !authのみ
 		if ($err == 0) {
 			# Captcha認証が成功した場合のみパスワードの発行
@@ -759,8 +769,8 @@ sub CaptchaAuthentication
 			# Captcha認証失敗
 			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
 		}
-		$Form->Set('mail', '');
 		$Cookie->Set('MAIL','');
+		$Form->Set('mail','');
 	}
 
 	if ($auth_code) {
@@ -776,8 +786,8 @@ sub CaptchaAuthentication
 			# パスワード不一致
 			$err = $ZP::E_FORM_FAILEDAUTH;
 		}
-		$Form->Set('mail', '');
 		$Cookie->Set('MAIL','');
+		$Form->Set('mail','');
 	}
 	
 	return $err;
