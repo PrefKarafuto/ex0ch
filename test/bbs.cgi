@@ -501,12 +501,12 @@ HTML
 	if($Set->Get('BBS_CAPTCHA') eq 'checked'){
 	$Page->Print(<<HTML);
 <div style="font-weight:bold;">
-専用ブラウザから投稿する場合<br>
+専用ブラウザから投稿する場合</div><br>
 ・ユーザー認証が必要です。<br>
 ・一度通常ブラウザから、メール欄に<br>
 !auth<br>
 と入れて書込みをし、Captcha認証をしてください。ワンタイムパスワードを発行します。<br>
-</div>
+
 HTML
 	}elsif($Set->Get('BBS_CAPTCHA') eq 'force'){
 	$Page->Print(<<HTML);
