@@ -497,6 +497,9 @@ HTML
 <input type="submit" value="　認証する　"><br>
 </form>
 <br>
+HTML
+	if($Set->Get('BBS_CAPTCHA') eq 'checked'){
+	$Page->Print(<<HTML);
 <div style="font-weight:bold;">
 専用ブラウザから投稿する場合<br>
 ・ユーザー認証が必要です。<br>
@@ -504,7 +507,16 @@ HTML
 !auth<br>
 と入れて書込みをし、Captcha認証をしてください。ワンタイムパスワードを発行します。<br>
 </div>
-
+HTML
+	}elsif($Set->Get('BBS_CAPTCHA') eq 'force'){
+	$Page->Print(<<HTML);
+<div style="font-weight:bold;">
+専用ブラウザからは投稿出来ません。<br>
+通常のブラウザを使ってください。<br>
+</div>
+HTML
+	}
+	$Page->Print(<<HTML);
 <p>
 変更する場合は戻るボタンで戻って書き直して下さい。<br>
 </p>
