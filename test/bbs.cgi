@@ -14,6 +14,8 @@ use warnings;
 no warnings 'once';
 use CGI::Cookie;
 use Digest::MD5;
+use JSON;
+use LWP::UserAgent;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 # 実行時間の計測開始 (デバッグ用)
@@ -91,11 +93,6 @@ sub BBSCGI
 			}
 			PrintBBSJump($CGI, $Page);
 		}
-		# Captcha認証画面表示
-		elsif ($err == $ZP::E_PAGE_CAPTCHA) {
-			PrintBBSCaptcha($CGI, $Page);
-			$log = $err;
-		}
 		else {
 			PrintBBSError($CGI, $Page, $err);
 			$log = $err;
@@ -105,6 +102,12 @@ sub BBSCGI
 		# cookie確認画面表示
 		if ($err == $ZP::E_PAGE_COOKIE) {
 			PrintBBSCookieConfirm($CGI, $Page);
+			$log = $err;
+			$err = $ZP::E_SUCCESS;
+		}
+		# Captcha認証画面表示
+		elsif ($err == $ZP::E_PAGE_CAPTCHA) {
+			PrintBBSCaptcha($CGI, $Page);
 			$log = $err;
 			$err = $ZP::E_SUCCESS;
 		}
@@ -248,9 +251,11 @@ sub Initialize
 	}
 
 	#セッションID設定
-	#cookieからセッションID取得
-	my $sid = LoadSessionID($Sys, $Cookie, $Conv);
-	$Sys->Set('SID',$sid);
+	LoadSessionID($Sys, $Cookie, $Conv);
+
+	# Captcha認証
+	my $err = CaptchaAuthentication($Sys,$Form,$Set,$Cookie);
+	return $err if $err;
 
 	# subjectの読み込み
 	$Threads->Load($Sys);
@@ -295,6 +300,8 @@ sub PrintBBSCookieConfirm
 	
 	
 	# cookie情報の出力
+	$Cookie->Set('countsession', $Sys->Get('SID'));
+	$Cookie->Set('securitykey', $Sys->Get('SEC'));
 	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
 	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
 	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
@@ -424,6 +431,8 @@ sub PrintBBSCaptcha
 	my $key = &$sanitize($Form->Get('key'));
 	
 	# cookie情報の出力
+	$Cookie->Set('countsession', $Sys->Get('SID'));
+	$Cookie->Set('securitykey', $Sys->Get('SEC'));
 	$Cookie->Set('NAME', $name, 'utf8')	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked'));
 	$Cookie->Set('MAIL', $mail, 'utf8')	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked'));
 	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
@@ -465,14 +474,8 @@ HTML
 	$Page->Print(<<HTML);
 <font size="4" color="#FF0000"><b>Captcha認証</b></font>
 <br>
-<div style="font-weight:bold;">
-専用ブラウザから投稿する場合<br>
-・ユーザー認証が必要です。<br>
-・一度通常ブラウザから書き込んでCaptcha認証を行い、メール欄に<br>
-!auth<br>
-と入れて書込みをしてください。ワンタイムパスワードを発行します。<br>
-</div>
 
+<p>書き込むにはキャプチャをクリアしてください。</p>
 <form method="POST" action="./bbs.cgi">
 HTML
 	
@@ -484,12 +487,23 @@ HTML
 	$Page->HTMLInput('hidden', 'time', $tm);
 	$Page->HTMLInput('hidden', 'page', 'captcha');
 	$Page->HTMLInput('hidden', $classname.'-response', $Form->Get($classname.'-response'));
-	$Page->HTMLInput('hidden', 'key', $key);
+
+	if ($Sys->Equal('MODE', 2)) {
+		$Page->HTMLInput('hidden', 'key', $key);
+	}
 
 	$Page->Print(<<HTML);
 <div class="$classname" data-sitekey="$sitekey"></div>
 <input type="submit" value="　認証する　"><br>
 </form>
+<br>
+<div style="font-weight:bold;">
+専用ブラウザから投稿する場合<br>
+・ユーザー認証が必要です。<br>
+・一度通常ブラウザから、メール欄に<br>
+!auth<br>
+と入れて書込みをし、Captcha認証をしてください。ワンタイムパスワードを発行します。<br>
+</div>
 
 <p>
 変更する場合は戻るボタンで戻って書き直して下さい。<br>
@@ -670,6 +684,8 @@ sub LoadSessionID
 		if ($ctx->b64digest ne $sec){
 			#一致しなかったら改竄されている
 			return $ZP::E_PAGE_COOKIE;
+		}else{
+			$Sys->Set('SEC',$sec);
 		}
 	}elsif($Conv->IsJPIP($Sys)){
 		# IPに紐付けられているかチェック
@@ -679,8 +695,147 @@ sub LoadSessionID
 	unless($sid){
 		# 新規ID発行
 		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
+		my $ctx = Digest::MD5->new;
+		$ctx->add($Sys->Get('SECURITY_KEY'));
+		$ctx->add(':', $sid);
+		$Sys->Set('SEC',$ctx->b64digest);
 	}
 	NINPOCHO::SetHash($ipHash,$sid,time,$ipFile);
 
-	return $sid;
+	$Sys->Set('SID',$sid);
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	改造版で追加
+#	Captchaの認証
+#	-------------------------------------------------------------------------------------
+#	@param	なし
+#	@return	規制通過なら0を返す
+#			規制チェックにかかったらエラーコードを返す
+#
+#------------------------------------------------------------------------------------------------------------
+sub CaptchaAuthentication
+{
+	my ($Sys,$Form,$Set,$Cookie) = @_;
+	return 0 unless $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY');
+
+	require './module/ninpocho.pl';
+
+	my $sid = $Sys->Get('SID');
+	# ワンタイムパス認証
+	my $auth_code = "";
+	my $is_com = 0;
+	my $in_mail = $Form->Get('mail');
+	return $in_mail;
+	if ($in_mail =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
+		$auth_code = $2 // '';
+		$is_com = 1;
+	}
+	
+
+	my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
+	my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
+	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
+	my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir);
+
+	# 認証処理
+	my $err = $is_auth && $Set->Get('BBS_CAPTCHA') ne 'force' ? 0 : Certification_Captcha($Sys, $Form);  # 成功で0
+	if($is_com && !$auth_code){	# !authのみ
+		if ($err == 0) {
+			# Captcha認証が成功した場合のみパスワードの発行
+			my $ctx = Digest::MD5->new;
+
+			$ctx->add('auth');
+			$ctx->add($Sys->Get('BBS'));
+			$ctx->add(time);
+			$ctx->add($ENV{'REMOTE_ADDR'});
+			my $pass = substr($ctx->hexdigest, 0, 8);
+
+			NINPOCHO::SetHash($pass, $sid, time(), $passDir);
+			$Sys->Set('PASSWORD', $pass);
+
+			$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
+		} else {
+			# Captcha認証失敗
+			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
+		}
+		$Form->Set('mail', '');
+		$Cookie->Set('MAIL','');
+	}
+
+	if ($auth_code) {
+		# Captcha認証の成功失敗を問わずパスワードの照合
+		my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
+		if ($sid) {
+			# パスワード合致
+			NINPOCHO::SetHash($sid, $auth_code, time, $sidDir);			# 認証済み設定
+			NINPOCHO::SetHash($auth_code, $sid, time - 60*3, $passDir); # ワンタイムパス無効化
+			$Sys->Set('SID', $sid);
+			$err = 0;
+		}else{
+			# パスワード不一致
+			$err = $ZP::E_FORM_FAILEDAUTH;
+		}
+		$Form->Set('mail', '');
+		$Cookie->Set('MAIL','');
+	}
+	
+	return $err;
+}
+
+sub Certification_Captcha {
+	my ($Sys,$Form) = @_;
+	my ($captcha_response,$url);
+
+	my $captcha_kind = $Sys->Get('CAPTCHA');
+	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	my $page = $Form->Get('page');
+	
+	if($captcha_kind eq 'h-captcha'){
+		$captcha_response = $Form->Get('h-captcha-response');
+		$url = 'https://api.hcaptcha.com/siteverify';
+	}elsif($captcha_kind eq 'g-recaptcha'){
+		$captcha_response = $Form->Get('g-recaptcha-response');
+		$url = 'https://www.google.com/recaptcha/api/siteverify';
+	}elsif($captcha_kind eq 'cf-turnstile'){
+		$captcha_response = $Form->Get('cf-turnstile-response');
+		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+	}else{
+		return 0;
+	}
+
+	if($page eq 'captcha' && $captcha_response){
+		my $ua = LWP::UserAgent->new();
+		my $response = $ua->post($url,{
+			secret => $secretkey,
+			response => $captcha_response,
+			remoteip => $ENV{'REMOTE_ADDR'},
+		   });
+		if ($response->is_success()) {
+			my $json_text = $response->decoded_content();
+			
+			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
+			my $out = decode_json($json_text);
+			
+			if ($out->{success} eq 'true') {
+				return 0;
+			}else{
+				return $ZP::E_FORM_FAILEDCAPTCHA;
+			}
+		} else {
+			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
+			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
+			# このエラーの場合、スルーしてログインする
+			return $ZP::E_SYSTEM_CAPTCHAERROR;
+		}
+	}elsif($page ne 'captcha'){
+		# Captchaページ以外から来た場合
+		# 認証ページへ
+		return $ZP::E_PAGE_CAPTCHA;
+	}else{
+		# Captchaページから来て、Captcha認証してない場合(専ブラ等)
+		return $ZP::E_FORM_NOCAPTCHA;
+	}
+	
 }

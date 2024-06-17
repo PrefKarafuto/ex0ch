@@ -150,13 +150,6 @@ sub Write
 		$password = $this->LoadNinpocho($Sys, $Form, $Ninja);
 	}
 
-	# Captchaユーザー認証
-	my $noCaptcha = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOCAPTCHA, $Form->Get('bbs'));
-	if (!$noCaptcha && $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY')){
-		$err = $this->CaptchaAuthentication($Sys,$Form, $Set, $Ninja);
-		return $err if $err;
-	}
-
 	#BANチェック
 	$err = $this->BanCheck($Sys, $Form, $Threads, $Ninja, $Sec);
 	return $err if $err;
@@ -1328,72 +1321,7 @@ sub NormalizationNameMail
 	
 	return $ZP::E_SUCCESS;
 }
-#------------------------------------------------------------------------------------------------------------
-#
-#	改造版で追加
-#	Captchaの認証
-#	-------------------------------------------------------------------------------------
-#	@param	なし
-#	@return	規制通過なら0を返す
-#			規制チェックにかかったらエラーコードを返す
-#
-#------------------------------------------------------------------------------------------------------------
-sub Certification_Captcha {
-	my $this = shift;
-	my ($Sys,$Form) = @_;
-	my ($captcha_response,$url);
 
-	my $captcha_kind = $Sys->Get('CAPTCHA');
-	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
-	my $page = $Form->Get('page');
-	
-	if($captcha_kind eq 'h-captcha'){
-		$captcha_response = $Form->Get('h-captcha-response');
-		$url = 'https://api.hcaptcha.com/siteverify';
-	}elsif($captcha_kind eq 'g-recaptcha'){
-		$captcha_response = $Form->Get('g-recaptcha-response');
-		$url = 'https://www.google.com/recaptcha/api/siteverify';
-	}elsif($captcha_kind eq 'cf-turnstile'){
-		$captcha_response = $Form->Get('cf-turnstile-response');
-		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-	}else{
-		return 0;
-	}
-
-	if($page eq 'captcha' && $captcha_response){
-		my $ua = LWP::UserAgent->new();
-		my $response = $ua->post($url,{
-			secret => $secretkey,
-			response => $captcha_response,
-			remoteip => $ENV{'REMOTE_ADDR'},
-		   });
-		if ($response->is_success()) {
-			my $json_text = $response->decoded_content();
-			
-			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
-			my $out = decode_json($json_text);
-			
-			if ($out->{success} eq 'true') {
-				return 0;
-			}else{
-				return $ZP::E_FORM_FAILEDCAPTCHA;
-			}
-		} else {
-			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
-			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
-			# このエラーの場合、スルーしてログインする
-			return $ZP::E_SYSTEM_CAPTCHAERROR;
-		}
-	}elsif($page ne 'captcha'){
-		# Captchaページ以外から来た場合
-		# 認証ページへ
-		return $ZP::E_PAGE_CAPTCHA;
-	}else{
-		# Captchaページから来て、Captcha認証してない場合(専ブラ等)
-		return $ZP::E_FORM_NOCAPTCHA;
-	}
-	
-}
 
 # SLIP生成
 sub MakeSlip
@@ -1471,74 +1399,6 @@ sub LoadNinpocho
 	return $password;
 }
 
-# Captchaユーザー認証
-sub CaptchaAuthentication
-{
-	my $this = shift;
-	my ($Sys,$Form,$Set,$Ninja) = @_;
-
-	my $sid = $Sys->Get('SID');
-	# ワンタイムパス認証
-	my $auth_code = "";
-	my $is_com = 0;
-	my $in_mail = $Form->Get('mail');
-	if ($in_mail =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
-		$auth_code = $2 // '';
-		$in_mail =~ s/^!auth(:([0-9a-fA-F]{8}))?$//g;
-		$Form->Set('mail', $in_mail);
-		$is_com = 1;
-	}
-
-	my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
-	my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
-	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
-	my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir);
-
-	# 認証処理
-	my $err = $is_auth && !$Ninja->Get('force_captcha') ? 0 : $this->Certification_Captcha($Sys, $Form);  # 成功で0
-	if($is_com && !$auth_code){	# !authのみ
-		if ($err == 0) {
-			# Captcha認証が成功した場合のみパスワードの発行
-			my $ctx = Digest::MD5->new;
-
-			$ctx->add('auth');
-			$ctx->add($Sys->Get('BBS'));
-			$ctx->add(time);
-			$ctx->add($ENV{'REMOTE_ADDR'});
-			my $pass = substr($ctx->hexdigest, 0, 8);
-
-			NINPOCHO::SetHash($pass, $sid, time(), $passDir);
-			$Sys->Set('PASSWORD', $pass);
-
-			$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
-		} else {
-			# Captcha認証失敗
-			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
-		}
-	}
-
-	if ($auth_code) {
-		# Captcha認証の成功失敗を問わずパスワードの照合
-		my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
-		if ($sid) {
-			# パスワード合致
-			NINPOCHO::SetHash($sid, $auth_code, time, $sidDir);			# 認証済み設定
-			NINPOCHO::SetHash($auth_code, $sid, time - 60*3, $passDir); # ワンタイムパス無効化
-			$Sys->Set('SID', $sid);
-			$err = 0;
-		}else{
-			# パスワード不一致
-			$err = $ZP::E_FORM_FAILEDAUTH;
-		}
-	}
-
-	if (!$err && $Set->Get('BBS_NINJA')){
-		# 認証成功
-		$Ninja->Load($Sys,undef);
-	}
-	
-	return $err;
-}
 
 # BANチェック
 sub BanCheck

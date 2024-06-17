@@ -580,9 +580,13 @@ sub PrintLimitSetting
 	my $setSpamPoint	= $Setting->Get('BBS_SPAMKILLI_POINT');
 
 	# 改造版で追加
-	my $Captcha		= $Setting->Get('BBS_CAPTCHA');
-	my $setCapInfo 		= (($Sys->Get('CAPTCHA_SITEKEY') eq undef || $Sys->Get('CAPTCHA_SECRETKEY') eq undef) ? 'Captchaのキーが設定されていません':'有効');
-	my $setCap		= ($setCapInfo eq '有効' ? '' : 'style="opacity:0.5"');
+	my $Captcha			= $Setting->Get('BBS_CAPTCHA');
+	my $setCapInfo 		= ((!$Sys->Get('CAPTCHA_SITEKEY') || !$Sys->Get('CAPTCHA_SECRETKEY') || !$Sys->Get('CAPTCHA')) ? 
+	'システムでCaptchaが設定されていません':'なし');
+	my $setCap			= ($setCapInfo eq 'なし' ? '' : 'disabled');
+	my $selCAnone		= ($Captcha eq '' ? 'selected' : '');
+	my $selCAchecked	= ($Captcha eq 'checked' ? 'selected' : '');
+	my $selCAforce		= ($Captcha eq 'force' ? 'selected' : '');
 	my $selROnone		= ($setReadOnly eq 'none' ? 'selected' : '');
 	my $selROcaps		= ($setReadOnly eq 'caps' ? 'selected' : '');
 	my $selROon			= ($setReadOnly eq 'on' ? 'selected' : '');
@@ -627,8 +631,13 @@ sub PrintLimitSetting
 	$Page->Print("<input type=checkbox name=BBS_JP_CHECK $setOverSea value=on>有効</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">スレッド作成制限(携帯)</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_THREADMOBILE $setThreadMb value=on>携帯から許可</td>");
-	$Page->Print("<td class=\"DetailTitle\">Captcha</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_CAPTCHA $Captcha value=on $setCap>$setCapInfo</td></tr>");
+
+	$Page->Print("<td class=\"DetailTitle\">Captcha</td><td><select name=BBS_CAPTCHA $setCap>");
+	$Page->Print("<option value=\"\" $selCAnone>$setCapInfo</option>");
+	$Page->Print("<option value=\"checked\" $selCAchecked>有効</option>");
+	$Page->Print("<option value=\"force\" $selCAforce>強制(専ブラ非対応)</option>");
+	$Page->Print("</select></td>");
+
 	$Page->Print("<tr><td class=\"DetailTitle\">同一スレッド名を禁止</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_SAMETHREAD value=on $setSameTitle>有効</td>");
 	$Page->Print("<td class=\"DetailTitle\">逆引き不可のIPからの投稿を制限</td><td>");
@@ -1279,7 +1288,7 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_SPAMKILLI_POINT', $Form->Get('BBS_SPAMKILL_POINT'));
 
 	# 改造版で追加
-	$Setting->Set('BBS_CAPTCHA', ($Form->Equal('BBS_CAPTCHA', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_CAPTCHA', $Form->Get('BBS_CAPTCHA'));
 	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_REVERSE_CHECK', ($Form->Equal('BBS_REVERSE_CHECK', 'on') ? 'checked' : ''));
 
