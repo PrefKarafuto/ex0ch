@@ -684,8 +684,6 @@ sub LoadSessionID
 		if ($ctx->b64digest ne $sec){
 			#一致しなかったら改竄されている
 			return $ZP::E_PAGE_COOKIE;
-		}else{
-			$Sys->Set('SEC',$sec);
 		}
 	}elsif($Conv->IsJPIP($Sys)){
 		# IPに紐付けられているかチェック
@@ -695,14 +693,15 @@ sub LoadSessionID
 	unless($sid){
 		# 新規ID発行
 		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
-		my $ctx = Digest::MD5->new;
-		$ctx->add($Sys->Get('SECURITY_KEY'));
-		$ctx->add(':', $sid);
-		$Sys->Set('SEC',$ctx->b64digest);
 	}
 	NINPOCHO::SetHash($ipHash,$sid,time,$ipFile);
 
+	my $ctx_sec = Digest::MD5->new;
+	$ctx_sec->add($Sys->Get('SECURITY_KEY'));
+	$ctx_sec->add(':', $sid);
+	$Sys->Set('SEC',$ctx_sec->b64digest);
 	$Sys->Set('SID',$sid);
+
 }
 
 #------------------------------------------------------------------------------------------------------------
