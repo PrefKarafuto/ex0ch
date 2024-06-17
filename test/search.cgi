@@ -104,7 +104,7 @@ sub PrintHead
 	$Banner = new BANNER;
 	$Banner->Load($Sys);
 
-	my $data = $Sys->Get('DATA');
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
 
 	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print(<<HTML);
@@ -118,9 +118,9 @@ sub PrintHead
 
  <title>検索＠Ex0ch</title>
 
- <link rel="stylesheet" type="text/css" href=".$data/search.css">
- <link rel="stylesheet" type="text/css" href=".$data/design.css">
- <script language="javascript" src=".$data/script.js"></script>
+ <link rel="stylesheet" type="text/css" href="$data_url/search.css">
+ <link rel="stylesheet" type="text/css" href="$data_url/design.css">
+ <script language="javascript" src="$data_url/script.js"></script>
 
 HTML
 

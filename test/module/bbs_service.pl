@@ -141,6 +141,7 @@ sub CreateSubback
 	# HTMLヘッダの出力
 	my $title = $Set->Get('BBS_TITLE');
 	my $code = $this->{'CODE'};
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
@@ -148,8 +149,8 @@ sub CreateSubback
 
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
- <script language="javascript" src="../test/datas/script.js"></script>
+  <link rel="stylesheet" type="text/css" href="$data_url/design.css">
+ <script language="javascript" src="$data_url/script.js"></script>
 
 HTML
 	
@@ -265,6 +266,7 @@ sub PrintIndexHead
 #	my $code = $this->{'CODE'};
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
+	my $data_url = $this->{'SYS'}->Get('SERVER').$this->{'SYS'}->Get('CGIPATH').$this->{'SYS'}->Get('DATA');
 	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
 
@@ -283,8 +285,8 @@ sub PrintIndexHead
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="EXぜろちゃんねる">
  <meta name="twitter:card" content="summary_large_image">
- <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
- <script language="javascript" src="../test/datas/script.js"></script>
+ <link rel="stylesheet" type="text/css" href="$data_url/design.css">
+ <script language="javascript" src="$data_url/script.js"></script>
  <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));

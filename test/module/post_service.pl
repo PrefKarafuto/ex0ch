@@ -192,7 +192,7 @@ sub Write
 	
 	if ($err == $ZP::E_SUCCESS) {
 		# タイムラインへ追加
-		#AddTimeLine($Sys,$Set,$line) if $Set->Get('TL_RES_MAX');
+		#$this->AddTimeLine($Sys,$Set,$Threads, $Conv, $line) if $Set->Get('TL_RES_MAX');
 
 		# subject.txtの更新
 		# スレッド作成モードなら新規に追加する
@@ -2020,14 +2020,9 @@ sub Ninpocho
 sub AddTimeLine
 {
 	my $this = shift;
-	my ($Sys,$Set,$line) = @_;
+	my ($Sys, $Set, $Threads, $Conv, $line) = @_;
 	require './module/dat.pl';
-	require './module/thread.pl';
-	require './module/data_utils.pl';
 	my $Dat = DAT->new;
-	my $Threads = THREAD->new;
-	my $Conv = DATA_UTILS->new;
-	$Threads->Load($Sys);
 
 	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/2147483647.dat';
 	my $title = $Threads->Get('SUBJECT',$Sys->Get('KEY'));

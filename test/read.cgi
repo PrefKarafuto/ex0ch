@@ -187,7 +187,7 @@ sub PrintReadHead
 	$title = '' if(!defined $title);
 	my $mascot = $Set->Get('BBS_MASCOT');
 	my $url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Sys->Get('KEY').'/';
-	my $favicon = $Set->Get('BBS_FAVICON');
+	my $favicon = $Sys->Get('SERVER').$Sys->Get('BBSPATH').$Set->Get('BBS_FAVICON');
 	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $bbspath = $Sys->Get('BBS');
@@ -212,6 +212,7 @@ sub PrintReadHead
 	}
 	
 	# HTMLヘッダの出力
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
   $Page->Print("Content-type: text/html;charset=Shift_JIS\n");
   $Page->Print("Cache-Control: max-age=0, s-maxage=1, stale-while-revalidate=2\n\n");
 	$Page->Print(<<HTML);
@@ -229,9 +230,9 @@ sub PrintReadHead
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
  <meta name="twitter:card" content="summary">
-  <link rel="stylesheet" type="text/css" href="../../..$data/design.css">
- <link rel="icon" href="../../../../$bbspath/$favicon">
- <script language="javascript" src="../../..$data/script.js"></script>
+  <link rel="stylesheet" type="text/css" href="$data_url/design.css">
+ <link rel="icon" href="$favicon">
+ <script language="javascript" src="$data_url/script.js"></script>
 
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
