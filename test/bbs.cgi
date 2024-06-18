@@ -516,19 +516,10 @@ HTML
 </div>
 HTML
 	}
-	$Page->Print(<<HTML);
-<p>
-変更する場合は戻るボタンで戻って書き直して下さい。<br>
-</p>
+	$Page->Print("<p>現在、荒らし対策でCaptchaをクリアしないと書きこみできないようにしています。</p>");
+	$Page->Print("<p><font size=\"2\">(ユーザー認証をすればこの画面は出なくなります。)</font></p>") if $Set->Get('BBS_CAPTCHA') ne 'force';
 
-<p>
-現在、荒らし対策でCaptchaをクリアしないと書きこみできないようにしています。<br>
-<font size="2">(ユーザー認証をすればこの画面は出なくなります。)</font><br>
-</p>
-
-</body>
-</html>
-HTML
+	$Page->Print("</body></html>");
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -760,6 +751,7 @@ sub CaptchaAuthentication
 	}elsif(!$is_auth && !$is_com){
 		# 認証情報もコマンドもない
 		$err = Certification_Captcha($Sys, $Form);
+		NINPOCHO::SetHash($sid, 1, time, $sidDir) unless $err;			# 認証済み設定
 	}
 
 	if($is_com && !$auth_code){	# !authのみ
