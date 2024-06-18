@@ -224,9 +224,6 @@ sub Initialize
 	# スレッド作成モードでMESSAGEが無い：スレッド作成画面
 	# 廃止
 	if ($Sys->Equal('MODE', 1)) {
-		if (!$Form->IsExist('MESSAGE')) {
-			return $ZP::E_FORM_NOTEXT;
-		}
 		$Form->Set('key', int(time));
 		$Sys->Set('KEY', $Form->Get('key'));
 	}

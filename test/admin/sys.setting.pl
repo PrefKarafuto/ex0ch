@@ -305,7 +305,7 @@ sub PrintBasicSetting
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','BASIC');\"";
 	if ($server eq '') {
 		my $sname = $ENV{'SERVER_NAME'};
-		$server = "http://$sname";
+		$server = "https://$sname";
 	}
 	if ($cgi eq '') {
 		my $path = $ENV{'SCRIPT_NAME'};

@@ -110,13 +110,16 @@ sub Write
 	my $err = $ZP::E_SUCCESS;
 	
 	# 入力内容チェック(名前、メール)
-	return $err if (($err = $this->NormalizationNameMail()) != $ZP::E_SUCCESS);
+	$err = $this->NormalizationNameMail();
+	return $err if $err;
 	
 	# 入力内容チェック(本文)
-	return $err if (($err = $this->NormalizationContents()) != $ZP::E_SUCCESS);
+	$err = $this->NormalizationContents();
+	return $err if $err;
 	
 	# 規制チェック
-	return $err if (($err = $this->IsRegulation()) != $ZP::E_SUCCESS);
+	$err = $this->IsRegulation();
+	return $err if $err;
 	
 
 	# データの書き込み
@@ -1432,7 +1435,7 @@ sub LevelLimit
 	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
 
 	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE') // '';
-	my $lvLim = $Threads->GetAttr($Sys->Get('KEY'),'ninLv');
+	my $lvLim = $Threads->GetAttr($Sys->Get('KEY'),'ninLv') || 0;
 	my $ninLv = $Ninja->Get('ninLv');
 
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_MAKE_THREAD'));
