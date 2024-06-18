@@ -1473,7 +1473,7 @@ sub MakeDatLine
 	my $idpart = 'ID:???';
 	my $threadkey = $Threads->GetAttr($threadid,'changeid') ? $threadid : '';
 	my $id = $Conv->MakeIDnew($Sys, 8, undef, $threadkey);
-	if ($Threads->GetAttr($threadid,'noid')){
+	if (!$Threads->GetAttr($threadid,'noid')){
 		$idpart = $Conv->GetIDPart($Set, $Form, $Sec, $id, $Sys->Get('CAPID'), $Sys->Get('KOYUU'), $idEnd);
 	}
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
