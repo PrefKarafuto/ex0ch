@@ -210,6 +210,9 @@ sub PrintReadHead
 	if($image !~ /^https?:\/\//){
 		$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
 	}
+	if($favicon !~ /^https?:\/\//){
+		$favicon = $Sys->Get('SERVER').'/'.$bbspath.'/'.$favicon;
+	}
 	
 	# HTMLヘッダの出力
 	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
