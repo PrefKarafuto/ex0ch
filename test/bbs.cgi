@@ -228,6 +228,12 @@ sub Initialize
 		$Sys->Set('KEY', $Form->Get('key'));
 	}
 	
+	######## FastCGIバグ応急処置 #########
+	if($ENV{'FCGI_ROLE'} && $Form->Get('MESSAGE') eq ''){
+		return $ZP::E_FORM_NOTEXT;
+	}
+	######################################
+
 	# cookieの存在チェック(PCのみ)
 	if ($client & $ZP::C_PC) {
 		if ($Set->Equal('SUBBBS_CGI_ON', 1)) {
