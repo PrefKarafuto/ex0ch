@@ -254,6 +254,7 @@ sub Initialize
 	}
 
 	#セッションID設定
+	$Sys->Set('SID', undef);
 	LoadSessionID($Sys, $Cookie, $Conv);
 
 	# Captcha認証
