@@ -693,7 +693,7 @@ sub LoadSessionID
 		}
 	}elsif($Conv->IsJPIP($Sys)){
 		# IPに紐付けられているかチェック
-		my $expiry = 60*60*24;
+		my $expiry = 60*30;	# 30分
 		$sid = NINPOCHO::GetHash($ipHash,$expiry,$ipFile);
 	}
 	unless($sid){
