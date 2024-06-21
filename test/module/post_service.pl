@@ -1523,9 +1523,9 @@ sub MakeDatLine
 		# スレ立て時にスレタイにID付加
 		if($handle){
 			my $capName = $Sec->Get($Sys->Get('CAPID'), 'NAME', 1, '');
-			$subject = $subject."</b> [$capName★]<b>";
+			$subject = $subject." [$capName★]";
 		}else{
-			$subject = $subject."</b> [$id★]<b>";
+			$subject = $subject." [$id★]";
 		}
 	}
 	
