@@ -635,7 +635,7 @@ sub PrintResponse
 	# メール欄無し
 	else {
 		my $color = $Set->Get('BBS_LINK_COLOR');
-		$Mail = "<font color=\"$color\"><b>$elem[0]</b></a>";
+		$Mail = "<font color=\"$color\"><b>$elem[0]</b></font>";
 	}
 	if ($elem[1] =~ /!aafont/){
 		# レイアウトが崩れるのでCO

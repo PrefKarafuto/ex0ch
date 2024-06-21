@@ -873,15 +873,19 @@ sub process_thread {
 
 	my $attrLive = $Threads->GetAttr($id, 'live');
 	my $attrPool = $Threads->GetAttr($id, 'pool');
+	my $attrNoPool = $Threads->GetAttr($id, 'nopool');
 	my $datPath = "$path/dat/$id.dat";
 	my $lastmodif = (stat $datPath)[9];
 
-	my $AttrResMax = $Threads->GetAttr($Sys->Get('KEY'),'maxres');
+	my $AttrResMax = $Threads->GetAttr($id,'maxres');
 	my $resNum = DAT::GetNumFromFile($datPath);
 	my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 
 	# poolコマンドが入力された場合　or　実況モード/スレッド完走且つ最終更新から一時間以上経っていた場合、落とす
-	if ((($attrLive || ($resNum > $MAXRES && $Set->Get('BBS_AUTOFALL'))) && (time - $lastmodif > $elapsed)) || $attrPool)  {
+	my $is_enable = $Set->Get('BBS_AUTOFALL');
+	my $is_complete = $resNum > $MAXRES;
+	my $is_timeover = time - $lastmodif > $elapsed;
+	if ($attrPool || ($attrLive&&$is_timeover) || ($is_complete&&$is_timeover&&$is_enable&&!$attrNoPool))  {
 		$need_update = 1;
 		if ($BBSname) {
 			# 過去ログ保管先として掲示板を設定
