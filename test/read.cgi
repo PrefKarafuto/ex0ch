@@ -521,7 +521,7 @@ sub PrintReadFoot
 		$Page->Print("<a href=\"$pathPrev\">前100</a>\n");
 		$Page->Print("<a href=\"$pathNext\">次100</a>\n");
 		$Page->Print("<a href=\"$pathLast\">最新50</a>\n");
-		$Page->Print("</div>\n");
+		$Page->Print("</div><br>\n");
 	}
 	my $permt = DAT::GetPermission($datPath);
 	my $perms = $Sys->Get('PM-STOP');
@@ -553,10 +553,12 @@ sub PrintReadFoot
 		$Page->Print(<<HTML);
 <a id="bottom"></a>
 <form method="POST" action="$cgipath/bbs.cgi">
-<input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
-<input type="submit" value="書き込む"><br class="smartphone">
-名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">
-E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="$cookMail" size="19"><br>
+<input type="hidden" name="bbs" value="$bbs">
+<input type="hidden" name="key" value="$key">
+<input type="hidden" name="time" value="$tm">
+<input type="submit" value="　書き込む　"><br class="smartphone">
+<input type="text" name="FROM" value="$cookName" size="19" placeholder="名前（任意）">
+<input type="text" name="mail" value="$cookMail" size="19" placeholder="コマンド（任意）"><br>
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
@@ -632,7 +634,8 @@ sub PrintResponse
 	}
 	# メール欄無し
 	else {
-		$Mail = "<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>";
+		my $color = $Set->Get('BBS_LINK_COLOR');
+		$Mail = "<font color=\"$color\"><b>$elem[0]</b></a>";
 	}
 	if ($elem[1] =~ /!aafont/){
 		# レイアウトが崩れるのでCO
@@ -728,7 +731,8 @@ sub PrintReadSearch
 		}
 		# メール欄無し
 		else {
-			$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
+			my $color = $Set->Get('BBS_LINK_COLOR');
+			$Page->Print("<font color=\"$color\"><b>$elem[0]</b></font>");
 		}
 		$Page->Print("：$elem[2]</dt>\n  <dd>$elem[3]<br><br></dd>\n");
 	}

@@ -435,7 +435,7 @@ sub PrintResult
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
 		}
 		else {
-			$Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
+			$Page->Print("<font color=\"blue\"><b>$$pResult[3]</b></font>");
 		}
 		
 		$Sys->Set('BBS',$$pResult[0]);
