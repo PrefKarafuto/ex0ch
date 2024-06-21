@@ -278,10 +278,10 @@ $msg
 <hr>
 <div class="reload">こちらでリロードしてください。&nbsp;<a href="$bbsPath/">&lt;&lt;掲示板に戻る</a>
 HTML
-		if(!$Sys->Equal('MODE', 1)){
-			$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
+		if($Sys->Equal('MODE', 1)){
+			$Page->Print("<a href=\"$bbsPath/#new_thread\">&lt;&lt;スレッド作成フォームに戻る</a></div>");
 		}else{
-			$Page->Print("<a href=\"$bbsPath/#new_thread\">スレッド作成フォームに戻る&gt;&gt;</a></div>");
+			$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
 		}
 			
 $Page->Print(<<HTML);
