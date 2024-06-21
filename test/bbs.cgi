@@ -246,7 +246,7 @@ sub Initialize
 			if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked') && !$Cookie->IsExist('NAME')) {
 				return $ZP::E_PAGE_COOKIE;
 			}
-			# メール欄cookie
+			# メール欄（コマンド欄）cookie
 			if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked') && !$Cookie->IsExist('MAIL')) {
 				return $ZP::E_PAGE_COOKIE;
 			}
@@ -506,7 +506,7 @@ HTML
 <div style="font-weight:bold;">
 専用ブラウザから投稿する場合</div><br>
 ・ユーザー認証が必要です。<br>
-・一度通常ブラウザから、メール欄に<br>
+・一度通常ブラウザから、コマンド欄に<br>
 !auth<br>
 と入れて書込みをし、Captcha認証をしてください。ワンタイムパスワードを発行します。<br>
 

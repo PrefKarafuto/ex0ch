@@ -368,7 +368,7 @@ sub PrintResEdit
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
 	$Page->Print("<input type=text size=50 value=\"$elem[0]\" name=FROM></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">メール</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">メール（コマンド）</td><td>");
 	$Page->Print("<input type=text size=50 value=\"$elem[1]\" name=mail></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">日付・ID</td><td>");
 	$Page->Print("<input type=text size=50 value=\"$elem[2]\" name=_DATE_></td></tr>");

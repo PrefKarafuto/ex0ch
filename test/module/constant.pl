@@ -132,7 +132,7 @@ our $E_PAGE_CAPTCHA     	= 9004;
 # CAP PERMISSION
 our $CAP_FORM_LONGSUBJECT		=  1; # タイトル文字数 制限解除
 our $CAP_FORM_LONGNAME			=  2; # 名前文字数 制限解除
-our $CAP_FORM_LONGMAIL			=  3; # メール文字数 制限解除
+our $CAP_FORM_LONGMAIL			=  3; # メール（コマンド）文字数 制限解除
 our $CAP_FORM_LONGTEXT			=  4; # 本文文字数 制限解除
 our $CAP_FORM_MANYLINE			=  5; # 本文行数 制限解除
 our $CAP_FORM_LONGLINE			=  6; # 本文1行文字数 制限解除

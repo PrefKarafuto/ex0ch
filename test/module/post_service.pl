@@ -424,7 +424,7 @@ sub Command
 	my $Command = '';
 	my $NinStat = $Set->Get('BBS_NINJA');
 
-	#スレ主用パス(メール欄)/スレ立て時専用処理
+	#スレ主用パス(コマンド欄)/スレ立て時専用処理
 	if($Sys->Equal('MODE', 1)){
 		#passを取得・設定
 		if($Form->Get('mail') =~ /!pass:(.{1,30})/ && ($setBitMask & 2 ** 0)){
@@ -1198,7 +1198,7 @@ sub IsRegulation
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	名前・メール欄の正規化
+#	名前・メール欄（コマンド欄）の正規化
 #	-------------------------------------------------------------------------------------
 #	@param	なし
 #	@return	規制通過なら0を返す
@@ -1923,7 +1923,7 @@ sub SpamBlock
 	my	($Setting, $form) = @_;
 	
 	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASCII');		#名前欄がASCIIのみ
-	my $mail_atsign_point	= $Setting->Get('BBS_SPAMKILLI_MAIL');		#メール欄に半角\@を含む
+	my $mail_atsign_point	= $Setting->Get('BBS_SPAMKILLI_MAIL');		#メール欄（コマンド欄）に半角\@を含む
 	my $nohost_point		= $Setting->Get('BBS_SPAMKILLI_HOST');		#ホスト名が逆引き不可
 	my $text_ahref_point	= $Setting->Get('BBS_SPAMKILLI_URL');		#本文に<;a href=か[url=を含む
 	my $text_ascii_ratio	= $Setting->Get('BBS_SPAMKILLI_MESSAGE');	#本文のASCIIの割合

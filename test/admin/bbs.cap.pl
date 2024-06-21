@@ -323,7 +323,7 @@ sub PrintGroupSetting
 	# 権限一覧表示
 	$Page->Print("<input type=checkbox name=C_SUBJECT $authNum[0] value=on>タイトル文字数規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_NAME $authNum[1] value=on>名前文字数規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_MAIL $authNum[2] value=on>メール文字数規制解除<br>");
+	$Page->Print("<input type=checkbox name=C_MAIL $authNum[2] value=on>メール（コマンド）文字数規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_CONTENTS $authNum[3] value=on>本文文字数規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_CONTLINE $authNum[4] value=on>本文行数規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_LINECOUNT $authNum[5] value=on>本文1行文字数規制解除<br>");

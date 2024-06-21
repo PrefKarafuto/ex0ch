@@ -695,7 +695,7 @@ sub PrintLastEdit
 	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_FROM value=\"$elem[0]\"><br>");
 	$Page->Print("<input type=checkbox name=SANIT_NAME value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">メール</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">メール（コマンド）</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_mail value=\"$elem[1]\"><br>");
 	$Page->Print("<input type=checkbox name=SANIT_MAIL value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">日付・ID</td><td>");

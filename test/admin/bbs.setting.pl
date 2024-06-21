@@ -598,7 +598,7 @@ sub PrintLimitSetting
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">タイトル文字数</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_SUBJECT_COUNT value=\"$setSubjectMax\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">メール文字数</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">メール（コマンド）文字数</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_MAIL_COUNT value=\"$setMailMax\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名前文字数</td><td>");
 	$Page->Print("<input type=text size=10 name=BBS_NAME_COUNT value=\"$setNameMax\"></td>");
@@ -678,7 +678,7 @@ sub PrintLimitSetting
 	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASCII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文のASCIIの割合が<input type=text size=3 name=BBS_SPAMKILL_MESSAGE value=\"$setAskiiMessage\" style=\"text-align: right\" maxlength=\"3\">％以上で");
 	$Page->Print("<input type=text size=3 name=BBS_SPAMKILL_MESPOINT value=\"$setMesPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
-	$Page->Print("メール欄に半角＠を含むと<input type=text size=3 name=BBS_SPAMKILL_MAIL value=\"$setMailPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
+	$Page->Print("メール欄（コマンド欄）に半角＠を含むと<input type=text size=3 name=BBS_SPAMKILL_MAIL value=\"$setMailPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("ホスト名が逆引き不可だと&#009;<input type=text size=3 name=BBS_SPAMKILL_HOST value=\"$setHostPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文に<;a href=か[url=を含むと<input type=text size=3 name=BBS_SPAMKILL_URL value=\"$setURLPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
 	$Page->Print("本文にリンクを含むと<input type=text size=3 name=BBS_SPAMKILL_LINK value=\"$setSpamLink\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
@@ -743,7 +743,7 @@ sub PrintCommandSetting
 	
 	$Page->Print("<tr><td colspan=4>スレ立て時のみ</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">スレッドパスワード（メール欄!pass:[password]）</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">スレッドパスワード（コマンド欄!pass:[password]）</td><td>");
 	$Page->Print("<input type=checkbox name=PASS value=1 $setpass>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド最大レス（!maxres:[10-$resmax]）</td><td>");
@@ -992,7 +992,7 @@ sub PrintOtherSetting
 	$Page->Print("<input type=checkbox name=BBS_NAMECOOKIE_CHECK $setNameCookie value=on>保存</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">indexプレビューレス数</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_CONTENTS_NUMBER value=\"$setContentNum\"></td>");
-	$Page->Print("<td class=\"DetailTitle\">　　メールcookie保存</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">　　メール（コマンド）cookie保存</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_MAILCOOKIE_CHECK $setMailCookie value=on>保存</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">indexレス内容表示行数(注)</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_INDEX_LINE_NUMBER value=\"$setContentLine\"></td>");
