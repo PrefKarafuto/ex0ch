@@ -216,6 +216,7 @@ sub PrintReadHead
 	
 	# HTMLヘッダの出力
 	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
+	$data_url =~ s/^https?://;
   $Page->Print("Content-type: text/html;charset=Shift_JIS\n");
   $Page->Print("Cache-Control: max-age=0, s-maxage=1, stale-while-revalidate=2\n\n");
 	$Page->Print(<<HTML);

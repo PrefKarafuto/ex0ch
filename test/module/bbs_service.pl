@@ -142,6 +142,7 @@ sub CreateSubback
 	my $title = $Set->Get('BBS_TITLE');
 	my $code = $this->{'CODE'};
 	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
+	$data_url =~ s/^https?://;
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
@@ -267,6 +268,7 @@ sub PrintIndexHead
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
 	my $data_url = $this->{'SYS'}->Get('SERVER').$this->{'SYS'}->Get('CGIPATH').$this->{'SYS'}->Get('DATA');
+	$data_url =~ s/^https?://;
 	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
 
