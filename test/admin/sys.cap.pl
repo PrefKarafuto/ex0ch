@@ -189,8 +189,8 @@ sub PrintCapList
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("表\示数<input type=text name=DISPNUM size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"　表\示　\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
+	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30\">　</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100\">Cap Display Name</td>");
@@ -285,7 +285,7 @@ sub PrintCapSetting
 	$Page->Print("<tr><td colspan=2>各項目を設定して[設定]ボタンを押してください。</td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">キャップ表\示名</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">キャップ表示名</td><td>");
 	$Page->Print("<input type=text size=30 name=NAME value=\"$name\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">パスワード</td><td>");
 	$Page->Print("<input type=password size=30 name=PASS value=\"$pass\"></td></tr>");

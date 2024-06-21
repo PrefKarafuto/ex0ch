@@ -269,30 +269,30 @@ sub fsearch {
   closedir(DIR);
 
   foreach my $file (@dir) {
-    if ($file eq '.' or $file eq '..') {
-      next;
-    }
+	if ($file eq '.' or $file eq '..') {
+	  next;
+	}
 
-    my $target = "$dir$file";
+	my $target = "$dir$file";
 
-    if (-d $target) {
-      &search("$target/", $word);
-    } else {
-      my $flag = 0;
+	if (-d $target) {
+	  &search("$target/", $word);
+	} else {
+	  my $flag = 0;
 
-      open(FH, $target);
-      while (my $line = <FH>) {
-        if (index(lc($line), lc($word)) >= 0) {
-          $flag = 1;
-        }
-      }
-      close(FH);
+	  open(FH, $target);
+	  while (my $line = <FH>) {
+		if (index(lc($line), lc($word)) >= 0) {
+		  $flag = 1;
+		}
+	  }
+	  close(FH);
 
-      if ($flag) {
-        $result = $target;
+	  if ($flag) {
+		$result = $target;
 				last;
-      }
-    }
+	  }
+	}
   }
 
   return $result;

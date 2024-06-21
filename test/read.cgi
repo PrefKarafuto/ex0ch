@@ -191,12 +191,13 @@ sub PrintReadHead
 	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $bbspath = $Sys->Get('BBS');
+	my $data = $Sys->Get('DATA');
 	my $datone = $Dat->Get(0);
 	my $description = 'ERROR:スレッドが存在しません。';
 	my $CSP = $Sys->Get('CSP');
 	
 	if (defined $datone && ref($datone) eq 'SCALAR') {
-    	my @threadTop = split(/<>/, $$datone);
+		my @threadTop = split(/<>/, $$datone);
 		$threadTop[3] =~ s/<br>/\n/g; 			#brタグをOGP用に改行コードに変換
 		my @topMessage = split(/(<|&lt;)/,$threadTop[3]);	#それ以外のHTMLタグが混入していた場合に直前で切る
 
@@ -206,11 +207,15 @@ sub PrintReadHead
 		$description = $topMessage[0];
 	}
 	
-    if($image !~ /^https?:\/\//){
-        $image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
-    }
-    
+	if($image !~ /^https?:\/\//){
+		$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
+	}
+	if($favicon !~ /^https?:\/\//){
+		$favicon = $Sys->Get('SERVER').'/'.$bbspath.'/'.$favicon;
+	}
+	
 	# HTMLヘッダの出力
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
   $Page->Print("Content-type: text/html;charset=Shift_JIS\n");
   $Page->Print("Cache-Control: max-age=0, s-maxage=1, stale-while-revalidate=2\n\n");
 	$Page->Print(<<HTML);
@@ -228,15 +233,12 @@ sub PrintReadHead
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="$bbsname">
  <meta name="twitter:card" content="summary">
-  <link rel="stylesheet" type="text/css" href="../../../datas/design.css">
- <link rel="icon" href="../../../../$bbspath/$favicon">
+  <link rel="stylesheet" type="text/css" href="$data_url/design.css">
+ <link rel="icon" href="$favicon">
+ <script language="javascript" src="$data_url/script.js"></script>
+
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
-	if($Set->Get('BBS_CAPTCHA')){
-		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
-		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
-		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
-	}
 	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
 
 	$Caption->Print($Page, undef);
@@ -253,10 +255,36 @@ HTML
 		$work[3] = $Set->Get('BBS_ALINK_COLOR');
 		$work[4] = $Set->Get('BBS_VLINK_COLOR');
 		
-		$Page->Print("<body bgcolor=\"$work[0]\" text=\"$work[1]\" link=\"$work[2]\" ");
-		$Page->Print("alink=\"$work[3]\" vlink=\"$work[4]\">\n\n");
+		$Page->Print("<body bgcolor=\"$work[0]\" text=\"$work[1]\" link=\"$work[2]\" alink=\"$work[3]\" vlink=\"$work[4]\">\n\n");
 		$Page->Print("<div class=\"backmascot\" style=\"background-image: url('$mascot');\">");
+		$Page->Print("<a id=\"top\"></a>\n");
 	}
+
+	# メニュー
+	my $bbs = $Sys->Get('BBS_ABS');
+	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
+	$Page->Print("<li class=\"menu-title\">$title</li>\n");
+	$Page->Print("<li><a href=\"./#top\">ページのトップ</a></li>\n");
+	$Page->Print("<li><a href=\"./#bottom\">書き込みフォーム</a></li>\n");
+	$Page->Print("<hr>\n");
+	$Page->Print("<li><a href=\"$bbs/subback.html\">スレッド一覧に戻る</a></li>\n");
+	$Page->Print("<li><a href=\"$bbs\">掲示板に戻る</a></li>\n");
+	
+	$Page->Print("</ul></nav>\n");
+
+	# スマホ用メニューバー
+	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\"><span class=\"sitename\">$title</span>\n");
+	$Page->Print("<div class=\"hamburger-icon\"><span></span><span></span><span></span></div></button>");
+	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
+	$Page->Print("<a href=\"./#top\">ページのトップ</a>\n");
+	$Page->Print("<a href=\"./#bottom\">書き込みフォーム</a>\n");
+	$Page->Print("<hr>\n");
+	$Page->Print("<a href=\"$bbs/subback.html\">スレッド一覧に戻る</a>\n");
+	$Page->Print("<a href=\"$bbs\">掲示板に戻る</a>\n");
+	$Page->Print("</div></nav>\n");
+
+	$Page->Print("<main class=\"content\">\n");
 	
 	# バナー出力
 	$Banner->Print($Page, 100, 2, 0) if ($Sys->Get('BANNER') & 5);
@@ -359,7 +387,7 @@ sub PrintReadMenu
 		my $title = $Dat->GetSubject();
 		my $ttlCol = $Set->Get('BBS_SUBJECT_COLOR');
 		$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
-		$Page->Print("<h1 style=\"color:$ttlCol;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title ($resNum)</h1>\n\n");
+		$Page->Print("<h1 style=\"color:$ttlCol;font-size:larger;margin:-.5em 0 0;\"><b>$title </b>($resNum)</h1>\n\n");
 		$Page->Print("<dl class=\"thread\">\n");
 	}
 }
@@ -493,7 +521,7 @@ sub PrintReadFoot
 		$Page->Print("<a href=\"$pathPrev\">前100</a>\n");
 		$Page->Print("<a href=\"$pathNext\">次100</a>\n");
 		$Page->Print("<a href=\"$pathLast\">最新50</a>\n");
-		$Page->Print("</div>\n");
+		$Page->Print("</div><br>\n");
 	}
 	my $permt = DAT::GetPermission($datPath);
 	my $perms = $Sys->Get('PM-STOP');
@@ -521,17 +549,16 @@ sub PrintReadFoot
 			$cookName = &$sanitize($Cookie->Get('NAME', '', 'utf8'));
 			$cookMail = &$sanitize($Cookie->Get('MAIL', '', 'utf8'));
 		}
-		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
-		my $classname = $Sys->Get('CAPTCHA');
-		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 
 		$Page->Print(<<HTML);
 <a id="bottom"></a>
 <form method="POST" action="$cgipath/bbs.cgi">
-<input type="hidden" name="bbs" value="$bbs"><input type="hidden" name="key" value="$key"><input type="hidden" name="time" value="$tm">
-$Captcha<input type="submit" value="書き込む"><br class="smartphone">
-名前：<input type="text" name="FROM" value="$cookName" size="19"><br class="smartphone">
-E-mail<font size="1">（省略可）</font>：<input type="text" name="mail" value="$cookMail" size="19"><br>
+<input type="hidden" name="bbs" value="$bbs">
+<input type="hidden" name="key" value="$key">
+<input type="hidden" name="time" value="$tm">
+<input type="submit" value="　書き込む　"><br class="smartphone">
+<input type="text" name="FROM" value="$cookName" size="19" placeholder="名前（任意）">
+<input type="text" name="mail" value="$cookMail" size="19" placeholder="コマンド（任意）"><br>
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
@@ -546,8 +573,9 @@ READ.CGI - $ver<br>
 <a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 </div>
 </div>
+</main>
 <div id="overlay">
-    <img id="overlay-image">
+	<img id="overlay-image">
   </div>
 <style>
 /* スマホ用レイアウト */
@@ -556,29 +584,6 @@ width:95%;
 margin:0;
 }
 </style>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const images = document.querySelectorAll('.post_image');
-    const overlay = document.getElementById('overlay');
-    const overlayImage = document.getElementById('overlay-image');
-  
-    images.forEach((image) => {
-      image.addEventListener('click', function() {
-        overlayImage.src = this.src;
-        overlayImage.onload = function() {
-          overlay.style.display = 'block';
-        };
-      });
-    });
-  
-    overlay.addEventListener('click', function(event) {
-      // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
-      if (event.target !== overlayImage) {
-        overlay.style.display = 'none';
-      }
-    });
-  });
-</script>
 </body>
 </html>
 HTML
@@ -597,7 +602,7 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResponse
 {
-    my ($CGI, $Page, $commands, $n) = @_;
+	my ($CGI, $Page, $commands, $n) = @_;
 	
 	# 前準備
 	my $Sys = $CGI->{'SYS'};
@@ -611,15 +616,15 @@ sub PrintResponse
 	my $nameCol	= $Set->Get('BBS_NAME_COLOR');
 	my $type = $Set->Get('BBS_READTYPE');
 	my $color = $Set->Get('BBS_POSTCOLOR');
-    	my $limit =$Sys->Get('LIMTIME');
+		my $limit =$Sys->Get('LIMTIME');
 	my $aa='';
 	
 	# URLと引用個所の適応
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
-	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
+	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
-	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Sys->Get('IMGTAG'));
+	$Conv->ConvertImageTag($Sys, $limit,\$elem[3])if($Set->Get('BBS_IMGTAG'));
 	$Conv->ConvertThreadTitle($Sys,\$elem[3])if($Set->Get('BBS_URL_TITLE') eq 'checked');
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
 
@@ -629,10 +634,12 @@ sub PrintResponse
 	}
 	# メール欄無し
 	else {
-		$Mail = "<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>";
+		my $color = $Set->Get('BBS_LINK_COLOR');
+		$Mail = "<font color=\"$color\"><b>$elem[0]</b></font>";
 	}
 	if ($elem[1] =~ /!aafont/){
-		$aa = 'aaview';
+		# レイアウトが崩れるのでCO
+		#$aa = 'aaview';
 	}
 	# 拡張機能を実行
 	$Sys->Set('_DAT_', \@elem);
@@ -658,12 +665,12 @@ HTML
 }
 	else{
 	$Page->Print(" <dt>$n ：");
-	    if ($elem[1] eq '') {
-		    $Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
-	    }
-	    else {
-		    $Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
-	    }
+		if ($elem[1] eq '') {
+			$Page->Print("<font color=\"$nameCol\"><b>$elem[0]</b></font>");
+		}
+		else {
+			$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
+		}
 	$Page->Print("：$elem[2]</dt>\n");
 	$Page->Print("  <dd $aa>$elem[3]<br><br></dd>\n");
 	}
@@ -724,7 +731,8 @@ sub PrintReadSearch
 		}
 		# メール欄無し
 		else {
-			$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
+			my $color = $Set->Get('BBS_LINK_COLOR');
+			$Page->Print("<font color=\"$color\"><b>$elem[0]</b></font>");
 		}
 		$Page->Print("：$elem[2]</dt>\n  <dd>$elem[3]<br><br></dd>\n");
 	}
@@ -789,6 +797,7 @@ sub PrintDiscovery
 	my ($CGI, $Page) = @_;
 	
 	my $Sys = $CGI->{'SYS'};
+	my $Set = $CGI->{'SET'};
 	my $Conv = $CGI->{'CONV'};
 	
 	my $cgipath = $Sys->Get('CGIPATH');
@@ -798,8 +807,9 @@ sub PrintDiscovery
 	my $kh = substr($key, 0, 4) . '/' . substr($key, 0, 5);
 	my $ver = $Sys->Get('VERSION');
 	my $server = $Sys->Get('SERVER');
+	my $kako = $Set->Get('BBS_KAKO');
 	
-	# 過去ログにあり
+	# 過去ログ倉庫にあり
 	if (-e $Conv->MakePath("$spath/kako/$kh/$key.html")) {
 		my $path = $Conv->MakePath("$lpath/kako/$kh/$key");
 		
@@ -813,6 +823,22 @@ sub PrintDiscovery
 		$Page->Print("\n<blockquote>\n");
 		$Page->Print("隊長! 過去ログ倉庫で、スレッド <a href=\"$path.html\">$server$path.html</a>");
 		$Page->Print(" <a href=\"$path.dat\">.dat</a> を発見しました。");
+		$Page->Print("</blockquote>\n");
+		
+	}
+	# 過去ログ用掲示板にあり
+	elsif (-e "../$kako/dat/$key.dat" && $kako) {
+		my $allPath = $Conv->CreatePath($Sys, 0, $kako, $key, '');
+		
+		my $title = "隊長！過去ログ掲示板に";
+		PrintReadHead($CGI, $Page, $title);
+		$Page->Print("\n<div style=\"margin-top:1em;\">\n");
+		$Page->Print(" <a href=\"$lpath/\">■掲示板に戻る■</a>\n");
+		$Page->Print("</div>\n\n");
+		$Page->Print("<hr style=\"background-color:#888;color:#888;border-width:0;height:1px;position:relative;top:-.4em;\">\n\n");
+		$Page->Print("<h1 style=\"color:red;font-size:larger;font-weight:normal;margin:-.5em 0 0;\">$title</h1>\n\n");
+		$Page->Print("\n<blockquote>\n");
+		$Page->Print("隊長! 過去ログ掲示板[$kako]で、スレッド <a href=\"$allPath\">$key</a>を発見しました。");
 		$Page->Print("</blockquote>\n");
 		
 	}

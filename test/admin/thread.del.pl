@@ -196,8 +196,8 @@ sub PrintResList
 	$common = "DoSubmit('thread.del','DISP','LIST');";
 	
 	$Page->Print("<center><dl><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2 align=right>表\示書式：<input type=text name=DISP_FORMAT_DEL");
-	$Page->Print(" value=\"$format\"><input type=button value=\"　表\示　\" onclick=\"$common\">");
+	$Page->Print("<tr><td colspan=2 align=right>表示書式：<input type=text name=DISP_FORMAT_DEL");
+	$Page->Print(" value=\"$format\"><input type=button value=\"　表示　\" onclick=\"$common\">");
 	$Page->Print("</td></tr>\n<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30\">　</th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:300\">Deleted Contents</td></tr>\n");
@@ -413,9 +413,9 @@ sub FunctionResDelete
 	require './module/bbs_service.pl';
 	my $BBSAid = BBS_SERVICE->new;
 	$Sys->Set('MODE', 'CREATE');
-    $BBSAid->Init($Sys, undef);
-    $BBSAid->CreateIndex();
-    $BBSAid->CreateSubback();
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
 	
 	# ログの設定
 	$delCnt = 0;

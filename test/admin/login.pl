@@ -108,7 +108,7 @@ sub PrintLogin
 
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
-	my $Captcha = $Sys->Get('ADMINCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+	my $Captcha = $sitekey && $classname && $Sys->Get('ADMINCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
 	my $text = $sitekey && $classname && $Captcha ? 'Captcha認証に失敗したか、' : "" ;
 	
 $Page->Print(<<HTML);
@@ -121,29 +121,29 @@ HTML
 	}
 	
 $Page->Print(<<HTML);
-    <table align="center" border="0" style="margin:30px 0;">
-     <tr>
-      <td>ユーザ名</td><td><input type="text" name="UserName" style="width:200px"></td>
-     </tr>
-     <tr>
-      <td>パスワード</td><td><input type="password" name="PassWord" style="width:200px"></td>
-     </tr>
-     <tr>
-      <td colspan="2" align="center">
-      <hr>
+	<table align="center" border="0" style="margin:30px 0;">
+	 <tr>
+	  <td>ユーザ名</td><td><input type="text" name="UserName" style="width:200px"></td>
+	 </tr>
+	 <tr>
+	  <td>パスワード</td><td><input type="password" name="PassWord" style="width:200px"></td>
+	 </tr>
+	 <tr>
+	  <td colspan="2" align="center">
+	  <hr>
 	  $Captcha
-      <input type="submit" value="　ログイン　">
-      </td>
-     </tr>
-    </table>
-    
-    <div class="Sorce">
-     <b>
-     <font face="Arial" size="3" color="red">Ex0ch Administration Page</font><br>
-     <font face="Arial">Powered by 0ch/0ch+/ex0ch script and 0ch/0ch+/ex0ch modules 2001-2024</font>
-     </b>
-    </div>
-    
+	  <input type="submit" value="　ログイン　">
+	  </td>
+	 </tr>
+	</table>
+	
+	<div class="Sorce">
+	 <b>
+	 <font face="Arial" size="3" color="red">Ex0ch Administration Page</font><br>
+	 <font face="Arial">Powered by 0ch/0ch+/ex0ch script and 0ch/0ch+/ex0ch modules 2001-2024</font>
+	 </b>
+	</div>
+	
    </div>
    
   </center>

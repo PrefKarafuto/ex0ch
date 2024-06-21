@@ -222,8 +222,8 @@ sub PrintThreadList
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("表\示数<input type=text name=DISPNUM size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"　表\示　\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
+	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">全</a></th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250px\">Thread Title</td>");

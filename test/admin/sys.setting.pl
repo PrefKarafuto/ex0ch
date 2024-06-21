@@ -81,11 +81,6 @@ sub DoPrint
 	elsif ($subMode eq 'OTHER') {													# その他設定画面
 		PrintOtherSetting($Page, $Sys, $Form);
 	}
-=pod
-	elsif ($subMode eq 'PLUS') {													# ぜろプラスオリジナル
-		PrintPlusSetting($Page, $Sys, $Form);
-	}
-=cut
 	elsif ($subMode eq 'VIEW') {													# 表示設定
 		PrintPlusViewSetting($Page, $Sys, $Form);
 	}
@@ -144,11 +139,6 @@ sub DoFunction
 	elsif ($subMode eq 'OTHER') {													# その他設定
 		$err = FunctionOtherSetting($Sys, $Form, $this->{'LOG'});
 	}
-=pod
-	elsif ($subMode eq 'PLUS') {													# ぜろプラスオリジナル
-		$err = FunctionPlusSetting($Sys, $Form, $this->{'LOG'});
-	}
-=cut
 	elsif ($subMode eq 'VIEW') {													# 表示設定
 		$err = FunctionPlusViewSetting($Sys, $Form, $this->{'LOG'});
 	}
@@ -315,7 +305,7 @@ sub PrintBasicSetting
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','BASIC');\"";
 	if ($server eq '') {
 		my $sname = $ENV{'SERVER_NAME'};
-		$server = "http://$sname";
+		$server = "https://$sname";
 	}
 	if ($cgi eq '') {
 		my $path = $ENV{'SCRIPT_NAME'};
@@ -446,7 +436,7 @@ sub PrintLimitterSetting
 	$vSYS[3] = $SYS->Get('ERRMAX');
 	$vSYS[4] = $SYS->Get('HSTMAX');
 	$vSYS[5] = $SYS->Get('ADMMAX');
-    $vSYS[6] = $SYS->Get('FLRMAX');
+	$vSYS[6] = $SYS->Get('FLRMAX');
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2>各項目を設定して[設定]ボタンを押してください。</td></tr>");
@@ -464,7 +454,7 @@ sub PrintLimitterSetting
 	$Page->Print("<td><input type=text size=10 name=HSTMAX value=\"$vSYS[4]\" ></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">管理操作ログ最大保持数</td>");
 	$Page->Print("<td><input type=text size=10 name=ADMMAX value=\"$vSYS[5]\" ></td></tr>\n");
-    $Page->Print("<tr><td class=\"DetailTitle\">ユーザー書き込み失敗ログ最大保持数</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">ユーザー書き込み失敗ログ最大保持数</td>");
 	$Page->Print("<td><input type=text size=10 name=FLRMAX value=\"$vSYS[6]\" ></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
@@ -487,7 +477,7 @@ sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $admCap, $srcCap, $logout);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout);
 	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -505,6 +495,7 @@ sub PrintOtherSetting
 	$CSP		= $SYS->Get('CSP');
 	$ninLvmax	= $SYS->Get('NINLVMAX');
 	$cookieExp	= $SYS->Get('COOKIE_EXPIRY');
+	$authExp	= $SYS->Get('AUTH_EXPIRY');
 	$nin_exp	= $SYS->Get('NIN_EXPIRY');
 	$pass_exp	= $SYS->Get('PASS_EXPIRY');
 	$logout		= $SYS->Get('LOGOUT');
@@ -524,16 +515,16 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ヘッダ関連</td></tr>\n");
-	$Page->Print("<tr><td>ヘッダ下部に表\示するテキスト</td>");
+	$Page->Print("<tr><td>ヘッダ下部に表示するテキスト</td>");
 	$Page->Print("<td><input type=text size=60 name=HEADTEXT value=\"$headText\" ></td></tr>\n");
-	$Page->Print("<tr><td>上記テキストに貼\るリンクのURL</td>");
+	$Page->Print("<tr><td>上記テキストに貼るリンクのURL</td>");
 	$Page->Print("<td><input type=text size=60 name=HEADURL value=\"$headUrl\" ></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
-	$Page->Print("画像リンクをIMGタグに変換</td>");
+	$Page->Print("imgur/twimg画像のみIMGタグ変換を許可</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=CSP $CSPSet value=on>");
-	$Page->Print("Youtube/niconico/Imgur埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</td>");
+	$Page->Print("Youtube/niconico埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</td>");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=URLLINK $linkChk value=on>");
 	$Page->Print("本文中URLへの自動リンク</td>");
 	$Page->Print("<tr><td colspan=2><b>以下自動リンクOFF時のみ有効</b></td></tr>\n");
@@ -549,17 +540,21 @@ sub PrintOtherSetting
 	#$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
 	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgiのGETメソ\ッド</td></tr>\n");
-	$Page->Print("<tr><td>bbs.cgiでGETメソ\ッドを使用する</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgiのGETメソッド</td></tr>\n");
+	$Page->Print("<tr><td>bbs.cgiでGETメソッドを使用する</td>");
 	$Page->Print("<td><input type=checkbox name=BBSGET $bbsget value=on></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック関連</td></tr>\n");
-	$Page->Print("<tr><td>更新チェックの間隔　※開発移行につき無効</td>");
-	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\" disabled>日(0でチェック無効)</td></tr>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック</td></tr>\n");
+	$Page->Print("<tr><td>更新チェックの間隔</td>");
+	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\">日(0でチェック無効)</td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Cookie関連</td></tr>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Cookie</td></tr>\n");
 	$Page->Print("<tr><td>Cookie有効期限</td>");
 	$Page->Print("<td><input type=text size=2 name=COOKIE_EXPIRY value=\"$cookieExp\">日</td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ユーザー認証</td></tr>\n");
+	$Page->Print("<tr><td>認証有効期限</td>");
+	$Page->Print("<td><input type=text size=2 name=AUTH_EXPIRY value=\"$authExp\">日</td></tr>\n");
 
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">忍法帖関連</td></tr>\n");
 	$Page->Print("<tr><td>忍法帖データ保持日数</td>");
@@ -605,10 +600,12 @@ sub PrintPlusViewSetting
 	my $Prtext		= $SYS->Get('PRTEXT');
 	my $Prlink		= $SYS->Get('PRLINK');
 	my $Msec		= $SYS->Get('MSEC');
+	my $hide_hits	= $SYS->Get('HIDE_HITS');
 	
 	my $bannerindex	= ($Banner & 3 ? 'checked' : '');
 	my $banner		= ($Banner & 5 ? 'checked' : '');
 	my $msec		= ($Msec == 1 ? 'checked' : '');
+	my $hide		= ($hide_hits == 0 ? 'checked' : '');
 	
 	my $common = "onclick=\"DoSubmit('sys.setting','FUNC','VIEW');\"";
 	
@@ -617,20 +614,24 @@ sub PrintPlusViewSetting
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Read.cgi関連</td></tr>\n");
-	$Page->Print("<tr><td>PR欄の表\示文字列 <small>(未入力でPR欄非表\示)</small></td>");
+	$Page->Print("<tr><td>PR欄の表示文字列 <small>(未入力でPR欄非表示)</small></td>");
 	$Page->Print("<td><input type=text size=60 name=PRTEXT value=\"$Prtext\"></td></tr>\n");
 	$Page->Print("<tr><td>PR欄のリンクURL</td>");
 	$Page->Print("<td><input type=text size=60 name=PRLINK value=\"$Prlink\"></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">告知欄表\示</td></tr>\n");
-	$Page->Print("<tr><td>index.htmlの告知欄を表\示する</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">告知欄表示</td></tr>\n");
+	$Page->Print("<tr><td>index.htmlの告知欄を表示する</td>");
 	$Page->Print("<td><input type=checkbox name=BANNERINDEX $bannerindex value=on></td></tr>\n");
-	$Page->Print("<tr><td>index.html以外の告知欄を表\示する</td>");
+	$Page->Print("<tr><td>index.html以外の告知欄を表示する</td>");
 	$Page->Print("<td><input type=checkbox name=BANNER $banner value=on></td></tr>\n");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">msec表\示</td></tr>\n");
-	$Page->Print("<tr><td>ミリ秒まで表\示する</small></td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">msec表示</td></tr>\n");
+	$Page->Print("<tr><td>ミリ秒まで表示する</td>");
 	$Page->Print("<td><input type=checkbox name=MSEC $msec value=on></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">規制情報公開</td></tr>\n");
+	$Page->Print("<tr><td>規制ユーザーの情報を公開する <br><small>(madakana.cgi、ユーザー規制のエラー画面)</small></td>");
+	$Page->Print("<td><input type=checkbox name=HIDE_HITS $hide value=on></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -677,6 +678,13 @@ sub PrintPlusSecSetting
 	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
 	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
 	my $Proxy_apikey  = $SYS->Get('PROXYCHECK_APIKEY');
+	my $Proxy_api		= $SYS->Get('PROXYCHECK_API');
+	my $noApiSet = $Proxy_api ? '':'selected';
+	my $pApiSet = $Proxy_api eq 'proxycheck.io' ? 'selected' : '';
+	my $IP2ApiSet = $Proxy_api eq 'ip2location' ? 'selected' : '';
+	my $IPApiSet = $Proxy_api eq 'ipqualityscore' ? 'selected' : '';
+	my $AApiSet = $Proxy_api eq 'abstract' ? 'selected' : '';
+	my $IPDApiSet = $Proxy_api eq 'ipdata' ? 'selected' : '';
 	my $admCap		= $SYS->Get('ADMINCAP');
 	my $srcCap		= $SYS->Get('SEARCHCAP');
 
@@ -735,7 +743,16 @@ sub PrintPlusSecSetting
 	$Page->Print("<td><input type=text size=60  name=CAPTCHA_SITEKEY value=\"$Captcha_sitekey\"></td></tr>\n");
 	$Page->Print("<tr><td>Captchaシークレットキー</td>");
 	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
-	$Page->Print("<tr><td><a href=\"https://proxycheck.io/api/\">ProxyCheck</a> APIキー</td>");
+	$Page->Print("<tr><td>プロキシチェックAPI種別<br><td>");
+	$Page->Print("<select name=PROXYCHECK_API required>");
+	$Page->Print("<option value=\"\" $noApiSet>なし</option>");
+	$Page->Print("<option value=\"proxycheck.io\" $pApiSet>ProxyCheck.io</option>");
+	$Page->Print("<option value=\"ipqualityscore\" $IPApiSet>IPQS</option>");
+	$Page->Print("<option value=\"ip2location\" $IP2ApiSet>IP2LOCATION.IO</option>");
+	$Page->Print("<option value=\"abstract\" $AApiSet>Abstract</option>");
+	$Page->Print("<option value=\"ipdata\" $IPDApiSet>ipdata</option>");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>APIキー</td>");
 	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"$Proxy_apikey\"></td></tr>\n");
 
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Captchaを課すCGI</td></tr>\n");
@@ -781,7 +798,7 @@ sub PrintPluginSetting
 		my ($id, $file, $class, $name, $expl, $valid);
 		
 		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-		$Page->Print("<tr><td colspan=5>有効にする機能\にチェックを入れてください。<br>");
+		$Page->Print("<tr><td colspan=5>有効にする機能にチェックを入れてください。<br>");
 		$Page->Print("<br>※0.7.5以前のプラグイン及び旧ぜろちゃんねる用プラグインは使用できません。詳細はリリースノートを参照してください。</td></tr>\n");
 		$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 		$Page->Print("<tr>");
@@ -1107,7 +1124,7 @@ sub FunctionLimitterSetting
 	$SYSTEM->Set('ERRMAX', $Form->Get('ERRMAX'));
 	$SYSTEM->Set('HSTMAX', $Form->Get('HSTMAX'));
 	$SYSTEM->Set('ADMMAX', $Form->Get('ADMMAX'));
-    $SYSTEM->Set('FLRMAX', $Form->Get('FLRMAX'));
+	$SYSTEM->Set('FLRMAX', $Form->Get('FLRMAX'));
 	
 	$SYSTEM->Save();
 	
@@ -1120,7 +1137,7 @@ sub FunctionLimitterSetting
 		push @$pLog, '　　　 エラーログ最大数：' . $Form->Get('ERRMAX');
 		push @$pLog, '　　　 ホストログ最大数：' . $Form->Get('HSTMAX');
 		push @$pLog, '　　　 管理操作ログ最大数：' . $Form->Get('ADMMAX');
-        push @$pLog, '　　　 ユーザ書き込み失敗ログ最大数：' . $Form->Get('FLRMAX');
+		push @$pLog, '　　　 ユーザ書き込み失敗ログ最大数：' . $Form->Get('FLRMAX');
 	}
 	return 0;
 }
@@ -1167,6 +1184,7 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('NIN_EXPIRY', $Form->Get('NIN_EXPIRY'));
 	$SYSTEM->Set('PASS_EXPIRY', $Form->Get('PASS_EXPIRY'));
 	$SYSTEM->Set('COOKIE_EXPIRY', $Form->Get('COOKIE_EXPIRY'));
+	$SYSTEM->Set('AUTH_EXPIRY', $Form->Get('AUTH_EXPIRY'));
 	$SYSTEM->Set('LOGOUT', $Form->Get('LOGOUT'));
 	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
 	
@@ -1177,7 +1195,7 @@ sub FunctionOtherSetting
 		push @$pLog, '■ その他設定';
 		push @$pLog, '　　　 ヘッダテキスト：' . $SYSTEM->Get('HEADTEXT');
 		push @$pLog, '　　　 ヘッダURL：' . $SYSTEM->Get('HEADURL');
-		push @$pLog, '　　　 IMGタグ変換：' . $SYSTEM->Get('IMGTAG');
+		push @$pLog, '　　　 Imgurのみ変換許可：' . $SYSTEM->Get('IMGTAG');
 		push @$pLog, '　　　 URL自動リンク：' . $SYSTEM->Get('URLLINK');
 		push @$pLog, '　　　 　開始時間：' . $SYSTEM->Get('LINKST');
 		push @$pLog, '　　　 　終了時間：' . $SYSTEM->Get('LINKED');
@@ -1185,6 +1203,7 @@ sub FunctionOtherSetting
 		push @$pLog, '　　　 index.htmlを更新しない：' . $SYSTEM->Get('FASTMODE');
 		push @$pLog, '　　　 bbs.cgiのGETメソッド：' . $SYSTEM->Get('BBSGET');
 		push @$pLog, '　　　 Cookie有効期限：' . $SYSTEM->Get('COOKIE_EXPIRY');
+		push @$pLog, '　　　 認証有効期限：' . $SYSTEM->Get('AUTH_EXPIRY');
 		push @$pLog, '　　　 忍法帖最大レベル：' . $SYSTEM->Get('NINLVMAX');
 		push @$pLog, '　　　 忍法帖データ保持期間：' . $SYSTEM->Get('NIN_EXPIRY');
 		push @$pLog, '　　　 パスワード設定時保持期間：' . $SYSTEM->Get('PASS_EXPIRY');
@@ -1230,16 +1249,18 @@ sub FunctionPlusViewSetting
 	my $banner = ($Form->Equal('BANNERINDEX', 'on')?2:0) | ($Form->Equal('BANNER', 'on')?4:0);
 	$SYSTEM->Set('BANNER', $banner);
 	$SYSTEM->Set('MSEC', ($Form->Equal('MSEC', 'on') ? 1 : 0));
+	$SYSTEM->Set('HIDE_HITS', ($Form->Equal('HIDE_HITS', 'on') ? 0 : 1));
 	
 	$SYSTEM->Save();
 	
 	# ログの設定
 	{
 		push @$pLog, '　　　 カウンターアカウント：' . $SYSTEM->Get('COUNTER');
-		push @$pLog, '　　　 PR欄表\示文字列：' . $SYSTEM->Get('PRTEXT');
+		push @$pLog, '　　　 PR欄表示文字列：' . $SYSTEM->Get('PRTEXT');
 		push @$pLog, '　　　 PR欄リンクURL：' . $SYSTEM->Get('PRLINK');
-		push @$pLog, '　　　 バナー表\示：' . $SYSTEM->Get('BANNER');
+		push @$pLog, '　　　 バナー表示：' . $SYSTEM->Get('BANNER');
 		push @$pLog, '　　　 ミリ秒表示：' . $SYSTEM->Get('MSEC');
+		push @$pLog, '　　　 規制情報公開：' . $SYSTEM->Get('HIDE_HITS');
 	}
 	return 0;
 }
@@ -1286,6 +1307,7 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));
 	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
 	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));
+	$SYSTEM->Set('PROXYCHECK_API', $Form->Get('PROXYCHECK_API'));
 	$SYSTEM->Set('PROXYCHECK_APIKEY', $Form->Get('PROXYCHECK_APIKEY'));
 	$SYSTEM->Set('ADMINCAP', ($Form->Equal('ADMINCAP', 'on') ? 1 : 0));
 	$SYSTEM->Set('SEARCHCAP', ($Form->Equal('SEARCHCAP', 'on') ? 1 : 0));

@@ -52,7 +52,7 @@ sub Load
 	
 	my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/SETTING.TXT';
 	
-	if (open(my $fh, '<:encoding(cp932)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -112,7 +112,7 @@ sub Save
 	my %orz = %{$this->{'SETTING'}};
 	
 	chmod($Sys->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
+	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		#binmode($fh);
 		seek($fh, 0, 0);
@@ -153,7 +153,7 @@ sub LoadFrom
 	
 	my $set = $this->{'SETTING'} = {};
 	
-	if (open(my $fh, '<:encoding(cp932)', $path)) {
+	if (open(my $fh, '<', $path)) {
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);
@@ -188,7 +188,7 @@ sub SaveAs
 	my ($path) = @_;
 	
 	chmod($this->{'SYS'}->Get('PM-TXT'), $path);
-	if (open(my $fh, (-f $path ? '+<:encoding(cp932)' : '>:encoding(cp932)'), $path)) {
+	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
 		flock($fh, 2);
 		seek($fh, 0, 0);
 		#binmode($fh);
@@ -372,14 +372,15 @@ sub InitSettingData
 		'BBS_SPAMKILLI_DOMAIN'	=> 'jp,com,net,org=2;*=3',
 		'BBS_SPAMKILLI_POINT'	=> 10,
 
-        'BBS_IMGTAG'            => '',
-        'BBS_TWITTER'           => '',
-        'BBS_MOVIE'             => '',
-        'BBS_URL_TITLE'         => '',
-        'BBS_HIGHLIGHT'         => 'checked',
+		'BBS_IMGTAG'            => '',
+		'BBS_TWITTER'           => '',
+		'BBS_MOVIE'             => '',
+		'BBS_URL_TITLE'         => '',
+		'BBS_HIGHLIGHT'         => 'checked',
+		'BBS_AUTOFALL'         	=> '',
 
-        'BBS_TASUKERUYO'        => '',
-        'BBS_OMIKUJI'           => '',
+		'BBS_TASUKERUYO'        => '',
+		'BBS_OMIKUJI'           => '',
 		'BBS_FAVICON'           => 'icon.png',
 
 		'BBS_CAPTCHA'			=> '',

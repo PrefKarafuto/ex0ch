@@ -1,6 +1,6 @@
 # EXぜろちゃんねる 
-HP: https://prefkarafuto.github.io/ExZeroChannel/
-GitHub: https://github.com/PrefKarafuto/ex0ch/
+HP: https://prefkarafuto.github.io
+GitHub: https://github.com/PrefKarafuto/ex0ch
 
 本スクリプトは、2002年に開発開始された「ぜろちゃんねる(http://0ch.mine.nu/)」スクリプトを２ちゃんねる仕様に改造するという目的で
 2010年はじまったプロジェクト「ぜろちゃんねるプラス(http://zerochplus.osdn.jp/)」がv0.7.4で開発停止したことを受けて、
@@ -12,7 +12,7 @@ GitHub: https://github.com/PrefKarafuto/ex0ch/
 ## インストール
 
 システム要件:
-- suEXECでCGI動作が可能なApache HTTP Serverが入っており，Perl 5.22以上が動作するUNIX系もしくはLinux系のOS
+- suEXECでCGI動作が可能なApache HTTP Serverが入っており，Perl 5.16以上が動作するUNIX系もしくはLinux系のOS
 - 10MB以上のディスクスペース
 
 依存関係:
@@ -22,6 +22,14 @@ GitHub: https://github.com/PrefKarafuto/ex0ch/
 - Net::DNS
 - LWP::UserAgent
 - XML::Simple
+- CGI::Cookie
+
+(Captchaを使う場合)
+- LWP::Protocol::https
+- Net::SSLeay
+
+(FastCGIを使う場合)
+- FCGI
 
 同梱のモジュール:
 - CGI::Session

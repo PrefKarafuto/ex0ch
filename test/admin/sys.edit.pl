@@ -197,7 +197,7 @@ sub PrintBannerForPCEdit
 	$Page->Print("<tr><td class=\"DetailTitle\">内容</td><td>");
 	$Page->Print("<textarea rows=10 cols=70 name=PC_CONTENT wrap=off>$content</textarea></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td colspan=2>※告知欄の表\示は設定で消すことができます。 [システム設定]→[表\示設定]→告知欄表\示(index.html以外の告知欄を表\示するのチェックをOFF)</td></tr>\n");
+	$Page->Print("<tr><td colspan=2>※告知欄の表示は設定で消すことができます。 [システム設定]→[表示設定]→告知欄表示(index.html以外の告知欄を表示するのチェックをOFF)</td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
 	$Page->Print("<input type=button value=\"　設定　\" $common,'FUNC','BANNER_PC');\"> ");
 	$Page->Print("<input type=button value=\"　確認　\" $common,'DISP','BANNER_PC');\">");

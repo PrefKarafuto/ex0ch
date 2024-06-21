@@ -125,10 +125,10 @@ sub Add
 	my ($word, $repl) = @_;
 	
 	return if (!defined $word || $word eq '');
-    if($word !~ /^!reg:/){
-	    $word =~ s/</&lt;/g;
-	    $word =~ s/>/&gt;/g;
-    }
+	if($word !~ /^!reg:/){
+		$word =~ s/</&lt;/g;
+		$word =~ s/>/&gt;/g;
+	}
 	push @{$this->{'NGWORD'}}, $word;
 	if (defined $repl) {
 		$repl =~ s/</&lt;/g;

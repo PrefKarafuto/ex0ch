@@ -16,20 +16,20 @@ use HTML::Entities;
 
 # 共通スレッド属性情報
 my %threadAttr = (
-    'sagemode'  => { 'name' => 'sage進行', 'type' => 'checkbox' },
-    'float'     => { 'name' => '浮上', 'type' => 'checkbox' },
-    'pass'      => { 'name' => 'パスワード', 'type' => 'text' },
-    'maxres'    => { 'name' => '最大レス数', 'type' => 'number' },
-    'slip'      => { 'name' => 'BBS_SLIP', 'type' => 'slip' },
-    'noid'      => { 'name' => 'IDなし', 'type' => 'checkbox' },
-    'changeid'  => { 'name' => '独自ID', 'type' => 'checkbox' },
-    'force774'  => { 'name' => '強制名無し', 'type' => 'checkbox' },
-    'change774' => { 'name' => '名無し変更', 'type' => 'text' },
-    'live'      => { 'name' => '実況モード', 'type' => 'checkbox' },
-    'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'checkbox' },
-    'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
-    'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
-    'ban'       => { 'name' => 'アクセス禁止<small>(対象SessionIDをカンマで区切る)</small>', 'type' => 'text' },
+	'sagemode'  => { 'name' => 'sage進行', 'type' => 'checkbox' },
+	'float'     => { 'name' => '浮上', 'type' => 'checkbox' },
+	'pass'      => { 'name' => 'パスワード', 'type' => 'text' },
+	'maxres'    => { 'name' => '最大レス数', 'type' => 'number' },
+	'slip'      => { 'name' => 'BBS_SLIP', 'type' => 'slip' },
+	'noid'      => { 'name' => 'IDなし', 'type' => 'checkbox' },
+	'changeid'  => { 'name' => '独自ID', 'type' => 'checkbox' },
+	'force774'  => { 'name' => '強制名無し', 'type' => 'checkbox' },
+	'change774' => { 'name' => '名無し変更', 'type' => 'text' },
+	'live'      => { 'name' => '実況モード', 'type' => 'checkbox' },
+	'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'checkbox' },
+	'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
+	'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
+	'ban'       => { 'name' => 'アクセス禁止<small>(対象SessionIDをカンマで区切る)</small>', 'type' => 'text' },
 );
 
 #------------------------------------------------------------------------------------------------------------
@@ -128,14 +128,14 @@ sub DoPrint
 		$BASE->PrintError($this->{'LOG'});
 	}
 	elsif ($subMode eq 'AUTORESDEL') {                                             # レス一括削除設定画面
-        PrintResAutoDelete($Page, $Sys, $Form, $BBS);
-    }
-    elsif ($subMode eq 'ABONELUMPRES') {                                        # レス一括あぼーん確認画面
-        PrintResLumpDelete($Page, $Sys, $Form, $BBS, 1);
-    }
-    elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除確認画面
-        PrintResLumpDelete($Page, $Sys, $Form, $BBS, 0);
-    }
+		PrintResAutoDelete($Page, $Sys, $Form, $BBS);
+	}
+	elsif ($subMode eq 'ABONELUMPRES') {                                        # レス一括あぼーん確認画面
+		PrintResLumpDelete($Page, $Sys, $Form, $BBS, 1);
+	}
+	elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除確認画面
+		PrintResLumpDelete($Page, $Sys, $Form, $BBS, 0);
+	}
 	
 	# 掲示板情報を設定
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
@@ -212,11 +212,11 @@ sub DoFunction
 		$err = FunctionThreadAutoPooling($Sys, $Form, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'ABONELUMPRES') {                                           # レス一括あぼ～ん
-        $err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 1);
-    }
-    elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除
-        $err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 0);
-    }
+		$err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 1);
+	}
+	elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除
+		$err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 0);
+	}
 	# 処理結果表示
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", "ERROR:$err");
@@ -304,7 +304,7 @@ sub PrintThreadList
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("表\示数<input type=text name=DISPNUM size=4 value=$dispNum>");
+	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">全</a></th>");
@@ -829,7 +829,7 @@ sub PrintThreadAutoPooling
 	$Page->Print("<input type=text size=4 name=POOLRES value=1000>を超えたもの</td></tr>\n");
 	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYTITLE value=on>");
 	$Page->Print("<b>タイトル</b></td><td>タイトルが");
-	$Page->Print("<input type=text size=15 name=POOLTITLE value=>にマッチするもの(正規表\現)</td></tr>\n");
+	$Page->Print("<input type=text size=15 name=POOLTITLE value=>にマッチするもの(正規表現)</td></tr>\n");
 	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYSTOP value=on>");
 	$Page->Print("<b>停止スレッド</b></td><td>スレッドが停止・または移転されているもの</td></tr>");
 	
@@ -1201,17 +1201,17 @@ sub FunctionThreadDelete
 	}
 	$Threads->SaveAttr($Sys);
 	#subject.txt更新
-    $Threads->Load($Sys);
-    $Threads->UpdateAll($Sys);
-    $Threads->Save($Sys);
+	$Threads->Load($Sys);
+	$Threads->UpdateAll($Sys);
+	$Threads->Save($Sys);
 
 	#my $originalMODE = $Sys->Get('MODE');
-    
+	
 	#index.html&subback.html更新
 	#$Sys->Set('MODE', 'CREATE');
-    #$BBSAid->Init($Sys, undef);
-    #$BBSAid->CreateIndex();
-    #$BBSAid->CreateSubback();
+	#$BBSAid->Init($Sys, undef);
+	#$BBSAid->CreateIndex();
+	#$BBSAid->CreateSubback();
 	#$Sys->Set('MODE',$originalMODE);
 	
 	return 0;

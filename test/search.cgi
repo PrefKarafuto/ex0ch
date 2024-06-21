@@ -18,6 +18,7 @@ use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 no warnings 'once';
 use JSON;
 use LWP::UserAgent;
+use Time::Local;
 
 BEGIN { use lib './perllib'; }
 
@@ -70,8 +71,9 @@ sub SearchCGI
 sub PrintHead
 {
 	my ($Sys, $Page, $BBS, $Form) = @_;
-	my ($pBBS, $bbs, $name, $dir, $Banner);
-	my ($sMODE, $sBBS, $sKEY, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
+	my ($pBBS, $bbs, $name, $catname, $dir, $Banner);
+	my ($sMODE, $sBBS, $sCAT, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id, $isSelC, $isSelB);
+	my ($dFROM, $dTO);
 	
 	my $sanitize = sub {
 		$_ = shift;
@@ -82,16 +84,18 @@ sub PrintHead
 		return $_;
 	};
 	
-	$sMODE	= &$sanitize($Form->Get('MODE', ''));
 	$sBBS	= &$sanitize($Form->Get('BBS', ''));
-	$sKEY	= &$sanitize($Form->Get('KEY', ''));
+	$sCAT	= &$sanitize($Form->Get('CATEGORY', ''));
 	$sWORD	= &$sanitize($Form->Get('WORD'));
+	$dFROM	= $Form->Get('FROM');
+	$dTO	= $Form->Get('TO');
 	@sTYPE	= $Form->GetAtArray('TYPE', 0);
 	
-	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0);
-	$cTYPE[0] = ($types & 1 ? 'checked' : '');
-	$cTYPE[1] = ($types & 2 ? 'checked' : '');
-	$cTYPE[2] = ($types & 4 ? 'checked' : '');
+	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0) | ($sTYPE[3] || 0);
+	$cTYPE[0] = ($types & 0x1 ? 'checked' : '');
+	$cTYPE[1] = ($types & 0x2 ? 'checked' : '');
+	$cTYPE[2] = ($types & 0x4 ? 'checked' : '');
+	$cTYPE[3] = ($types & 0x8 ? 'checked' : '');
 	
 	$BBSpath = $Sys->Get('BBSPATH');
 	
@@ -99,6 +103,8 @@ sub PrintHead
 	require './module/banner.pl';
 	$Banner = new BANNER;
 	$Banner->Load($Sys);
+
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
 
 	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print(<<HTML);
@@ -110,9 +116,12 @@ sub PrintHead
  <meta http-equiv="Content-Script-Type" content="text/css">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
- <title>検索＠0chPlus</title>
+ <title>検索＠Ex0ch</title>
 
- <link rel="stylesheet" type="text/css" href="./datas/search.css">
+ <link rel="stylesheet" type="text/css" href="$data_url/search.css">
+ <link rel="stylesheet" type="text/css" href="$data_url/design.css">
+ <script language="javascript" src="$data_url/script.js"></script>
+
 HTML
 
 	if($Sys->Get('SEARCHCAP')){
@@ -122,103 +131,145 @@ HTML
 	}
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
-	my $Captcha = $Sys->Get('SEARCHCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+	my $Captcha = $sitekey && $classname && $Sys->Get('SEARCHCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
 
+	$Page->Print("</head>\n<!--nobanner-->\n<body>\n");
+
+	# サイドメニュー
+	require './module/bbs_info.pl';
+	my $Category = CATEGORY_INFO->new;
+	$Category->Load($Sys);
+	$BBS->Load($Sys);
+	my @catSet;
+	$Category->GetKeySet(\@catSet);
+	$BBS->GetKeySet('ALL', '', \@bbsSet);
+
+	my $sitename = $Sys->Get('SITENAME') || 'EXぜろちゃんねる';
+
+	# PC用メニューバー
+	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
+	$Page->Print("<li class=\"menu-title\">$sitename</li>\n");
+	$Page->Print("<li><a class=\"active\" href=\"../test/search.cgi\">検索</a></li>\n");
+	$Page->Print("<li><a href=\"../bbsmenu.html\">BBS MENU</a></li>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
+	foreach my $catid (@catSet) {
+		my $catname = $Category->Get('NAME', $catid);
+		$Page->Print("<li class=\"category-title\">$catname</li>\n");
+		foreach my $id (@bbsSet) {
+			my $name = $BBS->Get('NAME', $id);
+			my $dir = $BBS->Get('DIR', $id);
+			$Page->Print("<li><a href=\"../$dir/\">$name</a></li>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+		}
+	}
+	
+	$Page->Print("</ul></nav>\n");
+
+	# スマホ用メニューバー
+	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\"><span class=\"sitename\">$sitename</span>\n");
+	$Page->Print("<div class=\"hamburger-icon\"><span></span><span></span><span></span></div></button>");
+	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
+	$Page->Print("<a class=\"active\" href=\"../test/search.cgi\">検索</a>\n");
+	$Page->Print("<a href=\"../bbsmenu.html\">BBS MENU</a>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
+	foreach my $catid (@catSet) {
+		my $catname = $Category->Get('NAME', $catid);
+		$Page->Print("<span class=\"category-title\">$catname</span>\n");
+		foreach my $id (@bbsSet) {
+			my $name = $BBS->Get('NAME', $id);
+			my $dir = $BBS->Get('DIR', $id);
+			$Page->Print("<a href=\"../$dir/\">$name</a>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+		}
+	}
+	$Page->Print("</div></nav>\n");
+
+	$Page->Print("<main class=\"content\">\n");
 	$Page->Print(<<HTML);
-</head>
-<!--nobanner-->
-<body>
 
-<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#ccffcc" style="margin-bottom:1.2em;" align="center">
+<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#ccffcc" style="margin-bottom:1.2em; word-break:break-all;" align="center">
  <tr>
   <td>
-  <font size="+1"><b>検索＠0chPlus</b></font>
+  <font size="+1"><b>検索＠Ex0ch</b></font>
   
   <div align="center" style="margin:1.2em 0;">
   <form action="./search.cgi" method="POST">
   <table border="0">
    <tr>
-    <td>検索モード</td>
-    <td>
-    <select name="MODE">
+	<td>対象カテゴリー<br>
+	<select name="CATEGORY">
+	<option value="">指定しない</option>
+
 HTML
 
-	if ($sMODE eq 'ALL') {
-		$Page->Print(<<HTML);
-     <option value="ALL" selected>鯖内全検索</option>
-     <option value="BBS">BBS指定全検索</option>
-     <option value="THREAD">スレッド指定全検索</option>
-HTML
-	}
-	elsif ($sMODE eq 'BBS' || $sMODE eq '') {
-		$Page->Print(<<HTML);
-     <option value="ALL">鯖内全検索</option>
-     <option value="BBS" selected>BBS指定全検索</option>
-     <option value="THREAD">スレッド指定全検索</option>
-HTML
-	}
-	elsif ($sMODE eq 'THREAD') {
-		$Page->Print(<<HTML);
-     <option value="ALL">鯖内全検索</option>
-     <option value="BBS">BBS指定全検索</option>
-     <option value="THREAD" selected>スレッド指定全検索</option>
-HTML
-	}
-	$Page->Print(<<HTML);
-    </select>
-    </td>
-   </tr>
-   <tr>
-    <td>指定BBS</td>
-    <td>
-    <select name="BBS">
-HTML
-
-	# BBSセットの取得
-	$BBS->GetKeySet('ALL', '', \@bbsSet);
 	
-	foreach $id (@bbsSet) {
-		$name = $BBS->Get('NAME', $id);
-		$dir = $BBS->Get('DIR', $id);
-		
-		# 板ディレクトリに.0ch_hiddenというファイルがあれば読み飛ばす
-		next if ( -e "$BBSpath/$dir/.0ch_hidden" && $sBBS ne $dir );
-		
-		if ($sBBS eq $dir) {
-			$Page->Print("     <option value=\"$dir\" selected>$name</option>\n");
+	foreach my $catid (@catSet) {
+		$catname = $Category->Get('NAME', $catid);
+		my $count = 0;
+		foreach my $id(@bbsSet){
+			$count++ if $catid eq $BBS->Get('CATEGORY', $id);
 		}
-		else {
-			$Page->Print("     <option value=\"$dir\">$name</option>\n");
-		}
+		next if !$count;
+		$catname .= " ($count)";
+		$isSelC = $sCAT eq $catid ? "selected" : "";
+
+		$Page->Print("<option value=\"$catid\" $isSelC>$catname</option>\n");
 	}
 	$Page->Print(<<HTML);
-    </select>
-    </td>
+	</select>
+	</td>
    </tr>
    <tr>
-    <td>指定スレッドキー</td>
-    <td>
-    <input type="text" size="20" name="KEY" value="$sKEY">
-    </td>
+	<td>対象BBS<br>
+	<select name="BBS">
+HTML
+
+	$Page->Print("<option value=\"\">すべて</option>\n");
+	foreach my $catid (@catSet) {
+		$catname = $Category->Get('NAME', $catid);
+		$Page->Print("<optgroup label=\"$catname\">");
+		foreach $id (@bbsSet) {
+			$name = $BBS->Get('NAME', $id);
+			$dir = $BBS->Get('DIR', $id);
+			
+			# 板ディレクトリに.0ch_hiddenというファイルがあれば読み飛ばす
+			next if ( -e "$BBSpath/$dir/.0ch_hidden" && $sBBS ne $dir );
+
+			# 選択肢
+			$isSelC = $sBBS eq $dir ? "selected" : "";
+			$Page->Print("<option value=\"$dir\" $isSelB>$name</option>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+		}
+		$Page->Print("</optgroup>");
+	}
+
+	$Page->Print(<<HTML);
+	</select>
+	</td>
    </tr>
    <tr>
-    <td>検索ワード</td>
-    <td><input type="text" size="40" name="WORD" value="$sWORD"></td>
+	<td>検索ワード<br><input type="text" size="35" name="WORD" value="$sWORD"></td>
    </tr>
    <tr>
-    <td>検索種別</td>
-    <td>
-    <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
-    <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
-    <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>
-    </td>
+	<td>検索範囲<br>
+	<input type="date" name="FROM" value="$dFROM"><small>から</small>
+	<input type="date" name="TO" value="$dTO"><small>まで</small><br>
+	</td>
    </tr>
    <tr>
-    <td colspan="2" align="right">
-    <hr>
+	<td>検索種別<br>
+	<input type="checkbox" name="TYPE" value="1" $cTYPE[0]><small>名前検索</small><br>
+	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]><small>本文検索</small><br>
+	<input type="checkbox" name="TYPE" value="4" $cTYPE[2]><small>ID検索</small><br>
+	<input type="checkbox" name="TYPE" value="8" $cTYPE[3]><small>スレタイ検索</small><br>
+	</td>
+   </tr>
+   <tr>
+	<td colspan="2" align="right">
+	<hr>
 	$Captcha
-    <input type="submit" value="検索" style="width:150px;">
-    </td>
+	<input type="submit" value="検索" style="width:150px;">
+	</td>
    </tr>
   </table>
   </form>
@@ -254,7 +305,7 @@ sub PrintFoot
 <a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 SEARCH.CGI - $ver
 </div>
-
+</main>
 HTML
 }
 
@@ -268,19 +319,25 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub Search
 {
-	my ($Sys, $Form, $Page, $BBS) = @_;;
+	my ($Sys, $Form, $Page, $BBS) = @_;
 	my ($Search, $Mode, $Result, @elem, $n, $base, $word);
 	my (@types, $Type);
 	
 	require './module/search.pl';
 	$Search = new SEARCH;
+	my $bbs = $Form->Get('BBS', '');
+	my $cat = $Form->Get('CATEGORY', '');
+	my @dFROM	= split(/-/,$Form->Get('FROM', ''));
+	my $FROM = $Form->Get('FROM', '') ? timelocal(0,0,0,$dFROM[2],$dFROM[1]-1,$dFROM[0]) : 0;
+	my @dTO	= split(/-/,$Form->Get('TO', ''));
+	my $TO = $Form->Get('TO', '') ? timelocal(0,0,0,$dTO[2]+1,$dTO[1]-1,$dTO[0]) - 1 : 0;
 	
-	$Mode = 0 if ($Form->Equal('MODE', 'ALL'));
-	$Mode = 1 if ($Form->Equal('MODE', 'BBS'));
-	$Mode = 2 if ($Form->Equal('MODE', 'THREAD'));
-	
+	$Mode = 2 if ($cat);
+	$Mode = 1 if ($bbs);
+	$Mode = 0 if (!$bbs && !$cat);
+
 	@types = $Form->GetAtArray('TYPE', 0);
-	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0);
+	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0) | ($types[3] || 0);
 	
 	my $sanitize = sub {
 		$_ = shift;
@@ -291,7 +348,7 @@ sub Search
 	};
 	
 	# 検索オブジェクトの設定と検索の実行
-	$Search->Create($Sys, $Mode, $Type, $Form->Get('BBS', ''), $Form->Get('KEY', ''));
+	$Search->Create($Sys, $Mode, $Type, $bbs, $cat, $FROM, $TO);
 	$Search->Run(&$sanitize($Form->Get('WORD')));
 	
 	if ($@ ne '') {
@@ -314,7 +371,7 @@ sub Search
 		$n = 1;
 		foreach (@$Result) {
 			@elem = split(/<>/);
-			PrintResult($Page, $BBS, $Conv, $n, $base, \@elem);
+			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
 			$n++;
 		}
 	}
@@ -339,6 +396,7 @@ sub PrintResultHead
 	my ($Page, $n) = @_;
 	
 	$Page->Print(<<HTML);
+<br>
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#efefef" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>
@@ -362,35 +420,41 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResult
 {
-	my ($Page, $BBS, $Conv, $n, $base, $pResult) = @_;
+	my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
 	my ($name, @bbsSet);
 	
 	$BBS->GetKeySet('DIR', $$pResult[0], \@bbsSet);
-	
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+
 	if (@bbsSet > 0) {
 		$name = $BBS->Get('NAME', $bbsSet[0]);
-		
+
 		$Page->Print("   <dt>$n 名前：<b>");
 		if ($$pResult[4] eq '') {
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
 		}
 		else {
-			$Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
+			$Page->Print("<font color=\"blue\"><b>$$pResult[3]</b></font>");
 		}
 		
-	$Page->Print(<<HTML);
+		$Sys->Set('BBS',$$pResult[0]);
+		$Threads->Load($Sys);
+		my $threadName = $Threads->Get('SUBJECT',$$pResult[1]);
+
+		$Page->Print(<<HTML);
  </b>：$$pResult[5]</dt>
-    <dd>
-    $$pResult[6]
-    <br>
-    <hr>
-    <a target="_blank" href="$base/$$pResult[0]/">【$name】</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">【スレッド】</a>
-    <a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">【レス】</a>
-    <br>
-    <br>
-    </dd>
-    
+	<dd>
+	$$pResult[6]
+	<br>
+	<hr>
+	<a target="_blank" href="$base/$$pResult[0]/">【$name】</a>
+	<a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/">【$threadName】</a>
+	<a target="_blank" href="./read.cgi/$$pResult[0]/$$pResult[1]/$$pResult[2]">【&gt;&gt;$$pResult[2]】</a>
+	<br>
+	<br>
+	</dd>
+	
 HTML
 	}
 }
@@ -424,7 +488,7 @@ sub PrintNoHit
 	
 	$Page->Print(<<HTML);
 <dt>
- 0 名前：<font color="forestgreen"><b>検索エンジソ\＠EXぜろちゃんねる</b></font>：No Hit
+ 0 名前：<font color="forestgreen"><b>検索エンジン＠EXぜろちゃんねる</b></font>：No Hit
 </dt>
 <dd>
  <br>
@@ -457,14 +521,14 @@ sub PrintSystemError
   <div class="title">
   <small><b>【ヒット数：0】</b></small><font size="+2" color="red">システムエラー</font>
   </div>
-   <dt>0 名前：<font color="forestgreen"><b>検索エンジソ\＠EXぜろちゃんねる</b></font>：System Error</dt>
-    <dd>
-    <br>
-    <br>
-    $msg<br>
-    <br>
-    <br>
-    </dd>
+   <dt>0 名前：<font color="forestgreen"><b>検索エンジン＠EXぜろちゃんねる</b></font>：System Error</dt>
+	<dd>
+	<br>
+	<br>
+	$msg<br>
+	<br>
+	<br>
+	</dd>
   </dl>
   </td>
  </tr>
@@ -483,20 +547,20 @@ HTML
 #
 #------------------------------------------------------------------------------------------------------------
 sub Certification_Captcha {
-    my ($Sys,$Form) = @_;
+	my ($Sys,$Form) = @_;
 	my ($captcha_response,$url);
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
-    my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
 	if($captcha_kind eq 'h-captcha'){
 		$captcha_response = $Form->Get('h-captcha-response');
-    	$url = 'https://api.hcaptcha.com/siteverify';
+		$url = 'https://api.hcaptcha.com/siteverify';
 	}elsif($captcha_kind eq 'g-recaptcha'){
 		$captcha_response = $Form->Get('g-recaptcha-response');
-    	$url = 'https://www.google.com/recaptcha/api/siteverify';
+		$url = 'https://www.google.com/recaptcha/api/siteverify';
 	}elsif($captcha_kind eq 'cf-turnstile'){
 		$captcha_response = $Form->Get('cf-turnstile-response');
-    	$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 	}else{
 		return 0;
 	}
@@ -507,7 +571,7 @@ sub Certification_Captcha {
 			secret => $secretkey,
 			response => $captcha_response,
 			remoteip => $ENV{'REMOTE_ADDR'},
-           });
+		});
 		if ($response->is_success()) {
 			my $json_text = $response->decoded_content();
 			

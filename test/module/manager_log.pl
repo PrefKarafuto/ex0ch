@@ -193,7 +193,7 @@ sub Set
 		if ($kind == 1) { $bf = $nm - $this->{'MAX'}; }			# エラーログ
 		if ($kind == 2) { $bf = $nm - $this->{'MAXS'}; }		# スレッドログ
 	#	if ($kind == 3) { $bf = $nm - $I->Get('timecount'); }	# 書き込みログ
-		if ($kind == 4) { $bf = $nm - $this->{'MAXF'}; }	    # 書き込み失敗ログ
+		if ($kind == 4) { $bf = $nm - $this->{'MAXF'}; }		# 書き込み失敗ログ
 		if ($kind == 5) { $bf = $nm - $this->{'MAXH'}; }		# ホストログ
 		if ($kind == 6) { $bf = $nm - $this->{'MAX'}; }			# samba
 		if ($kind == 7) { $bf = $nm - $this->{'MAX'}; }			# houshi

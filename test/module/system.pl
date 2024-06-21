@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS 0.9.3 20240520',				# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS 0.10.0 20240621',				# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -294,6 +294,7 @@ sub InitSystemValue
 		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
 		'CONFVER'	=> '',										# システム設定ファイルのバージョン
 		'UPCHECK'	=> 0,										# 更新チェック間隔(日)
+		'LASTCHECK'	=> 0,										# 前回チェック時刻
 		
 		# DNSBL設定
 		'DNSBL_TOREXIT'	=> 0,									# torexit.dan.me.uk
@@ -306,7 +307,8 @@ sub InitSystemValue
 		'CAPTCHA'			=> '',								# キャプチャの種類
 		'CAPTCHA_SITEKEY'	=> '',								# Captchaサイトキー
 		'CAPTCHA_SECRETKEY'	=> '',								# Captchaシークレットキー
-		'PROXYCHECK_APIKEY'	=> '',								# ProxyCheck.io APIキー
+		'PROXYCHECK_API'	=> '',								# プロキシ判定API
+		'PROXYCHECK_APIKEY'	=> '',								# APIキー
 
 		'ADMINCAP'		=> '',
 		'SEARCHCAP'		=> '',
@@ -314,13 +316,15 @@ sub InitSystemValue
 		'LASTMOD'		=> '',
 		'LOGOUT'		=> 30,									# 無操作状態で管理画面から自動ログアウトするまでの時間
 
-		'IMGTAG'		=> 0,									# 画像リンクをIMGタグに変換
+		'IMGTAG'		=> 1,									# 画像リンクをIMGタグに変換 => Imgur以外の画像URLもIMGタグに変換
 		'CSP'			=> 0,
 		'BANMAX'		=> 10,
 		'NINLVMAX'		=> 40,
+		'HIDE_HITS'		=> 1,									# 規制ユーザー非公開
 
 		'COOKIE_EXPIRY'	=> 30,									# Cookie期限
 		'NIN_EXPIRY'	=> 30,
+		'AUTH_EXPIRY'	=> 30,
 		'PASS_EXPIRY'	=> 365,
 		
 		'PERM_EXEC'		=> 0700,

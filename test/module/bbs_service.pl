@@ -141,6 +141,7 @@ sub CreateSubback
 	# HTMLヘッダの出力
 	my $title = $Set->Get('BBS_TITLE');
 	my $code = $this->{'CODE'};
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
@@ -148,6 +149,8 @@ sub CreateSubback
 
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="stylesheet" type="text/css" href="$data_url/design.css">
+ <script language="javascript" src="$data_url/script.js"></script>
 
 HTML
 	
@@ -155,6 +158,22 @@ HTML
 	
 	$Page->Print(" <title>$title - スレッド一覧</title>\n\n");
 	$Page->Print("</head>\n<body>\n\n");
+
+	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
+	$Page->Print("<li class=\"menu-title\">$title</li>\n");
+	$Page->Print("<li><a href=\"./\">掲示板に戻る</a></li>\n");
+	
+	$Page->Print("</ul></nav>\n");
+
+	# スマホ用メニューバー
+	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\"><span class=\"sitename\">$title</span>\n");
+	$Page->Print("<div class=\"hamburger-icon\"><span></span><span></span><span></span></div></button>");
+	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
+	$Page->Print("<a href=\"./\">掲示板に戻る</a>\n");
+	$Page->Print("</div></nav>\n");
+
+	$Page->Print("<main class=\"content\">\n");
 	
 	# バナー表示
 	if ($Sys->Get('BANNER') & 5) {
@@ -181,7 +200,7 @@ HTML
 		my $res = $Threads->Get('RES', $key);
 		my $path = $Conv->CreatePath($Sys, 0, $bbs, $key, 'l50');
 		
-		$Page->Print("&nbsp;&nbsp;$i: <a href=\"$path\" target=\"_blank\">$name($res)</a><br>\n");
+		$Page->Print("&nbsp;&nbsp;$i: <a href=\"$path\">$name($res)</a><br>\n");
 	}
 	
 	# フッタ部分の出力
@@ -201,12 +220,12 @@ HTML
 $version
 </div>
 
-
+</main>
 <style>
 /* スマホ用レイアウト */
 img {
-    max-width: 100%;
-    height:auto;
+	max-width: 100%;
+	height:auto;
 }
 
 textarea {
@@ -247,6 +266,7 @@ sub PrintIndexHead
 #	my $code = $this->{'CODE'};
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
+	my $data_url = $this->{'SYS'}->Get('SERVER').$this->{'SYS'}->Get('CGIPATH').$this->{'SYS'}->Get('DATA');
 	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
 
@@ -265,15 +285,11 @@ sub PrintIndexHead
  <meta property="og:image" content="$image">
  <meta property="og:site_name" content="EXぜろちゃんねる">
  <meta name="twitter:card" content="summary_large_image">
- <link rel="stylesheet" type="text/css" href="../test/datas/design.css">
+ <link rel="stylesheet" type="text/css" href="$data_url/design.css">
+ <script language="javascript" src="$data_url/script.js"></script>
  <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
-	if($this->{'SET'}->Get('BBS_CAPTCHA')){
-		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'h-captcha');
-		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'g-recaptcha');
-		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($this->{'SYS'}->Get('CAPTCHA') eq 'cf-turnstile');
-	}
 	$Page->Print('<meta http-equiv="Content-Security-Policy" content="frame-src \'self\' https://www.nicovideo.jp/ https://www.youtube.com/ https://imgur.com/  https://platform.twitter.com/;">') if ($CSP);
 	
 	$Caption->Print($Page, undef);
@@ -301,6 +317,80 @@ HEAD
 		$Page->Print("alink=\"$work[3]\" vlink=\"$work[4]\" background=\"$work[5]\">\n");
 
 	}
+
+	# サイドメニュー
+	require './module/bbs_info.pl';
+	my $Category = CATEGORY_INFO->new;
+	my $BBS = BBS_INFO ->new;
+	$Category->Load($this->{'SYS'});
+	$BBS->Load($this->{'SYS'});
+	my @catSet;
+	my @bbsSet;
+	$Category->GetKeySet(\@catSet);
+	$BBS->GetKeySet('ALL', '', \@bbsSet);
+
+	my $sitename = $this->{'SYS'}->Get('SITENAME') || 'EXぜろちゃんねる';
+	my $kako = $this->{'SET'}->Get('BBS_KAKO') ?  '../'.$this->{'SET'}->Get('BBS_KAKO') : './kako';
+
+	# PC用メニューバー
+	$Page->Print("<nav class=\"sidebar\" id=\"pc-sidebar\"><ul>\n");
+	$Page->Print("<li class=\"menu-title\">$sitename</li>\n");
+	$Page->Print("<li><a href=\"../test/search.cgi\">検索</a></li>\n");
+	$Page->Print("<li><a href=\"../bbsmenu.html\">BBS MENU</a></li>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"category-title\">$title</li>\n");
+	$Page->Print("<li><a href=\"./subback.html\">スレッド一覧</a></li>\n");
+	$Page->Print("<li><a href=\"$kako\">過去ログ倉庫</a></li>\n");
+	$Page->Print("<li><a href=\"./#top\">ページトップ</a></li>\n");
+	$Page->Print("<li><a href=\"./#new_thread\">スレッド作成</a></li>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
+	foreach my $catid (@catSet) {
+		my $catname = $Category->Get('NAME', $catid);
+		$Page->Print("<li class=\"category-title\">$catname</li>\n");
+		my $is_active = "";
+		foreach my $id (@bbsSet) {
+			my $name = $BBS->Get('NAME', $id);
+			my $dir = $BBS->Get('DIR', $id);
+			$is_active = 'class="active"' if $this->{'SYS'}->Get('BBS') eq $dir;
+			$Page->Print("<li><a $is_active href=\"../$dir/\">$name</a></li>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+			$is_active = "";
+		}
+	}
+	
+	$Page->Print("</ul></nav>\n");
+
+	# スマホ用メニューバー
+	$Page->Print("<nav class=\"dropdown\" id=\"mobile-dropdown\">\n");
+	$Page->Print("<button class=\"dropbtn\" onclick=\"toggleDropdown()\"><span class=\"sitename\">$sitename</span>\n");
+	$Page->Print("<div class=\"hamburger-icon\"><span></span><span></span><span></span></div></button>");
+	$Page->Print("<div class=\"dropdown-content\" id=\"dropdown-content\">\n");
+	$Page->Print("<a href=\"../test/search.cgi\">検索</a>\n");
+	$Page->Print("<a href=\"../bbsmenu.html\">BBS MENU</a>\n") if -e '../bbsmenu.html';
+	$Page->Print("<hr>");
+	$Page->Print("<span class=\"category-title\">$title</span>\n");
+	$Page->Print("<a href=\"./subback.html\">スレッド一覧</a>\n");
+	$Page->Print("<a href=\"$kako\">過去ログ倉庫</a>\n");
+	$Page->Print("<a href=\"./#top\">ページトップ</a>\n");
+	$Page->Print("<a href=\"./#new_thread\">スレッド作成</a>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
+	$Page->Print("<hr>");
+	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
+	foreach my $catid (@catSet) {
+		my $catname = $Category->Get('NAME', $catid);
+		$Page->Print("<span class=\"category-title\">$catname</span>\n");
+		my $is_active = '';
+		foreach my $id (@bbsSet) {
+			my $name = $BBS->Get('NAME', $id);
+			my $dir = $BBS->Get('DIR', $id);
+			$is_active = 'class="active"' if $this->{'SYS'}->Get('BBS') eq $dir;
+			$Page->Print("<a $is_active href=\"../$dir/\">$name</a>\n") if $catid eq $BBS->Get('CATEGORY', $id);
+			$is_active = "";
+		}
+	}
+	$Page->Print("</div></nav>\n");
+
+
+	$Page->Print("<main class=\"content\">\n");
 	$Page->Print("<a name=\"top\"></a>\n");
 	
 	# 看板画像表示あり
@@ -319,13 +409,14 @@ HEAD
 	my $cgipath = $this->{'SYS'}->Get('CGIPATH');
 	
 	$Page->Print(<<HTML);
-<br>
- <center>
+<table cellspacing="7" cellpadding="3" width="95%" style="margin:1.2em auto;" align="center">
+<tbody><tr><td>
   <a href="../bbsmenu.html" style="color:inherit;text-decoration: none;">
-   <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;">$title</div>
+   <div style="padding:0.25em 0.50em;border-radius:0.25em/0.25em;background:#39F;color:#FFF;font-size:1.25em;" align="center">$title</div>
   </a>
- </center>
-<br>
+  </td></tr>
+  </tbody>
+ </table>
 HTML
 	# ヘッダテーブルの表示
 	$Caption->Load($this->{'SYS'}, 'HEAD');
@@ -377,20 +468,20 @@ MENU
 		
 		# プレビュースレッドの場合はプレビューへのリンクを貼る
 		if ($i <= $prevNum) {
-                        $Page->Print("<font size=3>");
+						$Page->Print("<font size=3>");
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i:</a> ");
 			$Page->Print("<a href=\"#$i\">$name($res)</a>　</font>\n");
-                        $Page->Print("<hr>") if $i == $prevNum;
+						$Page->Print("<hr>") if $i == $prevNum;
 		}
 		else {
 			$Page->Print("  <a href=\"$path\" target=\"body\">$i: $name($res)</a>　\n");
 		}
 	}
-        my $threadNum = @threadSet;
-        $Page->Print("（全部で$threadNum\のスレッドがあります）");
+		my $threadNum = @threadSet;
+		$Page->Print("（全部で$threadNum\のスレッドがあります）");
 	$Page->Print(<<MENU);
   </small>
-  <br><br><div align="left"><font size=3><b><a href="./kako">過去ログ倉庫</a>／<a href="./subback.html">スレッド一覧はこちら</a>／<a href="./">リロード</a></b></font></div>
+  <br><br><div align="left"><font size=3><b><a href="./kako">過去ログ倉庫</a>／<a href="./subback.html">スレッド一覧</a>／<a href="./">リロード</a></b></font></div>
   </td>
  </tr>
 </table>
@@ -471,7 +562,7 @@ sub PrintIndexPreview
   <td>
   <a name="$cnt"></a>
   <div align="right"><a href="#menu">■</a><a href="#$prevT">▲</a><a href="#$nextT">▼</a></div>
-  <div style="font-weight:bold;margin-bottom:0.2em;">【$cnt:$res】<font size="+2" color="$ttlCol">$subject</font></div>
+  <div style="margin-bottom:0.2em;"><b>【$cnt:$res】</b><font size="+2" color="$ttlCol"><b>$subject</b></font></div>
   <dl class="post" style="margin-top:0px; border-style:none none none none;">
 THREAD
 		
@@ -487,14 +578,14 @@ THREAD
 		my $lastPath = $Conv->CreatePath($this->{'SYS'}, 0, $this->{'SYS'}->Get('BBS'), $key, 'l50');
 		my $numPath = $Conv->CreatePath($this->{'SYS'}, 0, $this->{'SYS'}->Get('BBS'), $key, '1-100');
 		$Page->Print(<<KAKIKO);
-    <div style="font-weight:bold;">
-     <a href="$allPath">全部読む</a>
-     <a href="$lastPath">最新50</a>
-     <a href="$numPath">1-100</a><br class="smartphone">
-     <a href="#top">板のトップ</a>
-     <a href="./">リロード</a>
-    </div>
-    </span>
+	<div style="font-weight:bold;">
+	 <a href="$allPath">全部読む</a>
+	 <a href="$lastPath">最新50</a>
+	 <a href="$numPath">1-100</a><br class="smartphone">
+	 <a href="#top">板のトップ</a>
+	 <a href="./">リロード</a>
+	</div>
+	</span>
    </blockquote>
   </form>
   </td>
@@ -535,13 +626,15 @@ sub PrintIndexFoot
 	my $tm = time;
 	if ($Set->Get('BBS_READONLY') ne 'on'){
 	# スレッド作成画面を別画面で表示
-	if ($Set->Equal('BBS_PASSWORD_CHECK', 'checked')) {
+	if (0) {
+		# 廃止
+=pod
 		$Page->Print(<<FORM);
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" align="center">
  <tr>
-  <td>
+  <td align="center">
   <form method="POST" action="$cgipath/bbs.cgi" style="margin:1.2em 0;">
-  <input type="submit" value="新規スレッド作成画面へ"><br>
+  <input type="submit" value="新規スレッド作成画面へ" style="font-size: 1.4em;"><br>
   <input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
   </form>
@@ -549,31 +642,34 @@ sub PrintIndexFoot
  </tr>
 </table>
 FORM
+=cut
 	}
 	# スレッド作成フォームはindexと同じ画面に表示
 	else {
-		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
-		my $classname = $Sys->Get('CAPTCHA');
-		my $Captcha = $Set->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
 		$Page->Print(<<FORM);
+
 <form method="POST" action="$cgipath/bbs.cgi">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
  <tr>
-  <td nowrap><div class ="reverse_order">
-  <span class = "order2">タイトル：<input type="text" name="subject" size="25"><br class="smartphone"></span>
-  <span class = "order1"><input type="submit" value="新規スレッド作成">$Captcha<br class="smartphone"></span></div>
-  名前：<input type="text" name="FROM" size="19"><br class="smartphone">E-mail：<input type="text" name="mail" size="19"><br>
+  <td>
+  <input type="submit" value="　新規スレッド作成　">
+  <hr><a id=\"new_thread\"></a>
+  <div class ="reverse_order">
+  <span class = "order2"><input type="text" name="subject" size="40" placeholder="スレッドタイトル（必須）"></span>
+  </div>
+  <br class="smartphone">
+  <input type="text" name="FROM" size="19" placeholder="名前（任意）">
+  <input type="text" name="mail" size="19" placeholder="コマンド（任意）"><br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
-FORM
-    $Page->Print(<<HTML);
+   </span>
 	<input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
 </td>
  </tr>
 </table>
 </form>
-HTML
+FORM
 	}
 }
 	else{
@@ -591,6 +687,8 @@ HTML
 	$year += 1900;
 	my $lastMod = sprintf("Last modified : %d/%02d/%02d %02d:%02d:%02d",$year,$mon,$day,$hour,$min,$sec);
 	$Page->Print("<div align=\"center\" style=\"font-size: 0.8em; color: #933;\">$lastMod</div>");
+
+	my $is_fcgi = $ENV{'FCGI_ROLE'} ? '/FastCGI' : '';
 	
 	my $is_fcgi = $ENV{'FCGI_ROLE'} ? '/FastCGI' : '';
 	
@@ -605,43 +703,17 @@ BBS.CGI - $ver (Perl$is_fcgi)
 @{[ $Set->Get('BBS_AUTH') ? '+ユーザー認証' : '' ]}
 +Samba24=$samba<br>
 </div>
+</main>
 <div id="overlay">
-    <img id="overlay-image">
+	<img id="overlay-image">
   </div>
 <style>
 /* スマホ用レイアウト */
 img {
-    max-width: 100%;
-    height:auto;
-}
-textarea {
-max-width:95%;
-margin:0;
+	max-width: 100%;
+	height:auto;
 }
 </style>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    const images = document.querySelectorAll('.post_image');
-    const overlay = document.getElementById('overlay');
-    const overlayImage = document.getElementById('overlay-image');
-  
-    images.forEach((image) => {
-      image.addEventListener('click', function() {
-        overlayImage.src = this.src;
-        overlayImage.onload = function() {
-          overlay.style.display = 'block';
-        };
-      });
-    });
-  
-    overlay.addEventListener('click', function(event) {
-      // クリックされた要素がoverlayImageでない場合、オーバーレイを閉じる
-      if (event.target !== overlayImage) {
-        overlay.style.display = 'none';
-      }
-    });
-  });
-</script>
 FOOT
 	
 	$Page->Print("</body>\n</html>\n");
@@ -696,10 +768,6 @@ sub PrintThreadPreviewOne
 	}
 	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
 		# 書き込みフォームの表示
-		my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
-		my $classname = $Sys->Get('CAPTCHA');
-		my $Captcha = $this->{'SET'}->Get('BBS_CAPTCHA') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div>" : '';
-
 		$Page->Print(<<KAKIKO);
   </dl>
   <hr>
@@ -708,13 +776,12 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
-   $Captcha
-   <input type="submit" value="書き込む" name="submit"><br class="smartphone">
-   名前：<input type="text" name="FROM" size="19"><br class="smartphone">
-   E-mail：<input type="text" name="mail" size="19"><br>
+   <input type="submit" value="　書き込む　" name="submit"><br class="smartphone">
+   <input type="text" name="FROM" size="19" placeholder="名前（任意）">
+   <input type="text" name="mail" size="19" placeholder="コマンド（任意）"><br>
 	<div class ="bbs_service_textarea">
-    <textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
-    </div>
+	<textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
+	</div>
 KAKIKO
 	}
 	else{
@@ -755,10 +822,10 @@ sub PrintResponse
  
 	# URLと引用個所の適応
 	$Conv->ConvertMovie(\$elem[3])if($Set->Get('BBS_MOVIE') eq 'checked');
-	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertURL($Sys, $Set, 0, \$elem[3])if($Sys->Get('URLLINK') eq 'TRUE');
+	$Conv->ConvertTweet(\$elem[3])if($Set->Get('BBS_TWITTER') eq 'checked');
 	$Conv->ConvertSpecialQuotation($Sys, \$elem[3])if($Set->Get('BBS_HIGHLIGHT') eq 'checked');
-	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'),\$elem[3],1)if($Sys->Get('IMGTAG'));
+	$Conv->ConvertImageTag($Sys,$Sys->Get('LIMTIME'),\$elem[3])if($Set->Get('BBS_IMGTAG'));
 	$Conv->ConvertQuotation($Sys, \$elem[3], 0);
  
 	# 拡張機能を実行
@@ -776,10 +843,12 @@ sub PrintResponse
 	}
 	# メール欄無し
 	else {
-		$Page->Print("<a href=\"mailto:$elem[1]\"><b>$elem[0]</b></a>");
+		my $color = $Set->Get('BBS_LINK_COLOR');
+		$Page->Print("<font color=\"$color\"><b>$elem[0]</b></font>");
 	}
 	if($elem[1] =~ /!aafont/){
-		$aa = 'class="aaview"';
+		# レイアウトが崩れるのでCO
+		#$aa = 'class="aaview"';
 	}
 	# 表示行数内ならすべて表示する
 	if ($contLine <= $dispLine || $n == 1) {

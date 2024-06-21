@@ -150,7 +150,7 @@ sub Save
 	if ($this->{'STAT'} && $fh) {
 		if (! $this->{'MODE'}) {
 			seek($fh, 0, 0);
-            my @getline = @{$this->{'LINE'}};
+			my @getline = @{$this->{'LINE'}};
 			print $fh @getline;
 			truncate($fh, tell($fh));
 			close($fh);

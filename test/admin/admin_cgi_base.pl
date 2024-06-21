@@ -232,13 +232,14 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('sys.top','DISP','NOTICE');">トップ</a> |
  <a href="javascript:DoSubmit('sys.bbs','DISP','LIST');">掲示板</a> |
  <a href="javascript:DoSubmit('sys.ninja','DISP','LIST');">忍法帖</a> |
+ <a href="javascript:DoSubmit('sys.gallery','DISP','LIST');">ギャラリー</a> |
  <a href="javascript:DoSubmit('sys.user','DISP','LIST');">ユーザー</a> |
  <a href="javascript:DoSubmit('sys.cap','DISP','LIST');">キャップ</a> |
  <a href="javascript:DoSubmit('sys.capg','DISP','LIST');">共通キャップグループ</a> |
  <a href="javascript:DoSubmit('sys.setting','DISP','INFO');">システム設定</a> |
+ <a href="javascript:DoSubmit('sys.union','DISP','INFO');">掲示板連合</a> |
  <a href="javascript:DoSubmit('sys.edit','DISP','BANNER_PC');">共通告知欄の編集</a> |
 HTML
-#<a href="javascript:DoSubmit('sys.union','DISP','INFO');">掲示板サーバー連合設定</a> |
 	}
 	# 掲示板管理メニュー
 	elsif ($mode == 2) {
@@ -253,8 +254,6 @@ $Page->Print(<<HTML);
  <a href="javascript:DoSubmit('bbs.cap','DISP','LIST');">キャップグループ</a> |
  <a href="javascript:DoSubmit('bbs.log','DISP','INFO');">ログ閲覧</a> |
 HTML
-#
-#<a href="javascript:DoSubmit('bbs.command','DISP','SETINFO');">各種コマンド設定</a> |
 	}
 	# スレッド管理メニュー
 	elsif ($mode == 3) {
@@ -297,7 +296,7 @@ $Page->Print(<<HTML);
   <td valign="top" class="Content">
   <table width="95%" cellspacing="0">
    <tr>
-    <td class="FunctionList">
+	<td class="FunctionList">
 HTML
 	
 	for ($i = 0 ; $i < $n ; $i++) {
@@ -316,7 +315,7 @@ HTML
 	}
 	
 $Page->Print(<<HTML);
-    </td>
+	</td>
    </tr>
   </table>
   </td>
@@ -424,15 +423,15 @@ sub PrintComplete
 $Page->Print(<<HTML);
   <table border="0" cellspacing="0" cellpadding="0" width="100%" align="center">
    <tr>
-    <td>
-    
-    <div class="oExcuted">
-     $processName\を正常に完了しました。
-    </div>
+	<td>
+	
+	<div class="oExcuted">
+	 $processName\を正常に完了しました。
+	</div>
    
-    <div class="LogExport">処理ログ</div>
-    <hr>
-    <blockquote class="LogExport">
+	<div class="LogExport">処理ログ</div>
+	<hr>
+	<blockquote class="LogExport">
 HTML
 	
 	# ログの表示
@@ -441,9 +440,9 @@ HTML
 	}
 	
 $Page->Print(<<HTML);
-    </blockquote>
-    <hr>
-    </td>
+	</blockquote>
+	<hr>
+	</td>
    </tr>
   </table>
 HTML
@@ -463,52 +462,42 @@ sub PrintError
 	my $this = shift;
 	my ($pLog) = @_;
 	my ($Page, $ecode);
-	
+
 	$Page = $this->{'INN'};
-	
+
 	# エラーコードの抽出
 	$ecode = pop @$pLog;
-	
-$Page->Print(<<HTML);
+
+	# エラーメッセージ
+	my %error_messages = (
+		1000 => "本機能の処理を実行する権限がありません。",
+		1001 => "入力必須項目が空欄になっています。",
+		1002 => "設定項目に規定外の文字が使用されています。",
+		2000 => "掲示板ディレクトリの作成に失敗しました。<br>パーミッション、または既に同名の掲示板が作成されていないかを確認してください。",
+		2001 => "SETTING.TXTの生成に失敗しました。",
+		2002 => "掲示板構成要素の生成に失敗しました。",
+		2003 => "過去ログ初期情報の生成に失敗しました。",
+		2004 => "掲示板情報の更新に失敗しました。",
+	);
+
+	$Page->Print(<<HTML);
   <table border="0" cellspacing="0" cellpadding="0" width="100%" align="center">
    <tr>
-    <td>
-    
-    <div class="xExcuted">
-HTML
+	<td>
 	
-	if ($ecode == 1000) {
-		$Page->Print("     ERROR:$ecode - 本機能\の処理を実行する権限がありません。\n");
-	}
-	elsif ($ecode == 1001) {
-		$Page->Print("     ERROR:$ecode - 入力必須項目が空欄になっています。\n");
-	}
-	elsif ($ecode == 1002) {
-		$Page->Print("     ERROR:$ecode - 設定項目に規定外の文字が使用されています。\n");
-	}
-	elsif ($ecode == 2000) {
-		$Page->Print("     ERROR:$ecode - 掲示板ディレクトリの作成に失敗しました。<br>\n");
-		$Page->Print("     パーミッション、または既に同名の掲示板が作成されていないかを確認してください。\n");
-	}
-	elsif ($ecode == 2001) {
-		$Page->Print("     ERROR:$ecode - SETTING.TXTの生成に失敗しました。\n");
-	}
-	elsif ($ecode == 2002) {
-		$Page->Print("     ERROR:$ecode - 掲示板構\成要素の生成に失敗しました。\n");
-	}
-	elsif ($ecode == 2003) {
-		$Page->Print("     ERROR:$ecode - 過去ログ初期情報の生成に失敗しました。\n");
-	}
-	elsif ($ecode == 2004) {
-		$Page->Print("     ERROR:$ecode - 掲示板情報の更新に失敗しました。\n");
-	}
-	else {
+	<div class="xExcuted">
+HTML
+
+	# エラーメッセージの出力
+	if (exists $error_messages{$ecode}) {
+		$Page->Print("     ERROR:$ecode - $error_messages{$ecode}\n");
+	} else {
 		$Page->Print("     ERROR:$ecode - 不明なエラーが発生しました。\n");
 	}
+
+	$Page->Print(<<HTML);
+	</div>
 	
-$Page->Print(<<HTML);
-    </div>
-    
 HTML
 
 	# エラーログがあれば出力する
@@ -521,14 +510,15 @@ HTML
 		$Page->Print("    </blockquote>");
 		$Page->Print('<hr>');
 	}
-	
-$Page->Print(<<HTML);
-    </td>
+
+	$Page->Print(<<HTML);
+	</td>
    </tr>
   </table>
 HTML
-	
+
 }
+
 
 #============================================================================================================
 #	モジュール終端

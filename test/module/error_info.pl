@@ -42,14 +42,14 @@ sub new
 #
 #------------------------------------------------------------------------------------------------------------
 sub Load {
-    my $this = shift;
+	my $this = shift;
 
-    $this->{'ERR'} = undef;
+	$this->{'ERR'} = undef;
 
-    my $messages = {
+	my $messages = {
 		'100' => { SUBJECT => 'サブジェクト長すぎ', MESSAGE => 'サブジェクトが長すぎます！' },
 		'101' => { SUBJECT => '名前長すぎ', MESSAGE => '名前が長すぎます！' },
-		'102' => { SUBJECT => 'メール長すぎ', MESSAGE => 'メールアドレスが長すぎます！' },
+		'102' => { SUBJECT => 'コマンド長すぎ', MESSAGE => 'コマンドが長すぎます！' },
 		'103' => { SUBJECT => '本文長すぎ', MESSAGE => '本文が長すぎます！' },
 		'104' => { SUBJECT => '1行長すぎ', MESSAGE => '長すぎる行があります！' },
 		'105' => { SUBJECT => '改行多すぎ', MESSAGE => '改行が多すぎます！' },
@@ -57,8 +57,11 @@ sub Load {
 		'150' => { SUBJECT => 'タイトルが無い', MESSAGE => 'サブジェクトが存在しません！' },
 		'151' => { SUBJECT => '本文が無い', MESSAGE => '本文がありません！' },
 		'152' => { SUBJECT => '名前が無い', MESSAGE => '名前いれてちょ。' },
-		'153' => { SUBJECT => '認証されてない', MESSAGE => 'Captcha認証をしてください。<br>専ブラからの場合は、一度通常ブラウザから認証して書き込みをした後、専ブラのCookieを削除してもう一度書き込んでください。' },
+		'153' => { SUBJECT => '認証されてない', MESSAGE => 'Captcha認証をしてください。' },
 		'154' => { SUBJECT => '認証失敗', MESSAGE => 'Captcha認証に失敗しました。' },
+		'155' => { SUBJECT => 'ユーザー認証失敗', MESSAGE => 'ユーザー認証に失敗しました。' },
+		'158' => { SUBJECT => '認証されてない', MESSAGE => 'ユーザー認証をしてください。' },
+		'159' => { SUBJECT => '認証用ワンタイムパスワード発行', MESSAGE => 'パスワードは<br><br>!auth:{!PASSWORD!}<br><br>です。この書き込みから3分以内にコマンド欄にパスワードを入力して、専用ブラウザから書き込んでください。' },
 		'200' => { SUBJECT => 'スレッド停止', MESSAGE => 'このスレッドは停止されてます。もう書けない。。。' },
 		'201' => { SUBJECT => '書き込み限界', MESSAGE => '{!RESMAX!}を超えてます。このスレッドにはもう書けない。。。' },
 		'202' => { SUBJECT => 'スレッド移転', MESSAGE => 'このスレッドは移転されたようです。詳しくは（略' },
@@ -97,13 +100,13 @@ sub Load {
 		'999' => { SUBJECT => 'ブラウザ変ですよん', MESSAGE => 'フォーム情報が正しく読めないです。' },
 		'990' => { SUBJECT => 'システムエラー', MESSAGE => 'システムが変です。サポートで聞いたほうがいいかも。。' },
 		'991' => { SUBJECT => 'システムエラー', MESSAGE => 'Captchaの設定が変です。管理者に連絡してくらはい。。' }
-    };
+	};
 
-    # メッセージデータをオブジェクトに格納
-    foreach my $id (keys %{$messages}) {
+	# メッセージデータをオブジェクトに格納
+	foreach my $id (keys %{$messages}) {
 		$this->{'SUBJECT'}->{$id} = $messages->{$id}->{SUBJECT};
 		$this->{'MESSAGE'}->{$id} = $messages->{$id}->{MESSAGE};
-    }
+	}
 }
 
 
@@ -147,6 +150,7 @@ sub Print
 	my $Set = $CGI->{'SET'};
 	my $version = $Sys->Get('VERSION');
 	my $bbsPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS');
+	my $threadPath = $Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Form->Get('key').'/l10#bottom';
 	my $message = $this->{'MESSAGE'}->{$err};
 	
 	# エラーメッセージの置換
@@ -170,12 +174,12 @@ sub Print
 	$Log->Load($Sys, 'ERR', '');
 	$Log->Set('', $err, $version, $koyuu, $mode);
 	$Log->Save($Sys);
-    
-    my $name = &$sanitize($Form->Get('NAME'));
-	my $mail = &$sanitize($Form->Get('MAIL'));
-    my $key = $Form->Get('key');
-    my $t = &$sanitize($Form->Get('subject',''));
-	my $msg = $Form->Get('MESSAGE');
+	
+	my $name = &$sanitize($Form->Get('NAME')) || '';
+	my $mail = &$sanitize($Form->Get('MAIL')) || '';
+	my $key = $Form->Get('key');
+	my $t = &$sanitize($Form->Get('subject','')) || '';
+	my $msg = $Form->Get('MESSAGE') || '';
 
 	#超過対策
 	if($Set->Get('BBS_MESSAGE_COUNT') < length($msg)){
@@ -202,7 +206,7 @@ sub Print
 	
 	#$Page->Print("Status: 412 Precondition Failed\n");
 	
-	if ($mode eq 'O') {
+	if (0) {
 		my $subject = $this->{'SUBJECT'}->{$err};
 		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 		$Page->Print("<html><head><title>");
@@ -214,6 +218,7 @@ sub Print
 	else {
 		my $Cookie = $CGI->{'COOKIE'};
 		my $Set = $CGI->{'SET'};
+		my $subject = $this->{'SUBJECT'}->{$err};
 		
 		my $name = &$sanitize($Form->Get('NAME'));
 		my $mail = &$sanitize($Form->Get('MAIL'));
@@ -227,12 +232,14 @@ sub Print
 			$Cookie->Set('MAIL', $mail, 'utf8');
 		}
 		# セキュリティキー生成
-		my $ctx = Digest::MD5->new;
-		$ctx->add($Sys->Get('SECURITY_KEY'));
-		$ctx->add(':', $Sys->Get('SID'));
-		my $sec = $Sys->Get('SID') ? $ctx->b64digest : "";
-		$Cookie->Set('countsession', $Sys->Get('SID'));
-		$Cookie->Set('securitykey', $sec);
+		if($Sys->Get('SID')){
+			my $ctx = Digest::MD5->new;
+			$ctx->add($Sys->Get('SECURITY_KEY'));
+			$ctx->add(':', $Sys->Get('SID'));
+			my $sec = $Sys->Get('SID') ? $ctx->b64digest : "";
+			$Cookie->Set('countsession', $Sys->Get('SID'));
+			$Cookie->Set('securitykey', $sec);
+		}
 		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
 		
 		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
@@ -253,10 +260,12 @@ sub Print
 <body>
 <!-- 2ch_X:error -->
 <div style="margin-bottom:2em;">
-<font size="+1" color="#FF0000"><b>ＥＲＲＯＲ：$message</b></font>
+<font size="+1" color="#FF0000"><b>ＥＲＲＯＲ：$subject</b></font>
 </div>
-
 <blockquote>
+<div>$message</div>
+</blockquote>
+<blockquote><br><br>
 ホスト<b>$koyuu</b><br>
 <br>
 名前： <b>$name</b><br>
@@ -267,7 +276,15 @@ $msg
 <br>
 </blockquote>
 <hr>
-<div class="reload">こちらでリロードしてください。<a href="$bbsPath/">&nbsp;GO!</a></div>
+<div class="reload">こちらでリロードしてください。&nbsp;<a href="$bbsPath/">&lt;&lt;掲示板に戻る</a>
+HTML
+		if($Sys->Equal('MODE', 1)){
+			$Page->Print("<a href=\"$bbsPath/#new_thread\">&lt;&lt;スレッド作成フォームに戻る</a></div>");
+		}else{
+			$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
+		}
+			
+$Page->Print(<<HTML);
 <div align="right">$version</div>
 </body>
 </html>

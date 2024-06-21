@@ -10,6 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use Encode qw(encode decode);
+use Time::Local;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -26,6 +27,8 @@ sub new
 	my $obj = {
 		'SYS'		=> undef,
 		'TYPE'		=> undef,
+		'FROM'		=> undef,
+		'TO'		=> undef,
 		'SEARCHSET'	=> undef,
 		'RESULTSET'	=> undef,
 	};
@@ -39,21 +42,24 @@ sub new
 #	検索設定
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	SYSTEM
-#	@param	$mode	0:全検索,1:BBS内検索,2:スレッド内検索
+#	@param	$mode	0:全検索,1:BBS内検索,2:カテゴリー内検索
 #	@param	$type	0:全検索,1:名前検索,2:本文検索
-#					4:ID(日付)検索
+#					4:ID検索,8:スレタイ検索
 #	@param	$bbs	検索BBS名($mode=1の場合に指定)
-#	@param	$thread	検索スレッド名($mode=2の場合に指定)
+#	@param	$cat	検索カテゴリー名($mode=2の場合に指定)
+#	@param	$from,$to	$fromから$toまでの期間で検索
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub Create
 {
 	my $this = shift;
-	my ($Sys, $mode, $type, $bbs, $thread) = @_;
+	my ($Sys, $mode, $type, $bbs, $cat, $from, $to) = @_;
 	
 	$this->{'SYS'} = $Sys;
 	$this->{'TYPE'} = $type;
+	$this->{'FROM'} = $from;
+	$this->{'TO'} = $to;
 	
 	$this->{'SEARCHSET'} = [];
 	$this->{'RESULTSET'} = [];
@@ -84,6 +90,7 @@ sub Create
 			$Threads->GetKeySet('ALL', '', \@threadSet);
 			
 			foreach my $threadID (@threadSet) {
+				next if ($threadID > $to && $to);
 				my $set = "$dir<>$threadID";
 				push @$pSearchSet, $set;
 			}
@@ -100,14 +107,42 @@ sub Create
 		$Threads->GetKeySet('ALL', '', \@threadSet);
 		
 		foreach my $threadID (@threadSet) {
+			next if ($threadID > $to && $to);
 			my $set = "$bbs<>$threadID";
 			push @$pSearchSet, $set;
 		}
 	}
-	# スレッド内全検索
+	# カテゴリー内全検索
 	elsif ($mode == 2) {
-		my $set = "$bbs<>$thread";
-		push @$pSearchSet, $set;
+		require './module/thread.pl';
+		require './module/bbs_info.pl';
+		my $BBSs = BBS_INFO->new;
+		
+		$BBSs->Load($Sys);
+		my @bbsSet = ();
+		$BBSs->GetKeySet('ALL', '', \@bbsSet);
+		
+		my $BBSpath = $Sys->Get('BBSPATH');
+		
+		foreach my $bbsID (@bbsSet) {
+			my $dir = $BBSs->Get('DIR', $bbsID);
+			
+			# 板ディレクトリに.0ch_hiddenというファイルがあれば読み飛ばす
+			next if (-e "$BBSpath/$dir/.0ch_hidden");
+			next if ($cat ne $BBSs->Get('CATEGORY', $bbsID));
+			
+			$Sys->Set('BBS', $dir);
+			my $Threads = THREAD->new;
+			$Threads->Load($Sys);
+			my @threadSet = ();
+			$Threads->GetKeySet('ALL', '', \@threadSet);
+			
+			foreach my $threadID (@threadSet) {
+				next if ($threadID > $to && $to);
+				my $set = "$dir<>$threadID";
+				push @$pSearchSet, $set;
+			}
+		}
 	}
 	# 指定がおかすぃ
 	else {
@@ -171,61 +206,76 @@ sub GetResultSet
 #
 #------------------------------------------------------------------------------------------------------------
 sub Search {
-    my $this = shift;
-    my ($word) = @_;
+	my $this = shift;
+	my ($word) = @_;
 
-    my $bbs = $this->{'SYS'}->Get('BBS');
-    my $key = $this->{'SYS'}->Get('KEY');
-    my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
-    my $DAT = $this->{'DAT'};
+	my $bbs = $this->{'SYS'}->Get('BBS');
+	my $key = $this->{'SYS'}->Get('KEY');
+	my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
+	my $DAT = $this->{'DAT'};
 
-    if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
-        my $pResultSet = $this->{'RESULTSET'};
-        my $type = $this->{'TYPE'} || 0x7;
+	my $from = $this->{'FROM'} || 0;
+	my $to = $this->{'TO'} || 0;
 
-        # 検索パターンをループの外でコンパイルする
-        my @patterns;
-        if ($type & 0x1) { push @patterns, quotemeta($word); }
-        if ($type & 0x2) { push @patterns, quotemeta($word); }
-        if ($type & 0x4) { push @patterns, quotemeta($word); }
-        my $pattern = join('|', @patterns);
-        my $re = qr/$pattern/;
+	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
+		my $pResultSet = $this->{'RESULTSET'};
+		my $type = $this->{'TYPE'} || 0x15;
 
-        # すべてのレス数でループ
-        for (my $i = 0; $i < $DAT->Size(); $i++) {
-            my $bFind = 0;
-            my $pDat = $DAT->Get($i);
-            my $data = $$pDat;
-            my @elem = split(/<>/, $data, -1);
+		# すべてのレス数でループ
+		for (my $i = 0; $i < $DAT->Size(); $i++) {
+			last if ($type == 0x8 && $i);
+			
+			my $bFind = 0;
+			my $pDat = $DAT->Get($i);
+			my @elem = split(/<>/, $$pDat, -1);
 
-            # 正規表現を使用せずに検索を実行する
-            if ($type & 0x1) {
-                if (index($elem[0], $word) != -1) {
-                    $elem[0] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
-                    $bFind = 1;
-                }
-            }
-            if ($type & 0x2) {
-                if (index($elem[3], $word) != -1) {
-                    $elem[3] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
-                    $bFind = 1;
-                }
-            }
-            if ($type & 0x4) {
-                if (index($elem[2], $word) != -1) {
-                    $elem[2] =~ s/(\Q$word\E)/<span class="res">$1<\/span>/g;
-                    $bFind = 1;
-                }
-            }
+			# レス時刻取得
+			if ($elem[2] =~ /(\d{4})\/(\d{2})\/(\d{2})\(\w+\) (\d{2}):(\d{2}):(\d{2})/) {
+				my $year = $1;
+				my $month = $2 - 1;   # 月 (0から始まる)
+				my $day = $3;         # 日
+				my $hour = $4;        # 時
+				my $min = $5;         # 分
+				my $sec = $6;         # 秒
 
-            if ($bFind) {
-                my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
-                $SetStr .= join('<>', @elem);
-                push @$pResultSet, $SetStr;
-            }
-        }
-    }
-    $DAT->Close();
+				my $unixtime = timelocal($sec, $min, $hour, $day, $month, $year);
+				next if (($unixtime < $from && $from) || ($to < $unixtime && $to));
+			}
+
+			# 名前検索
+			if ($type & 0x1) {
+				if ($elem[0] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+					$bFind = 1;
+				}
+			}
+			# 本文検索
+			if ($type & 0x2) {
+				if ($elem[3] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+					$bFind = 1;
+				}
+			}
+			# ID検索
+			if ($type & 0x4) {
+				my $id = (split(/ /,$elem[2]))[2];
+				if ($id =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+					$bFind = 1;
+				}
+			}
+			# スレタイ検索
+			if ($type & 0x8) {
+				if ($elem[4] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+					$bFind = 1;
+				}
+			}
+
+			if ($bFind) {
+				my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
+				$SetStr .= join('<>', @elem);
+				push @$pResultSet, $SetStr;
+			}
+		}
+	}
+	$DAT->Close();
 }
 
 #============================================================================================================

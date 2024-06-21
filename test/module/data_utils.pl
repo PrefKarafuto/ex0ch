@@ -229,36 +229,36 @@ sub ConvertTweet
 	my $this = shift;
 	my ($text) = @_ ;
 	
-	my $reg = '(?<!src=")(?<!a href=")(https?://(twitter|x)\.com/[A-Za-z0-9_]+/status/([^\p{Hiragana}\p{Katakana}\p{Han}\s]+)/?)';	 # TwitterURL検索
+	my $reg = '<a.*?>(https?://(twitter|x)(\.com/[A-Za-z0-9_]+/status/([0-9]+)/?))';	 # TwitterURL検索
 	
-	$$text =~ s|$reg|<a href="$1">$1</a><br><blockquote  class="twitter-tweet" data-width="300"><a href="$1">Tweet読み込み中...</a></blockquote>|g;
-	
+	$$text =~ s|$reg|<a href="$1">$1</a><br><blockquote class="twitter-tweet" data-width="300"><a href="https://twitter$3">Tweet読み込み中...</a></blockquote>|g;
+
 	return $text;
 	
 }
 #つべニコ動埋め込み
 sub ConvertMovie
 {
-    my $this = shift;
-    my ($text) = @_ ;
+	my $this = shift;
+	my ($text) = @_ ;
 
-    # Youtube URL patterns
-    my $youtube_pattern1 = qr{(https?://youtu\.be/([a-zA-Z0-9_-]+))};
-    my $youtube_pattern2 = qr{(https?://(www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+))};
+	# Youtube URL patterns
+	my $youtube_pattern1 = qr{(https?://youtu\.be/([a-zA-Z0-9_-]+))};
+	my $youtube_pattern2 = qr{(https?://(www\.)?youtube\.com/watch\?v=([a-zA-Z0-9_-]+))};
 
-    # NicoNico URL patterns
-    my $nico_pattern1 = qr{(https?://nico\.ms/sm([0-9]+))};
-    my $nico_pattern2 = qr{(https?://(www\.)?nicovideo\.jp/watch/sm([0-9]+))};
+	# NicoNico URL patterns
+	my $nico_pattern1 = qr{(https?://nico\.ms/sm([0-9]+))};
+	my $nico_pattern2 = qr{(https?://(www\.)?nicovideo\.jp/watch/sm([0-9]+))};
 
 	my $reg1 = '<div class="video"><div class="video_iframe"><iframe width="560" height="315" src=';
 	my $reg2 = 'frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe></div></div>';
 
-    $$text =~ s|$youtube_pattern1|$reg1"https://www.youtube.com/embed/$2"$reg2|g;
-    $$text =~ s|$youtube_pattern2|$reg1"https://www.youtube.com/embed/$3"$reg2|g;
-    $$text =~ s|$nico_pattern1|$reg1"https://embed.nicovideo.jp/watch/sm$3"$reg2|g;
+	$$text =~ s|$youtube_pattern1|$reg1"https://www.youtube.com/embed/$2"$reg2|g;
+	$$text =~ s|$youtube_pattern2|$reg1"https://www.youtube.com/embed/$3"$reg2|g;
+	$$text =~ s|$nico_pattern1|$reg1"https://embed.nicovideo.jp/watch/sm$3"$reg2|g;
 	$$text =~ s|$nico_pattern2|$reg1"https://embed.nicovideo.jp/watch/sm$3"$reg2|g;
 
-    return $text;
+	return $text;
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -413,34 +413,31 @@ sub GetThreadTitle
 #	汎用画像タグ変換
 #	-------------------------------------------------------------------------------------
 #	引数    	$Sys	SYSTEM
-#	    	$limit	リンク時間制限
-#	    	$text	対象文字列
+#			$limit	リンク時間制限
+#			$text	対象文字列
 #	戻り値	変換後のメッセージ
 #
 #------------------------------------------------------------------------------------------------------------
 sub ConvertImageTag
 {
 	my $this = shift;
-	my ($Sys,$limit, $text,$index) = @_;
+	my ($Sys,$limit,$text) = @_;
 
-	my $reg1 = q{(?<!src="?)https?://.*?\.(jpe?g|gif|bmp|png)};
-	my $reg2 = q{<a.*?>(.*?\.(jpe?g|gif|bmp|png))};
+	my $type = $Sys->Get('IMGTAG');
+
+	my $reg_img = qq{(jpe?g|gif|bmp|a?png|tiff?|xcf|webp)};
+	my $reg1 = qq{(?<!src="?)https?://.*?\.$reg_img};
+	my $reg2 = qq{<a.*?>(.*?\.$reg_img)};
+	my $reg3 = qq{(?<!src="?)https?://(i\.imgur\.com/[a-zA-Z0-9]{7}|pbs\.twimg\.com/media/[a-zA-Z0-9]{15})\.$reg_img};
+	my $reg4 = qq{<a.*?>(https?://(i\.imgur\.com/[a-zA-Z0-9]{7}|pbs\.twimg\.com/media/[a-zA-Z0-9]{15})\.$reg_img)};
 	
 	if($limit||($Sys->Get('URLLINK') eq 'FALSE')){
-		if ($index){
-			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" width=\"300px\" height=\"auto\">|g;
-		}
-		else{
-			$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
-		}
+		$reg1 = $reg3 if $type;
+		$$text =~ s|$reg1|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" style=\"max-width:250px;max-height:250px;\">|g;
 	}
 	else{
-		if ($index){
-			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" width=\"300px\" height=\"auto\">|g;
-		}
-		else{
-			$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img sclass=\"post_image\" src=\"$1\" style=\"max-width:250px;height:auto;\">|g;
-		}
+		$reg2 = $reg4 if $type;
+		$$text =~ s|$reg2|<a href=\"$1\">$1</a><br><img class=\"post_image\" src=\"$1\" style=\"max-width:250px;max-height:250px;\">|g;
 	}
 	return $text;
 }
@@ -740,15 +737,15 @@ sub GetProductInfo
 #
 #------------------------------------------------------------------------------------------------------------
 sub MakeIDnew {
-    my $this = shift;
-    my ($Sys, $column,$sid,$chid) = @_;
+	my $this = shift;
+	my ($Sys, $column,$sid,$chid) = @_;
 
-    my $addr = $ENV{'REMOTE_ADDR'};
-    my @ip = ($addr =~ /:/) ? split(/:/,$addr) : split(/\./,$addr);
-    my $ua = $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
+	my $addr = $ENV{'REMOTE_ADDR'};
+	my @ip = ($addr =~ /:/) ? split(/:/,$addr) : split(/\./,$addr);
+	my $ua = $ENV{'HTTP_SEC_CH_UA'} // $ENV{'HTTP_USER_AGENT'};
 
-    my $provider;
-    my $HOST = $ENV{'REMOTE_HOST'};
+	my $provider;
+	my $HOST = $ENV{'REMOTE_HOST'};
 
 	# プロバイダのドメインを取得
 	if ($HOST) {
@@ -763,25 +760,25 @@ sub MakeIDnew {
 		}
 	}
 
-    require Digest::MD5;
-    my $ctx = Digest::MD5->new;
-    $ctx->add('ex0ch ID Generation');
-    $ctx->add(':', $Sys->Get('SERVER'));
-    $ctx->add(':', $Sys->Get('BBS'));
-    # セッションIDが存在する場合はセッションIDを、存在しない場合はIP+UAを使ってIDを生成
-    if ($sid) {
-        $ctx->add(':', $sid);
-    } else {
-        $ctx->add(':', $ip[0].$ip[1].($#ip > 3 ? $ip[2].$ip[3]:'').$provider);
+	require Digest::MD5;
+	my $ctx = Digest::MD5->new;
+	$ctx->add('ex0ch ID Generation');
+	$ctx->add(':', $Sys->Get('SERVER'));
+	$ctx->add(':', $Sys->Get('BBS'));
+	# セッションIDが存在する場合はセッションIDを、存在しない場合はIP+UAを使ってIDを生成
+	if ($sid) {
+		$ctx->add(':', $sid);
+	} else {
+		$ctx->add(':', $ip[0].$ip[1].($#ip > 3 ? $ip[2].$ip[3]:'').$provider);
 		$ctx->add(':', $ua);
-    }
-    $ctx->add(':', join('-', (localtime)[3,4,5]));
-    $ctx->add(':', $chid);
-    
-    my $id = $ctx->b64digest;
-    $id = substr($id, 0, $column);
+	}
+	$ctx->add(':', join('-', (localtime)[3,4,5]));
+	$ctx->add(':', $chid);
+	
+	my $id = $ctx->b64digest;
+	$id = substr($id, 0, $column);
 
-    return $id;
+	return $id;
 }
 #------------------------------------------------------------------------------------------------------------
 #
@@ -1334,16 +1331,16 @@ sub IsReferer
 #------------------------------------------------------------------------------------------------------------
 sub IsJPIP {
 	my $this = shift;
-    my ($Sys) = @_;
+	my ($Sys) = @_;
 	my $ipAddr = $ENV{'REMOTE_ADDR'};
 	my $infoDir = $Sys->Get('INFO');
 
 	return 1 if $ENV{'REMOTE_HOST'} =~ /\.jp$/;
 
-    my $filename_ipv4 = ".$infoDir/IP_List/jp_ipv4.cgi";
+	my $filename_ipv4 = ".$infoDir/IP_List/jp_ipv4.cgi";
 	my $filename_ipv6 = ".$infoDir/IP_List/jp_ipv6.cgi";
 
-	if(time - (stat($filename_ipv4))[9] > 60*60*24*7 || !(-e $filename_ipv4)){
+	if(time - (stat($filename_ipv4))[9] > 60*60*24*30 || !(-e $filename_ipv4)){
 		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
 	}
 
@@ -1359,146 +1356,146 @@ sub IsJPIP {
 }
 # 日本IPリスト取得用
 sub GetApnicJPIPList {
-    my ($filename_ipv4, $filename_ipv6) = @_;
-    my $ua = LWP::UserAgent->new;
+	my ($filename_ipv4, $filename_ipv6) = @_;
+	my $ua = LWP::UserAgent->new;
 	$ua->timeout(1);
-    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
+	my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
 
 	my $response = $ua->get($url);
-    unless ($response->is_success) {
-        warn "データの取得に失敗: " . $response->status_line;
-        return 0; # 失敗時に0を返す
-    }
+	unless ($response->is_success) {
+		warn "データの取得に失敗: " . $response->status_line;
+		return 0; # 失敗時に0を返す
+	}
 	my $data = $response->decoded_content;
 	require Math::BigInt;
 
-    my @jp_ipv4_ranges;
-    my @jp_ipv6_ranges;
-    my $last_end_ipv4 = -1;
-    my $last_end_ipv6 = Math::BigInt->new(-1);
+	my @jp_ipv4_ranges;
+	my @jp_ipv6_ranges;
+	my $last_end_ipv4 = -1;
+	my $last_end_ipv6 = Math::BigInt->new(-1);
 
-    foreach my $line (split /\n/, $data) {
-        if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|.*$/) {
-            # IPv4の範囲処理
-            my $start_ip_num = ip_to_number($1);
-            my $end_ip_num = $start_ip_num + $2 - 1;
+	foreach my $line (split /\n/, $data) {
+		if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|.*$/) {
+			# IPv4の範囲処理
+			my $start_ip_num = ip_to_number($1);
+			my $end_ip_num = $start_ip_num + $2 - 1;
 
-            if ($start_ip_num == $last_end_ipv4 + 1) {
-                $jp_ipv4_ranges[-1]->{end} = $end_ip_num;
-            } else {
-                push @jp_ipv4_ranges, { start => $start_ip_num, end => $end_ip_num };
-            }
-            $last_end_ipv4 = $end_ip_num;
-        }
-        elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|.*$/) {
-            # IPv6の範囲処理
-            my $start_ip_num = ip_to_number($1);
-            my $end_ip_num = $start_ip_num + Math::BigInt->new(2)->bpow($2) - 1;
+			if ($start_ip_num == $last_end_ipv4 + 1) {
+				$jp_ipv4_ranges[-1]->{end} = $end_ip_num;
+			} else {
+				push @jp_ipv4_ranges, { start => $start_ip_num, end => $end_ip_num };
+			}
+			$last_end_ipv4 = $end_ip_num;
+		}
+		elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|.*$/) {
+			# IPv6の範囲処理
+			my $start_ip_num = ip_to_number($1);
+			my $end_ip_num = $start_ip_num + Math::BigInt->new(2)->bpow($2) - 1;
 
-            if ($start_ip_num == $last_end_ipv6 + 1) {
-                $jp_ipv6_ranges[-1]->{end} = $end_ip_num;
-            } else {
-                push @jp_ipv6_ranges, { start => $start_ip_num, end => $end_ip_num };
-            }
-            $last_end_ipv6 = $end_ip_num;
-        }
-    }
+			if ($start_ip_num == $last_end_ipv6 + 1) {
+				$jp_ipv6_ranges[-1]->{end} = $end_ip_num;
+			} else {
+				push @jp_ipv6_ranges, { start => $start_ip_num, end => $end_ip_num };
+			}
+			$last_end_ipv6 = $end_ip_num;
+		}
+	}
 
 	eval {
-        open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
-        foreach my $range (@jp_ipv4_ranges) {
-            print $file_ipv4 "$range->{start}-$range->{end}\n";
-        }
-        close $file_ipv4;
-        chmod 0600, $filename_ipv4;
+		open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
+		foreach my $range (@jp_ipv4_ranges) {
+			print $file_ipv4 "$range->{start}-$range->{end}\n";
+		}
+		close $file_ipv4;
+		chmod 0600, $filename_ipv4;
 
-        open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
-        foreach my $range (@jp_ipv6_ranges) {
-            print $file_ipv6 "$range->{start}-$range->{end}\n";
-        }
-        close $file_ipv6;
-        chmod 0600, $filename_ipv6;
-    };
-    if ($@) {
-        warn "ファイル書き込みに失敗しました: $@";
-        return 0; # 失敗時に0を返す
-    }
+		open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
+		foreach my $range (@jp_ipv6_ranges) {
+			print $file_ipv6 "$range->{start}-$range->{end}\n";
+		}
+		close $file_ipv6;
+		chmod 0600, $filename_ipv6;
+	};
+	if ($@) {
+		warn "ファイル書き込みに失敗しました: $@";
+		return 0; # 失敗時に0を返す
+	}
 
-    return 1; # 成功時に1を返す
+	return 1; # 成功時に1を返す
 }
 sub binary_search_ip_range {
-    my ($ipAddr, $filename) = @_;
-    my $ip_num = ip_to_number($ipAddr);
-    my $ranges = load_ip_ranges($filename);
+	my ($ipAddr, $filename) = @_;
+	my $ip_num = ip_to_number($ipAddr);
+	my $ranges = load_ip_ranges($filename);
 	return -1 unless $ranges;
-    my $low = 0;
-    my $high = @$ranges - 1;
+	my $low = 0;
+	my $high = @$ranges - 1;
 
-    while ($low <= $high) {
-        my $mid = int(($low + $high) / 2);
-        if ($ip_num < $ranges->[$mid]->{start}) {
-            $high = $mid - 1;
-        } elsif ($ip_num > $ranges->[$mid]->{end}) {
-            $low = $mid + 1;
-        } else {
-            return 1; # IPアドレスは範囲内にあります
-        }
-    }
+	while ($low <= $high) {
+		my $mid = int(($low + $high) / 2);
+		if ($ip_num < $ranges->[$mid]->{start}) {
+			$high = $mid - 1;
+		} elsif ($ip_num > $ranges->[$mid]->{end}) {
+			$low = $mid + 1;
+		} else {
+			return 1; # IPアドレスは範囲内にあります
+		}
+	}
 
-    return 0; # IPアドレスは範囲外です
+	return 0; # IPアドレスは範囲外です
 }
 sub load_ip_ranges {
-    my $filename = shift;
-    my @ranges;
+	my $filename = shift;
+	my @ranges;
 
-    # ファイルオープンと例外処理
-    open my $file, '<', $filename or do {
-        warn "ファイルを開けません: $filename";
-        return 0; # 失敗時に0を返す
-    };
-    
-    # ファイル読み込みと例外処理
-    eval {
+	# ファイルオープンと例外処理
+	open my $file, '<', $filename or do {
+		warn "ファイルを開けません: $filename";
+		return 0; # 失敗時に0を返す
+	};
+	
+	# ファイル読み込みと例外処理
+	eval {
 		require Math::BigInt;
-        while (my $line = <$file>) {
-            chomp $line;
-            my ($start, $end) = split /-/, $line;
-            push @ranges, {
-                start => Math::BigInt->new($start),
-                end => Math::BigInt->new($end)
-            };
-        }
-        close $file;
-    };
-    if ($@) {
-        warn "ファイル読み込み中にエラーが発生しました: $@";
-        return 0; # 失敗時に0を返す
-    }
+		while (my $line = <$file>) {
+			chomp $line;
+			my ($start, $end) = split /-/, $line;
+			push @ranges, {
+				start => Math::BigInt->new($start),
+				end => Math::BigInt->new($end)
+			};
+		}
+		close $file;
+	};
+	if ($@) {
+		warn "ファイル読み込み中にエラーが発生しました: $@";
+		return 0; # 失敗時に0を返す
+	}
 
-    return \@ranges; # 成功時にIP範囲の配列のリファレンスを返す
+	return \@ranges; # 成功時にIP範囲の配列のリファレンスを返す
 }
 sub ip_to_number {
-    my $ip = shift;
+	my $ip = shift;
 
-    if ($ip =~ /^\d{1,3}(?:\.\d{1,3}){3}$/) { # IPv4
-        return unpack("N", pack("C4", split(/\./, $ip)));
-    } elsif ($ip =~ /^[0-9a-f:]+$/i) { # IPv6
-        # 省略記法の処理
-        if ($ip =~ /::/) {
-            my $filler = ':' . ('0:' x (8 - (() = $ip =~ /:/g))) . '0';
-            $ip =~ s/::/$filler/;
-            $ip =~ s/^:/0:/; # 先頭が省略された場合
-            $ip =~ s/:$/:0/; # 末尾が省略された場合
-        }
+	if ($ip =~ /^\d{1,3}(?:\.\d{1,3}){3}$/) { # IPv4
+		return unpack("N", pack("C4", split(/\./, $ip)));
+	} elsif ($ip =~ /^[0-9a-f:]+$/i) { # IPv6
+		# 省略記法の処理
+		if ($ip =~ /::/) {
+			my $filler = ':' . ('0:' x (8 - (() = $ip =~ /:/g))) . '0';
+			$ip =~ s/::/$filler/;
+			$ip =~ s/^:/0:/; # 先頭が省略された場合
+			$ip =~ s/:$/:0/; # 末尾が省略された場合
+		}
 		require Math::BigInt;
-        my $bigint = Math::BigInt->new(0);
-        foreach my $part (split /:/, $ip) {
-            $bigint = ($bigint << 16) + hex($part);
-        }
-        return $bigint;
-    } else {
-        return undef;
-    }
+		my $bigint = Math::BigInt->new(0);
+		foreach my $part (split /:/, $ip) {
+			$bigint = ($bigint << 16) + hex($part);
+		}
+		return $bigint;
+	} else {
+		return undef;
+	}
 }
 #------------------------------------------------------------------------------------------------------------
 #
@@ -1510,53 +1507,51 @@ sub ip_to_number {
 #
 #------------------------------------------------------------------------------------------------------------
 sub IsProxyAPI {
-	my $this = shift;
-    my ($Sys,$mode) = @_;
+    my $this = shift;
+    my ($Sys, $mode) = @_;
 
-	my $infoDir = $Sys->Get('INFO');
-	my $ipAddr = $ENV{'REMOTE_ADDR'};
-	my $checkKey = $Sys->Get('PROXYCHECK_APIKEY');
+    my $infoDir = $Sys->Get('INFO');
+    my $ipAddr = $ENV{'REMOTE_ADDR'};
+    my $api_key = $Sys->Get('PROXYCHECK_APIKEY');
+	my $api_name = $Sys->Get('PROXYCHECK_API');
+	my $cache_day = 7;		# キャッシュの有効期間
 
-	$mode //= 1;
+    $mode //= 1;  # デフォルト値を設定
 
-    my $file = ".$infoDir/IP_List/proxy_check.cgi";#結果のキャッシュ
-	my $proxy_list;
-    $proxy_list = retrieve($file) if -e $file;
-    $proxy_list = {} unless defined $proxy_list;
+    my $cacheFile = "$infoDir/IP_List/proxy_check.cgi"; # 結果のキャッシュファイル
+    my $proxy_list = -e $cacheFile ? retrieve($cacheFile) : {};
 
-	if($proxy_list->{$ipAddr}->{"time"} + 60*60*24*7 > time){
-		if($proxy_list->{$ipAddr}->{"flag"}){
-			return 1;
-		}else{
-			return 0;
-		}
-	}
+    if (defined $proxy_list->{$ipAddr} && $proxy_list->{$ipAddr}->{"time"} + 60*60*24*$cache_day > time) {
+        return $proxy_list->{$ipAddr}->{"flag"};
+    }
+	
+	# APIリクエスト
+	# 'サービス名'	=> {url => "エンドポイントURL", json_key => 'API返答に含まれるプロキシ判定のキー', json_value => 'プロキシ判定が真であることを意味する値'},
+	my $api_req = {
+		'proxycheck.io'	=> {url => "https://proxycheck.io/v2/${ipAddr}?key=${$api_key}&vpn=${mode}", json_key => 'proxy', json_value => 'yes'},
+		'ipqualityscore'=> {url => "https://ipqualityscore.com/api/json/ip/${$api_key}/${ipAddr}", json_key => 'proxy', json_value => 'true'},
+		'ip2location'	=> {url => "https://api.ip2location.io/?key=${$api_key}&ip=${ipAddr}&format=json", json_key => 'is_proxy', json_value => 'true'},
+		'abstract'		=> {url => "https://ipgeolocation.abstractapi.com/v1/?api_key=${$api_key}&ip_address=${ipAddr}", json_key => 'is_vpn', json_value => 'true'},
+		'ipdata'		=> {url => "https://api.ipdata.co/${ipAddr}/threat?api-key=${$api_key}", json_key => 'is_anonymous', json_value => 'true'},
+	};
 
-	if($checkKey){
-		my $url = "http://proxycheck.io/v2/${ipAddr}?key=${checkKey}&vpn=${mode}";
-		my $ua = LWP::UserAgent->new();
-		my $response = $ua->get($url);
+    if ($api_key && $api_name) {
+        my $ua = LWP::UserAgent->new();
+        my $response = $ua->get($api_req->{$api_name}{url});
 
-		if ($response->is_success) {
-			my $json = $response->decoded_content();
-			my $out = decode_json($json);
-			my $isProxy = $out->{$ipAddr}->{"proxy"};
+        if ($response->is_success) {
+            my $json = $response->decoded_content();
+            my $out = decode_json($json);
+            my $isProxy = $out->{$ipAddr}->{$api_req->{$api_name}{json_key}};
 
-			if ($isProxy eq 'yes') {
-				$proxy_list->{$ipAddr}->{"flag"} = 1;
-				$proxy_list->{$ipAddr}->{"time"} = time;
-				store $proxy_list, $file;
-				chmod 0600, $file;
-				return 1;
-			}else{
-				$proxy_list->{$ipAddr}->{"flag"} = 0;
-				$proxy_list->{$ipAddr}->{"time"} = time;
-				store $proxy_list, $file;
-				chmod 0600, $file;
-				return 0;
-			}
-		}
-	}
+            $proxy_list->{$ipAddr}->{"flag"} = $isProxy eq $api_req->{$api_name}{json_value} ? 1 : 0;
+            $proxy_list->{$ipAddr}->{"time"} = time;
+            store $proxy_list, $cacheFile;
+            chmod 0600, $cacheFile;
+
+            return $proxy_list->{$ipAddr}->{"flag"};
+        }
+    }
     return 0;
 }
 #------------------------------------------------------------------------------------------------------------
@@ -1601,33 +1596,33 @@ sub IsProxyDNSBL
 #------------------------------------------------------------------------------------------------------------
 sub CheckDNSBL {
 	my $this = shift;
-    my ($ip, $DNSBL_host) = @_;
-    my $reversed_ip = '';
+	my ($ip, $DNSBL_host) = @_;
+	my $reversed_ip = '';
 	require Net::DNS;
 
-    if ($ip =~ /:/) {  # IPv6アドレスの場合
-        $ip =~ s/://g;
-        $reversed_ip = join('.', reverse(split('', $ip)));
-    } else {  # IPv4アドレスの場合
-        $reversed_ip = join('.', reverse(split(/\./, $ip)));
-    }
+	if ($ip =~ /:/) {  # IPv6アドレスの場合
+		$ip =~ s/://g;
+		$reversed_ip = join('.', reverse(split('', $ip)));
+	} else {  # IPv4アドレスの場合
+		$reversed_ip = join('.', reverse(split(/\./, $ip)));
+	}
 
-    my $query_host = "$reversed_ip.$DNSBL_host";
+	my $query_host = "$reversed_ip.$DNSBL_host";
 
-    my $res = Net::DNS::Resolver->new(
-        tcp_timeout => 1,  # TCPタイムアウトを1秒に設定
-        udp_timeout => 1,  # UDPタイムアウトを1秒に設定
-        retry       => 1,  # 再試行回数を1回に設定
-    );
+	my $res = Net::DNS::Resolver->new(
+		tcp_timeout => 1,  # TCPタイムアウトを1秒に設定
+		udp_timeout => 1,  # UDPタイムアウトを1秒に設定
+		retry       => 1,  # 再試行回数を1回に設定
+	);
 
-    my $query = $res->query($query_host, "A");
+	my $query = $res->query($query_host, "A");
 
 	if ($query) {
 		foreach my $rr ($query->answer) {
 			return 1 if $rr->type eq "A";  # Aレコードが見つかったら1を返して終了
 		}
 	}
-    return 0;  # マッチしない場合は0を返す
+	return 0;  # マッチしない場合は0を返す
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -1705,34 +1700,34 @@ sub MakePath
 # 逆引き関数
 sub reverse_lookup {
 	my $this = shift;
-    my ($ip) = @_;
+	my ($ip) = @_;
 
-    # IPv4とIPv6のアドレスを判断し、適切なSocket定数を使用
+	# IPv4とIPv6のアドレスを判断し、適切なSocket定数を使用
 	my $inet = $ip =~ /:/ ? AF_INET6 : AF_INET;
-    my $addr = inet_pton($inet, $ip);
+	my $addr = inet_pton($inet, $ip);
 
-    # 逆引き実施
-    my $host = gethostbyaddr($addr, $inet);
+	# 逆引き実施
+	my $host = gethostbyaddr($addr, $inet);
 
-    # 逆引きが成功した場合はホスト名を、失敗した場合はIPアドレスを返す
-    return $host ? $host : $ip;
+	# 逆引きが成功した場合はホスト名を、失敗した場合はIPアドレスを返す
+	return $host ? $host : $ip;
 }
 
 # IPv6展開
 sub expand_ipv6 {
 	my $this = shift;
-    my ($ip) = @_;
-    # いきなり128 bitのバイナリにする
-    my $packed_addr = inet_pton(AF_INET6, $ip);
-    # inet_pton は失敗しないはずだが
-    # nginx + Listen Unix domain socket の場合は REMOTE_ADDR = "unix:" and REMOTE_ADDR =~ /:/ になるので
-    # localhost(::1) として返す（扱う）
-    if (!defined $packed_addr) {
-        return "0000:0000:0000:0000:0000:0000:0000:0001";
-    }
-    # 16ビットずつ文字列に戻しつつ8個の配列にする
-    my @blocks = unpack '(H4)8', $packed_addr;
-    return join(':', @blocks);
+	my ($ip) = @_;
+	# いきなり128 bitのバイナリにする
+	my $packed_addr = inet_pton(AF_INET6, $ip);
+	# inet_pton は失敗しないはずだが
+	# nginx + Listen Unix domain socket の場合は REMOTE_ADDR = "unix:" and REMOTE_ADDR =~ /:/ になるので
+	# localhost(::1) として返す（扱う）
+	if (!defined $packed_addr) {
+		return "0000:0000:0000:0000:0000:0000:0000:0001";
+	}
+	# 16ビットずつ文字列に戻しつつ8個の配列にする
+	my @blocks = unpack '(H4)8', $packed_addr;
+	return join(':', @blocks);
 }
 
 #============================================================================================================

@@ -199,8 +199,8 @@ sub PrintKakoLogList
 	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST_KAKO', ");
 	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
 	$Page->Print("</td><td colspan=2 align=right>");
-	$Page->Print("表\示数<input type=text name=DISPNUM_KAKO size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"　表\示　\" onclick=\"$common\"></td></tr>\n");
+	$Page->Print("表示数<input type=text name=DISPNUM_KAKO size=4 value=$dispNum>");
+	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30\"><a href=\"javascript:toggleAll('LOGS')\">全</a></th>");

@@ -4,36 +4,36 @@
 */
 
 @media screen and (max-width:768px) {
-    .bbs_service_textarea textarea {
-    resize: vertical;
-    width:95%;
-    margin:0;
-    }
+	.bbs_service_textarea textarea {
+	resize: vertical;
+	width:95%;
+	margin:0;
+	}
 }
 
 /*PCでは無効（改行しない）*/
 .smartphone{
-    display: none;
+	display: none;
 }
 /*スマートフォンでは有効（改行する）*/
 @media screen and (max-width:768px) {
-    .smartphone{
-        display: block;
-    }
+	.smartphone{
+		display: block;
+	}
 }
 
 /* bbs.cgiでスレッド作成のボタンをスマホだと一番上にする */
 @media screen and (max-width:768px) {
-    .reverse_order{
-     display: flex;
-     flex-direction: column;
-    }
+	.reverse_order{
+	 display: flex;
+	 flex-direction: column;
+	}
 }
 .order1 {
-    order: 1;
+	order: 1;
 }
 .order2 {
-    order: 2;
+	order: 2;
 }
 .post {
   border-width: 1px;
@@ -42,7 +42,7 @@
   border-color: #ddd;
   margin-bottom: 8px;
   padding: 8px;
-  word-break: break-all;
+  word-break: break-word;
 }
 .meta {
   font-size: 14px;
@@ -55,16 +55,16 @@
  overflow-wrap:break-word;
 }
 .backmascot {
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position-x: calc(100% - 250px);
-    background-position-y: bottom;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position-x: calc(100% - 250px);
+	background-position-y: bottom;
 }
 .aaview{
-    font-family:MS Gothic;
-    font-size: 16px;
-    line-height:1;
-    white-space:nowrap;
+	font-family:MS Gothic;
+	font-size: 16px;
+	line-height:1;
+	white-space:nowrap;
 }
 /*
 埋め込み画像や動画のレスポンシブ化
@@ -72,17 +72,17 @@ https://akros-ac.jp/8277/
 */
 /* https://web-de-asobo.net/2022/10/06/html-dl-dt-dd/ */
 @media screen and (max-width:768px) {
-    dd {
-    margin-inline-start: 0;
-    }
+	dd {
+	margin-inline-start: 0;
+	}
 }
 
 .responsive{
-    position:relative;
-    padding-bottom: 56.25%; /* 16:9 */
-    height: 0;
-    overflow: hidden;
-    max-width: 300px
+	position:relative;
+	padding-bottom: 56.25%; /* 16:9 */
+	height: 0;
+	overflow: hidden;
+	max-width: 300px
 }
 .responsive iframe{
 position:absolute;
@@ -93,56 +93,233 @@ height:100%;
 }
 
 @media screen and (max-width:768px) {
-    blockquote{
-        margin-block-start: 0em;
-        margin-block-end: 0em;
-        margin-inline-start: 0px;
-        margin-inline-end: 0px;
-    }
+	blockquote{
+		margin-block-start: 0em;
+		margin-block-end: 0em;
+		margin-inline-start: 0px;
+		margin-inline-end: 0px;
+	}
 }
 .video {
-    width: 100%;
-    max-width: 560px;
+	width: 100%;
+	max-width: 560px;
   }
 .video_iframe {
-    position: relative;
-    width: 100%;
-    padding-top: 56.25%;
-    margin-bottom: 50px;
+	position: relative;
+	width: 100%;
+	padding-top: 56.25%;
+	margin-bottom: 50px;
   }
 .video_iframe iframe {
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 100%;
+	height: 100%;
   }
   #overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    z-index: 999;
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7);
+	z-index: 999;
   }
   
   #overlay img {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    max-width: 90%;
-    max-height: 90%;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	max-width: 75%;
+	max-height: 75%;
   }
   
   #close-button {
-    position: absolute;
-    bottom: 10%;
-    right: 10%;
-    cursor: pointer;
-    color: white;
-    font-size: 24px;
+	position: absolute;
+	bottom: 10%;
+	right: 10%;
+	cursor: pointer;
+	color: white;
+	font-size: 24px;
   }
-  
+  .bbs_service_textarea textarea{
+    width: 100%;
+    max-width: 800px;
+    display: block;
+    box-sizing: border-box; /* パディングとボーダーを含む幅を考慮 */
+    border: 1px solid #ccc; /* ボーダーのスタイリング */
+    border-radius: 4px; /* 角を丸くする */
+    font-size: 16px; /* フォントサイズを設定 */
+    resize: vertical; /* ユーザーが垂直方向にサイズを変更できるようにする */
+}
+/* PC用サイドメニューバー */
+.sidebar {
+    width: 200px;
+    height: 100%;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background-color: #333;
+    display: block;
+    overflow-y: auto; /* 縦スクロールを有効にする */
+}
+
+.sidebar ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    padding: 8px;
+    text-align: center;
+}
+
+.sidebar ul li a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active { /* アクティブなリンクのスタイル */
+    background-color: #575757;
+    font-weight: bold;
+}
+
+/* タイトルとカテゴリのスタイリング */
+.menu-title {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #444444;
+    padding: 10px;
+    text-align: center;
+}
+
+.category-title {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #dddddd;
+    padding: 8px 10px;
+    background-color: #555555;
+    text-align: left;
+}
+
+/* スマホ用プルダウンメニューバー */
+.dropdown {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0; /* 左端に配置 */
+    width: 100%;
+    background-color: #333;
+    z-index: 1;
+}
+
+.dropbtn {
+    background-color: #333;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    display: flex; /* フレックスボックスを使用 */
+    justify-content: space-between; /* 左右に配置 */
+    align-items: center; /* 垂直方向に中央揃え */
+    box-sizing: border-box; /* パディングを含む幅を考慮 */
+}
+
+.sitename {
+    max-width: calc(100% - 60px); /* ハンバーガーメニューアイコンの幅を考慮 */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hamburger-icon {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 24px;
+    height: 24px;
+}
+
+.hamburger-icon span {
+    display: block;
+    width: 24px;
+    height: 3px;
+    background-color: white;
+}
+
+/* ドロップダウンメニューのスタイル */
+.dropdown-content {
+    display: none;
+    position: fixed;
+    top: 50px; /* メニューボタンの高さ分下げる */
+    left: 0; /* 左端に配置 */
+    width: 100%;
+    max-height: calc(100vh - 50px); /* 画面高さからメニューボタンの高さを引いた分 */
+    background-color: #333;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    overflow-y: auto; /* 縦スクロールを有効にする */
+    box-sizing: border-box; /* パディングを含む幅を考慮 */
+    opacity: 0.95;
+}
+
+.dropdown-content a, .dropdown-content span {
+    display: block;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: white;
+    box-sizing: border-box; /* パディングを含む幅を考慮 */
+}
+
+.dropdown-content a:hover,
+.dropdown-content a.active { /* アクティブなリンクのスタイル */
+    background-color: #575757;
+    font-weight: bold;
+}
+
+/* スマホ用タイトルとカテゴリのスタイリング */
+.dropdown-content .menu-title {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #444444;
+    padding: 10px;
+}
+
+.dropdown-content .category-title {
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #dddddd;
+    background-color: #555555;
+    padding: 8px 10px;
+}
+
+
+/* メインコンテンツ */
+.content {
+    margin-left: 200px; /* サイドメニューの幅 + マージン */
+    box-sizing: border-box; /* ボックスサイズをコンテンツ＋パディング＋ボーダーに含める */
+    max-width: calc(100% - 200px); /* サイドメニューの幅を引いた分の最大幅 */
+}
+
+@media screen and (max-width: 768px) {
+    .sidebar {
+        display: none;
+    }
+    .dropdown {
+        display: block;
+    }
+    .content {
+        margin-left: 0;
+        padding-top: 70px; /* ドロップダウンメニューの高さ分 */
+        max-width: 100%; /* スマホ用メニュー表示時の最大幅を100%に設定 */
+    }
+}

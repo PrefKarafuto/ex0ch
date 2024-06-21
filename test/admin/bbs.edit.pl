@@ -426,12 +426,14 @@ sub PrintValidUserEdit
 	$kind[1] = $vUsers->Get('TYPE') eq 'enable' ? '' : 'selected';
 	$kind[2] = $vUsers->Get('METHOD') eq 'disable' ? '' : 'selected';
 	$kind[3] = $vUsers->Get('METHOD') eq 'host' ? '' : 'selected';
+
+	my $status = $SYS->Get('HIDE_HITS') ? "非公開です。" : "ユーザーに公開されます。";
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
+	$Page->Print("<tr><td colspan=2><hr>規制情報は$status<hr></td></tr>\n");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">記法</td><td style=\"font-size: 14px\">");
-	$Page->Print("・ホスト名(正規表\現)<br>");
+	$Page->Print("・ホスト名(正規表現)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">\\.host\\d+\\.jp\$</b><br>");
 	$Page->Print("・IPアドレス(範囲指定あり)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.0.123</b><br>");
@@ -440,10 +442,19 @@ sub PrintValidUserEdit
 	$Page->Print("・端末固有番号<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">12345678901234_xx</b> (au)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">AbCd123</b> (docomo)<br>");
-	$Page->Print("<span style=\"margin-left: 20px\">その他</span><br>");
+	$Page->Print("・ユーザーエージェント<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">Mozilla/5.0 ([UA文字列])</b> (通常ブラウザ)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">Monazilla/1.0 ([UA文字列])</b> (専ブラ)<br>");
+	$Page->Print("・セッションID<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">fb665de3cfa1857555532696ea0c1539</b> (十六進数32桁)<br>");
+	$Page->Print("<br>・拡張コマンド<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:expires=2013/07/29 00:00:00!\.example\.jp</b> (期限付き規制)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:tate=1!\.example\.jp</b> (スレ立て限定規制)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:method=disable!\.example\.jp</b> (書込み禁止)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:method=host!\.example\.jp</b> (host表示)<br>");
 	$Page->Print("</td></tr>\n");
 	
-	$Page->Print("<tr><td class=\"DetailTitle\">対象ホスト・<br>端末識別子一覧</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">規制対象一覧</td><td>");
 	$Page->Print("<textarea name=VALID_USERS rows=10 cols=70 wrap=off>");
 	
 	my $sanitize = sub {
@@ -466,7 +477,7 @@ sub PrintValidUserEdit
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">規制方法</td><td>");
 	$Page->Print("<select name=VALID_METHOD>");
-	$Page->Print("<option value=host $kind[2]>ホスト表\示</option>");
+	$Page->Print("<option value=host $kind[2]>ホスト表示</option>");
 	$Page->Print("<option value=disable $kind[3]>書き込み不可</option>");
 	$Page->Print("</select></td></tr>\n");
 	
@@ -538,7 +549,7 @@ sub PrintNGWordsEdit
 	$Page->Print("<tr><td class=\"DetailTitle\">NGワード処理</td><td>");
 	$Page->Print("<select name=NG_METHOD>");
 	$Page->Print("<option value=disable $kind[0]>書き込み不可</option>");
-	$Page->Print("<option value=host $kind[1]>ホスト表\示</option>");
+	$Page->Print("<option value=host $kind[1]>ホスト表示</option>");
 	$Page->Print("<option value=delete $kind[2]>NGワード削除</option>");
 	$Page->Print("<option value=substitute $kind[3]>NGワード置換</option>");
 	$Page->Print("</select></td></tr>\n");
@@ -684,7 +695,7 @@ sub PrintLastEdit
 	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_FROM value=\"$elem[0]\"><br>");
 	$Page->Print("<input type=checkbox name=SANIT_NAME value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">メール</td><td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">メール（コマンド）</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_mail value=\"$elem[1]\"><br>");
 	$Page->Print("<input type=checkbox name=SANIT_MAIL value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">日付・ID</td><td>");

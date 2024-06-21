@@ -62,6 +62,9 @@ our $E_FORM_NOTEXT			= 151;
 our $E_FORM_NONAME			= 152;
 our $E_FORM_NOCAPTCHA		= 153;
 our $E_FORM_FAILEDCAPTCHA	= 154;
+our $E_FORM_FAILEDAUTH	    = 155;
+our $E_FORM_FAILEDUSERAUTH  = 158;
+our $E_FORM_AUTHCOMMAND 	= 159;
 #  制限に関するエラー
 our $E_LIMIT_STOPPEDTHREAD	= 200;
 our $E_LIMIT_OVERMAXRES		= 201;
@@ -88,7 +91,7 @@ our $E_REG_NGUSER			= 601;
 our $E_REG_SPAMKILL			= 602;
 our $E_REG_SAMETITLE		= 603;
 our $E_REG_NOTJPHOST		= 207;
-our $E_REG_NOHOST		    = 208;
+our $E_REG_NOHOST			= 208;
 our $E_REG_DNSBL			= 997;
 our $E_REG_BAN              = 700;
 our $E_REG_NINLVLIMIT       = 701;
@@ -119,16 +122,17 @@ our $E_SYSTEM_ERROR			= 990;
 our $E_SYSTEM_CAPTCHAERROR	= 991;
 #  ページ表示用番号
 our $E_PAGE_FINDTHREAD		= $E_READ_FAILEDLOADDAT;
-our $E_PAGE_THREAD			= 9000;
+our $E_PAGE_THREAD			= 9000; # 廃止
 our $E_PAGE_COOKIE			= 9001;
 our $E_PAGE_WRITE			= 9002;
-our $E_PAGE_THREADMOBILE	= 9003;
+our $E_PAGE_THREADMOBILE	= 9003; # 廃止
+our $E_PAGE_CAPTCHA     	= 9004;
 
 
 # CAP PERMISSION
 our $CAP_FORM_LONGSUBJECT		=  1; # タイトル文字数 制限解除
 our $CAP_FORM_LONGNAME			=  2; # 名前文字数 制限解除
-our $CAP_FORM_LONGMAIL			=  3; # メール文字数 制限解除
+our $CAP_FORM_LONGMAIL			=  3; # メール（コマンド）文字数 制限解除
 our $CAP_FORM_LONGTEXT			=  4; # 本文文字数 制限解除
 our $CAP_FORM_MANYLINE			=  5; # 本文行数 制限解除
 our $CAP_FORM_LONGLINE			=  6; # 本文1行文字数 制限解除
@@ -151,7 +155,7 @@ our $CAP_REG_NGWORD				= 22; # NGワード 規制解除
 our $CAP_DISP_NOSLIP			= 23; # 端末識別子非表示
 our $CAP_DISP_CUSTOMID			= 24; # 専用ID許可
 our $CAP_REG_COMMAND			= 25; # コマンド許可
-our $CAP_REG_NOATTR			    = 26; # スレッド属性による規制解除
+our $CAP_REG_NOATTR				= 26; # スレッド属性による規制解除
 our $CAP_REG_NOHOST             = 27; # 逆引き不可規制解除
 our $CAP_REG_NONINJA            = 28; # 忍法帖規制解除
 our $CAP_REG_NOCAPTCHA          = 29; # キャプチャ規制解除
