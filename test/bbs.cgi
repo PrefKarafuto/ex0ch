@@ -94,6 +94,7 @@ sub BBSCGI
 			PrintBBSJump($CGI, $Page);
 		}
 		else {
+			$Threads->Close();
 			PrintBBSError($CGI, $Page, $err);
 			$log = $err;
 		}

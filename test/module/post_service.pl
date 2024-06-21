@@ -405,6 +405,7 @@ sub GetSessionID
 	# レス番が存在しない場合は空文字が返る
 	my $log_entry = $Logger->Get($resnum) // '';
 	my $sid = (split(/<>/, $log_entry))[9];
+	$Logger->Close();
 
 	return $sid;
 }
