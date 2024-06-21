@@ -405,6 +405,7 @@ sub GetSessionID
 	# レス番が存在しない場合は空文字が返る
 	my $log_entry = $Logger->Get($resnum) // '';
 	my $sid = (split(/<>/, $log_entry))[9];
+	$Logger->Close();
 
 	return $sid;
 }
@@ -1168,7 +1169,7 @@ sub IsRegulation
 		}
 		
 		# レス書き込み(連続投稿)
-		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOBREAKPOST, $bbs) && !$ENV{'FCGI_ROLE'}) {		# FCGIバグ応急処置
+		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_NOBREAKPOST, $bbs)) {
 			if ($Set->Get('timeclose') && $Set->Get('timecount') ne '') {
 				my $Log = MANAGER_LOG->new;
 				$Log->Load($Sys, 'HST');
@@ -1179,7 +1180,7 @@ sub IsRegulation
 			}
 		}
 		# レス書き込み(二重投稿)
-		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DOUBLEPOST, $bbs) && !$ENV{'FCGI_ROLE'}) {		# FCGIバグ応急処置
+		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DOUBLEPOST, $bbs)) {
 			if ($this->{'SYS'}->Get('KAKIKO') == 1) {
 				my $Log = MANAGER_LOG->new;
 				$Log->Load($Sys, 'WRT', $Sys->Get('KEY'));
