@@ -187,7 +187,7 @@ sub PrintReadHead
 	$title = '' if(!defined $title);
 	my $mascot = $Set->Get('BBS_MASCOT');
 	my $url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/read.cgi/'.$Sys->Get('BBS').'/'.$Sys->Get('KEY').'/';
-	my $favicon = $Sys->Get('SERVER').'/'.$Sys->Get('BBS').'/'.$Set->Get('BBS_FAVICON');
+	my $favicon = $Set->Get('BBS_FAVICON');
 	my $image = $Set->Get('BBS_TITLE_PICTURE');
 	my $bbsname = $Set->Get('BBS_TITLE');
 	my $bbspath = $Sys->Get('BBS');
