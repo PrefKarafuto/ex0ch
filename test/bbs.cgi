@@ -21,7 +21,7 @@ use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 # 実行時間の計測開始 (デバッグ用)
 # sys.top.plのSetMenuList関数でコメントアウトを解除すると管理画面からログが閲覧できます
 use Time::HiRes qw(gettimeofday tv_interval);
-my ($exit, $log, $bbs);
+my ($exit, $debug_log, $debug_bbs);
 
 # BBSCGI実行
 eval 'require FCGI;'; 
@@ -31,18 +31,18 @@ if (! $@) {
 	my $count = 0;
 	while($request->Accept() >= 0){
 		my $start_time = [gettimeofday];
-		($exit, $log, $bbs) = BBSCGI();
+		($exit, $debug_log, $debug_bbs) = BBSCGI();
 		# ログに保存 (デバッグ用)
-		CGIExecutionTime($start_time, $log, $bbs.":$count", 100);
+		CGIExecutionTime($start_time, $debug_log, $debug_bbs.":$count", 100);
 		$count++;
 		$request->Finish();
 	}
 } else {
 	# 通常
 	my $start_time = [gettimeofday];
-	($exit, $log, $bbs) = BBSCGI();
+	($exit, $debug_log, $debug_bbs) = BBSCGI();
 	# ログに保存 (デバッグ用)
-	CGIExecutionTime($start_time, $log, $bbs, 100);
+	CGIExecutionTime($start_time, $debug_log, $debug_bbs, 100);
 }
 
 # CGIの実行結果を終了コードとする

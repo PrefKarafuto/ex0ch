@@ -1,6 +1,6 @@
 # EXぜろちゃんねる 
-HP: https://prefkarafuto.github.io/ExZeroChannel/
-GitHub: https://github.com/PrefKarafuto/ex0ch/
+HP: https://prefkarafuto.github.io
+GitHub: https://github.com/PrefKarafuto/ex0ch
 
 本スクリプトは、2002年に開発開始された「ぜろちゃんねる(http://0ch.mine.nu/)」スクリプトを２ちゃんねる仕様に改造するという目的で
 2010年はじまったプロジェクト「ぜろちゃんねるプラス(http://zerochplus.osdn.jp/)」がv0.7.4で開発停止したことを受けて、
@@ -22,6 +22,14 @@ GitHub: https://github.com/PrefKarafuto/ex0ch/
 - Net::DNS
 - LWP::UserAgent
 - XML::Simple
+- CGI::Cookie
+
+(Captchaを使う場合)
+- LWP::Protocol::https
+- Net::SSLeay
+
+(FastCGIを使う場合)
+- FCGI
 
 同梱のモジュール:
 - CGI::Session
