@@ -174,11 +174,10 @@ sub Write
 		$Ninja->Save($Sys,$password);
 	}
 
-	my $data = $this->MakeDatLine($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result);
-	my $line = "$data\n";
+	my $line = $this->MakeDatLine($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result);
 
 	# ログ書き込み
-	$this->AddLog($Sys,$Set,$Form,$data);
+	$this->AddLog($Sys,$Set,$Form,$line);
 	
 	# リモートホスト保存(SETTING.TXT変更により、常に保存)
 	SaveHost($Sys, $Form);
@@ -1530,7 +1529,7 @@ sub MakeDatLine
 		}
 	}
 	
-	return "$name<>$mail<>$info<>$text<>$subject";
+	return "$name<>$mail<>$info<>$text<>$subject\n";
 }
 
 sub AddDatFile
@@ -1571,6 +1570,7 @@ sub AddLog
 	my $this = shift;
 	my ($Sys,$Set,$Form,$data) = @_;
 
+	chomp($data);
 	require './module/manager_log.pl';
 	my $Log = MANAGER_LOG->new;
 	$Log->Load($Sys, 'WRT', $Sys->Get('KEY'));
