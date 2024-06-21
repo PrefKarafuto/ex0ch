@@ -281,7 +281,7 @@ HTML
 		if(!$Sys->Equal('MODE', 1)){
 			$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
 		}else{
-			$Page->Print("<a href=\"$bbsPath/#\">スレッド作成フォームに戻る&gt;&gt;</a></div>");
+			$Page->Print("<a href=\"$bbsPath/#new_thread\">スレッド作成フォームに戻る&gt;&gt;</a></div>");
 		}
 			
 $Page->Print(<<HTML);
