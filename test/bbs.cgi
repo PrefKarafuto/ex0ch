@@ -838,7 +838,6 @@ sub Certification_Captcha {
 		} else {
 			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
 			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
-			# このエラーの場合、スルーしてログインする
 			return $ZP::E_SYSTEM_CAPTCHAERROR;
 		}
 	}elsif($page ne 'captcha'){
