@@ -108,6 +108,7 @@ background-color: white;
 font-size: 12px;
 padding-left: 10px;
 padding-top: 60px;
+padding-bottom: 60px;
 margin-left: 20%; /* Contentの横幅を引いた分 */
 height: calc(100% - 120px); /* 上下の固定要素を除いた高さ */
 overflow-y: auto; /* オーバーフロー時にスクロール */
