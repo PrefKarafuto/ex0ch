@@ -254,8 +254,8 @@ sub InitSystemValue
 		'DATA'		=> '/datas',								# 初期データ設置パス
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
-		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS dev-r165 20240621',			# CGIバージョン
+		'DEBUG'		=> 0,										# デバグモード(未使用)
+		'VERSION'	=> 'ex0ch BBS dev-r166 20240703',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -310,27 +310,28 @@ sub InitSystemValue
 		'PROXYCHECK_API'	=> '',								# プロキシ判定API
 		'PROXYCHECK_APIKEY'	=> '',								# APIキー
 
-		'ADMINCAP'		=> '',
-		'SEARCHCAP'		=> '',
+		'ADMINCAP'		=> '',									# admin.cgiにCaptchaを課すか
+		'SEARCHCAP'		=> '',									# search.cgiにCaptchaを課すか
 
-		'LASTMOD'		=> '',
+		'LASTMOD'		=> '',									# 最後にシステム管理者がログインした時刻
 		'LOGOUT'		=> 30,									# 無操作状態で管理画面から自動ログアウトするまでの時間
 
 		'IMGTAG'		=> 1,									# 画像リンクをIMGタグに変換 => Imgur以外の画像URLもIMGタグに変換
-		'CSP'			=> 0,
-		'BANMAX'		=> 10,
-		'NINLVMAX'		=> 40,
+		'CSP'			=> 0,									# コンテンツセキュリティポリシーを記述
+		'BANMAX'		=> 10,									# スレッドあたり最大BAN可能人数
+		'NINLVMAX'		=> 40,									# 忍法帖Lv最大値
 		'HIDE_HITS'		=> 1,									# 規制ユーザー非公開
 
 		'COOKIE_EXPIRY'	=> 30,									# Cookie期限
-		'NIN_EXPIRY'	=> 30,
-		'AUTH_EXPIRY'	=> 30,
-		'PASS_EXPIRY'	=> 365,
+		'NIN_EXPIRY'	=> 30,									# 忍法帖データ保持期限
+		'AUTH_EXPIRY'	=> 30,									# Captcha認証有効期限
+		'PASS_EXPIRY'	=> 365,									# パスワードを設定した場合の忍法帖データ保持期限
 		
+		# 未使用
 		'PERM_EXEC'		=> 0700,
 		'PERM_DATA'		=> 0600,
-		'PERM_CONTENT'		=> 0644,
-		'PERM_SYSDIR'		=> 0700,
+		'PERM_CONTENT'	=> 0644,
+		'PERM_SYSDIR'	=> 0700,
 		'PERM_DIR'		=> 0711,
 	);
 	
