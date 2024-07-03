@@ -103,6 +103,9 @@ sub DoPrint
 	elsif ($subMode eq 'DELLUMP') {													# レス一括削除画面
 		PrintResLumpDelete($Page, $Sys, $Form, $DAT);
 	}
+	elsif ($subMode eq 'LOG_THREAD_WRITE') {										# 書き込みログ
+		PrintLogList($Page, $Sys, $Form, $Logger);
+	}
 	elsif ($subMode eq 'COMPLETE') {												# 完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
 		$BASE->PrintComplete('過去ログ処理', $this->{'LOG'});
@@ -199,8 +202,8 @@ sub SetMenuList
 	}
 	# 管理グループ権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_USERGROUP, $bbs)){
-	#	$Base->SetMenu('<hr>', '');
-	#	$Base->SetMenu('書き込みログ', "'thread.res','DISP','LOG_THREAD_WRITE'");
+		$Base->SetMenu('<hr>', '');
+		$Base->SetMenu('書き込みログ', "'thread.res','DISP','LOG_THREAD_WRITE'");
 	}
 	$Base->SetMenu('<hr>', '');
 	$Base->SetMenu('掲示板管理へ戻る', "'bbs.thread','DISP','LIST'");
@@ -323,6 +326,89 @@ sub PrintResList
 		$Page->Print("<input type=button value=\"透明あぼ～ん\" $common,'DELETE')\">");
 		$Page->Print("</td></tr>\n");
 	}
+	$Page->Print("</table></dl><br>");
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	ログの表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Logger	Logger
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintLogList
+{
+	my ($Page, $Sys, $Form, $Logger) = @_;
+	my ($dispSt, $dispEd, $common, $common2, $i);
+	my ($isAccessUser, $format);
+	my ($log, @logs, $logsize);
+	
+	$Sys->Set('_TITLE', 'Log List');
+	
+	$logsize = $Logger->Size();
+	if ($logsize == 0) {
+		$Page->Print("<center><dl><table border=0 cellspacing=2 width=100%>");
+		$Page->Print("<hr>");
+		$Page->Print("<td class=\"DetailTitle\" style=\"width:300\">Contents</td></tr>\n");
+		$Page->Print("<tr><td colspan=2>ログが存在しませんでした。</td></tr>\n");
+		$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
+		$Page->Print("</table></dl><br>");
+		return;
+	}
+
+	# 表示書式の設定
+	$format = $Form->Get('DISP_FORMAT') eq '' ? 'l10' : $Form->Get('DISP_FORMAT');
+	($dispSt, $dispEd) = AnalyzeFormat($format, $Logger);
+	
+	$common = "DoSubmit('thread.res','DISP','LOG_THREAD_WRITE');";
+	
+	$Page->Print("<center><dl><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=2 align=right>表示書式：<input type=text name=DISP_FORMAT");
+	$Page->Print(" value=\"$format\"><input type=button value=\"　表示　\" onclick=\"$common\">");
+	$Page->Print("</td></tr>\n<tr><td colspan=2><hr></td></tr>\n");
+	$Page->Print("<tr><th style=\"width:30\">　</th>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:300\">Contents</td></tr>\n");
+	
+	# 権限取得
+	$isAccessUser = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_ACCESUSER, $Sys->Get('BBS'));
+
+	# レス一覧を出力
+	for ($i = $dispSt ; $i < $dispEd ; $i++) {
+		$log = $Logger->Get($i);
+		@logs = split(/<>/, $log, -1) if (defined $log);
+		
+		foreach (0 .. $#logs) {
+			$logs[$_] =~ s/[\x0d\x0a\0]//g;
+			$logs[$_] =~ s/&/&amp;/g;
+			$logs[$_] =~ s/"/&quot;/g;
+			$logs[$_] =~ s/'/&#39;/g;
+			$logs[$_] =~ s/</&lt;/g;
+			$logs[$_] =~ s/>/&gt;/g;
+		}
+		
+		$Page->Print("<tr><td class=\"Response\" valign=top>");
+		$Page->Print("</td>");
+		$Page->Print("<td class=\"Response\"><dt>");
+
+		$common2 = "\"javascript:SetOption('NINJA_ID','$logs[9]');";
+		$common2 .= "DoSubmit('bbs.ninja','DISP','EDIT')\"";
+		my $str = $logs[9];
+		my $length = length($str);
+		my $half = int($length / 2);
+		substr($str, 0, $half) = '*' x $half;
+
+		$Page->Print("<font color=forestgreen><b>$logs[0]</b></font>[$logs[1]]");
+		$Page->Print("：$logs[2]</dt><dd>$logs[3]");
+		$Page->Print("<br><br><hr>HOST:$logs[5]<br>IP:$logs[6]<br>UA:$logs[8]<br>SessionID:<a href=$common2>$str</a>") if (defined $log && $isAccessUser);
+		$Page->Print("</dd></td></tr>\n");
+	}
+	$Page->HTMLInput('hidden', 'SELECT_RES', '');
+	$Page->HTMLInput('hidden', 'NINJA_ID', '');
+	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("</table></dl><br>");
 }
 
