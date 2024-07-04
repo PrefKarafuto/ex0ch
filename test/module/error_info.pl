@@ -181,6 +181,10 @@ sub Print
 	my $t = &$sanitize($Form->Get('subject','')) || '';
 	my $msg = $Form->Get('MESSAGE') || '';
 
+	#酉バレ防止
+	$name = (split(/#/,$name))[0];
+	$mail = (split(/#/,$mail))[0];
+
 	#超過対策
 	if($Set->Get('BBS_MESSAGE_COUNT') < length($msg)){
 		$msg = substr($msg,0,$Set->Get('BBS_MESSAGE_COUNT'));
