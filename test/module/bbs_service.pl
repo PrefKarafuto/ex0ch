@@ -347,11 +347,11 @@ HEAD
 	$Page->Print("<li><a href=\"./#new_thread\">スレッド作成</a></li>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
-	foreach my $catid (@catSet) {
+	foreach my $catid (sort @catSet) {
 		my $catname = $Category->Get('NAME', $catid);
 		$Page->Print("<li class=\"category-title\">$catname</li>\n");
 		my $is_active = "";
-		foreach my $id (@bbsSet) {
+		foreach my $id (sort @bbsSet) {
 			my $name = $BBS->Get('NAME', $id);
 			my $dir = $BBS->Get('DIR', $id);
 			$is_active = 'class="active"' if $this->{'SYS'}->Get('BBS') eq $dir;
@@ -377,11 +377,11 @@ HEAD
 	$Page->Print("<a href=\"./#new_thread\">スレッド作成</a>\n") if $this->{'SET'}->Get('BBS_READONLY') ne 'on';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
-	foreach my $catid (@catSet) {
+	foreach my $catid (sort @catSet) {
 		my $catname = $Category->Get('NAME', $catid);
 		$Page->Print("<span class=\"category-title\">$catname</span>\n");
 		my $is_active = '';
-		foreach my $id (@bbsSet) {
+		foreach my $id (sort @bbsSet) {
 			my $name = $BBS->Get('NAME', $id);
 			my $dir = $BBS->Get('DIR', $id);
 			$is_active = 'class="active"' if $this->{'SYS'}->Get('BBS') eq $dir;
