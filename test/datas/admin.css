@@ -1,186 +1,209 @@
 /*------------------------------------------------------------------------------
 	基本
  *------------------------------------------------------------------------------*/
-*				{
-					box-sizing : border-box;
-					-moz-box-sizing : border-box;
-					-webkit-box-sizing: border-box;
-				}
+ *				{
+	box-sizing : border-box;
+	-moz-box-sizing : border-box;
+	-webkit-box-sizing: border-box;
+}
 
 body			{
-					margin: 5px;
-				}
+	margin: 5px;
+}
 
 td				{
-					font-size: 12px;
-				}
+	font-size: 12px;
+}
 
 th				{
-					font-size: 12px;
-				}
+	font-size: 12px;
+}
 
 a				{
-					color: steelblue;
-				}
+	color: steelblue;
+}
 
 /*------------------------------------------------------------------------------
-	ヘッダ
- *------------------------------------------------------------------------------*/
-div.MainHead	{
-					vertical-align: middle;
-					background-color: darkslateblue;
-					font-family: Arial;
-					font-size: 20px;
-					color: #ffffff;
-					padding-right: 20px;
-					padding-top: 5px;
-					padding-bottom: 5px;
-				}
+ヘッダ
+*------------------------------------------------------------------------------*/
+div.MainHead {
+vertical-align: middle;
+background-color: darkslateblue;
+font-family: Arial;
+font-size: 20px;
+color: #ffffff;
+padding-right: 20px;
+padding-top: 5px;
+padding-bottom: 5px;
+position: fixed; /* 固定表示にする */
+top: 20px; /* MainMenuの下に固定 */
+left: 0; /* 左端に固定 */
+width: 100%; /* 横幅を全体に広げる */
+}
 
 /*------------------------------------------------------------------------------
-	システムメニュー
- *------------------------------------------------------------------------------*/
-div.MainMenu	{
-					background-color: #ffffff;
-					font-family: Arial;
-					font-size: 12px;
-					height: 20px;
-				}
+システムメニュー
+*------------------------------------------------------------------------------*/
+div.MainMenu {
+background-color: #ffffff;
+font-family: Arial;
+font-size: 12px;
+height: 20px;
+position: fixed; /* 固定表示にする */
+top: 0; /* ページの上部に固定 */
+left: 0; /* 左端に固定 */
+width: 100%; /* 横幅を全体に広げる */
+text-align: right; /* 右寄せ */
+padding-top: 2px;
+}
 
 /*------------------------------------------------------------------------------
-	フッタ
- *------------------------------------------------------------------------------*/
-div.MainFoot	{
-					background-color: white;
-					font-family: Arial;
-					font-size: 12px;
-					border-style: solid;
-					border-color: black;
-					border-width: 1px 0px 0px 0px;
-					padding-top: 3px;
-					color: #336666;
-				}
+フッタ
+*------------------------------------------------------------------------------*/
+div.MainFoot {
+background-color: white;
+font-family: Arial;
+font-size: 12px;
+border-style: solid;
+border-color: black;
+border-width: 1px 0px 0px 0px;
+padding-top: 3px;
+color: #336666;
+position: fixed; /* 固定表示にする */
+bottom: 0; /* ページの下部に固定 */
+left: 0; /* 左端に固定 */
+width: 100%; /* 横幅を全体に広げる */
+z-index: 1000; /* 他の要素の上に表示するためのスタッキング順序 */
+}
 
 /*------------------------------------------------------------------------------
-	フッタ
- *------------------------------------------------------------------------------*/
-td.Content		{
-					padding-top: 10px;
-				}
-
+フッタ
+*------------------------------------------------------------------------------*/
+td.Content {
+padding-top: 10px;
+position: fixed; /* 固定表示にする */
+top: 70px; /* MainMenuとMainHeadの下に配置 */
+left: 0; /* 左端に固定 */
+width: 20%; /* 横幅を設定 */
+height: calc(100% - 120px); /* 上下の固定要素を除いた高さ */
+overflow-y: auto; /* オーバーフロー時にスクロール */
+}
 /*------------------------------------------------------------------------------
-	機能メニューリスト
- *------------------------------------------------------------------------------*/
+機能メニューリスト
+*------------------------------------------------------------------------------*/
 td.FunctionList	{
-					background-color: whitesmoke;
-					font-family: Arial;
-					font-size: 12px;
-					padding-top: 10px;
-					padding-bottom: 10px;
-					padding-left: 5px;
-					padding-right: 5px;
-					layout-grid-line: 10px;
-				}
+	background-color: whitesmoke;
+	font-family: Arial;
+	font-size: 12px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
 
 /*------------------------------------------------------------------------------
-	機能ブロック
- *------------------------------------------------------------------------------*/
-td.Function		{
-					background-color: white;
-					font-size: 12px;
-					padding-left: 10px;
-					padding-top: 10px;
-				}
+機能ブロック
+*------------------------------------------------------------------------------*/
+td.Function {
+background-color: white;
+font-size: 12px;
+padding-left: 10px;
+padding-top: 60px;
+padding-bottom: 60px;
+margin-left: 20%; /* Contentの横幅を引いた分 */
+height: calc(100% - 120px); /* 上下の固定要素を除いた高さ */
+overflow-y: auto; /* オーバーフロー時にスクロール */
+}
 
 /*------------------------------------------------------------------------------
-	機能タイトル
- *------------------------------------------------------------------------------*/
+機能タイトル
+*------------------------------------------------------------------------------*/
 div.FuncTitle	{
-					vertical-align: middle;
-					background-color: white;
-					border-style: solid;
-					border-color: black;
-					border-width: 1px;
-					padding-left: 2px;
-					font-family: Arial;
-					font-size: 18px;
-					height: 26px;
-					margin-bottom: 10px;
-				}
+	vertical-align: middle;
+	background-color: white;
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	padding-left: 2px;
+	font-family: Arial;
+	font-size: 18px;
+	height: 26px;
+	margin-bottom: 10px;
+}
 
 /*------------------------------------------------------------------------------
-	機能詳細タイトル
- *------------------------------------------------------------------------------*/
+機能詳細タイトル
+*------------------------------------------------------------------------------*/
 th.DetailTitle,
 td.DetailTitle	{
-					font-family: Arial;
-					font-size: 12px;
-					font-weight: bold;
-					border-width: 0px 0px 1px 0px;
-					border-color: silver;
-					border-style: solid;
-					background-color: #efefef;
-				}
+	font-family: Arial;
+	font-size: 12px;
+	font-weight: bold;
+	border-width: 0px 0px 1px 0px;
+	border-color: silver;
+	border-style: solid;
+	background-color: #efefef;
+}
 
 /*------------------------------------------------------------------------------
-	レス表示
- *------------------------------------------------------------------------------*/
+レス表示
+*------------------------------------------------------------------------------*/
 td.Response		{
-					font-size: 12px;
-					border-width: 0px 0px 1px 0px;
-					border-color: silver;
-					border-style: solid;
-				}
+	font-size: 12px;
+	border-width: 0px 0px 1px 0px;
+	border-color: silver;
+	border-style: solid;
+}
 
 /*------------------------------------------------------------------------------
-	ログ表示
- *------------------------------------------------------------------------------*/
+ログ表示
+*------------------------------------------------------------------------------*/
 .LogExport		{
-					font-size: 10px;
-				}
+	font-size: 10px;
+}
 
 div.oExcuted	{
-					padding: 5px;
-					margin: 10px 0;
-					background-color: #eeeeff;
-					border: 1px solid #9999ff;
-					text-decoration: none;
-					color: blue;
-					font-size: 14px;
-				}
+	padding: 5px;
+	margin: 10px 0;
+	background-color: #eeeeff;
+	border: 1px solid #9999ff;
+	text-decoration: none;
+	color: blue;
+	font-size: 14px;
+}
 
 div.xExcuted	{
-					padding: 5px;
-					padding:5px;
-					background-color:#ffeeee;
-					border:1px solid #ff9999;
-					font-size:18px;
-					text-decoration:none;
-					color:red;
-					font-size: 14px;
-				}
+	padding: 5px;
+	padding:5px;
+	background-color:#ffeeee;
+	border:1px solid #ff9999;
+	font-size:18px;
+	text-decoration:none;
+	color:red;
+	font-size: 14px;
+}
 
 div.LoginForm	{
-					padding: 50px 0;
-					width: 300px;
-				}
+	padding: 50px 0;
+	width: 300px;
+}
 
 /*------------------------------------------------------------------------------
-	その他
- *------------------------------------------------------------------------------*/
+その他
+*------------------------------------------------------------------------------*/
 .NormalStyle	{
-					font-weight: normal;
-				}
+	font-weight: normal;
+}
 
 .GrayColor		{
-					color: #666666;
-				}
+	color: #666666;
+}
 
 .UnderLine		{
-					text-decoration: underline;
-				}
+	text-decoration: underline;
+}
 
 input.delete	{
-					float: right;
-					color: red;
-				}
+	float: right;
+	color: red;
+}

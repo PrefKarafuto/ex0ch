@@ -154,10 +154,10 @@ HTML
 	$Page->Print("<li><a href=\"../bbsmenu.html\">BBS MENU</a></li>\n") if -e '../bbsmenu.html';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
-	foreach my $catid (@catSet) {
+	foreach my $catid (sort @catSet) {
 		my $catname = $Category->Get('NAME', $catid);
 		$Page->Print("<li class=\"category-title\">$catname</li>\n");
-		foreach my $id (@bbsSet) {
+		foreach my $id (sort @bbsSet) {
 			my $name = $BBS->Get('NAME', $id);
 			my $dir = $BBS->Get('DIR', $id);
 			$Page->Print("<li><a href=\"../$dir/\">$name</a></li>\n") if $catid eq $BBS->Get('CATEGORY', $id);
@@ -175,10 +175,10 @@ HTML
 	$Page->Print("<a href=\"../bbsmenu.html\">BBS MENU</a>\n") if -e '../bbsmenu.html';
 	$Page->Print("<hr>");
 	$Page->Print("<li class=\"menu-title\">掲示板一覧</li>\n");
-	foreach my $catid (@catSet) {
+	foreach my $catid (sort @catSet) {
 		my $catname = $Category->Get('NAME', $catid);
 		$Page->Print("<span class=\"category-title\">$catname</span>\n");
-		foreach my $id (@bbsSet) {
+		foreach my $id (sort @bbsSet) {
 			my $name = $BBS->Get('NAME', $id);
 			my $dir = $BBS->Get('DIR', $id);
 			$Page->Print("<a href=\"../$dir/\">$name</a>\n") if $catid eq $BBS->Get('CATEGORY', $id);
@@ -205,10 +205,10 @@ HTML
 HTML
 
 	
-	foreach my $catid (@catSet) {
+	foreach my $catid (sort @catSet) {
 		$catname = $Category->Get('NAME', $catid);
 		my $count = 0;
-		foreach my $id(@bbsSet){
+		foreach my $id(sort @bbsSet){
 			$count++ if $catid eq $BBS->Get('CATEGORY', $id);
 		}
 		next if !$count;
@@ -227,10 +227,10 @@ HTML
 HTML
 
 	$Page->Print("<option value=\"\">すべて</option>\n");
-	foreach my $catid (@catSet) {
+	foreach my $catid (sort @catSet) {
 		$catname = $Category->Get('NAME', $catid);
 		$Page->Print("<optgroup label=\"$catname\">");
-		foreach $id (@bbsSet) {
+		foreach $id (sort @bbsSet) {
 			$name = $BBS->Get('NAME', $id);
 			$dir = $BBS->Get('DIR', $id);
 			

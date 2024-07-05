@@ -1,4 +1,4 @@
-//ç”»åƒã‚ªãƒ¼ãƒãƒ¼ãƒ¬ã‚¤è¡¨ç¤º
+//‰æ‘œƒI[ƒo[ƒŒƒC•\¦
 document.addEventListener("DOMContentLoaded", function() {
 	const images = document.querySelectorAll('.post_image');
 	const overlay = document.getElementById('overlay');
@@ -14,13 +14,13 @@ document.addEventListener("DOMContentLoaded", function() {
 	});
   
 	overlay.addEventListener('click', function(event) {
-	  // ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸè¦ç´ ãŒoverlayImageã§ãªã„å ´åˆã€ã‚ªãƒ¼ãƒãƒ¼ãƒ¬ã‚¤ã‚’é–‰ã˜ã‚‹
+	  // ƒNƒŠƒbƒN‚³‚ê‚½—v‘f‚ªoverlayImage‚Å‚È‚¢ê‡AƒI[ƒo[ƒŒƒC‚ğ•Â‚¶‚é
 	  if (event.target !== overlayImage) {
 		overlay.style.display = 'none';
 	  }
 	});
 });
-//ãƒ¡ãƒ‹ãƒ¥ãƒ¼åˆ‡ã‚Šæ›¿ãˆ
+//ƒƒjƒ…[Ø‚è‘Ö‚¦
 function toggleDropdown() {
     var content = document.getElementById("dropdown-content");
     if (content.style.display === "block") {
@@ -29,7 +29,7 @@ function toggleDropdown() {
         content.style.display = "block";
     }
 }
-// ãƒ¡ãƒ‹ãƒ¥ãƒ¼ä»¥å¤–ã‚’ã‚¯ãƒªãƒƒã‚¯ã—ãŸã¨ãã«ãƒ¡ãƒ‹ãƒ¥ãƒ¼ã‚’é–‰ã˜ã‚‹
+// ƒƒjƒ…[ˆÈŠO‚ğƒNƒŠƒbƒN‚µ‚½‚Æ‚«‚Éƒƒjƒ…[‚ğ•Â‚¶‚é
 document.addEventListener('click', function(event) {
     var dropdown = document.getElementById("dropdown-content");
     var dropbtn = document.querySelector(".dropbtn");

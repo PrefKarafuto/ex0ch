@@ -122,7 +122,7 @@ sub Write
 	return $err if $err;
 	
 
-	# データの書き込み
+	# 管理モジュールを用意
 	require './module/dat.pl';
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
@@ -130,11 +130,7 @@ sub Write
 	my $Conv = $this->{'CONV'};
 	my $Threads = $this->{'THREADS'};
 	my $Sec = $this->{'SECURITY'};
-
-	# 管理モジュールを用意
-	require './module/ninpocho.pl';
-	my $Ninja = NINPOCHO->new;
-
+	
 	# 停止チェック
 	my $threadid = $Sys->Get('KEY');
 	$Threads->LoadAttr($Sys);
@@ -148,6 +144,8 @@ sub Write
 	my ($slip_result,$idEnd) = $this->MakeSlip($Sys,$Form,$Set,$Threads);
 
 	# 忍法帖ロード
+	require './module/ninpocho.pl';
+	my $Ninja = NINPOCHO->new;
 	my $password = '';
 	if ($Set->Get('BBS_NINJA')){
 		$password = $this->LoadNinpocho($Sys, $Form, $Ninja);
