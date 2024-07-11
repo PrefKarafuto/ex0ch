@@ -224,7 +224,7 @@ sub PrintNinjaList
 			$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
 			$Page->Print("<td>$n: <a href=$common>$id</a></td>");
 		}else{
-			$Page->Print("<td>$n: $id</td>");
+			$Page->Print("<td></td><td>$n: $id</td>");
 		}
 		$Page->Print("<td>$size</td><td>$mtime</td></tr>\n");
 	}

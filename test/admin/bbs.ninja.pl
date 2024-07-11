@@ -233,7 +233,7 @@ sub PrintNinjaEdit
 
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description</td></tr>\n");
 		$Page->Print("<tr><td>説明</td>");
-		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60></td></tr>\n");
+		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60 $is_disable></td></tr>\n");
 
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
@@ -267,23 +267,23 @@ sub PrintNinjaEdit
 
 		$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">■Regulation</td></tr>\n");
 		$Page->Print("<tr><td>書き込み禁止</td>");
-		$Page->Print("<td><select name=BAN>");
+		$Page->Print("<td><select name=BAN $is_disable>");
 		$Page->Print("<option value=\"\" $selBanNone>無効</option>");
 		$Page->Print("<option value=ban $selBanEnable>有効</option>");
 		$Page->Print("<option value=thread $selBanMakeThread>スレッド作成のみ禁止</option>");
 		$Page->Print("</select></td></tr>\n");
 		$Page->Print("<tr><td>コマンド禁止</td>");
-		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command $is_disable></td></tr>\n");
 		$Page->Print("<tr><td>URL禁止</td>");
-		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled $is_disable></td></tr>\n");
 		$Page->Print("<tr><td>強制sage</td>");
-		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage $is_disable></td></tr>\n");
 		$Page->Print("<tr><td>Captcha強制</td>");
-		$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=FORCE_CAPTCHA value=on $is_force_captcha $is_disable></td></tr>\n");
 		$Page->Print("<tr><td>名無し強制</td>");
-		$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=FORCE_774 value=on  $is_force_774 $is_disable></td></tr>\n");
 		$Page->Print("<tr><td>強制コテ<small>(名無し強制優先、名前欄用コマンド使用可)</small></td>");
-		$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\"></td></tr>\n");
+		$Page->Print("<td><input type=text name=FORCE_KOTE value=\"$is_force_kote\" $is_disable></td></tr>\n");
 		}else{
 		$Page->Print("<tr><td colspan=3>ID:$sid\の忍法帖データは存在しません。</td></tr>");
 	}
