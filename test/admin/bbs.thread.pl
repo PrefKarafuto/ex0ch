@@ -30,6 +30,8 @@ my %threadAttr = (
 	'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
 	'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
 	'ban'       => { 'name' => 'アクセス禁止<small>(対象SessionIDをカンマで区切る)</small>', 'type' => 'text' },
+	'sub'    	=> { 'name' => '副主', 'type' => 'text' },
+	#'vote' 	    => { 'name' => 'BAN投票', 'type' => 'text' },
 );
 
 #------------------------------------------------------------------------------------------------------------

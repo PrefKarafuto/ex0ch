@@ -874,7 +874,7 @@ sub VoteBanCommand
 						my $vote_count = @voteuserAttr;
 						my $specified_num = $Set->Get('BBS_VOTE');
 						if($vote_count >= $specified_num || $target_id eq $Sys->Get('SID')){
-							# 規定数以上の票もしくは対象による自己投票
+							# 規定数以上の票もしくはBAN対象による自己投票
 							push(@banuserAttr, $target_id);
 							my $bannum = @banuserAttr;
 							shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));

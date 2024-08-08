@@ -733,8 +733,11 @@ sub PrintCommandSetting
 	my $setnopool	= $setBitMask & 2 ** 18 ? 'checked' : '';
 	my $setdelete	= $setBitMask & 2 ** 19 ? 'checked' : '';
 	my $setextend	= $setBitMask & 2 ** 20 ? 'checked' : '';
+	my $setsubowner	= $setBitMask & 2 ** 21 ? 'checked' : '';
+	my $setvoteban	= $setBitMask & 2 ** 22 ? 'checked' : '';
 
 	my $resmax = $Setting->Get('BBS_MAX_RES') || $Sys->Get('RESMAX');
+	my $setvotenum = $Setting->Get('BBS_VOTE');
 	$resmax *= 2;
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
@@ -809,8 +812,17 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">追記（!add:[>>レス番]:[追記内容]）</td><td>");
 	$Page->Print("<input type=checkbox name=ADD value=65536 $setadd>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番] </td><td>");
+	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番]） </td><td>");
 	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">副主（!sub:[>>レス番]）</td><td>");
+	$Page->Print("<input type=checkbox name=SUB value=2097152 $setsubowner>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">BAN投票（!vote:[>>レス番]） </td><td>");
+	$Page->Print("<input type=checkbox name=VOTE value=4194304 $setvoteban>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">　　有効票数 </td><td>");
+	$Page->Print("<input type=number name=VOTE_NUM value=$setvotenum>有効</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
@@ -1326,7 +1338,7 @@ sub FunctionCommandSetting
 	
 	my $commandSet = 0;
 	my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
-					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND);
+					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE);
 
 	foreach (@inList) {
 		# 入力チェック	
@@ -1334,8 +1346,13 @@ sub FunctionCommandSetting
 		$commandSet |= $Form->Get($_);
 		push @$pLog, "「$_」を「" . $status. '」に設定';
 	}
+	# 規定外文字
+	if (!$Form->IsNumber('VOTE_NUM')) {
+		return 1002;
+	}
 	
 	$Setting->Set('BBS_COMMAND', $commandSet);
+	$Setting->Set('BBS_VOTE', $Form->Get('VOTE_NUM'));
 	$Setting->Save($Sys);
 	
 	return 0;
