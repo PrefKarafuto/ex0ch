@@ -218,7 +218,7 @@ sub Check {
 			next;
 		}
 		
-		# 有効期限 !exdeny:expires=2013/07/29 00:00:00!\.example\.jp$
+		# 有効期限 !exdeny:expires=2024/07/29 00:00:00!\.example\.jp$
 		if ($opt{'expires'} && $opt{'expires'} =~ m|^([0-9]+)/([0-9]+)/([0-9]+) ([0-9]+):([0-9]+):([0-9]+)$|) {
 			my $expires = timelocal($6, $5, $4, $3, $2-1, $1);
 			next if (time >= $expires);

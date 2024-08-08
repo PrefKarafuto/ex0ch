@@ -439,6 +439,8 @@ sub PrintValidUserEdit
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.0.123</b><br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.1.0-192.168.10.255</b><br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.0.0/16</b><br>");
+	$Page->Print("・IPv6(省略記法対応)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">fc00::/7</b><br>");
 	$Page->Print("・端末固有番号<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">12345678901234_xx</b> (au)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">AbCd123</b> (docomo)<br>");
@@ -448,7 +450,7 @@ sub PrintValidUserEdit
 	$Page->Print("・セッションID<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">fb665de3cfa1857555532696ea0c1539</b> (十六進数32桁)<br>");
 	$Page->Print("<br>・拡張コマンド<br>");
-	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:expires=2013/07/29 00:00:00!\.example\.jp</b> (期限付き規制)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:expires=2024/07/29 00:00:00!\.example\.jp</b> (期限付き規制)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:tate=1!\.example\.jp</b> (スレ立て限定規制)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:method=disable!\.example\.jp</b> (書込み禁止)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:method=host!\.example\.jp</b> (host表示)<br>");
