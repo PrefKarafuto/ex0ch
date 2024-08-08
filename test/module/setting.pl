@@ -393,6 +393,7 @@ sub InitSettingData
   		'BBS_COMMAND'			=> 0 ,
 		'BBS_HIDENUSI'			=> '',
 		'BBS_MAILFIELD'			=> 'checked',
+		'BBS_VOTE'				=> 10,
 
 		#忍法帖関連(必要Lv-消費Lv)
 		'NINJA_WRITE_MESSAGE'	=> 0,

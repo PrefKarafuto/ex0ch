@@ -334,7 +334,7 @@ sub ReadyBeforeWrite
 	if($Ninja->Get('ban_command') ne 'on' && (($Set->Get('BBS_NINJA') && $Ninja->Get('ninLv') >= $min_level) || !$Set->Get('BBS_NINJA') || $commandAuth)){
 
 		# Capの権限があった場合すべて許可
-		$CommandSet = oct("0b11111111111111111111111") if $commandAuth;		# 2^20
+		$CommandSet = oct("0b1111111111111111111111111") if $commandAuth;		# 2^22
 
 		if($Sys->Equal('MODE', 1)){
 			# スレ立て
@@ -361,9 +361,12 @@ sub ReadyBeforeWrite
 					Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 				}
 			}
-			elsif($commandAuth || GetSessionID($Sys,$threadid,1) eq $Sys->Get('SID')){
+			elsif($commandAuth || (GetSessionID($Sys,$threadid,1)||$Threads->GetAttr($threadid,'sub')) eq $Sys->Get('SID')){
 				Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 			}
+
+			# BAN投票用
+			VoteBanCommand($Sys,$Form,$Set,$Threads) if $Set->Get('BBS_VOTE');
 		}
 	}
 	
@@ -546,7 +549,7 @@ sub Command
 		#過去ログ送り
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!pool(<br>|$)/ && ($setBitMask & 2 ** 9)){
 			$Threads->SetAttr($threadid, 'pool',1);
-			$Command .= '※過去ログ送り<br>';;
+			$Command .= '※過去ログ送り<br>';
 		}
 		#スレタイ変更
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.+)(<br>|$)/ && ($setBitMask & 2 ** 14)){
@@ -700,6 +703,56 @@ sub Command
 				}
 			}
 		}
+		#副主
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!sub:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 21)){
+			my $sub_owner = GetSessionID($Sys,$threadid,$2);
+			if($Sys->Get('SID') ne $Threads->GetAttr($threadid, 'sub')){
+				if($sub_owner && GetSessionID($Sys,$threadid,1) ne $sub_owner){
+					$Threads->SetAttr($threadid, 'sub',$sub_owner);
+					$Command .= "※&gt;&gt;$2を副主に任命しました<br>";
+				}else{
+					$Command .= '※無効なレス番号<br>';
+				}
+			}else{
+				$Command .= '※使用不可<br>';
+			}
+		}
+		#BAN
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 12)){
+			my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
+			my $bannum = @banuserAttr;
+			my $bansid = GetSessionID($Sys,$threadid,$2);
+			my $nusisid = GetSessionID($Sys,$threadid,1);
+
+			my $ninLv = $Ninja->Get('ninLv');
+			my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USER_BAN'));
+
+			if(($NinStat && $ninLv >= $min_level) || !$NinStat ||$noNinja){
+				if($bansid){
+					if($bansid ne $nusisid){
+						# grepを使って$bansidが@banuserAttrに存在するかをチェック
+						my @matched = grep { $_ eq $bansid } @banuserAttr;
+
+						if(@matched){
+							$Command .= "※既にBAN済<br>";
+						} else {
+							# BANの処理
+							push(@banuserAttr, $bansid); # 新しい要素を配列の末尾に追加
+							shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));
+							$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
+							$Command .= "※BAN：&gt;&gt;$2<br>";
+							$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
+						}
+					} else {
+						$Command .= "※スレ主はBAN不可<br>";
+					}
+				} else {
+					$Command .= "※無効なレス番号<br>";
+				}
+			} else {
+				$Command .= "※レベル不足<br>";
+			}
+		}
 	}
 
 	##スレ立て時＆スレ中パスワード保持者のみ
@@ -739,42 +792,6 @@ sub Command
 		if(!$Set->Get('BBS_HIDENUSI')){
 			$Threads->SetAttr($threadid, 'hidenusi',1);
 			$Command .= '※スレ主非表示<br>';
-		}
-	}
-	#BAN
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 12)){
-		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
-		my $bannum = @banuserAttr;
-		my $bansid = GetSessionID($Sys,$threadid,$2);
-		my $nusisid = GetSessionID($Sys,$threadid,1);
-
-		my $ninLv = $Ninja->Get('ninLv');
-		my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USER_BAN'));
-
-		if(($NinStat && $ninLv >= $min_level) || !$NinStat ||$noNinja){
-			if($bansid){
-				if($bansid ne $nusisid){
-					# grepを使って$bansidが@banuserAttrに存在するかをチェック
-					my @matched = grep { $_ eq $bansid } @banuserAttr;
-
-					if(@matched){
-						$Command .= "※既にBAN済<br>";
-					} else {
-						# BANの処理
-						push(@banuserAttr, $bansid); # 新しい要素を配列の末尾に追加
-						shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));
-						$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
-						$Command .= "※BAN：&gt;&gt;$2<br>";
-						$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
-					}
-				} else {
-					$Command .= "※スレ主はBAN不可<br>";
-				}
-			} else {
-				$Command .= "※無効なレス番号<br>";
-			}
-		} else {
-			$Command .= "※レベル不足<br>";
 		}
 	}
 	#名無し変更
@@ -826,15 +843,74 @@ sub Command
 	}
 }
 
+# BAN投票
+sub VoteBanCommand
+{
+	my ($Sys,$Form,$Set,$Threads,$setBitMask) = @_;
+	my $threadid = $Sys->Get('KEY');
+	$Threads->LoadAttr($Sys);
+	my $Command = '';
+	# 投票
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!vote:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 22)){
+		my $target = $2;
+		my $target_id = GetSessionID($Sys,$threadid,$target);
+		if($target_id){
+			if($target_id ne GetSessionID($Sys,$threadid,1)){
+				my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
+				my @mached = grep { $_ eq $target_id } @banuserAttr;
+				if(@mached){
+					$Command = "※既にBAN済<br>";
+				} else {
+					my @voteuserAttr = split(/,/ ,$Threads->GetAttr($threadid,"vote_$target_id"));
+					my @del = grep { $_ ne $Sys->Get('SID') } @voteuserAttr;
+					if(@del){
+						$Threads->SetAttr($threadid,"vote_$target_id", join(',', @del));
+						$Command = "※投票取り消し<br>";
+					} else {
+						push(@voteuserAttr, $Sys->Get('SID'));
+						$Threads->SetAttr($threadid,"vote_$target_id", join(',', @voteuserAttr));
+
+						# BAN処理
+						my $vote_count = @voteuserAttr;
+						my $specified_num = $Set->Get('BBS_VOTE');
+						if($vote_count >= $specified_num || $target_id eq $Sys->Get('SID')){
+							# 規定数以上の票もしくは対象による自己投票
+							push(@banuserAttr, $target_id);
+							my $bannum = @banuserAttr;
+							shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));
+							$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
+							$Threads->SetAttr($threadid,"vote_$target_id", undef);
+
+							$Command = "※BAN：&gt;&gt;$target<br>";
+						}else{
+							$Command = "※&gt;&gt;${target}に投票しました [$vote_count/$specified_num]<br>";
+						}
+					}
+				}
+			}else{
+				$Command = "※スレ主には投票できません";
+			}	
+		}else{
+			$Command = "※無効なレス番号";
+		}
+	}
+
+	if($Command){
+		$Threads->SaveAttr($Sys);
+		$Command =~ s/<br>$//;
+		$Form->Set('MESSAGE',$Form->Get('MESSAGE')."<hr><font color=\"red\">$Command</font>");
+	}
+}
+
 # 過去ログの移動や保存を行う
 sub ToKakoLog {
 	my $this = shift;
 	my ($Sys, $Set, $Threads) = @_;
 	
 	require './module/file_utils.pl';
-	require './module/bbs_service.pl';  # 一度だけ読み込む
+	require './module/generate_index.pl';  # 一度だけ読み込む
 	my $Pools = POOL_THREAD->new;
-	my $BBSAid = BBS_SERVICE->new;  # 一度だけインスタンス化
+	my $BBSAid = GENERATE_INDEX->new;  # 一度だけインスタンス化
 
 	my $elapsed = 60 * 60;  # 1時間
 	
@@ -1605,8 +1681,8 @@ sub AddSubjectNewThread
 		#別の掲示板に移す場合
 		else{
 			FILE_UTILS::Move("$path/dat/$lid.dat", $Set->Get('BBS_KAKO')."/dat/$lid.dat");	
-			require './module/bbs_service.pl';
-			my $BBSAid = BBS_SERVICE -> new;
+			require './module/generate_index.pl';
+			my $BBSAid = GENERATE_INDEX -> new;
 
 			#$Sysで指すBBS名を一時変更するため保存
 			my $originalBBSname = $Sys->Get('BBS');
