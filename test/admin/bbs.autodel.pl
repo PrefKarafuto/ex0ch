@@ -105,6 +105,7 @@ HTML
 	  if(keyCode==13) DoSubmit('bbs.thread','DISP','AUTORESDEL');
 	}
   </script>
+
 HTML
 }
 
@@ -129,7 +130,7 @@ sub Search
 	#$Mode = 0 if ($Form->Equal('SMODE', 'ALL'));
 	#$Mode = 1 if ($Form->Equal('SMODE', 'BBS'));
 	#$Mode = 2 if ($Form->Equal('SMODE', 'THREAD'));
-	my $Mode = 1;
+	$Mode = 1;
 	#my $BBS = $Sys->Get('BBS');
    
 	@types = $Form->GetAtArray('TYPE', 0);
