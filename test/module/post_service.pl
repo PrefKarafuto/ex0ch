@@ -2029,7 +2029,7 @@ sub SpamBlock
 	if ($text =~ /&lt;a href=|\[url=/i) {
 		$point += $text_ahref_point;
 	}
-	if ($text =~ m|http://|) {
+	if ($text =~ m|https?://|) {
 		$point += $text_url_point;
 	}
 	
@@ -2065,7 +2065,7 @@ sub SpamBlock
 		
 		# 本文リンクからTLDを抽出し重複排除
 		my @tldlist = keys %{ {map { pop(@{[split(/\./, $_)]}), 1 }
-						($text =~ m|http://([a-z0-9\-\.]+)|gi)} };
+						($text =~ m|https?://([a-z0-9\-\.]+)|gi)} };
 		
 		# TLDの種類ごとに加点
 		foreach my $tld (@tldlist) {
