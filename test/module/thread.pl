@@ -405,6 +405,10 @@ sub LoadAttr
 
 	$threadID //= $Sys->Get('KEY');
 	my $attr = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info';
+	
+	require './module/file_utils.pl';
+	FILE_UTILS::CreateDirectory("$attr/attr", $Sys->Get('PM-ADIR'));	# 無かったら作成
+
 	my $path = $attr . '/attr.cgi';	# 旧仕様の属性ファイル
 	my $AttrPath = $attr . "/attr/attr_$threadID.cgi";
 	
