@@ -528,10 +528,11 @@ sub PrintTimeLine
 
 <a name="timeline"></a>
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$menuCol" style="margin:1.2em auto;" align="center">
+<button onclick="updateTimelineTimes()">更新</button>
  <tr>
   <td>
   <small>
-  <div style="height: 400px; overflow-y: scroll;">
+  <div style="height: 400px; overflow-y: scroll;" id="timeline" >
 MENU
 	
 	foreach my $file (@files) {
