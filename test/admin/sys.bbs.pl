@@ -646,6 +646,9 @@ sub FunctionBBSCreate
 	FILE_UTILS::CreateDirectory("$createPath/kako", $Sys->Get('PM-BDIR'));
 	FILE_UTILS::CreateDirectory("$createPath/pool", $Sys->Get('PM-ADIR'));
 	FILE_UTILS::CreateDirectory("$createPath/info", $Sys->Get('PM-ADIR'));
+
+	FILE_UTILS::CreateDirectory("$createPath/info/attr", $Sys->Get('PM-ADIR'));
+	FILE_UTILS::CreateDirectory("$createPath/info/timeline", $Sys->Get('PM-ADIR'));
 	
 	# デフォルトデータのコピー
 	FILE_UTILS::Copy("$dataPath/default_img.gif", "$createPath/kanban.gif");
