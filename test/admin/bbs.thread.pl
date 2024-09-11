@@ -579,7 +579,7 @@ sub PrintThreadAttr
 
 	require './module/thread.pl';
 	my $Threads = THREAD->new;
-	$Threads->LoadAttr($Sys);
+	$Threads->LoadAttr($Sys,$target_thread);
 
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>スレッドに属性を付加します。</td></tr>");
@@ -874,7 +874,7 @@ sub FunctionThreadStop
 	my $Threads	= THREAD->new; # use from 0.8.x
 	@threadList	= $Form->GetAtArray('THREADS');
 	$base		= $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat';
-	$Threads->LoadAttr($Sys);
+	$Threads->LoadAttrAll($Sys);
 	
 	# スレッドの停止
 	if ($mode) {
@@ -911,7 +911,7 @@ sub FunctionThreadStop
 		}
 	}
 	
-	$Threads->SaveAttr($Sys); # use from 0.8.x
+	$Threads->SaveAttrAll($Sys); # use from 0.8.x
 	
 	return 0;
 }
@@ -1074,7 +1074,7 @@ sub FunctionThreadDetailAttr
 	require './module/thread.pl';
 	
 	my $Threads	= THREAD->new;
-	$Threads->LoadAttr($Sys);
+	$Threads->LoadAttrAll($Sys);
 	my $target_thread = $Form->Get('TARGET_THREAD');
 
 	if($mode){
@@ -1101,7 +1101,7 @@ sub FunctionThreadDetailAttr
 			push @$pLog, "[$attrkey]属性を".($attr?'付加':'解除');
 		}
 	}
-	$Threads->SaveAttr($Sys);
+	$Threads->SaveAttrAll($Sys);
 	
 	return 0;
 }
@@ -1186,7 +1186,7 @@ sub FunctionThreadDelete
 	$BBSAid = BBS_SERVICE->new;
 	
 	$Threads->Load($Sys);
-	$Threads->LoadAttr($Sys);
+	$Threads->LoadAttrAll($Sys);
 	
 	@threadList = $Form->GetAtArray('THREADS');
 	$bbs		= $Sys->Get('BBS');
@@ -1201,7 +1201,7 @@ sub FunctionThreadDelete
 		unlink "$path/log/$id.cgi";
 		unlink "$path/log/del_$id.cgi";
 	}
-	$Threads->SaveAttr($Sys);
+	$Threads->SaveAttrAll($Sys);
 	#subject.txt更新
 	$Threads->Load($Sys);
 	$Threads->UpdateAll($Sys);

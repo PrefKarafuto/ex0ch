@@ -21,6 +21,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use Storable qw(lock_store lock_retrieve);
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -400,13 +401,16 @@ sub Delete
 sub LoadAttr
 {
 	my $this = shift;
-	my ($Sys) = @_;
+	my ($Sys,$threadID) = @_;
+
+	$threadID //= $Sys->Get('KEY');
+	my $attr = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info';
+	my $path = $attr . '/attr.cgi';	# 旧仕様の属性ファイル
+	my $AttrPath = $attr . "/attr/attr_$threadID.cgi";
 	
-	$this->{'ATTR'} = {};
-	
-	my $path = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info/attr.cgi';
-	
-	if (open(my $fh, '<', $path)) {
+	if (-e $path) {
+		# 旧ファイルが残ってる場合、移行
+		open(my $fh, '<', $path);
 		flock($fh, 2);
 		my @lines = <$fh>;
 		close($fh);       
@@ -437,9 +441,69 @@ sub LoadAttr
 			
 			$this->{'ATTR'}->{$id} = $hash;
 		}
+
+		# データ移行
+		if ($this->{'ATTR'}) {
+			foreach my $id (keys %{$this->{'ATTR'}}) {
+				my $new_path = $attr . "/attr/attr_$id.cgi";
+				
+				# スレッドIDごとのファイルに保存
+				eval {
+					lock_store($this->{'ATTR'}->{$id}, $new_path);
+				};
+				if ($@) {
+					warn "Failed to store data to $new_path: $@";
+				}
+			}
+			
+			# 移行が完了したら、旧ファイルを削除する
+			unlink $path or warn "Failed to delete old file $path: $!";
+		}
+	}elsif(-e $AttrPath){
+		# 新方式
+		eval {
+			$this->{'ATTR'}->{$threadID} = lock_retrieve($AttrPath);
+		};
+		if ($@) {
+			warn "Failed to retrieve data from $AttrPath: $@";
+			$this->{'ATTR'}->{$threadID} = {};
+		}
+	} else {
+		$this->{'ATTR'}->{$threadID} = {};  # ファイルが存在しない場合は空のデータ
 	}
 }
 
+# 互換性維持のため(主にadmin.cgi用)
+sub LoadAttrAll
+{
+    my $this = shift;
+    my ($Sys) = @_;
+    
+    $this->{'ATTR'} = {};  # 属性データの初期化
+    
+    my $attr_dir = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info/attr';
+    
+    # attrディレクトリ内のすべての "attr_xxx.cgi" ファイルを探索
+    opendir(my $dh, $attr_dir) or die "Could not open '$attr_dir' for reading: $!";
+    my @files = grep { /^attr_.+\.cgi$/ && -f "$attr_dir/$_" } readdir($dh);
+    closedir($dh);
+
+    # 各ファイルからデータを読み込み
+    foreach my $file (@files) {
+        my $filepath = "$attr_dir/$file";
+        my $thread_id = $file;
+        $thread_id =~ s/^attr_//;  # "attr_"を削除
+        $thread_id =~ s/\.cgi$//;  # 拡張子を削除
+        
+        eval {
+            my $data = lock_retrieve($filepath);
+            $this->{'ATTR'}->{$thread_id} = $data if defined $data;
+        };
+        if ($@) {
+            warn "Failed to retrieve data from $filepath: $@";
+        }
+    }
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	スレッド属性情報保存
@@ -450,44 +514,56 @@ sub LoadAttr
 #------------------------------------------------------------------------------------------------------------
 sub SaveAttr
 {
-	my $this = shift;
-	my ($Sys) = @_;
-	
-	my $path = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info/attr.cgi';
-	
-	chmod($Sys->Get('PM-ADM'), $path);
-	if (open(my $fh, (-f $path ? '+<' : '>'), $path)) {
-		flock($fh, 2);
-		#binmode($fh);
-		seek($fh, 0, 0);
-		
-		my $Attr = $this->{'ATTR'};
-		foreach my $id (keys %$Attr) {
-			my $hash = $Attr->{$id};
-			next if (!defined $hash);
-			
-			my $attrs = '';
-			while (my ($key, $val) = each %$hash) {
-				next if (!defined $val || $val eq '');
-				$key =~ s/([^\w])/'%'.unpack('H2', $1)/eg;
-				$val =~ s/([^\w])/'%'.unpack('H2', $1)/eg;
-				$attrs .= "$key=$val&";
-			}
-			
-			next if ($attrs eq '');
-			
-			my $data = join('<>',
-				$id,
-				$attrs,
-			);
-			
-			print $fh "$data\n";
-		}
-		
-		truncate($fh, tell($fh));
-		close($fh);
-	}
-	chmod($Sys->Get('PM-ADM'), $path);
+    my $this = shift;
+    my ($Sys,$threadID) = @_;
+
+    $threadID //= $Sys->Get('KEY');
+
+	my $AttrPath = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . "/info/attr/attr_$threadID.cgi";
+
+    # データをファイルに保存
+    eval {
+        lock_store($this->{'ATTR'}->{$threadID}, $AttrPath);
+    };
+    if ($@) {
+        warn "Failed to store data to $AttrPath: $@";
+    }
+
+    # ファイルの権限を設定
+    chmod($Sys->Get('PM-ADM'), $AttrPath);
+}
+
+# 互換性維持のため(主にadmin.cgi用)
+sub SaveAttrAll
+{
+    my $this = shift;
+    my ($Sys) = @_;
+    
+    # 属性データが存在しない場合は何もしない
+    return unless defined $this->{'ATTR'} && ref($this->{'ATTR'}) eq 'HASH';
+
+    my $attr_dir = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/attr';
+
+    # ディレクトリが存在しない場合は作成
+    unless (-d $attr_dir) {
+        mkdir $attr_dir or die "Could not create directory '$attr_dir': $!";
+    }
+
+    # 各スレッドIDに対応する属性データを保存
+    foreach my $thread_id (keys %{$this->{'ATTR'}}) {
+        my $AttrPath = "$attr_dir/attr_$thread_id.cgi";
+        
+        # データをファイルに保存
+        eval {
+            lock_store($this->{'ATTR'}->{$thread_id}, $AttrPath);
+        };
+        if ($@) {
+            warn "Failed to store data to $AttrPath: $@";
+        }
+
+        # ファイルの権限を設定
+        chmod($Sys->Get('PM-ADM'), $AttrPath);
+    }
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -501,20 +577,24 @@ sub SaveAttr
 #------------------------------------------------------------------------------------------------------------
 sub GetAttr
 {
-	my $this = shift;
-	my ($key, $attr) = @_;
-	
-	if (!defined $this->{'ATTR'}) {
-		warn "Attr info is not loaded.";
-		return;
-	}
-	my $Attr = $this->{'ATTR'};
-	
-	my $val = undef;
-	$val = $Attr->{$key}->{$attr} if (defined $Attr->{$key});
-	
-	# undef => empty string
-	return (defined $val ? $val : '');
+    my $this = shift;
+    my ($key, $attr) = @_;
+    
+    # スレッド属性データがロードされていない場合
+    unless (defined $this->{'ATTR'}->{$key}) {
+        warn "Attr info for thread '$key' is not loaded.";
+        return undef;
+    }
+
+    # 属性が指定されていない場合は、すべての属性を返す
+    if (!defined $attr) {
+        return $this->{'ATTR'}->{$key};
+    }
+    
+    # 指定された属性を返す（未定義の場合は空文字を返す）
+    my $val = $this->{'ATTR'}->{$key}->{$attr};
+    
+    return defined $val ? $val : '';
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -528,39 +608,43 @@ sub GetAttr
 #------------------------------------------------------------------------------------------------------------
 sub SetAttr
 {
-	my $this = shift;
-	my ($key, $attr, $val) = @_;
-	
-	if (!defined $this->{'ATTR'}) {
-		warn "Attr info is not loaded.";
-		return;
-	}
-	my $Attr = $this->{'ATTR'};
-	
-	$Attr->{$key} = {} if (!defined $Attr->{$key});
-	$Attr->{$key}->{$attr} = $val;
+    my $this = shift;
+    my ($key, $attr, $val) = @_;
+    
+    # スレッドの属性情報がロードされていない場合は警告を出す
+    unless (defined $this->{'ATTR'}->{$key}) {
+        warn "Attr info for thread '$key' is not loaded.";
+        return;
+    }
+
+    # 属性が定義されている場合はその属性を設定
+    if (defined $attr) {
+        $this->{'ATTR'}->{$key}->{$attr} = $val;
+    } else {
+        # 属性が定義されていない場合は、スレッド全体の属性を置き換える
+        $this->{'ATTR'}->{$key} = $val;
+    }
 }
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	スレッド属性情報削除
+#	スレッド属性情全削除
 #	-------------------------------------------------------------------------------------
 #	@param	$key		スレッドID
 #
 #------------------------------------------------------------------------------------------------------------
 sub DeleteAttr
 {
-	my $this = shift;
-	my ($key) = @_;
-	
-	if (!defined $this->{'ATTR'}) {
-		warn "Attr info is not loaded.";
-		return;
-	}
-	my $Attr = $this->{'ATTR'};
-	
-	delete $Attr->{$key};
+    my $this = shift;
+    my ($key) = @_;
+    
+    if (!defined $this->{'ATTR'}->{$key}) {
+        warn "Attr info is not loaded.";
+        return;
+    }
+    delete $this->{'ATTR'}->{$key};
 }
+
 
 #------------------------------------------------------------------------------------------------------------
 #
