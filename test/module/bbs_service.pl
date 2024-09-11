@@ -103,6 +103,7 @@ sub CreateIndex
 		
 		PrintIndexHead($this, $Index, $Caption);
 		PrintIndexMenu($this, $Index);
+		PrintTimeLine($this,$Index);
 		PrintIndexPreview($this, $Index);
 		PrintIndexFoot($this, $Index, $Caption);
 		
@@ -496,6 +497,75 @@ MENU
 	}
 }
 
+#------------------------------------------------------------------------------------------------------------
+#
+#	index.html生成(タイムライン部分)
+#	-------------------------------------------------------------------------------------
+#	@param	$Page
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintTimeLine
+{
+	my $this = shift;
+	my ($Page) = @_;
+	
+	my $Conv = $this->{'CONV'};
+	my $Sys = $this->{'SYS'};
+	my $Set = $this->{'SET'};
+	my $menuCol = $this->{'SET'}->Get('BBS_MENU_COLOR');
+	my $tl_max = $Set->Get('BBS_TL_MAX');
+
+	return unless $tl_max;
+
+	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/timeline';
+    opendir(my $dir, $TLpath) or die "Cannot open directory: $!";
+    my @files = sort { (stat("$TLpath/$b"))[9] <=> (stat("$TLpath/$a"))[9] } 
+    grep { /\.cgi$/ && -f "$TLpath/$_" } readdir($dir);
+    closedir($dir);
+	
+	$Page->Print(<<MENU);
+
+<a name="timeline"></a>
+<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$menuCol" style="margin:1.2em auto;" align="center">
+ <tr>
+  <td>
+  <small>
+  <div style="height: 400px; overflow-y: scroll;">
+MENU
+	
+	foreach my $file (@files) {
+        my $filepath = "$TLpath/$file";
+        open(my $fh, '<', $filepath) or die "Cannot open file: $!";
+        my $line = <$fh>;
+        close($fh);
+        
+		my $mtime = (stat($filepath))[9];
+
+        my @lines = split(/<>/, $line);
+        my $message = $lines[3];
+        my $title  = $lines[4];
+        my $url    = $lines[5];
+
+		$Page->Print(<<MENU);
+        <section class="timeline-entry" data-mtime="$mtime">
+        <div class="tl_title"><a href="$url">$title</a></div>
+        <div class="tl_message">$message</div>
+        <div class="tl_time"> - </div> <!-- JavaScriptで更新 -->
+        </section>
+MENU
+
+    }
+
+	$Page->Print(<<MENU);
+	</div>
+  </small>
+  </td>
+ </tr>
+</table>
+
+MENU
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	index.html生成(スレッドプレビュー部分)

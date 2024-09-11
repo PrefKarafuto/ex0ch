@@ -394,6 +394,7 @@ sub InitSettingData
 		'BBS_HIDENUSI'			=> '',
 		'BBS_MAILFIELD'			=> 'checked',
 		'BBS_VOTE'				=> 10,
+		'BBS_TL_MAX'			=> 100,
 
 		#忍法帖関連(必要Lv-消費Lv)
 		'NINJA_WRITE_MESSAGE'	=> 0,

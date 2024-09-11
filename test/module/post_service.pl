@@ -185,7 +185,7 @@ sub Write
 	
 	if ($err == $ZP::E_SUCCESS) {
 		# タイムラインへ追加
-		#$this->AddTimeLine($Sys,$Set,$Threads, $Conv, $line) if $Set->Get('TL_RES_MAX');
+		#$this->AddTimeLine($Sys,$Set,$Threads, $Conv, $line) if $Set->Get('BBS_TL_MAX');
 
 		# subject.txtの更新
 		# スレッド作成モードなら新規に追加する
@@ -334,7 +334,7 @@ sub ReadyBeforeWrite
 	if($Ninja->Get('ban_command') ne 'on' && (($Set->Get('BBS_NINJA') && $Ninja->Get('ninLv') >= $min_level) || !$Set->Get('BBS_NINJA') || $commandAuth)){
 
 		# Capの権限があった場合すべて許可
-		$CommandSet = oct("0b1111111111111111111111111") if $commandAuth;		# 2^22
+		$CommandSet = oct("0b11111111111111111111111111") if $commandAuth;		# 2^23
 
 		if($Sys->Equal('MODE', 1)){
 			# スレ立て
@@ -490,50 +490,22 @@ sub Command
 			}
 			$Command .= "VIPQ2_EXTDAT: $id:$slip:$line:$size:$a$b$c$d: EXT was configured<br>";
 		}
+		# スレッド属性引き継ぎ
+		if ($Form->Get('MESSAGE') =~ /(^|<br>)!loadattr:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 23)) {
+			my $Handover_threadid = $2;
+			$Threads->LoadAttr($Sys,$Handover_threadid);
+			my $Attr = Threads->GetAttr($Handover_threadid);
+			if($Attr){
+				$Threads->SetAttr($threadid,undef);
+				$Command .= "スレッドID:${Handover_threadid}から設定を引き継ぎました。<br>";
+			}else{
+				$Command .= '引き継ぎ可能な設定項目なし。<br>';
+			}
+		}
 	}
 
 	##スレ中パスワード保持者のみ
 	if(!$Sys->Equal('MODE', 1)){
-		#コマンド取り消し
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z&;]{4,20})(<br>|$)/ && ($setBitMask & 2 ** 8)){
-			my $delCommand = $2;
-			$delCommand =~ s/^sage$/sagemode/;
-			if($Threads->GetAttr($threadid, $delCommand)){
-				if($delCommand =~ /ban&gt;&gt;([1-9][0-9]*)/ ){
-					#BAN取り消し用
-					my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
-					my $bannum = @banuserAttr;
-					my $bansid = GetSessionID($Sys,$threadid,$1);
-					if($bannum){
-						if($bansid){
-							# grepを使って$bansidに一致しない要素だけを選択
-							my @newBanuserAttr = grep { $_ ne $bansid } @banuserAttr;
-							
-							if(@newBanuserAttr < @banuserAttr){
-								# 変更があればスレッド属性を更新
-								$Threads->SetAttr($threadid, join(',', @newBanuserAttr));
-								$Command .= "&gt;&gt;$1のBANを解除";
-							} else {
-								$Command .= "※対象はBANされていません<br>";
-							}
-						} else {
-							$Command .= "※無効なレス番号<br>";
-						}
-					}else {
-						$Command .= "※設定されていません<br>";
-					}
-				}
-				else{
-					$Threads->SetAttr($threadid, $delCommand,'');
-					$delCommand =~ s/^sagemode$/sage/;
-					$Command .= '※'.$delCommand.'取り消し<br>';
-				}
-			}
-			else{
-				$delCommand =~ s/^sagemode$/sage/;
-				$Command .= '※'.$delCommand.'は設定されていません<br>';
-			}
-		}
 		#スレスト
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!stop(<br>|$)/ && ($setBitMask & 2 ** 7)){
 			my $ninLv = $Ninja->Get('ninLv');
@@ -806,6 +778,46 @@ sub Command
 			$Command .= '※名無し：'.$new774.'<br>';
 		}else{
 			$Command .= '※名無し長すぎ<br>';
+		}
+	}
+	#コマンド取り消し
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z&;]{4,20})(<br>|$)/ && ($setBitMask & 2 ** 8)){
+		my $delCommand = $2;
+		$delCommand =~ s/^sage$/sagemode/;
+		if($Threads->GetAttr($threadid, $delCommand)){
+			if($delCommand =~ /ban&gt;&gt;([1-9][0-9]*)/ ){
+				#BAN取り消し用
+				my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
+				my $bannum = @banuserAttr;
+				my $bansid = GetSessionID($Sys,$threadid,$1);
+				if($bannum){
+					if($bansid){
+						# grepを使って$bansidに一致しない要素だけを選択
+						my @newBanuserAttr = grep { $_ ne $bansid } @banuserAttr;
+						
+						if(@newBanuserAttr < @banuserAttr){
+							# 変更があればスレッド属性を更新
+							$Threads->SetAttr($threadid, join(',', @newBanuserAttr));
+							$Command .= "&gt;&gt;$1のBANを解除";
+						} else {
+							$Command .= "※対象はBANされていません<br>";
+						}
+					} else {
+						$Command .= "※無効なレス番号<br>";
+					}
+				}else {
+					$Command .= "※設定されていません<br>";
+				}
+			}
+			else{
+				$Threads->SetAttr($threadid, $delCommand,'');
+				$delCommand =~ s/^sagemode$/sage/;
+				$Command .= '※'.$delCommand.'取り消し<br>';
+			}
+		}
+		else{
+			$delCommand =~ s/^sagemode$/sage/;
+			$Command .= '※'.$delCommand.'は設定されていません<br>';
 		}
 	}
 	#ID無し若しくはIDをスレッドで変更（!noidと!changeidがあった場合は!noid優先）
@@ -1968,33 +1980,53 @@ sub Ninpocho
 #	-------------------------------------------------------------------------------------
 #
 #------------------------------------------------------------------------------------------------------------
-sub AddTimeLine
-{
-	my $this = shift;
-	my ($Sys, $Set, $Threads, $Conv, $line) = @_;
-	require './module/dat.pl';
-	my $Dat = DAT->new;
+sub AddTimeLine {
+    my $this = shift;
+    my ($Sys, $Set, $Threads, $Conv, $line) = @_;
 
-	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/2147483647.dat';
-	my $title = $Threads->Get('SUBJECT',$Sys->Get('KEY'));
-	my $url = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), 'l10');
-	
+    my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/timeline';
+    my $title = $Threads->Get('SUBJECT', $Sys->Get('KEY'));
+    my $url = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), 'l10');
+
+	require './module/file_utils.pl';
+	FILE_UTILS::CreateDirectory("$TLpath", $Sys->Get('PM-ADIR'));	# 無かったら作成
+    
+    # タイムラインファイルの作成
 	chomp($line);
-	my @lines = split(/<>/, $line);
-	$lines[3] .= "<hr><a href=\"$url\">$title</a>";
-	$lines[4] = "★タイムライン★\n";
+	my @lines = split(/<>/,$line);
+    my $crypt_filename = crypt($lines[3], $Sys->Get('KEY'));
+    $crypt_filename =~ tr/./_/;
+    $crypt_filename =~ tr/\//-/;
+    open(my $fh, '>', $TLpath .'/'. $crypt_filename . ".cgi") or die "Cannot open file: $!";
+	chmod 0600,$fh;
+	$lines[4] //= $title;
+	$lines[5] //= $url;
 	$line = join('<>',@lines);
+    print $fh,$line;
+    close $fh;
 
-	my $err = $Dat->DirectAppend($Sys,$TLpath,$line);
-	my $resNum = DAT::GetNumFromFile($TLpath);
+    # タイムラインフォルダ内の .cgi ファイル数を取得
+    my $max_files = $Set->Get('BBS_TL_MAX');  # 保存するタイムラインファイルの最大数
+    opendir(my $dir, $TLpath) or die "Cannot open directory: $!";
+    my @files = grep { /\.cgi$/ && -f "$TLpath/$_" } readdir($dir);
+    closedir($dir);
 
-	if($resNum > $Set->Get('TL_RES_MAX')){
-		$Dat->Load($Sys,$TLpath,0);
-		$Dat->Delete(0);
-		$Dat->Save($Sys);
-	}
-	return $err;
+    # 規定数を超えている場合、差を計算して削除する
+    my $excess_files = scalar @files - $max_files;
+
+    if ($excess_files > 0) {
+        # ファイルを最終更新時刻でソート
+        @files = sort { (stat("$TLpath/$a"))[9] <=> (stat("$TLpath/$b"))[9] } @files;
+        
+        # 規定数以上の古いファイルを削除
+        for (my $i = 0; $i < $excess_files; $i++) {
+            my $file_to_delete = shift @files;
+            unlink "$TLpath/$file_to_delete" or warn "Could not delete $file_to_delete: $!";
+        }
+    }
 }
+
+
 #SPAMBLOCK
 sub SpamBlock
 {

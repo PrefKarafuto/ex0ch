@@ -735,6 +735,7 @@ sub PrintCommandSetting
 	my $setextend	= $setBitMask & 2 ** 20 ? 'checked' : '';
 	my $setsubowner	= $setBitMask & 2 ** 21 ? 'checked' : '';
 	my $setvoteban	= $setBitMask & 2 ** 22 ? 'checked' : '';
+	my $setloadattr	= $setBitMask & 2 ** 23 ? 'checked' : '';
 
 	my $resmax = $Setting->Get('BBS_MAX_RES') || $Sys->Get('RESMAX');
 	my $setvotenum = $Setting->Get('BBS_VOTE');
@@ -754,6 +755,9 @@ sub PrintCommandSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">extendコマンド（本文行頭!extend:[id]:[slip]:[maxres]:[maxsize]）</td><td>");
 	$Page->Print("<input type=checkbox name=EXTEND value=1048576 $setextend>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレッド設定引き継ぎ（!loadattr:[対象のスレッドID]）</td><td>");
+	$Page->Print("<input type=checkbox name=ATTR value=8388608 $setloadattr>有効</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 
 	$Page->Print("<tr><td colspan=4>いつでも</td></tr>");
@@ -853,10 +857,11 @@ sub PrintNinpochoSetting
 	my $setWrite		= $Setting->Get('NINJA_WRITE_MESSAGE');
 	my $setSage			= $Setting->Get('NINJA_FORCE_SAGE');
 
-	my ($setThread,$thcost)		= split(/-/,$Setting->Get('NINJA_MAKE_THREAD'));
+	my ($setThread,$thcost)			= split(/-/,$Setting->Get('NINJA_MAKE_THREAD'));
 	my ($setCommand,$comcost)		= split(/-/,$Setting->Get('NINJA_USE_COMMAND'));
 	my ($setStop,$stopcost)			= split(/-/,$Setting->Get('NINJA_THREAD_STOP'));
 	my ($setBan,$bancost)			= split(/-/,$Setting->Get('NINJA_USER_BAN'));
+	my ($setVote,$votecost)			= split(/-/,$Setting->Get('NINJA_BAN_VOTE'));
 	my ($setDelete,$delcost)		= split(/-/,$Setting->Get('NINJA_RES_DELETE'));
 
 	
@@ -885,6 +890,10 @@ sub PrintNinpochoSetting
 	$Page->Print("<input type=text size=8 name=NINJA_USER_BAN value=\"$setBan\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=COST_BAN value=\"$bancost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">BAN投票参加可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_BAN_VOTE value=\"$setVote\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_VOTE value=\"$votecost\"></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">レス削除可能レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=NINJA_RES_DELETE value=\"$setDelete\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
@@ -1338,7 +1347,7 @@ sub FunctionCommandSetting
 	
 	my $commandSet = 0;
 	my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
-					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE);
+					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE ATTR);
 
 	foreach (@inList) {
 		# 入力チェック	
@@ -1384,7 +1393,7 @@ sub FunctionNinpochoSetting
 	# 入力チェック
 	{
 		my @inList = qw(NINJA_WRITE_MESSAGE NINJA_FORCE_SAGE NINJA_MAKE_THREAD NINJA_USER_BAN
-		 NINJA_USE_COMMAND NINJA_THREAD_STOP NINJA_RES_DELETE);
+		 NINJA_BAN_VOTE NINJA_USE_COMMAND NINJA_THREAD_STOP NINJA_RES_DELETE);
 		foreach (@inList) {
 			push @$pLog, "「$_」を「" . $Form->Get($_) . '」に設定';
 		}
@@ -1397,6 +1406,7 @@ sub FunctionNinpochoSetting
 	$Setting->Set('NINJA_FORCE_SAGE', $Form->Get('NINJA_FORCE_SAGE'));
 	$Setting->Set('NINJA_MAKE_THREAD', $Form->Get('NINJA_MAKE_THREAD').'-'.$Form->Get('COST_TH'));
 	$Setting->Set('NINJA_USER_BAN', $Form->Get('NINJA_USER_BAN').'-'.$Form->Get('COST_BAN'));
+	$Setting->Set('NINJA_BAN_VOTE', $Form->Get('NINJA_BAN_VOTE').'-'.$Form->Get('COST_VOTE'));
 	$Setting->Set('NINJA_USE_COMMAND', $Form->Get('NINJA_USE_COMMAND').'-'.$Form->Get('COST_COM'));
 	$Setting->Set('NINJA_THREAD_STOP', $Form->Get('NINJA_THREAD_STOP').'-'.$Form->Get('COST_STOP'));
 	$Setting->Set('NINJA_RES_DELETE', $Form->Get('NINJA_RES_DELETE').'-'.$Form->Get('COST_DEL'));
