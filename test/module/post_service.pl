@@ -12,6 +12,7 @@ use LWP::UserAgent;
 use Digest::MD5;
 use JSON;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+use Encode qw(encode);
 use warnings;
 no warnings 'once';
 
@@ -185,7 +186,7 @@ sub Write
 	
 	if ($err == $ZP::E_SUCCESS) {
 		# タイムラインへ追加
-		#$this->AddTimeLine($Sys,$Set,$Threads, $Conv, $line) if $Set->Get('BBS_TL_MAX');
+		$this->AddTimeLine($Sys,$Set,$Threads, $Conv, $line) if $Set->Get('BBS_TL_MAX');
 
 		# subject.txtの更新
 		# スレッド作成モードなら新規に追加する
@@ -920,9 +921,9 @@ sub ToKakoLog {
 	my ($Sys, $Set, $Threads) = @_;
 	
 	require './module/file_utils.pl';
-	require './module/generate_index.pl';  # 一度だけ読み込む
+	require './module/bbs_service.pl';  # 一度だけ読み込む
 	my $Pools = POOL_THREAD->new;
-	my $BBSAid = GENERATE_INDEX->new;  # 一度だけインスタンス化
+	my $BBSAid = BBS_SERVICE->new;  # 一度だけインスタンス化
 
 	my $elapsed = 60 * 60;  # 1時間
 	
@@ -1693,8 +1694,8 @@ sub AddSubjectNewThread
 		#別の掲示板に移す場合
 		else{
 			FILE_UTILS::Move("$path/dat/$lid.dat", $Set->Get('BBS_KAKO')."/dat/$lid.dat");	
-			require './module/generate_index.pl';
-			my $BBSAid = GENERATE_INDEX -> new;
+			require './module/bbs_service.pl';
+			my $BBSAid = BBS_SERVICE -> new;
 
 			#$Sysで指すBBS名を一時変更するため保存
 			my $originalBBSname = $Sys->Get('BBS');
@@ -1994,16 +1995,22 @@ sub AddTimeLine {
     # タイムラインファイルの作成
 	chomp($line);
 	my @lines = split(/<>/,$line);
-    my $crypt_filename = crypt($lines[3], $Sys->Get('KEY'));
+	$lines[3] =~ tr/<br>//;
+    my $crypt_filename = crypt(encode('UTF-8', $lines[3]), $Sys->Get('KEY'));
     $crypt_filename =~ tr/./_/;
     $crypt_filename =~ tr/\//-/;
-    open(my $fh, '>', $TLpath .'/'. $crypt_filename . ".cgi") or die "Cannot open file: $!";
-	chmod 0600,$fh;
-	$lines[4] //= $title;
-	$lines[5] //= $url;
-	$line = join('<>',@lines);
-    print $fh,$line;
-    close $fh;
+    if(open(my $fh, '>', $TLpath .'/'. $crypt_filename . ".cgi")){
+		flock($fh, 2);
+		chmod 0600, $fh;
+		$lines[4] //= $title;
+		$lines[5] //= $url;
+		$line = join('<>',@lines);
+		print $fh "$line";
+		close $fh;
+		
+	}else{
+		warn "Could not open file [$TLpath]: $!";
+	}
 
     # タイムラインフォルダ内の .cgi ファイル数を取得
     my $max_files = $Set->Get('BBS_TL_MAX');  # 保存するタイムラインファイルの最大数

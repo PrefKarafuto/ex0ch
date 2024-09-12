@@ -964,6 +964,7 @@ sub PrintOtherSetting
 	my $setNinja		= $Setting->Get('BBS_NINJA');
 	my $setHideNusi		= $Setting->Get('BBS_HIDENUSI');
 	my $setTitleID		= $Setting->Get('BBS_TITLEID');
+	my $setTLMAX		= $Setting->Get('BBS_TL_MAX');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
@@ -1023,11 +1024,12 @@ sub PrintOtherSetting
 	$Page->Print("<input type=text size=8 name=BBS_MAX_MENU_THREAD value=\"$setThreadMenu\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on disabled>確認あり</td></tr>");
-	
-	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
-	$Page->Print("</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">タイムライン表示数<small>（0で非表示）</small></td><td>");
+	$Page->Print("<input type=text size=8 name=BBS_TL_MAX value=\"$setTLMAX\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">${type}画像埋め込み表示</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_IMGTAG value=on $setImage>有効</tr>");
+	$Page->Print("<input type=checkbox name=BBS_IMGTAG value=on $setImage>有効</td></tr>");
+
+	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">X(旧Twitter) 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setTwitter>有効</td></tr>");
@@ -1473,6 +1475,7 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_IMGTAG', ($Form->Equal('BBS_IMGTAG', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_TL_MAX', $Form->Get('BBS_TL_MAX'));
 	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	
 	# ID表示設定

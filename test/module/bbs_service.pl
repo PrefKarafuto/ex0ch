@@ -528,11 +528,11 @@ sub PrintTimeLine
 
 <a name="timeline"></a>
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$menuCol" style="margin:1.2em auto;" align="center">
-<button onclick="updateTimelineTimes()">更新</button>
+<tbody>
  <tr>
   <td>
   <small>
-  <div style="height: 400px; overflow-y: scroll;" id="timeline" >
+  <div style="height: 200px; overflow-y: scroll;" id="timeline" >
 MENU
 	
 	foreach my $file (@files) {
@@ -545,15 +545,17 @@ MENU
 
         my @lines = split(/<>/, $line);
         my $message = $lines[3];
+		$message =~ s/<br>//g;
         my $title  = $lines[4];
         my $url    = $lines[5];
 
 		$Page->Print(<<MENU);
-        <section class="timeline-entry" data-mtime="$mtime">
-        <div class="tl_title"><a href="$url">$title</a></div>
+    <a href="$url" class="timeline-entry" data-mtime="$mtime">
+        <div class="tl_title">
+            <span class="tl_time"> - </span> $title
+        </div>
         <div class="tl_message">$message</div>
-        <div class="tl_time"> - </div> <!-- JavaScriptで更新 -->
-        </section>
+    </a>
 MENU
 
     }
@@ -563,6 +565,7 @@ MENU
   </small>
   </td>
  </tr>
+ </tbody>
 </table>
 
 MENU

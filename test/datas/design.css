@@ -323,3 +323,42 @@ height:100%;
         max-width: 100%; /* スマホ用メニュー表示時の最大幅を100%に設定 */
     }
 }
+
+/* タイムライン全体にリンクのスタイルを適用 */
+a.timeline-entry {
+    display: block;  /* ブロック全体をクリック可能に */
+    text-decoration: none; /* デフォルトのリンクの下線を削除 */
+    padding: 5px;
+    border-radius: 5px;
+    color: rgb(4, 134, 185); /* リンクの色を黒に */
+    font-size: 0.8em;
+}
+
+/* マウスオーバー時の背景色の変更 */
+a.timeline-entry:hover {
+    background-color: rgba(0, 123, 255, 0.1); /* 半透明の青色背景に変更 */
+}
+
+/* タイトル部分 */
+.tl_title {
+    font-weight: bold;
+    margin-bottom: 5px;
+    background-color: white;
+    border-radius: 5px;
+    text-overflow: ellipsis;
+}
+
+/* 投稿メッセージ部分 */
+.tl_message {
+    color: #333;
+    white-space: nowrap; /* 改行を無効化 */
+    overflow: hidden; /* 要素の幅を超えた部分を隠す */
+    text-overflow: ellipsis; /* 溢れた部分を「...」で省略 */
+}
+
+/* 時間部分 */
+.tl_time {
+    font-size: 0.8em;
+    color: #888;
+    margin-right: 10px;
+}
