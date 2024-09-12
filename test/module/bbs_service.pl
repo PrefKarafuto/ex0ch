@@ -546,8 +546,15 @@ MENU
         my @lines = split(/<>/, $line);
         my $message = $lines[3];
 		$message =~ s/<br>//g;
-        my $title  = substr($lines[4],30);
-        my $url    = substr($lines[5],30);
+        my $title  = $lines[4];
+		my $url = $lines[5];
+		
+		if (length($message) > 30) {
+			$message = substr($message, 0, 30) . "...";
+		}
+		if (length($title) > 30) {
+			$title = substr($title, 0, 30) . "...";
+		}
 
 		$Page->Print(<<MENU);
     <a href="$url" class="timeline-entry" data-mtime="$mtime">
