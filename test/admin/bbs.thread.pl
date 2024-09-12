@@ -276,6 +276,7 @@ sub PrintThreadList
 	$Threads = THREAD->new;
 	
 	$Threads->Load($SYS);
+	$Threads->LoadAttrAll($SYS);
 	$Threads->GetKeySet('ALL', '', \@threadSet);
 	$ThreadNum = $Threads->GetNum();
 	$base = $SYS->Get('BBSPATH') . '/' . $SYS->Get('BBS') . '/dat';
