@@ -195,9 +195,6 @@ sub DoFunction
 	elsif ($subMode eq 'DETAILATTR') {													# 属性解除
 		$err = FunctionThreadDetailAttr($Sys, $Form, $this->{'LOG'},0);
 	}
-	elsif ($subMode eq 'DETAILATTRDELETE') {													# 属性解除
-		$err = FunctionThreadDetailAttr($Sys, $Form, $this->{'LOG'},1);
-	}
 	elsif ($subMode eq 'POOL') {													# DAT落ち
 		$err = FunctionThreadPooling($Sys, $Form, $this->{'LOG'});
 	}
@@ -628,7 +625,6 @@ sub PrintThreadAttr
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', $target_thread);
 	if($isStop){
 		$Page->Print("<input type=button value=\"　保存　\" onclick=\"$common,'DETAILATTR');\"> ");
-		$Page->Print("<input type=button value=\"　一括削除　\" onclick=\"$common,'DETAILATTRDELETE');\" class=\"delete\"> ");
 	}
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
@@ -1059,7 +1055,7 @@ sub FunctionThreadAttr
 
 sub FunctionThreadDetailAttr
 {
-	my ($Sys, $Form, $pLog, $mode) = @_;
+	my ($Sys, $Form, $pLog) = @_;
 	
 	# 権限チェック
 	{
@@ -1077,29 +1073,24 @@ sub FunctionThreadDetailAttr
 	$Threads->LoadAttrAll($Sys);
 	my $target_thread = $Form->Get('TARGET_THREAD');
 
-	if($mode){
-		$Threads->DeleteAttr($target_thread);
-		push @$pLog, "属性を一括削除しました。";
-	}else{
-		foreach my $attrkey (sort keys %threadAttr) {
-			my $defAttr = $Threads->GetAttr($target_thread,$attrkey);
-			my $attr = $Form->Get($attrkey);
-			my $name = $threadAttr{$attrkey}->{'name'};
-			my $type = $threadAttr{$attrkey}->{'type'};
+	foreach my $attrkey (sort keys %threadAttr) {
+		my $defAttr = $Threads->GetAttr($target_thread,$attrkey);
+		my $attr = $Form->Get($attrkey);
+		my $name = $threadAttr{$attrkey}->{'name'};
+		my $type = $threadAttr{$attrkey}->{'type'};
 
-			return 1002 if ($attr && ($type eq 'number' && $attr !~ /[0-9]*/));
-			if($attrkey eq 'pass' && $attr ne $defAttr && $attr){
-				require Digest::SHA::PurePerl;
-				my $ctx = Digest::SHA::PurePerl->new;
-				$ctx->add(':', $Sys->Get('SERVER'));
-				$ctx->add(':', $target_thread);
-				$ctx->add(':', $attr);
-				$attr = $ctx->b64digest;
-			}
-
-			$Threads->SetAttr($target_thread,$attrkey,$attr) if ($defAttr || $attr);
-			push @$pLog, "[$attrkey]属性を".($attr?'付加':'解除');
+		return 1002 if ($attr && ($type eq 'number' && $attr !~ /[0-9]*/));
+		if($attrkey eq 'pass' && $attr ne $defAttr && $attr){
+			require Digest::SHA::PurePerl;
+			my $ctx = Digest::SHA::PurePerl->new;
+			$ctx->add(':', $Sys->Get('SERVER'));
+			$ctx->add(':', $target_thread);
+			$ctx->add(':', $attr);
+			$attr = $ctx->b64digest;
 		}
+
+		$Threads->SetAttr($target_thread,$attrkey,$attr) if ($defAttr || $attr);
+		push @$pLog, "[$attrkey]属性を".($attr?'付加':'解除');
 	}
 	$Threads->SaveAttrAll($Sys);
 	
