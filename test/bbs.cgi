@@ -16,6 +16,7 @@ use CGI::Cookie;
 use Digest::MD5;
 use JSON;
 use LWP::UserAgent;
+use Storable qw(lock_store lock_retrieve);
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 # 実行時間の計測開始 (デバッグ用)
@@ -474,7 +475,7 @@ HTML
 <font size="4" color="#FF0000"><b>Captcha認証</b></font>
 <br>
 
-<p>書き込むにはキャプチャをクリアしてください。</p>
+<p>書き込むにはキャプチャを解いてください。</p>
 <form method="POST" action="./bbs.cgi">
 HTML
 	
@@ -675,9 +676,9 @@ sub LoadSessionID
 	$ctx->add(':', $Sys->Get('SERVER'));
 	$ctx->add(':', $ENV{'REMOTE_ADDR'});
 	my $infoDir = $Sys->Get('INFO');
-	my $ipFile = ".$infoDir/.ninpocho/hash/ip_addr.cgi";
 	my $ipHash = $ctx->b64digest;
-
+	my $ipFile = ".$infoDir/.ninpocho/hash/ip-$ipHash.cgi";
+	
 	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
 		my $ctx = Digest::MD5->new;
 		$ctx->add($Sys->Get('SECURITY_KEY'));
@@ -689,14 +690,18 @@ sub LoadSessionID
 		}
 	}elsif($Conv->IsJPIP($Sys)){
 		# IPに紐付けられているかチェック
-		my $expiry = 60*30;	# 30分
-		$sid = NINPOCHO::GetHash($ipHash,$expiry,$ipFile);
+		if(-e $ipFile && time - (stat($ipFile))[9] < 60 * 60 * 24 * 30 ){
+			$sid = lock_retrieve($ipFile);
+		}else{
+			$sid = "";
+		}
 	}
-	unless($sid){
+	if(!$sid){
 		# 新規ID発行
 		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
 	}
-	NINPOCHO::SetHash($ipHash,$sid,time,$ipFile);
+	lock_store($sid,$ipFile);
+	chmod 0600,$ipFile;
 
 	my $ctx_sec = Digest::MD5->new;
 	$ctx_sec->add($Sys->Get('SECURITY_KEY'));
@@ -724,36 +729,44 @@ sub CaptchaAuthentication
 	require './module/ninpocho.pl';
 
 	my $sid = $Sys->Get('SID');
+	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
+	my $Dir = "." . $Sys->Get('INFO') . "/.auth/";
+
 	# ワンタイムパス認証
 	my $auth_code = "";
-	my $is_com = 0;
-	my $in_mail = $Form->Get('mail');
-	if ($in_mail =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
+	my $saved_sid = "";
+	if ($Form->Get('mail') =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
 		$auth_code = $2 // '';
-		$is_com = 1;
+		if($auth_code){
+			my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
+			$saved_sid = lock_retrieve($codeFile);
+		}
 	}
 	
-
-	my $sidDir = "." . $Sys->Get('INFO') . "/.auth/auth.cgi";
-	my $passDir = "." . $Sys->Get('INFO') . "/.auth/onetime_pass.cgi";
-	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
-	my $is_auth = NINPOCHO::GetHash($sid,$auth_expiry,$sidDir);
+	my $sidFile = "$Dir/sid-$sid.cgi"; 			# sidと認証コードを紐付け
+	my $saved_code = lock_retrieve($sidFile);
 
 	# 認証処理
 	my $err = 0;
 	if($Set->Get('BBS_CAPTCHA') eq 'force'){
-		# 強制Captcha
+		# 毎回強制Captcha
 		$err = Certification_Captcha($Sys, $Form);
-	}elsif($is_auth && !$auth_code && $is_com){
+	}elsif($saved_code eq 'ok' && !$auth_code){
 		# 認証情報があるが認証コード発行コマンドがある
 		$err = Certification_Captcha($Sys, $Form);
-	}elsif(!$is_auth && !$is_com){
+	}elsif(!$auth_code && $saved_code ne 'ok'){
 		# 認証情報もコマンドもない
 		$err = Certification_Captcha($Sys, $Form);
-		NINPOCHO::SetHash($sid, 1, time, $sidDir) unless $err;			# 認証済み設定
+		lock_store('ok', $sidFile) unless $err;			# 認証済み設定
+	}elsif((time - (stat($sidFile))[9]) > $auth_expiry){
+		# 有効期限切れ
+		$err = Certification_Captcha($Sys, $Form);
+		lock_store('ok', $sidFile) unless $err;			# 認証済み設定
 	}
 
-	if($is_com && !$auth_code){	# !authのみ
+	chmod 0600, $sidFile;
+
+	if(!$auth_code && !$saved_sid){	# !authのみ
 		if ($err == 0) {
 			# Captcha認証が成功した場合のみパスワードの発行
 			my $ctx = Digest::MD5->new;
@@ -764,13 +777,16 @@ sub CaptchaAuthentication
 			$ctx->add($ENV{'REMOTE_ADDR'});
 			my $pass = substr($ctx->hexdigest, 0, 8);
 
-			NINPOCHO::SetHash($pass, $sid, time(), $passDir);
+			lock_store($sid, "$Dir/code-$pass.cgi");
+			chmod 0600, "$Dir/code-$pass.cgi";
 			$Sys->Set('PASSWORD', $pass);
 
 			$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
 		} else {
 			# Captcha認証失敗
 			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
+			lock_store('failed', "$Dir/sid-$saved_sid.cgi");
+			chmod 0600, "$Dir/sid-$saved_sid.cgi";
 		}
 		$Cookie->Set('MAIL','');
 		$Form->Set('mail','');
@@ -778,12 +794,12 @@ sub CaptchaAuthentication
 
 	if ($auth_code) {
 		# Captcha認証の成功失敗を問わずパスワードの照合
-		my $sid = NINPOCHO::GetHash($auth_code, 60 * 3, $passDir);
-		if ($sid) {
+		if ($auth_code eq $saved_code && $saved_sid && (time - (stat("$Dir/code-$auth_code.cgi"))[9]) < 60*5) {
 			# パスワード合致
-			NINPOCHO::SetHash($sid, $auth_code, time, $sidDir);			# 認証済み設定
-			NINPOCHO::SetHash($auth_code, $sid, time - 60*3, $passDir); # ワンタイムパス無効化
-			$Sys->Set('SID', $sid);
+			lock_store('ok', "$Dir/sid-$saved_sid.cgi");			# 認証済み設定
+			chmod 0600, "$Dir/sid-$saved_sid.cgi";
+			unlink "$Dir/code-$auth_code.cgi";
+			$Sys->Set('SID', $saved_sid);
 			$err = 0;
 		}else{
 			# パスワード不一致
