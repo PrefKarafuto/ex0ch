@@ -12,7 +12,9 @@ use warnings;
 use CGI::Session;
 use CGI::Cookie;
 use Digest::MD5;
-use Storable qw(store retrieve);
+use Storable qw(lock_store lock_retrieve);
+use MIME::Base64 ();
+use POSIX qw(strftime);
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -63,13 +65,14 @@ sub Load
 	#パスワードがあった場合
 	if($password){
 		my $ctx2 = Digest::MD5->new;
-		my $exp = $Sys->Get('PASS_EXPITY');
+		my $exp = $Sys->Get('PASS_EXPITY') || 1;
 		my $long_expiry = 60*60*24*$exp;
 		
 		$ctx2->add($Sys->Get('SECURITY_KEY'));
 		$ctx2->add(':', $password);
+		my $ctx2_hexdigest = $ctx2->hexdigest();
+		$sid_saved = GetHash('sid', $long_expiry, $ninDir.'hash/pw-' . $ctx2_hexdigest . '.cgi');
 
-		$sid_saved = GetHash($ctx2->b64digest,$long_expiry,$ninDir.'hash/password.cgi');
 		if($sid_saved && $sid_saved ne $sid){
 			$sid_before = $sid;
 			$sid = $sid_saved;
@@ -260,16 +263,41 @@ sub Save
 	return unless $session;
 
 	if ($password) {
+		my $seed = undef;
+		if ($session->param('password_is_randomized')) {
+			# 「ランダム生成」したパスワードを取り出す。
+			$password = $session->param('password_is_randomized');
+		} else {
+			if (open my $fh, '<', '/dev/urandom') {
+				binmode $fh;
+				read $fh, $seed, 8;
+				close $fh;
+				$password = MIME::Base64::encode_base64url($seed);
+			}
+		}
 		my $ctx3 = Digest::MD5->new;
 		$ctx3->add($Sys->Get('SECURITY_KEY'));
 		$ctx3->add(':', $password);
-		my $pass_hash = $ctx3->b64digest;
+		#my $pass_hash = $ctx3->b64digest();
+		my $ctx3_hexdigest = $ctx3->hexdigest();
+		my $pass_file = $ninDir . 'hash/pw-' . $ctx3_hexdigest . '.cgi';
 		# 既にpasswordが設定されていた場合、既存のパスワードを削除
-		if($session->param('password')){
-			DeleteHash($session->param('password'),$ninDir.'hash/password.cgi');
+		# ランダム生成の場合は「削除しない」
+		if($session->param('password_file_hash') && !$session->param('password_is_randomized')) {
+			my $old_pass_file = $ninDir . 'hash/pw-' . $session->param('password_file_hash') . '.cgi';
+			if (-e $old_pass_file) {
+				unlink $old_pass_file;
+			}
+			# DeleteHash($session->param('password'),$ninDir.'hash/password.cgi');
 		}
-		SetHash($pass_hash,$sid,time,$ninDir.'hash/password.cgi');
-		$session->param('password',$pass_hash);
+		if (defined $seed && !$session->param('password_is_randomized')) {
+			# パスワードをランダム生成した場合「のみ」平文で保管する。
+			# 既に保管してあった場合はそのまま表示する
+			$session->param('password_is_randomized', $password);
+		}
+		SetHash('sid',$sid,time,$pass_file);
+		#$session->param('password',$pass_hash);
+		$session->param('password_file_hash', $ctx3_hexdigest);
 	}
 
 	# セッション有効期限を設定
@@ -280,6 +308,50 @@ sub Save
 	}
 	# セッションを閉じる
 	$session->flush();
+	if ($password) {
+		my $CGI = $Sys->Get('MainCGI');
+		
+		# FCGI用
+		# 上の方でやってほしい。
+		$CGI->{'THREADS'}->Close();
+
+		my $nowtime = strftime "%Y-%m-%d %H:%M:%S", localtime time;
+		my $Page = $CGI->{'PAGE'};
+		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
+		$Page->Print(<<HTML);
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="ja">
+<head>
+ 
+ <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+ <meta name="viewport" content="width=device-width,initial-scale=1.0">
+ 
+ <title>忍法帖保存ページ</title>
+ 
+</head>
+<!--nobanner-->
+<body>
+
+<div style="margin-bottom:2em;">
+<font size="+1" color="#FF0000"><b>忍法帖保存ページ</b></font>
+</div>
+<blockquote>
+<div>
+これはあなたの忍法帖パスワードなので大切に保管してください。<br>
+最新のパスワードのみが有効です。
+キャンセルを押して戻ってください。
+</div>
+</blockquote>
+<blockquote>
+時刻: $nowtime (UTC)<br>
+パスワード: $password
+</blockquote>
+</body>
+</html>
+HTML
+$Page->Flush('', 0, 0);
+exit();
+	}
 }
 
 # ハッシュテーブルをファイルから読み込む関数
@@ -289,7 +361,7 @@ sub GetHash {
 	my $hash_table = {};
 
 	if (-e $filename) {
-		$hash_table = retrieve($filename);
+		$hash_table = lock_retrieve($filename);
 	}
 	
 	# キーに対応する値が存在するかチェック
@@ -298,12 +370,12 @@ sub GetHash {
 		if (($hash_table->{$key}{time} + $expiry) < time) {
 			# 有効期限切れの場合は削除してundefを返す
 			delete $hash_table->{$key};
-			store $hash_table, $filename;
+			lock_store $hash_table, $filename;
 			return undef;
 		} else {
 			# 有効期限内の場合は値を返す
 			$hash_table->{$key}{time} = time;
-			store $hash_table, $filename;
+			lock_store $hash_table, $filename;
 			return $hash_table->{$key}{value};
 		}
 	} else {
@@ -319,7 +391,7 @@ sub SetHash {
 	my $hash_table = {};
 
 	if (-e $filename) {
-		$hash_table = retrieve($filename);
+		$hash_table = lock_retrieve($filename);
 	}else {
         $hash_table = {};
     }
@@ -328,7 +400,7 @@ sub SetHash {
 		value => $value,
 		time => $time,
 	};
-	store $hash_table, $filename;
+	lock_store $hash_table, $filename;
 	chmod 0600,$filename,
 }
 sub DeleteHash
@@ -338,14 +410,14 @@ sub DeleteHash
 	my $hash_table = {};
 
 	if (-e $filename) {
-		$hash_table = retrieve($filename);
+		$hash_table = lock_retrieve($filename);
 		# 値が目的の値と一致した場合、その要素を削除
 		if ($hash_table->{$key}) {
 			delete $hash_table->{$key};
 		}
 	}
 		# 変更をファイルに保存
-		store $hash_table, $filename;
+		lock_store $hash_table, $filename;
 		chmod 0600,$filename;
 }
 
@@ -356,7 +428,7 @@ sub DeleteHashValue
 	my $hash_table = {};
 
 	if (-e $filename) {
-		$hash_table = retrieve($filename);
+		$hash_table = lock_retrieve($filename);
 
 		# ハッシュテーブルの各キーと値を繰り返し確認
 		foreach my $key (keys %$hash_table) {
@@ -367,7 +439,7 @@ sub DeleteHashValue
 		}
 
 		# 変更をファイルに保存
-		store $hash_table, $filename;
+		lock_store $hash_table, $filename;
 		chmod 0600,$filename;
 	}
 }
