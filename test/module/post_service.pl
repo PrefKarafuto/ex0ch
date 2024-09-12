@@ -492,12 +492,12 @@ sub Command
 			$Command .= "VIPQ2_EXTDAT: $id:$slip:$line:$size:$a$b$c$d: EXT was configured<br>";
 		}
 		# スレッド属性引き継ぎ
-		if ($Form->Get('MESSAGE') =~ /^!loadattr:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 23)) {
+		if ($Form->Get('MESSAGE') =~ /^!loadattr:([1-9][0-9]{9})(<br>|$)/ && ($setBitMask & 2 ** 23)) {
 			my $Handover_threadid = $1;
 			$Threads->LoadAttr($Sys,$Handover_threadid);
-			my $Attr = $Threads->GetAttr($Handover_threadid);
-			if($Attr){
-				$Threads->SetAttr($threadid,undef);
+			my %Attr = %{$Threads->GetAttr($Handover_threadid,undef)};
+			if(keys(%Attr)){
+				$Threads->SetAttr($threadid,undef,\%Attr);
 				$Command .= "スレッドID:${Handover_threadid}から設定を引き継ぎました。<br>";
 			}else{
 				$Command .= '引き継ぎ可能な設定項目なし。<br>';
