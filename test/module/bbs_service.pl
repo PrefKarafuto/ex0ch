@@ -550,11 +550,13 @@ MENU
         my $title  = $lines[4];
 		my $url = $lines[5];
 
-		if (length($message) > 30) {
-			$message = substr($message, 0, 30) . "...";
+		my $str_max = 60;
+
+		if (length($message) > $str_max) {
+			$message = substr($message, 0, $str_max) . "...";
 		}
-		if (length($title) > 30) {
-			$title = substr($title, 0, 30) . "...";
+		if (length($title) > $str_max) {
+			$title = substr($title, 0, $str_max) . "...";
 		}
 
 		$Page->Print(<<MENU);
