@@ -495,7 +495,7 @@ sub Command
 		if ($Form->Get('MESSAGE') =~ /^!loadattr:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 23)) {
 			my $Handover_threadid = $2;
 			$Threads->LoadAttr($Sys,$Handover_threadid);
-			my $Attr = Threads->GetAttr($Handover_threadid);
+			my $Attr = $Threads->GetAttr($Handover_threadid);
 			if($Attr){
 				$Threads->SetAttr($threadid,undef);
 				$Command .= "スレッドID:${Handover_threadid}から設定を引き継ぎました。<br>";
