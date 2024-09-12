@@ -692,6 +692,7 @@ sub LoadSessionID
 		# IPに紐付けられているかチェック
 		if(-e $ipFile && time - (stat($ipFile))[9] < 60 * 60 * 24 * 30 ){
 			$sid = lock_retrieve($ipFile);
+			$sid = $sid->{'sid'};
 		}else{
 			$sid = "";
 		}
@@ -700,7 +701,8 @@ sub LoadSessionID
 		# 新規ID発行
 		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
 	}
-	lock_store($sid,$ipFile);
+	my %data = ('sid'=> $sid);
+	lock_store(\%data,$ipFile);
 	chmod 0600,$ipFile;
 
 	my $ctx_sec = Digest::MD5->new;
@@ -740,11 +742,13 @@ sub CaptchaAuthentication
 		if($auth_code){
 			my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
 			$saved_sid = lock_retrieve($codeFile);
+			$saved_sid = $saved_sid->{'sid'};
 		}
 	}
 	
 	my $sidFile = "$Dir/sid-$sid.cgi"; 			# sidと認証コードを紐付け
 	my $saved_code = lock_retrieve($sidFile);
+	$saved_code = $saved_code->{'code'};
 
 	# 認証処理
 	my $err = 0;
@@ -757,11 +761,11 @@ sub CaptchaAuthentication
 	}elsif(!$auth_code && $saved_code ne 'ok'){
 		# 認証情報もコマンドもない
 		$err = Certification_Captcha($Sys, $Form);
-		lock_store('ok', $sidFile) unless $err;			# 認証済み設定
+		lock_store(\('code'=>$saved_code,'status'=>'ok'), $sidFile) unless $err;			# 認証済み設定
 	}elsif((time - (stat($sidFile))[9]) > $auth_expiry){
 		# 有効期限切れ
 		$err = Certification_Captcha($Sys, $Form);
-		lock_store('ok', $sidFile) unless $err;			# 認証済み設定
+		lock_store(\('code'=>$saved_code,'status'=>'ok'), $sidFile) unless $err;			# 認証済み設定
 	}
 
 	chmod 0600, $sidFile;
@@ -777,7 +781,7 @@ sub CaptchaAuthentication
 			$ctx->add($ENV{'REMOTE_ADDR'});
 			my $pass = substr($ctx->hexdigest, 0, 8);
 
-			lock_store($sid, "$Dir/code-$pass.cgi");
+			lock_store(\('sid'=>$sid), "$Dir/code-$pass.cgi");
 			chmod 0600, "$Dir/code-$pass.cgi";
 			$Sys->Set('PASSWORD', $pass);
 
@@ -785,7 +789,7 @@ sub CaptchaAuthentication
 		} else {
 			# Captcha認証失敗
 			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
-			lock_store('failed', "$Dir/sid-$saved_sid.cgi");
+			lock_store(\('code'=>$saved_code,'status'=>'failed'), "$Dir/sid-$saved_sid.cgi");
 			chmod 0600, "$Dir/sid-$saved_sid.cgi";
 		}
 		$Cookie->Set('MAIL','');
@@ -796,7 +800,7 @@ sub CaptchaAuthentication
 		# Captcha認証の成功失敗を問わずパスワードの照合
 		if ($auth_code eq $saved_code && $saved_sid && (time - (stat("$Dir/code-$auth_code.cgi"))[9]) < 60*5) {
 			# パスワード合致
-			lock_store('ok', "$Dir/sid-$saved_sid.cgi");			# 認証済み設定
+			lock_store(\('code'=>$saved_code,'status'=>'ok'), "$Dir/sid-$saved_sid.cgi");			# 認証済み設定
 			chmod 0600, "$Dir/sid-$saved_sid.cgi";
 			unlink "$Dir/code-$auth_code.cgi";
 			$Sys->Set('SID', $saved_sid);
