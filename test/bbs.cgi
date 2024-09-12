@@ -747,18 +747,19 @@ sub CaptchaAuthentication
 	}
 	
 	my $sidFile = "$Dir/sid-$sid.cgi"; 			# sidと認証コードを紐付け
-	my $saved_code = lock_retrieve($sidFile);
-	$saved_code = $saved_code->{'code'};
+	my $saved_info = lock_retrieve($sidFile);
+	my $saved_code = $saved_info->{'code'};
+	my $status = $saved_info->{'status'};
 
 	# 認証処理
 	my $err = 0;
 	if($Set->Get('BBS_CAPTCHA') eq 'force'){
 		# 毎回強制Captcha
 		$err = Certification_Captcha($Sys, $Form);
-	}elsif($saved_code eq 'ok' && !$auth_code){
+	}elsif($status eq 'ok' && !$auth_code){
 		# 認証情報があるが認証コード発行コマンドがある
 		$err = Certification_Captcha($Sys, $Form);
-	}elsif(!$auth_code && $saved_code ne 'ok'){
+	}elsif(!$auth_code && $status ne 'ok'){
 		# 認証情報もコマンドもない
 		$err = Certification_Captcha($Sys, $Form);
 		lock_store(\('code'=>$saved_code,'status'=>'ok'), $sidFile) unless $err;			# 認証済み設定
