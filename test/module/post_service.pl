@@ -493,7 +493,7 @@ sub Command
 		}
 		# スレッド属性引き継ぎ
 		if ($Form->Get('MESSAGE') =~ /^!loadattr:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 23)) {
-			my $Handover_threadid = $2;
+			my $Handover_threadid = $1;
 			$Threads->LoadAttr($Sys,$Handover_threadid);
 			my $Attr = $Threads->GetAttr($Handover_threadid);
 			if($Attr){
