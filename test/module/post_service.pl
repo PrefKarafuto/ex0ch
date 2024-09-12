@@ -1995,7 +1995,13 @@ sub AddTimeLine {
     # タイムラインファイルの作成
 	chomp($line);
 	my @lines = split(/<>/,$line);
-	$lines[3] =~ tr/<br>//;
+	
+	# sageなら反映しない
+	$Threads->LoadAttr($Sys);
+	if($lines[1] =~ /^sage$/ || $Threads->GetAttr($Sys->Get('KEY'),'sagemode')){
+		return;
+	}
+
     my $crypt_filename = crypt(encode('UTF-8', $lines[3]), $Sys->Get('KEY'));
     $crypt_filename =~ tr/./_/;
     $crypt_filename =~ tr/\//-/;
