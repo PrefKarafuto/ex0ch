@@ -351,7 +351,7 @@ a.timeline-entry:hover {
 /* 投稿メッセージ部分 */
 .tl_message {
     color: #333;
-    white-space: nowrap; /* 改行を無効化 */
+    white-space: wrap; /* 改行を無効化 */
     overflow: hidden; /* 要素の幅を超えた部分を隠す */
     text-overflow: ellipsis; /* 溢れた部分を「...」で省略 */
 }

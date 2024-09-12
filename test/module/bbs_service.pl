@@ -546,8 +546,8 @@ MENU
         my @lines = split(/<>/, $line);
         my $message = $lines[3];
 		$message =~ s/<br>//g;
-        my $title  = $lines[4];
-        my $url    = $lines[5];
+        my $title  = substr($lines[4],30);
+        my $url    = substr($lines[5],30);
 
 		$Page->Print(<<MENU);
     <a href="$url" class="timeline-entry" data-mtime="$mtime">
@@ -564,7 +564,11 @@ MENU
 	</div>
   </small>
   </td>
- </tr>
+ </tr><tr><td>
+<button type="button" onclick="window.location.href='./#timeline'; window.location.reload();">
+    再読み込み
+</button>
+ </td></tr>
  </tbody>
 </table>
 
