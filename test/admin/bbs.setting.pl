@@ -1348,17 +1348,18 @@ sub FunctionCommandSetting
 	$Setting->Load($Sys);
 	
 	my $commandSet = 0;
-	my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
+	my @List = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
 					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE ATTR);
 
-	foreach (@inList) {
+	foreach (@List) {
 		# 入力チェック	
 		my $status = $Form->Get($_) ?  '有効' : '無効';
 		$commandSet |= $Form->Get($_);
 		push @$pLog, "「$_」を「" . $status. '」に設定';
 	}
 	# 規定外文字
-	if (!$Form->IsNumber('VOTE_NUM')) {
+	my @inList = qw(VOTE_NUM);
+	if (!$Form->IsNumber(\@inList)) {
 		return 1002;
 	}
 	
