@@ -287,6 +287,7 @@ sub PrintNinjaEdit
 	#忍法帖の情報
 	my $lv = $Ninja->Get('ninLv');
 	my $count = $Ninja->Get('count');
+	my $today_count = int(time / (60 * 60 * 24)) == int($Ninja->Get('last_wtime') / (60 * 60 * 24)) ? $Ninja->Get('today_count') : 0 ;
 	my $thread_count = $Ninja->Get('thread_count');
 	my $lvuptime = $Ninja->Get('lvuptime') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('lvuptime')) : '';
 	my $ninID = crypt($sid,$sid);
@@ -369,7 +370,8 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA　(load_ua)</td><td>$load_ua</td></tr>\n");
 
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics (Key)</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">書き込み数　(count)</td><td>$count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">合計書き込み数　(count)</td><td>$count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">今日の書き込み数</td><td>$today_count</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数　(thread_count)</td><td>$thread_count</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数　(load_count)</td><td>$load_count</td></tr>\n");
 

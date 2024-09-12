@@ -492,7 +492,7 @@ sub Command
 			$Command .= "VIPQ2_EXTDAT: $id:$slip:$line:$size:$a$b$c$d: EXT was configured<br>";
 		}
 		# スレッド属性引き継ぎ
-		if ($Form->Get('MESSAGE') =~ /(^|<br>)!loadattr:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 23)) {
+		if ($Form->Get('MESSAGE') =~ /^!loadattr:([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 23)) {
 			my $Handover_threadid = $2;
 			$Threads->LoadAttr($Sys,$Handover_threadid);
 			my $Attr = Threads->GetAttr($Handover_threadid);
@@ -1887,7 +1887,7 @@ sub Ninpocho
 	# 書き込んだ時間の23時間後を取得
 	my $time23h = $resTime + 82800;
 	# セッションから前回レベルアップしたときの時間を取得
-	my $lvUpTime = $Ninja->Get('lvuptime') || $time23h;
+	my $lvUpTime = $Ninja->Get('lvuptime') || 0;
 
 	# レベルの上限
 	my $lvLim = $Sys->Get('NINLVMAX');

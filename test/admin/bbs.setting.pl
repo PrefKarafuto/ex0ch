@@ -756,7 +756,7 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">extendコマンド（本文行頭!extend:[id]:[slip]:[maxres]:[maxsize]）</td><td>");
 	$Page->Print("<input type=checkbox name=EXTEND value=1048576 $setextend>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">スレッド設定引き継ぎ（!loadattr:[対象のスレッドID]）</td><td>");
+	$Page->Print("<td class=\"DetailTitle\">スレッド設定引き継ぎ（本文行頭!loadattr:[対象のスレッドID]）</td><td>");
 	$Page->Print("<input type=checkbox name=ATTR value=8388608 $setloadattr>有効</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 
