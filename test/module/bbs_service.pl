@@ -546,9 +546,10 @@ MENU
         my @lines = split(/<>/, $line);
         my $message = $lines[3];
 		$message =~ s/<br>//g;
+		$message = (split(/</,$message))[0];
         my $title  = $lines[4];
 		my $url = $lines[5];
-		
+
 		if (length($message) > 30) {
 			$message = substr($message, 0, 30) . "...";
 		}
