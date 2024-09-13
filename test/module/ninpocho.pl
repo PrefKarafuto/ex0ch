@@ -260,7 +260,7 @@ sub Save
 	my $session = $this->{'SESSION'};
 
 	# 忍法帖を使わない場合
-	return unless $session;
+	return 0 unless $session;
 
 	if ($password) {
 		my $seed = undef;
@@ -309,48 +309,16 @@ sub Save
 	# セッションを閉じる
 	$session->flush();
 	if ($password) {
-		my $CGI = $Sys->Get('MainCGI');
+		my $nowtime = strftime "%Y-%m-%d %H:%M:%S", localtime time;
+		$Sys->Set('NIN_PASS',$password);
+		$Sys->Set('TIME',$nowtime);
 		
 		# FCGI用
 		# 上の方でやってほしい。
+		my $CGI = $Sys->Get('MainCGI');
 		$CGI->{'THREADS'}->Close();
 
-		my $nowtime = strftime "%Y-%m-%d %H:%M:%S", localtime time;
-		my $Page = $CGI->{'PAGE'};
-		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
-		$Page->Print(<<HTML);
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
-<html lang="ja">
-<head>
- 
- <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
- <meta name="viewport" content="width=device-width,initial-scale=1.0">
- 
- <title>忍法帖保存ページ</title>
- 
-</head>
-<!--nobanner-->
-<body>
-
-<div style="margin-bottom:2em;">
-<font size="+1" color="#FF0000"><b>忍法帖保存ページ</b></font>
-</div>
-<blockquote>
-<div>
-これはあなたの忍法帖パスワードなので大切に保管してください。<br>
-最新のパスワードのみが有効です。
-キャンセルを押して戻ってください。
-</div>
-</blockquote>
-<blockquote>
-時刻: $nowtime (UTC)<br>
-パスワード: $password
-</blockquote>
-</body>
-</html>
-HTML
-$Page->Flush('', 0, 0);
-exit();
+		return $ZP::E_FORM_SAVECOMMAND;
 	}
 }
 

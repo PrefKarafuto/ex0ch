@@ -170,7 +170,8 @@ sub Write
 		$this->Ninpocho($Sys,$Set,$Form,$Ninja);
 
 		# 忍法帖保存
-		$Ninja->Save($Sys,$password);
+		$err = $Ninja->Save($Sys,$password);
+		return $err if $err;
 	}
 
 	my $line = $this->MakeDatLine($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result);
