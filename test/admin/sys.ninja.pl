@@ -332,7 +332,7 @@ sub PrintNinjaEdit
 	my $is_force_774 = $Ninja->Get('force_774') ? 'checked' : '';
 	my $is_force_captcha = $Ninja->Get('force_captcha') ? 'checked' : '';
 
-	my $password = $Ninja->Get('password');
+	my $password = $Ninja->Get('password_is_randomized');
 	my $description = $Ninja->Get('user_desc');
 
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");

@@ -301,7 +301,7 @@ sub Save
 	}
 
 	# セッション有効期限を設定
-	if($session->param('password')){
+	if($session->param('password_is_randomized')){
 		$session->expire($Sys->Get('PASS_EXPIRY').'d');
 	}else{
 		$session->expire($Sys->Get('NIN_EXPIRY').'d');
