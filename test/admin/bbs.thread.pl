@@ -398,7 +398,7 @@ sub PrintThreadList
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
 	$Page->Print("<input type=button value=\"DAT落ち\" $common,'POOL')\"> ")				if ($isPool);
 	
-	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common,'CLEAR')\" class=\"delete\"> ")				if ($isResAbone);
+	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")				if ($isResAbone);
 	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")				if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
