@@ -312,11 +312,6 @@ sub Save
 		my $nowtime = strftime "%Y-%m-%d %H:%M:%S", localtime time;
 		$Sys->Set('NIN_PASS',$password);
 		$Sys->Set('TIME',$nowtime);
-		
-		# FCGI用
-		# 上の方でやってほしい。
-		my $CGI = $Sys->Get('MainCGI');
-		$CGI->{'THREADS'}->Close();
 
 		return $ZP::E_FORM_SAVECOMMAND;
 	}
