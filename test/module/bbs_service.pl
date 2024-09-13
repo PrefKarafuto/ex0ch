@@ -534,41 +534,43 @@ sub PrintTimeLine
   <small>
   <div style="height: 200px; overflow-y: scroll;" id="timeline" >
 MENU
-	
-	foreach my $file (@files) {
-        my $filepath = "$TLpath/$file";
-        open(my $fh, '<', $filepath) or die "Cannot open file: $!";
-        my $line = <$fh>;
-        close($fh);
-        
-		my $mtime = (stat($filepath))[9];
+	if(@files){
+		foreach my $file (@files) {
+			my $filepath = "$TLpath/$file";
+			open(my $fh, '<', $filepath) or die "Cannot open file: $!";
+			my $line = <$fh>;
+			close($fh);
+			
+			my $mtime = (stat($filepath))[9];
 
-        my @lines = split(/<>/, $line);
-        my $message = $lines[3];
-		$message =~ s/<br>//g;
-		$message = (split(/</,$message))[0];
-        my $title  = $lines[4];
-		my $url = $lines[5];
+			my @lines = split(/<>/, $line);
+			my $message = $lines[3];
+			$message =~ s/<br>//g;
+			$message = (split(/</,$message))[0];
+			my $title  = $lines[4];
+			my $url = $lines[5];
 
-		my $str_max = 60;
+			my $str_max = 60;
 
-		if (length($message) > $str_max) {
-			$message = substr($message, 0, $str_max) . "...";
-		}
-		if (length($title) > $str_max) {
-			$title = substr($title, 0, $str_max) . "...";
-		}
+			if (length($message) > $str_max) {
+				$message = substr($message, 0, $str_max) . "...";
+			}
+			if (length($title) > $str_max) {
+				$title = substr($title, 0, $str_max) . "...";
+			}
 
-		$Page->Print(<<MENU);
-    <a href="$url" class="timeline-entry" data-mtime="$mtime">
-        <div class="tl_title">
-            <span class="tl_time"> - </span> $title
-        </div>
-        <div class="tl_message">$message</div>
-    </a>
+			$Page->Print(<<MENU);
+		<a href="$url" class="timeline-entry" data-mtime="$mtime">
+			<div class="tl_title">
+				<span class="tl_time"> - </span> $title
+			</div>
+			<div class="tl_message">$message</div>
+		</a>
 MENU
-
-    }
+    	}
+	}else{
+		$Page->Print("投稿はありません");
+	}
 
 	$Page->Print(<<MENU);
 	</div>

@@ -216,6 +216,9 @@ sub DoFunction
 	elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除
 		$err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 0);
 	}
+	elsif ($subMode eq 'CLEAR') {                                          # TLクリア
+		$err = FunctionClearTimeline($Sys, $Form, $this->{'LOG'});
+	}
 	# 処理結果表示
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", "ERROR:$err");
@@ -395,6 +398,7 @@ sub PrintThreadList
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
 	$Page->Print("<input type=button value=\"DAT落ち\" $common,'POOL')\"> ")				if ($isPool);
 	
+	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common,'CLEAR')\" class=\"delete\"> ")				if ($isResAbone);
 	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")				if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
@@ -1207,6 +1211,52 @@ sub FunctionThreadDelete
 	#$BBSAid->CreateIndex();
 	#$BBSAid->CreateSubback();
 	#$Sys->Set('MODE',$originalMODE);
+	
+	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	タイムラインのクリア
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionClearTimeline
+{
+	my ($Sys, $Form, $pLog) = @_;
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+
+	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/timeline';
+    opendir(my $dh, $TLpath) or die "Can't open $TLpath: $!";
+
+	# ディレクトリ内のファイルを取得して処理
+	while (my $file = readdir($dh)) {
+		next if ($file =~ m/^\./);  # 「.」や「..」をスキップ
+		if ($file =~ /\.cgi$/) {
+			my $file_path = $TLpath.'/'.$file;
+			if (-f $file_path) {
+				unlink($file_path) or warn "Could not unlink $file_path: $!";
+			}
+		}
+	}
+
+	# ディレクトリを閉じる
+	closedir($dh);
+	
+	push @$pLog, 'タイムラインをクリアしました。';
 	
 	return 0;
 }
