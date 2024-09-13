@@ -46,6 +46,8 @@ sub Load {
 
 	$this->{'ERR'} = undef;
 
+	# あらかじめ$Sys->Set('EXAMPLE',$str)のように値をセットしておけば、$strの内容をメッセージで出力可能
+	# {!EXAMPLE!}という形式でメッセージにタグを追加すると、その箇所が$strに置換される
 	my $messages = {
 		'100' => { SUBJECT => 'サブジェクト長すぎ', MESSAGE => 'サブジェクトが長すぎます！' },
 		'101' => { SUBJECT => '名前長すぎ', MESSAGE => '名前が長すぎます！' },
