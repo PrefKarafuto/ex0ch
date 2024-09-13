@@ -525,8 +525,6 @@ sub PrintTimeLine
     closedir($dir);
 	
 	$Page->Print(<<MENU);
-
-<a name="timeline"></a>
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$menuCol" style="margin:1.2em auto;" align="center">
 <tbody>
  <tr>
@@ -577,7 +575,7 @@ MENU
   </small>
   </td>
  </tr><tr><td>
-<button type="button" onclick="window.location.href='./#timeline'; window.location.reload();">
+<button type="button" onclick="window.location.href='./'; window.location.reload();">
     再読み込み
 </button>
  </td></tr>
