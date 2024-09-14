@@ -732,7 +732,7 @@ sub CaptchaAuthentication
 
 	my $sid = $Sys->Get('SID');
 	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
-	my $Dir = "." . $Sys->Get('INFO') . "/.auth/";
+	my $Dir = "." . $Sys->Get('INFO') . "/.auth";
 
 	# ワンタイムパス認証
 	my $auth_code = "";
