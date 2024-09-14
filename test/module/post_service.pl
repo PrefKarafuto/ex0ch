@@ -837,41 +837,35 @@ sub Command
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!attr(<br>|$)/){
 		my %ThreadAttr = $Threads->SetAttr($threadid);
 		my %allAttr = (
-			'sagemode'  => { 'name' => 'sage進行', 'type' => 'checkbox' },
-			'float'     => { 'name' => '浮上', 'type' => 'checkbox' },
-			'pass'      => { 'name' => 'パスワード', 'type' => 'text' },
-			'maxres'    => { 'name' => '最大レス数', 'type' => 'number' },
-			'slip'      => { 'name' => 'BBS_SLIP', 'type' => 'slip' },
-			'noid'      => { 'name' => 'IDなし', 'type' => 'checkbox' },
-			'changeid'  => { 'name' => '独自ID', 'type' => 'checkbox' },
-			'force774'  => { 'name' => '強制名無し', 'type' => 'checkbox' },
-			'change774' => { 'name' => '名無し変更', 'type' => 'text' },
-			'live'      => { 'name' => '実況モード', 'type' => 'checkbox' },
-			'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'checkbox' },
-			'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
-			'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
-			'ban'       => { 'name' => 'アクセス禁止', 'type' => 'text' },
-			'sub'    	=> { 'name' => '副主', 'type' => 'text' },
-			'vote' 	    => { 'name' => 'BAN投票', 'type' => 'text' },
+			'sagemode'  => { 'name' => 'sage進行', 'type' => 'bool' },
+			'float'     => { 'name' => '浮上', 'type' => 'bool' },
+			'pass'      => { 'name' => 'パスワード', 'type' => 'bool' },
+			'maxres'    => { 'name' => '最大レス数', 'type' => 'str' },
+			'slip'      => { 'name' => 'BBS_SLIP', 'type' => 'str' },
+			'noid'      => { 'name' => 'IDなし', 'type' => 'bool' },
+			'changeid'  => { 'name' => '独自ID', 'type' => 'bool' },
+			'force774'  => { 'name' => '強制名無し', 'type' => 'bool' },
+			'change774' => { 'name' => '名無し変更', 'type' => 'str' },
+			'live'      => { 'name' => '実況モード', 'type' => 'bool' },
+			'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'bool' },
+			'nopool'    => { 'name' => '不落', 'type' => 'bool' },
+			'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'str' },
+			'ban'       => { 'name' => 'アクセス禁止', 'type' => 'elem' },
+			'sub'    	=> { 'name' => '副主', 'type' => 'bool' },
+			'vote' 	    => { 'name' => 'BAN投票', 'type' => 'elem' },
 		);
 		$Command .= 'スレッドの設定<br>';
 		foreach my $attr (sort keys %ThreadAttr){
 			my $type = $allAttr{$attr}->{'type'};
 			my $value = $ThreadAttr{$attr};
 			if($value){
-				if($type eq 'checkbox'){
+				if($type eq 'bool'){
 					$Command .= $allAttr{$attr}->{'name'}.'<br>';
-				}elsif($type eq ('number' || 'slip')){
+				}elsif($type eq 'str'){
 					$Command .= $allAttr{$attr}->{'name'}.":$value<br>";
-				}elsif($type eq 'text'){
-					if($attr eq ('ban'||'vote')){
-						my $count = (split(/,/,$value));
-						$Command .= $allAttr{$attr}->{'name'}.":$count<br>";
-					}elsif($attr eq ('sub'||'pass')){
-						$Command .= $allAttr{$attr}->{'name'}.'<br>';
-					}else{
-						$Command .= $allAttr{$attr}->{'name'}.":$value<br>";
-					}
+				}elsif($type eq 'elem'){
+					my $count = (split(/,/,$value));
+					$Command .= $allAttr{$attr}->{'name'}.":$count<br>";
 				}
 			}
 		}
