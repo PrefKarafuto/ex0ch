@@ -271,11 +271,16 @@ sub Save
 			$password = $session->param('password_is_randomized');
 		} else {
 			if (open my $fh, '<', '/dev/urandom') {
+				# Unix系
 				binmode $fh;
 				read $fh, $seed, 8;
 				close $fh;
 				$password = MIME::Base64::encode_base64url($seed);
+			} else {
+				# Windows系
+				$seed = Digest::MD5->new->add($^O, rand(2**32), $^V, $$)->digest;
 			}
+			$password = substr MIME::Base64::encode_base64url($seed), 0, 11;
 		}
 		my $ctx3 = Digest::MD5->new;
 		$ctx3->add($Sys->Get('SECURITY_KEY'));
