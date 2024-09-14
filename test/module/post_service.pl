@@ -833,6 +833,50 @@ sub Command
 		$Command .= '※ID変更<br>';
 	}
 
+	#設定表示
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!attr(<br>|$)/){
+		my %ThreadAttr = $Threads->SetAttr($threadid);
+		my %allAttr = (
+			'sagemode'  => { 'name' => 'sage進行', 'type' => 'checkbox' },
+			'float'     => { 'name' => '浮上', 'type' => 'checkbox' },
+			'pass'      => { 'name' => 'パスワード', 'type' => 'text' },
+			'maxres'    => { 'name' => '最大レス数', 'type' => 'number' },
+			'slip'      => { 'name' => 'BBS_SLIP', 'type' => 'slip' },
+			'noid'      => { 'name' => 'IDなし', 'type' => 'checkbox' },
+			'changeid'  => { 'name' => '独自ID', 'type' => 'checkbox' },
+			'force774'  => { 'name' => '強制名無し', 'type' => 'checkbox' },
+			'change774' => { 'name' => '名無し変更', 'type' => 'text' },
+			'live'      => { 'name' => '実況モード', 'type' => 'checkbox' },
+			'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'checkbox' },
+			'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
+			'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
+			'ban'       => { 'name' => 'アクセス禁止', 'type' => 'text' },
+			'sub'    	=> { 'name' => '副主', 'type' => 'text' },
+			'vote' 	    => { 'name' => 'BAN投票', 'type' => 'text' },
+		);
+		$Command .= 'スレッドの設定<br>';
+		foreach my $attr (sort keys %ThreadAttr){
+			my $type = $allAttr{$attr}->{'type'};
+			my $value = $ThreadAttr{$attr};
+			if($value){
+				if($type eq 'checkbox'){
+					$Command .= $allAttr{$attr}->{'name'}.'<br>';
+				}elsif($type eq ('number' || 'slip')){
+					$Command .= $allAttr{$attr}->{'name'}.":$value<br>";
+				}elsif($type eq 'text'){
+					if($attr eq ('ban'||'vote')){
+						my $count = (split(/,/,$value));
+						$Command .= $allAttr{$attr}->{'name'}.":$count<br>";
+					}elsif($attr eq ('sub'||'pass')){
+						$Command .= $allAttr{$attr}->{'name'}.'<br>';
+					}else{
+						$Command .= $allAttr{$attr}->{'name'}.":$value<br>";
+					}
+				}
+			}
+		}
+	}
+
 	#忍法帖があった場合
 	if($Set->Get('BBS_NINJA')){
 		#忍法帖レベル制限
