@@ -766,11 +766,11 @@ sub CaptchaAuthentication
 	}elsif(!$auth_code && $status ne 'ok'){
 		# 認証情報もコマンドもない
 		$err = Certification_Captcha($Sys, $Form);
-		lock_store(\('code'=>$saved_code,'status'=>'ok'), $sidFile) unless $err;			# 認証済み設定
+		lock_store({'code'=>$saved_code,'status'=>'ok'}, $sidFile) unless $err;			# 認証済み設定
 	}elsif((time - (stat($sidFile))[9]) > $auth_expiry){
 		# 有効期限切れ
 		$err = Certification_Captcha($Sys, $Form);
-		lock_store(\('code'=>$saved_code,'status'=>'ok'), $sidFile) unless $err;			# 認証済み設定
+		lock_store({'code'=>$saved_code,'status'=>'ok'}, $sidFile) unless $err;			# 認証済み設定
 	}
 
 	chmod 0600, $sidFile;
@@ -794,7 +794,7 @@ sub CaptchaAuthentication
 		} else {
 			# Captcha認証失敗
 			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
-			lock_store(\('code'=>$saved_code,'status'=>'failed'), "$Dir/sid-$saved_sid.cgi");
+			lock_store({'code'=>$saved_code,'status'=>'failed'}, "$Dir/sid-$saved_sid.cgi");
 			chmod 0600, "$Dir/sid-$saved_sid.cgi";
 		}
 		$Cookie->Set('MAIL','');
@@ -805,7 +805,7 @@ sub CaptchaAuthentication
 		# Captcha認証の成功失敗を問わずパスワードの照合
 		if ($auth_code eq $saved_code && $saved_sid && (time - (stat("$Dir/code-$auth_code.cgi"))[9]) < 60*5) {
 			# パスワード合致
-			lock_store(\('code'=>$saved_code,'status'=>'ok'), "$Dir/sid-$saved_sid.cgi");			# 認証済み設定
+			lock_store({'code'=>$saved_code,'status'=>'ok'}, "$Dir/sid-$saved_sid.cgi");			# 認証済み設定
 			chmod 0600, "$Dir/sid-$saved_sid.cgi";
 			unlink "$Dir/code-$auth_code.cgi";
 			$Sys->Set('SID', $saved_sid);
