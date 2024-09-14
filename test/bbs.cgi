@@ -747,6 +747,8 @@ sub CaptchaAuthentication
 			if(-e $codeFile){
 				$saved_sid = lock_retrieve($codeFile);
 				$saved_sid = $saved_sid->{'sid'};
+			}else{
+				$saved_sid = $sid;
 			}
 		}
 	}
@@ -812,7 +814,7 @@ sub CaptchaAuthentication
 			chmod 0600, "$Dir/sid-$saved_sid.cgi";
 			unlink "$Dir/code-$auth_code.cgi";
 			$Sys->Set('SID', $saved_sid);
-			$err = 0;
+			$err = $ZP::E_SUCCESS;
 		}else{
 			# パスワード不一致
 			$err = $ZP::E_FORM_FAILEDAUTH;
