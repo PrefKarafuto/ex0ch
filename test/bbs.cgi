@@ -786,7 +786,7 @@ sub CaptchaAuthentication
 			$ctx->add($ENV{'REMOTE_ADDR'});
 			my $pass = substr($ctx->hexdigest, 0, 6);
 
-			lock_store(\('sid'=>$sid), "$Dir/code-$pass.cgi");
+			lock_store({'sid'=>$sid}, "$Dir/code-$pass.cgi");
 			chmod 0600, "$Dir/code-$pass.cgi";
 			$Sys->Set('PASSWORD', $pass);
 
