@@ -251,10 +251,11 @@ sub Initialize
 
 	#セッションID設定
 	$Sys->Set('SID', undef);
-	LoadSessionID($Sys, $Cookie, $Conv);
+	my $err = LoadSessionID($Sys, $Cookie, $Conv);
+	return $err if $err;
 
 	# Captcha認証
-	my $err = CaptchaAuthentication($Sys,$Form,$Set,$Cookie);
+	$err = CaptchaAuthentication($Sys,$Form,$Set,$Cookie);
 	return $err if $err;
 
 	# subjectの読み込み
@@ -710,6 +711,8 @@ sub LoadSessionID
 	$ctx_sec->add(':', $sid);
 	$Sys->Set('SEC',$ctx_sec->b64digest);
 	$Sys->Set('SID',$sid);
+
+	return $ZP::E_SUCCESS;
 
 }
 
