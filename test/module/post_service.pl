@@ -1478,16 +1478,15 @@ sub LoadNinpocho
 
 	# 忍法帖パスがあったらロード
 	my $ninmail = $Form->Get('mail');
-	if($ninmail=~ /!load:(.{10,30})/){
+	if($ninmail=~ /!load:([A-Za-z0-9\-_]+)/){
 		$password = $1;
-		$ninmail =~ s/!load:(.{10,30})//;
+		$ninmail =~ s/!load:([A-Za-z0-9\-_]+)//;
 		$Form->Set('mail',$ninmail);
 		$Ninja->Load($Sys,$password);	#ロード
 		$password = '';
-	}
-	elsif($ninmail =~ /!save:(.{10,30})/){
-		$password = $1;
-		$ninmail =~ s/!save:(.{10,30})//;
+	}elsif($ninmail =~ /!save/){
+		$password = 'save';
+		$ninmail =~ s/!save//;
 		$Form->Set('mail',$ninmail);
 		# 後でセーブするときに$passwordを使う
 	}

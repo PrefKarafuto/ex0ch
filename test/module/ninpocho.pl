@@ -252,7 +252,8 @@ sub DeleteOnly
 sub Save
 {
 	my $this = shift;
-	my ($Sys,$password) = @_;
+	my ($Sys,$com) = @_;
+	my $password;
 	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
 	my $infoDir = $Sys->Get('INFO');
 	my $ninDir = ".$infoDir/.ninpocho/";
@@ -262,7 +263,7 @@ sub Save
 	# 忍法帖を使わない場合
 	return 0 unless $session;
 
-	if ($password) {
+	if ($com eq 'save') {
 		my $seed = undef;
 		if ($session->param('password_is_randomized')) {
 			# 「ランダム生成」したパスワードを取り出す。
