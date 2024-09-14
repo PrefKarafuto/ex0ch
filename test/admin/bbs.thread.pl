@@ -13,6 +13,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use HTML::Entities;
+no warnings 'once';
 
 # 共通スレッド属性情報
 my %threadAttr = (

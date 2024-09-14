@@ -15,6 +15,7 @@ use Digest::MD5;
 use Storable qw(lock_store lock_retrieve);
 use MIME::Base64 ();
 use POSIX qw(strftime);
+no warnings 'once';
 
 #------------------------------------------------------------------------------------------------------------
 #
