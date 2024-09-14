@@ -737,7 +737,7 @@ sub CaptchaAuthentication
 	# ワンタイムパス認証
 	my $auth_code = "";
 	my $saved_sid = "";
-	if ($Form->Get('mail') =~ /^!auth(:([0-9a-fA-F]{8}))?$/) {
+	if ($Form->Get('mail') =~ /^!auth(:([0-9a-fA-F]{6}))?$/) {
 		$auth_code = $2 // '';
 		if($auth_code){
 			my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
@@ -780,7 +780,7 @@ sub CaptchaAuthentication
 			$ctx->add($Sys->Get('BBS'));
 			$ctx->add(time);
 			$ctx->add($ENV{'REMOTE_ADDR'});
-			my $pass = substr($ctx->hexdigest, 0, 8);
+			my $pass = substr($ctx->hexdigest, 0, 6);
 
 			lock_store(\('sid'=>$sid), "$Dir/code-$pass.cgi");
 			chmod 0600, "$Dir/code-$pass.cgi";
