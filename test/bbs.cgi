@@ -797,8 +797,8 @@ sub CaptchaAuthentication
 		} else {
 			# Captcha認証失敗
 			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
-			lock_store({'code'=>$saved_code,'status'=>'failed'}, "$Dir/sid-$saved_sid.cgi");
-			chmod 0600, "$Dir/sid-$saved_sid.cgi";
+			lock_store({'code'=>$saved_code,'status'=>'failed'}, "$Dir/sid-$sid.cgi");
+			chmod 0600, "$Dir/sid-$sid.cgi";
 		}
 		$Cookie->Set('MAIL','');
 		$Form->Set('mail','');
