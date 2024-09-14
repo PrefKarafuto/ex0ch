@@ -147,9 +147,9 @@ sub Write
 	# 忍法帖ロード
 	require './module/ninpocho.pl';
 	my $Ninja = NINPOCHO->new;
-	my $password = '';
+	my $SaveCom = 0;
 	if ($Set->Get('BBS_NINJA')){
-		$password = $this->LoadNinpocho($Sys, $Form, $Ninja);
+		$SaveCom = $this->LoadNinpocho($Sys, $Form, $Ninja);
 	}
 
 	#BANチェック
@@ -170,10 +170,11 @@ sub Write
 		$this->Ninpocho($Sys,$Set,$Form,$Ninja);
 
 		# 忍法帖保存
-		$err = $Ninja->Save($Sys,$password);
+		$err = $Ninja->Save($Sys,$SaveCom);
 		return $err if $err;
 	}
 
+	# Datに保存する一行データを生成
 	my $line = $this->MakeDatLine($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result);
 
 	# ログ書き込み
@@ -1468,29 +1469,29 @@ sub MakeSlip
 
 	return ($slip_result,$idEnd);
 }
+
 sub LoadNinpocho
 {
 	my $this = shift;
 	my ($Sys,$Form,$Ninja) = @_;
-	my $password = "";
+	my $is_save = 0;
 
 	$Ninja->Load($Sys,undef);
 
 	# 忍法帖パスがあったらロード
 	my $ninmail = $Form->Get('mail');
 	if($ninmail=~ /!load:([A-Za-z0-9\-_]+)/){
-		$password = $1;
+		my $password = $1;
 		$ninmail =~ s/!load:([A-Za-z0-9\-_]+)//;
 		$Form->Set('mail',$ninmail);
 		$Ninja->Load($Sys,$password);	#ロード
-		$password = '';
 	}elsif($ninmail =~ /!save/){
-		$password = 'save';
+		$is_save = 1;
 		$ninmail =~ s/!save//;
 		$Form->Set('mail',$ninmail);
 		# 後でセーブするときに$passwordを使う
 	}
-	return $password;
+	return $is_save;
 }
 
 
