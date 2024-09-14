@@ -726,6 +726,8 @@ sub LoadSessionID
 sub CaptchaAuthentication
 {
 	my ($Sys,$Form,$Set,$Cookie) = @_;
+	my ($auth_code,$saved_sid,$saved_info,$saved_code,$status);
+
 	return 0 unless $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY');
 
 	require './module/ninpocho.pl';
@@ -735,21 +737,23 @@ sub CaptchaAuthentication
 	my $Dir = "." . $Sys->Get('INFO') . "/.auth";
 
 	# ワンタイムパス認証
-	my $auth_code = "";
-	my $saved_sid = "";
 	if ($Form->Get('mail') =~ /^!auth(:([0-9a-fA-F]{6}))?$/) {
 		$auth_code = $2 // '';
 		if($auth_code){
 			my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
-			$saved_sid = lock_retrieve($codeFile);
-			$saved_sid = $saved_sid->{'sid'};
+			if(-e $codeFile){
+				$saved_sid = lock_retrieve($codeFile);
+				$saved_sid = $saved_sid->{'sid'};
+			}
 		}
 	}
 	
 	my $sidFile = "$Dir/sid-$sid.cgi"; 			# sidと認証コードを紐付け
-	my $saved_info = lock_retrieve($sidFile);
-	my $saved_code = $saved_info->{'code'};
-	my $status = $saved_info->{'status'};
+	if(-e $sidFile){
+		$saved_info = lock_retrieve($sidFile);
+		$saved_code = $saved_info->{'code'};
+		$status = $saved_info->{'status'};
+	}
 
 	# 認証処理
 	my $err = 0;
