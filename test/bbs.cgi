@@ -742,14 +742,12 @@ sub CaptchaAuthentication
 	# ワンタイムパス認証
 	if ($Form->Get('mail') =~ /^!auth(:([0-9a-fA-F]{6}))?$/) {
 		$auth_code = $2 // '';
-		if($auth_code){
-			my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
-			if(-e $codeFile){
-				$saved_sid = lock_retrieve($codeFile);
-				$saved_sid = $saved_sid->{'sid'};
-			}else{
-				$saved_sid = $sid;
-			}
+		my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
+		if($auth_code && -e $codeFile){
+			$saved_sid = lock_retrieve($codeFile);
+			$saved_sid = $saved_sid->{'sid'};
+		}else{
+			$saved_sid = $sid;
 		}
 	}
 	
@@ -807,17 +805,22 @@ sub CaptchaAuthentication
 	}
 
 	if ($auth_code) {
-		# Captcha認証の成功失敗を問わずパスワードの照合
-		if ($auth_code eq $saved_code && $saved_sid && (time - (stat("$Dir/code-$auth_code.cgi"))[9]) < 60*5) {
-			# パスワード合致
-			lock_store({'code'=>$saved_code,'status'=>'ok'}, "$Dir/sid-$saved_sid.cgi");			# 認証済み設定
-			chmod 0600, "$Dir/sid-$saved_sid.cgi";
-			unlink "$Dir/code-$auth_code.cgi";
-			$Sys->Set('SID', $saved_sid);
-			$err = $ZP::E_SUCCESS;
-		}else{
-			# パスワード不一致
+		if ((time - (stat("$Dir/code-$auth_code.cgi"))[9]) >= 60*5) {
+			# 有効期限切れ
 			$err = $ZP::E_FORM_FAILEDAUTH;
+		} else {
+			# Captcha認証の成功失敗を問わずパスワードの照合
+			if ($auth_code eq $saved_code && $saved_sid) {
+				# パスワード合致
+				lock_store({'code'=>$saved_code,'status'=>'ok'}, "$Dir/sid-$saved_sid.cgi");
+				chmod 0600, "$Dir/sid-$saved_sid.cgi";
+				unlink "$Dir/code-$auth_code.cgi";
+				$Sys->Set('SID', $saved_sid);
+				$err = $ZP::E_SUCCESS;
+			} else {
+				# パスワード不一致
+				$err = $ZP::E_FORM_FAILEDAUTH;
+			}
 		}
 		$Cookie->Set('MAIL','');
 		$Form->Set('mail','');
