@@ -835,7 +835,7 @@ sub Command
 
 	#設定表示
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!attr(<br>|$)/){
-		my %ThreadAttr = $Threads->GetAttr($threadid);
+		my %ThreadAttr = $Threads->GetAttr($threadid,undef);
 		my %allAttr = (
 			'sagemode'  => { 'name' => 'sage進行', 'type' => 'bool' },
 			'float'     => { 'name' => '浮上', 'type' => 'bool' },
@@ -864,7 +864,7 @@ sub Command
 				}elsif($type eq 'str'){
 					$Command .= $allAttr{$attr}->{'name'}.":$value<br>";
 				}elsif($type eq 'elem'){
-					my $count = (split(/,/,$value));
+					my $count = scalar(split(/,/,$value));
 					$Command .= $allAttr{$attr}->{'name'}.":$count<br>";
 				}
 			}
