@@ -784,7 +784,6 @@ sub CaptchaAuthentication
 		}
 
 		$Cookie->Set('MAIL','');
-		#$Form->Set('mail','');
 
 	}elsif(-e "$Dir/sid-$sid.cgi"){
 		$saved_info = lock_retrieve("$Dir/sid-$sid.cgi");
