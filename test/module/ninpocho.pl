@@ -72,7 +72,27 @@ sub Load
 		$ctx2->add($Sys->Get('SECURITY_KEY'));
 		$ctx2->add(':', $password);
 		my $ctx2_hexdigest = $ctx2->hexdigest();
-		$sid_saved = GetHash('sid', $long_expiry, $ninDir.'hash/pw-' . $ctx2_hexdigest . '.cgi');
+		my $filename = $ninDir.'hash/pw-' . $ctx2_hexdigest . '.cgi';
+		my $hash_table = {};
+
+		if (-e $filename) {
+			$hash_table = lock_retrieve($filename);
+		}
+		
+		# キーに対応する値が存在するかチェック
+		if (exists $hash_table->{'sid'}) {
+			# 有効期限をチェック
+			if (($hash_table->{'sid'}{'time'} + $long_expiry) < time) {
+				# 有効期限切れの場合は削除してundefを返す
+				delete $hash_table->{'sid'};
+				lock_store $hash_table, $filename;
+			} else {
+				# 有効期限内の場合は値を返す
+				$hash_table->{'sid'}{'time'} = time;
+				lock_store $hash_table, $filename;
+				$sid_saved = $hash_table->{'sid'}{'value'};
+			}
+		}
 
 		if($sid_saved && $sid_saved ne $sid){
 			$sid_before = $sid;
@@ -228,7 +248,20 @@ sub Delete {
 				$count++;
 			}
 			foreach my $filename (@file_list) {
-				DeleteHashValue($sid, $filename);
+				my $hash_table = {};
+				if (-e $filename) {
+					$hash_table = lock_retrieve($filename);
+					# ハッシュテーブルの各キーと値を繰り返し確認
+					foreach my $key (keys %$hash_table) {
+						# 値が目的の値と一致した場合、その要素を削除
+						if ($hash_table->{$key}->{value} eq $sid) {
+							delete $hash_table->{$key};
+						}
+					}
+					# 変更をファイルに保存
+					lock_store $hash_table, $filename;
+					chmod 0600,$filename;
+				}
 			}
 		}
 	}
@@ -285,7 +318,6 @@ sub Save
 		my $ctx3 = Digest::MD5->new;
 		$ctx3->add($Sys->Get('SECURITY_KEY'));
 		$ctx3->add(':', $password);
-		#my $pass_hash = $ctx3->b64digest();
 		my $ctx3_hexdigest = $ctx3->hexdigest();
 		my $pass_file = $ninDir . 'hash/pw-' . $ctx3_hexdigest . '.cgi';
 		# 既にpasswordが設定されていた場合、既存のパスワードを削除
@@ -295,15 +327,23 @@ sub Save
 			if (-e $old_pass_file) {
 				unlink $old_pass_file;
 			}
-			# DeleteHash($session->param('password'),$ninDir.'hash/password.cgi');
 		}
 		if (defined $seed && !$session->param('password_is_randomized')) {
 			# パスワードをランダム生成した場合「のみ」平文で保管する。
 			# 既に保管してあった場合はそのまま表示する
 			$session->param('password_is_randomized', $password);
 		}
-		SetHash('sid',$sid,time,$pass_file);
-		#$session->param('password',$pass_hash);
+		my $hash_table = {};
+
+		if (-e $pass_file) {
+			$hash_table = lock_retrieve($pass_file);
+		}
+		$hash_table->{'sid'} = {
+			value => $sid,
+			time => time,
+		};
+		lock_store $hash_table, $pass_file;
+		chmod 0600,$pass_file,
 		$session->param('password_file_hash', $ctx3_hexdigest);
 	}
 
@@ -321,96 +361,6 @@ sub Save
 		$Sys->Set('TIME',$nowtime);
 
 		return $ZP::E_FORM_SAVECOMMAND;
-	}
-}
-
-# ハッシュテーブルをファイルから読み込む関数
-sub GetHash {
-	#my $this = shift;
-	my ($key, $expiry,$filename) = @_;
-	my $hash_table = {};
-
-	if (-e $filename) {
-		$hash_table = lock_retrieve($filename);
-	}
-	
-	# キーに対応する値が存在するかチェック
-	if (exists $hash_table->{$key}) {
-		# 有効期限をチェック
-		if (($hash_table->{$key}{time} + $expiry) < time) {
-			# 有効期限切れの場合は削除してundefを返す
-			delete $hash_table->{$key};
-			lock_store $hash_table, $filename;
-			return undef;
-		} else {
-			# 有効期限内の場合は値を返す
-			$hash_table->{$key}{time} = time;
-			lock_store $hash_table, $filename;
-			return $hash_table->{$key}{value};
-		}
-	} else {
-		# キーが存在しない場合はundefを返す
-		return undef;
-	}
-}
-
-# パラメータをハッシュテーブルに保存し、ファイルに保存する関数
-sub SetHash {
-	#my $this = shift;
-	my ($key, $value, $time ,$filename) = @_;
-	my $hash_table = {};
-
-	if (-e $filename) {
-		$hash_table = lock_retrieve($filename);
-	}else {
-        $hash_table = {};
-    }
-
-	$hash_table->{$key} = {
-		value => $value,
-		time => $time,
-	};
-	lock_store $hash_table, $filename;
-	chmod 0600,$filename,
-}
-sub DeleteHash
-{
-	#my $this = shift;
-	my ($key, $filename) = @_;
-	my $hash_table = {};
-
-	if (-e $filename) {
-		$hash_table = lock_retrieve($filename);
-		# 値が目的の値と一致した場合、その要素を削除
-		if ($hash_table->{$key}) {
-			delete $hash_table->{$key};
-		}
-	}
-		# 変更をファイルに保存
-		lock_store $hash_table, $filename;
-		chmod 0600,$filename;
-}
-
-sub DeleteHashValue 
-{
-	#my $this = shift;
-	my ($target_value, $filename) = @_;
-	my $hash_table = {};
-
-	if (-e $filename) {
-		$hash_table = lock_retrieve($filename);
-
-		# ハッシュテーブルの各キーと値を繰り返し確認
-		foreach my $key (keys %$hash_table) {
-			# 値が目的の値と一致した場合、その要素を削除
-			if ($hash_table->{$key}->{value} eq $target_value) {
-				delete $hash_table->{$key};
-			}
-		}
-
-		# 変更をファイルに保存
-		lock_store $hash_table, $filename;
-		chmod 0600,$filename;
 	}
 }
 
