@@ -835,7 +835,7 @@ sub Command
 
 	#設定表示
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!attr(<br>|$)/){
-		my %ThreadAttr = $Threads->GetAttr($threadid,undef);
+		my %ThreadAttr = %{$Threads->GetAttr($threadid,undef)};
 		my %allAttr = (
 			'sagemode'  => { 'name' => 'sage進行', 'type' => 'bool' },
 			'float'     => { 'name' => '浮上', 'type' => 'bool' },
