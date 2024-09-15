@@ -494,7 +494,7 @@ HTML
 	}
 
 	$Page->Print(<<HTML);
-<div class="$classname" data-sitekey="$sitekey"></div>
+<div class="$classname" data-sitekey="$sitekey"></div><br>
 <input type="submit" value="　認証する　"><br>
 </form>
 <br>
@@ -724,103 +724,77 @@ sub LoadSessionID
 sub CaptchaAuthentication
 {
 	my ($Sys,$Form,$Set,$Cookie) = @_;
-	my ($auth_code,$saved_sid,$saved_info,$saved_code,$status);
+	my ($auth_code,$authed_sid,$saved_info,$saved_code,$status);
 
+	# Captchaが設定されていない場合は処理しない
 	return 0 unless $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY');
-
-	require './module/ninpocho.pl';
 
 	my $sid = $Sys->Get('SID');
 	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
 	my $Dir = "." . $Sys->Get('INFO') . "/.auth";
+	my $mail = $Form->Get('mail');
 
-	# ワンタイムパス認証
-	if ($Form->Get('mail') =~ /^!auth(:([0-9a-fA-F]{6}))?$/) {
-		$auth_code = $2 // '';
-		my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
-		if($auth_code && -e $codeFile){
-			$saved_sid = lock_retrieve($codeFile);
-			$saved_sid = $saved_sid->{'sid'};
-		}else{
-			$saved_sid = $sid;
-		}
-	}
-	
-	my $sidFile = "$Dir/sid-$sid.cgi"; 			# sidと認証コードを紐付け
-	if(-e $sidFile){
-		$saved_info = lock_retrieve($sidFile);
-		$saved_code = $saved_info->{'code'};
-		$status = $saved_info->{'status'};
-	}
-
-	# 認証処理
-	my $err = 0;
+	# Captcha認証
+	my $err = Certification_Captcha($Sys, $Form);
 	if($Set->Get('BBS_CAPTCHA') eq 'force'){
 		# 毎回強制Captcha
-		$err = Certification_Captcha($Sys, $Form);
-	}elsif($status eq 'ok' && !$auth_code){
-		# 認証情報があるが認証コード発行コマンドがある
-		$err = Certification_Captcha($Sys, $Form);
-	}elsif(!$auth_code && $status ne 'ok'){
-		# 認証情報もコマンドもない
-		$err = Certification_Captcha($Sys, $Form);
-		lock_store({'code'=>$saved_code,'status'=>'ok'}, $sidFile) unless $err;			# 認証済み設定
-	}elsif((time - (stat($sidFile))[9]) > $auth_expiry){
-		# 有効期限切れ
-		$err = Certification_Captcha($Sys, $Form);
-		lock_store({'code'=>$saved_code,'status'=>'ok'}, $sidFile) unless $err;			# 認証済み設定
-	}
-
-	chmod 0600, $sidFile;
-
-	if(!$auth_code && !$saved_sid){	# !authのみ
-		if ($err == 0) {
-			# Captcha認証が成功した場合のみパスワードの発行
-			my $ctx = Digest::MD5->new;
-
-			$ctx->add('auth');
-			$ctx->add($Sys->Get('BBS'));
-			$ctx->add(time);
-			$ctx->add($ENV{'REMOTE_ADDR'});
-			my $pass = substr($ctx->hexdigest, 0, 6);
-
-			lock_store({'sid'=>$sid}, "$Dir/code-$pass.cgi");
-			chmod 0600, "$Dir/code-$pass.cgi";
-			$Sys->Set('PASSWORD', $pass);
-
-			$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
-		} else {
-			# Captcha認証失敗
-			$err = $ZP::E_FORM_FAILEDUSERAUTH if ($err == $ZP::E_FORM_FAILEDCAPTCHA);
-			lock_store({'code'=>$saved_code,'status'=>'failed'}, "$Dir/sid-$sid.cgi");
-			chmod 0600, "$Dir/sid-$sid.cgi";
-		}
-		$Cookie->Set('MAIL','');
-		$Form->Set('mail','');
-	}
-
-	if ($auth_code) {
-		if ((time - (stat("$Dir/code-$auth_code.cgi"))[9]) >= 60*5) {
-			# 有効期限切れ
-			$err = $ZP::E_FORM_FAILEDAUTH;
-		} else {
-			# Captcha認証の成功失敗を問わずパスワードの照合
-			if ($auth_code eq $saved_code && $saved_sid) {
-				# パスワード合致
-				lock_store({'code'=>$saved_code,'status'=>'ok'}, "$Dir/sid-$saved_sid.cgi");
-				chmod 0600, "$Dir/sid-$saved_sid.cgi";
-				unlink "$Dir/code-$auth_code.cgi";
-				$Sys->Set('SID', $saved_sid);
-				$err = $ZP::E_SUCCESS;
-			} else {
-				# パスワード不一致
+	}elsif ($mail =~ /^!auth(:([0-9a-fA-F]{6}))?/) {
+		#ワンタイムパス
+		$auth_code = $2;
+		my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
+		if($auth_code && -e $codeFile){
+			# !auth:xxxxxx
+			$authed_sid = lock_retrieve($codeFile);
+			if (time - ($authed_sid->{'creation_time'}) >= 60*5) {
+				# 有効期限切れ
 				$err = $ZP::E_FORM_FAILEDAUTH;
+			}else{
+				# 成功
+				my $authed_ip = $authed_sid->{'ip_addr'};
+				$sid = $authed_sid->{'sid'};
+				$Sys->Set('SID',$sid);
+
+				lock_store({'creation_time'=>time}, "$Dir/sid-$sid.cgi");
+				chmod 0600, "$Dir/sid-$sid.cgi";
+				unlink $codeFile;
+
+				$err = $ZP::E_SUCCESS;
 			}
+		}elsif(!defined($auth_code)){
+			# !auth
+			unless($err){
+				# Captcha成功
+				my $ctx = Digest::MD5->new;
+				$ctx->add('auth');
+				$ctx->add($Sys->Get('BBS'));
+				$ctx->add(time);
+				$ctx->add($ENV{'REMOTE_ADDR'});
+
+				$auth_code = substr($ctx->hexdigest, 0, 6);
+				my $issueCodeFile = "$Dir/code-$auth_code.cgi";
+
+				lock_store({'sid'=>$sid,'ip_addr'=>$ENV{'REMOTE_ADDR'},'creation_time'=>time}, $issueCodeFile);
+				chmod 0600, $issueCodeFile;
+				$Sys->Set('PASSWORD', $auth_code);
+
+				$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
+			}
+		}else{
+			$err = $ZP::E_FORM_FAILEDAUTH;
 		}
+
 		$Cookie->Set('MAIL','');
-		$Form->Set('mail','');
+		#$Form->Set('mail','');
+
+	}elsif(-e "$Dir/sid-$sid.cgi"){
+		$saved_info = lock_retrieve("$Dir/sid-$sid.cgi");
+		my $elapsed_time = time - ($saved_info->{'creation_time'});
+		if ($elapsed_time >= $auth_expiry) {
+			$err = $ZP::E_FORM_FAILEDUSERAUTH;
+		}else{
+			$err = $ZP::E_SUCCESS;
+		}
 	}
-	
 	return $err;
 }
 
