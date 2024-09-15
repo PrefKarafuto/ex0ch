@@ -975,7 +975,7 @@ sub ToKakoLog {
 	my $isUpdate = '';  # 更新が必要な場合
 	
 	$Threads->GetKeySet('ALL', '', \@threadList);
-	$Threads->LoadAttr($Sys);
+	$Threads->LoadAttrAll($Sys);
 
 	foreach my $id (@threadList) {
 		my $need_update = process_thread($Sys, $Set, $Threads, $Pools, $path, $otherBBSpath, $id, $elapsed, $BBSname);
