@@ -691,7 +691,7 @@ sub LoadSessionID
 		}
 	}elsif($Conv->IsJPIP($Sys)){
 		# IPに紐付けられているかチェック
-		if(-e $ipFile && time - (stat($ipFile))[9] < 60 * 60 * 24 * 30 ){
+		if(-e $ipFile && time - (stat($ipFile))[9] < 60 * 60 * 24){
 			$sid = lock_retrieve($ipFile);
 			$sid = $sid->{'sid'};
 		}else{
@@ -852,7 +852,7 @@ sub Certification_Captcha {
 			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
 			my $out = decode_json($json_text);
 			
-			if ($out->{success} eq 'true') {
+			if ($out->{success}) {
 				return 0;
 			}else{
 				return $ZP::E_FORM_FAILEDCAPTCHA;
