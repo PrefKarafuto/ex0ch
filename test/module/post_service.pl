@@ -854,7 +854,7 @@ sub Command
 			'sub'    	=> { 'name' => '副主', 'type' => 'bool' },
 			'vote' 	    => { 'name' => 'BAN投票', 'type' => 'elem' },
 		);
-		$Command .= 'スレッドの設定<br>';
+		$Command .= '[スレッドの設定]<br>';
 		foreach my $attr (sort keys %ThreadAttr){
 			my $type = $allAttr{$attr}->{'type'};
 			my $value = $ThreadAttr{$attr};
