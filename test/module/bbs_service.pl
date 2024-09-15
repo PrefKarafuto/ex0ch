@@ -750,7 +750,7 @@ FORM
   </div>
   <br class="smartphone">
   <input type="text" name="FROM" size="19" placeholder="名前（任意）">
-  <input type="text" name="mail" size="19" placeholder="コマンド／キャップ（$status）"><br>
+  <input type="text" name="mail" size="19" placeholder="コマンド/Cap（$status）"><br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
    </span>
@@ -868,7 +868,7 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="time" value="$tm">
    <input type="submit" value="　書き込む　" name="submit"><br class="smartphone">
    <input type="text" name="FROM" size="19" placeholder="名前（任意）">
-   <input type="text" name="mail" size="19" placeholder="コマンド／キャップ（$status）"><br>
+   <input type="text" name="mail" size="19" placeholder="コマンド/Cap（$status）"><br>
 	<div class ="bbs_service_textarea">
 	<textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 	</div>
