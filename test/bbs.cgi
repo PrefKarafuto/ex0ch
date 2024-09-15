@@ -759,6 +759,8 @@ sub CaptchaAuthentication
 					chmod 0600, "$Dir/sid-$sid.cgi";
 					unlink $codeFile;
 
+					$Form->Set('mail','');
+
 					$err = $ZP::E_SUCCESS;
 				}else{
 					# IP不一致
