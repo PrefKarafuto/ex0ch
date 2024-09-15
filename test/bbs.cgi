@@ -751,14 +751,19 @@ sub CaptchaAuthentication
 			}else{
 				# 成功
 				my $authed_ip = $authed_sid->{'ip_addr'};
-				$sid = $authed_sid->{'sid'};
-				$Sys->Set('SID',$sid);
+				if($ENV{'REMOTE_ADDR'} eq $authed_ip){
+					# 認証時とIP一致
+					$sid = $authed_sid->{'sid'};
+					$Sys->Set('SID',$sid);
+					lock_store({'creation_time'=>time}, "$Dir/sid-$sid.cgi");
+					chmod 0600, "$Dir/sid-$sid.cgi";
+					unlink $codeFile;
 
-				lock_store({'creation_time'=>time}, "$Dir/sid-$sid.cgi");
-				chmod 0600, "$Dir/sid-$sid.cgi";
-				unlink $codeFile;
-
-				$err = $ZP::E_SUCCESS;
+					$err = $ZP::E_SUCCESS;
+				}else{
+					# IP不一致
+					$err = $ZP::E_FORM_FAILEDAUTH;
+				}
 			}
 		}elsif(!defined($auth_code)){
 			# !auth
