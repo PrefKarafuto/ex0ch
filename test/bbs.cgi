@@ -780,6 +780,7 @@ sub CaptchaAuthentication
 				$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
 			}
 		}else{
+			# 認証パスがあるが、紐付けファイルが無い
 			$err = $ZP::E_FORM_FAILEDAUTH;
 		}
 
@@ -789,8 +790,10 @@ sub CaptchaAuthentication
 		$saved_info = lock_retrieve("$Dir/sid-$sid.cgi");
 		my $elapsed_time = time - ($saved_info->{'creation_time'});
 		if ($elapsed_time >= $auth_expiry) {
+			# 認証有効期限切れ
 			$err = $ZP::E_FORM_FAILEDUSERAUTH;
 		}else{
+			# 成功
 			$err = $ZP::E_SUCCESS;
 		}
 	}
