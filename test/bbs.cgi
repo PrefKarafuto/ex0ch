@@ -792,6 +792,7 @@ sub CaptchaAuthentication
 		$Cookie->Set('MAIL','');
 
 	}elsif(-e "$Dir/sid-$sid.cgi"){
+		# 認証済みユーザー
 		$saved_info = lock_retrieve("$Dir/sid-$sid.cgi");
 		my $elapsed_time = time - ($saved_info->{'creation_time'});
 		if ($elapsed_time >= $auth_expiry) {
