@@ -690,21 +690,22 @@ sub LoadSessionID
 			return $ZP::E_PAGE_COOKIE;
 		}
 	}elsif($Conv->IsJPIP($Sys)){
-		# IPに紐付けられているかチェック
+		# JPIPに紐付けられているかチェック
 		if(-e $ipFile && time - (stat($ipFile))[9] < 60 * 60 * 24){
 			$sid = lock_retrieve($ipFile);
-			$sid = $sid->{'sid'};
+			my $crtime = $sid->{'crtime'};
+			lock_store({'sid'=> $sid,'crtime'=> $crtime},$ipFile);
+			chmod 0600,$ipFile;
 		}else{
-			$sid = "";
+			$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
+			lock_store({'sid'=> $sid,'crtime'=> time},$ipFile);
+			chmod 0600,$ipFile;
 		}
 	}
 	if(!$sid){
 		# 新規ID発行
 		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
 	}
-	my %data = ('sid'=> $sid);
-	lock_store(\%data,$ipFile);
-	chmod 0600,$ipFile;
 
 	my $ctx_sec = Digest::MD5->new;
 	$ctx_sec->add($Sys->Get('SECURITY_KEY'));
@@ -745,7 +746,7 @@ sub CaptchaAuthentication
 		if($auth_code && -e $codeFile){
 			# !auth:xxxxxx
 			$authed_sid = lock_retrieve($codeFile);
-			if (time - ($authed_sid->{'creation_time'}) >= 60*5) {
+			if (time - ($authed_sid->{'crtime'}) >= 60*5) {
 				# 有効期限切れ
 				$err = $ZP::E_FORM_FAILEDAUTH;
 			}else{
@@ -755,7 +756,7 @@ sub CaptchaAuthentication
 					# 認証時とIP一致
 					$sid = $authed_sid->{'sid'};
 					$Sys->Set('SID',$sid);
-					lock_store({'creation_time'=>time}, "$Dir/sid-$sid.cgi");
+					lock_store({'crtime'=>time}, "$Dir/sid-$sid.cgi");
 					chmod 0600, "$Dir/sid-$sid.cgi";
 					unlink $codeFile;
 
@@ -780,7 +781,7 @@ sub CaptchaAuthentication
 				$auth_code = substr($ctx->hexdigest, 0, 6);
 				my $issueCodeFile = "$Dir/code-$auth_code.cgi";
 
-				lock_store({'sid'=>$sid,'ip_addr'=>$ENV{'REMOTE_ADDR'},'creation_time'=>time}, $issueCodeFile);
+				lock_store({'sid'=>$sid,'ip_addr'=>$ENV{'REMOTE_ADDR'},'crtime'=>time}, $issueCodeFile);
 				chmod 0600, $issueCodeFile;
 				$Sys->Set('PASSWORD', $auth_code);
 
@@ -796,7 +797,7 @@ sub CaptchaAuthentication
 	}elsif(-e "$Dir/sid-$sid.cgi"){
 		# 認証済みユーザー
 		$saved_info = lock_retrieve("$Dir/sid-$sid.cgi");
-		my $elapsed_time = time - ($saved_info->{'creation_time'});
+		my $elapsed_time = time - ($saved_info->{'crtime'});
 		if ($elapsed_time >= $auth_expiry) {
 			# 認証有効期限切れ
 			$err = $ZP::E_FORM_FAILEDUSERAUTH;
