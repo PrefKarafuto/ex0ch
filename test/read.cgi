@@ -561,7 +561,7 @@ sub PrintReadFoot
 <input type="hidden" name="time" value="$tm">
 <input type="submit" value="　書き込む　"><br class="smartphone">
 <input type="text" name="FROM" value="$cookName" size="19" placeholder="名前（任意）">
-<input type="text" name="mail" value="$cookMail" size="19" placeholder="コマンド/Cap（$status）"><br>
+<input type="text" name="mail" value="$cookMail" size="19" placeholder="コマンド・Cap（$status）"><br>
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
