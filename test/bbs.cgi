@@ -694,6 +694,7 @@ sub LoadSessionID
 		if(-e $ipFile && time - (stat($ipFile))[9] < 60 * 60 * 24){
 			$sid = lock_retrieve($ipFile);
 			my $crtime = $sid->{'crtime'};
+			$sid = $sid->{'sid'};
 			lock_store({'sid'=> $sid,'crtime'=> $crtime},$ipFile);
 			chmod 0600,$ipFile;
 		}else{
