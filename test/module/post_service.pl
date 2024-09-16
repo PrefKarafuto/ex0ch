@@ -1633,6 +1633,9 @@ sub MakeDatLine
 	#SLIPがあった場合は付加する
 	$name .= "</b> (${slip_result})" if (($slip_result && !$noslip) && (!$handle || !$noAttr));
 
+	# 無意味なタグを除去
+	$name =~ s|<b></b>||g;
+
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
 	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
