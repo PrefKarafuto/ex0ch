@@ -846,19 +846,18 @@ sub Command
 			'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'str' },
 			'ban'       => { 'name' => 'アクセス禁止', 'type' => 'elem' },
 			'sub'    	=> { 'name' => '副主', 'type' => 'bool' },
-			'vote' 	    => { 'name' => 'BAN投票', 'type' => 'elem' },
 		);
 		$Command .= '[スレッドの設定]<br>';
 		foreach my $attr (sort keys %ThreadAttr){
 			my $type = $allAttr{$attr}->{'type'};
 			my $value = $ThreadAttr{$attr};
-			if($value){
+			if(defined $value){
 				if($type eq 'bool'){
 					$Command .= $allAttr{$attr}->{'name'}.'<br>';
 				}elsif($type eq 'str'){
 					$Command .= $allAttr{$attr}->{'name'}.":$value<br>";
 				}elsif($type eq 'elem'){
-					my $count = scalar(split(/,/,$value));
+					my $count = scalar keys %{$value};
 					$Command .= $allAttr{$attr}->{'name'}.":$count<br>";
 				}
 			}
