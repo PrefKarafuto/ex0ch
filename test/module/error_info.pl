@@ -107,10 +107,8 @@ sub Load {
 	};
 
 	# メッセージデータをオブジェクトに格納
-	foreach my $id (keys %{$messages}) {
-		$this->{'SUBJECT'}->{$id} = $messages->{$id}->{SUBJECT};
-		$this->{'MESSAGE'}->{$id} = $messages->{$id}->{MESSAGE};
-	}
+	$this->{'SUBJECT'} = { map { $_ => $messages->{$_}->{SUBJECT} } keys %{$messages} };
+	$this->{'MESSAGE'} = { map { $_ => $messages->{$_}->{MESSAGE} } keys %{$messages} };
 }
 
 
