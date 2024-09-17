@@ -679,6 +679,8 @@ sub LoadSessionID
 	my $infoDir = $Sys->Get('INFO');
 	my $ipHash = $ctx->b64digest;
 	my $ipFile = ".$infoDir/.ninpocho/hash/ip-$ipHash.cgi";
+
+	my $fileExpiry = 60 * 60 * 24;
 	
 	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
 		my $ctx = Digest::MD5->new;
@@ -691,7 +693,7 @@ sub LoadSessionID
 		}
 	}elsif($Conv->IsJPIP($Sys)){
 		# JPIPに紐付けられているかチェック
-		if(-e $ipFile && time - (stat($ipFile))[9] < 60 * 60 * 24){
+		if(-e $ipFile && time - (stat($ipFile))[9] < $fileExpiry){
 			$sid = lock_retrieve($ipFile);
 			my $crtime = $sid->{'crtime'};
 			$sid = $sid->{'sid'};
@@ -701,6 +703,14 @@ sub LoadSessionID
 			$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
 			lock_store({'sid'=> $sid,'crtime'=> time},$ipFile);
 			chmod 0600,$ipFile;
+
+			# 期限切れファイルのクリア
+			opendir(my $ipDir, ".$infoDir/.ninpocho/hash/") or die "Cannot open directory: $!";
+			my @files = grep { /ip-\.cgi$/ && -f ".$infoDir/.ninpocho/hash/$_" } readdir($ipDir);
+			closedir($ipDir);
+			foreach my $file (@files){
+				unlink $file if(time - (stat($file))[9] > $fileExpiry);
+			}
 		}
 	}
 	if(!$sid){
@@ -736,6 +746,8 @@ sub CaptchaAuthentication
 	my $Dir = "." . $Sys->Get('INFO') . "/.auth";
 	my $mail = $Form->Get('mail');
 
+	my $fileExpiry = 60 * 5;
+
 	# Captcha認証
 	my $err = Certification_Captcha($Sys, $Form);
 	if($Set->Get('BBS_CAPTCHA') eq 'force'){
@@ -747,7 +759,7 @@ sub CaptchaAuthentication
 		if($auth_code && -e $codeFile){
 			# !auth:xxxxxx
 			$authed_sid = lock_retrieve($codeFile);
-			if (time - ($authed_sid->{'crtime'}) >= 60*5) {
+			if (time - ($authed_sid->{'crtime'}) >= $fileExpiry) {
 				# 有効期限切れ
 				$err = $ZP::E_FORM_FAILEDAUTH;
 			}else{
@@ -761,7 +773,16 @@ sub CaptchaAuthentication
 					chmod 0600, "$Dir/sid-$sid.cgi";
 					unlink $codeFile;
 
+					# mailフォームクリア
 					$Form->Set('mail','');
+					
+					# 期限切れファイルのクリア
+					opendir(my $authDir, "$Dir/") or die "Cannot open directory: $!";
+					my @files = grep { /(sid|code)-\.cgi$/ && -f "$Dir/$_" } readdir($authDir);
+					closedir($authDir);
+					foreach my $file (@files){
+						unlink $file if(time - (stat($file))[9] > $fileExpiry);
+					}
 
 					$err = $ZP::E_SUCCESS;
 				}else{
