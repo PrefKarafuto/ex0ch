@@ -694,8 +694,8 @@ sub Command
 		}
 		#BAN
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 12)){
-			my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
-			my $bannum = @banuserAttr;
+			my %banuserAttr = %{$Threads->GetAttr($threadid,'ban')};
+			my $bannum = scalar keys %banuserAttr;
 			my $bansid = GetSessionID($Sys,$threadid,$2);
 			my $nusisid = GetSessionID($Sys,$threadid,1);
 
@@ -705,16 +705,12 @@ sub Command
 			if(($NinStat && $ninLv >= $min_level) || !$NinStat ||$noNinja){
 				if($bansid){
 					if($bansid ne $nusisid){
-						# grepを使って$bansidが@banuserAttrに存在するかをチェック
-						my @matched = grep { $_ eq $bansid } @banuserAttr;
-
-						if(@matched){
+						if(defined $banuserAttr{$bansid} && $banuserAttr{$bansid} == 0){
 							$Command .= "※既にBAN済<br>";
 						} else {
 							# BANの処理
-							push(@banuserAttr, $bansid); # 新しい要素を配列の末尾に追加
-							shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));
-							$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
+							$banuserAttr{$bansid} = 0;
+							$Threads->SetAttr($threadid, 'ban', \%banuserAttr);
 							$Command .= "※BAN：&gt;&gt;$2<br>";
 							$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
 						}
@@ -790,17 +786,15 @@ sub Command
 		if($Threads->GetAttr($threadid, $delCommand)){
 			if($delCommand =~ /ban&gt;&gt;([1-9][0-9]*)/ ){
 				#BAN取り消し用
-				my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
-				my $bannum = @banuserAttr;
+				my %banuserAttr = %{$Threads->GetAttr($threadid,'ban')};
+				my $bannum = scalar keys %banuserAttr;
 				my $bansid = GetSessionID($Sys,$threadid,$1);
 				if($bannum){
 					if($bansid){
-						# grepを使って$bansidに一致しない要素だけを選択
-						my @newBanuserAttr = grep { $_ ne $bansid } @banuserAttr;
-						
-						if(@newBanuserAttr < @banuserAttr){
+						if(defined $banuserAttr{$bansid} && $banuserAttr{$bansid} == 0){
 							# 変更があればスレッド属性を更新
-							$Threads->SetAttr($threadid, join(',', @newBanuserAttr));
+							delete $banuserAttr{$bansid};
+							$Threads->SetAttr($threadid, 'ban',\%banuserAttr);
 							$Command .= "&gt;&gt;$1のBANを解除";
 						} else {
 							$Command .= "※対象はBANされていません<br>";
@@ -909,35 +903,27 @@ sub VoteBanCommand
 		my $target_id = GetSessionID($Sys,$threadid,$target);
 		if($target_id){
 			if($target_id ne GetSessionID($Sys,$threadid,1)){
-				my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
-				my @mached = grep { $_ eq $target_id } @banuserAttr;
-				if(@mached){
+				my %banuserAttr = %{$Threads->GetAttr($threadid,'ban')};
+				if(defined $banuserAttr{$target_id} && $banuserAttr{$target_id} == 0){
 					$Command = "※既にBAN済<br>";
 				} else {
-					my @voteuserAttr = split(/,/ ,$Threads->GetAttr($threadid,"vote_$target_id"));
-					my @del = grep { $_ ne $Sys->Get('SID') } @voteuserAttr;
-					if(@del){
-						$Threads->SetAttr($threadid,"vote_$target_id", join(',', @del));
+					if(exists $banuserAttr{$target_id}->{$Sys->Get('SID')}){
+						delete $banuserAttr{$target_id}->{$Sys->Get('SID')};
+						$Threads->SetAttr($threadid,'ban', \%banuserAttr);
 						$Command = "※投票取り消し<br>";
 					} else {
-						push(@voteuserAttr, $Sys->Get('SID'));
-						$Threads->SetAttr($threadid,"vote_$target_id", join(',', @voteuserAttr));
-
+						$banuserAttr{$target_id}->{$Sys->Get('SID')} = 1;
 						# BAN処理
-						my $vote_count = @voteuserAttr;
+						my $vote_count = scalar keys %{ $banuserAttr{$target_id} };
 						my $specified_num = $Set->Get('BBS_VOTE');
 						if($vote_count >= $specified_num || $target_id eq $Sys->Get('SID')){
 							# 規定数以上の票もしくはBAN対象による自己投票
-							push(@banuserAttr, $target_id);
-							my $bannum = @banuserAttr;
-							shift @banuserAttr if ($bannum+1 > $Sys->Get('BANMAX'));
-							$Threads->SetAttr($threadid, 'ban', join(',', @banuserAttr));
-							$Threads->SetAttr($threadid,"vote_$target_id", undef);
-
+							$banuserAttr{$target_id} = 0;
 							$Command = "※BAN：&gt;&gt;$target<br>";
 						}else{
 							$Command = "※&gt;&gt;${target}に投票しました [$vote_count/$specified_num]<br>";
 						}
+						$Threads->SetAttr($threadid, 'ban', \%banuserAttr);
 					}
 				}
 			}else{
@@ -1548,10 +1534,8 @@ sub BanCheck
 
 	my $nusisid = GetSessionID($Sys,$threadid,1);
 	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
-		my @banuserAttr = split(/,/ ,$Threads->GetAttr($threadid,'ban'));
-		foreach my $userlist(@banuserAttr){
-			return $ZP::E_REG_BAN if($sid eq $userlist);
-		}
+		my %banuserAttr = %{$Threads->GetAttr($threadid,'ban')};
+		return $ZP::E_REG_BAN if(defined $banuserAttr{$sid} && $banuserAttr{$sid} == 0);
 	}
 }
 
