@@ -895,7 +895,8 @@ sub ClearExpiredFiles
 	closedir($targetDir);
 	my $count = 0;
 	foreach my $file (@files){
-		unlink $file if(time - (stat($file))[9] > $expiry);
+		my $filename = "$dir/$file";
+		unlink $filename if(time - (stat($filename))[9] > $expiry);
 		$count++;
 	}
 	return $count;
