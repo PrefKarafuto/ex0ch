@@ -705,12 +705,7 @@ sub LoadSessionID
 			chmod 0600,$ipFile;
 
 			# 期限切れファイルのクリア
-			opendir(my $ipDir, ".$infoDir/.ninpocho/hash/") or die "Cannot open directory: $!";
-			my @files = grep { /ip-\.cgi$/ && -f ".$infoDir/.ninpocho/hash/$_" } readdir($ipDir);
-			closedir($ipDir);
-			foreach my $file (@files){
-				unlink $file if(time - (stat($file))[9] > $fileExpiry);
-			}
+			ClearExpiredFiles(".$infoDir/.ninpocho/hash",qr/^ip-[\x20-\x7E]+\.cgi$/,$fileExpiry);
 		}
 	}
 	if(!$sid){
@@ -777,12 +772,7 @@ sub CaptchaAuthentication
 					$Form->Set('mail','');
 					
 					# 期限切れファイルのクリア
-					opendir(my $authDir, "$Dir/") or die "Cannot open directory: $!";
-					my @files = grep { /(sid|code)-\.cgi$/ && -f "$Dir/$_" } readdir($authDir);
-					closedir($authDir);
-					foreach my $file (@files){
-						unlink $file if(time - (stat($file))[9] > $fileExpiry);
-					}
+					ClearExpiredFiles($Dir,qr/^code-[\x20-\x7E]+\.cgi$/,$fileExpiry);
 
 					$err = $ZP::E_SUCCESS;
 				}else{
@@ -822,7 +812,7 @@ sub CaptchaAuthentication
 		my $elapsed_time = time - ($saved_info->{'crtime'});
 		if ($elapsed_time >= $auth_expiry) {
 			# 認証有効期限切れ
-			$err = $ZP::E_FORM_FAILEDUSERAUTH;
+			$err = $ZP::E_FORM_EXPIREDUSERAUTH;
 		}else{
 			# 成功
 			$err = $ZP::E_SUCCESS;
@@ -894,4 +884,19 @@ sub Certification_Captcha {
 		return $ZP::E_FORM_NOCAPTCHA;
 	}
 	
+}
+
+# 期限切れファイルのクリア
+sub ClearExpiredFiles
+{
+	my ($dir, $reg_file, $expiry) = @_;
+	opendir(my $targetDir, "$dir/") or die "Cannot open directory: $!";
+	my @files = grep { /$reg_file/ && -f "$dir/$_" } readdir($targetDir);
+	closedir($targetDir);
+	my $count = 0;
+	foreach my $file (@files){
+		unlink $file if(time - (stat($file))[9] > $expiry);
+		$count++;
+	}
+	return $count;
 }
