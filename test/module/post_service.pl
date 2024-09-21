@@ -1548,9 +1548,8 @@ sub BanCheck
     # NinjaのBAN状態をチェック
     return $ZP::E_REG_BAN if (!$noNinja && ($Ninja->Get('ban') eq 'ban' || ($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1))));
 
-    my $nusisid = GetSessionID($Sys, $threadid, 1);
-
-    if ($sid ne $nusisid && $nusisid && !$noAttr) {
+    if (!$noAttr) {
+		# スレッド単位でBAN
         my $ban_attr_ref = $Threads->GetAttr($threadid, 'ban');
 
         # 戻り値がハッシュリファレンスか確認
