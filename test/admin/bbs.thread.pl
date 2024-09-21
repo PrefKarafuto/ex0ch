@@ -592,7 +592,7 @@ sub PrintThreadAttr
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Value</td>");
 	
 	foreach my $attrkey (sort keys %threadAttr) {
-		my $attr = $Threads->GetAttr($target_thread,$attrkey);
+		my $attr = $Threads->GetAttr($target_thread, $attrkey);
 		my $name = $threadAttr{$attrkey}->{'name'};
 		my $type = $threadAttr{$attrkey}->{'type'};
 		my $checked = $type eq 'checkbox' && $attr ? 'checked' : '';
@@ -617,10 +617,12 @@ sub PrintThreadAttr
 			$Page->Print("<option value=\"vvvvv\" $vvvvv>vvvvv</option>\n");
 			$Page->Print("<option value=\"vvvvvv\" $vvvvvv>vvvvvv</option>\n");
 			$Page->Print("</select></td></tr>\n");
-		}elsif($type eq 'hash'){
+		}
+		elsif($type eq 'hash'){
 			my $viewStr = '';
-			if($attr){
-				foreach my $userID (sort keys %{$attr}){	
+			# $attr がハッシュリファレンスか確認
+			if (ref($attr) eq 'HASH') {
+				foreach my $userID (sort keys %{$attr}){    
 					if(defined $userID && $attr->{$userID} == 0){
 						$viewStr .= $userID."\n";
 					} elsif(defined $userID && exists $attr->{$userID}){
@@ -629,12 +631,13 @@ sub PrintThreadAttr
 					}
 				}
 			}
-			$Page->Print("<td><textarea name=\"$attrkey\" cols=\"60\" rows=\"5\" value=\"$attr\" $disabled>$viewStr</textarea></td></tr>\n")
+			$Page->Print("<td><textarea name=\"$attrkey\" cols=\"60\" rows=\"5\" $disabled>$viewStr</textarea></td></tr>\n");
 		}
 		else{
 			$Page->Print("<td><input name=\"$attrkey\" type=\"$type\" value=\"$attr\" $min $size $disabled></td></tr>\n");
 		}
 	}
+
 	my $common = "DoSubmit('bbs.thread','FUNC'";
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
@@ -1073,65 +1076,78 @@ sub FunctionThreadAttr
 
 sub FunctionThreadDetailAttr
 {
-	my ($Sys, $Form, $pLog) = @_;
-	
-	# 権限チェック
-	{
-		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
-		my $chkID = $Sys->Get('ADMIN')->{'USER'};
-		
-		if (($SEC->IsAuthority($chkID, $ZP::AUTH_THREADSTOP, $Sys->Get('BBS'))) == 0) {
-			return 1000;
-		}
-	}
+    my ($Sys, $Form, $pLog) = @_;
+    
+    # 権限チェック
+    {
+        my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+        my $chkID = $Sys->Get('ADMIN')->{'USER'};
+        
+        if (($SEC->IsAuthority($chkID, $ZP::AUTH_THREADSTOP, $Sys->Get('BBS'))) == 0) {
+            return 1000;
+        }
+    }
 
-	require './module/thread.pl';
-	
-	my $Threads	= THREAD->new;
-	$Threads->LoadAttrAll($Sys);
-	my $target_thread = $Form->Get('TARGET_THREAD');
+    require './module/thread.pl';
+    
+    my $Threads = THREAD->new;
+    $Threads->LoadAttrAll($Sys);
+    my $target_thread = $Form->Get('TARGET_THREAD');
 
-	foreach my $attrkey (sort keys %threadAttr) {
-		my $defAttr = $Threads->GetAttr($target_thread,$attrkey);
-		my $attr = $Form->Get($attrkey);
-		my $name = $threadAttr{$attrkey}->{'name'};
-		my $type = $threadAttr{$attrkey}->{'type'};
+    foreach my $attrkey (sort keys %threadAttr) {
+        my $defAttr = $Threads->GetAttr($target_thread, $attrkey);
+        my $attr = $Form->Get($attrkey);
+        my $name = $threadAttr{$attrkey}->{'name'};
+        my $type = $threadAttr{$attrkey}->{'type'};
 
-		return 1002 if ($attr && ($type eq 'number' && $attr !~ /[0-9]*/));
-		if ($attrkey eq 'ban' && $attr){
-			my @userData = split(/\n/,$attr);
-			my %hash = {};
-			foreach my $userID (@userData){
-				if($attr =~ /([0-9a-f]{32})(:([1-9][0-9]*))?/){
-					if($3){
-						$hash{$1} = %{$defAttr};
-					}else{
-						$hash{$1} = 0;
-					}
-				}elsif($attr eq ''){
-					next;
-				}else{
-					return 1002;
-				}
-			}
-			$attr = %hash;
-		}
-		if($attrkey eq 'pass' && $attr ne $defAttr && $attr){
-			require Digest::SHA::PurePerl;
-			my $ctx = Digest::SHA::PurePerl->new;
-			$ctx->add(':', $Sys->Get('SERVER'));
-			$ctx->add(':', $target_thread);
-			$ctx->add(':', $attr);
-			$attr = $ctx->b64digest;
-		}
+        # 数値型のバリデーション修正
+        return 1002 if ($attr && $type eq 'number' && $attr !~ /^\d+$/);
 
-		$Threads->SetAttr($target_thread,$attrkey,$attr) if ($defAttr || $attr);
-		push @$pLog, "[$attrkey]属性を".($attr?'付加':'解除');
-	}
-	$Threads->SaveAttrAll($Sys);
-	
-	return 0;
+        if ($attrkey eq 'ban' && $attr){
+            my @userData = split(/\n/, $attr);
+            my %hash = ();
+
+            # $defAttr がハッシュリファレンスか確認
+            my %defHash = ();
+            if (ref($defAttr) eq 'HASH') {
+                %defHash = %{$defAttr};
+            }
+
+            foreach my $userID (@userData){
+                chomp $userID;
+                if($userID =~ /^([0-9a-f]{32})(?::([1-9][0-9]*))?$/){
+                    my ($id, $count) = ($1, $2);
+                    if(defined $count){
+                        # 既存の値をコピー
+                        $hash{$id} = $defHash{$id} // {};
+                    }else{
+                        $hash{$id} = 0;
+                    }
+                }elsif($userID eq ''){
+                    next;
+                }else{
+                    return 1002;
+                }
+            }
+            $attr = \%hash;  # ハッシュリファレンスを代入
+        }
+        if($attrkey eq 'pass' && $attr ne $defAttr && $attr){
+            require Digest::SHA::PurePerl;
+            my $ctx = Digest::SHA::PurePerl->new;
+            $ctx->add(':', $Sys->Get('SERVER'));
+            $ctx->add(':', $target_thread);
+            $ctx->add(':', $attr);
+            $attr = $ctx->b64digest;
+        }
+
+        $Threads->SetAttr($target_thread, $attrkey, $attr) if ($defAttr || $attr);
+        push @$pLog, "[$attrkey]属性を".($attr ? '付加' : '解除');
+    }
+    $Threads->SaveAttrAll($Sys);
+    
+    return 0;
 }
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	スレッドdat落ち
