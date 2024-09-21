@@ -1,6 +1,6 @@
 #============================================================================================================
 #
-#	元号表示 - テンプレート
+#	元号表示
 #	0ch_era.pl
 #	---------------------------------------------------------------------------
 #	202x.xx.xx start
@@ -122,11 +122,12 @@ sub execute
 	if ($type & (16)) {
 		my ($year, $other) = split(/\//,$form->Get('datepart'),2);
 		my $era_name = $this->GetConf('元号');
-		my $start_date = ymd_to_unixtime($this->GetConf('開始日時'));
+        my $dateStr = $this->GetConf('開始日時');
+		my $start_date = $this->ymd_to_unixtime($dateStr);
 		my $format = $this->GetConf('フォーマット');
 
 		if($start_date && time >= $start_date){
-			my $era_year = $year - (split(/\//,$this->GetConf('開始日時'),2))[0];
+			my $era_year = $year - (split(/\//,$dateStr,2))[0];
 			$era_year = $era_year ? $era_year + 1 : '元';
 
 			if ($format == 1) {
@@ -149,12 +150,8 @@ sub ymd_to_unixtime {
     
     # YYYY/MM/DD を年、月、日それぞれに分割
     my ($year, $month, $day) = split(/\//, $date);
-    
-    # 年を4桁にする
-    $year -= 1900;
-    
-    # 月は0から11で表す必要があるので1を引く
-    $month -= 1;
+
+    $month--;
     
     # timelocal関数でUnix時間を取得
     my $unixtime = timelocal(0, 0, 0, $day, $month, $year);
