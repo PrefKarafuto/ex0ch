@@ -94,7 +94,7 @@ sub getConfig
 		'開始日時'	=> {
 			'default'		=> '2019/5/1',
 			'valuetype'		=> 2,
-			'description'	=> 'その元号がスタートする日付をYYYY/MM/DD形式で指定してください。',
+			'description'	=> 'その元号がスタートする日付をYYYY/MM/DD形式(もしくはYYYY/MM/DD hour:min:sec)で指定してください。',
 		},
 		'フォーマット'	=> {
 			'default'		=> 1,
@@ -146,15 +146,17 @@ sub execute
 
 sub ymd_to_unixtime {
 	my	$this = shift;
-    my ($date) = @_;
+    my ($date_time) = @_;
+
+    my ($date, $time) = split(/ /, $date_time);
     
     # YYYY/MM/DD を年、月、日それぞれに分割
     my ($year, $month, $day) = split(/\//, $date);
-
+    my ($hour, $min, $sec) = split(/:/, $time);
     $month--;
     
     # timelocal関数でUnix時間を取得
-    my $unixtime = timelocal(0, 0, 0, $day, $month, $year);
+    my $unixtime = timelocal($sec, $min, $hour, $day, $month, $year);
     
     return $unixtime;
 }
