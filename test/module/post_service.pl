@@ -157,7 +157,7 @@ sub Write
 	return $err if $err;
 	
 	# 書き込み直前処理
-	$err = $this->ReadyBeforeWrite(DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1,$Ninja);
+	$err = $this->ReadyBeforeWrite($Ninja);
 	return $err if $err;
 
 	# 忍法帖
@@ -254,14 +254,13 @@ sub ReadyBeforeCheck
 #	書き込み直前処理
 #	-------------------------------------------------------------------------------------
 #	@param	なし
-#	@param	$res
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
 sub ReadyBeforeWrite
 {
 	my $this = shift;
-	my ($res,$Ninja) = @_;
+	my ($Ninja) = @_;
 	
 	my $Sys = $this->{'SYS'};
 	my $Set = $this->{'SET'};
@@ -317,12 +316,6 @@ sub ReadyBeforeWrite
 			}
 		}
 	}
-	
-	# pluginに渡す値を設定
-	$Sys->Set('_ERR', 0);
-	$Sys->Set('_NUM_', $res);
-	$Sys->Set('_THREAD_', $this->{'THREADS'});
-	$Sys->Set('_SET_', $this->{'SET'});
 	
 	my $CommandSet = $Set->Get('BBS_COMMAND');
 
@@ -389,7 +382,6 @@ sub ReadyBeforeWrite
 		}
 		$Form->Set('FROM', $from);
 	}
-	$this->ExecutePlugin(16);
 
 	$this->OMIKUJI($Sys, $Form);	#おみくじ
 	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
@@ -1610,6 +1602,14 @@ sub MakeDatLine
 	$updown = '' if ($Ninja->Get('force_sage') && !$noNinja);
 	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && $Set->Get('BBS_NINJA') && !$noNinja);
 	$Sys->Set('updown', $updown);
+	
+	# pluginに渡す値を設定
+	$Sys->Set('_ERR', 0);
+	$Sys->Set('_NUM_', DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1);
+	$Sys->Set('_THREAD_', $this->{'THREADS'});
+	$Sys->Set('_SET_', $this->{'SET'});
+	# プラグイン実行
+	$this->ExecutePlugin(16);
 
 	# レス要素の取得
 	my $subject = $Form->Get('subject', '');
