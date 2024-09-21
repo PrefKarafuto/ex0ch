@@ -30,9 +30,8 @@ my %threadAttr = (
 	'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'checkbox' },
 	'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
 	'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
-	'ban'       => { 'name' => 'アクセス禁止<small>(対象SessionIDをカンマで区切る)</small>', 'type' => 'text' },
+	'ban'       => { 'name' => 'アクセス禁止<small>SessionID（:投票数）</small>', 'type' => 'hash' },
 	'sub'    	=> { 'name' => '副主', 'type' => 'text' },
-	#'vote' 	    => { 'name' => 'BAN投票', 'type' => 'text' },
 );
 
 #------------------------------------------------------------------------------------------------------------
@@ -618,6 +617,17 @@ sub PrintThreadAttr
 			$Page->Print("<option value=\"vvvvv\" $vvvvv>vvvvv</option>\n");
 			$Page->Print("<option value=\"vvvvvv\" $vvvvvv>vvvvvv</option>\n");
 			$Page->Print("</select></td></tr>\n");
+		}elsif($type eq 'hash'){
+			my $viewStr = '';
+			foreach my $userID (sort keys %{$attr}){	
+				if(defined $userID && $attr->{$userID} == 0){
+					$viewStr .= $userID."\n";
+				} elsif(defined $userID && exists $attr->{$userID}){
+					my $count = scalar keys %{$attr->{$userID}};
+					$viewStr .= $userID .':'.$count."\n";
+				}
+			}
+			$Page->Print("<td><textarea name=\"$attrkey\" cols=\"60\" rows=\"5\" value=\"$attr\" $disabled>$viewStr</textarea></td></tr>\n")
 		}
 		else{
 			$Page->Print("<td><input name=\"$attrkey\" type=\"$type\" value=\"$attr\" $min $size $disabled></td></tr>\n");
@@ -1086,6 +1096,24 @@ sub FunctionThreadDetailAttr
 		my $type = $threadAttr{$attrkey}->{'type'};
 
 		return 1002 if ($attr && ($type eq 'number' && $attr !~ /[0-9]*/));
+		if ($attrkey eq 'ban' && $attr){
+			my @userData = split(/\n/,$attr);
+			my %hash = {};
+			foreach my $userID (@userData){
+				if($attr =~ /([0-9a-f]{32})(:([1-9][0-9]*))?/){
+					if($3){
+						$hash{$1} = %{$defAttr};
+					}else{
+						$hash{$1} = 0;
+					}
+				}elsif($attr eq ''){
+					next;
+				}else{
+					return 1002;
+				}
+			}
+			$attr = %hash;
+		}
 		if($attrkey eq 'pass' && $attr ne $defAttr && $attr){
 			require Digest::SHA::PurePerl;
 			my $ctx = Digest::SHA::PurePerl->new;
