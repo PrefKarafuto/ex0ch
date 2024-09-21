@@ -619,12 +619,14 @@ sub PrintThreadAttr
 			$Page->Print("</select></td></tr>\n");
 		}elsif($type eq 'hash'){
 			my $viewStr = '';
-			foreach my $userID (sort keys %{$attr}){	
-				if(defined $userID && $attr->{$userID} == 0){
-					$viewStr .= $userID."\n";
-				} elsif(defined $userID && exists $attr->{$userID}){
-					my $count = scalar keys %{$attr->{$userID}};
-					$viewStr .= $userID .':'.$count."\n";
+			if($attr){
+				foreach my $userID (sort keys %{$attr}){	
+					if(defined $userID && $attr->{$userID} == 0){
+						$viewStr .= $userID."\n";
+					} elsif(defined $userID && exists $attr->{$userID}){
+						my $count = scalar keys %{$attr->{$userID}};
+						$viewStr .= $userID .':'.$count."\n";
+					}
 				}
 			}
 			$Page->Print("<td><textarea name=\"$attrkey\" cols=\"60\" rows=\"5\" value=\"$attr\" $disabled>$viewStr</textarea></td></tr>\n")
