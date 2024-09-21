@@ -686,7 +686,14 @@ sub Command
 		}
 		#BAN
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 12)){
-			my %banuserAttr = %{$Threads->GetAttr($threadid,'ban')};
+			my $ban_attr_ref = $Threads->GetAttr($threadid,'ban');
+			my %banuserAttr = ();
+
+			# 戻り値がハッシュリファレンスか確認
+			if (ref($ban_attr_ref) eq 'HASH') {
+				%banuserAttr = %{$ban_attr_ref};
+			}
+
 			my $bannum = scalar keys %banuserAttr;
 			my $bansid = GetSessionID($Sys,$threadid,$2);
 			my $nusisid = GetSessionID($Sys,$threadid,1);
@@ -694,7 +701,7 @@ sub Command
 			my $ninLv = $Ninja->Get('ninLv');
 			my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USER_BAN'));
 
-			if(($NinStat && $ninLv >= $min_level) || !$NinStat ||$noNinja){
+			if(($NinStat && $ninLv >= $min_level) || !$NinStat || $noNinja){
 				if($bansid){
 					if($bansid ne $nusisid){
 						if(defined $banuserAttr{$bansid} && $banuserAttr{$bansid} == 0){
@@ -704,7 +711,7 @@ sub Command
 							$banuserAttr{$bansid} = 0;
 							$Threads->SetAttr($threadid, 'ban', \%banuserAttr);
 							$Command .= "※BAN：&gt;&gt;$2<br>";
-							$Ninja->Set('ninLv',$ninLv - $factor) unless $noNinja;
+							$Ninja->Set('ninLv', $ninLv - $factor) unless $noNinja;
 						}
 					} else {
 						$Command .= "※スレ主はBAN不可<br>";
@@ -777,8 +784,15 @@ sub Command
 		$delCommand =~ s/^sage$/sagemode/;
 		if($Threads->GetAttr($threadid, $delCommand)){
 			if($delCommand =~ /ban&gt;&gt;([1-9][0-9]*)/ ){
-				#BAN取り消し用
-				my %banuserAttr = %{$Threads->GetAttr($threadid,'ban')};
+				# BAN取り消し用
+				my $ban_attr_ref = $Threads->GetAttr($threadid,'ban');
+				my %banuserAttr = ();
+
+				# 戻り値がハッシュリファレンスか確認
+				if (ref($ban_attr_ref) eq 'HASH') {
+					%banuserAttr = %{$ban_attr_ref};
+				}
+
 				my $bannum = scalar keys %banuserAttr;
 				my $bansid = GetSessionID($Sys,$threadid,$1);
 				if($bannum){
@@ -786,7 +800,7 @@ sub Command
 						if(defined $banuserAttr{$bansid} && $banuserAttr{$bansid} == 0){
 							# 変更があればスレッド属性を更新
 							delete $banuserAttr{$bansid};
-							$Threads->SetAttr($threadid, 'ban',\%banuserAttr);
+							$Threads->SetAttr($threadid, 'ban', \%banuserAttr);
 							$Command .= "&gt;&gt;$1のBANを解除";
 						} else {
 							$Command .= "※対象はBANされていません<br>";
@@ -794,11 +808,10 @@ sub Command
 					} else {
 						$Command .= "※無効なレス番号<br>";
 					}
-				}else {
+				} else {
 					$Command .= "※設定されていません<br>";
 				}
-			}
-			else{
+			}else{
 				$Threads->SetAttr($threadid, $delCommand,'');
 				$delCommand =~ s/^sagemode$/sage/;
 				$Command .= '※'.$delCommand.'取り消し<br>';
@@ -894,10 +907,20 @@ sub VoteBanCommand
 		my $target_id = GetSessionID($Sys,$threadid,$target);
 		if($target_id){
 			if($target_id ne GetSessionID($Sys,$threadid,1)){
-				my %banuserAttr = %{$Threads->GetAttr($threadid,'ban')};
+				my $ban_attr_ref = $Threads->GetAttr($threadid,'ban');
+				my %banuserAttr = ();
+
+				# 戻り値がハッシュリファレンスか確認
+				if (ref($ban_attr_ref) eq 'HASH') {
+					%banuserAttr = %{$ban_attr_ref};
+				}
+
 				if(defined $banuserAttr{$target_id} && $banuserAttr{$target_id} == 0){
 					$Command = "※既にBAN済<br>";
 				} else {
+					# $banuserAttr{$target_id} の値が未定義の場合に備えて初期化
+					$banuserAttr{$target_id} = {} unless ref($banuserAttr{$target_id}) eq 'HASH' || $banuserAttr{$target_id} == 0;
+
 					if(exists $banuserAttr{$target_id}->{$Sys->Get('SID')}){
 						delete $banuserAttr{$target_id}->{$Sys->Get('SID')};
 						$Threads->SetAttr($threadid,'ban', \%banuserAttr);
@@ -911,19 +934,20 @@ sub VoteBanCommand
 							# 規定数以上の票もしくはBAN対象による自己投票
 							$banuserAttr{$target_id} = 0;
 							$Command = "※BAN：&gt;&gt;$target<br>";
-						}else{
+						} else {
 							$Command = "※&gt;&gt;${target}に投票しました [$vote_count/$specified_num]<br>";
 						}
 						$Threads->SetAttr($threadid, 'ban', \%banuserAttr);
 					}
 				}
-			}else{
+			} else {
 				$Command = "※スレ主には投票できません";
-			}	
-		}else{
+			}   
+		} else {
 			$Command = "※無効なレス番号";
 		}
 	}
+
 
 	if($Command){
 		$Threads->SaveAttr($Sys);
@@ -1602,7 +1626,7 @@ sub MakeDatLine
 	$updown = '' if ($Ninja->Get('force_sage') && !$noNinja);
 	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && $Set->Get('BBS_NINJA') && !$noNinja);
 	$Sys->Set('updown', $updown);
-	
+
 	# pluginに渡す値を設定
 	$Sys->Set('_ERR', 0);
 	$Sys->Set('_NUM_', DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1);
