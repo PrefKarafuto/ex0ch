@@ -1546,6 +1546,7 @@ sub LevelLimit
 
 	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
 	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
+	my $makeThread = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_LIMIT_THREADCAPONLY, $Form->Get('bbs'));
 
 	my $write_min = $Set->Get('NINJA_WRITE_MESSAGE') // '';
 	my $lvLim = $Threads->GetAttr($Sys->Get('KEY'),'ninLv') || 0;
@@ -1555,10 +1556,12 @@ sub LevelLimit
 	if(!$noNinja){
 		if($Sys->Equal('MODE', 1)){
 			# スレ立てモード
-			if($ninLv < $min_level){
-				return $ZP::E_REG_NINLVLIMIT;
-			}else{
-				$Ninja->Set('ninLv',$ninLv - $factor);
+			if(!$makeThread){
+				if($ninLv < $min_level){
+					return $ZP::E_REG_NINLVLIMIT;
+				}else{
+					$Ninja->Set('ninLv',$ninLv - $factor);
+				}
 			}
 		}else{
 			# 書き込みモード
