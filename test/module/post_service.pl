@@ -1533,25 +1533,33 @@ sub LoadNinpocho
 	return $is_save;
 }
 
-
 # BANチェック
 sub BanCheck
 {
-	my $this = shift;
-	my ($Sys, $Form,$Threads, $Ninja, $Sec) = @_;
+    my $this = shift;
+    my ($Sys, $Form, $Threads, $Ninja, $Sec) = @_;
 
-	my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
-	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
+    my $noAttr = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
+    my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
 
-	my $threadid = $Sys->Get('KEY');
-	my $sid = $Sys->Get('SID');
-	return $ZP::E_REG_BAN if(!$noNinja&&($Ninja->Get('ban') eq 'ban'||($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1))));
+    my $threadid = $Sys->Get('KEY');
+    my $sid = $Sys->Get('SID');
 
-	my $nusisid = GetSessionID($Sys,$threadid,1);
-	if($sid ne $nusisid && $nusisid && $Threads->GetAttr($threadid,'ban') && !$noAttr){
-		my %banuserAttr = %{$Threads->GetAttr($threadid,'ban')};
-		return $ZP::E_REG_BAN if(defined $banuserAttr{$sid} && $banuserAttr{$sid} == 0);
-	}
+    # NinjaのBAN状態をチェック
+    return $ZP::E_REG_BAN if (!$noNinja && ($Ninja->Get('ban') eq 'ban' || ($Ninja->Get('ban_mthread') eq 'thread' && $Sys->Equal('MODE', 1))));
+
+    my $nusisid = GetSessionID($Sys, $threadid, 1);
+
+    if ($sid ne $nusisid && $nusisid && !$noAttr) {
+        my $ban_attr_ref = $Threads->GetAttr($threadid, 'ban');
+
+        # 戻り値がハッシュリファレンスか確認
+        if (ref($ban_attr_ref) eq 'HASH') {
+            if (defined $ban_attr_ref->{$sid} && $ban_attr_ref->{$sid} == 0) {
+                return $ZP::E_REG_BAN;
+            }
+        }
+    }
 }
 
 # レベル制限
