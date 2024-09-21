@@ -148,7 +148,7 @@ sub ymd_to_unixtime {
     my ($date) = @_;
     
     # YYYY/MM/DD を年、月、日それぞれに分割
-    my ($year, $month, $day) = split('/', $date);
+    my ($year, $month, $day) = split(/\//, $date);
     
     # 年を4桁にする
     $year -= 1900;
