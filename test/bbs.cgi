@@ -691,16 +691,17 @@ sub LoadSessionID
 			#一致しなかったら改竄されている
 			return $ZP::E_PAGE_COOKIE;
 		}
-	}elsif($Conv->IsJPIP($Sys)){
+	}
+	
+	if($Conv->IsJPIP($Sys)){
 		# JPIPに紐付けられているかチェック
 		if(-e $ipFile && time - (stat($ipFile))[9] < $fileExpiry){
-			$sid = lock_retrieve($ipFile);
-			my $crtime = $sid->{'crtime'};
-			$sid = $sid->{'sid'};
+			my $sid_loaded = lock_retrieve($ipFile);
+			my $crtime = $sid_loaded->{'crtime'};
+			$sid = $sid_loaded->{'sid'} unless $sid;
 			lock_store({'sid'=> $sid,'crtime'=> $crtime},$ipFile);
 			chmod 0600,$ipFile;
-		}else{
-			$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
+		}elsif($sid){
 			lock_store({'sid'=> $sid,'crtime'=> time},$ipFile);
 			chmod 0600,$ipFile;
 
