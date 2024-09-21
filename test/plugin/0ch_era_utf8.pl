@@ -94,12 +94,27 @@ sub getConfig
 		'開始日時'	=> {
 			'default'		=> '2019/5/1',
 			'valuetype'		=> 2,
-			'description'	=> 'その元号がスタートする日付をYYYY/MM/DD形式(もしくはYYYY/MM/DD hour:min:sec)で指定してください。',
+			'description'	=> '元号がスタートした日付をYYYY/MM/DD形式(もしくはYYYY/MM/DD hour:min:sec)で指定してください。',
 		},
 		'フォーマット'	=> {
 			'default'		=> 1,
 			'valuetype'		=> 1,
 			'description'	=> '出力される日付のフォーマット。0:YYYY/MM/DD 1:YYYY(ERA)/MM/DD 2:ERA/MM/DD',
+		},
+        '(次の元号)'	=> {
+			'default'		=> '',
+			'valuetype'		=> 2,
+			'description'	=> '改元が分かっている場合に、次の元号を入れてください。',
+		},
+		'(改元日時)'	=> {
+			'default'		=> '',
+			'valuetype'		=> 2,
+			'description'	=> '改元が分かっている場合に、その日付をYYYY/MM/DD形式(もしくはYYYY/MM/DD hour:min:sec)で指定してください。',
+		},
+		'対象掲示板'	=> {
+			'default'		=> '',
+			'valuetype'		=> 2,
+			'description'	=> '機能を有効化する掲示板のディレクトリ名を指定してください。（複数の場合はカンマ区切り。無記入で全ての掲示板。）',
 		},
 	);
 	
@@ -122,11 +137,21 @@ sub execute
 	if ($type & (16)) {
 		my ($year, $other) = split(/\//,$form->Get('datepart'),2);
 		my $era_name = $this->GetConf('元号');
+        my $next_era_name = $this->GetConf('次の元号');
         my $dateStr = $this->GetConf('開始日時');
+        my $nextDateStr = $this->GetConf('改元日時');
 		my $start_date = $this->ymd_to_unixtime($dateStr);
+        my $next_date = $this->ymd_to_unixtime($nextDateStr);
 		my $format = $this->GetConf('フォーマット');
+        my $target_bbs = $this->GetConf('対象掲示板');
+        my $bbs = $sys->Get('BBS');
 
-		if($start_date && time >= $start_date){
+		if($start_date && time >= $start_date && (!$target_bbs||$target_bbs =~ /$bbs/)){
+            if($next_era_name && time >= $next_date && $next_date > $start_date){
+                # 改元
+                $dateStr = $nextDateStr;
+                $era_name = $next_era_name;
+            }
 			my $era_year = $year - (split(/\//,$dateStr,2))[0];
 			$era_year = $era_year ? $era_year + 1 : '元';
 
