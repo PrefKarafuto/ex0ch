@@ -137,9 +137,9 @@ sub execute
 	if ($type & (16)) {
 		my ($year, $other) = split(/\//,$form->Get('datepart'),2);
 		my $era_name = $this->GetConf('元号');
-        my $next_era_name = $this->GetConf('次の元号');
+        my $next_era_name = $this->GetConf('(次の元号)');
         my $dateStr = $this->GetConf('開始日時');
-        my $nextDateStr = $this->GetConf('改元日時');
+        my $nextDateStr = $this->GetConf('(改元日時)');
 		my $start_date = $this->ymd_to_unixtime($dateStr);
         my $next_date = $this->ymd_to_unixtime($nextDateStr);
 		my $format = $this->GetConf('フォーマット');
@@ -147,7 +147,7 @@ sub execute
         my $bbs = $sys->Get('BBS');
 
 		if($start_date && time >= $start_date && (!$target_bbs||$target_bbs =~ /$bbs/)){
-            if($next_era_name && time >= $next_date && $next_date > $start_date){
+            if($next_era_name && $next_date && time >= $next_date && $next_date > $start_date){
                 # 改元
                 $dateStr = $nextDateStr;
                 $era_name = $next_era_name;
@@ -173,7 +173,9 @@ sub ymd_to_unixtime {
 	my	$this = shift;
     my ($date_time) = @_;
 
-    my ($date, $time) = split(/ /, $date_time);
+    my ($date, $time) = split(/\s/, $date_time);
+
+    return 0 if (!$date && !$time);
     
     # YYYY/MM/DD を年、月、日それぞれに分割
     my ($year, $month, $day) = split(/\//, $date);
