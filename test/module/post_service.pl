@@ -109,6 +109,10 @@ sub Write
 	$this->ReadyBeforeCheck();
 	
 	my $err = $ZP::E_SUCCESS;
+
+	# キャプチャ
+	$err = $this->CaptchaAuthentication();
+	return $err if $err;
 	
 	# 入力内容チェック(名前、メール)
 	$err = $this->NormalizationNameMail();
@@ -200,6 +204,9 @@ sub Write
 			$Threads->OnDemand($Sys, $threadid, $resNum, $Sys->Get('updown', ''));
 		}
 	}
+
+	# 期限切れのファイルを削除
+	$this->CleanUp($Sys);
 	
 	return $err;
 
@@ -323,7 +330,7 @@ sub ReadyBeforeWrite
 	my $threadid = $Sys->Get('KEY');
 	my $commandAuth = $Sec->IsAuthority($capID, $ZP::CAP_REG_COMMAND, $Form->Get('bbs'));
 	my $noAttr = $Sec->IsAuthority($capID, $ZP::CAP_REG_NOATTR, $Form->Get('bbs'));
-	my $noNinja = $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
+	my $noNinja = $Sec->IsAuthority($capID, $ZP::CAP_REG_NONINJA, $Form->Get('bbs'));
 
 	# コマンド
 	my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USE_COMMAND'));
@@ -2262,6 +2269,195 @@ sub SameTitleCheck
 	return 0;
 }
 
+#------------------------------------------------------------------------------------------------------------
+#
+#	ワンタイムパスワード認証
+#
+#------------------------------------------------------------------------------------------------------------
+sub CaptchaAuthentication
+{
+	my	$this = shift;
+	my $Sys = $this->{'SYS'};
+	my $Set = $this->{'SET'};
+	my $Form = $this->{'FORM'};
+	my $Sec = $this->{'SECURITY'};
+	my ($auth_code,$authed_sid,$saved_info,$saved_code,$status);
+
+	# Captchaが設定されていない場合は処理しない
+	return 0 unless $Set->Get('BBS_CAPTCHA') && $Sys->Get('CAPTCHA') && $Sys->Get('CAPTCHA_SECRETKEY') && $Sys->Get('CAPTCHA_SITEKEY');
+
+	# キャップ権限でキャプチャをパスできる場合
+	return 0 if $Sec->IsAuthority($Sys->Get('CAPID'), $ZP::CAP_REG_NOCAPTCHA, $Sys->Get('BBS'));
+
+	my $sid = $Sys->Get('SID');
+	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60*60*24;
+	my $Dir = "." . $Sys->Get('INFO') . "/.auth";
+	my $mail = $Form->Get('mail');
+
+	my $fileExpiry = 60 * 5;
+
+	# Captcha認証
+	my $err = $this->Certification_Captcha($Sys, $Form);
+	if($Set->Get('BBS_CAPTCHA') eq 'force'){
+		# 毎回強制Captcha
+	}elsif ($mail =~ /^!auth(:([0-9a-fA-F]{6}))?/) {
+		#ワンタイムパス
+		$auth_code = $2;
+		my $codeFile = "$Dir/code-$auth_code.cgi";	# 認証コードとsidを紐付け
+		if($auth_code && -e $codeFile){
+			# !auth:xxxxxx
+			$authed_sid = lock_retrieve($codeFile);
+			if (time - ($authed_sid->{'crtime'}) >= $fileExpiry) {
+				# 有効期限切れ
+				$err = $ZP::E_FORM_FAILEDAUTH;
+			}else{
+				# 成功
+				my $authed_ip = $authed_sid->{'ip_addr'};
+				if($ENV{'REMOTE_ADDR'} eq $authed_ip){
+					# 認証時とIP一致
+					$sid = $authed_sid->{'sid'};
+					$Sys->Set('SID',$sid);
+					lock_store({'crtime'=>time}, "$Dir/sid-$sid.cgi");
+					chmod 0600, "$Dir/sid-$sid.cgi";
+					unlink $codeFile;
+
+					# mailフォームクリア
+					$Form->Set('mail','success');
+					
+					# 期限切れファイルのクリア
+					# ClearExpiredFiles($Dir,qr/^code-[\x20-\x7E]+\.cgi$/,$fileExpiry);
+
+					$err = $ZP::E_SUCCESS;
+				}else{
+					# IP不一致
+					$err = $ZP::E_FORM_FAILEDAUTH;
+				}
+			}
+		}elsif(!defined($auth_code)){
+			# !auth
+			unless($err){
+				# Captcha成功
+				my $ctx = Digest::MD5->new;
+				$ctx->add('auth');
+				$ctx->add($Sys->Get('BBS'));
+				$ctx->add(time);
+				$ctx->add($ENV{'REMOTE_ADDR'});
+
+				$auth_code = substr($ctx->hexdigest, 0, 6);
+				my $issueCodeFile = "$Dir/code-$auth_code.cgi";
+
+				lock_store({'sid'=>$sid,'ip_addr'=>$ENV{'REMOTE_ADDR'},'crtime'=>time}, $issueCodeFile);
+				chmod 0600, $issueCodeFile;
+				$Sys->Set('PASSWORD', $auth_code);
+
+				$err = $ZP::E_FORM_AUTHCOMMAND;		# パスワード発行画面
+			}
+		}else{
+			# 認証パスがあるが、紐付けファイルが無い
+			$err = $ZP::E_FORM_FAILEDAUTH;
+		}
+
+	}elsif(-e "$Dir/sid-$sid.cgi"){
+		# 認証済みユーザー
+		$saved_info = lock_retrieve("$Dir/sid-$sid.cgi");
+		my $elapsed_time = time - ($saved_info->{'crtime'});
+		if ($elapsed_time >= $auth_expiry) {
+			# 認証有効期限切れ
+			$err = $ZP::E_FORM_EXPIREDUSERAUTH;
+		}else{
+			# 成功
+			$err = $ZP::E_SUCCESS;
+		}
+	}
+	return $err;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	Captchaの認証
+#	-------------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------------------------------------
+sub Certification_Captcha {
+	my	$this = shift;
+	my ($Sys,$Form) = @_;
+	my ($captcha_response,$url);
+
+	my $captcha_kind = $Sys->Get('CAPTCHA');
+	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
+	my $page = $Form->Get('page');
+	
+	if($captcha_kind eq 'h-captcha'){
+		$captcha_response = $Form->Get('h-captcha-response');
+		$url = 'https://api.hcaptcha.com/siteverify';
+	}elsif($captcha_kind eq 'g-recaptcha'){
+		$captcha_response = $Form->Get('g-recaptcha-response');
+		$url = 'https://www.google.com/recaptcha/api/siteverify';
+	}elsif($captcha_kind eq 'cf-turnstile'){
+		$captcha_response = $Form->Get('cf-turnstile-response');
+		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+	}else{
+		return 0;
+	}
+
+	if($page eq 'captcha' && $captcha_response){
+		my $ua = LWP::UserAgent->new();
+		my $response = $ua->post($url,{
+			secret => $secretkey,
+			response => $captcha_response,
+			remoteip => $ENV{'REMOTE_ADDR'},
+		   });
+		if ($response->is_success()) {
+			my $json_text = $response->decoded_content();
+			
+			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
+			my $out = decode_json($json_text);
+			
+			if ($out->{success}) {
+				return 0;
+			}else{
+				return $ZP::E_FORM_FAILEDCAPTCHA;
+			}
+		} else {
+			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
+			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
+			return $ZP::E_SYSTEM_CAPTCHAERROR;
+		}
+	}elsif($page ne 'captcha'){
+		# Captchaページ以外から来た場合
+		# 認証ページへ
+		return $ZP::E_PAGE_CAPTCHA;
+	}else{
+		# Captchaページから来て、Captcha認証してない場合(専ブラ等)
+		return $ZP::E_FORM_NOCAPTCHA;
+	}
+	
+}
+
+# ファイルクリーンアップ
+sub CleanUp
+{
+	my $this = shift;
+	my ($Sys) = @_;
+	my $last_flush = $Sys->Gey('LAST_FLUSH');
+	my $span = 60 * 60 * 24 * 7;
+	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60 * 60 * 24;
+	my $ip_expiry = 60 * 60 * 24;
+	my $code_expiry = 60 * 5;
+	require './module/file_utils.pl';
+
+	if(time - $last_flush > $span){
+		# IP-SID紐付けファイル
+		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.ninpocho/hash',qr/^ip-[\x20-\x7E]+\.cgi$/,$ip_expiry);
+		# ユーザー認証情報保存ファイル
+		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.auth',qr/^sid-[\x20-\x7E]+\.cgi$/,$auth_expiry);
+		# ワンタイムパス認証用ファイル
+		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.auth',qr/^code-[\x20-\x7E]+\.cgi$/,$code_expiry);
+
+		$Sys->Set('LAST_FLUSH',time);
+	}
+	
+}
 #============================================================================================================
 #	Module END
 #============================================================================================================

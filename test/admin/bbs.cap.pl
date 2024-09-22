@@ -349,7 +349,7 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=C_COMMAND $authNum[24] value=on>コマンド使用可<br>");
 	$Page->Print("<input type=checkbox name=C_NOATTR $authNum[25] value=on>スレッド属性無効<br>");
 	$Page->Print("<input type=checkbox name=C_NONINJA $authNum[27] value=on>忍法帖規制無効<br>");
-	#$Page->Print("<input type=checkbox name=C_NOCAPTCHA $authNum[28] value=on>Captcha無効<br>");	# 暫定廃止
+	$Page->Print("<input type=checkbox name=C_NOCAPTCHA $authNum[28] value=on>Captcha無効<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示
@@ -556,7 +556,7 @@ sub FunctionGroupSetting
 	$authNum[25]	= $Form->Equal('C_NOATTR', 'on') ? 1 : 0;
 	$authNum[26]	= $Form->Equal('C_NOHOST', 'on') ? 1 : 0;
 	$authNum[27]	= $Form->Equal('C_NONINJA', 'on') ? 1 : 0;
-	#$authNum[28]	= $Form->Equal('C_NOCAPTCHA', 'on') ? 1 : 0;	#暫定廃止
+	$authNum[28]	= $Form->Equal('C_NOCAPTCHA', 'on') ? 1 : 0;
 	
 	for ($i = 0 ; $i < $ZP::CAP_MAXNUM ; $i++) {
 		if ($authNum[$i]){
