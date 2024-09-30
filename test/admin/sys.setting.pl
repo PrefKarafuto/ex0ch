@@ -889,6 +889,7 @@ sub PrintPluginOptionSetting
 	$Page->Print("<td class=\"DetailTitle\">Type</td></tr>\n");
 	
 	%conftype = (
+		0	=>	'変更不可',
 		1	=>	'数値',
 		2	=>	'文字列',
 		3	=>	'真偽値',
@@ -906,8 +907,9 @@ sub PrintPluginOptionSetting
 			$Page->Print("<tr><td>$key</td>");
 			if ($type eq 3) {
 				$Page->Print("<td><input type=checkbox name=PLUGIN_OPT_@{[unpack('H*', $key)]}@{[$val ? ' checked' : '']}></td>");
-			}
-			else {
+			}elsif ($type eq 0) {
+				$Page->Print("<td>$val</td>");
+			}else {
 				$Page->Print("<td><input type=text name=PLUGIN_OPT_@{[unpack('H*', $key)]} value=\"$val\" size=30></td>");
 			}
 			$Page->Print("<td>$desc</td><td>$conftype{$type}</td></tr>\n");
@@ -1371,7 +1373,28 @@ sub FunctionPluginSetting
 				last;
 			}
 		}
-		push @$pLog, $Plugin->Get('NAME', $id) . ' を' . ($valid ? '有効' : '無効') . 'に設定しました。';
+		
+		if($Plugin->Get('TYPE', $id) & 64)
+		{
+			# パッチ用
+			my $file = $Plugin->Get('FILE', $id);
+			my $className = $Plugin->Get('CLASS', $id);
+			
+			require "./plugin/$file";
+			my $Config = PLUGINCONF->new($Plugin, $id);
+			my $command = $className->new($Config);
+			my $status = $Config->GetConfig('patch_status');
+			my $result = $command->execute($Sys, $Form, 64);
+
+			if($result){
+				push @$pLog, 'パッチ '.$Plugin->Get('NAME', $id) . 'の適用に失敗しました。' if $valid;
+			}else{
+				push @$pLog, 'パッチ '.$Plugin->Get('NAME', $id) . ($status ? ' は適用済みです。':' を適用しました。') if $valid;
+			}
+		}else{
+			push @$pLog, $Plugin->Get('NAME', $id) . ' を' . ($valid ? '有効' : '無効') . 'に設定しました。';
+		}
+
 		$Plugin->Set($id, 'VALID', $valid);
 		
 		$_ = $Form->Get("PLUGIN_${id}_ORDER", $i + 1);
