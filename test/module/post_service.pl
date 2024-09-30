@@ -207,6 +207,9 @@ sub Write
 
 	# 期限切れのファイルを削除
 	$this->CleanUp($Sys);
+
+	# 書き込み完了後に実行するプラグイン
+	$this->ExecutePlugin(32);
 	
 	return $err;
 
