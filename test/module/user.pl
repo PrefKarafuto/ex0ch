@@ -188,6 +188,9 @@ sub Check {
     my $this = shift;
     my ($host, $addr, $koyuu, $ua, $sid) = @_;
 
+    require './module/data_utils.pl';
+    my $Conv = DATA_UTILS->new;
+
     my $Sys = $this->{'SYS'};
     my $flag = 0;
 	my $method = $this->{'METHOD'};
@@ -198,7 +201,7 @@ sub Check {
 
     my $addrb;
     if ($addr =~ /:/) {
-        $addrb = ip_to_bin(expand_ipv6($addr));
+        $addrb = ip_to_bin($Conv->expand_ipv6($addr));
     } else {
         $addrb = unpack('B32', pack('C*', split(/\./, $addr)));
     }
@@ -235,7 +238,7 @@ sub Check {
             $length ||= ($ip_check =~ /:/) ? 128 : 32;
             my $bin_check;
             if ($ip_check =~ /:/) {
-                $bin_check = substr(ip_to_bin(expand_ipv6($ip_check)), 0, $length);
+                $bin_check = substr(ip_to_bin($Conv->expand_ipv6($ip_check)), 0, $length);
             } else {
                 $bin_check = substr(unpack("B32", pack('C*', split(/\./, $ip_check))), 0, $length);
             }
@@ -250,8 +253,8 @@ sub Check {
             my ($ip_start, $ip_end) = ($1, $2);
             my ($bin_start, $bin_end);
             if ($ip_start =~ /:/ && $ip_end =~ /:/) {
-                $bin_start = ip_to_bin(expand_ipv6($ip_start));
-                $bin_end = ip_to_bin(expand_ipv6($ip_end));
+                $bin_start = ip_to_bin($Conv->expand_ipv6($ip_start));
+                $bin_end = ip_to_bin($Conv->expand_ipv6($ip_end));
             } else {
                 $bin_start = unpack('B32', pack('C*', split(/\./, $ip_start)));
                 $bin_end = unpack('B32', pack('C*', split(/\./, $ip_end)));
