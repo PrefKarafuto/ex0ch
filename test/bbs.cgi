@@ -254,10 +254,6 @@ sub Initialize
 	my $err = LoadSessionID($Sys, $Cookie, $Conv);
 	return $err if $err;
 
-	# Captcha認証
-	$err = CaptchaAuthentication($Sys,$Form,$Set,$Cookie);
-	return $err if $err;
-
 	# subjectの読み込み
 	$Threads->Load($Sys);
 	
