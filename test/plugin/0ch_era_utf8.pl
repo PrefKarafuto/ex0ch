@@ -151,6 +151,10 @@ sub execute
                 # 改元
                 $dateStr = $nextDateStr;
                 $era_name = $next_era_name;
+				$this->SetConf('元号', $era_name);
+				$this->SetConf('開始日時', $dateStr);
+				$this->SetConf('(次の元号)','');
+				$this->SetConf('(改元日時)','');
             }
 			my $era_year = $year - (split(/\//,$dateStr,2))[0];
 			$era_year = $era_year ? $era_year + 1 : '元';
