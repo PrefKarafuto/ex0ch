@@ -13,6 +13,7 @@ use Digest::MD5;
 use JSON;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use Encode qw(encode);
+use Storable qw(lock_store lock_retrieve);
 use warnings;
 no warnings 'once';
 
@@ -2442,7 +2443,7 @@ sub CleanUp
 {
 	my $this = shift;
 	my ($Sys) = @_;
-	my $last_flush = $Sys->Gey('LAST_FLUSH');
+	my $last_flush = $Sys->Get('LAST_FLUSH');
 	my $span = 60 * 60 * 24 * 7;
 	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60 * 60 * 24;
 	my $ip_expiry = 60 * 60 * 24;
