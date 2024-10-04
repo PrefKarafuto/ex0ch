@@ -112,7 +112,7 @@ sub Load
 		#新規作成時に追加
 		my $mes = $Form->Get('MESSAGE');
 		$mes =~ s/<(b|h)r>//g;
-		$session->param('new_message',$mes);
+		$session->param('new_message',substr($mes, 0, 30));
 		$session->param('c_bbsdir',$Sys->Get('BBS'));
 		$session->param('c_threadkey',$Sys->Get('KEY'));
 		$session->param('c_addr',$ENV{'REMOTE_ADDR'});
@@ -127,7 +127,7 @@ sub Load
 			my $mes = $Form->Get('MESSAGE');
 			$mes =~ s/<(b|h)r>//g;
 			$session->param('load_count',$load_count);
-			$session->param('load_message',$mes);
+			$session->param('load_message',substr($mes, 0, 30));
 			$session->param('load_from',$sid_before);
 			$session->param('load_time',time);
 			$session->param('load_bbsdir',$Sys->Get('BBS'));
