@@ -234,7 +234,7 @@ sub PrintNinjaEdit
 
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Description</td></tr>\n");
 		$Page->Print("<tr><td>説明</td>");
-		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60></td></tr>\n");
+		$Page->Print("<td><input type=text size=60 name=DESCRIPTION value=\"$description\" maxlength=60 $is_disable></td></tr>\n");
 
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■User Information</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ID</td><td>$ninID</td></tr>\n");
