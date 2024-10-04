@@ -280,8 +280,8 @@ sub LogSearch
 				my $match_count = 0;
 				my $condition_count = 0;
 				my @data = $LOG->Get($i);
-				my ($log_ip, $log_host, $log_ua, $log_sid) = ($data[6], $data[5], $data[8], $data[9]);
-				$log_sid = defined $data[9] ? $data[9] : '';
+				my ($log_ip, $log_host, $log_ua) = ($data[6], $data[5], $data[8]);
+				my $log_sid = defined $data[9] ? $data[9] : '';
 
 				if ($ip_addr) {
 					$condition_count++;
