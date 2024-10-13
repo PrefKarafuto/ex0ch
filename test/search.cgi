@@ -49,11 +49,11 @@ sub SearchCGI
 	$Form->DecodeForm(1);
 	$Sys->Init();
 	$BBS->Load($Sys);
-	$capt = Certification_Captcha($Sys,$Form) if $Sys->Get('SEARCHCAP');
+	$capt = $Sys->Get('SEARCHCAP') ? Certification_Captcha($Sys,$Form) : 1;
 	PrintHead($Sys, $Page, $BBS, $Form);
 	
 	# 検索ワードがある場合は検索を実行する
-	if ($Form->Get('WORD', '') ne '' && !$capt) {
+	if ($Form->Get('WORD', '') ne '' && $capt) {
 		Search($Sys, $Form, $Page, $BBS);
 	}
 	PrintFoot($Sys, $Page);
@@ -563,7 +563,7 @@ sub Certification_Captcha {
 		$captcha_response = $Form->Get('cf-turnstile-response');
 		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 	}else{
-		return 0;
+		return 1;
 	}
 
 	if($captcha_response){
@@ -580,14 +580,16 @@ sub Certification_Captcha {
 			my $out = decode_json($json_text);
 			
 			if ($out->{success} eq 'true') {
-				return 0;
-			}else{
+				# パス
 				return 1;
+			}else{
+				# 失敗
+				return 0;
 			}
 		} else {
 			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
 			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
-			# このエラーの場合、スルー
+			# このエラーの場合、検索は実行されない
 			return 0;
 		}
 	}else{

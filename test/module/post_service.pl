@@ -414,6 +414,13 @@ sub GetSessionID
 	my $sid = (split(/<>/, $log_entry))[9];
 	$Logger->Close();
 
+	if($resnum == 1 && !$sid){
+		require './module/thread.pl';
+		my $Threads = THREAD->new;
+		$Threads->LoadAttr($Sys);
+		$sid = $Threads->GetAttr($threadid,'owner');
+	}
+
 	return $sid;
 }
 
@@ -530,7 +537,7 @@ sub Command
 			$Command .= '※過去ログ送り<br>';
 		}
 		#スレタイ変更
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!changetitle:(.+)(<br>|$)/ && ($setBitMask & 2 ** 14)){
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!(changetitle|chtt):(.+)(<br>|$)/ && ($setBitMask & 2 ** 14)){
 			my $newTitle = $2;
 			if($Set->Get('BBS_SUBJECT_COUNT') >= length($newTitle) && $newTitle){
 				require './module/dat.pl';
@@ -1746,11 +1753,16 @@ sub AddSubjectNewThread
 	my $Pools = POOL_THREAD->new;
 	$Pools->Load($Sys);
 	$Threads->Add($Sys->Get('KEY'), $Form->Get('subject', ''), 1);
+
+	# スレ主情報保存
+	$Threads->SetAttr($Sys->Get('KEY'),'owner',$Sys->Get('SID'));
+	$Threads->SaveAttr($Sys);
 	
 	# スレッド数限界によるdat落ち処理
 	my $submax = $Sys->Get('SUBMAX');
 	my @tlist;
 	$Threads->GetKeySet('ALL', undef, \@tlist);
+	$Threads->LoadAttrAll($Sys);
 	foreach my $lid (reverse @tlist) {
 		last if ($Threads->GetNum() <= $submax);
 		

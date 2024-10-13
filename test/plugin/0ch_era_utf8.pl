@@ -164,8 +164,8 @@ sub execute
 				$form->Set('datepart', "$year(${era_name}${era_year}年)/$other");
 			}
 			elsif ($format == 2) {
-				# ERA/MM/DD (元号表示)
-				$form->Set('datepart', "${era_name}${era_year}年/$other");
+				# ERA(YYYY)/MM/DD (元号表示)
+				$form->Set('datepart', "${era_name}${era_year}($year)年/$other");
 			}
 		}
 	}

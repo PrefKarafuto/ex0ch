@@ -287,6 +287,7 @@ sub LogSearch
 				my $condition_count = 0;
 				my @data;
 				my $pRes	= $DAT->Get($i);
+				next unless defined $pRes;
 				my @elem	= split(/<>/, $$pRes);
 				
 				for my $d (0, 1, -1, 2, 3, -2, -3) {
