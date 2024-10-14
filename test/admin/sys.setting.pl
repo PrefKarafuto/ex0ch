@@ -657,7 +657,7 @@ sub PrintPlusSecSetting
 {
 	
 	my ($Page, $SYS, $Form) = @_;
-	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha);
+	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha,$Captcha_IP);
 	my ($kakiko, $trip12, $torexit, $s5h, $dronebl);
 	my ($common);
 	
@@ -670,21 +670,25 @@ sub PrintPlusSecSetting
 	$Trip12		= $SYS->Get('TRIP12');
 	$TOREXIT	= $SYS->Get('DNSBL_TOREXIT');
 	$Captcha	= $SYS->Get('CAPTCHA');
+	$Captcha_IP	= $SYS->Get('CAPTCHA_LENIENCY');
 	
-	my $noCapSet = $Captcha ? '':'selected';
-	my $hCapSet = $Captcha eq 'h-captcha' ? 'selected' : '';
-	my $reCapSet = $Captcha eq 'g-recaptcha' ? 'selected' : '';
-	my $TurnSet = $Captcha eq 'cf-turnstile' ? 'selected' : '';
+	my $noCapSet 	= $Captcha ? '':'selected';
+	my $hCapSet 	= $Captcha eq 'h-captcha' ? 'selected' : '';
+	my $reCapSet 	= $Captcha eq 'g-recaptcha' ? 'selected' : '';
+	my $TurnSet 	= $Captcha eq 'cf-turnstile' ? 'selected' : '';
+	my $noCapIP 	= $Captcha_IP ? '':'selected';
+	my $CapIPRelax 	= $Captcha_IP eq 'relaxed' ? 'selected' : '';
+	my $CapIPStrict = $Captcha_IP eq 'strict' ? 'selected' : '';
 	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
-	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
-	my $Proxy_apikey  = $SYS->Get('PROXYCHECK_APIKEY');
+	my $Captcha_secretkey  	= $SYS->Get('CAPTCHA_SECRETKEY');
+	my $Proxy_apikey  	= $SYS->Get('PROXYCHECK_APIKEY');
 	my $Proxy_api		= $SYS->Get('PROXYCHECK_API');
-	my $noApiSet = $Proxy_api ? '':'selected';
-	my $pApiSet = $Proxy_api eq 'proxycheck.io' ? 'selected' : '';
-	my $IP2ApiSet = $Proxy_api eq 'ip2location' ? 'selected' : '';
-	my $IPApiSet = $Proxy_api eq 'ipqualityscore' ? 'selected' : '';
-	my $AApiSet = $Proxy_api eq 'abstract' ? 'selected' : '';
-	my $IPDApiSet = $Proxy_api eq 'ipdata' ? 'selected' : '';
+	my $noApiSet 	= $Proxy_api ? '':'selected';
+	my $pApiSet 	= $Proxy_api eq 'proxycheck.io' ? 'selected' : '';
+	my $IP2ApiSet 	= $Proxy_api eq 'ip2location' ? 'selected' : '';
+	my $IPApiSet 	= $Proxy_api eq 'ipqualityscore' ? 'selected' : '';
+	my $AApiSet 	= $Proxy_api eq 'abstract' ? 'selected' : '';
+	my $IPDApiSet 	= $Proxy_api eq 'ipdata' ? 'selected' : '';
 	my $admCap		= $SYS->Get('ADMINCAP');
 	my $srcCap		= $SYS->Get('SEARCHCAP');
 
@@ -730,19 +734,8 @@ sub PrintPlusSecSetting
 	$Page->Print("<input type=checkbox name=DNSBL_DRONEBL $dronebl value=on>");
 	$Page->Print("<a href=\"https://dronebl.org/\" target=\"_blank\">DroneBL</a>\n");
 	$Page->Print("</td></tr>\n");
-	
+
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">外部APIキー</td></tr>\n");
-	$Page->Print("<tr><td>Captcha種別<br><td>");
-	$Page->Print("<select name=CAPTCHA required>");
-	$Page->Print("<option value=\"\" $noCapSet>なし</option>");
-	$Page->Print("<option value=\"h-captcha\" $hCapSet>hCaptcha</option>");
-	$Page->Print("<option value=\"g-recaptcha\" $reCapSet>reCAPTCHA v2</option>");
-	$Page->Print("<option value=\"cf-turnstile\" $TurnSet>Turnstile</option>");
-	$Page->Print("</select></td></tr>\n");
-	$Page->Print("<tr><td>Captchaサイトキー<br>");
-	$Page->Print("<td><input type=text size=60  name=CAPTCHA_SITEKEY value=\"$Captcha_sitekey\"></td></tr>\n");
-	$Page->Print("<tr><td>Captchaシークレットキー</td>");
-	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
 	$Page->Print("<tr><td>プロキシチェックAPI種別<br><td>");
 	$Page->Print("<select name=PROXYCHECK_API required>");
 	$Page->Print("<option value=\"\" $noApiSet>なし</option>");
@@ -754,6 +747,25 @@ sub PrintPlusSecSetting
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<tr><td>APIキー</td>");
 	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"$Proxy_apikey\"></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Captcha設定</td></tr>\n");
+	$Page->Print("<tr><td>Captcha種別<br><td>");
+	$Page->Print("<select name=CAPTCHA required>");
+	$Page->Print("<option value=\"\" $noCapSet>なし</option>");
+	$Page->Print("<option value=\"h-captcha\" $hCapSet>hCaptcha</option>");
+	$Page->Print("<option value=\"g-recaptcha\" $reCapSet>reCAPTCHA v2</option>");
+	$Page->Print("<option value=\"cf-turnstile\" $TurnSet>Turnstile</option>");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>(Turnstileのみ)IPの検証<br><td>");
+	$Page->Print("<select name=CAPTCHA_LENIENCY required>");
+	$Page->Print("<option value=\"\" $noCapIP>なし</option>");
+	$Page->Print("<option value=\"relaxed\" $CapIPRelax>普通</option>");
+	$Page->Print("<option value=\"strict\" $CapIPStrict>厳格</option>");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>Captchaサイトキー<br>");
+	$Page->Print("<td><input type=text size=60  name=CAPTCHA_SITEKEY value=\"$Captcha_sitekey\"></td></tr>\n");
+	$Page->Print("<tr><td>Captchaシークレットキー</td>");
+	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
 
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Captchaを課すCGI</td></tr>\n");
 	$Page->Print("<tr><td>admin.cgi</td>");
@@ -1307,6 +1319,7 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('DNSBL_S5H', ($Form->Equal('DNSBL_S5H', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_DRONEBL', ($Form->Equal('DNSBL_DRONEBL', 'on') ? 1 : 0));
 	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));
+	$SYSTEM->Set('CAPTCHA_LENIENCY', $Form->Get('CAPTCHA_LENIENCY'));
 	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
 	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));
 	$SYSTEM->Set('PROXYCHECK_API', $Form->Get('PROXYCHECK_API'));

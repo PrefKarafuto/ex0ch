@@ -123,6 +123,7 @@ sub Certification_Captcha {
 	my ($captcha_response,$url);
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
+	my $captcha_leniency = $Sys->Get('CAPTCHA_LENIENCY');
 	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
 	if($captcha_kind eq 'h-captcha'){
 		$captcha_response = $Form->Get('h-captcha-response');
@@ -142,6 +143,7 @@ sub Certification_Captcha {
 		secret => $secretkey,
 		response => $captcha_response,
 		remoteip => $ENV{'REMOTE_ADDR'},
+		remoteip_leniency => $captcha_leniency,
 	});
 	
 	if ($response->is_success()) {
