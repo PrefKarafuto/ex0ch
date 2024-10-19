@@ -66,6 +66,7 @@ sub DecodeForm
 		$val =~ s/%([0-9a-fA-F][0-9a-fA-F])/pack('C', hex($1))/eg;
 		$val =~ s/\r\n|\r|\n/\n/g;
 		$val =~ s/\0//g;
+		$val =~ s/((&#[0-9a-zA-Z]+?;)|[0-9♂♀*#])(\xFC)+/$1&#65039;/g;	#ChMate用
 		$val = Encode::decode("cp932",$val);
 		$val =~ s|〜|～|g;
 		$this->{'FORM'}->{$var} = $val;
