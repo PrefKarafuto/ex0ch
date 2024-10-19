@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード(未使用)
-		'VERSION'	=> 'ex0ch BBS dev-r175 20241015',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r176 20241020',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -337,21 +337,19 @@ sub InitSystemValue
 		'PERM_DIR'		=> 0711,
 	);
 	
-	if ('Permission') {
-		my $uid = (stat $ENV{'SCRIPT_FILENAME'})[4];
-		if ($uid == 0) { # root / not linux
-		} elsif ($uid == $<) { # suEXEC
-		} else {
-			$sys{'PM-DAT'} = 0666;
-			$sys{'PM-STOP'} = 0444;
-			$sys{'PM-TXT'} = 0666;
-			$sys{'PM-LOG'} = 0666;
-			$sys{'PM-ADM'} = 0666;
-			$sys{'PM-ADIR'} = 0777;
-			$sys{'PM-BDIR'} = 0777;
-			$sys{'PM-LDIR'} = 0777;
-			$sys{'PM-KDIR'} = 0777;
-		}
+	my $uid = (stat $ENV{'SCRIPT_FILENAME'})[4];
+	if ($uid == 0) { # root / not linux
+	} elsif ($uid == $<) { # suEXEC
+	} else {
+		$sys{'PM-DAT'} = 0666;
+		$sys{'PM-STOP'} = 0444;
+		$sys{'PM-TXT'} = 0666;
+		$sys{'PM-LOG'} = 0666;
+		$sys{'PM-ADM'} = 0666;
+		$sys{'PM-ADIR'} = 0777;
+		$sys{'PM-BDIR'} = 0777;
+		$sys{'PM-LDIR'} = 0777;
+		$sys{'PM-KDIR'} = 0777;
 	}
 	
 	while (my ($key, $val) = each %sys) {
