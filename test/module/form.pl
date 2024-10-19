@@ -68,7 +68,7 @@ sub DecodeForm
 		$val =~ s/\0//g;
 		$val =~ s/((&#[0-9a-zA-Z]+?;)|[0-9♂♀*#])(\xFC)+/$1&#65039;/g;	#ChMate用
 		$val = Encode::decode("cp932",$val);
-		$val =~ s|〜|～|g;
+		$val =~ s|〜|～|g;		# 波ダッシュ・全角チルダ問題 
 		$this->{'FORM'}->{$var} = $val;
 		$this->{'FORM'}->{"Raw_$var"} = $val;
 	}
