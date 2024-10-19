@@ -96,21 +96,22 @@ sub BBSCGI
 		}
 		else {
 			$Threads->Close();
-			#SaveErrorInfo($Sys, $Set, $err);
-			PrintBBSError($CGI, $Page, $err);
-			$log = $err;
+			# Captcha認証画面表示
+			if ($err == $ZP::E_PAGE_CAPTCHA) {
+				PrintBBSCaptcha($CGI, $Page);
+				$log = $err;
+				$err = $ZP::E_SUCCESS;
+			}else{
+				#SaveErrorInfo($Sys, $Set, $err);
+				PrintBBSError($CGI, $Page, $err);
+				$log = $err;
+			}
 		}
 	}
 	else {
 		# cookie確認画面表示
 		if ($err == $ZP::E_PAGE_COOKIE) {
 			PrintBBSCookieConfirm($CGI, $Page);
-			$log = $err;
-			$err = $ZP::E_SUCCESS;
-		}
-		# Captcha認証画面表示
-		elsif ($err == $ZP::E_PAGE_CAPTCHA) {
-			PrintBBSCaptcha($CGI, $Page);
 			$log = $err;
 			$err = $ZP::E_SUCCESS;
 		}

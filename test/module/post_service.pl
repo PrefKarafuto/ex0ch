@@ -2446,7 +2446,7 @@ sub Certification_Captcha {
 		# 認証ページへ
 		return $ZP::E_PAGE_CAPTCHA;
 	}else{
-		# Captchaページから来て、Captcha認証してない場合(専ブラ等)
+		# Captcha認証してない場合(専ブラ等)
 		return $ZP::E_FORM_NOCAPTCHA;
 	}
 	
