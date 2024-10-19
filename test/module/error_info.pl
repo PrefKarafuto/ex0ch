@@ -176,82 +176,72 @@ sub Print
 	$Log->Load($Sys, 'ERR', '');
 	$Log->Set('', $err, $version, $koyuu, $mode);
 	$Log->Save($Sys);
-	
-	my $name = &$sanitize($Form->Get('NAME')) || '';
-	my $mail = &$sanitize($Form->Get('MAIL')) || '';
-	my $key = $Form->Get('key');
-	my $t = &$sanitize($Form->Get('subject','')) || '';
-	my $msg = $Form->Get('MESSAGE') || '';
 
-	#酉バレ防止
-	$name = (split(/#/,$name))[0];
-	$mail = (split(/#/,$mail))[0];
+	# 書き込み失敗ログ保存
+	if(1){
+		my $name = &$sanitize($Form->Get('NAME')) || '';
+		my $mail = &$sanitize($Form->Get('MAIL')) || '';
+		my $key = $Form->Get('key');
+		my $t = &$sanitize($Form->Get('subject','')) || '';
+		my $msg = $Form->Get('MESSAGE') || '';
 
-	#超過対策
-	if($Set->Get('BBS_MESSAGE_COUNT') < length($msg)){
-		$msg = substr($msg,0,$Set->Get('BBS_MESSAGE_COUNT'));
-		$msg .= ' ...(長すぎたので省略)';
-	}
-	if($Set->Get('BBS_NAME_COUNT') < length($name)){
-		$name = substr($name,0,$Set->Get('BBS_NAME_COUNT'));
-		$name .= ' ...(長すぎたので省略)';
-	}
-	if($Set->Get('BBS_MAIL_COUNT') < length($mail)){
-		$mail = substr($mail,0,$Set->Get('BBS_MAIL_COUNT'));
-		$mail .= ' ...(長すぎたので省略)';
-	}
-	if($Set->Get('BBS_SUBJECT_COUNT') < length($t) && $t){
-		$t = substr($t,0,$Set->Get('BBS_SUBJECT_COUNT'));
-		$t .= ' ...(長すぎたので省略)';
-	}
-	my $title = $t?"(New)$t":"$key";
-	
-	$Log->Load($Sys, 'FLR', '');
-	$Log->Set('', $err,"$title<>$name<>$mail<>$msg", $koyuu, $mode);
-	$Log->Save($Sys);
-	
-	#$Page->Print("Status: 412 Precondition Failed\n");
-	
-	if (0) {
-		my $subject = $this->{'SUBJECT'}->{$err};
-		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
-		$Page->Print("<html><head><title>");
-		$Page->Print("ＥＲＲＯＲ！</title></head><!--nobanner-->\n");
-		$Page->Print("<body><font color=red>ERROR:$subject</font><hr>");
-		$Page->Print("$message<hr><a href=\"$bbsPath/i/\">こちら</a>");
-		$Page->Print("から戻ってください</body></html>");
-	}
-	else {
-		my $Cookie = $CGI->{'COOKIE'};
-		my $Set = $CGI->{'SET'};
-		my $subject = $this->{'SUBJECT'}->{$err};
-		
-		my $name = &$sanitize($Form->Get('NAME'));
-		my $mail = &$sanitize($Form->Get('MAIL'));
-		my $msg = $Form->Get('MESSAGE');
-		
-		# cookie情報の出力
-		if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked')) {
-			$Cookie->Set('NAME', $name, 'utf8');
+		#酉バレ防止
+		$name = (split(/#/,$name))[0];
+		$mail = (split(/#/,$mail))[0];
+
+		#超過対策
+		if($Set->Get('BBS_MESSAGE_COUNT') < length($msg)){
+			$msg = substr($msg,0,$Set->Get('BBS_MESSAGE_COUNT'));
+			$msg .= ' ...(長すぎたので省略)';
 		}
-		if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked')) {
-			$Cookie->Set('MAIL', $mail, 'utf8');
+		if($Set->Get('BBS_NAME_COUNT') < length($name)){
+			$name = substr($name,0,$Set->Get('BBS_NAME_COUNT'));
+			$name .= ' ...(長すぎたので省略)';
 		}
-		# セキュリティキー生成
-		if($Sys->Get('SID')){
-			my $ctx = Digest::MD5->new;
-			$ctx->add($Sys->Get('SECURITY_KEY'));
-			$ctx->add(':', $Sys->Get('SID'));
-			my $sec = $Sys->Get('SID') ? $ctx->b64digest : "";
-			$Cookie->Set('countsession', $Sys->Get('SID'));
-			$Cookie->Set('securitykey', $sec);
+		if($Set->Get('BBS_MAIL_COUNT') < length($mail)){
+			$mail = substr($mail,0,$Set->Get('BBS_MAIL_COUNT'));
+			$mail .= ' ...(長すぎたので省略)';
 		}
-		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
+		if($Set->Get('BBS_SUBJECT_COUNT') < length($t) && $t){
+			$t = substr($t,0,$Set->Get('BBS_SUBJECT_COUNT'));
+			$t .= ' ...(長すぎたので省略)';
+		}
+		my $title = $t?"(New)$t":"$key";
 		
-		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
-		
-		if ($err < $ZP::E_REG_SAMBA_CAUTION || $err > $ZP::E_REG_SAMBA_STILL) {
-			$Page->Print(<<HTML);
+		$Log->Load($Sys, 'FLR', '');
+		$Log->Set('', $err,"$title<>$name<>$mail<>$msg", $koyuu, $mode);
+		$Log->Save($Sys);
+	}
+	
+	my $Cookie = $CGI->{'COOKIE'};
+	my $subject = $this->{'SUBJECT'}->{$err};
+	
+	my $name = &$sanitize($Form->Get('NAME'));
+	my $mail = &$sanitize($Form->Get('MAIL'));
+	my $msg = $Form->Get('MESSAGE');
+	
+	# cookie情報の出力
+	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked')) {
+		$Cookie->Set('NAME', $name, 'utf8');
+	}
+	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked')) {
+		$Cookie->Set('MAIL', $mail, 'utf8');
+	}
+	# セキュリティキー生成
+	if($Sys->Get('SID')){
+		my $ctx = Digest::MD5->new;
+		$ctx->add($Sys->Get('SECURITY_KEY'));
+		$ctx->add(':', $Sys->Get('SID'));
+		my $sec = $Sys->Get('SID') ? $ctx->b64digest : "";
+		$Cookie->Set('countsession', $Sys->Get('SID'));
+		$Cookie->Set('securitykey', $sec);
+	}
+	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
+	
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
+	
+	if ($err < $ZP::E_REG_SAMBA_CAUTION || $err > $ZP::E_REG_SAMBA_STILL) {
+		$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
 <head>
@@ -284,27 +274,27 @@ $msg
 <hr>
 <div class="reload">こちらでリロードしてください。&nbsp;<a href="$bbsPath/">&lt;&lt;掲示板に戻る</a>
 HTML
-		if($Sys->Equal('MODE', 1)){
-			$Page->Print("<a href=\"$bbsPath/#new_thread\">&lt;&lt;スレッド作成フォームに戻る</a></div>");
-		}else{
-			$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
-		}
+	if($Sys->Equal('MODE', 1)){
+		$Page->Print("<a href=\"$bbsPath/#new_thread\">&lt;&lt;スレッド作成フォームに戻る</a></div>");
+	}else{
+		$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
+	}
 			
 $Page->Print(<<HTML);
 <div align="right">$version</div>
 </body>
 </html>
 HTML
-		}
-		else {
-			my $sambaerr = {
-				$ZP::E_REG_SAMBA_CAUTION	=> $ZP::E_REG_SAMBA_2CH1,
-				$ZP::E_REG_SAMBA_WARNING	=> $ZP::E_REG_SAMBA_2CH2,
-				$ZP::E_REG_SAMBA_LISTED		=> $ZP::E_REG_SAMBA_2CH3,
-				$ZP::E_REG_SAMBA_STILL		=> $ZP::E_REG_SAMBA_2CH3,
-			}->{$err};
-			
-			$Page->Print(<<HTML);
+	}
+	else {
+		my $sambaerr = {
+			$ZP::E_REG_SAMBA_CAUTION	=> $ZP::E_REG_SAMBA_2CH1,
+			$ZP::E_REG_SAMBA_WARNING	=> $ZP::E_REG_SAMBA_2CH2,
+			$ZP::E_REG_SAMBA_LISTED		=> $ZP::E_REG_SAMBA_2CH3,
+			$ZP::E_REG_SAMBA_STILL		=> $ZP::E_REG_SAMBA_2CH3,
+		}->{$err};
+		
+		$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
 <head>
@@ -332,7 +322,6 @@ HTML
 </body>
 </html>
 HTML
-		}
 		
 	}
 }

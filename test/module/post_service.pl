@@ -2339,10 +2339,6 @@ sub CaptchaAuthentication
 
 					# mailフォームクリア
 					$Form->Set('mail','success');
-					
-					# 期限切れファイルのクリア
-					# ClearExpiredFiles($Dir,qr/^code-[\x20-\x7E]+\.cgi$/,$fileExpiry);
-
 					$err = $ZP::E_SUCCESS;
 				}else{
 					# IP不一致
