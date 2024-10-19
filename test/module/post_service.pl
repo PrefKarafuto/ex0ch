@@ -233,7 +233,7 @@ sub ReadyBeforeCheck
 
 	# ChMateから投稿した絵文字対策
 	{
-		my $vs16_regexp = qr{((&#[0-9a-zA-Z]+?;)|[0-9♂♀*#])(\x{FC})+};
+		my $vs16_regexp = qr/((&#[0-9a-zA-Z]+?;)|[0-9♂♀*#])(\xFC)+/;
 		my $from = $Form->Get('FROM');
 		my $mail = $Form->Get('mail');
 		my $text = $Form->Get('MESSAGE');
