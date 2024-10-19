@@ -230,6 +230,25 @@ sub ReadyBeforeCheck
 	
 	my $Sys = $this->{'SYS'};
 	my $Form = $this->{'FORM'};
+
+	# ChMateから投稿した絵文字対策
+	{
+		my $vs16_regexp = qr{((&#[0-9a-zA-Z]+?;)|[0-9♂♀*#])(\x{FC})+};
+		my $from = $Form->Get('FROM');
+		my $mail = $Form->Get('mail');
+		my $text = $Form->Get('MESSAGE');
+		my $subject = $Form->Get('subject');
+
+		$from =~ s/$vs16_regexp/$1&#65039;/g;
+		$mail =~ s/$vs16_regexp/$1&#65039;/g;
+		$text =~ s/$vs16_regexp/$1&#65039;/g;
+		$subject =~ s/$vs16_regexp/$1&#65039;/g;
+
+		$Form->Set('FROM', $from);
+		$Form->Set('mail', $mail);
+		$Form->Set('MESSAGE', $text);
+		$Form->Set('subject', $subject);
+	}
 	
 	# cookie用にオリジナルを保存する
 	my $from = $Form->Get('FROM');
