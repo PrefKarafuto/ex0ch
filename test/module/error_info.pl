@@ -178,7 +178,7 @@ sub Print
 	$Log->Save($Sys);
 
 	# 書き込み失敗ログ保存
-	if(1){
+	if($err != ($ZP::E_PAGE_CAPTCHA||$ZP::E_PAGE_COOKIE||$ZP::E_FORM_NOCAPTCHA)){
 		my $name = &$sanitize($Form->Get('NAME')) || '';
 		my $mail = &$sanitize($Form->Get('MAIL')) || '';
 		my $key = $Form->Get('key');
