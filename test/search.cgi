@@ -579,7 +579,7 @@ sub Certification_Captcha {
 			# JSON::decode_json関数でJSONテキストをPerlデータ構造に変換
 			my $out = decode_json($json_text);
 			
-			if ($out->{success} eq 'true') {
+			if ($out->{success}) {
 				return 0;
 			}else{
 				return 1;

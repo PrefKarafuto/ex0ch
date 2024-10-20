@@ -148,7 +148,7 @@ sub Certification_Captcha {
 		my $json_text = $response->decoded_content();
 		my $out = decode_json($json_text);
 		
-		if ($out->{success} eq 'true') {
+		if ($out->{success}) {
 			return 0;
 		}elsif ($out->{error_codes} =~ /(missing-input-secret|invalid-input-secret|sitekey-secret-mismatch)/){
 			# 管理者側の設定ミス

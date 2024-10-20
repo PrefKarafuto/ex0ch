@@ -648,6 +648,7 @@ FORM
 	}
 	# スレッド作成フォームはindexと同じ画面に表示
 	else {
+		my $status = $Set->Equal('BBS_READONLY', 'caps') || $Set->Equal('BBS_THREADCAPONLY', 'checked') ? '必須' : '任意';
 		$Page->Print(<<FORM);
 
 <form method="POST" action="$cgipath/bbs.cgi">
@@ -661,7 +662,7 @@ FORM
   </div>
   <br class="smartphone">
   <input type="text" name="FROM" size="19" placeholder="名前（任意）">
-  <input type="text" name="mail" size="19" placeholder="コマンド（任意）"><br>
+  <input type="text" name="mail" size="19" placeholder="コマンド・Cap（$status）"><br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
    </span>
@@ -768,6 +769,7 @@ sub PrintThreadPreviewOne
 	}
 	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
 		# 書き込みフォームの表示
+		my $status = $this->{'SET'}->Equal('BBS_READONLY', 'caps') ? '必須' : '任意';
 		$Page->Print(<<KAKIKO);
   </dl>
   <hr>
@@ -778,7 +780,7 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="time" value="$tm">
    <input type="submit" value="　書き込む　" name="submit"><br class="smartphone">
    <input type="text" name="FROM" size="19" placeholder="名前（任意）">
-   <input type="text" name="mail" size="19" placeholder="コマンド（任意）"><br>
+   <input type="text" name="mail" size="19" placeholder="コマンド・Cap（$status）"><br>
 	<div class ="bbs_service_textarea">
 	<textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 	</div>

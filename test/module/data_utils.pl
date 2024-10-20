@@ -10,7 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use Encode;
-use Socket qw(inet_pton inet_aton AF_INET6 AF_INET);
+use Socket qw(inet_pton AF_INET6 AF_INET);
 use HTML::Entities;
 use JSON;
 use Storable;
@@ -644,28 +644,35 @@ sub GetClient
 #	@return	ヒットした場合1 それ以外は0
 #
 #------------------------------------------------------------------------------------------------------------
+sub CIDRHIT {
+    my ($orz, $ho) = @_;
 
-sub CIDRHIT
-{
-	
-	my ($orz, $ho) = @_;
-	
-	foreach (@$orz) {
-		# 完全一致 = /32 ってことで^^;
-		$_ .= '/32' if ($_ !~ m|/|);
-		
-		# 以下CIDR形式
-		my ($target, $length) = split('/', $_);
-		
-		my $ipaddr = unpack("B$length", pack('C*', split(/\./, $ho)));
-		$target = unpack("B$length", pack('C*', split(/\./, $target)));
-		
-		if ($target eq $ipaddr) {
-			return 1;
-		}
-	}
-	
-	return 0;
+    foreach (@$orz) {
+        $_ .= '/32' if ($_ !~ m|/|);
+
+        my ($target, $length) = split('/', $_);
+
+        my ($ipaddr_bin, $target_bin);
+
+        if (index($ho, ':') != -1) { # IPv6アドレスの場合
+            $ipaddr_bin = inet_pton(AF_INET6, $ho);
+            $target_bin = inet_pton(AF_INET6, $target);
+        } else { # IPv4アドレスの場合
+            $ipaddr_bin = inet_pton(AF_INET, $ho);
+            $target_bin = inet_pton(AF_INET, $target);
+        }
+
+        # バイナリデータをビット列に変換
+        my $ipaddr_bits = unpack("B*", $ipaddr_bin);
+        my $target_bits = unpack("B*", $target_bin);
+
+        # 指定された長さでビット列を比較
+        if (substr($ipaddr_bits, 0, $length) eq substr($target_bits, 0, $length)) {
+            return 1;
+        }
+    }
+
+    return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
