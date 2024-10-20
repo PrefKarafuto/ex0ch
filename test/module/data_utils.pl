@@ -1563,7 +1563,7 @@ sub IsProxyAPI {
 }
 #------------------------------------------------------------------------------------------------------------
 #
-#	プロクシチェック - IsProxyDNSBL
+#	プロクシチェック - IsListedDNSBL
 #	--------------------------------------
 #	引　数：$Sys   : SYSTEM
 #			$Form  : 
@@ -1572,7 +1572,7 @@ sub IsProxyAPI {
 #	戻り値：プロクシなら対象ポート番号
 #
 #------------------------------------------------------------------------------------------------------------
-sub IsProxyDNSBL
+sub IsListedDNSBL
 {
 	my $this = shift;
 	my ($Sys, $Form, $from, $mode) = @_;
@@ -1580,6 +1580,7 @@ sub IsProxyDNSBL
 	my @dnsbls = ();
 	
 	push(@dnsbls, 'torexit.dan.me.uk') if($Sys->Get('DNSBL_TOREXIT'));# Tor検出用
+	push(@dnsbls, 'zen.spamhaus.org') if($Sys->Get('DNSBL_SPAMHAUS'));
 	push(@dnsbls, 'all.s5h.net') if($Sys->Get('DNSBL_S5H'));
 	push(@dnsbls, 'dnsbl.dronebl.org') if($Sys->Get('DNSBL_DRONEBL'));
 	

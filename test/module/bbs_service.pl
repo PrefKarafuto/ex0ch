@@ -786,6 +786,7 @@ FORM
 <a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 BBS.CGI - $ver (Perl$is_fcgi)
 @{[ $Sys->Get('DNSBL_TOREXIT') ? '+dan.me.uk' : '' ]}
+@{[ $Sys->Get('DNSBL_SPAMHAUS') ? '+S5H' : '' ]}
 @{[ $Sys->Get('DNSBL_S5H') ? '+S5H' : '' ]}
 @{[ $Sys->Get('DNSBL_DRONEBL') ? '+DeoneBL' : '' ]}
 @{[ $Set->Get('BBS_NINJA') ? '+忍法帖' : '' ]}

@@ -657,7 +657,7 @@ sub PrintPlusSecSetting
 {
 	
 	my ($Page, $SYS, $Form) = @_;
-	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha,$Captcha_IP);
+	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha,$Captcha_IP,$spamhaus);
 	my ($kakiko, $trip12, $torexit, $s5h, $dronebl);
 	my ($common);
 	
@@ -695,6 +695,7 @@ sub PrintPlusSecSetting
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
 	$torexit	= ($TOREXIT == 1 ? 'checked' : '');
+	$spamhaus	= ($SYS->Get('DNSBL_SPAMHAUS') == 1 ? 'checked' : '');
 	$s5h		= ($SYS->Get('DNSBL_S5H') == 1 ? 'checked' : '');
 	$dronebl	= ($SYS->Get('DNSBL_DRONEBL') == 1 ? 'checked' : '');
 	$admCap		= ($admCap == 1 ? 'checked' : '');
@@ -729,6 +730,8 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください(規制を行う場合は各掲示板の設定で有効にしてください)<br>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_TOREXIT $torexit value=on>");
 	$Page->Print("<a href=\"https://www.dan.me.uk/dnsbl\" target=\"_blank\">Dan.me.uk</a>(Tor出口ノード判定)\n");
+	$Page->Print("<input type=checkbox name=DNSBL_SPAMHAUS $spamhaus value=on>");
+	$Page->Print("<a href=\"https://www.spamhaus.org/\" target=\"_blank\">Spamhaus</a>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_S5H $s5h value=on>");
 	$Page->Print("<a href=\"http://www.usenix.org.uk/content/rbl.html\" target=\"_blank\">S5H</a>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_DRONEBL $dronebl value=on>");
@@ -1316,6 +1319,7 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('DEFHOUSHI', $Form->Get('DEFHOUSHI'));
 	$SYSTEM->Set('TRIP12', ($Form->Equal('TRIP12', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_TOREXIT', ($Form->Equal('DNSBL_TOREXIT', 'on') ? 1 : 0));
+	$SYSTEM->Set('DNSBL_SPAMHAUS', ($Form->Equal('DNSBL_SPAMHAUS', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_S5H', ($Form->Equal('DNSBL_S5H', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_DRONEBL', ($Form->Equal('DNSBL_DRONEBL', 'on') ? 1 : 0));
 	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));

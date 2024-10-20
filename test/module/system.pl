@@ -298,6 +298,7 @@ sub InitSystemValue
 		
 		# DNSBL設定
 		'DNSBL_TOREXIT'	=> 0,									# torexit.dan.me.uk
+		'DNSBL_SPAMHAUS'		=> 0,							# zen.spamhaus.org
 		'DNSBL_S5H'		=> 0,									# all.s5h.net
 		'DNSBL_DRONEBL'	=> 0,									# dnsbl.dronebl.org
 

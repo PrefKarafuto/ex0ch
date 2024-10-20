@@ -534,6 +534,7 @@ sub PrintLimitSetting
 	my $Setting = SETTING->new;
 	$Setting->Load($Sys);
 	my $DNSBL = $Sys->Get('DNSBL_TOREXIT');
+	$DNSBL += $Sys->Get('DNSBL_SPAMHAUS');
 	$DNSBL += $Sys->Get('DNSBL_S5H');
 	$DNSBL += $Sys->Get('DNSBL_DRONEBL');
 	my $isDNSBL = ($DNSBL?'':'disabled');
@@ -1223,6 +1224,7 @@ sub FunctionLimitSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting);
 	my $DNSBL = $Sys->Get('DNSBL_TOREXIT');
+	$DNSBL += $Sys->Get('DNSBL_SPAMHAUS');
 	$DNSBL += $Sys->Get('DNSBL_S5H');
 	$DNSBL += $Sys->Get('DNSBL_DRONEBL');
 	# 権限チェック

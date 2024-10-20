@@ -1182,7 +1182,7 @@ sub IsRegulation
 			$Sys->Set('IPCOUNTRY','abroad');
 		}
 		# PROXYチェック
-		if ($this->{'CONV'}->IsProxyDNSBL($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {			# DNSBLによるチェック
+		if ($this->{'CONV'}->IsListedDNSBL($this->{'SYS'}, $this->{'FORM'}, $from, $mode)) {			# DNSBLによるチェック
 			#$this->{'FORM'}->Set('FROM', "</b> [—\{}\@{}\@{}-] <b>$from");
 			if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_DNSBL, $bbs) && $Set->Equal('BBS_DNSBL_CHECK', 'checked')) {
 				return $ZP::E_REG_DNSBL;
