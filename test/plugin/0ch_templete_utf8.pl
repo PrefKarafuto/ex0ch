@@ -75,7 +75,7 @@ sub getType
 #		\%config = (
 #			'設定名'	=> {
 #				'default'		=> 初期値,			# 真偽値の場合は on/true: 1, off/false: 0
-#				'valuetype'		=> 値のタイプ,		# 数値: 1, 文字列: 2, 真偽値: 3
+#				'valuetype'		=> 値のタイプ,		# 数値: 1, 文字列: 2, 真偽値: 3, 内部用: 0
 #				'description'	=> '設定の説明',	# 無くても構いません
 #			},
 #		);
