@@ -217,6 +217,10 @@ sub Search {
 	my $from = $this->{'FROM'} || 0;
 	my $to = $this->{'TO'} || 0;
 
+	my $mtime = (stat($Path))[9];
+
+	return if(($mtime < $from && $from)||($key > $to && $to));
+
 	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
 		my $pResultSet = $this->{'RESULTSET'};
 		my $type = $this->{'TYPE'} || 0x15;
