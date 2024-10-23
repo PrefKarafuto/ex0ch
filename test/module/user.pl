@@ -293,6 +293,7 @@ sub Check {
     }
 
     # 規制ユーザ
+    $this->{'TYPE'} //= '';
     if ($flag && $this->{'TYPE'} eq 'disable') {
         if ($this->{'METHOD'} eq 'disable') {
             # 処理：書き込み不可
