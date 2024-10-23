@@ -238,7 +238,7 @@ HTML
 			next if ( -e "$BBSpath/$dir/.0ch_hidden" && $sBBS ne $dir );
 
 			# 選択肢
-			$isSelC = $sBBS eq $dir ? "selected" : "";
+			$isSelB = $sBBS eq $dir ? "selected" : "";
 			$Page->Print("<option value=\"$dir\" $isSelB>$name</option>\n") if $catid eq $BBS->Get('CATEGORY', $id);
 		}
 		$Page->Print("</optgroup>");
