@@ -224,6 +224,7 @@ sub Search {
 	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
 		my $pResultSet = $this->{'RESULTSET'};
 		my $type = $this->{'TYPE'} || 0x15;
+		my $word_regex = qr/(\Q$word\E)(?![^<>]*>)/;
 
 		# すべてのレス数でループ
 		for (my $i = 0; $i < $DAT->Size(); $i++) {
@@ -243,31 +244,32 @@ sub Search {
 				my $sec = $6;         # 秒
 
 				my $unixtime = timelocal($sec, $min, $hour, $day, $month, $year);
-				next if (($unixtime < $from && $from) || ($to < $unixtime && $to));
+				next if ($unixtime < $from && $from);
+				last if ($to < $unixtime && $to);
 			}
 
 			# 名前検索
 			if ($type & 0x1) {
-				if ($elem[0] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+				if ($elem[0] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
 					$bFind = 1;
 				}
 			}
 			# 本文検索
 			if ($type & 0x2) {
-				if ($elem[3] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+				if ($elem[3] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
 					$bFind = 1;
 				}
 			}
 			# ID検索
 			if ($type & 0x4) {
 				my $id = (split(/ /,$elem[2]))[2];
-				if ($id =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+				if ($id =~ s/$word_regex/<span class="res">$1<\/span>/g) {
 					$bFind = 1;
 				}
 			}
 			# スレタイ検索
 			if ($type & 0x8) {
-				if ($elem[4] =~ s/(\Q$word\E)(?![^<>]*>)/<span class="res">$1<\/span>/g) {
+				if ($elem[4] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
 					$bFind = 1;
 				}
 			}
