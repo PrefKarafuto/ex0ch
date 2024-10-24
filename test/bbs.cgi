@@ -700,15 +700,6 @@ sub LoadSessionID
 	}
 
 	#改竄をチェック
-	my $ctx = Digest::MD5->new;
-	$ctx->add(':', $Sys->Get('SERVER'));
-	$ctx->add(':', $ENV{'REMOTE_ADDR'});
-	my $infoDir = $Sys->Get('INFO');
-	my $ipHash = $ctx->hexdigest;
-	my $ipFile = ".$infoDir/.ninpocho/hash/ip-$ipHash.cgi";
-
-	my $fileExpiry = 60 * 60 * 24;
-	
 	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
 		my $ctx = Digest::MD5->new;
 		$ctx->add($Sys->Get('SECURITY_KEY'));
@@ -719,6 +710,15 @@ sub LoadSessionID
 			return $ZP::E_PAGE_COOKIE;
 		}
 	}
+
+	my $ctx = Digest::MD5->new;
+	$ctx->add(':', $Sys->Get('SERVER'));
+	$ctx->add(':', $ENV{'REMOTE_ADDR'});
+	my $infoDir = $Sys->Get('INFO');
+	my $ipHash = $ctx->hexdigest;
+	my $ipFile = ".$infoDir/.ninpocho/hash/ip-$ipHash.cgi";
+
+	my $fileExpiry = 60 * 60 * 24;
 	
 	if($Conv->IsJPIP($Sys)){
 		# JPIPに紐付けられているかチェック
