@@ -537,8 +537,8 @@ sub Command
 			$Command .= '※過去ログ送り<br>';
 		}
 		#スレタイ変更
-		if($Form->Get('MESSAGE') =~ /(^|<br>)!(changetitle|chtt):(.+)(<br>|$)/ && ($setBitMask & 2 ** 14)){
-			my $newTitle = $2;
+		if($Form->Get('MESSAGE') =~ /(^|<br>)!(changetitle|chtt):(.*)(<br>|$)/ && ($setBitMask & 2 ** 14)){
+			my $newTitle = $3;
 			if($Set->Get('BBS_SUBJECT_COUNT') >= length($newTitle) && $newTitle){
 				require './module/dat.pl';
 				my $Dat = DAT->new;
