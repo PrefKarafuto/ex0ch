@@ -206,83 +206,66 @@ sub GetResultSet
 #
 #------------------------------------------------------------------------------------------------------------
 sub Search {
-	my $this = shift;
-	my ($word) = @_;
+    my $this = shift;
+    my ($word) = @_;
 
-	my $bbs = $this->{'SYS'}->Get('BBS');
-	my $key = $this->{'SYS'}->Get('KEY');
-	my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
-	my $DAT = $this->{'DAT'};
+    my $bbs = $this->{'SYS'}->Get('BBS');
+    my $key = $this->{'SYS'}->Get('KEY');
+    my $Path = $this->{'SYS'}->Get('BBSPATH') . "/$bbs/dat/$key.dat";
 
-	my $from = $this->{'FROM'} || 0;
-	my $to = $this->{'TO'} || 0;
+    my $from = $this->{'FROM'} || 0;
+    my $to = $this->{'TO'} || time();  # デフォルトで現在時刻まで
 
-	my $mtime = (stat($Path))[9];
+    my $mtime = (stat($Path))[9];
 
-	return if(($mtime < $from && $from)||($key > $to && $to));
+    return if (($mtime < $from && $from) || ($key > $to && $to));
 
-	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
-		my $pResultSet = $this->{'RESULTSET'};
-		my $type = $this->{'TYPE'} || 0x15;
-		my $word_regex = qr/(\Q$word\E)(?![^<>]*>)/;
+    open my $fh, '<', $Path or return;
 
-		# すべてのレス数でループ
-		for (my $i = 0; $i < $DAT->Size(); $i++) {
-			last if ($type == 0x8 && $i);
-			
-			my $bFind = 0;
-			my $pDat = $DAT->Get($i);
-			my @elem = split(/<>/, $$pDat, -1);
+    my $word_regex = qr/(\Q$word\E)(?![^<>]*>)/;
 
-			# レス時刻取得
-			if ($elem[2] =~ /(\d{4})\/(\d{2})\/(\d{2})\(\w+\) (\d{2}):(\d{2}):(\d{2})/) {
-				my $year = $1;
-				my $month = $2 - 1;   # 月 (0から始まる)
-				my $day = $3;         # 日
-				my $hour = $4;        # 時
-				my $min = $5;         # 分
-				my $sec = $6;         # 秒
+    my $pResultSet = $this->{'RESULTSET'};
+    my $type = $this->{'TYPE'} || 0x15;
+    my $line_num = 0;
 
-				my $unixtime = timelocal($sec, $min, $hour, $day, $month, $year);
-				next if ($unixtime < $from && $from);
-				last if ($to < $unixtime && $to);
-			}
+    while (my $line = <$fh>) {
+		last if ($type == 0x8 && $line_num);
 
-			# 名前検索
-			if ($type & 0x1) {
-				if ($elem[0] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
-					$bFind = 1;
-				}
-			}
-			# 本文検索
-			if ($type & 0x2) {
-				if ($elem[3] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
-					$bFind = 1;
-				}
-			}
-			# ID検索
-			if ($type & 0x4) {
-				my $id = (split(/ /,$elem[2]))[2];
-				if ($id =~ s/$word_regex/<span class="res">$1<\/span>/g) {
-					$bFind = 1;
-				}
-			}
-			# スレタイ検索
-			if ($type & 0x8) {
-				if ($elem[4] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
-					$bFind = 1;
-				}
-			}
+        $line_num++;
+        my @elem = split(/<>/, $line, -1);
 
-			if ($bFind) {
-				my $SetStr = "$bbs<>$key<>" . ($i + 1) . '<>';
-				$SetStr .= join('<>', @elem);
-				push @$pResultSet, $SetStr;
-			}
-		}
-	}
-	$DAT->Close();
+        # レス時刻取得と日付範囲のチェック
+        if ($elem[2] =~ /(\d{4})\/(\d{2})\/(\d{2})\(\w+\) (\d{2}):(\d{2}):(\d{2})/) {
+            my $unixtime = timelocal($6, $5, $4, $3, $2 - 1, $1);
+            next if ($unixtime < $from);
+            last if ($unixtime > $to);
+        }
+
+        my $bFind = 0;
+
+        # 各種検索タイプに応じた処理
+        if ($type & 0x1 && $elem[0] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
+            $bFind = 1;
+        }
+        if ($type & 0x2 && $elem[3] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
+            $bFind = 1;
+        }
+        if ($type & 0x4 && $elem[2] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
+            $bFind = 1;
+        }
+        if ($type & 0x8 && $elem[4] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
+            $bFind = 1;
+            last;  # スレタイ検索のみの場合、最初の行で終了
+        }
+
+        if ($bFind) {
+            my $SetStr = "$bbs<>$key<>$line_num<>" . join('<>', @elem);
+            push @$pResultSet, $SetStr;
+        }
+    }
+    close $fh;
 }
+
 
 #============================================================================================================
 #	Module END
