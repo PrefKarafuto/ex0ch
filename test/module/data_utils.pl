@@ -1443,6 +1443,12 @@ sub IsListedDNSBL
 	
 	return 0;
 }
+sub IsProxyDNSBL
+{
+	my $this = shift;
+	my ($Sys, $Form, $from, $mode) = @_;
+	return IsListedDNSBL($Sys, $Form, $from, $mode);
+}
 
 #------------------------------------------------------------------------------------------------------------
 #
