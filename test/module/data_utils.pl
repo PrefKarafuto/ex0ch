@@ -670,7 +670,7 @@ sub CIDRHIT {
 
         # バイナリデータをビット列に変換
         my $ipaddr_bits = unpack("B*", $ipaddr_bin);
-        my $target_bits = unpack("B*", $target_bin); # 667行目 
+        my $target_bits = unpack("B*", $target_bin);
 
         # 指定された長さでビット列を比較
         if (substr($ipaddr_bits, 0, $length) eq substr($target_bits, 0, $length)) {
@@ -1345,7 +1345,6 @@ sub IsReferer
 #------------------------------------------------------------------------------------------------------------
 sub IsJPIP {
 	my $this = shift;
-	my () = @_;
 	my $ipAddr = $ENV{'REMOTE_ADDR'};
 
 	return 1 if $ENV{'REMOTE_HOST'} =~ /\.jp$/;
