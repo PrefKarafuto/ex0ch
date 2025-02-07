@@ -89,8 +89,8 @@ sub DoPrint
 	elsif ($subMode eq 'DELETE') {                                             # 忍法帖削除画面
 		PrintNinjaDelete($Page, $Sys, $Form);
 	}
-	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
-	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
+	#$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
+	#$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 	$BASE->Print($Sys->Get('_TITLE'), 1);
 }
 
@@ -667,6 +667,9 @@ sub PrintNinjaSidSearch
 			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
 			$n++;
 		}
+		$Page->HTMLInput('hidden', 'TARGET_BBS', '');
+			$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
+			$Page->HTMLInput('hidden', 'DISP_FORMAT', '');
 	}
 	# 検索ヒット無し
 	else {
@@ -800,7 +803,7 @@ sub PrintResult
 	</td>
 	<td class=Response >
 	<dt>
-	<a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
+	<a href="javascript:SetOption('TARGET_BBS', '$$pResult[0]');('TARGET_THREAD', '$$pResult[1]');SetOption('DISP_FORMAT', '$$pResult[2]');DoSubmit('thread.res','DISP','LIST');"> $$pResult[2]</a>：<b>
 HTML
 		if ($$pResult[4] eq '') {
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");

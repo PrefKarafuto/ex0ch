@@ -231,7 +231,7 @@ sub Put {
         # 年と月をフォーマットしてファイル名を生成
         my $year  = $time[5];
         my $month = sprintf("%02d", $time[4]);
-        my $logName = "$this->{'PATH'}/${year}_${month}.cgi";
+        my $logName = "$this->{PATH}/${year}_${month}.cgi";
 
         # ファイルを開く
         open(my $fh, '>>', $logName) or die "ファイルを開けません: $!";

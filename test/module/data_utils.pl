@@ -14,6 +14,9 @@ use Socket qw(inet_pton AF_INET6 AF_INET);
 use HTML::Entities;
 use JSON;
 use Storable;
+use File::Spec;
+use Math::BigInt;
+use LWP::UserAgent;
 no warnings qw(once);
 
 #------------------------------------------------------------------------------------------------------------
@@ -1344,12 +1347,188 @@ sub IsReferer
 #
 #------------------------------------------------------------------------------------------------------------
 sub IsJPIP {
-	my $this = shift;
-	my $ipAddr = $ENV{'REMOTE_ADDR'};
+    my ($self, $Sys) = @_;
+    my $ipAddr     = $ENV{'REMOTE_ADDR'} // '';
+    my $remoteHost = $ENV{'REMOTE_HOST'} // '';
 
-	return 1 if $ENV{'REMOTE_HOST'} =~ /\.jp$/;
+    # REMOTE_HOST が .jp で終わる場合は即日本のIPとする
+    return 1 if $remoteHost =~ /\.jp$/;
 
-	return 0;
+    my $infoDir = $Sys->Get('INFO');
+    my $filename_ipv4 = File::Spec->catfile($infoDir, 'IP_List', 'jp_ipv4.cgi');
+    my $filename_ipv6 = File::Spec->catfile($infoDir, 'IP_List', 'jp_ipv6.cgi');
+
+    # ファイルが存在しない、または最終更新から 30 日以上経過している場合は更新
+    if ( ! -e $filename_ipv4 || ( (stat($filename_ipv4))[9] && time - (stat($filename_ipv4))[9] > 60*60*24*30 ) ) {
+        unless ( GetApnicJPIPList($filename_ipv4, $filename_ipv6) ) {
+            warn "日本IPリストの更新に失敗しました。";
+            return 0;
+        }
+    }
+
+    my $result;
+    if ($ipAddr =~ /\./) {
+        $result = binary_search_ip_range($ipAddr, $filename_ipv4);
+    } else {
+        $result = binary_search_ip_range($ipAddr, $filename_ipv6);
+    }
+    # binary_search_ip_range が -1 を返した場合はエラーとみなす
+    return ($result == -1 ? 0 : $result);
+}
+
+### APNICから日本IPリストを取得しファイルに保存
+sub GetApnicJPIPList {
+    my ($filename_ipv4, $filename_ipv6) = @_;
+    my $ua = LWP::UserAgent->new( timeout => 5 );
+    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
+
+    my $response = $ua->get($url);
+    unless ( $response->is_success ) {
+        warn "データの取得に失敗: " . $response->status_line;
+        return 0;
+    }
+    my $data = $response->decoded_content;
+
+    my (@jp_ipv4_ranges, @jp_ipv6_ranges);
+    my $last_end_ipv4 = -1;
+    my $last_end_ipv6 = Math::BigInt->new(-1);
+
+    foreach my $line ( split /\n/, $data ) {
+        # IPv4 の場合 (第5フィールドはアドレス個数)
+        if ( $line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|/ ) {
+            my $start_ip_num = ip_to_number($1);
+            my $count        = $2;
+            my $end_ip_num   = $start_ip_num + $count - 1;
+
+            if ( $start_ip_num == $last_end_ipv4 + 1 ) {
+                $jp_ipv4_ranges[-1]{end} = $end_ip_num;
+            } else {
+                push @jp_ipv4_ranges, { start => $start_ip_num, end => $end_ip_num };
+            }
+            $last_end_ipv4 = $end_ip_num;
+        }
+        # IPv6 の場合 (第5フィールドはプレフィックス長)
+        elsif ( $line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|/ ) {
+            my $start_ip_num = ip_to_number($1);
+            my $prefix       = $2;
+            # 正しくは、ブロックサイズは 2^(128 - プレフィックス長)
+            my $num_addresses = Math::BigInt->new(2)->bpow(128 - $prefix);
+            my $end_ip_num = $start_ip_num + $num_addresses - 1;
+
+            if ( $start_ip_num == $last_end_ipv6->copy()->badd(1) ) {
+                $jp_ipv6_ranges[-1]{end} = $end_ip_num;
+            } else {
+                push @jp_ipv6_ranges, { start => $start_ip_num, end => $end_ip_num };
+            }
+            $last_end_ipv6 = $end_ip_num;
+        }
+    }
+
+    # IPv4, IPv6 のリストをそれぞれファイルへ書き出す
+    unless ( write_ip_ranges($filename_ipv4, \@jp_ipv4_ranges) ) {
+        warn "IPv4リストの書き込みに失敗しました。";
+        return 0;
+    }
+    unless ( write_ip_ranges($filename_ipv6, \@jp_ipv6_ranges) ) {
+        warn "IPv6リストの書き込みに失敗しました。";
+        return 0;
+    }
+
+    return 1;
+}
+
+### IPレンジを書き出す共通サブルーチン
+sub write_ip_ranges {
+    my ($filename, $ranges) = @_;
+    open my $fh, '>', $filename or do {
+        warn "ファイルを開けません: $filename";
+        return 0;
+    };
+    foreach my $range ( @$ranges ) {
+        print $fh "$range->{start}-$range->{end}\n";
+    }
+    close $fh;
+    chmod 0600, $filename;
+    return 1;
+}
+
+### バイナリサーチによるIPレンジ内判定
+sub binary_search_ip_range {
+    my ($ipAddr, $filename) = @_;
+    my $ip_num = ip_to_number($ipAddr);
+    my $ranges = load_ip_ranges($filename);
+    return -1 unless $ranges && @$ranges;
+    my $low = 0;
+    my $high = scalar(@$ranges) - 1;
+
+    while ( $low <= $high ) {
+        my $mid = int( ($low + $high) / 2 );
+        if ( $ip_num < $ranges->[$mid]{start} ) {
+            $high = $mid - 1;
+        }
+        elsif ( $ip_num > $ranges->[$mid]{end} ) {
+            $low = $mid + 1;
+        }
+        else {
+            return 1;  # IPはレンジ内
+        }
+    }
+    return 0;  # IPはレンジ外
+}
+
+### ファイルからIPレンジを読み込む
+sub load_ip_ranges {
+    my ($filename) = @_;
+    my @ranges;
+    open my $fh, '<', $filename or do {
+        warn "ファイルを開けません: $filename";
+        return;
+    };
+    while ( my $line = <$fh> ) {
+        chomp $line;
+        my ($start, $end) = split /-/, $line;
+        push @ranges, {
+            start => Math::BigInt->new($start),
+            end   => Math::BigInt->new($end),
+        };
+    }
+    close $fh;
+    return \@ranges;
+}
+
+### IPアドレスを数値に変換 (IPv4/IPv6)
+sub ip_to_number {
+    my ($ip) = @_;
+
+    # IPv4 の場合
+    if ( $ip =~ /^(\d{1,3}(?:\.\d{1,3}){3})$/ ) {
+        my @octets = split /\./, $ip;
+        # 各オクテットが 0～255 か確認（簡易チェック）
+        for my $octet (@octets) {
+            return undef unless $octet >= 0 && $octet <= 255;
+        }
+        return unpack("N", pack("C4", @octets));
+    }
+    # IPv6 の場合
+    elsif ( $ip =~ /:/ ) {
+        # IPv6 の省略記法 "::" を展開する
+        if ( $ip =~ /::/ ) {
+            my ($left, $right) = split /::/, $ip, 2;
+            my @left_parts  = ($left  eq '' ? () : split(/:/, $left));
+            my @right_parts = ($right eq '' ? () : split(/:/, $right));
+            my $missing = 8 - (scalar(@left_parts) + scalar(@right_parts));
+            my @middle = (('0') x $missing);
+            $ip = join(":", (@left_parts, @middle, @right_parts));
+        }
+        my @parts = split /:/, $ip;
+        return undef unless scalar(@parts) == 8;
+        my $bigint = Math::BigInt->new(0);
+        for my $part (@parts) {
+            $bigint = ($bigint << 16) + hex($part);
+        }
+        return $bigint;
+    }
+    return undef;
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -1443,6 +1622,7 @@ sub IsListedDNSBL
 	
 	return 0;
 }
+
 sub IsProxyDNSBL
 {
 	my $this = shift;

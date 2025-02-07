@@ -13,7 +13,7 @@ use Digest::MD5;
 use JSON;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use Encode qw(encode);
-use Storable qw(lock_store lock_retrieve);
+use Storable qw(lock_store lock_retrieve dclone);
 use warnings;
 no warnings 'once';
 
@@ -142,9 +142,6 @@ sub Write
 	$Threads->LoadAttr($Sys);
  	return $ZP::E_LIMIT_STOPPEDTHREAD if ($Threads->GetAttr($threadid,'stop'));
 	return $ZP::E_LIMIT_MOVEDTHREAD if ($Threads->GetAttr($threadid,'pool'));
-	
-	#コマンドによる過去ログ送り用
-	$this->ToKakoLog($Sys,$Set,$Threads);
 
 	# SLIP
 	my ($slip_result,$idEnd) = $this->MakeSlip($Sys,$Form,$Set,$Threads);
@@ -204,10 +201,10 @@ sub Write
 		else {
 			$Threads->OnDemand($Sys, $threadid, $resNum, $Sys->Get('updown', ''));
 		}
-	}
 
-	# 期限切れのファイルを削除
-	$this->CleanUp($Sys);
+		# 過去ログ送り用
+		$this->ToKakoLog($Sys,$Set,$Threads);
+	}
 
 	# 書き込み完了後に実行するプラグイン
 	$this->ExecutePlugin(32);
@@ -368,7 +365,7 @@ sub ReadyBeforeWrite
 					Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 				}
 			}
-			elsif($commandAuth || (GetSessionID($Sys,$threadid,1)||$Threads->GetAttr($threadid,'sub')) eq $Sys->Get('SID')){
+			elsif($commandAuth || (GetSessionID($Sys,$Threads,1)||$Threads->GetAttr($threadid,'sub')) eq $Sys->Get('SID')){
 				Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 			}
 
@@ -402,25 +399,24 @@ sub ReadyBeforeWrite
 # ログからセッションID取得
 sub GetSessionID
 {
-	my ($Sys,$threadid,$resnum) = @_;
-	require './module/log.pl';
-	my $Logger = LOG->new;
-	my $logPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/' . $threadid;
-	$resnum--;
-	$Logger->Open($logPath, 0, 1 | 2);
+	my ($Sys,$Threads,$resnum) = @_;
+	my $sid = '';
 
-	# レス番が存在しない場合は空文字が返る
-	my $log_entry = $Logger->Get($resnum) // '';
-	my $sid = (split(/<>/, $log_entry))[9];
-	$Logger->Close();
+	if($resnum == 1){
+		$sid = $Threads->GetAttr($Sys->Get('KEY'),'owner');
+	}else{
+		require './module/log.pl';
+		my $Logger = LOG->new;
+		my $logPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/' . $Sys->Get('KEY');
+		$resnum--;
+		$Logger->Open($logPath, 0, 1 | 2);
 
-	if($resnum == 1 && !$sid){
-		require './module/thread.pl';
-		my $Threads = THREAD->new;
-		$Threads->LoadAttr($Sys);
-		$sid = $Threads->GetAttr($threadid,'owner');
+		# レス番が存在しない場合は空文字が返る
+		my $log_entry = $Logger->Get($resnum) // '';
+		$sid = (split(/<>/, $log_entry))[9];
+		$Logger->Close();
+
 	}
-
 	return $sid;
 }
 
@@ -507,11 +503,16 @@ sub Command
 		if ($Form->Get('MESSAGE') =~ /^!loadattr:([1-9][0-9]{9})(<br>|$)/ && ($setBitMask & 2 ** 23)) {
 			my $Handover_threadid = $1;
 			$Threads->LoadAttr($Sys,$Handover_threadid);
-			my %Attr = %{$Threads->GetAttr($Handover_threadid,undef)};
-			if(keys(%Attr)){
-				$Threads->SetAttr($threadid,undef,\%Attr);
+			# 元のスレッドの属性を取得
+			my $Attr_ref = $Threads->GetAttr($Handover_threadid);
+
+			if (defined $Attr_ref && keys %{$Attr_ref}) {
+				# 属性をディープコピーして、新しいスレッドに設定
+				my $Attr_copy = dclone($Attr_ref);
+				$Threads->SetAttr($threadid, $Attr_copy);
+
 				$Command .= "スレッドID:${Handover_threadid}から設定を引き継ぎました。<br>";
-			}else{
+			} else {
 				$Command .= '引き継ぎ可能な設定項目なし。<br>';
 			}
 		}
@@ -657,7 +658,7 @@ sub Command
 			my $addMessage = $3;
 			my $targetNum = $2 - 1;
 			if($addMessage && $targetNum + 1){
-				if(GetSessionID($Sys,$threadid,1) eq GetSessionID($Sys,$threadid,$targetNum +1)){
+				if(GetSessionID($Sys,$Threads,1) eq GetSessionID($Sys,$Threads,$targetNum +1)){
 					require './module/dat.pl';
 					my $Dat = DAT->new;
 					my $Path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS').'/dat/'.$threadid.'.dat';
@@ -690,9 +691,9 @@ sub Command
 		}
 		#副主
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!sub:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 21)){
-			my $sub_owner = GetSessionID($Sys,$threadid,$2);
+			my $sub_owner = GetSessionID($Sys,$Threads,$2);
 			if($Sys->Get('SID') ne $Threads->GetAttr($threadid, 'sub')){
-				if($sub_owner && GetSessionID($Sys,$threadid,1) ne $sub_owner){
+				if($sub_owner && GetSessionID($Sys,$Threads,1) ne $sub_owner){
 					$Threads->SetAttr($threadid, 'sub',$sub_owner);
 					$Command .= "※&gt;&gt;$2を副主に任命しました<br>";
 				}else{
@@ -704,17 +705,9 @@ sub Command
 		}
 		#BAN
 		if($Form->Get('MESSAGE') =~ /(^|<br>)!ban:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 12)){
-			my $ban_attr_ref = $Threads->GetAttr($threadid,'ban');
-			my %banuserAttr = ();
-
-			# 戻り値がハッシュリファレンスか確認
-			if (ref($ban_attr_ref) eq 'HASH') {
-				%banuserAttr = %{$ban_attr_ref};
-			}
-
-			my $bannum = scalar keys %banuserAttr;
-			my $bansid = GetSessionID($Sys,$threadid,$2);
-			my $nusisid = GetSessionID($Sys,$threadid,1);
+			my $ban = $Threads->GetAttr($threadid,'ban');
+			my $bansid = GetSessionID($Sys,$Threads,$2);
+			my $nusisid = GetSessionID($Sys,$Threads,1);
 
 			my $ninLv = $Ninja->Get('ninLv');
 			my ($min_level, $factor) = split(/-/, $Set->Get('NINJA_USER_BAN'));
@@ -722,12 +715,12 @@ sub Command
 			if(($NinStat && $ninLv >= $min_level) || !$NinStat || $noNinja){
 				if($bansid){
 					if($bansid ne $nusisid){
-						if(defined $banuserAttr{$bansid} && $banuserAttr{$bansid} == 0){
+						if(defined $ban->{$bansid} && $ban->{$bansid} == 0){
 							$Command .= "※既にBAN済<br>";
 						} else {
 							# BANの処理
-							$banuserAttr{$bansid} = 0;
-							$Threads->SetAttr($threadid, 'ban', \%banuserAttr);
+							$ban->{$bansid} = 0;
+							$Threads->SetAttr($threadid, 'ban', );
 							$Command .= "※BAN：&gt;&gt;$2<br>";
 							$Ninja->Set('ninLv', $ninLv - $factor) unless $noNinja;
 						}
@@ -796,6 +789,22 @@ sub Command
 			$Command .= '※名無し長すぎ<br>';
 		}
 	}
+	#強制キャップ
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!cap:&gt;&gt;([1-9][0-9]*):(.*)(<br>|$)/ && ($setBitMask & 2 ** 23)){
+		my $target = GetSessionID($Sys,$Threads,$2);
+		if($target){
+			if($Set->Get('BBS_NAME_COUNT') >= length($3)){
+				require HTML::Entities;
+				my $cap_name = HTML::Entities::encode_entities($3);
+				$Threads->SetAttr($threadid, 'cap',$target,$cap_name);
+				$Command .= "※&gt;&gt;$2に副主にキャップを付加しました<br>";
+			}else{
+				$Command .= '※キャップ長すぎ<br>';
+			}
+		}else{
+			$Command .= '※無効なレス番号<br>';
+		}
+	}
 	#コマンド取り消し
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!delcmd:([0-9a-zA-Z&;]{4,20})(<br>|$)/ && ($setBitMask & 2 ** 8)){
 		my $delCommand = $2;
@@ -803,31 +812,19 @@ sub Command
 		if($Threads->GetAttr($threadid, $delCommand)){
 			if($delCommand =~ /ban&gt;&gt;([1-9][0-9]*)/ ){
 				# BAN取り消し用
-				my $ban_attr_ref = $Threads->GetAttr($threadid,'ban');
-				my %banuserAttr = ();
-
-				# 戻り値がハッシュリファレンスか確認
-				if (ref($ban_attr_ref) eq 'HASH') {
-					%banuserAttr = %{$ban_attr_ref};
-				}
-
-				my $bannum = scalar keys %banuserAttr;
-				my $bansid = GetSessionID($Sys,$threadid,$1);
-				if($bannum){
-					if($bansid){
-						if(defined $banuserAttr{$bansid} && $banuserAttr{$bansid} == 0){
-							# 変更があればスレッド属性を更新
-							delete $banuserAttr{$bansid};
-							$Threads->SetAttr($threadid, 'ban', \%banuserAttr);
-							$Command .= "&gt;&gt;$1のBANを解除";
-						} else {
-							$Command .= "※対象はBANされていません<br>";
-						}
+				my $ban = $Threads->GetAttr($threadid,'ban');
+				my $bansid = GetSessionID($Sys,$Threads,$1);
+				if($bansid){
+					if(defined $ban->{$bansid} && $ban->{$bansid} == 0){
+						# 変更があればスレッド属性を更新
+						delete $ban->{$bansid};
+						$Threads->SetAttr($threadid, 'ban', $ban);
+						$Command .= "&gt;&gt;$1のBANを解除";
 					} else {
-						$Command .= "※無効なレス番号<br>";
+						$Command .= "※対象はBANされていません<br>";
 					}
 				} else {
-					$Command .= "※設定されていません<br>";
+					$Command .= "※無効なレス番号<br>";
 				}
 			}else{
 				$Threads->SetAttr($threadid, $delCommand,'');
@@ -852,7 +849,7 @@ sub Command
 
 	#設定表示
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!attr(<br>|$)/){
-		my %ThreadAttr = %{$Threads->GetAttr($threadid,undef)};
+		my $ThreadAttr = $Threads->GetAttr($threadid,undef);
 		my %allAttr = (
 			'sagemode'  => { 'name' => 'sage進行', 'type' => 'bool' },
 			'float'     => { 'name' => '浮上', 'type' => 'bool' },
@@ -871,9 +868,9 @@ sub Command
 			'sub'    	=> { 'name' => '副主', 'type' => 'bool' },
 		);
 		$Command .= '[スレッドの設定]<br>';
-		foreach my $attr (sort keys %ThreadAttr){
-			my $type = $allAttr{$attr}->{'type'};
-			my $value = $ThreadAttr{$attr};
+		foreach my $attr (sort keys %allAttr){
+			my $value = $ThreadAttr->{$attr};
+			my $type = $attr->{'type'};
 			if(defined $value){
 				if($type eq 'bool'){
 					$Command .= $allAttr{$attr}->{'name'}.'<br>';
@@ -922,9 +919,9 @@ sub VoteBanCommand
 	# 投票
 	if($Form->Get('MESSAGE') =~ /(^|<br>)!vote:&gt;&gt;([1-9][0-9]*)(<br>|$)/ && ($setBitMask & 2 ** 22)){
 		my $target = $2;
-		my $target_id = GetSessionID($Sys,$threadid,$target);
+		my $target_id = GetSessionID($Sys,$Threads,$target);
 		if($target_id){
-			if($target_id ne GetSessionID($Sys,$threadid,1)){
+			if($target_id ne GetSessionID($Sys,$Threads,1)){
 				my $ban_attr_ref = $Threads->GetAttr($threadid,'ban');
 				my %banuserAttr = ();
 
@@ -1146,11 +1143,13 @@ sub IsRegulation
 	if ($Sys->Equal('MODE', 2)) {
 		my $AttrResMax = $Threads->GetAttr($threadid,'maxres');
 		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
+		my $ResNum = DAT::GetNumFromFile($datPath);
+		$Sys->Set('RESNUM',$ResNum);
 		# 移転スレッド
 		return $ZP::E_LIMIT_MOVEDTHREAD if (DAT::IsMoved($datPath));
 		
 		# レス最大数
-		return $ZP::E_LIMIT_OVERMAXRES if ($MAXRES < DAT::GetNumFromFile($datPath));
+		return $ZP::E_LIMIT_OVERMAXRES if ($MAXRES < $ResNum);
 		
 		# datファイルサイズ制限
 		if ($Set->Get('BBS_DATMAX')) {
@@ -1654,7 +1653,7 @@ sub MakeDatLine
 
 	# pluginに渡す値を設定
 	$Sys->Set('_ERR', 0);
-	$Sys->Set('_NUM_', DAT::GetNumFromFile($Sys->Get('DATPATH')) + 1);
+	$Sys->Set('_NUM_', $Sys->Get('RESNUM') + 1);
 	$Sys->Set('_THREAD_', $this->{'THREADS'});
 	$Sys->Set('_SET_', $this->{'SET'});
 	# プラグイン実行
@@ -1665,6 +1664,19 @@ sub MakeDatLine
 	my $name = $Form->Get('FROM', '');
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
+
+	if(!$Sys->Get('CAPID')){
+		my $cap_ref = $Threads->GetAttr($threadid,'cap');
+		my %cap = ();
+
+		if (ref($cap_ref) eq 'HASH') {
+			%cap = %{$cap_ref};
+		}
+		if($cap{$Sys->Get('SID')}){
+			$name = $cap{$Sys->Get('SID')};
+		}
+	}
+
 	#SLIPがあった場合は付加する
 	$name .= "</b> (${slip_result})" if (($slip_result && !$noslip) && (!$handle || !$noAttr));
 
@@ -1674,7 +1686,7 @@ sub MakeDatLine
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
 	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
-		$idpart .= '(主)' if (($sid eq GetSessionID($Sys,$threadid,1)) || $Sys->Equal('MODE', 1));
+		$idpart .= '(主)' if (($sid eq GetSessionID($Sys,$Threads,1)) || $Sys->Equal('MODE', 1));
 	}
 
 	$bepart = $Form->Get('BEID', '');
@@ -1702,14 +1714,13 @@ sub AddDatFile
 	my $this = shift;
 	my ($Sys,$Threads,$line) = @_;
 
-	my $resNum = 0;
+	my $resNum = $Sys->Get('RESNUM') // 0;
 	my $err = 0;
 	my $datPath = $Sys->Get('DATPATH');
 	my $err2 = DAT::DirectAppend($Sys, $datPath, $line);
 	my $AttrResMax = $Threads->GetAttr($Sys->Get('KEY'),'maxres');
 	if ($err2 == 0) {
 		# レス数が最大数を超えたらover設定をする
-		$resNum = DAT::GetNumFromFile($datPath);
 		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 		if ($resNum >= $MAXRES) {
 			# datにOVERスレッドレスを書き込む
@@ -2448,30 +2459,6 @@ sub Certification_Captcha {
 	
 }
 
-# ファイルクリーンアップ
-sub CleanUp
-{
-	my $this = shift;
-	my ($Sys) = @_;
-	my $last_flush = $Sys->Get('LAST_FLUSH');
-	my $span = 60 * 60 * 24 * 7;
-	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60 * 60 * 24;
-	my $ip_expiry = 60 * 60 * 24;
-	my $code_expiry = 60 * 5;
-	require './module/file_utils.pl';
-
-	if(time - $last_flush > $span){
-		# IP-SID紐付けファイル
-		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.ninpocho/hash',qr/^ip-[\x20-\x7E]+\.cgi$/,$ip_expiry);
-		# ユーザー認証情報保存ファイル
-		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.auth',qr/^sid-[\x20-\x7E]+\.cgi$/,$auth_expiry);
-		# ワンタイムパス認証用ファイル
-		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.auth',qr/^code-[\x20-\x7E]+\.cgi$/,$code_expiry);
-
-		$Sys->Set('LAST_FLUSH',time);
-	}
-	
-}
 #============================================================================================================
 #	Module END
 #============================================================================================================

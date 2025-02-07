@@ -184,6 +184,7 @@ sub Print
 		my $key = $Form->Get('key');
 		my $t = &$sanitize($Form->Get('subject','')) || '';
 		my $msg = $Form->Get('MESSAGE') || '';
+		$msg =~ s/\n/<br>/g;
 
 		#酉バレ防止
 		$name = (split(/#/,$name))[0];

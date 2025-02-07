@@ -64,7 +64,7 @@ sub getExplanation
 sub getType
 {
 	my	$this = shift;
-	return (16);
+	return (4|8);
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -134,8 +134,9 @@ sub execute
 	my	$this = shift;
 	my	($sys, $form, $type) = @_;
 	
-	if ($type & (16)) {
-		my ($year, $other) = split(/\//,$form->Get('datepart'),2);
+	if ($type & (4|8)) {
+		my ($year, $month, $day, $hour, $minute, $second, $epoch);
+
 		my $era_name = $this->GetConf('元号');
         my $next_era_name = $this->GetConf('(次の元号)');
         my $dateStr = $this->GetConf('開始日時');
@@ -146,8 +147,13 @@ sub execute
         my $target_bbs = $this->GetConf('対象掲示板');
         my $bbs = $sys->Get('BBS');
 
-		if($start_date && time >= $start_date && (!$target_bbs||$target_bbs =~ /$bbs/)){
-            if($next_era_name && $next_date && time >= $next_date && $next_date > $start_date){
+		if ($sys->Get('_DAT_')->[2] =~ /^(\d{4})\/(\d{2})\/(\d{2})\([^\)]+\)\s+(\d{2}):(\d{2}):(\d{2})(?:\.\d+)?/) {
+			($year, $month, $day, $hour, $minute, $second) = ($1, $2, $3, $4, $5, $6);
+			$epoch = timelocal($second, $minute, $hour, $day, $month - 1, $year);
+		}
+
+		if($start_date && $epoch >= $start_date && (!$target_bbs||$target_bbs =~ /$bbs/)){
+            if($next_era_name && $next_date && $epoch >= $next_date && $next_date > $start_date){
                 # 改元
                 $dateStr = $nextDateStr;
                 $era_name = $next_era_name;
@@ -158,7 +164,6 @@ sub execute
             }
 			my $era_year = $year - (split(/\//,$dateStr,2))[0];
 			$era_year = $era_year ? $era_year + 1 : '元';
-
 			if ($format == 1) {
 				# YYYY(ERA)/MM/DD (西暦(元号)表示)
 				$form->Set('datepart', "$year(${era_name}${era_year}年)/$other");

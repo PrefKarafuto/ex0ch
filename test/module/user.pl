@@ -208,7 +208,6 @@ sub Check {
 
     foreach my $line (@{$this->{'USER'}}) {
         next if ($line =~ /^[#;]|^$/);	#コメント・空行はスキップ
-		next unless ($line =~ s/^!exdeny:(.*?)!\s*//);
 		
 		my %opt;
 		foreach (split(/&/, $1)) {
@@ -279,7 +278,7 @@ sub Check {
             last;
         }
         # ユーザーエージェント(正規表現)
-        elsif (defined $ua && $line =~ /Mo(na)?zilla/ && $ua =~ /$line/) {
+        elsif (defined $ua && $ua =~ /$line/) {
             $flag = 1;
             $Sys->Set('HITS', $line);
             last;
