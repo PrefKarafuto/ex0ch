@@ -193,7 +193,7 @@ sub Check {
 
     my $Sys = $this->{'SYS'};
     my $flag = 0;
-	my $method = $this->{'METHOD'};
+    my $method = $this->{'METHOD'};
     my $adex_ipv4 = '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}';
     my $adex_ipv6 = '([0-9a-fA-F]{1,4}:){1,7}[0-9a-fA-F]{1,4}';
     my $adex = qr/$adex_ipv4|$adex_ipv6/;
@@ -207,31 +207,35 @@ sub Check {
     }
 
     foreach my $line (@{$this->{'USER'}}) {
-        next if ($line =~ /^[#;]|^$/);	#コメント・空行はスキップ
-		
-		my %opt;
-		foreach (split(/&/, $1)) {
-			my ($key, $val) = split(/=/, $_, 2);
-			$opt{$key} = $val;
-		}
-		
-		# スレ立て規制 !exdeny:tate=1!\.example\.jp$
-		if ($opt{'tate'} && !$Sys->Equal('MODE', 1)) {
-			next;
-		}
-		
-		# 有効期限 !exdeny:expires=2024/07/29 00:00:00!\.example\.jp$
-		if ($opt{'expires'} && $opt{'expires'} =~ m|^([0-9]+)/([0-9]+)/([0-9]+) ([0-9]+):([0-9]+):([0-9]+)$|) {
-			my $expires = timelocal($6, $5, $4, $3, $2-1, $1);
-			next if (time >= $expires);
-		}
-		
-		# 規制方法指定
-		if ($opt{'method'} && grep { $_ eq $opt{'method'} } qw(disable host)) {
-			$method = $opt{'method'};
-		}
+        next if ($line =~ /^[#;]|^$/);    # コメント・空行はスキップ
 
-        # IPアドレス/CIDR
+        my %opt;
+        # 行頭にオプション部分（例: !exdeny:...!）がある場合は抽出して削除する
+        if ($line =~ s/^!exdeny:([^!]+)!//) {
+            my $opt_str = $1;
+            foreach (split(/&/, $opt_str)) {
+                my ($key, $val) = split(/=/, $_, 2);
+                $opt{$key} = $val;
+            }
+        }
+        
+        # スレ立て規制のチェック
+        if ($opt{'tate'} && !$Sys->Equal('MODE', 1)) {
+            next;
+        }
+        
+        # 有効期限のチェック
+        if ($opt{'expires'} && $opt{'expires'} =~ m|^([0-9]+)/([0-9]+)/([0-9]+) ([0-9]+):([0-9]+):([0-9]+)$|) {
+            my $expires = timelocal($6, $5, $4, $3, $2-1, $1);
+            next if (time >= $expires);
+        }
+        
+        # 規制方法指定のチェック
+        if ($opt{'method'} && grep { $_ eq $opt{'method'} } qw(disable host)) {
+            $method = $opt{'method'};
+        }
+
+        # IPアドレス/CIDRのチェック
         if ($line =~ m|^($adex)(?:/([0-9]+))?$|) {
             my ($ip_check, $length) = ($1, $2);
             $length ||= ($ip_check =~ /:/) ? 128 : 32;
@@ -247,16 +251,16 @@ sub Check {
                 last;
             }
         }
-        # IPアドレス範囲指定
+        # IPアドレス範囲指定のチェック
         elsif ($line =~ m|^($adex)-($adex)$|) {
             my ($ip_start, $ip_end) = ($1, $2);
             my ($bin_start, $bin_end);
             if ($ip_start =~ /:/ && $ip_end =~ /:/) {
                 $bin_start = ip_to_bin($Conv->expand_ipv6($ip_start));
-                $bin_end = ip_to_bin($Conv->expand_ipv6($ip_end));
+                $bin_end   = ip_to_bin($Conv->expand_ipv6($ip_end));
             } else {
                 $bin_start = unpack('B32', pack('C*', split(/\./, $ip_start)));
-                $bin_end = unpack('B32', pack('C*', split(/\./, $ip_end)));
+                $bin_end   = unpack('B32', pack('C*', split(/\./, $ip_end)));
             }
             ($bin_start, $bin_end) = ($bin_end, $bin_start) if $bin_start gt $bin_end;
             if ($addrb ge $bin_start && $addrb le $bin_end) {
@@ -265,55 +269,55 @@ sub Check {
                 last;
             }
         }
-        # 端末固有識別子
+        # 端末固有識別子のチェック
         elsif (defined $koyuu && $koyuu =~ /^\Q$line\E$/) {
             $flag = 1;
             $Sys->Set('HITS', $line);
             last;
         }
-        # ホスト名(正規表現)
+        # ホスト名(正規表現)のチェック
         elsif ($host =~ /$line/) {
             $flag = 1;
             $Sys->Set('HITS', $line);
             last;
         }
-        # ユーザーエージェント(正規表現)
+        # ユーザーエージェント(正規表現)のチェック
         elsif (defined $ua && $ua =~ /$line/) {
             $flag = 1;
             $Sys->Set('HITS', $line);
             last;
         }
-        # セッションID
-        elsif (defined $sid && $line=~ $sid_regex && $sid =~ /^\Q$line\E$/) {
+        # セッションIDのチェック
+        elsif (defined $sid && $line =~ $sid_regex && $sid =~ /^\Q$line\E$/) {
             $flag = 1;
             $Sys->Set('HITS', $line);
             last;
         }
     }
 
-    # 規制ユーザ
+    # 規制ユーザの場合
     $this->{'TYPE'} //= '';
     if ($flag && $this->{'TYPE'} eq 'disable') {
         if ($this->{'METHOD'} eq 'disable') {
-            # 処理：書き込み不可
+            # 書き込み不可
             return 4;
         }
         elsif ($this->{'METHOD'} eq 'host') {
-            # 処理：ホスト表示
+            # ホスト表示
             return 2;
         }
         else {
             return 4;
         }
     }
-    # 限定ユーザ以外
+    # 限定ユーザ以外の場合
     elsif (! $flag && $this->{'TYPE'} eq 'enable') {
         if ($this->{'METHOD'} eq 'disable') {
-            # 処理：書き込み不可
+            # 書き込み不可
             return 4;
         }
         elsif ($this->{'METHOD'} eq 'host') {
-            # 処理：ホスト表示
+            # ホスト表示
             return 2;
         }
         else {
@@ -322,6 +326,7 @@ sub Check {
     }
     return 0;
 }
+
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================
