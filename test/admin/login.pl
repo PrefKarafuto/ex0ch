@@ -140,7 +140,7 @@ $Page->Print(<<HTML);
 	<div class="Sorce">
 	 <b>
 	 <font face="Arial" size="3" color="red">Ex0ch Administration Page</font><br>
-	 <font face="Arial">Powered by 0ch/0ch+/ex0ch script and 0ch/0ch+/ex0ch modules 2001-2024</font>
+	 <font face="Arial">Powered by 0ch/0ch+/ex0ch script and 0ch/0ch+/ex0ch modules 2001-2025</font>
 	 </b>
 	</div>
 	
