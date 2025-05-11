@@ -282,7 +282,7 @@ sub Check {
             last;
         }
         # ユーザーエージェント(正規表現)のチェック
-        elsif (defined $ua && $ua =~ /$line/) {
+        elsif (defined $ua && $line =~ /Mo(na)?zilla/ && $ua =~ /$line/) {
             $flag = 1;
             $Sys->Set('HITS', $line);
             last;

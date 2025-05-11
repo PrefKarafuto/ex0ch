@@ -106,9 +106,6 @@ sub BBSCGI
 				$log = $err;
 			}
 		}
-
-		# 期限切れのファイルを削除
-		CleanUp($Sys);
 	}
 	else {
 		# cookie確認画面表示
@@ -751,29 +748,3 @@ sub LoadSessionID
 
 }
 
-# ファイルクリーンアップ
-sub CleanUp
-{
-	my $this = shift;
-	my ($Sys) = @_;
-	my $last_flush = $Sys->Get('LAST_FLUSH');
-	my $span = 60 * 60 * 24 * 7;
-	my $auth_expiry = $Sys->Get('AUTH_EXPIRY') * 60 * 60 * 24;
-	my $ip_expiry = 60 * 60 * 24;
-	my $code_expiry = 60 * 5;
-
-	if(time - $last_flush > $span){
-		require './module/file_utils.pl';
-		# IP-SID紐付けファイル
-		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.ninpocho/hash',qr/^ip-[\x20-\x7E]+\.cgi$/,$ip_expiry);
-		# ユーザー認証情報保存ファイル
-		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.auth',qr/^sid-[\x20-\x7E]+\.cgi$/,$auth_expiry);
-		# ワンタイムパス認証用ファイル
-		FILE_UTILS::ClearExpiredFiles('.'.$Sys->Get('INFO').'/.auth',qr/^code-[\x20-\x7E]+\.cgi$/,$code_expiry);
-
-		$Sys->Init();
-		$Sys->Set('LAST_FLUSH',time);
-		$Sys->Save();
-	}
-	
-}
