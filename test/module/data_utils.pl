@@ -1358,7 +1358,7 @@ sub IsJPIP {
     # IP をバイナリ化
     my $ip_bin = ip_to_bin($ipAddr) or return 0;
 
-    my $infoDir    = $Sys->Get('INFO');
+    my $infoDir    = '.'.$Sys->Get('INFO');
     my $cache_file = File::Spec->catfile($infoDir, 'IP_List', 'jpn_ip_cache.cgi');
 
     # キャッシュが無い or 30日以上古いときは更新
@@ -1416,10 +1416,6 @@ sub update_ip_cache {
     # キャッシュ書き出し
     store { v4 => \@v4, v6 => \@v6 }, $cache_file;
 }
-
-#―――――――――――――――――――――――――――
-# 二分探索＋マスク比較で範囲判定
-#―――――――――――――――――――――――――――
 sub ip_in_list_binary {
     my ($ip_bin, $list) = @_;
     my ($lo, $hi, $idx) = (0, $#$list, -1);
@@ -1436,12 +1432,6 @@ sub ip_in_list_binary {
     my $e = $list->[$idx];
     return (($ip_bin & $e->{mask}) eq $e->{net_bin}) ? 1 : 0;
 }
-
-#――――――――――――――――――――――――――――
-# IsJPIP：キャッシュ自動更新付き
-#――――――――――――――――――――――――――――
-
-
 #------------------------------------------------------------------------------------------------------------
 #
 #	プロクシチェック - IsProxyAPI
