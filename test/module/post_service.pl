@@ -2100,7 +2100,7 @@ sub AddTimeLine {
     $crypt_filename =~ tr/\//-/;
     if(open(my $fh, '>', $TLpath .'/'. $crypt_filename . ".cgi")){
 		flock($fh, 2);
-		chmod 0600, $fh;
+		chmod 0600, $crypt_filename;
 		$lines[4] //= $title;
 		$lines[5] //= $url;
 		$line = join('<>',@lines);

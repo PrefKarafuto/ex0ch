@@ -1359,7 +1359,7 @@ sub IsJPIP {
     my $ip_bin = ip_to_bin($ipAddr) or return 0;
 
     my $infoDir    = '.'.$Sys->Get('INFO');
-    my $cache_file = File::Spec->catfile($infoDir, 'IP_List', 'jpn_ip_cache.cgi');
+    my $cache_file = $infoDir. 'IP_List'. 'jpn_ip_cache.cgi';
 
     # キャッシュが無い or 30日以上古いときは更新
     if (!-e $cache_file or (-M $cache_file) > 30) {
