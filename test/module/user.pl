@@ -276,16 +276,22 @@ sub Check {
             last;
         }
         # ホスト名(正規表現)のチェック
-        elsif ($host =~ /$line/) {
-            $flag = 1;
-            $Sys->Set('HITS', $line);
-            last;
+        if (defined $host) {
+            my $host_pat = eval { qr/$line/ };
+            if (!$@ && $host =~ $host_pat) {
+                $flag = 1;
+                $Sys->Set('HITS', $line);
+                last;
+            }
         }
         # ユーザーエージェント(正規表現)のチェック
-        elsif (defined $ua && $line =~ /Mo(na)?zilla/ && $ua =~ /$line/) {
-            $flag = 1;
-            $Sys->Set('HITS', $line);
-            last;
+        if (defined $ua) {
+            my $pat = eval { qr{$line}i };
+            if (!$@ && $ua =~ $pat) {
+                $flag = 1;
+                $Sys->Set('HITS', $line);
+                last;
+            }
         }
         # セッションIDのチェック
         elsif (defined $sid && $line =~ $sid_regex && $sid =~ /^\Q$line\E$/) {
