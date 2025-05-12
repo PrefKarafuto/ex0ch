@@ -445,8 +445,8 @@ sub PrintValidUserEdit
 	$Page->Print("<b style=\"margin-left: 20px\">12345678901234_xx</b> (au)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">AbCd123</b> (docomo)<br>");
 	$Page->Print("・ユーザーエージェント<br>");
-	$Page->Print("<b style=\"margin-left: 20px\">\QMozilla/5.0 [UA文字列]\E</b> (任意のブラウザUAを指定)<br>");
-	$Page->Print("<b style=\"margin-left: 20px\">(?#Mozilla) Safari</b> (特定のブラウザすべて)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">Mozilla/5.0 [UA文字列]</b> (任意のブラウザUAを指定)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">Safari</b> (特定のブラウザすべて)<br>");
 	$Page->Print("・セッションID<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">fb665de3cfa1857555532696ea0c1539</b> (十六進数32桁)<br>");
 	$Page->Print("<br>・拡張コマンド<br>");

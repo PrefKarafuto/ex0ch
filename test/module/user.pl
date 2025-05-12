@@ -285,14 +285,26 @@ sub Check {
             }
         }
         # ユーザーエージェントのチェック
-        if (defined $ua) {
-            my $pat = eval { qr{\Q$line\E}i };
-            if (!$@ && $ua =~ $pat) {
-                $flag = 1;
-                $Sys->Set('HITS', $line);
-                last;
+        # 「!reg:」付きなら正規表現モード
+            if ($line =~ /^!reg:(.*)$/) {
+                my $pattern_str = $1;
+                next if (index($pattern_str, '(?{') >= 0 or index($pattern_str, '(??{') >= 0);
+                my $pat = eval { qr#$pattern_str# };
+                next if $@;
+                if (!$@ && $ua =~ $pat) {
+                    $flag = 1;
+                    $Sys->Set('HITS', $line);
+                    last;
+                }
             }
-        }
+            elsif (defined $ua) {
+                my $pat = eval { qr{\Q$line\E}i };
+                if (!$@ && $ua =~ $pat) {
+                    $flag = 1;
+                    $Sys->Set('HITS', $line);
+                    last;
+                }
+            }
         # セッションIDのチェック
         elsif (defined $sid && $line =~ $sid_regex && $sid =~ /^\Q$line\E$/) {
             $flag = 1;
