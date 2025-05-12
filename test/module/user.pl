@@ -284,9 +284,9 @@ sub Check {
                 last;
             }
         }
-        # ユーザーエージェント(正規表現)のチェック
+        # ユーザーエージェントのチェック
         if (defined $ua) {
-            my $pat = eval { qr{$line}i };
+            my $pat = eval { qr{\Q$line\E}i };
             if (!$@ && $ua =~ $pat) {
                 $flag = 1;
                 $Sys->Set('HITS', $line);
