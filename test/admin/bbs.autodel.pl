@@ -44,10 +44,14 @@ sub PrintResAutoDelete
 	$sWORD  = &$sanitize($Form->Get('WORD'));
 	@sTYPE  = $Form->GetAtArray('TYPE', 0);
 	$id = $Form->Get('TARGET_BBS', '');
-	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0);
+	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0) | ($sTYPE[3] || 0) | ($sTYPE[4] || 0) | ($sTYPE[5] || 0) | ($sTYPE[6] || 0);
 	$cTYPE[0] = ($types & 1 ? 'checked' : '');
 	$cTYPE[1] = ($types & 2 ? 'checked' : '');
 	$cTYPE[2] = ($types & 4 ? 'checked' : '');
+	$cTYPE[3] = ($types & 8 ? 'checked' : '');
+	$cTYPE[4] = ($types & 16 ? 'checked' : '');
+	$cTYPE[5] = ($types & 32 ? 'checked' : '');
+	$cTYPE[6] = ($types & 64 ? 'checked' : '');
    
 	$SYS->Set('_TITLE', 'Res Auto Delete');
    
@@ -78,9 +82,13 @@ HTML
   <tr>
 	<td>検索種別</td>
 	<td>
-	  <input type="checkbox" name="TYPE" value="2" $cTYPE[1] checked>本文検索<br>
+	  <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>
 	  <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
 	  <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
+	  <input type="checkbox" name="TYPE" value="8" $cTYPE[3] disabled>IP検索<br>
+	  <input type="checkbox" name="TYPE" value="16" $cTYPE[4] disabled>HOST検索<br>
+	  <input type="checkbox" name="TYPE" value="32" $cTYPE[5] disabled>UA検索<br>
+	  <input type="checkbox" name="TYPE" value="64" $cTYPE[6] disabled>SessionID検索<br>
 	</td>
   </tr>
   <tr>
@@ -134,7 +142,7 @@ sub Search
 	#my $BBS = $Sys->Get('BBS');
    
 	@types = $Form->GetAtArray('TYPE', 0);
-	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0);
+	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0) | ($types[3] || 0) | ($types[4] || 0) | ($types[5] || 0) | ($types[6] || 0);
    
 	my $sanitize = sub {
 		$_ = shift;
