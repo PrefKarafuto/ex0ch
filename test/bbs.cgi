@@ -491,7 +491,8 @@ HTML
 	}
 
 	$Page->Print(<<HTML);
-<div class="$classname" data-sitekey="$sitekey"></div><br>
+<div class="$classname" data-sitekey="$sitekey"></div>
+<div id="captcha-placeholder">CAPTCHA読み込み中…</div><br>
 <input type="submit" value="　認証する　"><br>
 </form>
 <br>
