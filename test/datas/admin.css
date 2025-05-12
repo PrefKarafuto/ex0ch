@@ -217,6 +217,7 @@ input.delete	{
 	text-align: center;
 	border: 1px dashed #ccc;
 	margin-top: 0.5em;
+	width: fit-content;
   }
   #captcha-widget:not(:empty) + #captcha-placeholder {
 	display: none;
