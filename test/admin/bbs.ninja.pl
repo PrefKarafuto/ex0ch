@@ -48,13 +48,21 @@ sub DoPrint
 {
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
-	my ($subMode, $BASE, $Page);
+	my ($subMode, $BASE, $BBS, $Page);
 	
 	require './admin/admin_cgi_base.pl';
 	$BASE = ADMIN_CGI_BASE->new;
+	$BBS = $pSys->{'AD_BBS'};
 	
-	# 管理情報を登録
-	$Sys->Set('ADMIN', $pSys);
+	# 掲示板情報の読み込みとグループ設定
+	if (! defined $BBS){
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
+		
+		$BBS->Load($Sys);
+		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
+		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
+	}
 	
 	# 管理マスタオブジェクトの生成
 	$Page		= $BASE->Create($Sys, $Form);
