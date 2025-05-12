@@ -14,7 +14,7 @@ sub getConfig{my $this = shift;my %config = ('patch_status'=> {'default'=>'','va
 #-----------------------------------------------------------------------------------------
 #   Patch本体
 #-----------------------------------------------------------------------------------------
-sub getName{my $this = shift;           return 'ex0ch Update Patch 2024/xx/xx';}
+sub getName{my $this = shift;           return 'ex0ch Update Patch 2025/xx/xx';}
 sub getExplanation{my $this = shift;    return 'これはパッチの雛形です。適用しても何も起こりません。';}
 sub execute
 {

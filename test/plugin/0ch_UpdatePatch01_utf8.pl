@@ -14,8 +14,8 @@ sub getConfig{my $this = shift;my %config = ('patch_status'=> {'default'=>'','va
 #-----------------------------------------------------------------------------------------
 #   Patch本体
 #-----------------------------------------------------------------------------------------
-sub getName{my $this = shift;           return 'ex0ch Update Patch 01 2024/10/01';}
-sub getExplanation{my $this = shift;    return 'v0.10.1以前のバージョンからアップデートする際、本パッチを適応してください。ex0ch新規導入の場合は不要です。';}
+sub getName{my $this = shift;           return 'ex0ch Update Patch 01 2025/10/01';}
+sub getExplanation{my $this = shift;    return 'v0.10.2以前のバージョンからアップデートする際、本パッチを適応してください。ex0ch新規導入の場合は不要です。';}
 sub execute
 {
 	my	$this = shift;
