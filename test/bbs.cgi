@@ -444,7 +444,7 @@ sub PrintBBSCaptcha
 
  <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
+ <link rel="stylesheet" href="./datas/design.css" type="text/css">
  <title>■ Captcha認証 ■</title>
 HTML
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
@@ -491,7 +491,7 @@ HTML
 	}
 
 	$Page->Print(<<HTML);
-<div class="$classname" data-sitekey="$sitekey"></div>
+<div id="captcha-widget" class="$classname" data-sitekey="$sitekey"></div>
 <div id="captcha-placeholder">CAPTCHA読み込み中…</div><br>
 <input type="submit" value="　認証する　"><br>
 </form>
