@@ -450,7 +450,6 @@ sub PrintResLumpDelete
 		my $bbsName = $BBS->Get('NAME', $bbsID);
 		my $bbsDir = $BBS->Get('DIR', $bbsID);
 		$Sys->Set('BBS', $bbsDir);
-		$Page->Print("<tr><td><div class=\"FuncTitle\">$bbsName</div></td></tr>\n");
 		foreach my $threadID (keys %{$wholeSet{$bbsID}}){
 			$Threads = THREAD->new;
 			$Threads->Load($Sys);
