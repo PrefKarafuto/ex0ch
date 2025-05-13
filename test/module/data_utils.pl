@@ -15,9 +15,7 @@ use HTML::Entities;
 use JSON;
 use Storable;
 use File::Spec;
-use Math::BigInt;
 use LWP::UserAgent;
-use HTTP::Tiny;
 no warnings qw(once);
 
 #------------------------------------------------------------------------------------------------------------
@@ -1359,7 +1357,7 @@ sub IsJPIP {
     my $ip_bin = ip_to_bin($ipAddr) or return 0;
 
     my $infoDir    = '.'.$Sys->Get('INFO');
-    my $cache_file = $infoDir. 'IP_List'. 'jpn_ip_cache.cgi';
+    my $cache_file = $infoDir. '/IP_List/jpn_ip_cache.cgi';
 
     # キャッシュが無い or 30日以上古いときは更新
     if (!-e $cache_file or (-M $cache_file) > 30) {
@@ -1388,32 +1386,48 @@ sub make_mask {
 }
 sub update_ip_cache {
     my ($cache_file, $infoDir) = @_;
-    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
-    my $res = HTTP::Tiny->new->get($url);
-    die "APNIC 取得失敗: $res->{status}\n" unless $res->{success};
 
+    # キャッシュディレクトリを作成（存在しなければ）
+    use File::Basename qw(dirname);
+    use File::Path     qw(make_path);
+    my $cache_dir = dirname($cache_file);
+    unless (-d $cache_dir) {
+        make_path($cache_dir)
+            or die "ディレクトリ $cache_dir の作成に失敗: $!";
+    }
+
+    # — LWP::UserAgent を使って APNIC データ取得 —
+    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
+    my $ua  = LWP::UserAgent->new(
+        agent   => 'MyApp/1.0',
+        timeout => 10,
+    );
+    my $res = $ua->get($url);
+    die "APNIC 取得失敗: " . $res->status_line . "\n"
+        unless $res->is_success;
+
+    my $content = $res->decoded_content(charset => 'none');
+
+    # — 取得データをパースしてバイナリリスト作成 —
     my (@v4, @v6);
-    for my $line (split /\n/, $res->{content}) {
+    for my $line (split /\n/, $content) {
         next if $line =~ /^#/;
-        # IPv4: 割当数 → プレフィクス長算出
         if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|/) {
             my ($addr, $count) = ($1, $2);
-            # count は 2^n のはずなので log2 で求める
             my $prefix = 32 - int(log($count)/log(2));
-            if (my $bin = ip_to_bin($addr)) {
+            if (my $bin = inet_pton(AF_INET, $addr)) {
                 push @v4, { net_bin => $bin, mask => make_mask($prefix, length $bin) };
             }
         }
-        # IPv6: 第５フィールドがプレフィクス長
         elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|/i) {
             my ($addr, $prefix) = ($1, $2);
-            if (my $bin = ip_to_bin($addr)) {
+            if (my $bin = inet_pton(AF_INET6, $addr)) {
                 push @v6, { net_bin => $bin, mask => make_mask($prefix, length $bin) };
             }
         }
     }
 
-    # キャッシュ書き出し
+    # — Storable でキャッシュ書き出し —
     store { v4 => \@v4, v6 => \@v6 }, $cache_file;
 }
 sub ip_in_list_binary {
