@@ -416,7 +416,7 @@ HTML
 sub PrintResLumpDelete
 {
 	my ($Page, $Sys, $Form, $BBS, $mode) = @_;
-	my (@valueSet, @bbsSet, @threadSet, @resSet, @elem, $pRes, $num, $common, $isAbone);
+	my (@valueSet, @bbsSet, @threadSet, @resSet, @elem, $pRes, $num, $common, $isAbone, $target_bbs);
 	my ($bbsID, $threadKey, $bbsResNum, @keyAndResSet, $keyAndRes, %wholeSet);
 	my ($Threads, $DAT);
    
@@ -430,6 +430,7 @@ sub PrintResLumpDelete
 	#$wholeSet{12}{35} = (58, 79);
 	#$Page->Print(%wholeSet."AA<br>");
 	@valueSet = $Form->GetAtArray('RESS');
+	$target_bbs = $Sys->Get('BBS');
 	foreach (@valueSet){
 		($bbsID, $threadKey, $bbsResNum) = split /\//;
 		if (!exists($wholeSet{$bbsID}{$threadKey})){
@@ -493,6 +494,7 @@ sub PrintResLumpDelete
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
+	$Sys->Set('BBS',$target_bbs);
 }
  
 #------------------------------------------------------------------------------------------------------------

@@ -247,9 +247,7 @@ sub DoFunction
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
-	if(!$bbs){
-		$Base->SetMenu('忍法帖を検索', "'sys.ninja','DISP','SEARCH'");
-	}else{
+	if($bbs){
 		$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
 		$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
 		# スレッドdat落ち権限のみ
@@ -257,8 +255,8 @@ sub SetMenuList
 			$Base->SetMenu('一括DAT落ち', "'bbs.thread','DISP','AUTOPOOL'");
 		}
 		$Base->SetMenu('<hr>', '');
-		$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 	}
+	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------
