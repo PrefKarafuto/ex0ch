@@ -16,6 +16,8 @@ use CGI::Session;
 use CGI::Cookie;
 use Digest::MD5;
 use Storable qw(lock_store lock_retrieve);
+use File::Path qw(make_path);
+use File::Basename qw(dirname);
 use MIME::Base64 ();  # encode_base64url
 
 #------------------------------------------------------------------------------------------------------------
@@ -55,47 +57,29 @@ sub Load {
     my $sid_before;
 
     # パスワード指定時
-    if ($password) {
-        # 期限（日数）
-        my $exp_days    = $Sys->Get('PASS_EXPIRY') || 1;
-        my $long_expiry = 60 * 60 * 24 * $exp_days;
+	if ($password) {
+		# 有効期限（日数）
+		my $exp_days    = $Sys->Get('PASS_EXPIRY') || 1;
+		my $long_expiry = 60 * 60 * 24 * $exp_days;
 
-        # パスワードダイジェスト（キー）
-        my $ctx  = Digest::MD5->new;
-        $ctx->add($Sys->Get('SECURITY_KEY'), ':', $password);
-        my $hash = $ctx->hexdigest;
+		# ダイジェスト（ファイル内キー）
+		my $ctx  = Digest::MD5->new;
+		$ctx->add($Sys->Get('SECURITY_KEY'), ':', $password);
+		my $hash = $ctx->hexdigest;
 
-        # 管理ファイル
-        my $pw_file = "$ninDir/hash/password.cgi";
-        # 既存テーブル読み込み or 空ハッシュ
-        my $table = (-e $pw_file) ? lock_retrieve($pw_file) : {};
+		my $pw_file = "$ninDir/hash/password.cgi";
 
-        if (exists $table->{$hash}) {
-            my $entry = $table->{$hash};
+		# GetHash が期限切れチェック＆タイムスタンプ更新を行いつつ
+		# 成功時は保存済 SID を返し、失敗時は undef を返す
+		my $saved = GetHash($hash, $long_expiry, $pw_file);
+		return undef unless defined $saved;
 
-            # 有効期限内？
-            if ($entry->{time} + $long_expiry >= time) {
-                # タイムスタンプ更新して保存
-                $entry->{time} = time;
-                lock_store($table, $pw_file);
-
-                # 保存済 SID を取得
-                my $saved = $entry->{value};
-                if ($saved ne $sid) {
-                    $sid_before = $sid;
-                    $sid        = $saved;
-                }
-            } else {
-                # 期限切れ→削除してエラー
-                delete $table->{$hash};
-                lock_store($table, $pw_file);
-                return undef;
-            }
-        } else {
-            # キーなし→エラー
-            return undef;
-        }
-    }
+		# SID が変わっていたらロードフラグ用に保持
+		if ($saved ne $sid) {
+			$sid_before = $sid;
+			$sid        = $saved;
+		}
+	}
 
     # セッション読み込み or 新規作成
     my $session = CGI::Session->new(
@@ -260,19 +244,16 @@ sub Save {
         my $ctx = Digest::MD5->new;
         $ctx->add($Sys->Get('SECURITY_KEY'), ':', $password);
         my $hash = $ctx->hexdigest;
-        my $file = "$ninDir/hash/pw-$hash.cgi";
+        my $pw_file = "$ninDir/hash/password.cgi";
 
-        # 既存パスワード削除
-        if (my $old = $this->{SESSION}->param('password_file_hash')) {
-            unlink "$ninDir/hash/pw-$old.cgi" if -e "$ninDir/hash/pw-$old.cgi";
-        }
+        # 古いハッシュエントリがあれば削除
+		if (my $old = $this->{SESSION}->param('password_file_hash')) {
+			DeleteHash($old, $pw_file);
+		}
 
-        # テーブルに書き込み
-        my $table = -e $file ? lock_retrieve($file) : {};
-        $table->{sid} = { value => $this->{SID}, time => time };
-        lock_store($table, $file);
-        chmod 0600, $file;
-        $this->{SESSION}->param(password_file_hash => $hash);
+		# 新しい SID を登録
+		SetHash($hash, $this->{SID}, time, $pw_file);
+		$this->{SESSION}->param(password_file_hash => $hash);
     }
 
     # 有効期限設定
@@ -292,5 +273,132 @@ sub Save {
     }
     return 1;
 }
+
+# -----------------------------------------------------------------------------
+# 指定ファイルが置かれるディレクトリを保証するヘルパー
+# -----------------------------------------------------------------------------
+sub _ensure_dir {
+    my ($file) = @_;
+    my $dir = dirname($file);
+    make_path($dir) unless -d $dir;
+}
+
+# -----------------------------------------------------------------------------
+# ハッシュテーブルをファイルから読み込む関数
+# @param $key     検索キー
+# @param $expiry  有効期限（秒）
+# @param $file    ファイルパス
+# @return 値または undef
+# -----------------------------------------------------------------------------
+sub GetHash {
+    my ($key, $expiry, $file) = @_;
+
+    # 存在すればロック付き読み込み、なければ空ハッシュ
+    my $table = -e $file
+              ? lock_retrieve($file)
+              : {};
+
+    # キーがあるか？
+    if (exists $table->{$key}) {
+        my $entry = $table->{$key};
+        # 期限切れ判定
+        if ($entry->{time} + $expiry < time) {
+            delete $table->{$key};
+            _ensure_dir($file);
+            lock_store($table, $file);
+            chmod 0600, $file;
+            return undef;
+        }
+        # 有効期限内 → タイムスタンプ更新
+        $entry->{time} = time;
+        _ensure_dir($file);
+        lock_store($table, $file);
+        chmod 0600, $file;
+        return $entry->{value};
+    }
+
+    return undef;
+}
+
+# -----------------------------------------------------------------------------
+# ハッシュテーブルに key=>value を保存する関数
+# @param $key    登録キー
+# @param $value  登録値
+# @param $time   登録時刻（time()）
+# @param $file   ファイルパス
+# @return 1=成功
+# -----------------------------------------------------------------------------
+sub SetHash {
+    my ($key, $value, $time, $file) = @_;
+
+    # 既存テーブル読み込み or 空ハッシュ
+    my $table = -e $file
+              ? lock_retrieve($file)
+              : {};
+
+    $table->{$key} = { value => $value, time => $time };
+
+    _ensure_dir($file);
+    lock_store($table, $file);
+    chmod 0600, $file;
+
+    return 1;
+}
+
+# -----------------------------------------------------------------------------
+# 指定キーのエントリを削除する関数
+# @param $key   削除キー
+# @param $file  ファイルパス
+# @return 1=削除した, 0=何もしなかった
+# -----------------------------------------------------------------------------
+sub DeleteHash {
+    my ($key, $file) = @_;
+
+    return 0 unless -e $file;
+
+    my $table = lock_retrieve($file) || {};
+    return 0 unless exists $table->{$key};
+
+    delete $table->{$key};
+
+    _ensure_dir($file);
+    lock_store($table, $file);
+    chmod 0600, $file;
+
+    return 1;
+}
+
+# -----------------------------------------------------------------------------
+# 値が一致するエントリをすべて削除する関数
+# @param $target_value  削除対象の値
+# @param $file          ファイルパス
+# @return 削除件数 (0以上)
+# -----------------------------------------------------------------------------
+sub DeleteHashValue {
+    my ($target_value, $file) = @_;
+
+    return 0 unless -e $file;
+
+    my $table   = lock_retrieve($file) || {};
+    my $deleted = 0;
+
+    foreach my $key (keys %$table) {
+        my $val = $table->{$key}{value};
+        next unless defined $val;
+        if ($val eq $target_value) {
+            delete $table->{$key};
+            $deleted++;
+        }
+    }
+
+    if ($deleted) {
+        _ensure_dir($file);
+        lock_store($table, $file);
+        chmod 0600, $file;
+    }
+
+    return $deleted;
+}
+
 
 1;  # Module END
