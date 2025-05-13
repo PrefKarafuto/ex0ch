@@ -140,9 +140,12 @@ sub DoPrint
 	}
 	
 	# 掲示板情報を設定
-	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
-	
-	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
+	if($subMode eq 'ABONELUMPRES'||'DELLUMPRES' && !$Form->Get('TARGET_BBS')){	# システム画面から来た場合
+		$BASE->Print($Sys->Get('_TITLE'), 1);
+	}else{																		# 掲示板画面から来た場合
+		$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
+		$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
+	}
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -244,15 +247,18 @@ sub DoFunction
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
-	
-	$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
-	$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
-	# スレッドdat落ち権限のみ
-	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {
-		$Base->SetMenu('一括DAT落ち', "'bbs.thread','DISP','AUTOPOOL'");
+	if(!$bbs){
+		$Base->SetMenu('忍法帖を検索', "'sys.ninja','DISP','SEARCH'");
+	}else{
+		$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
+		$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
+		# スレッドdat落ち権限のみ
+		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {
+			$Base->SetMenu('一括DAT落ち', "'bbs.thread','DISP','AUTOPOOL'");
+		}
+		$Base->SetMenu('<hr>', '');
+		$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 	}
-	$Base->SetMenu('<hr>', '');
-	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 }
 
 #------------------------------------------------------------------------------------------------------------

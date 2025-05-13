@@ -668,8 +668,8 @@ sub PrintNinjaSidSearch
 			$n++;
 		}
 		$Page->HTMLInput('hidden', 'TARGET_BBS', '');
-			$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
-			$Page->HTMLInput('hidden', 'DISP_FORMAT', '');
+		$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
+		$Page->HTMLInput('hidden', 'DISP_FORMAT', '');
 	}
 	# 検索ヒット無し
 	else {

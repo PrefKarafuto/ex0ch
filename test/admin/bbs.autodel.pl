@@ -509,7 +509,7 @@ sub PrintResLumpDelete
 sub FunctionResLumpDelete
 {
 	my ($Sys, $Form, $pLog, $BBS, $mode) = @_;
-	my (@resSet, $pRes, $abone, $path, $tm, $user, $delCnt, $num, $datPath, $LOG, $logsize, $lastnum);
+	my (@resSet, $pRes, $abone, $path, $tm, $user, $delCnt, $num, $datPath, $LOG, $logsize, $lastnum,$target_bbs);
 	my (@valueSet, @bbsSet, @threadSet, @elem, $common, $isAbone);
 	my ($bbsID, $threadKey, $bbsResNum, %wholeSet);
 	my ($Threads, $Dat, $logMessage);
@@ -522,6 +522,7 @@ sub FunctionResLumpDelete
    
 	%wholeSet = ();
 	@valueSet = $Form->GetAtArray('RESS');
+	$target_bbs = $Sys->Get('BBS');
 	foreach (@valueSet){
 		#$Page->Print($_."<br>");
 		($bbsID, $threadKey, $bbsResNum) = split /\//;
@@ -666,6 +667,8 @@ sub FunctionResLumpDelete
 	$BBSAid->Init($Sys, undef);
 	$BBSAid->CreateIndex();
 	$BBSAid->CreateSubback();
+	
+	$Sys->Set('BBS','');
    
 	return 0;
 }
