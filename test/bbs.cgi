@@ -16,6 +16,7 @@ use CGI::Cookie;
 use Digest::MD5;
 use JSON;
 use LWP::UserAgent;
+use File::Path qw(make_path);
 use Storable qw(lock_store lock_retrieve);
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
@@ -683,69 +684,62 @@ sub SaveErrorInfo{
 }
 
 # SessionIDの取得
-sub LoadSessionID
-{
-	my ($Sys, $Cookie, $Conv) = @_;
-	require './module/ninpocho.pl';
+sub LoadSessionID {
+    my ($Sys, $Cookie, $Conv) = @_;
 
-	my $sid = $Cookie->Get('countsession');
-	my $sec = $Cookie->Get('securitykey');
-	my %cookies = fetch CGI::Cookie;
-	if (!$sid && exists $cookies{'countsession'}) {
-		$sid = $cookies{'countsession'}->value;
-		$sid =~ s/"//g;
-	}
-	if (!$sec && exists $cookies{'securitykey'}) {
-		$sec = $cookies{'securitykey'}->value;
-		$sec =~ s/"//g;
-	}
+    # ninpocho モジュール＆ディレクトリ準備
+    require './module/ninpocho.pl';
+    my $infoDir = $Sys->Get('INFO');
+    my $baseDir = "$infoDir/.ninpocho";
+    my $hashDir = "$baseDir/hash";
+    make_path($hashDir) unless -d $hashDir;
 
-	#改竄をチェック
-	if($sid =~ /^[0-9a-fA-F]{32}$/ && $sec){
-		my $ctx = Digest::MD5->new;
-		$ctx->add($Sys->Get('SECURITY_KEY'));
-		$ctx->add(':', $sid);
-		
-		if ($ctx->b64digest ne $sec){
-			#一致しなかったら改竄されている
-			return $ZP::E_PAGE_COOKIE;
-		}
-	}
+    # Cookie から取得
+    my $sid = $Cookie->Get('countsession');
+    my $sec = $Cookie->Get('securitykey');
+    my %cookies = fetch CGI::Cookie;
+    if (!$sid && exists $cookies{'countsession'}) {
+        ($sid = $cookies{'countsession'}->value) =~ s/"//g;
+    }
+    if (!$sec && exists $cookies{'securitykey'}) {
+        ($sec = $cookies{'securitykey'}->value) =~ s/"//g;
+    }
 
-	my $ctx = Digest::MD5->new;
-	$ctx->add(':', $Sys->Get('SERVER'));
-	$ctx->add(':', $ENV{'REMOTE_ADDR'});
-	my $infoDir = $Sys->Get('INFO');
-	my $ipHash = $ctx->hexdigest;
-	my $ipFile = ".$infoDir/.ninpocho/hash/ip-$ipHash.cgi";
+    # 改竄チェック
+    if ($sid =~ /^[0-9a-fA-F]{32}$/ && $sec) {
+        my $ctx = Digest::MD5->new;
+        $ctx->add($Sys->Get('SECURITY_KEY'), ':', $sid);
+        return $ZP::E_PAGE_COOKIE
+            if $ctx->b64digest ne $sec;
+    }
 
-	my $fileExpiry = 60 * 60 * 24;
-	
-	if($Conv->IsJPIP($Sys)){
-		# JPIPに紐付けられているかチェック
-		if(-e $ipFile && time - (stat($ipFile))[9] < $fileExpiry){
-			my $sid_loaded = lock_retrieve($ipFile);
-			my $crtime = $sid_loaded->{'crtime'};
-			$sid = $sid_loaded->{'sid'} unless $sid;
-			lock_store({'sid'=> $sid,'crtime'=> $crtime},$ipFile);
-			chmod 0600,$ipFile;
-		}elsif($sid){
-			lock_store({'sid'=> $sid,'crtime'=> time},$ipFile);
-			chmod 0600,$ipFile;
-		}
-	}
-	if(!$sid){
-		# 新規ID発行
-		$sid = Digest::MD5->new()->add($$,time(),rand(time))->hexdigest();
-	}
+    # IP ハッシュとファイルパス
+    my $ctx_ip = Digest::MD5->new;
+    $ctx_ip->add('', $Sys->Get('SERVER'), ':', $ENV{REMOTE_ADDR});
+    my $ipKey   = $ctx_ip->b64digest;
+    my $ipFile  = "$hashDir/ip_addr.cgi";
+    my $expiry  = 60 * 30;   # 30分
 
-	my $ctx_sec = Digest::MD5->new;
-	$ctx_sec->add($Sys->Get('SECURITY_KEY'));
-	$ctx_sec->add(':', $sid);
-	$Sys->Set('SEC',$ctx_sec->b64digest);
-	$Sys->Set('SID',$sid);
+    # JPIP の場合、既存バインドをロード
+    if ($Conv->IsJPIP($Sys)) {
+        my $loaded = NINPOCHO::GetHash($ipKey, $expiry, $ipFile);
+        $sid = $loaded if $loaded;
+    }
 
-	return $ZP::E_SUCCESS;
+    # 未だ SID がなければ新規発行
+    unless ($sid) {
+        $sid = Digest::MD5->new->add($$, time(), rand())->hexdigest;
+    }
 
+    # 最終的に必ずバインドを書き戻し（SID 更新または初期登録）
+    NINPOCHO::SetHash($ipKey, $sid, time, $ipFile);
+
+    # securitykey 発行
+    my $ctx_sec = Digest::MD5->new;
+    $ctx_sec->add($Sys->Get('SECURITY_KEY'), ':', $sid);
+    $Sys->Set('SEC', $ctx_sec->b64digest);
+    $Sys->Set('SID', $sid);
+
+    return $ZP::E_SUCCESS;
 }
 

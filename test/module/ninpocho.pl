@@ -1,374 +1,296 @@
 #============================================================================================================
 #
-#	忍法帖情報管理パッケージ
+#   忍法帖情報管理パッケージ (修正版)
 #
 #============================================================================================================
-package	NINPOCHO;
+package NINPOCHO;
 
 use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+
+use File::Path qw(make_path);
+use POSIX qw(strftime);
 use CGI::Session;
 use CGI::Cookie;
 use Digest::MD5;
 use Storable qw(lock_store lock_retrieve);
-use MIME::Base64 ();
-use POSIX qw(strftime);
-no warnings 'once';
+use MIME::Base64 ();  # encode_base64url
 
 #------------------------------------------------------------------------------------------------------------
-#
-#	コンストラクタ
-#	-------------------------------------------------------------------------------------
-#	@param	なし
-#	@return	モジュールオブジェクト
-#
+#   コンストラクタ
+#   @return モジュールオブジェクト
 #------------------------------------------------------------------------------------------------------------
-sub new
-{
-	my $class = shift;
-	
-	my $obj = {
-		'SESSION'		=> undef,   # セッションオブジェクト
-		'SID'			=> undef,   # セッションID
-		'ANON_FLAG'     => undef,   # 匿名化状態か
-		'CREATE_FLAG'   => undef,   # 新規作成か
-		'LOAD_FLAG'     => undef,   # passからロードか
-	};
-	bless $obj, $class;
-	
-	return $obj;
+sub new {
+    my $class = shift;
+    my $obj = {
+        SESSION     => undef,
+        SID         => undef,
+        ANON_FLAG   => undef,
+        CREATE_FLAG => undef,
+        LOAD_FLAG   => undef,
+    };
+    bless $obj, $class;
+    return $obj;
 }
 
 #------------------------------------------------------------------------------------------------------------
-#
-#	忍法帖ロード
-#	-------------------------------------------------------------------------------------
-#	@param	$Sys	SYSTEM
-#	@param	$password	あればパスワードで忍法帖をロード。無ければ通常ロード
-#	@return	パスワードがあり、かつセッションIDが見つからない場合0
-#
+#   忍法帖ロード
+#   @param $Sys       SYSTEM
+#   @param $password  パスワードがあれば指定
+#   @return セッションIDまたは undef
 #------------------------------------------------------------------------------------------------------------
-sub Load
-{
-	my $this = shift;
-	my ($Sys,$password) = @_;
-	my ($sid,$sid_saved,$sid_before);
+sub Load {
+    my ($this, $Sys, $password) = @_;
+    my $infoDir = $Sys->Get('INFO');
+    my $ninDir  = ".$infoDir/.ninpocho/";
 
-	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
-	my $Form = $Sys->Get('MainCGI')->{'FORM'};
-	my $Set = $Sys->Get('MainCGI')->{'SET'};
-	my $infoDir = $Sys->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
-	$sid = $Sys->Get('SID');
-	
-	#パスワードがあった場合
-	if($password){
-		my $ctx2 = Digest::MD5->new;
-		my $exp = $Sys->Get('PASS_EXPITY') || 1;
-		my $long_expiry = 60*60*24*$exp;
-		
-		$ctx2->add($Sys->Get('SECURITY_KEY'));
-		$ctx2->add(':', $password);
-		my $ctx2_hexdigest = $ctx2->hexdigest();
-		my $filename = $ninDir.'hash/pw-' . $ctx2_hexdigest . '.cgi';
-		my $hash_table = {};
+    # ディレクトリ確実に作成
+    unless (-d $ninDir) {
+        make_path($ninDir, "$ninDir/hash");
+    }
 
-		if (-e $filename) {
-			$hash_table = lock_retrieve($filename);
-		}
-		
-		# キーに対応する値が存在するかチェック
-		if (exists $hash_table->{'sid'}) {
-			# 有効期限をチェック
-			if (($hash_table->{'sid'}{'time'} + $long_expiry) < time) {
-				# 有効期限切れの場合は削除してundefを返す
-				delete $hash_table->{'sid'};
-				lock_store $hash_table, $filename;
-			} else {
-				# 有効期限内の場合は値を返す
-				$hash_table->{'sid'}{'time'} = time;
-				lock_store $hash_table, $filename;
-				$sid_saved = $hash_table->{'sid'}{'value'};
-			}
-		}
+    my $sid = $Sys->Get('SID');
+    my $sid_before;
 
-		if($sid_saved && $sid_saved ne $sid){
-			$sid_before = $sid;
-			$sid = $sid_saved;
-		}else{
-			# 無かったらロードしない
-			return undef;
-		}
-	}
+    # パスワード指定時
+    if ($password) {
+        # 期限（日数）
+        my $exp_days    = $Sys->Get('PASS_EXPIRY') || 1;
+        my $long_expiry = 60 * 60 * 24 * $exp_days;
 
-	# セッションデータのロードもしくは新規作成
-	my $session = CGI::Session->new("driver:file;serializer:storable", $sid, {Directory => $ninDir});
-	if($session ->is_new()){
-		$sid = $session->id();
-		$this->{'CREATE_FLAG'} = 1;
+        # パスワードダイジェスト（キー）
+        my $ctx  = Digest::MD5->new;
+        $ctx->add($Sys->Get('SECURITY_KEY'), ':', $password);
+        my $hash = $ctx->hexdigest;
 
-		#新規作成時に追加
-		my $mes = $Form->Get('MESSAGE');
-		$mes =~ s/<(b|h)r>//g;
-		$session->param('new_message',substr($mes, 0, 30));
-		$session->param('c_bbsdir',$Sys->Get('BBS'));
-		$session->param('c_threadkey',$Sys->Get('KEY'));
-		$session->param('c_addr',$ENV{'REMOTE_ADDR'});
-		$session->param('c_host',$ENV{'REMOTE_HOST'});
-		$session->param('c_ua',$ENV{'HTTP_USER_AGENT'});
-	}else{
-		if ($sid && $sid_before){
-			#忍法帖ロード時に追加
-			my $load_count = $session->param('load_count') || 0;
-			$this->{'LOAD_FLAG'} = 1;
-			$load_count++;
-			my $mes = $Form->Get('MESSAGE');
-			$mes =~ s/<(b|h)r>//g;
-			$session->param('load_count',$load_count);
-			$session->param('load_message',substr($mes, 0, 30));
-			$session->param('load_from',$sid_before);
-			$session->param('load_time',time);
-			$session->param('load_bbsdir',$Sys->Get('BBS'));
-			$session->param('load_threadkey',$Sys->Get('KEY'));
-			$session->param('load_addr',$ENV{'REMOTE_ADDR'});
-			$session->param('load_host',$ENV{'REMOTE_HOST'});
-			$session->param('load_ua',$ENV{'HTTP_USER_AGENT'});
-		}else{
-			# 通常時処理
-			# ninpocho.plでは行わない
-		}
-	}
-	$this->{'SESSION'} = $session;
+        # 管理ファイル
+        my $pw_file = "$ninDir/hash/password.cgi";
+        # 既存テーブル読み込み or 空ハッシュ
+        my $table = (-e $pw_file) ? lock_retrieve($pw_file) : {};
 
-	$this->{'SID'} = $sid;
-	$Sys->Set('SID',$sid);
+        if (exists $table->{$hash}) {
+            my $entry = $table->{$hash};
 
-	return $sid;
+            # 有効期限内？
+            if ($entry->{time} + $long_expiry >= time) {
+                # タイムスタンプ更新して保存
+                $entry->{time} = time;
+                lock_store($table, $pw_file);
+
+                # 保存済 SID を取得
+                my $saved = $entry->{value};
+                if ($saved ne $sid) {
+                    $sid_before = $sid;
+                    $sid        = $saved;
+                }
+            } else {
+                # 期限切れ→削除してエラー
+                delete $table->{$hash};
+                lock_store($table, $pw_file);
+                return undef;
+            }
+        } else {
+            # キーなし→エラー
+            return undef;
+        }
+    }
+
+    # セッション読み込み or 新規作成
+    my $session = CGI::Session->new(
+        "driver:file;serializer:storable", $sid,
+        { Directory => $ninDir }
+    );
+    if ($session->is_new) {
+        $sid = $session->id;
+        $this->{CREATE_FLAG} = 1;
+        # 初回データ設定
+        my $mes = $Sys->Get('MainCGI')->{'FORM'}->Get('MESSAGE') || '';
+        $mes =~ s{<\s*(?:b|h)r\b[^>]*>}{}gi;
+        $session->param(new_message => substr($mes, 0, 30));
+        $session->param(c_bbsdir     => $Sys->Get('BBS'));
+        $session->param(c_threadkey  => $Sys->Get('KEY'));
+        $session->param(c_addr       => $ENV{REMOTE_ADDR});
+        $session->param(c_host       => $ENV{REMOTE_HOST});
+        $session->param(c_ua         => $ENV{HTTP_USER_AGENT});
+    } else {
+        if ($sid_before) {
+            $this->{LOAD_FLAG} = 1;
+            my $count = $session->param('load_count') || 0;
+            $session->param(load_count => ++$count);
+            my $mes = $Sys->Get('MainCGI')->{'FORM'}->Get('MESSAGE') || '';
+            $mes =~ s{<\s*(?:b|h)r\b[^>]*>}{}gi;
+            $session->param(load_message   => substr($mes, 0, 30));
+            $session->param(load_from      => $sid_before);
+            $session->param(load_time      => time);
+            $session->param(load_bbsdir    => $Sys->Get('BBS'));
+            $session->param(load_threadkey => $Sys->Get('KEY'));
+            $session->param(load_addr      => $ENV{REMOTE_ADDR});
+            $session->param(load_host      => $ENV{REMOTE_HOST});
+            $session->param(load_ua        => $ENV{HTTP_USER_AGENT});
+        }
+    }
+    $session->flush;
+    $this->{SESSION} = $session;
+    $this->{SID}     = $sid;
+    $Sys->Set('SID', $sid);
+    return $sid;
 }
-# セッションIDから忍法帖を読み込む(admin.cgi用)
+
+#------------------------------------------------------------------------------------------------------------
+#   admin 用: SID から読み込み
+#------------------------------------------------------------------------------------------------------------
 sub LoadOnly {
-	my $this = shift;
-	my ($Sys,$sid) = @_;
-	my $infoDir = $Sys->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
-	my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
-
-	# セッションの読み込みが失敗した場合、0を返す
-	return 0 unless $session;
-
-	$this->{'SESSION'} = $session;
-	$this->{'SID'} = $sid;
-	return 1; # 正常に読み込みが完了した場合、1を返す
+    my ($this, $Sys, $sid) = @_;
+    my $ninDir = "." . $Sys->Get('INFO') . "/.ninpocho/";
+    return 0 unless -d $ninDir;
+    my $session = CGI::Session->load(
+        "driver:file;serializer:storable", $sid,
+        { Directory => $ninDir }
+    );
+    return 0 unless $session;
+    $this->{SESSION} = $session;
+    $this->{SID}     = $sid;
+    return 1;
 }
-# セッションに忍法帖保存(admin.cgi用)
-sub SaveOnly
-{
-	my $this = shift;
-	return 0 unless $this->{'SESSION'};
-	# セッションを閉じる
-	$this->{'SESSION'}->flush();
-	return 1;
-}
+
 #------------------------------------------------------------------------------------------------------------
-#
-#   忍法帖情報取得
-#   -------------------------------------------------------------------------------------
-#   @param  可変長の情報種別パス
-#   @return 忍法帖の要素の情報
-#
+#   admin 用: セッション保存
+#------------------------------------------------------------------------------------------------------------
+sub SaveOnly {
+    my $this = shift;
+    return 0 unless $this->{SESSION};
+    $this->{SESSION}->flush;
+    return 1;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#   情報取得
 #------------------------------------------------------------------------------------------------------------
 sub Get {
-	my $this = shift;
-	my ($name) = @_;
+    my ($this, $name) = @_;
+    return '' unless $this->{SESSION};
+    return $this->{SESSION}->param($name) // '';
+}
+sub isNew  { shift->{CREATE_FLAG} }
+sub isLoad { shift->{LOAD_FLAG} }
 
-	# セッションが存在しない場合は空文字列を返す
-	return '' unless $this->{'SESSION'};
-
-	# パラメータの値を取得し、未初期化の場合は空文字列を返す
-	my $val = $this->{'SESSION'}->param($name) // '';
-	
-	return $val;
-}
-sub isNew
-{
-	my $this = shift;
-	return $this->{'CREATE_FLAG'};
-}
-sub isLoad
-{
-	my $this = shift;
-	return $this->{'LOAD_FLAG'};
-}
 #------------------------------------------------------------------------------------------------------------
-#
-#   忍法帖情報設定
-#   -------------------------------------------------------------------------------------
-#   @param  可変長の情報種別パス
-#   @param  $val        設定値
-#
+#   情報設定
 #------------------------------------------------------------------------------------------------------------
-sub Set
-{
-	my $this = shift;
-	my ($name, $val) = @_;
-	
-	return unless $this->{'SESSION'};
-	$this->{'SESSION'}->param($name,$val);
-
-	return $this->{'SESSION'}->param($name);
+sub Set {
+    my ($this, $name, $val) = @_;
+    return unless $this->{SESSION};
+    $this->{SESSION}->param($name => $val);
+    return $this->{SESSION}->param($name);
 }
 
 #------------------------------------------------------------------------------------------------------------
-#
-#   忍法帖削除（admin.cgiでの使用を想定）
-#   -------------------------------------------------------------------------------------
-#	@param	$Sys	SYSTEM
-#   @param  $sid_array_ref    セッションIDの配列リファレンス
-#   @return 削除に成功したら1　$sidで指定されたセッションがなければ0
-#
+#   admin 用: セッション削除
 #------------------------------------------------------------------------------------------------------------
 sub Delete {
-	my $this=shift;
-	my ($Sys, $sid_array_ref) = @_;
-	my $infoDir = $Sys->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
-	my @file_list = (
-		'hash/user_info.cgi',
-		'hash/password.cgi',
-		'hash/ip_addr.cgi'
-	);
-	my $count = 0;
-
-	foreach my $sid (@$sid_array_ref) {
-		my $session = CGI::Session->load("driver:file;serializer:storable", $sid, {Directory => $ninDir});
-		if ($session->is_empty) {
-			next; # このセッションIDは無効なので次へ
-		} else {
-			if ( ($session->ctime) <= time() ) {
-				$session->delete();
-				$session->flush();
-				$count++;
-			}
-			foreach my $filename (@file_list) {
-				my $hash_table = {};
-				if (-e $filename) {
-					$hash_table = lock_retrieve($filename);
-					# ハッシュテーブルの各キーと値を繰り返し確認
-					foreach my $key (keys %$hash_table) {
-						# 値が目的の値と一致した場合、その要素を削除
-						if ($hash_table->{$key}->{value} eq $sid) {
-							delete $hash_table->{$key};
-						}
-					}
-					# 変更をファイルに保存
-					lock_store $hash_table, $filename;
-					chmod 0600,$filename;
-				}
-			}
-		}
-	}
-	return $count;
+    my ($this, $Sys, $sid_array_ref) = @_;
+    my $ninDir = "." . $Sys->Get('INFO') . "/.ninpocho/";
+    my $count = 0;
+    foreach my $sid (@$sid_array_ref) {
+        my $session = CGI::Session->load(
+            "driver:file;serializer:storable", $sid,
+            { Directory => $ninDir }
+        );
+        next unless $session;
+        # 期限切れ判定
+        if ($session->is_expired) {
+            $session->delete;
+            $session->flush;
+            $count++;
+        }
+    }
+    # ハッシュファイル内の参照削除
+    foreach my $file ("$ninDir/hash/user_info.cgi",
+                      "$ninDir/hash/ip_addr.cgi")
+    {
+        next unless -e $file;
+        my $table = lock_retrieve($file) || {};
+        foreach my $key (keys %$table) {
+            # 値が sid_array_ref のいずれかに一致する場合はキーを削除
+            if (grep { $table->{$key}{value} eq $_ } @{$sid_array_ref}) {
+                delete $table->{$key};
+            }
+        }
+        lock_store($table, $file);
+        chmod 0600, $file;
+    }
+    return $count;
 }
-sub DeleteOnly
-{
-	my $this=shift;
-	$this->{'SESSION'}->delete();
-	$this->{'SESSION'}->flush();
+
+sub DeleteOnly {
+    my $this = shift;
+    return unless $this->{SESSION};
+    $this->{SESSION}->delete;
+    $this->{SESSION}->flush;
 }
 
 #------------------------------------------------------------------------------------------------------------
-#
-#	忍法帖情報保存
-#	-------------------------------------------------------------------------------------
-#	@param	$Sys	SYSTEM
-#	@param	$com	真ならパスワードで忍法帖をセーブ。偽なら通常セーブ
-#	@return	なし
-#
+#   保存
 #------------------------------------------------------------------------------------------------------------
-sub Save
-{
-	my $this = shift;
-	my ($Sys,$com) = @_;
-	my $password;
-	my $Cookie = $Sys->Get('MainCGI')->{'COOKIE'};
-	my $infoDir = $Sys->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/";
-	my $sid = $this->{'SID'};
-	my $session = $this->{'SESSION'};
+sub Save {
+    my ($this, $Sys, $com) = @_;
+    return 0 unless $this->{SESSION};
+    my $password;
+    my $infoDir = $Sys->Get('INFO');
+    my $ninDir  = "." . $infoDir . "/.ninpocho/";
 
-	# 忍法帖を使わない場合
-	return 0 unless $session;
+    if ($com) {
+        # パスワード生成
+        my $seed;
+        if ($this->{SESSION}->param('password_is_randomized')) {
+            $password = $this->{SESSION}->param('password_is_randomized');
+        } else {
+            if (open my $fh, '<', '/dev/urandom') {
+                binmode $fh;
+                read $fh, $seed, 8;
+                close $fh;
+            } else {
+                $seed = Digest::MD5->new->add($^O, rand, $^V, $$)->digest;
+            }
+            $password = substr MIME::Base64::encode_base64url($seed), 0, 11;
+            $this->{SESSION}->param(password_is_randomized => $password);
+        }
+        my $ctx = Digest::MD5->new;
+        $ctx->add($Sys->Get('SECURITY_KEY'), ':', $password);
+        my $hash = $ctx->hexdigest;
+        my $file = "$ninDir/hash/pw-$hash.cgi";
 
-	if ($com) {
-		my $seed = undef;
-		if ($session->param('password_is_randomized')) {
-			# 「ランダム生成」したパスワードを取り出す。
-			$password = $session->param('password_is_randomized');
-		} else {
-			if (open my $fh, '<', '/dev/urandom') {
-				# Unix系
-				binmode $fh;
-				read $fh, $seed, 8;
-				close $fh;
-				$password = MIME::Base64::encode_base64url($seed);
-			} else {
-				# Windows系
-				$seed = Digest::MD5->new->add($^O, rand(2**32), $^V, $$)->digest;
-			}
-			$password = substr MIME::Base64::encode_base64url($seed), 0, 11;
-		}
-		my $ctx3 = Digest::MD5->new;
-		$ctx3->add($Sys->Get('SECURITY_KEY'));
-		$ctx3->add(':', $password);
-		my $ctx3_hexdigest = $ctx3->hexdigest();
-		my $pass_file = $ninDir . 'hash/pw-' . $ctx3_hexdigest . '.cgi';
-		# 既にpasswordが設定されていた場合、既存のパスワードを削除
-		# ランダム生成の場合は「削除しない」
-		if($session->param('password_file_hash') && !$session->param('password_is_randomized')) {
-			my $old_pass_file = $ninDir . 'hash/pw-' . $session->param('password_file_hash') . '.cgi';
-			if (-e $old_pass_file) {
-				unlink $old_pass_file;
-			}
-		}
-		if (defined $seed && !$session->param('password_is_randomized')) {
-			# パスワードをランダム生成した場合「のみ」平文で保管する。
-			# 既に保管してあった場合はそのまま表示する
-			$session->param('password_is_randomized', $password);
-		}
-		my $hash_table = {};
+        # 既存パスワード削除
+        if (my $old = $this->{SESSION}->param('password_file_hash')) {
+            unlink "$ninDir/hash/pw-$old.cgi" if -e "$ninDir/hash/pw-$old.cgi";
+        }
 
-		if (-e $pass_file) {
-			$hash_table = lock_retrieve($pass_file);
-		}
-		$hash_table->{'sid'} = {
-			value => $sid,
-			time => time,
-		};
-		lock_store $hash_table, $pass_file;
-		chmod 0600,$pass_file,
-		$session->param('password_file_hash', $ctx3_hexdigest);
-	}
+        # テーブルに書き込み
+        my $table = -e $file ? lock_retrieve($file) : {};
+        $table->{sid} = { value => $this->{SID}, time => time };
+        lock_store($table, $file);
+        chmod 0600, $file;
+        $this->{SESSION}->param(password_file_hash => $hash);
+    }
 
-	# セッション有効期限を設定
-	if($session->param('password_is_randomized')){
-		$session->expire($Sys->Get('PASS_EXPIRY').'d');
-	}else{
-		$session->expire($Sys->Get('NIN_EXPIRY').'d');
-	}
-	# セッションを閉じる
-	$session->flush();
-	if ($password) {
-		my $nowtime = strftime "%Y-%m-%d %H:%M:%S", localtime time;
-		$Sys->Set('NIN_PASS',$password);
-		$Sys->Set('TIME',$nowtime);
+    # 有効期限設定
+    if ($this->{SESSION}->param('password_is_randomized')) {
+        $this->{SESSION}->expire($Sys->Get('PASS_EXPIRY') . 'd');
+    } else {
+        $this->{SESSION}->expire($Sys->Get('NIN_EXPIRY') . 'd');
+    }
+    $this->{SESSION}->flush;
 
-		return $ZP::E_FORM_SAVECOMMAND;
-	}
+    # パスワード生成時はフォームコマンド
+    if ($password) {
+        my $now = strftime "%Y-%m-%d %H:%M:%S", localtime;
+        $Sys->Set('NIN_PASS', $password);
+        $Sys->Set('TIME',    $now);
+        return $ZP::E_FORM_SAVECOMMAND;
+    }
+    return 1;
 }
 
-#============================================================================================================
-#	Module END
-#============================================================================================================
-1;
+1;  # Module END
