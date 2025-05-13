@@ -278,20 +278,24 @@ sub LogSearch
 	my $datsize = $DAT->Size();
 	my $logsize = $LOG->Size();
 
-	my $offset = $logsize - $datsize;
+	my $base_offset = $logsize - $datsize;
 	if($logsize){
 		my $pResultSet = $this->{'RESULTSET'};
 		if($datsize){
 			for (my $i = 0; $i < $logsize; $i++) {
+				my $offset = $base_offset;
 				my $match_count = 0;
 				my $condition_count = 0;
 				my @data;
 				my $pRes	= $DAT->Get($i);
 				next unless defined $pRes;
-				my @elem	= split(/<>/, $$pRes);
+				my @elem	= split(/<>/, $$pRes,-1);
 				
 				for my $d (0, 1, -1, 2, 3, -2, -3) {
-					my $log = $LOG->Get($offset+$d + $i);
+					my $idx = $offset + $i + $d;
+					next if $idx < 0 || $idx >= $logsize;
+					
+					my $log = $LOG->Get($offset + $d + $i);
 					@data = split(/<>/, $log, -1) if (defined $log);
 					if (defined $log && $data[2] eq $elem[2]) {
 						# ログとレスが一致
