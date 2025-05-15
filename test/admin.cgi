@@ -32,10 +32,15 @@ sub AdminCGI
 	require './module/constant.pl';
 
 	# IP
-	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
 	require './module/data_utils.pl';
+	my $Conv = DATA_UTILS->new;
+	my $client_ip = $Conv->is_cdn_ip($ENV{'REMOTE_ADDR'}) ;
+	if ($client_ip) {
+		# 信用できるプロキシ経由と判断
+		$ENV{'REMOTE_ADDR'} = $client_ip;
+	}
 	if(!defined $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq '') {
-		$ENV{'REMOTE_HOST'} = DATA_UTILS->new->reverse_lookup($ENV{'REMOTE_ADDR'});
+		$ENV{'REMOTE_HOST'} = $Conv->reverse_lookup($ENV{'REMOTE_ADDR'});
 	}
 	
 	# システム初期設定

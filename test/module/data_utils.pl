@@ -1687,15 +1687,23 @@ sub expand_ipv6 {
 	return join(':', @blocks);
 }
 
-# CloudFlareのIPを判定
-sub is_cf_ip {
+# CDNのIPを判定
+sub is_cdn_ip {
     my ($class, $ip) = @_;
     require './module/cidr_list.pl';
 	my $cidr = $ZP_CIDR::cidr;
-    my $list = $ip =~ /:/
-         ? $cidr->{cf_v6}
-         : $cidr->{cf_v4};
-    return CIDRHIT($list, $ip);
+	
+	if($ip =~ /:/){
+		return $ENV{'HTTP_CF_CONNECTING_IP'} if CIDRHIT($cidr->{cf_v6}, $ip);
+		return $ENV{'HTTP_FASTLY_CLIENT_IP'} if CIDRHIT($cidr->{fs_v6}, $ip);
+		return $ENV{'HTTP_TRUE_CLIENT_IP'} if CIDRHIT($cidr->{ak_v6}, $ip);
+	}else{
+		return $ENV{'HTTP_CF_CONNECTING_IP'} if CIDRHIT($cidr->{cf_v4}, $ip);
+		return $ENV{'HTTP_FASTLY_CLIENT_IP'} if CIDRHIT($cidr->{fs_v4}, $ip);
+		return $ENV{'HTTP_TRUE_CLIENT_IP'} if CIDRHIT($cidr->{ak_v4}, $ip);
+	}
+
+    return;
 }
 #============================================================================================================
 #	モジュール終端
