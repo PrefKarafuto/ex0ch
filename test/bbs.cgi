@@ -179,7 +179,11 @@ sub Initialize
 	# ホスト情報設定(DNS逆引き)
 	#変数初期化チェックを挿入。
 	#IPアドレスの設定とリモホ逆引き用
-	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
+	my $client_ip = $ENV{'HTTP_CF_CONNECTING_IP'} || $ENV{'REMOTE_ADDR'};
+	if ($Conv->is_cf_ip($client_ip) ) {
+		# 本当にCloudflareのプロキシ経由と判断
+		$ENV{'REMOTE_ADDR'} = $client_ip;
+	}
 	if(!defined $ENV{'REMOTE_HOST'} || $ENV{'REMOTE_HOST'} eq '') {
 		$ENV{'REMOTE_HOST'} = $Conv->reverse_lookup($ENV{'REMOTE_ADDR'});
 	}
