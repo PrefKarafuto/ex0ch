@@ -170,10 +170,15 @@ sub Set {
     return $this->{SESSION}->param($name);
 }
 
-# 全設定ハッシュをそのまま返す
+# 全設定ハッシュ
 sub All {
     my $this = shift;
-    return $this->{'SESSION'} ||= {};
+    my ($sess) = @_;
+    if(!$sess){
+        return $this->{'SESSION'} ||= {};
+    }else{
+        $this->{'SESSION'} = $sess;
+    }
 }
 
 #------------------------------------------------------------------------------------------------------------
