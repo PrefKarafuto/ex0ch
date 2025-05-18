@@ -13,6 +13,9 @@ use LWP::UserAgent;
 use JSON;
 use File::stat;
 
+# 最大再帰数
+use constant MAX_DEPTH => 5;
+
 # --- 定数・グローバル ---
 our @RULES;    # パース済ルールAST
 
@@ -219,9 +222,76 @@ sub List {
 }
 
 #------------------------------------------------------------------------------
-# Check: 与えられたコンテキストでASTの@RULESを評価
+# Check: ルール適用チェック
 #------------------------------------------------------------------------------
 sub Check {
+    my ($ctx, $depth) = @_;
+    $depth ||= 0;
+    if ($depth > MAX_DEPTH) {
+        return { action => 'allow', score => $ctx->{score} // 0 };
+    }
+    $ctx->{user_info}//={};
+    $ctx->{unique}//={};
+    $ctx->{score}//=0;
+    my $now = Time::Piece->new;
+    RULE: for my $r (@RULES) {
+        next RULE if $r->{meta}{expire_at}    && $now > $r->{meta}{expire_at};
+        next RULE if $r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after};
+        my $hit = eval_condition($r->{cond}, $ctx);
+        if ($r->{list_type} && $r->{list_type} eq 'WHITELIST') {
+            if ($hit) { notify($r); return { action => 'allow', by => $r->{name} } }
+            next RULE;
+        }
+        if ($hit) {
+            notify($r);
+            my $act = $r->{action};
+            if ($act eq 'BLOCK') {
+                return { action => 'block', code => $r->{error_code}, by => $r->{name} };
+            }
+            elsif ($act eq 'ALLOW_IP') {
+                return { action => 'allow_ip', msg => $r->{params}{code}, by => $r->{name} };
+            }
+            elsif ($act eq 'DELETE_WORD') {
+                $ctx->{message} = '';
+            }
+            elsif ($act eq 'REPLACE_WORD') {
+                my $to = $r->{params}{replace_to} // '';
+                $ctx->{message} =~ s/.*/$to/;
+            }
+            elsif ($act eq 'SCORE_ADD') {
+                $ctx->{score} += ($r->{params}{number} // 1);
+            }
+            elsif ($act eq 'SCORE_SUB') {
+                $ctx->{score} -= ($r->{params}{number} // 1);
+            }
+            elsif ($act eq 'SCORE_CLEAR') {
+                $ctx->{score} = 0;
+            }
+            elsif ($act eq 'SCORE_GT') {
+                if ($ctx->{score} > ($r->{params}{number} // 0)) {
+                    return { action => 'block', code => $r->{error_code}, by => $r->{name} };
+                }
+            }
+            elsif ($act eq 'SET') {
+                for my $k (keys %{ $r->{params} }) {
+                    next unless $k =~ /^(user_info|unique)\.(.+)$/;
+                    my ($ns,$key) = ($1,$2);
+                    $ctx->{$ns}{$key} = $r->{params}{$k};
+                }
+            }
+            elsif ($act eq 'USE') {
+                Check($ctx, $depth + 1);
+            }
+            next RULE;
+        }
+    }
+    return { action => 'allow', score => $ctx->{score} };
+}
+
+#------------------------------------------------------------------------------
+# match_rules: 与えられたコンテキストでASTの@RULESを評価
+#------------------------------------------------------------------------------
+sub match_rules {
     my ($this, $ctx) = @_;
     $ctx->{user_info}//={};
     $ctx->{unique}//={};
@@ -370,69 +440,6 @@ sub notify {
     warn "[LOG] rule=$r->{name}\n"           if $r->{meta}{log_if};
     warn "[NOTIFY] rule=$r->{name} code=$r->{meta}{notify_admin}\n"
          if $r->{meta}{notify_admin};
-}
-
-#------------------------------------------------------------------------------
-# apply_rules: ルール適用
-#------------------------------------------------------------------------------
-sub apply_rules {
-    my ($ctx) = @_;
-    $ctx->{user_info}//={};
-    $ctx->{unique}//={};
-    $ctx->{score}//=0;
-    my $now = Time::Piece->new;
-    RULE: for my $r (@RULES) {
-        next RULE if $r->{meta}{expire_at}    && $now > $r->{meta}{expire_at};
-        next RULE if $r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after};
-        my $hit = eval_condition($r->{cond}, $ctx);
-        if ($r->{list_type} && $r->{list_type} eq 'WHITELIST') {
-            if ($hit) { notify($r); return { action => 'allow', by => $r->{name} } }
-            next RULE;
-        }
-        if ($hit) {
-            notify($r);
-            my $act = $r->{action};
-            if ($act eq 'BLOCK') {
-                return { action => 'block', code => $r->{error_code}, by => $r->{name} };
-            }
-            elsif ($act eq 'ALLOW_IP') {
-                return { action => 'allow_ip', msg => $r->{params}{code}, by => $r->{name} };
-            }
-            elsif ($act eq 'DELETE_WORD') {
-                $ctx->{message} = '';
-            }
-            elsif ($act eq 'REPLACE_WORD') {
-                my $to = $r->{params}{replace_to} // '';
-                $ctx->{message} =~ s/.*/$to/;
-            }
-            elsif ($act eq 'SCORE_ADD') {
-                $ctx->{score} += ($r->{params}{number} // 1);
-            }
-            elsif ($act eq 'SCORE_SUB') {
-                $ctx->{score} -= ($r->{params}{number} // 1);
-            }
-            elsif ($act eq 'SCORE_CLEAR') {
-                $ctx->{score} = 0;
-            }
-            elsif ($act eq 'SCORE_GT') {
-                if ($ctx->{score} > ($r->{params}{number} // 0)) {
-                    return { action => 'block', code => $r->{error_code}, by => $r->{name} };
-                }
-            }
-            elsif ($act eq 'SET') {
-                for my $k (keys %{ $r->{params} }) {
-                    next unless $k =~ /^(user_info|unique)\.(.+)$/;
-                    my ($ns,$key) = ($1,$2);
-                    $ctx->{$ns}{$key} = $r->{params}{$k};
-                }
-            }
-            elsif ($act eq 'USE') {
-                apply_rules($ctx);
-            }
-            next RULE;
-        }
-    }
-    return { action => 'allow', score => $ctx->{score} };
 }
 
 1;
