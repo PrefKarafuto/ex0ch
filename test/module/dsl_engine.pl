@@ -200,7 +200,7 @@ sub build_context {
 }
 
 # 変更を確定
-sub build_context {
+sub flush_context {
     my ($this) = @_;
     my %ctx = $this->{'ctx'};
 
