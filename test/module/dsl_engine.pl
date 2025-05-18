@@ -80,6 +80,7 @@ my $DSL_BODY = qr{
   <op:
        HAS|NOT_HAS|MATCH|EQ|NEQ|IN|NOT_IN|LT|GT|LE|GE
      | COUNT_WITHIN|UNIQUE_WITHIN|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|API_CHECK|SET
+     | EXISTS|NOT_EXISTS|EMPTY|NOT_EMPTY
   >
 
   <value>
@@ -444,6 +445,26 @@ sub eval_expr {
        $field =~ /^user_info\.(.+)$/ ? ($ctx->{user_info}{$1}//'')
      : $field =~ /^unique\.(.+)$/    ? ($ctx->{unique}{$1}//'')
      :                               ($ctx->{$field}//'');
+     
+    if ($op eq 'EXISTS') {
+        return defined $val;
+    }
+    if ($op eq 'NOT_EXISTS') {
+        return ! defined $val;
+    }
+    if ($op eq 'EMPTY') {
+        return ! defined($val)
+            || ( ! ref($val)      && $val eq '' )
+            || ( ref($val) eq 'ARRAY'  && ! @$val )
+            || ( ref($val) eq 'HASH'   && ! keys %$val );
+    }
+    if ($op eq 'NOT_EMPTY') {
+        return defined($val)
+            && ( ref($val) ? (ref($val) eq 'ARRAY'  ? @$val
+                              : ref($val) eq 'HASH' ? keys %$val
+                              : 1)
+               : $val ne '' );
+    }
     my %ops = (
         HAS     => sub { index($tgt,$val) != -1 },
         NOT_HAS => sub { index($tgt,$val) == -1 },
