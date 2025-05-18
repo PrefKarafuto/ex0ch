@@ -1682,6 +1682,8 @@ sub MakeDatLine
 
 	# 無意味なタグを除去
 	$name =~ s|<b></b>||g;
+	# 末尾の空白文字（スペース、タブ、改行など）をすべて削除
+	$text =~ s{(?:\s*<br\s*/?>\s*)+\z}{}gi;
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
