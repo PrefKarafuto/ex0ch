@@ -39,7 +39,12 @@ my $DSL_BODY = qr{
       <cond: <group> ( <ws> <logic_op> <ws> <group> )* > <ws>
       '=>' <ws>
       <action: BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE > <ws>
-      (<params: WITH <param_list> >)? <ws>
+      (?: 
+       <replace_field: message|mail|name|title|ip|ua|session_id> <ws>
+       <replace_pat: /(?:[^\\/\\]|\\.)+/(?:[ismx]*)> <ws>
+       TO <ws>
+       <replace_to: /"(?:[^"\\]|\\.)*"/>
+       )? <ws>
       ( ';' <ws> ERROR <ws> <error_code:\d+> )? <ws>
       (<meta>
          ';' <ws> (EXPIRE <ws> AT <ws> ".*?" | EXPIRE <ws> AFTER <ws> \( .*? \) | NOTIFY_ADMIN <ws> WITH <ws> code=\d+ | LOG_IF <ws> (?:true|false))
@@ -252,13 +257,17 @@ sub Check {
                 return { action => 'allow_ip', msg => $r->{params}{code}, by => $r->{name} };
             }
             elsif ($act eq 'REPLACE') {
-                my $pat_spec = $r->{params}{pattern}
-                  or croak "REPLACE requires a 'pattern' parameter";
-                my $pat = ref($pat_spec) eq 'Regexp'
-                        ? $pat_spec
-                        : qr/\Q$pat_spec\E/;
-                my $to = $r->{params}{replace_to} // '';
-                $ctx->{message} =~ s/$pat/$to/g;
+                my $field = $r->{replace_field}
+                        // do {
+                            # AST の最初の <expr> ノードからフィールド名を取り出す
+                            my $first_expr = $r->{cond}{group}[0]{expr}[0];
+                            $first_expr->{field}[0];
+                            };
+
+                my $pat_obj = $r->{replace_pat}
+                or croak "REPLACE requires '/…/ TO …' syntax";
+                ( my $to = $r->{replace_to} // '' ) =~ s/^"(.*)"$/$1/s;
+                $ctx->{$field} =~ s/$pat_obj/$to/g;
             }
             elsif ($act eq 'SCORE_ADD') {
                 $ctx->{score} += ($r->{params}{number} // 1);
