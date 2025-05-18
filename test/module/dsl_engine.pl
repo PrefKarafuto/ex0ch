@@ -40,7 +40,7 @@ my $DSL_BODY = qr{
       '=>' <ws>
       <action: BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE > <ws>
       (?: 
-       <replace_field: message|mail|name|title|ip|ua|session_id> <ws>
+       <replace_field: message|mail|name|title> <ws>
        <replace_pat: /(?:[^\\/\\]|\\.)+/(?:[ismx]*)> <ws>
        TO <ws>
        <replace_to: /"(?:[^"\\]|\\.)*"/>
@@ -74,12 +74,14 @@ my $DSL_BODY = qr{
    | ua
    | session_id
    | user_info\.[A-Za-z0-9_]+
+   | attr\.[A-Za-z0-9_]+
+   | setting\.[A-Za-z0-9_]+
    | unique\.[A-Za-z0-9_]+
   >
 
   <op:
-       HAS|NOT_HAS|MATCH|EQ|NEQ|IN|NOT_IN|LT|GT|LE|GE
-     | COUNT_WITHIN|UNIQUE_WITHIN|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|API_CHECK|SET
+       HAS|NOT_HAS|MATCH|EQ|NEQ|IN|NOT_IN|IN_CIDR|LT|GT|LE|GE
+     | COUNT_WITHIN|UNIQUE_WITHIN|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|API_CHECK|DNSBL_CHECK|SET
      | EXISTS|NOT_EXISTS|EMPTY|NOT_EMPTY
   >
 
@@ -125,7 +127,7 @@ sub _split_rules {
 #------------------------------------------------------------------------------
 sub new {
     my ($class) = @_;
-    return bless { RULES => [], rule_file => undef }, $class;
+    return bless { RULES => [], rule_file => undef ,Sys => undef}, $class;
 }
 
 #------------------------------------------------------------------------------
@@ -133,6 +135,7 @@ sub new {
 #------------------------------------------------------------------------------
 sub Load {
     my ($this, $Sys) = @_;
+    $this->{Sys} = $Sys;
     my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/dsl_rules.cgi';
     $this->{rule_file} = $path;
     local $/ = undef;
@@ -148,6 +151,37 @@ sub Load {
     _load_rules_from_string($text, $created);
     return 0;
 }
+
+# コンテキスト設定
+sub build_context {
+    my ($this, $Sys, $Set, $Form, $Thread, $Ninja, $Unique) = @_;
+
+    my $attr_ref  = $Thread->GetAttr($Sys->Get('KEY')) // {};
+    my %attr      = ref $attr_ref eq 'HASH' ? %$attr_ref : ();
+
+    # user_info 取得
+    my $ui = $Ninja->All() || {};
+    my %user_info = ref $ui eq 'HASH' ? %$ui : ();
+
+    # ベースのコンテキスト
+    my %ctx = (
+        message     => $Form->Get('message')    // '',
+        mail        => $Form->Get('mail')       // '',
+        name        => $Form->Get('name')       // '',
+        title       => $Form->Get('subject')      // '',
+        ip          => $ENV{REMOTE_ADDR}     // '',
+        ua          => $ENV{HTTP_USER_AGENT} // '',
+        session_id  => $Sys->Get('SID') // '',
+        score       => 0,
+        setting     => $Set->All()    // {},
+        attr        => \%attr,
+        unique      => $Unique // {},
+        user_info   => \%user_info,
+    );
+
+    return \%ctx;
+}
+
 
 #------------------------------------------------------------------------------
 # Save: 現在のRULESをファイルへ保存（ブロック単位）
@@ -233,71 +267,81 @@ sub List {
 sub Check {
     my ($ctx, $depth) = @_;
     $depth ||= 0;
-    if ($depth > MAX_DEPTH) {
-        return { action => 'allow', score => $ctx->{score} // 0 };
-    }
+    return { action=>'allow', score=>$ctx->{score}//0 }
+      if $depth > MAX_DEPTH;
+
+    $ctx->{Sys} = $this->{Sys};
+
     $ctx->{user_info}//={};
     $ctx->{unique}//={};
+    $ctx->{attr}//={};
+    $ctx->{setting}//={};
     $ctx->{score}//=0;
     my $now = Time::Piece->new;
-    RULE: for my $r (@RULES) {
-        next RULE if $r->{meta}{expire_at}    && $now > $r->{meta}{expire_at};
-        next RULE if $r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after};
+
+  RULE:
+    for my $r (@RULES) {
+        next RULE if $r->{meta}{expire_at}
+                  && $now > $r->{meta}{expire_at};
+        next RULE if $r->{meta}{expire_after}
+                  && time > $r->{created}->epoch + $r->{meta}{expire_after};
+
         my $hit = eval_condition($r->{cond}, $ctx);
+
         if ($r->{list_type} && $r->{list_type} eq 'WHITELIST') {
-            if ($hit) { notify($r); return { action => 'allow', by => $r->{name} } }
+            if ($hit) {
+                notify($r);
+                return { action=>'allow', by=>$r->{name} };
+            }
             next RULE;
         }
+
         if ($hit) {
             notify($r);
             my $act = $r->{action};
+
             if ($act eq 'BLOCK') {
-                return { action => 'block', code => $r->{error_code}, by => $r->{name} };
+                return { action=>'block', code=>$r->{error_code}, by=>$r->{name} };
             }
             elsif ($act eq 'ALLOW_IP') {
-                return { action => 'allow_ip', msg => $r->{params}{code}, by => $r->{name} };
+                return { action=>'allow_ip', msg=>$r->{params}{code}, by=>$r->{name} };
             }
             elsif ($act eq 'REPLACE') {
+                # フィールド制限付き置換
                 my $field = $r->{replace_field}
-                        // do {
-                            # AST の最初の <expr> ノードからフィールド名を取り出す
-                            my $first_expr = $r->{cond}{group}[0]{expr}[0];
-                            $first_expr->{field}[0];
-                            };
-
-                my $pat_obj = $r->{replace_pat}
-                or croak "REPLACE requires '/…/ TO …' syntax";
-                ( my $to = $r->{replace_to} // '' ) =~ s/^"(.*)"$/$1/s;
-                $ctx->{$field} =~ s/$pat_obj/$to/g;
+                          // $r->{cond}{group}[0]{expr}[0]{field}[0];
+                die "Invalid replace field '$field'"
+                  unless $field =~ /^(?:message|mail|name|title)$/;
+                my $pat = $r->{replace_pat}
+                  or croak "REPLACE requires '/…/ TO …' syntax";
+                ( my $to = $r->{replace_to}//'' ) =~ s/^"(.*)"$/$1/s;
+                $ctx->{$field} =~ s/$pat/$to/g;
             }
-            elsif ($act eq 'SCORE_ADD') {
-                $ctx->{score} += ($r->{params}{number} // 1);
-            }
-            elsif ($act eq 'SCORE_SUB') {
-                $ctx->{score} -= ($r->{params}{number} // 1);
-            }
-            elsif ($act eq 'SCORE_CLEAR') {
-                $ctx->{score} = 0;
-            }
+            elsif ($act eq 'SCORE_ADD')   { $ctx->{score} += $r->{params}{number}//1 }
+            elsif ($act eq 'SCORE_SUB')   { $ctx->{score} -= $r->{params}{number}//1 }
+            elsif ($act eq 'SCORE_CLEAR') { $ctx->{score}  = 0 }
             elsif ($act eq 'SCORE_GT') {
-                if ($ctx->{score} > ($r->{params}{number} // 0)) {
-                    return { action => 'block', code => $r->{error_code}, by => $r->{name} };
+                if ($ctx->{score} > ($r->{params}{number}//0)) {
+                    return { action=>'block', code=>$r->{error_code}, by=>$r->{name} };
                 }
             }
             elsif ($act eq 'SET') {
                 for my $k (keys %{ $r->{params} }) {
-                    next unless $k =~ /^(user_info|unique)\.(.+)$/;
-                    my ($ns,$key) = ($1,$2);
-                    $ctx->{$ns}{$key} = $r->{params}{$k};
+                    if ($k =~ /^(user_info|unique|attr)\.(.+)$/) {
+                        my ($ns,$sub) = ($1,$2);
+                        $ctx->{$ns}{$sub} = $r->{params}{$k};
+                    }
                 }
             }
             elsif ($act eq 'USE') {
-                Check($ctx, $depth + 1);
+                return Check($ctx, $depth+1);
             }
+
             next RULE;
         }
     }
-    return { action => 'allow', score => $ctx->{score} };
+
+    return { action=>'allow', score=>$ctx->{score} };
 }
 
 #------------------------------------------------------------------------------
@@ -307,11 +351,15 @@ sub match_rules {
     my ($this, $ctx) = @_;
     $ctx->{user_info}//={};
     $ctx->{unique}//={};
+    $ctx->{attr}//={};
+    $ctx->{setting}//={};
     $ctx->{score}//=0;
     my @hits;
     for my $r (@RULES) {
-        next if $r->{meta}{expire_at}    && Time::Piece->new > $r->{meta}{expire_at};
-        next if $r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after};
+        next if $r->{meta}{expire_at}
+                && Time::Piece->new > $r->{meta}{expire_at};
+        next if $r->{meta}{expire_after}
+                && time > $r->{created}->epoch + $r->{meta}{expire_after};
         push @hits, $r->{name} if eval_condition($r->{cond}, $ctx);
     }
     return @hits;
@@ -446,38 +494,57 @@ sub eval_expr {
         }
         elsif ( $field =~ /^unique\.(.+)$/ ) {
             my $k = $1;
-            ( $ctx->{unique}{$k}, exists $ctx->{unique}{$k} )
+            ( $ctx->{unique}{$k},    exists $ctx->{unique}{$k} )
+        }
+        elsif ( $field =~ /^attr\.(.+)$/ ) {
+            my $k = $1;
+            ( $ctx->{attr}{$k},      exists $ctx->{attr}{$k} )
+        }
+        elsif ( $field =~ /^setting\.(.+)$/ ) {
+            my $k = $1;
+            ( $ctx->{setting}{$k},   exists $ctx->{setting}{$k} )
         }
         else {
-            ( $ctx->{$field}, exists $ctx->{$field} )
+            ( $ctx->{$field},        exists $ctx->{$field} )
         }
     };
 
     my $op = $e->{op}[0];
-    return $exists   if $op eq 'EXISTS';
-    return !$exists  if $op eq 'NOT_EXISTS';
+    return  $exists          if $op eq 'EXISTS';
+    return !$exists          if $op eq 'NOT_EXISTS';
+    return !defined($raw)||$raw eq '' if $op eq 'EMPTY';
+    return  defined($raw)&&$raw ne '' if $op eq 'NOT_EMPTY';
 
-    if ($op eq 'EMPTY') {
-        return !defined($raw) || $raw eq '';
-    }
-    if ($op eq 'NOT_EMPTY') {
-        return defined($raw) && $raw ne '';
-    }
-─
     my $val = defined($raw) ? $raw : '';
     my $cmp = decode_value($e->{value}[0]);
+
     my %ops = (
-        HAS     => sub { index($val, $cmp) != -1 },
-        NOT_HAS => sub { index($val, $cmp) == -1 },
-        MATCH   => sub { $val =~ $cmp },
-        EQ      => sub { $val eq $cmp },
-        NEQ     => sub { $val ne $cmp },
-        IN      => sub { grep { $val eq $_ } @$cmp },
-        NOT_IN  => sub { !grep { $val eq $_ } @$cmp },
-        LT      => sub { $val <  $cmp },
-        GT      => sub { $val >  $cmp },
-        LE      => sub { $val <= $cmp },
-        GE      => sub { $val >= $cmp },
+        HAS           => sub { index($val,$cmp)!=-1 },
+        NOT_HAS       => sub { index($val,$cmp)==-1 },
+        MATCH         => sub { $val=~$cmp },
+        EQ            => sub { $val eq $cmp },
+        NEQ           => sub { $val ne $cmp },
+        IN            => sub { grep { $val eq $_ } @$cmp },
+        NOT_IN        => sub { !grep { $val eq $_ } @$cmp },
+        LT            => sub { $val <  $cmp },
+        GT            => sub { $val >  $cmp },
+        LE            => sub { $val <= $cmp },
+        GE            => sub { $val >= $cmp },
+        COUNT_WITHIN  => sub { ... },
+        UNIQUE_WITHIN => sub { ... },
+        API_CHECK     => sub {
+            require './module/data_utils.pl';
+            return DATA_UTILS::IsProxyAPI(undef, $ctx->{Sys}, $cmp);
+        },
+        DNSBL_CHECK   => sub {
+            require './module/data_utils.pl';
+            return DATA_UTILS::CheckDNSBL(undef, $ENV{REMOTE_ADDR}, $cmp);
+            },
+        IN_CIDR       => sub {
+            require './module/data_utils.pl';
+            my @orz = ref $cmp eq 'ARRAY' ? @$cmp : ($cmp);
+            return DATA_UTILS::CIDRHIT(\@orz, $val);
+        },
     );
     return $ops{$op}->() if $ops{$op};
     return 0;
