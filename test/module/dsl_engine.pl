@@ -38,7 +38,7 @@ my $DSL_BODY = qr{
       <list_type>? <ws>
       <cond: <group> ( <ws> <logic_op> <ws> <group> )* > <ws>
       '=>' <ws>
-      <action: BLOCK|ALLOW_IP|DELETE_WORD|REPLACE_WORD|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE > <ws>
+      <action: BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE > <ws>
       (<params: WITH <param_list> >)? <ws>
       ( ';' <ws> ERROR <ws> <error_code:\d+> )? <ws>
       (<meta>
@@ -251,12 +251,14 @@ sub Check {
             elsif ($act eq 'ALLOW_IP') {
                 return { action => 'allow_ip', msg => $r->{params}{code}, by => $r->{name} };
             }
-            elsif ($act eq 'DELETE_WORD') {
-                $ctx->{message} = '';
-            }
-            elsif ($act eq 'REPLACE_WORD') {
+            elsif ($act eq 'REPLACE') {
+                my $pat_spec = $r->{params}{pattern}
+                  or croak "REPLACE requires a 'pattern' parameter";
+                my $pat = ref($pat_spec) eq 'Regexp'
+                        ? $pat_spec
+                        : qr/\Q$pat_spec\E/;
                 my $to = $r->{params}{replace_to} // '';
-                $ctx->{message} =~ s/.*/$to/;
+                $ctx->{message} =~ s/$pat/$to/g;
             }
             elsif ($act eq 'SCORE_ADD') {
                 $ctx->{score} += ($r->{params}{number} // 1);
