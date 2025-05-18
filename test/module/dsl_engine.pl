@@ -68,6 +68,7 @@ my $DSL_BODY = qr{
    | name
    | title
    | ip
+   | host
    | ua
    | session_id
    | user_info\.[A-Za-z0-9_]+
@@ -187,6 +188,7 @@ sub build_context {
         name        => $Form->Get('name')       // '',
         title       => $Form->Get('subject')      // '',
         ip          => $ENV{REMOTE_ADDR}     // '',
+        host         => $ENV{REMOTE_HOST}     // '',
         ua          => $ENV{HTTP_USER_AGENT} // '',
         session_id  => $Sys->Get('SID') // '',
         score       => 0,
