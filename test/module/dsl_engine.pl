@@ -202,14 +202,14 @@ sub build_context {
 # 変更を確定
 sub flush_context {
     my ($this) = @_;
-    my %ctx = $this->{'ctx'};
+    my $ctx = $this->{'ctx'};
 
     $this->{'FORM'}->Set('message',$ctx->{message});
     $this->{'FORM'}->Set('mail',$ctx->{mail});
     $this->{'FORM'}->Set('name',$ctx->{name});
     $this->{'FORM'}->Set('subject',$ctx->{title});
-    $this->{'THREAD'}->SetAttr($ctx->{attr});
-    $this->{'NINJA'}->All($ctx->{message});
+    $this->{'THREAD'}->SetAttr($this->{'SYS'}->Get('KEY'),$ctx->{attr});
+    $this->{'NINJA'}->All($ctx->{user_info});
 
     # 任意拡張分
     #$this->{'UNIQUE'}->???;
