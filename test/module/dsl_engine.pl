@@ -439,48 +439,50 @@ sub eval_expr_node {
 sub eval_expr {
     my ($e, $ctx) = @_;
     my $field = $e->{field}[0];
-    my $val   = decode_value($e->{value}[0]);
-    my $op    = $e->{op}[0];
-    my $tgt =
-       $field =~ /^user_info\.(.+)$/ ? ($ctx->{user_info}{$1}//'')
-     : $field =~ /^unique\.(.+)$/    ? ($ctx->{unique}{$1}//'')
-     :                               ($ctx->{$field}//'');
-     
-    if ($op eq 'EXISTS') {
-        return defined $val;
-    }
-    if ($op eq 'NOT_EXISTS') {
-        return ! defined $val;
-    }
+    my ($raw, $exists) = do {
+        if ( $field =~ /^user_info\.(.+)$/ ) {
+            my $k = $1;
+            ( $ctx->{user_info}{$k}, exists $ctx->{user_info}{$k} )
+        }
+        elsif ( $field =~ /^unique\.(.+)$/ ) {
+            my $k = $1;
+            ( $ctx->{unique}{$k}, exists $ctx->{unique}{$k} )
+        }
+        else {
+            ( $ctx->{$field}, exists $ctx->{$field} )
+        }
+    };
+
+    my $op = $e->{op}[0];
+    return $exists   if $op eq 'EXISTS';
+    return !$exists  if $op eq 'NOT_EXISTS';
+
     if ($op eq 'EMPTY') {
-        return ! defined($val)
-            || ( ! ref($val)      && $val eq '' )
-            || ( ref($val) eq 'ARRAY'  && ! @$val )
-            || ( ref($val) eq 'HASH'   && ! keys %$val );
+        return !defined($raw) || $raw eq '';
     }
     if ($op eq 'NOT_EMPTY') {
-        return defined($val)
-            && ( ref($val) ? (ref($val) eq 'ARRAY'  ? @$val
-                              : ref($val) eq 'HASH' ? keys %$val
-                              : 1)
-               : $val ne '' );
+        return defined($raw) && $raw ne '';
     }
+─
+    my $val = defined($raw) ? $raw : '';
+    my $cmp = decode_value($e->{value}[0]);
     my %ops = (
-        HAS     => sub { index($tgt,$val) != -1 },
-        NOT_HAS => sub { index($tgt,$val) == -1 },
-        MATCH   => sub { $tgt =~ $val },
-        EQ      => sub { $tgt eq $val },
-        NEQ     => sub { $tgt ne $val },
-        IN      => sub { grep { $tgt eq $_ } @$val },
-        NOT_IN  => sub { !grep { $tgt eq $_ } @$val },
-        LT      => sub { $tgt < $val },
-        GT      => sub { $tgt > $val },
-        LE      => sub { $tgt <= $val },
-        GE      => sub { $tgt >= $val },
+        HAS     => sub { index($val, $cmp) != -1 },
+        NOT_HAS => sub { index($val, $cmp) == -1 },
+        MATCH   => sub { $val =~ $cmp },
+        EQ      => sub { $val eq $cmp },
+        NEQ     => sub { $val ne $cmp },
+        IN      => sub { grep { $val eq $_ } @$cmp },
+        NOT_IN  => sub { !grep { $val eq $_ } @$cmp },
+        LT      => sub { $val <  $cmp },
+        GT      => sub { $val >  $cmp },
+        LE      => sub { $val <= $cmp },
+        GE      => sub { $val >= $cmp },
     );
     return $ops{$op}->() if $ops{$op};
     return 0;
 }
+
 
 #------------------------------------------------------------------------------
 # notify: ログ・通知
