@@ -659,7 +659,7 @@ sub PrintPlusSecSetting
 	
 	my ($Page, $SYS, $Form) = @_;
 	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha,$Captcha_IP,$spamhaus);
-	my ($kakiko, $trip12, $torexit, $s5h, $dronebl, $bgdsl);
+	my ($kakiko, $trip12, $torexit, $s5h, $dronebl, $bgdsl, $DSL);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Regulation Setting');
@@ -672,6 +672,7 @@ sub PrintPlusSecSetting
 	$TOREXIT	= $SYS->Get('DNSBL_TOREXIT');
 	$Captcha	= $SYS->Get('CAPTCHA');
 	$Captcha_IP	= $SYS->Get('CAPTCHA_LENIENCY');
+	$DSL		= $SYS->Get('BGDSL');
 	
 	my $noCapSet 	= $Captcha ? '':'selected';
 	my $hCapSet 	= $Captcha eq 'h-captcha' ? 'selected' : '';
