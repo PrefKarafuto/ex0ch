@@ -1017,21 +1017,20 @@ sub FunctionBGDSLEdit {
         4 => '重複ルール名',
     );
 
-    foreach my $line (@lines) {
-        next if $line =~ /^\s*$/;         # 空行スキップ
+    # ブロック単位で分割（multi-line 対応）
+    my @blocks = DSL_ENGINE::_split_rules( $Form->Get('BGDSL') );
 
-        # 先頭の「ルール名:」を抜き出し
-        my ($name) = $line =~ /^\s*([A-Za-z_]\w*)\s*:/;
+    for my $block (@blocks) {
+        next unless $block =~ /\S/;            # 空白のみのブロックはスキップ
+        # ルール名抽出
+        my ($name) = $block =~ /^\s*([A-Za-z_]\w*)\s*:/;
         $name ||= '<unknown>';
 
-        # 改行を補完して Add
-        my $block = $line . ( $line =~ /\n\z/ ? "" : "\n" );
+        # Add 実行
         my $res = $dsl->Add($block);
 
-        # ステータス文字列
-        my $status = $STATUS{$res} // "不明($res)";
-
         # ログ出力
+        my $status = $STATUS{$res} // "不明($res)";
         push @$pLog, "[$name]: $status";
     }
 
