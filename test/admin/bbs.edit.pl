@@ -985,7 +985,7 @@ sub FunctionNGWordEdit
 #	@return	エラーコード
 #
 #------------------------------------------------------------------------------------------------------------
-sub FunctionBGDSLEdit {
+sub FunctionBoardGuardEdit {
     my ($Sys, $Form, $pLog) = @_;
 
     # 権限チェック
