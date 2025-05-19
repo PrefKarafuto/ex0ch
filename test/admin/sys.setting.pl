@@ -702,7 +702,7 @@ sub PrintPlusSecSetting
 	$dronebl	= ($SYS->Get('DNSBL_DRONEBL') == 1 ? 'checked' : '');
 	$admCap		= ($admCap == 1 ? 'checked' : '');
 	$srcCap		= ($srcCap == 1 ? 'checked' : '');
-	$bgdsl		= ($bgdsl == 1 ? 'checked' : '');
+	$bgdsl		= ($DSL == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
