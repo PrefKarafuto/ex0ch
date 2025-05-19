@@ -162,9 +162,7 @@ sub Load {
     open my $fh, '<', $path or return 1;
     my $text = <$fh>;
     close $fh;
-    # 重複ルール名チェック
     my @blocks = _split_rules($text);
-    _check_duplicate_names(\@blocks);
     $this->{_blocks} = \@blocks;
     # ファイル更新時刻を created として利用
     my $created = Time::Piece->new( stat($path)->mtime );
@@ -244,18 +242,22 @@ sub Save {
 #------------------------------------------------------------------------------
 sub Add {
     my ($this, $block) = @_;
+
+    # 文法チェック(1:空 2:DSL文法エラー 3:正規表現エラー)
     my ($ok, $errs) = validate_rule_syntax($block);
-    croak "Validation error: @$errs" unless $ok;
+    return $ok if $ok;
 
     # テキストブロックに追加
     push @{ $this->{_blocks} }, $block;
+
     # 重複チェック
-    _check_duplicate_names($this->{_blocks});
+    my $dup_names = _check_duplicate_names($this->{_blocks});
+    return 4 if $dup_names;
 
     # 改めて全文をパースして AST を再構築
     my $all = join '', @{ $this->{_blocks} };
     $this->_load_rules_from_string($all, Time::Piece->new);
-    return 1;
+    return 0;
 }
 
 #------------------------------------------------------------------------------
@@ -469,16 +471,16 @@ sub validate_rule_syntax {
     $blk =~ s{/\*.*?\*/}{}gs;
     return (1, []) unless $blk =~ /\S/;
     unless ($blk =~ /^\A$DSL_BODY\z/ms) {
-        return (0, ["DSL syntax error"]);
+        return (2, ["DSL syntax error"]);
     }
     while ($blk =~ m{/(?:[^/\\]|\\.)+/[ismx]*}g) {
         my $pat = $&;
         my ($body,$flags) = $pat =~ m{^/(.*)/([ismx]*)$};
         eval { qr/$body/$flags };
-        return (0, ["Regex error: $pat - $@"])
+        return (3, ["Regex error: $pat - $@"])
             if $@;
     }
-    return (1, []);
+    return (0, []);
 }
 
 #------------------------------------------------------------------------------
@@ -553,8 +555,9 @@ sub _check_duplicate_names {
         }
     }
     if (@dups) {
-        croak "Duplicate rule names found: " . join(', ', @dups);
+        return 1;
     }
+    return 0;
 }
 
 
