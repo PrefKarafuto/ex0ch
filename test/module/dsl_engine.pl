@@ -35,7 +35,7 @@ my $DSL_BODY = qr{
       <list_type>? <ws>
       <cond: <group> ( <ws> <logic_op> <ws> <group> )* > <ws>
       '=>' <ws>
-      <action: BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE > <ws>
+      <action: BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE|DELETE > <ws>
       (?: 
        <replace_field: message|mail|name|title> <ws>
        <replace_pat: /(?:[^\\/\\]|\\.)+/(?:[ismx]*)> <ws>
@@ -71,6 +71,7 @@ my $DSL_BODY = qr{
    | host
    | ua
    | session_id
+   | time
    | user_info\.[A-Za-z0-9_]+
    | attr\.[A-Za-z0-9_]+
    | setting\.[A-Za-z0-9_]+
@@ -89,11 +90,16 @@ my $DSL_BODY = qr{
   | /\/(?:[^\/\\]|\\.)*\/[ismx]*/  # 正規表現
   | /\d+/                         # 数値
   | /\S+/                         # その他トークン
+  | <func_call>
+  > 
+
+  <func_call>
+    <name: /[A-Za-z_]\w*/> '\(' <ws> (<[args]:<value>>( <ws> ',' <ws> <value> )* )? <ws> '\)'
   >
 
   <logic_op: AND|OR >
   <param_list: <param> ( <ws> ',' <ws> <param> )* >
-  <param: /[A-Za-z_]\w*/ '=' ( /"(?:[^"\\]|\\.)*"/ | /\d+/ ) >
+  <param: /[A-Za-z_]\w*/ '=' ( /"(?:[^"\\]|\\.)*"/ | /\d+/ | /\d+[smhd]/ | /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/ ) >
   <error_code: /\d+/>  
   <ws: \s* >
 }xms;
@@ -128,6 +134,7 @@ sub new
 	my $class = shift;
 	
 	my $obj = {
+        '_blocks'   => [],
         'RULES'     => [],
 		'rule_file'	=> undef,
         'SYS'       => undef,
@@ -155,10 +162,12 @@ sub Load {
     open my $fh, '<', $path or return 1;
     my $text = <$fh>;
     close $fh;
+    # 重複ルール名チェック
+    my @blocks = _split_rules($text);
+    _check_duplicate_names(\@blocks);
+    $this->{_blocks} = \@blocks;
     # ファイル更新時刻を created として利用
     my $created = Time::Piece->new( stat($path)->mtime );
-    # ルールブロック分割
-    $this->{RULES} = [ _split_rules($text) ];
     # ASTパース
     $this->_load_rules_from_string($text, $created);
     return 0;
@@ -197,6 +206,7 @@ sub build_context {
         unique      => $Unique // {},
         user_info   => \%user_info,
     );
+    $ctx{time}     = time;
 
     $this->{'ctx'} = \%ctx;
 }
@@ -224,7 +234,7 @@ sub Save {
     croak 'No rule_file' unless $this->{rule_file};
     open my $fh, '>', $this->{rule_file} or croak $!;
     flock($fh, LOCK_EX);
-    print $fh $_ for @{ $this->{RULES} };
+    print $fh $_ for @{ $this->{_blocks} };
     close $fh;
     return 0;
 }
@@ -236,9 +246,14 @@ sub Add {
     my ($this, $block) = @_;
     my ($ok, $errs) = validate_rule_syntax($block);
     croak "Validation error: @$errs" unless $ok;
-    push @{ $this->{RULES} }, $block;
-    my $all = join '', @{ $this->{RULES} };
-    # 新規追加は現在時刻を created に設定
+
+    # テキストブロックに追加
+    push @{ $this->{_blocks} }, $block;
+    # 重複チェック
+    _check_duplicate_names($this->{_blocks});
+
+    # 改めて全文をパースして AST を再構築
+    my $all = join '', @{ $this->{_blocks} };
     $this->_load_rules_from_string($all, Time::Piece->new);
     return 1;
 }
@@ -249,15 +264,15 @@ sub Add {
 sub Update {
     my ($this, $name, $newblk) = @_;
     my $found = 0;
-    for my $i (0..$#{ $this->{RULES} }) {
-        if ($this->{RULES}[$i] =~ /^\s*\Q$name\E\s*:/) {
-            $this->{RULES}[$i] = $newblk;
+    for my $i (0..$#{ $this->{_blocks} }) {
+        if ($this->{_blocks}[$i] =~ /^\s*\Q$name\E\s*:/) {
+            $this->{_blocks}[$i] = $newblk;
             $found = 1;
             last;
         }
     }
     croak "Rule '$name' not found" unless $found;
-    my $all = join '', @{ $this->{RULES} };
+    my $all = join '', @{ $this->{_blocks} };
     # 更新はロード時刻を preserved created には使わない
     $this->_load_rules_from_string($all);
     return 1;
@@ -268,10 +283,10 @@ sub Update {
 #------------------------------------------------------------------------------
 sub Delete {
     my ($this, $name) = @_;
-    my $before = @{ $this->{RULES} };
-    @{ $this->{RULES} } = grep { $_ !~ /^\s*\Q$name\E\s*:/ } @{ $this->{RULES} };
-    croak "Rule '$name' not found" if @{ $this->{RULES} } == $before;
-    my $all = join '', @{ $this->{RULES} };
+    my $before = @{ $this->{_blocks} };
+    @{ $this->{_blocks} } = grep { $_ !~ /^\s*\Q$name\E\s*:/ } @{ $this->{_blocks} };
+    croak "Rule '$name' not found" if @{ $this->{_blocks} } == $before;
+    my $all = join '', @{ $this->{_blocks} };
     $this->_load_rules_from_string($all);
     return 1;
 }
@@ -281,7 +296,7 @@ sub Delete {
 #------------------------------------------------------------------------------
 sub Clear {
     my ($this) = @_;
-    $this->{RULES} = [];
+    $this->{_blocks} = [];
     return 1;
 }
 
@@ -365,19 +380,61 @@ sub Check {
             elsif ($act eq 'SET') {
                 for my $k (keys %{ $r->{params} }) {
                     if ($k =~ /^(user_info|unique|attr)\.(.+)$/) {
-                        my ($ns,$sub) = ($1,$2);
-                        $ctx->{$ns}{$sub} = $r->{params}{$k};
+                        my ($ns, $sub) = ($1, $2);
+                        my $raw_rhs     = $r->{params}{$k};
+                        my $newval      = evaluate_rhs($raw_rhs, $ctx);
+                        $ctx->{$ns}{$sub} = $newval;
                     }
                 }
             }
             elsif ($act eq 'USE') {
                 return $this->Check($depth + 1);
             }
+            elsif ($act eq 'DELETE') {
+                # パラメータ取得
+                my $scope      = uc($r->{params}{scope}  // 'THREAD');
+                my $limit      = $r->{params}{limit}      // 0;
+        
+                # period (過去) → older_than 秒
+                my $older_than;
+                my $units = { s => 1, m => 60, h => 3600, d => 86400 };
+                if (defined $r->{params}{period}) {
+                    my ($n,$u) = $r->{params}{period} =~ /^(\d+)([smhd])$/;
+                    $older_than = time - $n * $units->{$u};
+                }
 
+                # newer_than (以降) → UNIX 時刻または相対
+                my $newer_than;
+                if (defined $r->{params}{newer_than}) {
+                    my $raw = $r->{params}{newer_than};
+                    if ($raw =~ /^(\d+)([smhd])$/) {
+                        # 相対
+                        my ($n,$u) = ($1,$2);
+                        $newer_than = time - $n * $units->{$u};
+                    }
+                    else {
+                        # 絶対時刻
+                        $newer_than = Time::Piece->strptime($raw, "%Y-%m-%dT%H:%M:%S")->epoch;
+                    }
+                }
+
+                # 削除方向: newer_than 指定時は最新順 (DESC)、それ以外は古い順 (ASC)
+                my $order = defined $newer_than ? 'DESC' : 'ASC';
+
+                $this->perform_delete(
+                    ctx         => $ctx,
+                    scope       => $scope,
+                    older_than  => $older_than,
+                    newer_than  => $newer_than,
+                    order       => $order,
+                    limit       => $limit,
+                by          => $r->{name},
+                );
+                next RULE;
+            }
             next RULE;
         }
     }
-
     return { action=>'allow', score=>$ctx->{score} };
 }
 
@@ -526,27 +583,37 @@ sub eval_expr {
     my ($this, $e) = @_;
     my $ctx   = $this->{ctx};
     my $field = $e->{field}[0];
-    my ($raw, $exists) = do {
-        if ( $field =~ /^user_info\.(.+)$/ ) {
-            my $k = $1;
-            ( $ctx->{user_info}{$k}, exists $ctx->{user_info}{$k} )
-        }
-        elsif ( $field =~ /^unique\.(.+)$/ ) {
-            my $k = $1;
-            ( $ctx->{unique}{$k},    exists $ctx->{unique}{$k} )
-        }
-        elsif ( $field =~ /^attr\.(.+)$/ ) {
-            my $k = $1;
-            ( $ctx->{attr}{$k},      exists $ctx->{attr}{$k} )
-        }
-        elsif ( $field =~ /^setting\.(.+)$/ ) {
-            my $k = $1;
-            ( $ctx->{setting}{$k},   exists $ctx->{setting}{$k} )
-        }
-        else {
-            ( $ctx->{$field},        exists $ctx->{$field} )
-        }
-    };
+
+    my $lhs_raw = $field =~ /^(user_info|unique|attr|setting)\.[A-Za-z0-9_]+$/
+                ? $field
+                : '"' . ($ctx->{$field}//'') . '"';
+    my ($raw, $exists);
+    if ($field eq 'time') {
+        ($raw, $exists) = ($ctx->{time}, 1);
+    }
+    else {
+        ($raw, $exists) = do {
+            if ( $field =~ /^user_info\.(.+)$/ ) {
+                my $k = $1;
+                ( $ctx->{user_info}{$k}, exists $ctx->{user_info}{$k} )
+            }
+            elsif ( $field =~ /^unique\.(.+)$/ ) {
+                my $k = $1;
+                ( $ctx->{unique}{$k},    exists $ctx->{unique}{$k} )
+            }
+            elsif ( $field =~ /^attr\.(.+)$/ ) {
+                my $k = $1;
+                ( $ctx->{attr}{$k},      exists $ctx->{attr}{$k} )
+            }
+            elsif ( $field =~ /^setting\.(.+)$/ ) {
+                my $k = $1;
+                ( $ctx->{setting}{$k},   exists $ctx->{setting}{$k} )
+            }
+            else {
+                ( $ctx->{$field},        exists $ctx->{$field} )
+            }
+        };
+    }
 
     my $op = $e->{op}[0];
     return  $exists          if $op eq 'EXISTS';
@@ -554,8 +621,8 @@ sub eval_expr {
     return !defined($raw)||$raw eq '' if $op eq 'EMPTY';
     return  defined($raw)&&$raw ne '' if $op eq 'NOT_EMPTY';
 
-    my $val = defined($raw) ? $raw : '';
-    my $cmp = decode_value($e->{value}[0]);
+    my $val = evaluate_rhs($lhs_raw, $ctx);
+    my $cmp = evaluate_rhs($e->{value}[0], $ctx);
 
     my %ops = (
         HAS           => sub { index($val,$cmp)!=-1 },
@@ -589,7 +656,142 @@ sub eval_expr {
     return 0;
 }
 
+#------------------------------------------------------------------------------#
+# evaluate_rhs: SET／param 右辺に書かれた「式」を評価して返す
+#   ・数値リテラル、文字列リテラル
+#   ・四則演算 +,-,*,/,%
+#   ・関数: UPPER(str), LOWER(str), CONCAT(a,b,...), SUBSTR(str,offset[,length]), REPLACE(str,pattern,repl)
+#   ・フィールド参照: user_info.xxx, unique.xxx, attr.xxx, setting.xxx
+#------------------------------------------------------------------------------#
+sub evaluate_rhs {
+    my ($raw, $ctx) = @_;
+    $raw =~ s/^\s+|\s+$//g;
+    # 1) 文字列リテラル or 数値リテラル
+    return 0+$raw             if $raw =~ /^\d+$/;
+    return $1                if $raw =~ /^"(.*)"$/s;
 
+    # 1.5) 全体が "(…)" で囲まれていたら中身を再帰
+    if ($raw =~ /^\((.*)\)$/s) {
+        return evaluate_rhs($1, $ctx);
+    }
+
+    # 2) 最優先：+ と - （深さ０のカッコ外を探す）
+    {
+        my $depth = 0;
+        for (my $i = length($raw)-1; $i >= 0; $i--) {
+            my $c = substr($raw,$i,1);
+            $depth += 1 if $c eq ')';
+            $depth -= 1 if $c eq '(';
+            if ($depth == 0 && $c =~ /[+\-]/) {
+                my $l = substr($raw,0,$i);
+                my $r = substr($raw,$i+1);
+                return $c eq '+'
+                   ? evaluate_rhs($l,$ctx) + evaluate_rhs($r,$ctx)
+                   : evaluate_rhs($l,$ctx) - evaluate_rhs($r,$ctx);
+            }
+        }
+    }
+
+    # 3) 次に * / %
+    {
+        my $depth = 0;
+        for (my $i = length($raw)-1; $i >= 0; $i--) {
+            my $c = substr($raw,$i,1);
+            $depth += 1 if $c eq ')';
+            $depth -= 1 if $c eq '(';
+            if ($depth == 0 && $c =~ m{[*/%]}) {
+                my $l = substr($raw,0,$i);
+                my $r = substr($raw,$i+1);
+                my ($lv,$rv) = (evaluate_rhs($l,$ctx), evaluate_rhs($r,$ctx));
+                return $c eq '*' ? $lv * $rv
+                     : $c eq '/' ? ($rv==0?0:$lv/$rv)
+                     :              $lv % $rv;
+            }
+        }
+    }
+
+    # 4) 関数呼び出し
+    if ($raw =~ /^\s*([A-Za-z_]\w*)\s*\(\s*(.*)\)\s*$/s) {
+        my ($fn, $args) = (uc $1, $2);
+        # カンマで分割（単純）
+        my @parts = map { s/^\s+|\s+$//g; $_ } split /,/, $args;
+        my @vals  = map { evaluate_rhs($_, $ctx) } @parts;
+
+        if    ($fn eq 'UPPER')   { return uc $vals[0] }
+        elsif ($fn eq 'LOWER')   { return lc $vals[0] }
+        elsif ($fn eq 'CONCAT')  { return join '', @vals }
+        elsif ($fn eq 'SUBSTR')  {
+            my ($s,$off,$len) = @vals;
+            return defined $len
+                ? substr($s, $off, $len)
+                : substr($s, $off);
+        }
+        elsif ($fn eq 'REPLACE') {
+            my ($s,$pat,$repl) = @vals;
+            if ($pat =~ m{^/(.*)/([ismx]*)$}) {
+                my $re = eval "qr/$1/$2";
+                $s =~ s/$re/$repl/g;
+            }
+            return $s;
+        }elsif ($fn eq 'FORMAT_TIME') {
+            my ($ts, $fmt) = @vals;
+            my $t = Time::Piece->new($ts);
+            return $t->strftime($fmt);
+        }
+        # ここに他の関数を追加可
+    }
+
+    # 5) フィールド参照
+    if ($raw =~ m{^(user_info|unique|attr|setting)\.([A-Za-z0-9_]+)$}) {
+        my ($ns,$key) = ($1,$2);
+        return $ctx->{$ns}{$key} // '';
+    }
+
+    # 6) フォールバック: JSON・配列・正規表現・既存の literal
+    return decode_value($raw);
+}
+
+#------------------------------------------------------------------------------#
+# perform_delete: DELETE アクションの実装
+#   - ctx: ルール適用時のコンテキスト
+#   - scope: 'THREAD' or 'BOARD'
+#   - older_than: この秒数より前（optional）
+#   - newer_than: この秒数より後（optional）
+#   - order: 'ASC' or 'DESC'
+#   - limit: 件数上限
+#   - by: ルール名
+#------------------------------------------------------------------------------#
+sub perform_delete {
+    my ($this, %opt) = @_;
+    my $ctx        = $opt{ctx};
+    my $scope      = $opt{scope};
+    my $older_than = $opt{older_than};
+    my $newer_than = $opt{newer_than};
+    my $order      = $opt{order};
+    my $limit      = $opt{limit};
+    my $rule_name  = $opt{by};
+
+    # 呼び出し先のインターフェースに合わせて引数を整形
+    my %args = (
+        limit      => $limit,
+        order      => $order,
+        reason     => "DELETE by $rule_name",
+    );
+    $args{older_than} = $older_than  if defined $older_than;
+    $args{newer_than} = $newer_than  if defined $newer_than;
+
+    if ($scope eq 'THREAD') {
+        # スレッド内で削除（後で実装）
+    }
+    else {
+        # 掲示板全体で削除（後で実装）
+    }
+
+    warn "[DELETE] rule=$rule_name scope=$scope "
+        . (defined $older_than ? "older_than=$older_than " : "")
+        . (defined $newer_than ? "newer_than=$newer_than " : "")
+        . "order=$order limit=$limit\n";
+}
 #------------------------------------------------------------------------------
 # notify: ログ・通知
 #------------------------------------------------------------------------------
