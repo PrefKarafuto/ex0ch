@@ -622,7 +622,7 @@ sub PrintBoardGuardDSLEdit {
 <tr>
   <td class="DetailTitle">BoardGuard DSL</td>
   <td>
-    <textarea name="BGDSL" rows="20" cols="80" wrap="off">
+<textarea name="BGDSL" rows="20" cols="80" wrap="off">
 HTML
 
     # HTMLエスケープ
@@ -636,7 +636,7 @@ HTML
     $Page->Print($sanitize->($dsl_text));
 
     $Page->Print(<<'HTML');
-    </textarea>
+</textarea>
   </td>
 </tr>
 <tr><td colspan=2><hr></td></tr>

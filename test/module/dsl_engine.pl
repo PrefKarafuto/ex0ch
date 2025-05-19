@@ -5,10 +5,9 @@ use warnings;
 use utf8;
 use open IO => ':encoding(cp932)';
 use Fcntl qw(:flock);
-use Carp;
 use Time::Piece;
 use Time::Seconds;
-use Regexp::Grammars;
+use Carp;
 use LWP::UserAgent;
 use JSON;
 use File::stat;
@@ -18,7 +17,7 @@ use constant MAX_DEPTH => 5;
 
 # --- DSL 文法定義 (Regexp::Grammars) ---
 # <rule_file> 本体は下記のDSL_BODYで定義
-my $DSL_BODY = qr{
+our $DSL_BODY_TEXT = <<'GRAMMAR';
   <rule_file>
     <[comment]>* <[rule_line]>* <[comment]>*
   <rule_file>
@@ -102,9 +101,9 @@ my $DSL_BODY = qr{
   <param: /[A-Za-z_]\w*/ '=' ( /"(?:[^"\\]|\\.)*"/ | /\d+/ | /\d+[smhd]/ | /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/ ) >
   <error_code: /\d+/>  
   <ws: \s* >
-}xms;
-# 全文アンカー付き文法
-my $DSL_GRAMMAR = qr{\A $DSL_BODY \z}xms;
+GRAMMAR
+
+our ($DSL_BODY, $DSL_GRAMMAR);
 
 #------------------------------------------------------------------------------
 # split_rules: テキストをルールブロック単位に分割
@@ -462,22 +461,43 @@ sub match_rules {
     }
     return @hits;
 }
+
+#------------------------------------------------------------------------------
+# _ensure_grammar_loaded: 文法を遅れてロード
+#------------------------------------------------------------------------------
+sub _ensure_grammar_loaded {
+    return if $DSL_BODY;   # 既にコンパイル済みなら何もしない
+
+    # 必要なモジュールを遅延ロード
+    require Regexp::Grammars;
+
+    # テキスト→qr// xms の遅延コンパイル
+    $DSL_BODY = eval "qr{$DSL_BODY_TEXT}xms";
+    die "DSL_BODY compile failed: $@" if $@;
+
+    $DSL_GRAMMAR = qr/\A(?:$DSL_BODY)\z/xms;
+    die "DSL_GRAMMAR compile failed: $@" if $@;
+}
+
 #------------------------------------------------------------------------------
 # validate_rule_syntax: 文法と正規表現チェック
 #------------------------------------------------------------------------------
 sub validate_rule_syntax {
     my ($blk) = @_;
+    _ensure_grammar_loaded();
     $blk =~ s{//.*$}{}mg;
     $blk =~ s/#.*$//mg;
     $blk =~ s{/\*.*?\*/}{}gs;
+    $blk =~ s/\r?\n\z//;
     return (1, []) unless $blk =~ /\S/;
-    unless ($blk =~ /^\A$DSL_BODY\z/ms) {
+    unless ($blk =~ /^$DSL_BODY/ms) {
         return (2, ["DSL syntax error"]);
     }
     while ($blk =~ m{/(?:[^/\\]|\\.)+/[ismx]*}g) {
         my $pat = $&;
         my ($body,$flags) = $pat =~ m{^/(.*)/([ismx]*)$};
-        eval { qr/$body/$flags };
+        my $to_eval = "qr{$body}$flags";
+        eval $to_eval;
         return (3, ["Regex error: $pat - $@"])
             if $@;
     }
@@ -501,7 +521,7 @@ sub decode_value {
         return \@vals;
     }
     if ($raw =~ m{^/(.*)/([ismx]*)$}) {
-        return eval { qr/$1/$2 };
+        return eval "qr{$1}$2";
     }
     return $raw =~ /^\d+$/ ? 0+$raw : $raw;
 }
@@ -515,9 +535,9 @@ sub _load_rules_from_string {
     $src =~ s{//.*$}{}mg;
     $src =~ s/#.*$//mg;
     $src =~ s{/\*.*?\*/}{}gs;
+    my @parsed_rules;
     if ($src =~ $DSL_GRAMMAR) {
         my $parsed = {%/};
-        my @parsed_rules;
         for my $r (@{ $parsed->{rule_file}{rule_line} || [] }) {
             my $meta = {};
             for my $m (@{ $r->{meta}||[] }) {
