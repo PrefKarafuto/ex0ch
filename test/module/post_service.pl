@@ -394,6 +394,30 @@ sub ReadyBeforeWrite
 	$this->OMIKUJI($Sys, $Form);	#おみくじ
 	$this->tasukeruyo($Sys, $Form);	#IP+UA表示
 
+	# BoardGuardDSL規制
+	if($Sys->Get('BGDSL')){
+		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_BGDSL, $bbs)) {
+			require './module/dsl_engine.pl';
+			my $dsl = DSL_ENGINE->new;
+			$dsl->Load($Sys);
+
+			my $Unique = [];	# 独自拡張用
+			$dsl->build_context($Sys,$Set,$Form,$Threads,$Ninja,$Unique);
+
+			my ($action, $code, $rule_name) = $dsl->Check;
+			$dsl->flush_context;
+
+			if($action eq 'allow'){
+				return 0;
+			}elsif($action eq 'block'){
+				my $return_code = $code || $ZP::E_REG_NGUSER;
+				return $return_code;
+			}elsif($action eq 'allow_ip'){
+				return $ZP::E_REG_NGUSER if ($from !~ /$host/i);
+				$Form->Set('FROM', "</b>[´・ω・｀] <b>$from");
+			}
+		}
+	}
 	return 0;
 }
 # ログからセッションID取得

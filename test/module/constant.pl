@@ -161,7 +161,8 @@ our $CAP_REG_NOATTR				= 26; # スレッド属性による規制解除
 our $CAP_REG_NOHOST             = 27; # 逆引き不可規制解除
 our $CAP_REG_NONINJA            = 28; # 忍法帖規制解除
 our $CAP_REG_NOCAPTCHA          = 29; # キャプチャ規制解除
-our $CAP_MAXNUM					= 29;
+our $CAP_REG_BGDSL              = 30; # BGDSL規制解除
+our $CAP_MAXNUM					= 30;
 # USER AUTHORITY
 our $AUTH_SYSADMIN		=  0; # システム管理権限(形式的に)
 our $AUTH_USERGROUP		=  1; # 管理グループ設定
@@ -180,7 +181,8 @@ our $AUTH_RESEDIT		= 13; # レス編集
 our $AUTH_BBSEDIT		= 14; # 各種編集
 our $AUTH_LOGVIEW		= 15; # ログの閲覧・削除
 our $AUTH_NINJAEDIT		= 16; # 忍法帖の閲覧・編集
-our $AUTH_MAXNUM		= 16;
+our $AUTH_BGDSLEDIT		= 17; # BGDSL編集
+our $AUTH_MAXNUM		= 17;
 
 
 # REGEXP

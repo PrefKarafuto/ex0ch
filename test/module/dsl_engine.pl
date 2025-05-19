@@ -335,7 +335,8 @@ sub Check {
     for my $r (@{$this->{RULES}}) {
         next RULE
           if ($r->{meta}{expire_at}    && $now > $r->{meta}{expire_at})
-          || ($r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after});
+          || ($r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after})
+          || (validate_rule_syntax($r))[0];
 
         # 条件評価
         my $hit = $this->eval_condition($r->{cond});

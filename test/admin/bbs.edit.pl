@@ -87,6 +87,9 @@ sub DoPrint
 	elsif ($subMode eq 'NGWORD') {													# NGワード編集画面
 		PrintNGWordsEdit($Page, $Sys, $Form);
 	}
+	elsif ($subMode eq 'BGDSL') {													# BGDSL編集画面
+		PrintBoardGuardDSLEdit($Page, $Sys, $Form);
+	}
 	elsif ($subMode eq 'LAST') {													# 1001編集画面
 		PrintLastEdit($Page, $Sys, $Form);
 	}
@@ -148,6 +151,9 @@ sub DoFunction
 	elsif ($subMode eq 'NGWORD') {													# NGワード編集
 		$err = FunctionNGWordEdit($Sys, $Form, $this->{'LOG'});
 	}
+	elsif ($subMode eq 'BGDSL') {													# BGDSL編集
+		$err = FunctionBoardGuardEdit($Sys, $Form, $this->{'LOG'});
+	}
 	elsif ($subMode eq 'LAST') {													# 1001編集
 		$err = FunctionLastEdit($Sys, $Form, $this->{'LOG'});
 	}
@@ -193,6 +199,11 @@ sub SetMenuList
 	# 管理グループ設定権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_NGWORDS, $bbs)) {
 		$Base->SetMenu("NGワードの編集","'bbs.edit','DISP','NGWORD'");
+		$bAuth = 1;
+	}
+	# 管理グループ設定権限のみ
+	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_BGDSLEDIT, $bbs)) {
+		$Base->SetMenu("BoardGuars DSLの編集(実験的)","'bbs.edit','DISP','BGDSL'");
 		$bAuth = 1;
 	}
 	if ($bAuth) {
@@ -571,6 +582,83 @@ sub PrintNGWordsEdit
 
 #------------------------------------------------------------------------------------------------------------
 #
+#	BGDSL編集画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintBoardGuardDSLEdit {
+    my ($Page, $SYS, $Form) = @_;
+    my ($dsl_text, $isAuth, @blocks);
+
+    $SYS->Set('_TITLE', 'BBS BoardGuard Edit');
+
+    # DSLエンジン読み込み
+    require './module/dsl_engine.pl';
+    my $dsl = DSL_ENGINE->new;
+    $dsl->Load($SYS);
+
+    # フォームからの再描画（POST後の再表示） or 初回はファイル内容
+    if (defined $Form->Get('BGDSL')) {
+        $dsl_text = $Form->Get('BGDSL');
+    }
+    else {
+        @blocks   = @{ $dsl->{_blocks} // [] };
+        $dsl_text = join '', map { $_ =~ s/\r?\n\z//; "$_\n" } @blocks;
+    }
+
+    # 権限取得
+    $isAuth = $SYS->Get('ADMIN')->{'SECINFO'}
+              ->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BGDSLEDIT, $SYS->Get('BBS'));
+
+    # 出力
+    $Page->Print(<<'HTML');
+<center><table border=0 cellspacing=2 width=100%>
+<tr><td colspan=2><hr></td></tr>
+<tr>
+  <td class="DetailTitle">BoardGuard DSL</td>
+  <td>
+    <textarea name="BGDSL" rows="20" cols="80" wrap="off">
+HTML
+
+    # HTMLエスケープ
+    my $sanitize = sub {
+        my $s = shift;
+        $s =~ s/&/&amp;/g;
+        $s =~ s/</&lt;/g;
+        $s =~ s/>/&gt;/g;
+        return $s;
+    };
+    $Page->Print($sanitize->($dsl_text));
+
+    $Page->Print(<<'HTML');
+    </textarea>
+  </td>
+</tr>
+<tr><td colspan=2><hr></td></tr>
+HTML
+
+    # 保存ボタン（権限があれば）
+    if ($isAuth) {
+        $Page->Print(<<'HTML');
+<tr><td colspan=2 align="left">
+  <input
+    type="button"
+    value="　保存　"
+    onclick="DoSubmit('bbs.edit','FUNC','BGDSL')"
+  >
+</td></tr>
+HTML
+    }
+
+    $Page->Print("</table><br>\n");
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
 #	1001編集画面の表示
 #	-------------------------------------------------------------------------------------
 #	@param	$Page	ページコンテキスト
@@ -884,6 +972,74 @@ sub FunctionNGWordEdit
 	$Words->Save($Sys);
 	
 	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	BGDSL編集
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionBGDSLEdit {
+    my ($Sys, $Form, $pLog) = @_;
+
+    # 権限チェック
+    my $SEC  = $Sys->Get('ADMIN')->{'SECINFO'};
+    my $user = $Sys->Get('ADMIN')->{'USER'};
+    unless ($SEC->IsAuthority($user, $ZP::AUTH_BGDSLEDIT, $Sys->Get('BBS'))) {
+        return 1000;
+    }
+
+    # DSLエンジン読み込み
+    require './module/dsl_engine.pl';
+    my $dsl = DSL_ENGINE->new;
+    $dsl->Load($Sys);
+
+    # テキストエリアから行ごとに切り出し
+    my @lines = split /\r?\n/, $Form->Get('BGDSL');
+
+    # 既存ルールクリア
+    $dsl->Clear();
+
+    # ログ記録
+    push @$pLog, '■BoardGuard DSL ルール一覧:';
+
+    # ステータス表示用テーブル
+    my %STATUS = (
+        0 => 'OK',
+        1 => 'なし',
+        2 => 'DSL文法エラー',
+        3 => '正規表現文法エラー',
+        4 => '重複ルール名',
+    );
+
+    foreach my $line (@lines) {
+        next if $line =~ /^\s*$/;         # 空行スキップ
+
+        # 先頭の「ルール名:」を抜き出し
+        my ($name) = $line =~ /^\s*([A-Za-z_]\w*)\s*:/;
+        $name ||= '<unknown>';
+
+        # 改行を補完して Add
+        my $block = $line . ( $line =~ /\n\z/ ? "" : "\n" );
+        my $res = $dsl->Add($block);
+
+        # ステータス文字列
+        my $status = $STATUS{$res} // "不明($res)";
+
+        # ログ出力
+        push @$pLog, "[$name]: $status";
+    }
+
+    # ファイル保存
+    $dsl->Save($Sys);
+    push @$pLog, '→ 保存完了';
+
+    return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------

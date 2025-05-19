@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード(未使用)
-		'VERSION'	=> 'ex0ch BBS dev-r181 20250518',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r182 20250520',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -315,6 +315,8 @@ sub InitSystemValue
 
 		'ADMINCAP'		=> '',									# admin.cgiにCaptchaを課すか
 		'SEARCHCAP'		=> '',									# search.cgiにCaptchaを課すか
+
+		'BGDSL'			=> '',									# 強力な複合規制機能を許可(実験的)
 
 		'LASTMOD'		=> '',									# 最後にシステム管理者がログインした時刻
 		'LOGOUT'		=> 30,									# 無操作状態で管理画面から自動ログアウトするまでの時間

@@ -243,6 +243,7 @@ sub PrintSystemInfo
 		CGI::Carp
 		JSON
 		FCGI
+		Regexp::Grammars
 	));
 	
 	my $core = {};
@@ -658,7 +659,7 @@ sub PrintPlusSecSetting
 	
 	my ($Page, $SYS, $Form) = @_;
 	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha,$Captcha_IP,$spamhaus);
-	my ($kakiko, $trip12, $torexit, $s5h, $dronebl);
+	my ($kakiko, $trip12, $torexit, $s5h, $dronebl, $bgdsl);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Regulation Setting');
@@ -700,6 +701,7 @@ sub PrintPlusSecSetting
 	$dronebl	= ($SYS->Get('DNSBL_DRONEBL') == 1 ? 'checked' : '');
 	$admCap		= ($admCap == 1 ? 'checked' : '');
 	$srcCap		= ($srcCap == 1 ? 'checked' : '');
+	$bgdsl		= ($bgdsl == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -777,6 +779,10 @@ sub PrintPlusSecSetting
 	$Page->Print("<td><input type=checkbox name=SEARCHCAP $srcCap value=on></td></tr>\n");
 	$Page->Print("<tr><td>bbs.cgi</td>");
 	$Page->Print("<td>各掲示板の設定で有効化してください</td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">BoardGuard DSL(実験的、要Regexp::Grammars)</td></tr>\n");
+	$Page->Print("<tr><td>強力な複合式ユーザー規制を有効化する(注意：<a href=\"https://github.com/PrefKarafuto/ex0ch/wiki/BoardGuard-DSL\">このDSLの文法・機能</a>をしっかり理解していないと、datやデータファイルが破損する恐れがあります！)</td>");
+	$Page->Print("<td><input type=checkbox name=BGDSL $bgdsl value=on></td></tr>\n");
 
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -1330,6 +1336,7 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('PROXYCHECK_APIKEY', $Form->Get('PROXYCHECK_APIKEY'));
 	$SYSTEM->Set('ADMINCAP', ($Form->Equal('ADMINCAP', 'on') ? 1 : 0));
 	$SYSTEM->Set('SEARCHCAP', ($Form->Equal('SEARCHCAP', 'on') ? 1 : 0));
+	$SYSTEM->Set('BGDSL', ($Form->Equal('BGDSL', 'on') ? 1 : 0));
 	$SYSTEM->Save();
 	
 	{
@@ -1344,6 +1351,7 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 ProxyChecker APIキー：' . $SYSTEM->Get('PROXYCHECK_APIKEY');
 		push @$pLog, '　　　 admin.cgiへのCaptcha：' . $SYSTEM->Get('ADMINCAP');
 		push @$pLog, '　　　 search.cgiへのCaptcha：' . $SYSTEM->Get('SEARCHCAP');
+		push @$pLog, '　　　 BoardGuard DSL：' . $SYSTEM->Get('BGDSL');
 	}
 	return 0;
 }
