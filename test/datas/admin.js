@@ -1,23 +1,23 @@
 var postflag = false;
 
 //----------------------------------------------------------------------------------------
-//	submitˆ—
+//	submitï¿½ï¿½ï¿½ï¿½
 //----------------------------------------------------------------------------------------
 function DoSubmit(modName, mode, subMode)
 {
-	// •t‰Áî•ñÝ’è
-	document.ADMIN.MODULE.value		= modName;				// ƒ‚ƒWƒ…[ƒ‹–¼
-	document.ADMIN.MODE.value		= mode;					// ƒƒCƒ“ƒ‚[ƒh
-	document.ADMIN.MODE_SUB.value	= subMode;				// ƒTƒuƒ‚[ƒh
+	// ï¿½tï¿½ï¿½ï¿½ï¿½ï¿½Ý’ï¿½
+	document.ADMIN.MODULE.value		= modName;				// ï¿½ï¿½ï¿½Wï¿½ï¿½ï¿½[ï¿½ï¿½ï¿½ï¿½
+	document.ADMIN.MODE.value		= mode;					// ï¿½ï¿½ï¿½Cï¿½ï¿½ï¿½ï¿½ï¿½[ï¿½h
+	document.ADMIN.MODE_SUB.value	= subMode;				// ï¿½Tï¿½uï¿½ï¿½ï¿½[ï¿½h
 	
 	postflag = true;
 	
-	// POST‘—M
+	// POSTï¿½ï¿½ï¿½M
 	document.ADMIN.submit();
 }
 
 //----------------------------------------------------------------------------------------
-//	ƒIƒvƒVƒ‡ƒ“Ý’è
+//	ï¿½Iï¿½vï¿½Vï¿½ï¿½ï¿½ï¿½ï¿½Ý’ï¿½
 //----------------------------------------------------------------------------------------
 function SetOption(key, val)
 {
@@ -44,3 +44,16 @@ function toggleAll(key)
 		}
 	}
 }
+
+//Lines count
+document.addEventListener('DOMContentLoaded', function(){
+	const ta   = document.getElementById('dslText');
+	const nums = document.getElementById('dslLines');
+	function update(){
+	  const n = ta.value.split('\n').length || 1;
+	  nums.innerHTML = Array.from({length:n},(_,i)=>i+1).join('<br>');
+	}
+	ta.addEventListener('scroll', ()=> nums.scrollTop = ta.scrollTop);
+	ta.addEventListener('input',  update);
+	update();
+  });

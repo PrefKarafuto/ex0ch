@@ -175,7 +175,7 @@ sub All {
     my $this = shift;
     my ($sess) = @_;
     if(!$sess){
-        return $this->{'SESSION'} ||= {};
+        return $this->{'SESSION'};
     }else{
         $this->{'SESSION'} = $sess;
     }

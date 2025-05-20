@@ -11,100 +11,113 @@ use Carp;
 use LWP::UserAgent;
 use JSON;
 use File::stat;
-
+BEGIN{open STDERR, '>error.log'}
 # 最大再帰数
 use constant MAX_DEPTH => 5;
 
 # --- DSL 文法定義 (Regexp::Grammars) ---
 # <rule_file> 本体は下記のDSL_BODYで定義
 our $DSL_BODY_TEXT = <<'GRAMMAR';
-  <:skip( ws comment )>
+  # ── トークン定義 ──
+  <token: ws>      \s+
+  <token: comment> (?x://[^\n]*\n? | \#[^\n]*\n? | (?s:/\*.*?\*/))
 
-  <rule: rule_file>
-       <[rule_line]>*
-   </rule_file>
-  <token: ws>  \h* \n
+  # ── 開始パターン: 必ずここで呼び出す ──
+  <rule_file>
+    <[rule_line]>*
+  </rule>
 
-  <token: comment>
-        \/\/ [^\n]* \R?
-      | \#   [^\n]* \R?
-      | /\* .*? \*/    (?s)
-
-  <rule_line>
+  # ── 1行ごとのルール定義 ──
+  <rule: rule_line>
     (?<raw>
-      <name> ':' <ws>
-      <list_type>? <ws>
-      <cond: <group> ( <ws> <logic_op> <ws> <group> )* > <ws>
-      '=>' <ws>
-      <action: BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE|DELETE > <ws>
-      (?: <param_list> <ws> )?
-      (?: 
-       <replace_field: message|mail|name|title> <ws>
-       <replace_pat: /(?:[^\\/\\]|\\.)+/(?:[ismx]*)> <ws>
-       TO <ws>
-       <replace_to: /"(?:[^"\\]|\\.)*"/>
-       )? <ws>
-      ( ';' <ws> ERROR <ws> <error_code:\d+> )? <ws>
-      (<meta>
-         ';' <ws> (EXPIRE <ws> AT <ws> ".*?" | EXPIRE <ws> AFTER <ws> \( .*? \) | NOTIFY_ADMIN <ws> WITH <ws> code=\d+ | LOG_IF <ws> (?:true|false))
-      >)* <ws>
+       <name> ':' <ws>*
+       <list_type>? <ws>*
+       <cond: <group> ( <ws>* <logic_op> <ws>* <group> )* > <ws>*
+       '=>' <ws>* <action> <ws>*
+       (?: <param_list> <ws>* )?
+       (?: <replace_field> <ws>* <replace_pat> <ws>* TO <ws>* <replace_to> )?
+       (?: ';' <ws>* ERROR <ws>* <error_code> )?
+       (?: <meta> <ws>* )*
     )
     ( <comment> )?
-  </rule_line>
+  </rule>
 
-  <name:       /[A-Za-z_]\w*/ >
-  <list_type:  /BLACKLIST|WHITELIST/ >
+  # ── サブルール群 ──
+  <name:       /[A-Za-z_]\w*/>
+  <list_type:  /BLACKLIST|WHITELIST/>
+  <action:     /BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE|DELETE/>
 
   <group>
     <expr>
-  | '\(' <ws> <cond> <ws> '\)'
-  >
+  | '\(' <ws>* <cond> <ws>* '\)'
+  </group>
 
   <expr>
-    <field> <ws> <op> <ws> <value>
-  >
+    <field> <ws>* <op> <ws>* <value>
+  </expr>
 
   <field:
-     message
-   | mail
-   | name
-   | title
-   | ip
-   | host
-   | ua
-   | session_id
-   | time
-   | user_info\.[A-Za-z0-9_]+
-   | attr\.[A-Za-z0-9_]+
-   | setting\.[A-Za-z0-9_]+
-   | unique\.[A-Za-z0-9_]+
+       message
+     | mail
+     | name
+     | title
+     | ip
+     | host
+     | ua
+     | session_id
+     | time
+     | user_info\.[A-Za-z0-9_]+
+     | attr\.[A-Za-z0-9_]+
+     | setting\.[A-Za-z0-9_]+
+     | unique\.[A-Za-z0-9_]+
   >
 
   <op:
-       HAS|NOT_HAS|MATCH|EQ|NEQ|IN|NOT_IN|IN_CIDR|LT|GT|LE|GE
-     | COUNT_WITHIN|UNIQUE_WITHIN|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|API_CHECK|DNSBL_CHECK|SET
-     | EXISTS|NOT_EXISTS|EMPTY|NOT_EMPTY
+       HAS|NOT_HAS|MATCH|EQ|NEQ|IN|NOT_IN|IN_CIDR
+     | LT|GT|LE|GE|COUNT_WITHIN|UNIQUE_WITHIN
+     | API_CHECK|DNSBL_CHECK|SET|EXISTS|NOT_EXISTS|EMPTY|NOT_EMPTY
   >
+
+  <param_list: <param> ( <ws>* ',' <ws>* <param> )*>
+  <param: /[A-Za-z_]\w*/ '=' 
+          ( /"(?:[^"\\]|\\.)*"/ 
+          | /\d+/ 
+          | /\d+[smhd]/ 
+          | /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/ 
+          )
+  >
+  <error_code: /\d+/>
 
   <value>
-    /"(?:[^"\\]|\\.)*"/s      # ダブルクォート文字列
-  | /\[(?:[^\]\[]|\\.)*\]/s   # 配列リテラル
-  | /\/(?:[^\/\\]|\\.)*\/[ismx]*/  # 正規表現
-  | /\d+/                         # 数値
-  | /\S+/                         # その他トークン
-  | <func_call>
-  > 
+      <string>
+    | /\[(?:[^\]\[\r\n]|\\.)*\]/
+    | /\/(?:[^\/\\]|\\.)*\/[ismx]*/
+    | /\d+/
+    | /\S+/
+    | <func_call>
+  </value>
+
+  <string: /(["'])(?:(?!\1|\\).|\\.)*\1/>
 
   <func_call>
-    <name: /[A-Za-z_]\w*/> '\(' <ws> (<[args]:<value>>( <ws> ',' <ws> <value> )* )? <ws> '\)'
-  >
+    <name> '\(' <ws>* 
+      ( <[args]:<value>> 
+        ( <ws>* ',' <ws>* <value> )*
+      )? <ws>* '\)'
+  </func_call>
 
-  <logic_op: AND|OR >
-  <param_list: <param> ( <ws> ',' <ws> <param> )* >
-  <param: /[A-Za-z_]\w*/ '=' ( /"(?:[^"\\]|\\.)*"/ | /\d+/ | /\d+[smhd]/ | /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/ ) >
-  <error_code: /\d+/>  
-  <ws: \s* >
+  <logic_op: /AND|OR/>
+
+  <meta:
+    ';' <ws>*
+    (?: EXPIRE <ws>* AT <ws>* "[^"]*" 
+      | EXPIRE <ws>* AFTER <ws>*\(\s*\d+(?:sec|min|h|d)\s*\)
+      | NOTIFY_ADMIN <ws>* WITH <ws>* code=\d+
+      | LOG_IF <ws>* (?:true|false)
+    )
+  >
 GRAMMAR
+
 
 our ($DSL_BODY, $DSL_GRAMMAR);
 
@@ -189,14 +202,15 @@ sub build_context {
     my %attr      = ref $attr_ref eq 'HASH' ? %$attr_ref : ();
 
     # user_info 取得
+    $Ninja->LoadOnly($Sys, $Sys->Get('SID'));
     my $ui = $Ninja->All() || {};
     my %user_info = ref $ui eq 'HASH' ? %$ui : ();
 
     # ベースのコンテキスト
     my %ctx = (
-        message     => $Form->Get('message')    // '',
+        message     => $Form->Get('MESSAGE')    // '',
         mail        => $Form->Get('mail')       // '',
-        name        => $Form->Get('name')       // '',
+        name        => $Form->Get('FROM')       // '',
         title       => $Form->Get('subject')      // '',
         ip          => $ENV{REMOTE_ADDR}     // '',
         host         => $ENV{REMOTE_HOST}     // '',
@@ -218,9 +232,9 @@ sub flush_context {
     my ($this) = @_;
     my $ctx = $this->{'ctx'};
 
-    $this->{'FORM'}->Set('message',$ctx->{message});
+    $this->{'FORM'}->Set('MESSAGE',$ctx->{message});
     $this->{'FORM'}->Set('mail',$ctx->{mail});
-    $this->{'FORM'}->Set('name',$ctx->{name});
+    $this->{'FORM'}->Set('FROM',$ctx->{name});
     $this->{'FORM'}->Set('subject',$ctx->{title});
     $this->{'THREAD'}->SetAttr($this->{'SYS'}->Get('KEY'),$ctx->{attr});
     $this->{'NINJA'}->All($ctx->{user_info});
@@ -332,17 +346,22 @@ sub Check {
     $ctx->{attr}//={};
     $ctx->{setting}//={};
     $ctx->{score}//=0;
+    
+    warn ">>> Loaded rules: " . scalar(@{$this->{RULES}}) 
+     . " names=[" 
+     . join(",", map $_->{name}//'(no-name)', @{$this->{RULES}}) 
+     . "]\n";
+
 
     my $now = Time::Piece->new;
-
   RULE:
     for my $r (@{$this->{RULES}}) {
         next RULE
           if ($r->{meta}{expire_at}    && $now > $r->{meta}{expire_at})
-          || ($r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after})
-          || (validate_rule_syntax($r))[0];
+          || ($r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after});
 
         # 条件評価
+        
         my $hit = $this->eval_condition($r->{cond});
 
         # WHITELIST
@@ -471,7 +490,7 @@ sub match_rules {
 # _ensure_grammar_loaded: 文法を遅れてロード
 #------------------------------------------------------------------------------
 sub _ensure_grammar_loaded {
-    return if $DSL_BODY;   # 既にコンパイル済みなら何もしない
+    return if defined $DSL_GRAMMAR;   # 既にコンパイル済みなら何もしない
 
     # 必要なモジュールを遅延ロード
     require Regexp::Grammars;
@@ -536,11 +555,16 @@ sub _load_rules_from_string {
     $created //= Time::Piece->new;
     $src =~ s/^\x{FEFF}//;
     $src =~ s/\r\n/\n/g;
+    
+    use Data::Dumper;
+    warn "[DSL DEBUG] parse tree:\n" . Dumper(\%/);
+    
     my @parsed_rules;
+    _ensure_grammar_loaded();
     if ($src =~ $DSL_GRAMMAR) {
         my $parsed = {%/};
+        warn "[DSL DEBUG] after match:\n" . Dumper(\%/);
         for my $r (@{ $parsed->{rule_file}{rule_line} || [] }) {
-        	next if $r =~ /^\s*$/s;
             my $meta = {};
             for my $m (@{ $r->{meta}||[] }) {
                 if ($m =~ /EXPIRE\s+AT\s+"(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}:\d{2})"/) {
@@ -690,9 +714,18 @@ sub eval_expr {
 sub evaluate_rhs {
     my ($raw, $ctx) = @_;
     $raw =~ s/^\s+|\s+$//g;
-    # 1) 文字列リテラル or 数値リテラル
-    return 0+$raw             if $raw =~ /^\d+$/;
-    return $1                if $raw =~ /^"((?:\[^"\\] | \\.)\*)"\$/s;
+    # -- 数値リテラル --
+    if ( $raw =~ /^(\d+)$/ ) {
+        return 0 + $1;
+    }
+
+    # -- 文字列リテラル ('…' または "…") --
+    #    中のエスケープ（\' \" \\）を解除して返す
+    if ( $raw =~ /^"(.*)"$/s || $raw =~ /^'(.*)'$/s ) {
+        my $str = $1;
+        $str =~ s/\\(['"\\])/$1/g;
+        return $str;
+    }
 
     # 1.5) 全体が "(…)" で囲まれていたら中身を再帰
     if ($raw =~ /^\((.*)\)$/s) {

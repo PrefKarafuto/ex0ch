@@ -615,12 +615,19 @@ $dsl_text = (defined $from_form && $from_form ne '')
 
     # 出力
     $Page->Print(<<'HTML');
-<center><table border=0 cellspacing=2 width=100%>
-<tr><td colspan=2><hr></td></tr>
+<center><table border=0 cellspacing=1 width=100%>
+<tr><td colspan=1><hr>BoardGuard DSL 編集画面<hr></td></tr>
 <tr>
-  <td class="DetailTitle">BoardGuard DSL</td>
   <td>
-<textarea name="BGDSL" rows="20" cols="80" wrap="off">
+<div class="dsl-editor">
+  <div id="dslLines" class="dsl-lines"></div>
+  <textarea
+      id="dslText"
+      class="dsl-text"
+      name="BGDSL"
+      spellcheck="false"
+      wrap="off"
+  >
 HTML
 	# HTMLエスケープ
     my $sanitize = sub {
@@ -633,6 +640,7 @@ HTML
 	$Page->Print($sanitize->($dsl_text));
     $Page->Print(<<'HTML');
 </textarea>
+</div>
   </td>
 </tr>
 <tr><td colspan=2><hr></td></tr>

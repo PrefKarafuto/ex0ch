@@ -222,3 +222,31 @@ input.delete	{
   #captcha-widget:not(:empty) + #captcha-placeholder {
 	display: none;
   }
+
+/* DSL EDIT */
+.dsl-editor{
+	display:flex;
+	font-family:monospace;
+	font-size: 16px;
+	border:1px solid #888;
+	height:400px;
+	}
+
+	.dsl-lines{
+	padding:4px 6px 0 6px;
+	background:#f5f5f5;
+	color:#777;
+	text-align:right;
+	user-select:none;
+	overflow:hidden;
+	}
+
+	.dsl-text{
+	flex:1;
+	padding:4px;
+	border:none;
+	resize:none;
+	font-family:inherit;
+	outline:none;
+	overflow:scroll;
+	}
