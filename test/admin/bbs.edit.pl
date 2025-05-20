@@ -593,7 +593,7 @@ sub PrintNGWordsEdit
 #------------------------------------------------------------------------------------------------------------
 sub PrintBoardGuardDSLEdit {
     my ($Page, $SYS, $Form) = @_;
-    my ($dsl_text, $isAuth, @blocks);
+    my ($dsl_text, $isAuth);
 
     $SYS->Set('_TITLE', 'BBS BoardGuard Edit');
 
@@ -603,13 +603,11 @@ sub PrintBoardGuardDSLEdit {
     $dsl->Load($SYS);
 
     # フォームからの再描画（POST後の再表示） or 初回はファイル内容
-    if (defined $Form->Get('BGDSL')) {
-        $dsl_text = $Form->Get('BGDSL');
-    }
-    else {
-        @blocks   = @{ $dsl->{_blocks} // [] };
-        $dsl_text = join '', map { $_ =~ s/\r?\n\z//; "$_\n" } @blocks;
-    }
+    my $from_form = $Form->Get('BGDSL');
+$dsl_text = (defined $from_form && $from_form ne '')
+          ? $from_form
+          : ($dsl->{SRC_RAW} // '');
+
 
     # 権限取得
     $isAuth = $SYS->Get('ADMIN')->{'SECINFO'}
@@ -624,8 +622,7 @@ sub PrintBoardGuardDSLEdit {
   <td>
 <textarea name="BGDSL" rows="20" cols="80" wrap="off">
 HTML
-
-    # HTMLエスケープ
+	# HTMLエスケープ
     my $sanitize = sub {
         my $s = shift;
         $s =~ s/&/&amp;/g;
@@ -633,8 +630,7 @@ HTML
         $s =~ s/>/&gt;/g;
         return $s;
     };
-    $Page->Print($sanitize->($dsl_text));
-
+	$Page->Print($sanitize->($dsl_text));
     $Page->Print(<<'HTML');
 </textarea>
   </td>
@@ -1032,7 +1028,7 @@ sub FunctionBoardGuardEdit {
 
         # ログ出力
         my $status = $STATUS{$res} // "不明($res)";
-        push @$pLog, "[$name]: $status";
+        push @$pLog, "[$name]: $status" if ($res != 1);
     }
 
     # ファイル保存

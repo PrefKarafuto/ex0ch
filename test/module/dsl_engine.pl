@@ -18,15 +18,17 @@ use constant MAX_DEPTH => 5;
 # --- DSL 文法定義 (Regexp::Grammars) ---
 # <rule_file> 本体は下記のDSL_BODYで定義
 our $DSL_BODY_TEXT = <<'GRAMMAR';
-  <rule_file>
-    <[comment]>* <[rule_line]>* <[comment]>*
-  <rule_file>
+  <:skip( ws comment )>
 
-  <comment>
-    (?: \# [^\n]* )
-  | (?: '//' [^\n]* )
-  | (?: '/\*' (?: .*? ) '\*/' )
-  >x
+  <rule: rule_file>
+       <[rule_line]>*
+   </rule_file>
+  <token: ws>  \h* \n
+
+  <token: comment>
+        \/\/ [^\n]* \R?
+      | \#   [^\n]* \R?
+      | /\* .*? \*/    (?s)
 
   <rule_line>
     (?<raw>
@@ -35,6 +37,7 @@ our $DSL_BODY_TEXT = <<'GRAMMAR';
       <cond: <group> ( <ws> <logic_op> <ws> <group> )* > <ws>
       '=>' <ws>
       <action: BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE|DELETE > <ws>
+      (?: <param_list> <ws> )?
       (?: 
        <replace_field: message|mail|name|title> <ws>
        <replace_pat: /(?:[^\\/\\]|\\.)+/(?:[ismx]*)> <ws>
@@ -47,7 +50,7 @@ our $DSL_BODY_TEXT = <<'GRAMMAR';
       >)* <ws>
     )
     ( <comment> )?
-  <rule_line>
+  </rule_line>
 
   <name:       /[A-Za-z_]\w*/ >
   <list_type:  /BLACKLIST|WHITELIST/ >
@@ -135,6 +138,7 @@ sub new
 	my $obj = {
         '_blocks'   => [],
         'RULES'     => [],
+        'SRC_RAW'	=> [],
 		'rule_file'	=> undef,
         'SYS'       => undef,
 		'SET'		=> undef,
@@ -162,6 +166,7 @@ sub Load {
     my $text = <$fh>;
     close $fh;
     my @blocks = _split_rules($text);
+    $this->{SRC_RAW} = $text;
     $this->{_blocks} = \@blocks;
     # ファイル更新時刻を created として利用
     my $created = Time::Piece->new( stat($path)->mtime );
@@ -244,19 +249,20 @@ sub Add {
 
     # 文法チェック(1:空 2:DSL文法エラー 3:正規表現エラー)
     my ($ok, $errs) = validate_rule_syntax($block);
-    return $ok if $ok;
-
-    # テキストブロックに追加
-    push @{ $this->{_blocks} }, $block;
+    my $ret = 0;
+    $ret = $ok if $ok;
 
     # 重複チェック
-    my $dup_names = _check_duplicate_names($this->{_blocks});
-    return 4 if $dup_names;
+    my $dup_names = _check_duplicate_names([ @{ $this->{_blocks} }, $block ]);
+    $ret = 4 if $dup_names;
+    
+    # OK なら追加
+    push @{ $this->{_blocks} }, $block;
 
     # 改めて全文をパースして AST を再構築
     my $all = join '', @{ $this->{_blocks} };
     $this->_load_rules_from_string($all, Time::Piece->new);
-    return 0;
+    return $ret;
 }
 
 #------------------------------------------------------------------------------
@@ -272,7 +278,6 @@ sub Update {
             last;
         }
     }
-    croak "Rule '$name' not found" unless $found;
     my $all = join '', @{ $this->{_blocks} };
     # 更新はロード時刻を preserved created には使わない
     $this->_load_rules_from_string($all);
@@ -472,10 +477,7 @@ sub _ensure_grammar_loaded {
     require Regexp::Grammars;
 
     # テキスト→qr// xms の遅延コンパイル
-    $DSL_BODY = eval "qr{$DSL_BODY_TEXT}xms";
-    die "DSL_BODY compile failed: $@" if $@;
-
-    $DSL_GRAMMAR = qr/\A(?:$DSL_BODY)\z/xms;
+    $DSL_GRAMMAR = eval { qr{\A$DSL_BODY_TEXT\z}xms };
     die "DSL_GRAMMAR compile failed: $@" if $@;
 }
 
@@ -485,12 +487,12 @@ sub _ensure_grammar_loaded {
 sub validate_rule_syntax {
     my ($blk) = @_;
     _ensure_grammar_loaded();
-    $blk =~ s{//.*$}{}mg;
-    $blk =~ s/#.*$//mg;
+    $blk =~ s{^\s*//.*$}{}mg;
+    $blk =~ s{^\s*#.*$}{}mg;
     $blk =~ s{/\*.*?\*/}{}gs;
     $blk =~ s/\r?\n\z//;
     return (1, []) unless $blk =~ /\S/;
-    unless ($blk =~ /^$DSL_BODY/ms) {
+    unless ($blk =~ $DSL_GRAMMAR) {
         return (2, ["DSL syntax error"]);
     }
     while ($blk =~ m{/(?:[^/\\]|\\.)+/[ismx]*}g) {
@@ -532,13 +534,13 @@ sub decode_value {
 sub _load_rules_from_string {
     my ($this, $src, $created) = @_;
     $created //= Time::Piece->new;
-    $src =~ s{//.*$}{}mg;
-    $src =~ s/#.*$//mg;
-    $src =~ s{/\*.*?\*/}{}gs;
+    $src =~ s/^\x{FEFF}//;
+    $src =~ s/\r\n/\n/g;
     my @parsed_rules;
     if ($src =~ $DSL_GRAMMAR) {
         my $parsed = {%/};
         for my $r (@{ $parsed->{rule_file}{rule_line} || [] }) {
+        	next if $r =~ /^\s*$/s;
             my $meta = {};
             for my $m (@{ $r->{meta}||[] }) {
                 if ($m =~ /EXPIRE\s+AT\s+"(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}:\d{2})"/) {
@@ -557,8 +559,6 @@ sub _load_rules_from_string {
             }
             push @parsed_rules, { %$r, meta=>$meta, created=>$created };
         }
-    } else {
-        croak "DSL parse failed";
     }
     $this->{RULES} = \@parsed_rules;
 }
@@ -692,7 +692,7 @@ sub evaluate_rhs {
     $raw =~ s/^\s+|\s+$//g;
     # 1) 文字列リテラル or 数値リテラル
     return 0+$raw             if $raw =~ /^\d+$/;
-    return $1                if $raw =~ /^"(.*)"$/s;
+    return $1                if $raw =~ /^"((?:\[^"\\] | \\.)\*)"\$/s;
 
     # 1.5) 全体が "(…)" で囲まれていたら中身を再帰
     if ($raw =~ /^\((.*)\)$/s) {
