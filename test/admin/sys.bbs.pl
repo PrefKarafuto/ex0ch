@@ -254,7 +254,7 @@ sub PrintBBSList
 				$subject	= $BBS->Get('SUBJECT', $id);
 				$category	= $BBS->Get('CATEGORY', $id);
 				$category	= $Category->Get('NAME', $category);
-				$url		= $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', '')).$BBS->Get('DIR', $belongID);
+				$url		= $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', '')).'/'.$BBS->Get('DIR', $belongID);
 
 				$common1 = "\"javascript:SetOption('TARGET_BBS','$id');";
 				$common1 .= "DoSubmit('bbs.thread','DISP','LIST');\"";
