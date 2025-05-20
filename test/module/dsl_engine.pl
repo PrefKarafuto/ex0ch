@@ -11,7 +11,7 @@ use Carp;
 use LWP::UserAgent;
 use JSON;
 use File::stat;
-BEGIN{open STDERR, '>error.log'}
+# BEGIN{open STDERR, '>error.log'}
 # 最大再帰数
 use constant MAX_DEPTH => 5;
 
