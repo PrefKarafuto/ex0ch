@@ -25,7 +25,7 @@ our $DSL_BODY_TEXT = <<'GRAMMAR';
   # ── 開始パターン: 必ずここで呼び出す ──
   <rule_file>
     <[rule_line]>*
-  </rule>
+  </rule_file>
 
   # ── 1行ごとのルール定義 ──
   <rule: rule_line>
