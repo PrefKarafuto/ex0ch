@@ -203,7 +203,7 @@ sub build_context {
 
     # user_info 取得
     $Ninja->LoadOnly($Sys, $Sys->Get('SID'));
-    my $ui = $Ninja->All() || {};
+    my $ui = $Set->Get('BBS_NINJA') ? $Ninja->All() : {};
     my %user_info = ref $ui eq 'HASH' ? %$ui : ();
 
     # ベースのコンテキスト
