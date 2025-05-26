@@ -61,6 +61,9 @@ our $DSL_BODY_TEXT = <<'GRAMMAR';
      | mail
      | name
      | title
+     | thread_id
+     | bbs
+     | captcha
      | ip
      | host
      | ua
@@ -208,21 +211,27 @@ sub build_context {
 
     # ベースのコンテキスト
     my %ctx = (
-        message     => $Form->Get('MESSAGE')    // '',
-        mail        => $Form->Get('mail')       // '',
-        name        => $Form->Get('FROM')       // '',
-        title       => $Form->Get('subject')      // '',
-        ip          => $ENV{REMOTE_ADDR}     // '',
-        host         => $ENV{REMOTE_HOST}     // '',
-        ua          => $ENV{HTTP_USER_AGENT} // '',
-        session_id  => $Sys->Get('SID') // '',
-        score       => 0,
-        setting     => $Set->All()    // {},
-        attr        => \%attr,
-        unique      => $Unique // {},
-        user_info   => \%user_info,
+        message     => $Form->Get('MESSAGE')// '',  # 投稿本文
+        mail        => $Form->Get('mail')   // '',  # メール欄/コマンド欄
+        name        => $Form->Get('FROM')   // '',  # 名前欄
+        title       => $Form->Get('subject')// '',  # （スレ立て時のみ）スレタイ
+        time        => $Form->Get('time')   // '',  # 投稿時刻
+        thread_id   => $Form->Get('key')    // '',  # （スレ投稿時のみ）スレッドID
+        bbs         => $Form->Get('bbs')    // '',  # 掲示板ディレクトリ名
+        ip          => $ENV{REMOTE_ADDR}    // '',  # IPアドレス
+        host        => $ENV{REMOTE_HOST}    // '',  # ホスト名
+        ua          => $ENV{HTTP_USER_AGENT}// '',  # ユーザーエージェント
+        session_id  => $Sys->Get('SID')     // '',  # セッションID（忍法帖ID）
+        setting     => $Set->All()          // {},  # 掲示板設定情報
+        attr        => \%attr,                      # スレッド属性情報
+        user_info   => \%user_info,                 # 忍法帖情報
+        score       => 0,                           # スコア管理用変数
+        unique      => $Unique              // {},  # 独自拡張用
     );
-    $ctx{time}     = time;
+
+    # Captchaを行ったか
+    # Captchaが設定されていなければ$ctx{'captcha'}は未定義。
+    $ctx{'captcha'} = $Form->Get($Sys->Get('CAPTCHA').'-response') ? 1 : 0 if $Sys->Get('CAPTCHA');
 
     $this->{'ctx'} = \%ctx;
 }
