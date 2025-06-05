@@ -251,6 +251,7 @@ sub Check {
         package DSL::SafeCompartment;
         use constant _DENY_   => 0;
         use constant _ACCEPT_ => 1;
+        use constant _PASS_   => 2;
 CONST
 
     # (E) さらに、ZP パッケージに定義された our スカラ変数を自動列挙して共有
@@ -398,13 +399,28 @@ CONST
                 next;
             }
 
-            # 返り値が 0 (_DENY_) なら即座に返す
-            if (!defined $result or $result == 0) {
-                return 0;  # _DENY_
+            # 返り値に応じて振り分ける
+            if (!defined $result) {
+                # undefined もパスとみなす
+                next;
             }
-            # _ACCEPT_ (=1) なら次のルールへ
+            elsif ($result == 0) {
+                # _DENY_ -> 即座に拒否
+                return 0;
+            }
+            elsif ($result == 1) {
+                # _ACCEPT_ -> 即座に許可
+                return 1;
+            }
+            elsif ($result == 2) {
+                # _PASS_ -> 明示的に次のルールへ
+                next;
+            }
+            else {
+                # それ以外（想定外）はパス扱い
+                next;
+            }
         }
-
         # すべてのルールが _ACCEPT_ (=1) を返した場合
         return 1;  # _ACCEPT_
     }
