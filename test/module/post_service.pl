@@ -402,13 +402,14 @@ sub ReadyBeforeWrite
 			$dsl->Load();
 
 			my $Unique = [];	# 独自拡張用
+			my $is_captcha = $Form->Get($Sys->Get('CAPTCHA').'-response');
 			$dsl->SetCtx({
 			message     => $Form->Get('MESSAGE')    // '',
 			mail        => $Form->Get('mail')       // '',
 			name        => $Form->Get('FROM')       // '',
 			subject     => $Form->Get('subject')    // '',
 			time        => $Form->Get('time')       // time(),
-			thread_id   => $Form->Get('key')        // '',
+			thread_id   => $threadid		        // '',
 			bbs         => $Form->Get('bbs')        // '',
 			fp          => $Form->Get('fp')         // '',
 			ip          => $ENV{REMOTE_ADDR}        // '',
@@ -416,6 +417,7 @@ sub ReadyBeforeWrite
 			ua          => $ENV{HTTP_USER_AGENT}    // '',
 			session_id  => $Sys->Get('SID')         // '',
 			cap_id		=> $capID 					// '',
+			is_captcha	=> $is_captcha				// '',
 			setting     => $Set->All()              // {},
 			attr        => $Threads->GetAttr($threadid) // {},  # スレッド属性ハッシュ
 			user_info   => $Ninja->Get() 			// {},      # 忍法帖情報ハッシュ
