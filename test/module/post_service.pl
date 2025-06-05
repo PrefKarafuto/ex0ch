@@ -420,7 +420,7 @@ sub ReadyBeforeWrite
 			is_captcha	=> $is_captcha				// '',
 			setting     => $Set->All()              // {},
 			attr        => $Threads->GetAttr($threadid) // {},  # スレッド属性ハッシュ
-			user_info   => $Ninja->Get() 			// {},      # 忍法帖情報ハッシュ
+			user_info   => $Ninja->All() 			// {},      # 忍法帖情報ハッシュ
 			score       => 0,
 			unique      => $Unique                  // {},  # 拡張用
 			# 以下、値の返却時に使用
@@ -439,7 +439,7 @@ sub ReadyBeforeWrite
 			$Form->Set('FROM', $out{name});
 			$Form->Set('subject', $out{subject});
 
-			$Ninja->Set($out{user_info});
+			$Ninja->All($out{user_info});
 
 			$Threads->SetAttr($threadid,$out{attr});
 			$Threads->SaveAttr($Sys);
