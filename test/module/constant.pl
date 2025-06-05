@@ -129,6 +129,10 @@ our $E_PAGE_COOKIE			= 9001;
 our $E_PAGE_WRITE			= 9002; # 未使用
 our $E_PAGE_THREADMOBILE	= 9003; # 廃止
 our $E_PAGE_CAPTCHA     	= 9004;
+our $E_PAGE_CHECK     	    = 9005;
+#　特殊
+our $E_SUCCESS_FAKE			= -1;
+our $E_SUCCESS_DELETE	    = -2;
 
 
 # CAP PERMISSION

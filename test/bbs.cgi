@@ -101,6 +101,8 @@ sub BBSCGI
 				PrintBBSCaptcha($CGI, $Page);
 				$log = $err;
 				$err = $ZP::E_SUCCESS;
+			}elsif($err < 0){
+				PrintBBSJump($CGI, $Page);
 			}else{
 				#SaveErrorInfo($Sys, $Set, $err);
 				PrintBBSError($CGI, $Page, $err);
