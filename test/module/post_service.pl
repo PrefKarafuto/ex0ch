@@ -398,23 +398,62 @@ sub ReadyBeforeWrite
 	if($Sys->Get('BGDSL')){
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_REG_BGDSL, $bbs)) {
 			require './module/dsl_engine.pl';
-			my $dsl = DSL_ENGINE->new;
-			$dsl->Load($Sys);
+			my $dsl = DSL::Engine->new($Sys);
+			$dsl->Load();
 
 			my $Unique = [];	# 独自拡張用
-			$dsl->build_context($Sys,$Set,$Form,$Threads,$Ninja,$Unique);
+			$dsl->SetCtx({
+			message     => $Form->Get('MESSAGE')    // '',
+			mail        => $Form->Get('mail')       // '',
+			name        => $Form->Get('FROM')       // '',
+			subject     => $Form->Get('subject')    // '',
+			time        => $Form->Get('time')       // time(),
+			thread_id   => $Form->Get('key')        // '',
+			bbs         => $Form->Get('bbs')        // '',
+			fp          => $Form->Get('fp')         // '',
+			ip          => $ENV{REMOTE_ADDR}        // '',
+			host        => $ENV{REMOTE_HOST}        // '',
+			ua          => $ENV{HTTP_USER_AGENT}    // '',
+			session_id  => $Sys->Get('SID')         // '',
+			cap_id		=> $capID 					// '',
+			setting     => $Set->All()              // {},
+			attr        => $Threads->GetAttr($threadid) // {},  # スレッド属性ハッシュ
+			user_info   => $Ninja->Get() 			// {},      # 忍法帖情報ハッシュ
+			score       => 0,
+			unique      => $Unique                  // {},  # 拡張用
+			# 以下、値の返却時に使用
+			error_code 	=> 0,
+			error_subject	=> '',
+			error_message	=> '',
+			});
 
-			my ($action, $code, $rule_name) = $dsl->Check;
-			$dsl->flush_context;
+			my $result = $dsl->Check(5);	# タイムアウト5秒
 
-			if($action eq 'allow'){
+			my %out = %{ $dsl->GetOutResult };
+
+			# 変更を反映
+			$Form->Set('MESSAGE',$out{message});
+			$Form->Set('mail', $out{mail});
+			$Form->Set('FROM', $out{name});
+			$Form->Set('subject', $out{subject});
+
+			$Ninja->Set($out{user_info});
+
+			$Threads->SetAttr($threadid,$out{attr});
+			$Threads->SaveAttr($Sys);
+
+			# 規制
+			if ($result){
+				# 書き込み許可
 				return 0;
-			}elsif($action eq 'block'){
-				my $return_code = $code || $ZP::E_REG_NGUSER;
-				return $return_code;
-			}elsif($action eq 'allow_ip'){
-				return $ZP::E_REG_NGUSER if ($from !~ /$host/i);
-				$Form->Set('FROM', "</b>[´・ω・｀] <b>$from");
+			}elsif($out{error_code}){
+				# 拒否：任意のエラー
+				$Sys->Set('_ORIGERRSUB_',$out{error_subject});
+				$Sys->Set('_ORIGERRMES_',$out{error_message});
+				return $out{error_code};
+			}else{
+				# 拒否
+				return $ZP::E_REG_NGUSER;
 			}
 		}
 	}

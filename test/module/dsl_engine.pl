@@ -1,871 +1,483 @@
-package DSL_ENGINE;
+#===============================================================================
+#  dsl_engine.pl
+#
+#  DSL ルールファイル (例: dsl_rules.cgi) の読み込み・保存・全体編集・
+#  個別関数単位での評価・文法チェックを行うモジュール。
+#  「%ctx」は読み取り専用とし、出力用に「%out」を用意して呼び出し元に返す。
+#
+#  提供メソッド：
+#    new, Load, Save, Set, Get, SetCtx, Check, GetOutResult, syntax_check
+#
+#  使い方例:
+#    use lib '/path/to/this/script';
+#    use DSL::Engine;
+#
+#    my $engine = DSL::Engine->new( file_path => '/path/to/dsl_rules.cgi' );
+#    $engine->Load() or die "Load failed\n";
+#
+#    # 管理画面で編集するときはファイル全体を取り出し、編集後にまるごとセット
+#    my $full_text = $engine->Get();
+#    # …管理画面で $full_text を編集して $edited_text を得る…
+#    $engine->Set($edited_text);
+#    $engine->Save() or die "Save failed\n";
+#
+#    # コンテキストを設定して DSL を実行
+#    $engine->SetCtx({
+#      message    => 'こんにちは',
+#      mail       => '',
+#      name       => 'ユーザー',
+#      subject    => '',
+#      time       => time(),
+#      thread_id  => '',
+#      bbs        => 'testbbs',
+#      fp         => '',
+#      ip         => '127.0.0.1',
+#      host       => 'localhost',
+#      ua         => 'Mozilla/5.0',
+#      session_id => 'ABC123',
+#      setting    => { require_admin => 0 },
+#      attr       => { is_admin => 0, is_locked => 0 },
+#      user_info  => { last_post_time => time()-60, last_message => '' },
+#      score      => 0,
+#      unique     => {},
+#    });
+#    $engine->Check();
+#
+#    # 関数単位でエラーのあったルールを参照
+#    if (my $errors = $engine->{_check_error}) {
+#      foreach my $rule (keys %{$errors}) {
+#        warn "Rule '$rule' error: $errors->{$rule}\n";
+#      }
+#    }
+#
+#    # DSL 実行後の出力用ハッシュを取得
+#    my $out_ref = $engine->GetOutResult();
+#    # 例: $out_ref->{message} に DSL がセットした文字列が入る
+#
+#    # DSL ファイル全体の構文チェック
+#    $engine->syntax_check()
+#      or warn "File syntax error: " . $engine->{_syntax_error};
+#===============================================================================
 
+package DSL::Engine;
 use strict;
 use warnings;
 use utf8;
 use open IO => ':encoding(cp932)';
-use Fcntl qw(:flock);
-use Time::Piece;
-use Time::Seconds;
+
+use Safe;
 use Carp;
-use LWP::UserAgent;
-use JSON;
-use File::stat;
-# BEGIN{open STDERR, '>error.log'}
-# 最大再帰数
-use constant MAX_DEPTH => 5;
-
-# --- DSL 文法定義 (Regexp::Grammars) ---
-# <rule_file> 本体は下記のDSL_BODYで定義
-our $DSL_BODY_TEXT = <<'GRAMMAR';
-  # ── トークン定義 ──
-  <token: ws>      \s+
-  <token: comment> (?x://[^\n]*\n? | \#[^\n]*\n? | (?s:/\*.*?\*/))
-
-  # ── 開始パターン: 必ずここで呼び出す ──
-  <rule_file>
-    <[rule_line]>*
-  </rule_file>
-
-  # ── 1行ごとのルール定義 ──
-  <rule: rule_line>
-    (?<raw>
-       <name> ':' <ws>*
-       <list_type>? <ws>*
-       <cond: <group> ( <ws>* <logic_op> <ws>* <group> )* > <ws>*
-       '=>' <ws>* <action> <ws>*
-       (?: <param_list> <ws>* )?
-       (?: <replace_field> <ws>* <replace_pat> <ws>* TO <ws>* <replace_to> )?
-       (?: ';' <ws>* ERROR <ws>* <error_code> )?
-       (?: <meta> <ws>* )*
-    )
-    ( <comment> )?
-  </rule>
-
-  # ── サブルール群 ──
-  <name:       /[A-Za-z_]\w*/>
-  <list_type:  /BLACKLIST|WHITELIST/>
-  <action:     /BLOCK|ALLOW_IP|REPLACE|SCORE_ADD|SCORE_SUB|SCORE_CLEAR|SCORE_GT|SET|USE|DELETE/>
-
-  <group>
-    <expr>
-  | '\(' <ws>* <cond> <ws>* '\)'
-  </group>
-
-  <expr>
-    <field> <ws>* <op> <ws>* <value>
-  </expr>
-
-  <field:
-       message
-     | mail
-     | name
-     | title
-     | thread_id
-     | bbs
-     | captcha
-     | ip
-     | host
-     | ua
-     | session_id
-     | time
-     | user_info\.[A-Za-z0-9_]+
-     | attr\.[A-Za-z0-9_]+
-     | setting\.[A-Za-z0-9_]+
-     | unique\.[A-Za-z0-9_]+
-  >
-
-  <op:
-       HAS|NOT_HAS|MATCH|EQ|NEQ|IN|NOT_IN|IN_CIDR
-     | LT|GT|LE|GE|COUNT_WITHIN|UNIQUE_WITHIN
-     | API_CHECK|DNSBL_CHECK|SET|EXISTS|NOT_EXISTS|EMPTY|NOT_EMPTY
-  >
-
-  <param_list: <param> ( <ws>* ',' <ws>* <param> )*>
-  <param: /[A-Za-z_]\w*/ '=' 
-          ( /"(?:[^"\\]|\\.)*"/ 
-          | /\d+/ 
-          | /\d+[smhd]/ 
-          | /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/ 
-          )
-  >
-  <error_code: /\d+/>
-
-  <value>
-      <string>
-    | /\[(?:[^\]\[\r\n]|\\.)*\]/
-    | /\/(?:[^\/\\]|\\.)*\/[ismx]*/
-    | /\d+/
-    | /\S+/
-    | <func_call>
-  </value>
-
-  <string: /(["'])(?:(?!\1|\\).|\\.)*\1/>
-
-  <func_call>
-    <name> '\(' <ws>* 
-      ( <[args]:<value>> 
-        ( <ws>* ',' <ws>* <value> )*
-      )? <ws>* '\)'
-  </func_call>
-
-  <logic_op: /AND|OR/>
-
-  <meta:
-    ';' <ws>*
-    (?: EXPIRE <ws>* AT <ws>* "[^"]*" 
-      | EXPIRE <ws>* AFTER <ws>*\(\s*\d+(?:sec|min|h|d)\s*\)
-      | NOTIFY_ADMIN <ws>* WITH <ws>* code=\d+
-      | LOG_IF <ws>* (?:true|false)
-    )
-  >
-GRAMMAR
+use Storable qw(dclone);
 
 
-our ($DSL_BODY, $DSL_GRAMMAR);
+#------------------------------------------------------------------------------#
+# パッケージ変数: 
+#   %ctx  - DSL 実行時の読み取り専用コンテキスト
+#   %out  - DSL 実行時の出力用ハッシュ (呼び出し元に渡す)
+#------------------------------------------------------------------------------#
+our %ctx = ();
+our %out = ();
 
-#------------------------------------------------------------------------------
-# split_rules: テキストをルールブロック単位に分割
-#------------------------------------------------------------------------------
-sub _split_rules {
-    my ($text) = @_;
-    my @lines = split /\n/, $text;
-    my @blocks;
-    my $cur = '';
-    for my $line (@lines) {
-        if ($line =~ /^\s*[A-Za-z_]\w*\s*:/) {
-            push @blocks, $cur if $cur ne '';
-            $cur = $line . "\n";
-        } else {
-            $cur .= $line . "\n";
-        }
-    }
-    push @blocks, $cur if $cur ne '';
-    return @blocks;
+#------------------------------------------------------------------------------#
+# コンストラクタ: new
+#------------------------------------------------------------------------------#
+# 引数:
+#   file_path => 'dsl_rules.cgi'   # DSL ルールファイルのパス (必須)
+# 戻り値:
+#   オブジェクト (ハッシュリファレンス)
+sub new {
+    my ($class, $Sys) = @_;
+    my $self = {};
+
+    $self->{file_path}      = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . "/info/dsl_rules.cgi";
+    $self->{dsl_text}       = '';     # ファイル全体の文字列
+    $self->{_check_error}   = {};     # Check() での各関数単位のエラーを格納
+    $self->{_syntax_error}  = '';     # syntax_check() でのエラー
+
+    # Safe コンパートメントを初期化
+    my $comp = Safe->new('DSL::SafeCompartment');
+    $comp->permit_only(
+        ':default',
+        ':base_core',
+        ':base_loop',
+        ':base_math',
+        ':base_list',
+        ':base_orig',
+    );
+    $comp->deny(
+        qw(
+          open
+          sysopen
+          unlink
+          rename
+          chmod
+          chown
+          system
+          exec
+          fork
+          kill
+          syscall
+          lock
+          tie
+        )
+    );
+    $self->{_safe}      = $comp;
+    $self->{_coderefs}  = {};    # 成功した関数のコード参照を格納
+    bless $self, $class;
+    return $self;
 }
 
-#------------------------------------------------------------------------------
-# コンストラクタ
-#------------------------------------------------------------------------------
-sub new
-{
-	my $class = shift;
-	
-	my $obj = {
-        '_blocks'   => [],
-        'RULES'     => [],
-        'SRC_RAW'	=> [],
-		'rule_file'	=> undef,
-        'SYS'       => undef,
-		'SET'		=> undef,
-		'FORM'		=> undef,
-		'THREAD'	=> undef,
-		'NINJA'		=> undef,
-        'UNIQUE'	=> undef,
-		'ctx'	    => undef,
-	};
-	bless $obj, $class;
-	
-	return $obj;
-}
-
-#------------------------------------------------------------------------------
-# Load: ファイルから読み込み、分割してパース
-#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------#
+# メソッド: Load
+#  DSL ファイルを読み込み、内部キャッシュ (dsl_text) に保持する
+# 戻り値: 成功 => 1, 失敗 => 0
+#------------------------------------------------------------------------------#
 sub Load {
-    my ($this, $Sys) = @_;
-    $this->{'SYS'} = $Sys;
-    my $path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/dsl_rules.cgi';
-    $this->{rule_file} = $path;
-    local $/ = undef;
-    open my $fh, '<', $path or return 1;
-    my $text = <$fh>;
+    my ($self) = @_;
+    my $path = $self->{file_path};
+
+    open my $fh, '<', $path
+      or do {
+        carp "Load: cannot open '$path': $!";
+        return 0;
+      };
+    local $/;    # スラープモード
+    my $content = <$fh>;
     close $fh;
-    my @blocks = _split_rules($text);
-    $this->{SRC_RAW} = $text;
-    $this->{_blocks} = \@blocks;
-    # ファイル更新時刻を created として利用
-    my $created = Time::Piece->new( stat($path)->mtime );
-    # ASTパース
-    $this->_load_rules_from_string($text, $created);
-    return 0;
+
+    $self->{dsl_text} = $content;
+    return 1;
 }
 
-# コンテキスト設定
-sub build_context {
-    my ($this, $Sys, $Set, $Form, $Thread, $Ninja, $Unique) = @_;
-    $this->{'SYS'} = $Sys;
-	$this->{'FORM'} = $Form;
-	$this->{'SET'} = $Set;
-	$this->{'THREAD'} = $Thread;
-	$this->{'NINJA'} = $Ninja;
-	$this->{'UNIQUE'} = $Unique;
-
-    my $attr_ref  = $Thread->GetAttr($Sys->Get('KEY')) // {};
-    my %attr      = ref $attr_ref eq 'HASH' ? %$attr_ref : ();
-
-    # user_info 取得
-    $Ninja->LoadOnly($Sys, $Sys->Get('SID'));
-    my $ui = $Set->Get('BBS_NINJA') ? $Ninja->All() : {};
-    my %user_info = ref $ui eq 'HASH' ? %$ui : ();
-
-    # ベースのコンテキスト
-    my %ctx = (
-        message     => $Form->Get('MESSAGE')// '',  # 投稿本文
-        mail        => $Form->Get('mail')   // '',  # メール欄/コマンド欄
-        name        => $Form->Get('FROM')   // '',  # 名前欄
-        title       => $Form->Get('subject')// '',  # （スレ立て時のみ）スレタイ
-        time        => $Form->Get('time')   // '',  # 投稿時刻
-        thread_id   => $Form->Get('key')    // '',  # （スレ投稿時のみ）スレッドID
-        bbs         => $Form->Get('bbs')    // '',  # 掲示板ディレクトリ名
-        ip          => $ENV{REMOTE_ADDR}    // '',  # IPアドレス
-        host        => $ENV{REMOTE_HOST}    // '',  # ホスト名
-        ua          => $ENV{HTTP_USER_AGENT}// '',  # ユーザーエージェント
-        session_id  => $Sys->Get('SID')     // '',  # セッションID（忍法帖ID）
-        setting     => $Set->All()          // {},  # 掲示板設定情報
-        attr        => \%attr,                      # スレッド属性情報
-        user_info   => \%user_info,                 # 忍法帖情報
-        score       => 0,                           # スコア管理用変数
-        unique      => $Unique              // {},  # 独自拡張用
-    );
-
-    # Captchaを行ったか
-    # Captchaが設定されていなければ$ctx{'captcha'}は未定義。
-    $ctx{'captcha'} = $Form->Get($Sys->Get('CAPTCHA').'-response') ? 1 : 0 if $Sys->Get('CAPTCHA');
-
-    $this->{'ctx'} = \%ctx;
-}
-
-# 変更を確定
-sub flush_context {
-    my ($this) = @_;
-    my $ctx = $this->{'ctx'};
-
-    $this->{'FORM'}->Set('MESSAGE',$ctx->{message});
-    $this->{'FORM'}->Set('mail',$ctx->{mail});
-    $this->{'FORM'}->Set('FROM',$ctx->{name});
-    $this->{'FORM'}->Set('subject',$ctx->{title});
-    $this->{'THREAD'}->SetAttr($this->{'SYS'}->Get('KEY'),$ctx->{attr});
-    $this->{'NINJA'}->All($ctx->{user_info});
-
-    # 任意拡張分
-    #$this->{'UNIQUE'}->???;
-}
-#------------------------------------------------------------------------------
-# Save: 現在のRULESをファイルへ保存（ブロック単位）
-#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------#
+# メソッド: Save
+#  内部キャッシュ (dsl_text) をファイルに上書き保存する
+# 戻り値: 成功 => 1, 失敗 => 0
+#------------------------------------------------------------------------------#
 sub Save {
-    my ($this, $Sys) = @_;
-    croak 'No rule_file' unless $this->{rule_file};
-    open my $fh, '>', $this->{rule_file} or croak $!;
-    flock($fh, LOCK_EX);
-    print $fh $_ for @{ $this->{_blocks} };
+    my ($self) = @_;
+    my $path    = $self->{file_path};
+    my $content = $self->{dsl_text};
+
+    open my $fh, '>', $path
+      or do {
+        carp "Save: cannot open '$path': $!";
+        return 0;
+      };
+    print $fh $content;
     close $fh;
-    return 0;
-}
 
-#------------------------------------------------------------------------------
-# Add: 新規ブロックを文法検証後に追加
-#------------------------------------------------------------------------------
-sub Add {
-    my ($this, $block) = @_;
-
-    # 文法チェック(1:空 2:DSL文法エラー 3:正規表現エラー)
-    my ($ok, $errs) = validate_rule_syntax($block);
-    my $ret = 0;
-    $ret = $ok if $ok;
-
-    # 重複チェック
-    my $dup_names = _check_duplicate_names([ @{ $this->{_blocks} }, $block ]);
-    $ret = 4 if $dup_names;
-    
-    # OK なら追加
-    push @{ $this->{_blocks} }, $block;
-
-    # 改めて全文をパースして AST を再構築
-    my $all = join '', @{ $this->{_blocks} };
-    $this->_load_rules_from_string($all, Time::Piece->new);
-    return $ret;
-}
-
-#------------------------------------------------------------------------------
-# Update: 名前でブロックを置換
-#------------------------------------------------------------------------------
-sub Update {
-    my ($this, $name, $newblk) = @_;
-    my $found = 0;
-    for my $i (0..$#{ $this->{_blocks} }) {
-        if ($this->{_blocks}[$i] =~ /^\s*\Q$name\E\s*:/) {
-            $this->{_blocks}[$i] = $newblk;
-            $found = 1;
-            last;
-        }
-    }
-    my $all = join '', @{ $this->{_blocks} };
-    # 更新はロード時刻を preserved created には使わない
-    $this->_load_rules_from_string($all);
     return 1;
 }
 
-#------------------------------------------------------------------------------
-# Delete: ブロック単位で削除
-#------------------------------------------------------------------------------
-sub Delete {
-    my ($this, $name) = @_;
-    my $before = @{ $this->{_blocks} };
-    @{ $this->{_blocks} } = grep { $_ !~ /^\s*\Q$name\E\s*:/ } @{ $this->{_blocks} };
-    croak "Rule '$name' not found" if @{ $this->{_blocks} } == $before;
-    my $all = join '', @{ $this->{_blocks} };
-    $this->_load_rules_from_string($all);
+#------------------------------------------------------------------------------#
+# メソッド: Get
+#  引数なし。DSL ファイル全体のテキストを返す
+#------------------------------------------------------------------------------#
+sub Get {
+    my ($self) = @_;
+    return $self->{dsl_text};
+}
+
+#------------------------------------------------------------------------------#
+# メソッド: Set
+#  引数: $new_text
+#  DSL ファイル全体をまるごと置き換える
+# 戻り値: 成功 => 1
+#------------------------------------------------------------------------------#
+sub Set {
+    my ($self, $new_text) = @_;
+    croak "Set: new_text is required" unless defined $new_text;
+    $self->{dsl_text} = $new_text;
     return 1;
 }
 
-#------------------------------------------------------------------------------
-# Clear: 全ブロッククリア
-#------------------------------------------------------------------------------
-sub Clear {
-    my ($this) = @_;
-    $this->{_blocks} = [];
+#------------------------------------------------------------------------------#
+# メソッド: SetCtx
+#  引数: $hashref (参照)
+#  メイン側で処理すべきコンテキストを設定する（読み取り専用）
+# 戻り値: 成功 => 1
+#------------------------------------------------------------------------------#
+sub SetCtx {
+    my ($self, $ctx_ref) = @_;
+    croak "SetCtx: hashref required" unless ref($ctx_ref) eq 'HASH';
+
+    # グローバル %ctx を上書き（読み取り専用として使う）
+    %ctx = %{$ctx_ref};
     return 1;
 }
 
-#------------------------------------------------------------------------------
-# List: ブロック名一覧
-#------------------------------------------------------------------------------
-sub List {
-    my ($this) = @_;
-    return map { /^\s*([A-Za-z_]\w*)/; $1 } @{ $this->{RULES} };
-}
-
-#------------------------------------------------------------------------------
-# Check: ルール適用チェック
-#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------#
+# メソッド: Check
+#
+#   引数:
+#     $timeout  - ルール実行ごとのタイムアウト秒 (省略可)
+#     $mode     - 'syntax' を渡すと「構文チェック（ルール単位）」、それ以外は「DSL 評価」
+#
+#  戻り値:
+#   - $mode eq 'syntax' のとき => ルールごとのステータスを格納したハッシュリファレンス
+#         (例) { RuleA => 0, RuleB => 2, RuleC => 4, … }
+#   - それ以外 (評価モード) のとき => 0 (_DENY_) または 1 (_ACCEPT_)
+#
+#  内部で行うこと:
+#   1) %ctx をディープコピーして %out に初期化
+#   2) Safe に %ctx, %out, _DENY_/_ACCEPT_ 定数, ZP::* 定数 を共有
+#   3) トップレベルコードを一度 Safe で評価
+#   4) 各ルールを個別に Safe で定義し、$self->{_coderefs} に格納
+#   5) $mode eq 'syntax' の場合は「ルール毎に eval だけ行い文法エラー or 正規表現エラー or 重複チェック」を実施し、
+#      $self->{_rule_status}, $self->{_rule_error} に結果をセットしてハッシュリファレンスを返す
+#   6) 評価モードの場合は「各ルールのコードリファレンスを呼び出し、最初に _DENY_ を返したら即座に 0 を返し、
+#      すべて _ACCEPT_ なら最終的に 1 を返す」
+#------------------------------------------------------------------------------#
 sub Check {
-    my ($this, $depth) = @_;
-    $depth ||= 0;
+    my ($self, $timeout_arg, $mode) = @_;
 
-    my $ctx = $this->{ctx};
-    # 深さオーバーは「許可」
-    return { action=>'allow', score=>$ctx->{score}//0 }
-      if $depth > MAX_DEPTH;
+    # (A) エラー情報・コード参照をクリア
+    $self->{_check_error} = {};
+    $self->{_coderefs}   = {};
+    $self->{_rule_status} = {};   # 構文チェックモード用
+    $self->{_rule_error}  = {};   # 構文チェックモード用
 
-    # ctxの初期化
-    $ctx->{user_info}//={};
-    $ctx->{unique}//={};
-    $ctx->{attr}//={};
-    $ctx->{setting}//={};
-    $ctx->{score}//=0;
-    
-    warn ">>> Loaded rules: " . scalar(@{$this->{RULES}}) 
-     . " names=[" 
-     . join(",", map $_->{name}//'(no-name)', @{$this->{RULES}}) 
-     . "]\n";
+    # (B) %ctx をディープコピーして %out に初期化
+    #     → DSL 評価モードでは %out に結果を書き込む。構文チェックモードでも初期化だけ行う
+    %out = %{ dclone(\%ctx) };
 
+    # (C) Safe に %ctx, %out を共有
+    $self->{_safe}->share_from('DSL::Engine', ['%ctx', '%out']);
+    my $comp = $self->{_safe};
 
-    my $now = Time::Piece->new;
-  RULE:
-    for my $r (@{$this->{RULES}}) {
-        next RULE
-          if ($r->{meta}{expire_at}    && $now > $r->{meta}{expire_at})
-          || ($r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after});
+    # (D) Safe 名称空間に定数 _DENY_ / _ACCEPT_ を定義
+    $comp->reval(<<'CONST');
+        package DSL::SafeCompartment;
+        use constant _DENY_   => 0;
+        use constant _ACCEPT_ => 1;
+CONST
 
-        # 条件評価
-        
-        my $hit = $this->eval_condition($r->{cond});
-
-        # WHITELIST
-        if ($r->{list_type} && $r->{list_type} eq 'WHITELIST') {
-            if ($hit) {
-                notify($r);
-                return { action=>'allow', by=>$r->{name} };
+    # (E) さらに、ZP パッケージに定義された our スカラ変数を自動列挙して共有
+    {
+        no strict 'refs';
+        my @zp_scalars;
+        foreach my $symbol (keys %ZP::) {
+            if (defined *{"ZP::$symbol"}{SCALAR}) {
+                push @zp_scalars, '$' . $symbol;
             }
-            next RULE;
+        }
+        use strict 'refs';
+        $comp->share_from('ZP', \@zp_scalars);
+    }
+
+    # (F) トップレベルコード（サブルーチンヘルパー定義や my 変数定義など）を Safe 上で評価
+    my $dsl        = $self->{dsl_text};
+    my $top_level  = $dsl;
+    foreach my $rule (_parse_all_rules($dsl)) {
+        my $raw = $rule->{raw};
+        $top_level =~ s/\Q$raw\E//g;
+    }
+    my $wrapped_top = "package DSL::SafeCompartment;\n" . $top_level;
+    $comp->reval($wrapped_top);
+    if (my $err = $@) {
+        chomp $err;
+        $self->{_check_error}{_TOPLEVEL_} = $err;
+        # トップレベルに構文エラーがあっても、続行して個別ルール定義を試みる
+    }
+
+    # (G) 各ルールブロックを個別に Safe で定義 → コード参照を取得して保持
+    #     定義時に文法エラーが起きたルールは $self->{_check_error}{$name} にエラーを記録
+    my @all_rules = _parse_all_rules($dsl);
+    foreach my $rule (@all_rules) {
+        my $name = $rule->{name};
+        my $raw  = $rule->{raw};   # 例: "RuleFoo sub { … }"
+
+        # "sub { … }" 部分だけ抽出
+        my ($inner) = $raw =~ /^\s*\Q$name\E\s+(sub\s*\{.*\})\s*$/s;
+        unless (defined $inner) {
+            $self->{_check_error}{$name} = "Malformed block for rule '$name'";
+            next;
         }
 
-        # BLACKLIST
-        if ($hit) {
-            notify($r);
-            my $act = $r->{action};
+        # 本文を取り出して "sub $name { … }" に変換
+        my ($body) = $inner =~ /^sub\s*\{(.*)\}\s*$/s;
+        unless (defined $body) {
+            $self->{_check_error}{$name} = "Cannot extract body for rule '$name'";
+            next;
+        }
+        my $named = "sub $name { $body }";
 
-            if ($act eq 'BLOCK') {
-                return { action=>'block', code=>$r->{error_code}, by=>$r->{name} };
-            }
-            elsif ($act eq 'ALLOW_IP') {
-                return { action=>'allow_ip', msg=>$r->{params}{code}, by=>$r->{name} };
-            }
-            elsif ($act eq 'REPLACE') {
-                # message|mail|name|title のみ
-                my $field = $r->{replace_field}
-                          // $r->{cond}{group}[0]{expr}[0]{field}[0];
-                die "Invalid replace field '$field'"
-                  unless $field =~ /^(?:message|mail|name|title)$/;
-                my $pat = $r->{replace_pat}
-                  or croak "REPLACE requires '/…/ TO …' syntax";
-                (my $to = $r->{replace_to}//'') =~ s/^"(.*)"$/$1/s;
-                $ctx->{$field} =~ s/$pat/$to/g;
-            }
-            elsif ($act eq 'SCORE_ADD')   { $ctx->{score} += $r->{params}{number}//1 }
-            elsif ($act eq 'SCORE_SUB')   { $ctx->{score} -= $r->{params}{number}//1 }
-            elsif ($act eq 'SCORE_CLEAR') { $ctx->{score} = 0 }
-            elsif ($act eq 'SCORE_GT') {
-                if ($ctx->{score} > ($r->{params}{number}//0)) {
-                    return { action=>'block', code=>$r->{error_code}, by=>$r->{name} };
-                }
-            }
-            elsif ($act eq 'SET') {
-                for my $k (keys %{ $r->{params} }) {
-                    if ($k =~ /^(user_info|unique|attr)\.(.+)$/) {
-                        my ($ns, $sub) = ($1, $2);
-                        my $raw_rhs     = $r->{params}{$k};
-                        my $newval      = evaluate_rhs($raw_rhs, $ctx);
-                        $ctx->{$ns}{$sub} = $newval;
-                    }
-                }
-            }
-            elsif ($act eq 'USE') {
-                return $this->Check($depth + 1);
-            }
-            elsif ($act eq 'DELETE') {
-                # パラメータ取得
-                my $scope      = uc($r->{params}{scope}  // 'THREAD');
-                my $limit      = $r->{params}{limit}      // 0;
-        
-                # period (過去) → older_than 秒
-                my $older_than;
-                my $units = { s => 1, m => 60, h => 3600, d => 86400 };
-                if (defined $r->{params}{period}) {
-                    my ($n,$u) = $r->{params}{period} =~ /^(\d+)([smhd])$/;
-                    $older_than = time - $n * $units->{$u};
-                }
+        # Safe 上で評価してサブルーチン定義
+        $comp->reval("package DSL::SafeCompartment;\n$named");
+        if (my $err2 = $@) {
+            chomp $err2;
+            $self->{_check_error}{$name} = $err2;
+            next;
+        }
 
-                # newer_than (以降) → UNIX 時刻または相対
-                my $newer_than;
-                if (defined $r->{params}{newer_than}) {
-                    my $raw = $r->{params}{newer_than};
-                    if ($raw =~ /^(\d+)([smhd])$/) {
-                        # 相対
-                        my ($n,$u) = ($1,$2);
-                        $newer_than = time - $n * $units->{$u};
-                    }
-                    else {
-                        # 絶対時刻
-                        $newer_than = Time::Piece->strptime($raw, "%Y-%m-%dT%H:%M:%S")->epoch;
-                    }
-                }
-
-                # 削除方向: newer_than 指定時は最新順 (DESC)、それ以外は古い順 (ASC)
-                my $order = defined $newer_than ? 'DESC' : 'ASC';
-
-                $this->perform_delete(
-                    ctx         => $ctx,
-                    scope       => $scope,
-                    older_than  => $older_than,
-                    newer_than  => $newer_than,
-                    order       => $order,
-                    limit       => $limit,
-                by          => $r->{name},
-                );
-                next RULE;
-            }
-            next RULE;
+        # 定義済みの CODE リファレンスを取得して保持
+        no strict 'refs';
+        my $coderef = \&{"DSL::SafeCompartment::$name"};
+        use strict 'refs';
+        if (defined $coderef && ref($coderef) eq 'CODE') {
+            $self->{_coderefs}{$name} = $coderef;
+        }
+        else {
+            $self->{_check_error}{$name} = "Failed to locate sub $name in Safe";
         }
     }
-    return { action=>'allow', score=>$ctx->{score} };
-}
 
-#------------------------------------------------------------------------------
-# match_rules: 与えられたコンテキストでASTの@RULESを評価
-#------------------------------------------------------------------------------
-sub match_rules {
-    my ($this) = @_;
-    my $ctx = $this->{ctx};
+    # (H) ここからモード別に分岐
+    if (defined $mode && $mode eq 'syntax') {
+        # ----------------------------
+        # 【構文チェックモード】ルール単位で文法・正規表現・重複をチェック
+        # ----------------------------
+        # (H-1) ルール名の重複チェック
+        my %count_name;
+        $count_name{ $_->{name} }++ foreach @all_rules;
 
-    $ctx->{user_info}//={};
-    $ctx->{unique}//={};
-    $ctx->{attr}//={};
-    $ctx->{setting}//={};
-    $ctx->{score}//=0;
+        foreach my $rule (@all_rules) {
+            my $name = $rule->{name};
 
-    my @hits;
-    for my $r (@{$this->{RULES}}) {
-        next if ($r->{meta}{expire_at}    && Time::Piece->new > $r->{meta}{expire_at})
-             || ($r->{meta}{expire_after} && time > $r->{created}->epoch + $r->{meta}{expire_after});
-        push @hits, $r->{name} if $this->eval_condition($r->{cond});
-    }
-    return @hits;
-}
-
-#------------------------------------------------------------------------------
-# _ensure_grammar_loaded: 文法を遅れてロード
-#------------------------------------------------------------------------------
-sub _ensure_grammar_loaded {
-    return if defined $DSL_GRAMMAR;   # 既にコンパイル済みなら何もしない
-
-    # 必要なモジュールを遅延ロード
-    require Regexp::Grammars;
-
-    # テキスト→qr// xms の遅延コンパイル
-    $DSL_GRAMMAR = eval { qr{\A$DSL_BODY_TEXT\z}xms };
-    die "DSL_GRAMMAR compile failed: $@" if $@;
-}
-
-#------------------------------------------------------------------------------
-# validate_rule_syntax: 文法と正規表現チェック
-#------------------------------------------------------------------------------
-sub validate_rule_syntax {
-    my ($blk) = @_;
-    _ensure_grammar_loaded();
-    $blk =~ s{^\s*//.*$}{}mg;
-    $blk =~ s{^\s*#.*$}{}mg;
-    $blk =~ s{/\*.*?\*/}{}gs;
-    $blk =~ s/\r?\n\z//;
-    return (1, []) unless $blk =~ /\S/;
-    unless ($blk =~ $DSL_GRAMMAR) {
-        return (2, ["DSL syntax error"]);
-    }
-    while ($blk =~ m{/(?:[^/\\]|\\.)+/[ismx]*}g) {
-        my $pat = $&;
-        my ($body,$flags) = $pat =~ m{^/(.*)/([ismx]*)$};
-        my $to_eval = "qr{$body}$flags";
-        eval $to_eval;
-        return (3, ["Regex error: $pat - $@"])
-            if $@;
-    }
-    return (0, []);
-}
-
-#------------------------------------------------------------------------------
-# decode_value: 配列リテラル中のカンマを正しく扱う
-#------------------------------------------------------------------------------
-sub decode_value {
-    my ($raw) = @_;
-    if ($raw =~ /^"(.*)"$/s) {
-        return $1;
-    }
-    if ($raw =~ /^\[(.*)\]$/s) {
-        my $inner = $1;
-        my @vals;
-        while ($inner =~ /\G\s*"((?:[^"\\]|\\.)*)"\s*(?:,|$)/g) {
-            push @vals, $1;
-        }
-        return \@vals;
-    }
-    if ($raw =~ m{^/(.*)/([ismx]*)$}) {
-        return eval "qr{$1}$2";
-    }
-    return $raw =~ /^\d+$/ ? 0+$raw : $raw;
-}
-
-#------------------------------------------------------------------------------
-# _load_rules_from_string: コメント除去後にDSLをパースし@RULESにセット
-#------------------------------------------------------------------------------
-sub _load_rules_from_string {
-    my ($this, $src, $created) = @_;
-    $created //= Time::Piece->new;
-    $src =~ s/^\x{FEFF}//;
-    $src =~ s/\r\n/\n/g;
-    
-    use Data::Dumper;
-    warn "[DSL DEBUG] parse tree:\n" . Dumper(\%/);
-    
-    my @parsed_rules;
-    _ensure_grammar_loaded();
-    if ($src =~ $DSL_GRAMMAR) {
-        my $parsed = {%/};
-        warn "[DSL DEBUG] after match:\n" . Dumper(\%/);
-        for my $r (@{ $parsed->{rule_file}{rule_line} || [] }) {
-            my $meta = {};
-            for my $m (@{ $r->{meta}||[] }) {
-                if ($m =~ /EXPIRE\s+AT\s+"(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2}:\d{2})"/) {
-                    $meta->{expire_at} = Time::Piece->strptime("$1 $2", "%Y-%m-%d %H:%M:%S");
-                }
-                elsif ($m =~ /EXPIRE\s+AFTER\s+\(\s*(\d+)(sec|min|h|d)\s*\)/) {
-                    my ($n,$u)=($1,$2);
-                    $meta->{expire_after} = $n * { sec=>1, min=>60, h=>3600, d=>86400 }->{$u};
-                }
-                elsif ($m =~ /NOTIFY_ADMIN\s+WITH\s+code=(\d+)/) {
-                    $meta->{notify_admin} = $1;
-                }
-                elsif ($m =~ /LOG_IF\s+(true|false)/) {
-                    $meta->{log_if} = $1 eq 'true';
-                }
+            # (H-1-a) 重複チェック
+            if ($count_name{$name} > 1) {
+                $self->{_rule_status}{$name} = 4;    # 4 = 重複ルール名
+                $self->{_rule_error}{$name}  = "Duplicate rule name '$name'";
+                next;
             }
-            push @parsed_rules, { %$r, meta=>$meta, created=>$created };
+
+            # (H-1-b) まず「Safe 上に定義するだけ」で構文エラー／正規表現エラーを検出
+            #         ※ 既に定義時に Safe->reval() で文法エラーを _check_error に入れている可能性アリ
+            if (exists $self->{_check_error}{$name}) {
+                # 定義時点でエラーがあった場合
+                my $e = $self->{_check_error}{$name};
+                # 正規表現エラーか文法エラーかを判別
+                if ($e =~ /Unmatched|regex|\\Q.*\\E.*doesn't match/ ) {
+                    $self->{_rule_status}{$name} = 3;    # 3 = 正規表現文法エラー
+                } else {
+                    $self->{_rule_status}{$name} = 2;    # 2 = ルール文法エラー
+                }
+                $self->{_rule_error}{$name} = $e;
+                next;
+            }
+
+            # (H-1-c) 定義自体は成功しているので「正常完了」
+            $self->{_rule_status}{$name} = 0;    # 0 = OK
+            $self->{_rule_error}{$name}  = '';
         }
-    }
-    $this->{RULES} = \@parsed_rules;
-}
 
-#------------------------------------------------------------------------------ 
-# _check_duplicate_names: RULES 配列中のルール名重複チェック
-#------------------------------------------------------------------------------ 
-sub _check_duplicate_names {
-    my ($blocks_ref) = @_;
-    my %seen;
-    my @dups;
-    for my $blk (@$blocks_ref) {
-        if ($blk =~ /^\s*([A-Za-z_]\w*)\s*:/) {
-            push @dups, $1 if $seen{$1}++;
-        }
-    }
-    if (@dups) {
-        return 1;
-    }
-    return 0;
-}
-
-
-#------------------------------------------------------------------------------
-# 条件評価ロジック
-#------------------------------------------------------------------------------
-sub eval_condition {
-    my ($this, $cond) = @_;
-    my $res = $this->eval_expr_node($cond->{group}[0]);
-    for my $i (0 .. $#{$cond->{logic_op}//[]}) {
-        my $op   = $cond->{logic_op}[$i];
-        my $next = $this->eval_expr_node($cond->{group}[$i+1]);
-        $res = $op eq 'AND' ? ($res && $next) : ($res || $next);
-    }
-    return $res;
-}
-
-sub eval_expr_node {
-    my ($this, $node) = @_;
-    return $node->{expr}
-         ? $this->eval_expr($node->{expr}[0])
-         : $this->eval_condition($node->{cond}[0]);
-}
-
-sub eval_expr {
-    my ($this, $e) = @_;
-    my $ctx   = $this->{ctx};
-    my $field = $e->{field}[0];
-
-    my $lhs_raw = $field =~ /^(user_info|unique|attr|setting)\.[A-Za-z0-9_]+$/
-                ? $field
-                : '"' . ($ctx->{$field}//'') . '"';
-    my ($raw, $exists);
-    if ($field eq 'time') {
-        ($raw, $exists) = ($ctx->{time}, 1);
+        # 最終的に「ルール名 => ステータス」のハッシュリファレンスを返す
+        return $self->{_rule_status};
     }
     else {
-        ($raw, $exists) = do {
-            if ( $field =~ /^user_info\.(.+)$/ ) {
-                my $k = $1;
-                ( $ctx->{user_info}{$k}, exists $ctx->{user_info}{$k} )
+        # ----------------------------
+        # 【評価モード】各ルールを Safe 上で呼び出し、最初に _DENY_ (=0) が返ったら 0、最後まで OK なら 1
+        # ----------------------------
+        my $timeout = defined $timeout_arg ? $timeout_arg : $self->{timeout};
+
+        foreach my $rule (@all_rules) {
+            my $name = $rule->{name};
+            next unless exists $self->{_coderefs}{$name};
+            my $coderef = $self->{_coderefs}{$name};
+
+            # タイムアウト設定
+            local $SIG{ALRM} = sub { die "DSL_TIMEOUT\n" };
+            alarm $timeout;
+
+            my $result;
+            eval {
+                $result = $coderef->(\%ctx);
+                alarm 0;  # 正常終了したらすぐにアラーム解除
+            };
+            alarm 0;  # 念のためここでも解除
+
+            if (my $e = $@) {
+                chomp $e;
+                if ($e eq 'DSL_TIMEOUT') {
+                    $self->{_check_error}{$name} = "Timeout in rule '$name'";
+                }
+                else {
+                    $self->{_check_error}{$name} = "Runtime error in rule '$name': $e";
+                }
+                next;
             }
-            elsif ( $field =~ /^unique\.(.+)$/ ) {
-                my $k = $1;
-                ( $ctx->{unique}{$k},    exists $ctx->{unique}{$k} )
+
+            # 返り値が 0 (_DENY_) なら即座に返す
+            if (!defined $result or $result == 0) {
+                return 0;  # _DENY_
             }
-            elsif ( $field =~ /^attr\.(.+)$/ ) {
-                my $k = $1;
-                ( $ctx->{attr}{$k},      exists $ctx->{attr}{$k} )
-            }
-            elsif ( $field =~ /^setting\.(.+)$/ ) {
-                my $k = $1;
-                ( $ctx->{setting}{$k},   exists $ctx->{setting}{$k} )
-            }
-            else {
-                ( $ctx->{$field},        exists $ctx->{$field} )
-            }
-        };
+            # _ACCEPT_ (=1) なら次のルールへ
+        }
+
+        # すべてのルールが _ACCEPT_ (=1) を返した場合
+        return 1;  # _ACCEPT_
     }
+}
 
-    my $op = $e->{op}[0];
-    return  $exists          if $op eq 'EXISTS';
-    return !$exists          if $op eq 'NOT_EXISTS';
-    return !defined($raw)||$raw eq '' if $op eq 'EMPTY';
-    return  defined($raw)&&$raw ne '' if $op eq 'NOT_EMPTY';
 
-    my $val = evaluate_rhs($lhs_raw, $ctx);
-    my $cmp = evaluate_rhs($e->{value}[0], $ctx);
-
-    my %ops = (
-        HAS           => sub { index($val,$cmp)!=-1 },
-        NOT_HAS       => sub { index($val,$cmp)==-1 },
-        MATCH         => sub { $val=~$cmp },
-        EQ            => sub { $val eq $cmp },
-        NEQ           => sub { $val ne $cmp },
-        IN            => sub { grep { $val eq $_ } @$cmp },
-        NOT_IN        => sub { !grep { $val eq $_ } @$cmp },
-        LT            => sub { $val <  $cmp },
-        GT            => sub { $val >  $cmp },
-        LE            => sub { $val <= $cmp },
-        GE            => sub { $val >= $cmp },
-        COUNT_WITHIN  => sub { ... },
-        UNIQUE_WITHIN => sub { ... },
-        API_CHECK     => sub {
-            require './module/data_utils.pl';
-            return DATA_UTILS::IsProxyAPI(undef, $this->{SYS}, $cmp);
-        },
-        DNSBL_CHECK   => sub {
-            require './module/data_utils.pl';
-            return DATA_UTILS::CheckDNSBL(undef, $ENV{REMOTE_ADDR}, $cmp);
-            },
-        IN_CIDR       => sub {
-            require './module/data_utils.pl';
-            my @orz = ref $cmp eq 'ARRAY' ? @$cmp : ($cmp);
-            return DATA_UTILS::CIDRHIT(\@orz, $val);
-        },
-    );
-    return $ops{$op}->() if $ops{$op};
-    return 0;
+#------------------------------------------------------------------------------#
+# メソッド: GetOutResult
+#  Check() 実行後の %out をそのままハッシュリファレンスで返す
+#  たとえばDSL内で $out{message} = $ctx{message} . 'test'; と書くと、
+#  呼び出し元では GetOutResult()->{message} に '...test' が入る。
+#------------------------------------------------------------------------------#
+sub GetOutResult {
+    my ($self) = @_;
+    return { %out };  # 元ハッシュをコピーして返す
 }
 
 #------------------------------------------------------------------------------#
-# evaluate_rhs: SET／param 右辺に書かれた「式」を評価して返す
-#   ・数値リテラル、文字列リテラル
-#   ・四則演算 +,-,*,/,%
-#   ・関数: UPPER(str), LOWER(str), CONCAT(a,b,...), SUBSTR(str,offset[,length]), REPLACE(str,pattern,repl)
-#   ・フィールド参照: user_info.xxx, unique.xxx, attr.xxx, setting.xxx
+# メソッド: syntax_check
+#  DSL ファイル全体を Perl -c で構文チェックする
+#  失敗時は _syntax_error にエラーメッセージをセット
+# 戻り値: 正常 => 1, エラー => 0
 #------------------------------------------------------------------------------#
-sub evaluate_rhs {
-    my ($raw, $ctx) = @_;
-    $raw =~ s/^\s+|\s+$//g;
-    # -- 数値リテラル --
-    if ( $raw =~ /^(\d+)$/ ) {
-        return 0 + $1;
+sub syntax_check {
+    my ($self) = @_;
+    $self->{_syntax_error} = '';
+    my $path = $self->{file_path};
+
+    # perl -c をバッククォートで呼び出し、その出力とステータスを確認
+    my $output = `perl -c $path 2>&1`;
+    my $status = $? >> 8;
+    if ($status != 0) {
+        chomp $output;
+        $self->{_syntax_error} = $output;
+        return 0;
     }
-
-    # -- 文字列リテラル ('…' または "…") --
-    #    中のエスケープ（\' \" \\）を解除して返す
-    if ( $raw =~ /^"(.*)"$/s || $raw =~ /^'(.*)'$/s ) {
-        my $str = $1;
-        $str =~ s/\\(['"\\])/$1/g;
-        return $str;
-    }
-
-    # 1.5) 全体が "(…)" で囲まれていたら中身を再帰
-    if ($raw =~ /^\((.*)\)$/s) {
-        return evaluate_rhs($1, $ctx);
-    }
-
-    # 2) 最優先：+ と - （深さ０のカッコ外を探す）
-    {
-        my $depth = 0;
-        for (my $i = length($raw)-1; $i >= 0; $i--) {
-            my $c = substr($raw,$i,1);
-            $depth += 1 if $c eq ')';
-            $depth -= 1 if $c eq '(';
-            if ($depth == 0 && $c =~ /[+\-]/) {
-                my $l = substr($raw,0,$i);
-                my $r = substr($raw,$i+1);
-                return $c eq '+'
-                   ? evaluate_rhs($l,$ctx) + evaluate_rhs($r,$ctx)
-                   : evaluate_rhs($l,$ctx) - evaluate_rhs($r,$ctx);
-            }
-        }
-    }
-
-    # 3) 次に * / %
-    {
-        my $depth = 0;
-        for (my $i = length($raw)-1; $i >= 0; $i--) {
-            my $c = substr($raw,$i,1);
-            $depth += 1 if $c eq ')';
-            $depth -= 1 if $c eq '(';
-            if ($depth == 0 && $c =~ m{[*/%]}) {
-                my $l = substr($raw,0,$i);
-                my $r = substr($raw,$i+1);
-                my ($lv,$rv) = (evaluate_rhs($l,$ctx), evaluate_rhs($r,$ctx));
-                return $c eq '*' ? $lv * $rv
-                     : $c eq '/' ? ($rv==0?0:$lv/$rv)
-                     :              $lv % $rv;
-            }
-        }
-    }
-
-    # 4) 関数呼び出し
-    if ($raw =~ /^\s*([A-Za-z_]\w*)\s*\(\s*(.*)\)\s*$/s) {
-        my ($fn, $args) = (uc $1, $2);
-        # カンマで分割（単純）
-        my @parts = map { s/^\s+|\s+$//g; $_ } split /,/, $args;
-        my @vals  = map { evaluate_rhs($_, $ctx) } @parts;
-
-        if    ($fn eq 'UPPER')   { return uc $vals[0] }
-        elsif ($fn eq 'LOWER')   { return lc $vals[0] }
-        elsif ($fn eq 'CONCAT')  { return join '', @vals }
-        elsif ($fn eq 'SUBSTR')  {
-            my ($s,$off,$len) = @vals;
-            return defined $len
-                ? substr($s, $off, $len)
-                : substr($s, $off);
-        }
-        elsif ($fn eq 'REPLACE') {
-            my ($s,$pat,$repl) = @vals;
-            if ($pat =~ m{^/(.*)/([ismx]*)$}) {
-                my $re = eval "qr/$1/$2";
-                $s =~ s/$re/$repl/g;
-            }
-            return $s;
-        }elsif ($fn eq 'FORMAT_TIME') {
-            my ($ts, $fmt) = @vals;
-            my $t = Time::Piece->new($ts);
-            return $t->strftime($fmt);
-        }
-        # ここに他の関数を追加可
-    }
-
-    # 5) フィールド参照
-    if ($raw =~ m{^(user_info|unique|attr|setting)\.([A-Za-z0-9_]+)$}) {
-        my ($ns,$key) = ($1,$2);
-        return $ctx->{$ns}{$key} // '';
-    }
-
-    # 6) フォールバック: JSON・配列・正規表現・既存の literal
-    return decode_value($raw);
+    return 1;
 }
 
 #------------------------------------------------------------------------------#
-# perform_delete: DELETE アクションの実装
-#   - ctx: ルール適用時のコンテキスト
-#   - scope: 'THREAD' or 'BOARD'
-#   - older_than: この秒数より前（optional）
-#   - newer_than: この秒数より後（optional）
-#   - order: 'ASC' or 'DESC'
-#   - limit: 件数上限
-#   - by: ルール名
+# 内部サブルーチン: _parse_all_rules
+#  引数: $dsl_text
+#  DSL テキスト全体から、すべての "RuleName sub { … }" ブロックを検出し、
+#  名前、ブロック本体、raw（元の文字列）を配列として返す。
+#  戻り値: @rules = ( { name => 'RuleName', body => "sub { … }", raw => "RuleName sub { … }" }, … )
 #------------------------------------------------------------------------------#
-sub perform_delete {
-    my ($this, %opt) = @_;
-    my $ctx        = $opt{ctx};
-    my $scope      = $opt{scope};
-    my $older_than = $opt{older_than};
-    my $newer_than = $opt{newer_than};
-    my $order      = $opt{order};
-    my $limit      = $opt{limit};
-    my $rule_name  = $opt{by};
+sub _parse_all_rules {
+    my ($dsl) = @_;
+    my @results;
+    while ($dsl =~ /(\w+)\s+sub\s*\{/g) {
+        my $name      = $1;
+        my $start_pos = $-[0];
+        my $substr    = substr($dsl, $start_pos);
+        my $nest      = 0;
+        my $len       = length $substr;
+        my $end_index;
+        for my $i (0 .. $len - 1) {
+            my $ch = substr($substr, $i, 1);
+            $nest++ if $ch eq '{';
+            $nest-- if $ch eq '}';
+            if ($nest == 0) {
+                $end_index = $i;
+                last;
+            }
+        }
+        last unless defined $end_index;  # 波括弧の閉じが見つからなかった場合は抜ける
 
-    # 呼び出し先のインターフェースに合わせて引数を整形
-    my %args = (
-        limit      => $limit,
-        order      => $order,
-        reason     => "DELETE by $rule_name",
-    );
-    $args{older_than} = $older_than  if defined $older_than;
-    $args{newer_than} = $newer_than  if defined $newer_than;
-
-    if ($scope eq 'THREAD') {
-        # スレッド内で削除（後で実装）
+        my $raw_block = substr($substr, 0, $end_index + 1);
+        my ($body)    = $raw_block =~ /^\s*\Q$name\E\s+(sub\s*\{.*\})\s*$/s;
+        push @results, { name => $name, body => $body, raw => $raw_block };
+        pos($dsl) = $start_pos + $end_index + 1;
     }
-    else {
-        # 掲示板全体で削除（後で実装）
-    }
-
-    warn "[DELETE] rule=$rule_name scope=$scope "
-        . (defined $older_than ? "older_than=$older_than " : "")
-        . (defined $newer_than ? "newer_than=$newer_than " : "")
-        . "order=$order limit=$limit\n";
-}
-#------------------------------------------------------------------------------
-# notify: ログ・通知
-#------------------------------------------------------------------------------
-sub notify {
-    my ($r) = @_;
-    warn "[LOG] rule=$r->{name}\n"           if $r->{meta}{log_if};
-    warn "[NOTIFY] rule=$r->{name} code=$r->{meta}{notify_admin}\n"
-         if $r->{meta}{notify_admin};
+    return @results;
 }
 
 1;

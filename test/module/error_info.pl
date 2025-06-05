@@ -216,6 +216,12 @@ sub Print
 	
 	my $Cookie = $CGI->{'COOKIE'};
 	my $subject = $this->{'SUBJECT'}->{$err};
+
+	# 存在しないエラーコードの場合
+	unless($subject){
+		$subject = $Sys->Get('_ORIGERRSUB_') || "不明なエラー";
+		$message = $Sys->Get('_ORIGERRMES_') || "定義されていないエラーです。";
+	}
 	
 	my $name = &$sanitize($Form->Get('NAME'));
 	my $mail = &$sanitize($Form->Get('MAIL'));

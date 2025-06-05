@@ -599,14 +599,14 @@ sub PrintBoardGuardDSLEdit {
 
     # DSLエンジン読み込み
     require './module/dsl_engine.pl';
-    my $dsl = DSL_ENGINE->new;
-    $dsl->Load($SYS);
+    my $dsl = DSL::Engine->new($SYS);
+    $dsl->Load();
 
     # フォームからの再描画（POST後の再表示） or 初回はファイル内容
     my $from_form = $Form->Get('BGDSL');
 $dsl_text = (defined $from_form && $from_form ne '')
           ? $from_form
-          : ($dsl->{SRC_RAW} // '');
+          : ($dsl->Get() // '');
 
 
     # 権限取得
@@ -992,58 +992,51 @@ sub FunctionNGWordEdit
 sub FunctionBoardGuardEdit {
     my ($Sys, $Form, $pLog) = @_;
 
-    # 権限チェック
     my $SEC  = $Sys->Get('ADMIN')->{'SECINFO'};
     my $user = $Sys->Get('ADMIN')->{'USER'};
     unless ($SEC->IsAuthority($user, $ZP::AUTH_BGDSLEDIT, $Sys->Get('BBS'))) {
         return 1000;
     }
 
-    # DSLエンジン読み込み
     require './module/dsl_engine.pl';
-    my $dsl = DSL_ENGINE->new;
-    $dsl->Load($Sys);
+    my $dsl = DSL::Engine->new($Sys);
+    # 既存のファイルを読み込んでおく（構文チェック・評価モードのどちらにも必要）
+    $dsl->Load();
 
-    # テキストエリアから行ごとに切り出し
-    my @lines = split /\r?\n/, $Form->Get('BGDSL');
-
-    # 既存ルールクリア
-    $dsl->Clear();
-
-    # ログ記録
     push @$pLog, '■BoardGuard DSL ルール一覧:';
+
+    my $new_text = $Form->Get('BGDSL') // '';
+    my $status_ref = $dsl->Check(undef, 'syntax');
+    # 例: $status_ref = { RuleA => 0, RuleB => 2, RuleC => 4, … }
 
     # ステータス表示用テーブル
     my %STATUS = (
         0 => 'OK',
         1 => 'なし',
-        2 => 'DSL文法エラー',
+        2 => 'ルール文法エラー',
         3 => '正規表現文法エラー',
         4 => '重複ルール名',
     );
 
-    # ブロック単位で分割（multi-line 対応）
-    my @blocks = DSL_ENGINE::_split_rules( $Form->Get('BGDSL') );
+    my @all_rules = _parse_all_rules($new_text);
+    foreach my $rule (@all_rules) {
+        my $name   = $rule->{name};
+        # 存在しないキーは「1 => 'なし'」とみなす
+        my $code   = exists $status_ref->{$name} ? $status_ref->{$name} : 1;
+        my $label  = $STATUS{$code} // "不明($code)";
+        push @$pLog, sprintf("  %s : %s", $name, $label);
 
-    for my $block (@blocks) {
-        next unless $block =~ /\S/;            # 空白のみのブロックはスキップ
-        # ルール名抽出
-        my ($name) = $block =~ /^\s*([A-Za-z_]\w*)\s*:/;
-        $name ||= '<unknown>';
-
-        # Add 実行
-        my $res = $dsl->Add($block);
-
-        # ログ出力
-        my $status = $STATUS{$res} // "不明($res)";
-        push @$pLog, "[$name]: $status" if ($res != 1);
+        # エラーの場合はエラーメッセージもログに出しておく
+        if ($code != 0) {
+            my $errmsg = $dsl->{_rule_error}{$name} // '';
+            push @$pLog, "    → エラー内容: $errmsg" if $errmsg ne '';
+        }
     }
-
-    # ファイル保存
-    $dsl->Save($Sys);
+    $dsl->Set($new_text);
+    $dsl->Save();
     push @$pLog, '→ 保存完了';
 
-    return 0;
+	return 0;
 }
 
 #------------------------------------------------------------------------------------------------------------
