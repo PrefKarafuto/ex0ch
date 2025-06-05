@@ -1712,8 +1712,8 @@ sub MakeDatLine
 	my $updown = 'top';
 	$updown = '' if ($Form->Contain('mail', 'sage'));
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
-	$updown = '' if ($Ninja->Get('force_sage') && !$noNinja);
-	$updown = '' if ($Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && $Set->Get('BBS_NINJA') && !$noNinja);
+	$updown = '' if ($Set->Get('BBS_NINJA') && $Ninja->Get('force_sage') && !$noNinja);
+	$updown = '' if ($Set->Get('BBS_NINJA') && $Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && !$noNinja);
 	$Sys->Set('updown', $updown);
 
 	# pluginに渡す値を設定
