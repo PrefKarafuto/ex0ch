@@ -106,19 +106,54 @@ sub new {
     );
     $comp->deny(
         qw(
-          open
-          sysopen
-          unlink
-          rename
-          chmod
-          chown
-          system
-          exec
-          fork
-          kill
-          syscall
-          lock
-          tie
+        open
+        sysopen
+        unlink
+        rename
+        chmod
+        chown
+        truncate
+        utime
+        lstat
+        readlink
+        symlink
+        opendir
+        readdir
+        closedir
+        system
+        exec
+        qx
+        readpipe
+        pipe
+        glob
+        fork
+        kill
+        wait
+        waitpid
+        syscall
+        alarm
+        sleep
+        lock
+        flock
+        select
+        sysselect
+        fcntl
+        ioctl
+        do
+        require
+        use
+        eval
+        package
+        bless
+        tie
+        dbmopen
+        dbmclose
+        %SIG
+        %ENV
+        sysread
+        syswrite
+        seekdir
+        telldir
         )
     );
     $self->{_safe}      = $comp;
