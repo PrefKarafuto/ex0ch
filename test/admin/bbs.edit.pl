@@ -1006,6 +1006,7 @@ sub FunctionBoardGuardEdit {
     push @$pLog, '■BoardGuard DSL ルール一覧:';
 
     my $new_text = $Form->Get('BGDSL') // '';
+	$dsl->Set($new_text);
     my $status_ref = $dsl->Check(undef, 'syntax');
     # 例: $status_ref = { RuleA => 0, RuleB => 2, RuleC => 4, … }
 
@@ -1018,7 +1019,7 @@ sub FunctionBoardGuardEdit {
         4 => '重複ルール名',
     );
 
-    my @all_rules = _parse_all_rules($new_text);
+    my @all_rules = DSL::Engine::_parse_all_rules($new_text);
     foreach my $rule (@all_rules) {
         my $name   = $rule->{name};
         # 存在しないキーは「1 => 'なし'」とみなす
@@ -1032,7 +1033,6 @@ sub FunctionBoardGuardEdit {
             push @$pLog, "    → エラー内容: $errmsg" if $errmsg ne '';
         }
     }
-    $dsl->Set($new_text);
     $dsl->Save();
     push @$pLog, '→ 保存完了';
 

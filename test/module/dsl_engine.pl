@@ -97,64 +97,11 @@ sub new {
     # Safe コンパートメントを初期化
     my $comp = Safe->new('DSL::SafeCompartment');
     $comp->permit_only(
-        ':default',
         ':base_core',
         ':base_loop',
         ':base_math',
         ':base_list',
         ':base_orig',
-    );
-    $comp->deny(
-        qw(
-        open
-        sysopen
-        unlink
-        rename
-        chmod
-        chown
-        truncate
-        utime
-        lstat
-        readlink
-        symlink
-        opendir
-        readdir
-        closedir
-        system
-        exec
-        qx
-        readpipe
-        pipe
-        glob
-        fork
-        kill
-        wait
-        waitpid
-        syscall
-        alarm
-        sleep
-        lock
-        flock
-        select
-        sysselect
-        fcntl
-        ioctl
-        do
-        require
-        use
-        eval
-        package
-        bless
-        tie
-        dbmopen
-        dbmclose
-        %SIG
-        %ENV
-        sysread
-        syswrite
-        seekdir
-        telldir
-        )
     );
     $self->{_safe}      = $comp;
     $self->{_coderefs}  = {};    # 成功した関数のコード参照を格納
@@ -505,29 +452,64 @@ sub syntax_check {
 sub _parse_all_rules {
     my ($dsl) = @_;
     my @results;
-    while ($dsl =~ /(\w+)\s+sub\s*\{/g) {
+    
+    # pos() を最初にリセットしておく
+    pos($dsl) = 0;
+
+    # 「ルール名 sub {」に相当する箇所をグローバル検索
+    RULE:
+    while ( $dsl =~ /\b([A-Za-z_][A-Za-z0-9_]*)\b\s*sub\s*\{/g ) {
         my $name      = $1;
-        my $start_pos = $-[0];
-        my $substr    = substr($dsl, $start_pos);
-        my $nest      = 0;
-        my $len       = length $substr;
-        my $end_index;
-        for my $i (0 .. $len - 1) {
-            my $ch = substr($substr, $i, 1);
-            $nest++ if $ch eq '{';
-            $nest-- if $ch eq '}';
-            if ($nest == 0) {
-                $end_index = $i;
-                last;
+        # 全体文字列中で「'{' の位置」 = $+[0] - 1 になる
+        my $open_brace_pos = $+[0] - 1;
+
+        # ここから、ネストを数えて対応する '}' を探す
+        my $nest = 1;  # この時点で '{' を１つ見つけたことにする
+        my $i    = $open_brace_pos;
+        my $length = length($dsl);
+        my $end_pos;
+
+        # 文字列を１文字ずつ走査し、ネストが 0 になる位置を探す
+        for ( $i = $open_brace_pos + 1; $i < $length; ++$i ) {
+            my $ch = substr($dsl, $i, 1);
+            if ( $ch eq '{' ) {
+                $nest++;
+            }
+            elsif ( $ch eq '}' ) {
+                $nest--;
+                if ( $nest == 0 ) {
+                    $end_pos = $i;
+                    last;
+                }
             }
         }
-        last unless defined $end_index;  # 波括弧の閉じが見つからなかった場合は抜ける
 
-        my $raw_block = substr($substr, 0, $end_index + 1);
-        my ($body)    = $raw_block =~ /^\s*\Q$name\E\s+(sub\s*\{.*\})\s*$/s;
-        push @results, { name => $name, body => $body, raw => $raw_block };
-        pos($dsl) = $start_pos + $end_index + 1;
+        # 対応する '}' が見つからなかった場合はここで終了
+        unless ( defined $end_pos ) {
+            last;  # 以降のルールも探せないとみなし抜ける
+        }
+
+        # raw_block: ルール名から終端 '}' までの文字列を切り出す
+        my $raw_block = substr( $dsl, $-[0], $end_pos - $-[0] + 1 );
+
+        # サブルーチン部分 (body)（"sub { … }"）を抽出
+        # raw_block の先頭には "RuleName sub { ... }" なので、正規表現で "sub { … }" 部分だけを取り出す
+        my ($body) = $raw_block =~ /^\s*\Q$name\E\s+(sub\s*\{.*\})\s*$/s;
+        # もしマッチしないなら構文が想定外である可能性があるので省く
+        unless ( defined $body ) {
+            next RULE;
+        }
+
+        push @results, {
+            name => $name,
+            body => $body,
+            raw  => $raw_block,
+        };
+
+        # ループを継続するときは、pos($dsl) を「このルールの末尾」すなわち $end_pos + 1 にセットしておく
+        pos($dsl) = $end_pos + 1;
     }
+
     return @results;
 }
 
