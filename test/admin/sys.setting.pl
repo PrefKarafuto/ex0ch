@@ -243,7 +243,6 @@ sub PrintSystemInfo
 		CGI::Carp
 		JSON
 		FCGI
-		Regexp::Grammars
 	));
 	
 	my $core = {};
