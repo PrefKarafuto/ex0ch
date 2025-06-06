@@ -101,6 +101,7 @@ sub new {
         ':base_loop',
         ':base_math',
         ':base_orig',
+        ':base_mem',
     );
     $self->{_safe}      = $comp;
     $self->{_coderefs}  = {};    # 成功した関数のコード参照を格納
@@ -230,9 +231,9 @@ sub Check {
     # (D) Safe 名称空間に定数 _DENY_ / _ACCEPT_ を定義
     $comp->reval(<<'CONST');
         package DSL::SafeCompartment;
-        use constant _DENY_   => 0;
-        use constant _ACCEPT_ => 1;
-        use constant _PASS_   => 2;
+        sub _DENY_ () { 0 }
+        sub _ACCEPT_ () { 1 }
+        sub _PASS_ () { 2 }
 CONST
 
     # (E) さらに、ZP パッケージに定義された our スカラ変数を自動列挙して共有
