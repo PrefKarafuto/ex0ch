@@ -295,7 +295,11 @@ CONST
 
         # 定義済みの CODE リファレンスを取得して保持
         no strict 'refs';
-        my $coderef = \&{"DSL::SafeCompartment::$name"};
+        my $coderef = $comp->reval(qq{
+            package DSL::SafeCompartment;
+            $named
+            \\&$name;
+        });
         use strict 'refs';
         if (defined $coderef && ref($coderef) eq 'CODE') {
             $self->{_coderefs}{$name} = $coderef;
