@@ -604,6 +604,7 @@ sub PrintBoardGuardDSLEdit {
 
     # フォームからの再描画（POST後の再表示） or 初回はファイル内容
     my $from_form = $Form->Get('BGDSL');
+	my $status = $SYS->Get('BGDSL') ? "有効" : "無効" ;
 	$dsl_text = (defined $from_form && $from_form ne '') ? $from_form : ($dsl->Get() // '');
 
     # 権限取得
@@ -670,7 +671,7 @@ sub PrintBoardGuardDSLEdit {
     });
   </script>
 	<center><table border=0 cellspacing=1 width=100%>
-	<tr><td colspan=1><hr>BoardGuard DSL 編集画面<hr></td></tr>
+	<tr><td colspan=1><hr>BoardGuard DSL：$status<hr></td></tr>
 	<tr>
 		<td>
 		<textarea
