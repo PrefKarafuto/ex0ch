@@ -90,6 +90,7 @@ sub new {
     my $self = {};
 
     $self->{file_path}      = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . "/info/dsl_rules.cgi";
+    $self->{file_parm}      = $Sys->Get('PM-ADM');
     $self->{dsl_text}       = '';     # ファイル全体の文字列
     $self->{_check_error}   = {};     # Check() での各関数単位のエラーを格納
     $self->{_syntax_error}  = '';     # syntax_check() でのエラー
@@ -148,6 +149,7 @@ sub Save {
       };
     print $fh $content;
     close $fh;
+    chmod($self->{file_parm}, $path);
 
     return 1;
 }
