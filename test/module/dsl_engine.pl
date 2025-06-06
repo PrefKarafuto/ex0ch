@@ -100,7 +100,6 @@ sub new {
         ':base_core',
         ':base_loop',
         ':base_math',
-        ':base_list',
         ':base_orig',
     );
     $self->{_safe}      = $comp;
