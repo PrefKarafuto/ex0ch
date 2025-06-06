@@ -225,8 +225,8 @@ sub Check {
     %out = %{ dclone(\%ctx) };
 
     # (C) Safe に %ctx, %out を共有
-    $self->{_safe}->share_from('DSL::Engine', ['%ctx', '%out']);
     my $comp = $self->{_safe};
+    $comp->share_from('DSL::Engine', ['%ctx', '%out']);
 
     # (D) Safe 名称空間に定数 _DENY_ / _ACCEPT_ を定義
     $comp->reval(<<'CONST');
@@ -369,7 +369,7 @@ CONST
 
             my $result;
             eval {
-                $result = $coderef->(\%ctx);
+                $result = $coderef->(\%ctx, \%out);
                 alarm 0;  # 正常終了したらすぐにアラーム解除
             };
             alarm 0;  # 念のためここでも解除
