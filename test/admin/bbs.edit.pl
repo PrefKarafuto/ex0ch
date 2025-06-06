@@ -604,46 +604,98 @@ sub PrintBoardGuardDSLEdit {
 
     # フォームからの再描画（POST後の再表示） or 初回はファイル内容
     my $from_form = $Form->Get('BGDSL');
-$dsl_text = (defined $from_form && $from_form ne '')
-          ? $from_form
-          : ($dsl->Get() // '');
-
+	$dsl_text = (defined $from_form && $from_form ne '') ? $from_form : ($dsl->Get() // '');
 
     # 権限取得
-    $isAuth = $SYS->Get('ADMIN')->{'SECINFO'}
-              ->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BGDSLEDIT, $SYS->Get('BBS'));
+    $isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BGDSLEDIT, $SYS->Get('BBS'));
 
-    # 出力
-    $Page->Print(<<'HTML');
-<center><table border=0 cellspacing=1 width=100%>
-<tr><td colspan=1><hr>BoardGuard DSL 編集画面<hr></td></tr>
-<tr>
-  <td>
-<div class="dsl-editor">
-  <div id="dslLines" class="dsl-lines"></div>
-  <textarea
-      id="dslText"
-      class="dsl-text"
-      name="BGDSL"
-      spellcheck="false"
-      wrap="off"
-  >
+	# CodeMirror エディタのテーマ
+	my $theme = "eclipse";	
+
+	# 出力
+    $Page->Print(<<HTML);
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${theme}.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.css">
+		
+  <style>
+    .CodeMirror {
+      border: 1px solid #ddd;
+      height: 500px;
+      min-height: 300px;
+      font-size: 14px;
+    }
+	.cm-trailingspace {
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QUXCToH00Y1UgAAACFJREFUCNdjPMDBUc/AwNDAAAFMTAwMDA0OP34wQgX/AQBYgwYEx4f9lQAAAABJRU5ErkJggg==);
+        background-position: bottom left;
+        background-repeat: repeat-x;
+    }
+	.cm-matchhighlight {
+		background-color: lightgreen;
+	}
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/perl/perl.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/trailingspace.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/match-highlighter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/scrollpastend.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const textarea = document.getElementById("perl-editor");
+      
+      const editor = CodeMirror.fromTextArea(textarea, {
+        mode: "text/x-perl",   // Perl 用のシンタックスハイライト
+        lineNumbers: true,     // 行番号を表示
+		styleActiveLine: true, // アクティブ行ハイライト
+        indentUnit: 4,         // インデント幅を半角スペース4文字に
+        indentWithTabs: false, // タブの代わりにスペースでインデント
+        lineWrapping: true,    // 長い行を自動で折り返す
+        theme: "${theme}",     // デフォルトのテーマ指定（必要に応じて変更可）
+		// その他アドオン
+		matchBrackets: true,
+		autoCloseBrackets: true,
+		showTrailingSpace: true,
+		highlightSelectionMatches: true,
+		scrollbarStyle: "simple",
+		scrollPastEnd: true
+      });
+      
+      // 必要に応じて、エディタインスタンスのメソッドで操作が可能
+      // 例: editor.setSize("100%", "500px");  // 幅・高さを固定したい場合
+    });
+  </script>
+	<center><table border=0 cellspacing=1 width=100%>
+	<tr><td colspan=1><hr>BoardGuard DSL 編集画面<hr></td></tr>
+	<tr>
+		<td>
+		<textarea
+				id="perl-editor"
+				class="dsl-text"
+				name="BGDSL"
+				spellcheck="false"
+				wrap="off"
+		>
 HTML
-	# HTMLエスケープ
-    my $sanitize = sub {
-        my $s = shift;
-        $s =~ s/&/&amp;/g;
-        $s =~ s/</&lt;/g;
-        $s =~ s/>/&gt;/g;
-        return $s;
-    };
-	$Page->Print($sanitize->($dsl_text));
-    $Page->Print(<<'HTML');
+		# HTMLエスケープ
+			my $sanitize = sub {
+					my $s = shift;
+					$s =~ s/&/&amp;/g;
+					$s =~ s/</&lt;/g;
+					$s =~ s/>/&gt;/g;
+					return $s;
+			};
+		$Page->Print($sanitize->($dsl_text));
+			$Page->Print(<<'HTML');
+
 </textarea>
-</div>
-  </td>
-</tr>
-<tr><td colspan=2><hr></td></tr>
+		</td>
+	</tr>
+	<tr><td colspan=2><hr></td></tr>
 HTML
 
     # 保存ボタン（権限があれば）
@@ -1006,6 +1058,7 @@ sub FunctionBoardGuardEdit {
     push @$pLog, '■BoardGuard DSL ルール一覧:';
 
     my $new_text = $Form->Get('BGDSL') // '';
+	$new_text =~ s/\s+\z//;
 	$dsl->Set($new_text);
     my $status_ref = $dsl->Check(undef, 'syntax');
     # 例: $status_ref = { RuleA => 0, RuleB => 2, RuleC => 4, … }

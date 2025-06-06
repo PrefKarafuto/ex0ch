@@ -44,16 +44,3 @@ function toggleAll(key)
 		}
 	}
 }
-
-//Lines count
-document.addEventListener('DOMContentLoaded', function(){
-	const ta   = document.getElementById('dslText');
-	const nums = document.getElementById('dslLines');
-	function update(){
-	  const n = ta.value.split('\n').length || 1;
-	  nums.innerHTML = Array.from({length:n},(_,i)=>i+1).join('<br>');
-	}
-	ta.addEventListener('scroll', ()=> nums.scrollTop = ta.scrollTop);
-	ta.addEventListener('input',  update);
-	update();
-  });
