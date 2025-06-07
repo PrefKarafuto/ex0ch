@@ -222,3 +222,19 @@ input.delete	{
   #captcha-widget:not(:empty) + #captcha-placeholder {
 	display: none;
   }
+
+  /* CodeMirror */
+  .CodeMirror {
+	border: 1px solid #ddd;
+	height: 500px;
+	min-height: 300px;
+	font-size: 14px;
+  }
+  .cm-trailingspace {
+	  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QUXCToH00Y1UgAAACFJREFUCNdjPMDBUc/AwNDAAAFMTAwMDA0OP34wQgX/AQBYgwYEx4f9lQAAAABJRU5ErkJggg==);
+	  background-position: bottom left;
+	  background-repeat: repeat-x;
+  }
+  .cm-matchhighlight {
+	  background-color: lightgreen;
+  }
