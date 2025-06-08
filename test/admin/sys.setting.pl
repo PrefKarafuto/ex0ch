@@ -534,8 +534,8 @@ sub PrintOtherSetting
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">動作モード(read.cgi)</td></tr>\n");
 	$Page->Print("<tr><td>PATH種別</td>");
-	$Page->Print("<td><input type=radio name=PATHKIND value=\"0\" $pathInfo>PATHINFO　");
-	$Page->Print("<input type=radio name=PATHKIND value=\"1\" $pathQuery>QUERYSTRING</td></tr>\n");
+	$Page->Print("<td><label><input type=radio name=PATHKIND value=\"0\" $pathInfo>PATHINFO</label>　");
+	$Page->Print("<label><input type=radio name=PATHKIND value=\"1\" $pathQuery>QUERYSTRING</label></td></tr>\n");
 	
 	#$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
 	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
@@ -601,11 +601,15 @@ sub PrintPlusViewSetting
 	my $Prlink		= $SYS->Get('PRLINK');
 	my $Msec		= $SYS->Get('MSEC');
 	my $hide_hits	= $SYS->Get('HIDE_HITS');
+	my $refresh_mode	= $SYS->Get('REFRESH_MODE');
 	
 	my $bannerindex	= ($Banner & 3 ? 'checked' : '');
 	my $banner		= ($Banner & 5 ? 'checked' : '');
 	my $msec		= ($Msec == 1 ? 'checked' : '');
 	my $hide		= ($hide_hits == 0 ? 'checked' : '');
+	my $def			= ($refresh_mode eq 'default' ? 'checked' : '');
+	my $ind			= ($refresh_mode eq 'index' ? 'checked' : '');
+	my $red			= ($refresh_mode eq 'readcgi' ? 'checked' : '');
 	
 	my $common = "onclick=\"DoSubmit('sys.setting','FUNC','VIEW');\"";
 	
@@ -632,6 +636,12 @@ sub PrintPlusViewSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">規制情報公開</td></tr>\n");
 	$Page->Print("<tr><td>規制ユーザーの情報を公開する <br><small>(madakana.cgi、ユーザー規制のエラー画面)</small></td>");
 	$Page->Print("<td><input type=checkbox name=HIDE_HITS $hide value=on></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">書き込み後の遷移先</td></tr>\n");
+	$Page->Print("<tr><td>掲示板に書き込まれた後どこに自動遷移するか指定します。</td>");
+	$Page->Print("<td><label><input type=radio name=REFRESH_MODE value=\"default\" $def>DEFAULT</label>\n");
+	$Page->Print("<label><input type=radio name=REFRESH_MODE value=\"index\" $ind>INDEX</label>\n");
+	$Page->Print("<label><input type=radio name=REFRESH_MODE value=\"readcgi\" $red>READ.CGI</label></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -1273,6 +1283,7 @@ sub FunctionPlusViewSetting
 	$SYSTEM->Set('BANNER', $banner);
 	$SYSTEM->Set('MSEC', ($Form->Equal('MSEC', 'on') ? 1 : 0));
 	$SYSTEM->Set('HIDE_HITS', ($Form->Equal('HIDE_HITS', 'on') ? 0 : 1));
+	$SYSTEM->Set('REFRESH_MODE', $Form->Get('REFRESH_MODE'));
 	
 	$SYSTEM->Save();
 	
@@ -1284,6 +1295,7 @@ sub FunctionPlusViewSetting
 		push @$pLog, '　　　 バナー表示：' . $SYSTEM->Get('BANNER');
 		push @$pLog, '　　　 ミリ秒表示：' . $SYSTEM->Get('MSEC');
 		push @$pLog, '　　　 規制情報公開：' . $SYSTEM->Get('HIDE_HITS');
+		push @$pLog, '　　　 書き込み後遷移先：' . $SYSTEM->Get('REFRESH_MODE');
 	}
 	return 0;
 }

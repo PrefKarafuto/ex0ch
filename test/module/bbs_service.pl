@@ -756,6 +756,7 @@ FORM
    </span>
 	<input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
+  <input type="hidden" name="from_index" value="1">
 </td>
  </tr>
 </table>
@@ -867,6 +868,7 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
+   <input type="hidden" name="from_index" value="1">
    <input type="submit" value="　書き込む　" name="submit"><br class="smartphone">
    <input type="text" name="FROM" size="19" placeholder="名前（任意）">
    <input type="text" name="mail" size="19" placeholder="コマンド・Cap（$status）"><br>

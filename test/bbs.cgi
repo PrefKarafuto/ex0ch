@@ -302,6 +302,7 @@ sub PrintBBSCookieConfirm
 	my $msg = &$sanitize($Form->Get('MESSAGE'));
 	my $subject = &$sanitize($Form->Get('subject'));
 	my $key = &$sanitize($Form->Get('key'));
+	my $fi = $Form->Get('from_index');
 	
 	
 	# cookie情報の出力
@@ -369,6 +370,7 @@ HTML
 	$Page->HTMLInput('hidden', 'MESSAGE', $msg);
 	$Page->HTMLInput('hidden', 'bbs', $bbs);
 	$Page->HTMLInput('hidden', 'time', $tm);
+	$Page->HTMLInput('hidden', 'from_index', $fi);
 
 	if($Sys->Get('CAPTCHA')){
 		my $capkind = $Sys->Get('CAPTCHA').'-response';
@@ -434,6 +436,7 @@ sub PrintBBSCaptcha
 	my $msg = &$sanitize($Form->Get('MESSAGE'));
 	my $subject = &$sanitize($Form->Get('subject'));
 	my $key = &$sanitize($Form->Get('key'));
+	my $fi = $Form->Get('from_index');
 	
 	# cookie情報の出力
 	$Cookie->Set('countsession', $Sys->Get('SID'));
@@ -490,6 +493,7 @@ HTML
 	$Page->HTMLInput('hidden', 'MESSAGE', $msg);
 	$Page->HTMLInput('hidden', 'bbs', $bbs);
 	$Page->HTMLInput('hidden', 'time', $tm);
+	$Page->HTMLInput('hidden', 'from_index', $fi);
 	$Page->HTMLInput('hidden', 'page', 'captcha');
 	$Page->HTMLInput('hidden', $classname.'-response', $Form->Get($classname.'-response'));
 
@@ -547,10 +551,22 @@ sub PrintBBSJump
 	my $Conv = $CGI->{'CONV'};
 	my $Cookie = $CGI->{'COOKIE'};
 	
-	my $bbsPath = $Conv->MakePath($Sys->Get('CGIPATH').'/read.cgi/'.$Form->Get('bbs').'/'.$Form->Get('key').'/l10');
+	my $bbsPath = $Conv->MakePath($Sys->Get('CGIPATH').'/read.cgi/'.$Form->Get('bbs').'/'.$Form->Get('key').'/l10#bottom');
 	my $name = $Form->Get('NAME', '');
 	my $mail = $Form->Get('MAIL', '');
+	my $from_index = $Form->Get('FROM_INDEX', '');
 	my $sid = $Sys->Get('SID');
+
+	# 書き込み後の遷移先URL
+	my $mode = $Sys->Get('REFRESH_MODE');
+	my $refreshURL;
+	if ($mode eq 'index' || ($mode eq 'default' && $Form->Get('from_index'))) {
+		$refreshURL = $Sys->Get('BBS_ABS');
+	}
+	else {
+		$refreshURL = $bbsPath;
+	}
+
 		
 	# セキュリティキー生成
 	my $ctx = Digest::MD5->new;
@@ -569,7 +585,7 @@ sub PrintBBSJump
 <head>
 	<title>書きこみました。</title>
 <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
-<meta http-equiv="Refresh" content="5;URL=$bbsPath#bottom">
+<meta http-equiv="Refresh" content="5;URL=$refreshURL">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 </head>
 <!--nobanner-->
