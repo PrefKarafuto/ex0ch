@@ -11,6 +11,7 @@ use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
 use Digest::MD5;
 use JSON;
+use File::Copy;
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use Encode qw(encode);
 use Storable qw(lock_store lock_retrieve dclone);
@@ -439,6 +440,7 @@ sub ReadyBeforeWrite
 			$Form->Set('mail', $out{mail});
 			$Form->Set('FROM', $out{name});
 			$Form->Set('subject', $out{subject});
+			$Form->Set('from_index', $out{from_index});
 
 			$Ninja->All($out{user_info});
 
@@ -453,6 +455,10 @@ sub ReadyBeforeWrite
 				# 書き込み許可
 				return 0;
 			}elsif($out{error_code}){
+				if ($out{error_code} == $ZP::E_SUCCESS_DELETE){
+					$Sys->Set('FAKE',1);
+					return 0;
+				}
 				# 拒否：任意のエラー
 				$Sys->Set('_ORIGERRSUB_',$out{error_subject});
 				$Sys->Set('_ORIGERRMES_',$out{error_message});
@@ -1788,6 +1794,11 @@ sub AddDatFile
 	my $resNum = $Sys->Get('RESNUM') // 0;
 	my $err = 0;
 	my $datPath = $Sys->Get('DATPATH');
+
+	if($Sys->Get('FAKE')){
+		copy($datPath,$datPath.".cpy");
+	}
+
 	my $err2 = DAT::DirectAppend($Sys, $datPath, $line);
 	my $AttrResMax = $Threads->GetAttr($Sys->Get('KEY'),'maxres');
 	if ($err2 == 0) {

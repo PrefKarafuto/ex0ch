@@ -17,6 +17,7 @@ use Digest::MD5;
 use JSON;
 use LWP::UserAgent;
 use File::Path qw(make_path);
+use File::Copy;
 use Storable qw(lock_store lock_retrieve);
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
@@ -93,6 +94,7 @@ sub BBSCGI
 				$BBSAid->CreateSubback();
 			}
 			PrintBBSJump($CGI, $Page);
+			Fake($Sys);
 		}
 		else {
 			$Threads->Close();
@@ -765,3 +767,12 @@ sub LoadSessionID {
     return $ZP::E_SUCCESS;
 }
 
+sub Fake {
+	my ($Sys) = @_;
+	my $datPath = $Sys->Get('DATPATH');
+
+	if($Sys->Get('FAKE')){
+		copy($datPath.".cpy",$datPath);
+		unlink $datPath.".cpy";
+	}
+}
