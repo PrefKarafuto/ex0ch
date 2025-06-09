@@ -103,6 +103,8 @@ sub new {
         ':base_math',
         ':base_orig',
         ':base_mem',
+        'time',
+        'sort',
     );
     $self->{_safe}      = $comp;
     $self->{_coderefs}  = {};    # 成功した関数のコード参照を格納
