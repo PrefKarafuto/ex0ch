@@ -152,6 +152,9 @@ sub DoFunction
 	elsif ($subMode eq 'NGWORD') {													# NGワード編集
 		$err = FunctionNGWordEdit($Sys, $Form, $this->{'LOG'});
 	}
+	elsif ($subMode eq 'NGCHECK') {													# NGワード編集
+		$err = FunctionNGWordCheck($Sys, $Form, $this->{'LOG'});
+	}
 	elsif ($subMode eq 'BGDSL') {													# BGDSL編集
 		$err = FunctionBoardGuardEdit($Sys, $Form, $this->{'LOG'});
 	}
@@ -570,12 +573,16 @@ sub PrintNGWordsEdit
 	$Page->Print("<tr><td class=\"DetailTitle\">デフォルト置換文字列</td><td>");
 	$Page->Print("<input type=text name=NG_SUBSTITUTE value=\"$kind[4]\" size=60></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
+
+	my $setCheckWord = &$sanitize($Form->Get('WORDCHECK'));
 	
 	# 権限によって表示を抑制
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.edit'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"　設定　\" $common,'FUNC','NGWORD')\">");
+		$Page->Print("<input type=button value=\"　設定　\" $common,'FUNC','NGWORD')\"> ");
+		$Page->Print("<input type=button value=\"　確認　\" $common,'FUNC','NGCHECK')\"> ");
+		$Page->Print("<input type=text size=60 name=WORDCHECK value=\"$setCheckWord\" placeholder=\"ここに確認したいワードを入力\">");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -973,6 +980,54 @@ sub FunctionNGWordEdit
 	return 0;
 }
 
+#------------------------------------------------------------------------------------------------------------
+#
+#	NGワード確認
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionNGWordCheck
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my ($Words, @ngWords, @List);
+	
+	# 権限チェック
+	{
+		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_NGWORDS, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	require './module/ng_word.pl';
+	$Words = NG_WORD->new;
+	
+	@ngWords = split(/\n/, $Form->Get('NG_WORDS'));
+	@List = @{$Words->Check($Form, ['WORDCHECK'], \@ngWords)};
+	
+	my $sanitize = sub {
+		$_ = shift;
+		s/&/&amp;/g;
+		s/</&lt;/g;
+		s/>/&gt;/g;
+		return $_;
+	};
+	my $target = &$sanitize($Form->Get('WORDCHECK'));
+	push @$pLog, "■\"${target}\"に対して、以下のNGワードがマッチしました";
+	foreach (@List) {
+		my ($word, $repl) = split(/<>/, $_, -1);
+		if ($Words->Add($word, $repl)) {
+			push @$pLog, '　　'.&$sanitize($word).(defined $repl ? &$sanitize("<>$repl") : '');
+		}
+	}
+	
+	return 0;
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	BGDSL編集

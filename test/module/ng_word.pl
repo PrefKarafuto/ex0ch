@@ -196,13 +196,16 @@ sub Clear
 #	-------------------------------------------
 #	引　数：$Form  : FORM
 #			$pList : チェックリスト(リファレンス)
+#			$List  : NGワードチェック用(リファレンス)
 #	戻り値：検知番号
 #
 #------------------------------------------------------------------------------------------------------------
 sub Check {
     my $this  = shift;
-    my ($Form, $pList) = @_;
-    foreach my $word (@{$this->{'NGWORD'}}) {
+    my ($Form, $pList, $cList) = @_;
+	my @hList;
+	my @List = $cList ? @$cList : @{$this->{'NGWORD'}} ;
+    foreach my $word (@List) {
         next if $word eq '';
 
         foreach my $key (@$pList) {
@@ -220,8 +223,11 @@ sub Check {
                 next if $@;    # エラーがあればスキップ
 
                 # マッチしたら即規制
-                return 3 if $decoded_work =~ $pat;
-            }
+                if ($decoded_work =~ $pat) {
+					return 3 unless $cList;
+					push @hList,$word;
+				}
+			}
             else {
                 # リテラルマッチ用に \Q…\E でコンパイル
                 my $pat = eval { qr/\Q$word\E/ };
@@ -230,13 +236,14 @@ sub Check {
                 if ($decoded_work =~ $pat) {
                     return $this->{'METHOD'} eq 'host'    ? 2
                          : $this->{'METHOD'} eq 'disable' ? 3
-                         :                                   1;
+                         : 1 unless $cList;
+					push @hList,$word;
                 }
             }
         }
     }
 
-    return 0;
+    return $cList ? \@hList : 0;
 }
 
 
