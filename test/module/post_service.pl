@@ -419,6 +419,7 @@ sub ReadyBeforeWrite
 			cap_id		=> $capID 					// '',
 			is_captcha	=> $is_captcha				// '',
 			setting     => $Set->All()              // {},
+			#system		=> $Sys->All()				// {},
 			attr        => $Threads->GetAttr($threadid) // {},  # スレッド属性ハッシュ
 			user_info   => $Ninja->All() 			// {},      # 忍法帖情報ハッシュ
 			score       => 0,
@@ -443,6 +444,9 @@ sub ReadyBeforeWrite
 
 			$Threads->SetAttr($threadid,$out{attr});
 			$Threads->SaveAttr($Sys);
+
+			$Set->All($out{setting});
+			#$Sys->All($out{system});
 
 			# 規制
 			if ($result){
