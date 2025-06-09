@@ -413,6 +413,7 @@ sub ReadyBeforeWrite
 			thread_id   => $threadid		        // '',
 			bbs         => $Form->Get('bbs')        // '',
 			fp          => $Form->Get('fp')         // '',
+			from_index  => $Form->Get('from_index') // '',
 			ip          => $ENV{REMOTE_ADDR}        // '',
 			host        => $ENV{REMOTE_HOST}        // '',
 			ua          => $ENV{HTTP_USER_AGENT}    // '',
