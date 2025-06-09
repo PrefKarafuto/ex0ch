@@ -582,7 +582,7 @@ sub PrintNGWordsEdit
 		$Page->Print("<tr><td colspan=2 align=left>");
 		$Page->Print("<input type=button value=\"　設定　\" $common,'FUNC','NGWORD')\"> ");
 		$Page->Print("<input type=button value=\"　確認　\" $common,'FUNC','NGCHECK')\"> ");
-		$Page->Print("<input type=text size=60 name=WORDCHECK value=\"$setCheckWord\" placeholder=\"ここに確認したいワードを入力\">");
+		$Page->Print("<textarea rows=1 cols=60 name=WORDCHECK placeholder=\"ここに確認したいワードを入力\" style=\"font-size:1em\"></textarea>");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
