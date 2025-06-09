@@ -408,7 +408,7 @@ sub ReadyBeforeWrite
 			message     => $Form->Get('MESSAGE')    // '',
 			mail        => $Form->Get('mail')       // '',
 			name        => $Form->Get('FROM')       // '',
-			subject     => $Form->Get('subject')    // '',
+			title     => $Form->Get('subject')    // '',
 			time        => $Form->Get('time')       // time(),
 			thread_id   => $threadid		        // '',
 			bbs         => $Form->Get('bbs')        // '',
@@ -440,7 +440,7 @@ sub ReadyBeforeWrite
 			$Form->Set('MESSAGE',$out{message});
 			$Form->Set('mail', $out{mail});
 			$Form->Set('FROM', $out{name});
-			$Form->Set('subject', $out{subject});
+			$Form->Set('subject', $out{title});
 			$Form->Set('from_index', $out{from_index});
 
 			$Ninja->All($out{user_info});
