@@ -414,7 +414,12 @@ sub InitSettingData
 # 全設定ハッシュをそのまま返す
 sub All {
     my $this = shift;
-    return $this->{'SETTING'} ||= {};
+	my ($hash) = @_;
+	if($hash){
+		$this->{'SETTING'} = $hash;
+	}else{
+		return $this->{'SETTING'} ||= {};
+	}
 }
 
 #============================================================================================================

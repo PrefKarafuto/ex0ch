@@ -368,6 +368,17 @@ sub InitSystemValue
 	push @$pKey, @key;
 }
 
+# 全設定ハッシュをそのまま返す
+sub All {
+    my $this = shift;
+	my ($hash) = @_;
+	if($hash){
+		$this->{'SYS'} = $hash;
+	}else{
+		return $this->{'SYS'} ||= {};
+	}
+}
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	システム変数正規化 - NormalizeConf
