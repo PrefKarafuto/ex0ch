@@ -236,19 +236,30 @@ sub Check {
         sub _DENY_ () { 0 }
         sub _ACCEPT_ () { 1 }
         sub _PASS_ () { 2 }
+        sub _NEXT_ () { 2 }
 CONST
 
     # (E) さらに、ZP パッケージに定義された our スカラ変数を自動列挙して共有
+    # (E) さらに、ZP パッケージに定義された our スカラ変数を自動列挙して共有
+    my $constants = "";
     {
         no strict 'refs';
-        my @zp_scalars;
-        foreach my $symbol (keys %ZP::) {
-            if (defined *{"ZP::$symbol"}{SCALAR}) {
-                push @zp_scalars, '$' . $symbol;
+        for my $symbol (
+            # 末尾に :: が付かない（真のシンボルだけ）かつ
+            # SCALAR slot が定義済みのもの
+            grep { $_ !~ /::$/ && defined *{"ZP::$_"}{SCALAR} } 
+            keys %ZP::
+        ) {
+            my $value = ${"ZP::$symbol"};                   # 実際の値を取得
+            # 数値以外の値（文字列など）が入りうる場合は適宜クォートを
+            if (defined $value && $value !~ /^\d+$/) {
+                # シンプルにシングルクォートで囲む例
+                $value =~ s/'/\\'/g;
+                $value = "'$value'";
             }
+            $constants .= sprintf("our \$%s = %s;\n", $symbol, defined $value ? $value : 'undef');
         }
         use strict 'refs';
-        $comp->share_from('ZP', \@zp_scalars);
     }
 
     # (F) トップレベルコード（サブルーチンヘルパー定義や my 変数定義など）を Safe 上で評価
@@ -258,7 +269,7 @@ CONST
         my $raw = $rule->{raw};
         $top_level =~ s/\Q$raw\E//g;
     }
-    my $wrapped_top = "package DSL::SafeCompartment;\n" . $top_level;
+    my $wrapped_top = "package DSL::SafeCompartment;\n" . $top_level . "\n" . $constants;
     $comp->reval($wrapped_top);
     if (my $err = $@) {
         chomp $err;
@@ -392,15 +403,15 @@ CONST
                 # undefined もパスとみなす
                 next;
             }
-            elsif ($result == 0) {
+            elsif ($result eq 0) {
                 # _DENY_ -> 即座に拒否
                 return 0;
             }
-            elsif ($result == 1) {
+            elsif ($result eq 1) {
                 # _ACCEPT_ -> 即座に許可
                 return 1;
             }
-            elsif ($result == 2) {
+            elsif ($result eq 2) {
                 # _PASS_ -> 明示的に次のルールへ
                 next;
             }
