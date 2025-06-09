@@ -229,6 +229,10 @@ sub PrintResList
 	my (@elem, $resNum, $dispNum, $dispSt, $dispEd, $common, $common2, $i);
 	my ($pRes, $isAbone, $isEdit, $isAccessUser, $format);
 	my ($log, @logs, $datsize, $logsize);
+
+	require './module/bbs_info.pl';
+	require './module/data_utils.pl';
+	my $BBS = BBS_INFO->new;
 	
 	$Sys->Set('_TITLE', 'Res List');
 	
@@ -254,6 +258,22 @@ sub PrintResList
 	$logsize = $Logger->Size();
 	
 	$datsize -= 1 if ($Dat->IsStopped($Sys));
+
+	# 所属掲示板一覧取得
+	my (@belongBBS,@bbsSet,%keySet);
+	$BBS->Load($Sys);
+	$BBS->GetKeySet('ALL', '', \@bbsSet);
+	$Sys->Get('ADMIN')->{'SECINFO'}->GetBelongBBSList($Sys->Get('ADMIN')->{'USER'}, $BBS, \@belongBBS);
+	my $BBSurl = $Sys->Get('SERVER') . $Sys->Get('CGIPATH') . '/read.cgi';
+	foreach my $id (@bbsSet) {
+		foreach my $belongID (@belongBBS) {
+			if ($id eq $belongID) {
+				my $dir = $BBS->Get('DIR', $belongID);
+				$keySet{$dir} = $belongID;
+			}
+		}
+	}
+	my $regstr = qr/\Q$BBSurl\E\/([A-Za-z0-9_]+)\/(\d{10})\/?((l)?\d+)?/;
 	
 	# レス一覧を出力
 	my $offset = $logsize - $datsize;
@@ -308,6 +328,22 @@ sub PrintResList
 		my $length = length($str);
 		my $half = int($length / 2);
 		substr($str, 0, $half) = '*' x $half;
+
+		# 鯖内掲示板のURLをリンクに
+		if ( $elem[3] =~ /$regstr/ ) {
+				my ($bbs_name, $thread_id, $disp_fmt) = ($1, $2, $3);
+				if ( exists $keySet{$bbs_name} ) {
+						my $bbs_key = $keySet{$bbs_name};
+						$elem[3] =~ s|$regstr|
+								qq{<a href="javascript:
+										SetOption('TARGET_BBS','$bbs_key');
+										SetOption('TARGET_THREAD','$thread_id');
+										SetOption('DISP_FORMAT','$disp_fmt');
+										DoSubmit('thread.res','DISP','LIST');
+								">[掲示板内リンク：$bbs_name/$thread_id/$disp_fmt]</a>}
+						|gex;
+				}
+		}
 
 		$Page->Print("：<font color=forestgreen><b>$elem[0]</b></font>[$elem[1]]");
 		$Page->Print("：$elem[2]</dt><dd>$elem[3]");
@@ -770,6 +806,14 @@ sub FunctionResDelete
 	# subject.txt更新
 	$Threads->UpdateAll($Sys);
 	$Threads->Save($Sys);
+
+	# indexの更新
+	require './module/bbs_service.pl';
+	my $BBSAid = BBS_SERVICE->new;
+	$Sys->Set('MODE', 'CREATE');
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
 	
 	# ログの設定
 	$delCnt = 0;
