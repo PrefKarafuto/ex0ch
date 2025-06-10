@@ -313,8 +313,9 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=C_NGWORD $authNum[21] value=on>NGワード規制解除<br>");
 	$Page->Print("<input type=checkbox name=C_COMMAND $authNum[24] value=on>コマンド使用可<br>");
 	$Page->Print("<input type=checkbox name=C_NOATTR $authNum[25] value=on>スレッド属性無効<br>");
-	$Page->Print("<input type=checkbox name=C_NONINJA $authNum[27] value=on>忍法帖無効<br>");
-	#$Page->Print("<input type=checkbox name=C_NOCAPTCHA $authNum[28] value=on>Captcha無効<br>");	# 暫定廃止
+	$Page->Print("<input type=checkbox name=C_NONINJA $authNum[27] value=on>忍法帖規制無効<br>");
+	$Page->Print("<input type=checkbox name=C_NOCAPTCHA $authNum[28] value=on>Captcha無効<br>");
+	$Page->Print("<input type=checkbox name=C_NOBGDSL $authNum[29] value=on>BGDSL規制無効<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示
@@ -478,7 +479,8 @@ sub FunctionGroupSetting
 		'C_COMMAND'			=> $ZP::CAP_REG_COMMAND,
 		'C_NOATTR'			=> $ZP::CAP_REG_NOATTR,
 		'C_NONINJA'			=> $ZP::CAP_REG_NONINJA,
-		#'C_NOCAPTCHA'		=> $ZP::CAP_REG_NOCAPTCHA,		# 暫定廃止
+		'C_NOCAPTCHA'		=> $ZP::CAP_REG_NOCAPTCHA,
+		'C_NOBGDSL'			=> $ZP::CAP_REG_DNSBL,
 	);
 	my @auths = ();
 	foreach (keys %field2auth) {

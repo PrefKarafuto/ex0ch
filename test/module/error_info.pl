@@ -10,6 +10,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use Digest::MD5;
+no warnings 'once';
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -46,6 +47,8 @@ sub Load {
 
 	$this->{'ERR'} = undef;
 
+	# あらかじめ$Sys->Set('EXAMPLE',$str)のように値をセットしておけば、$strの内容をメッセージで出力可能
+	# {!EXAMPLE!}という形式でメッセージにタグを追加すると、その箇所が$strに置換される
 	my $messages = {
 		'100' => { SUBJECT => 'サブジェクト長すぎ', MESSAGE => 'サブジェクトが長すぎます！' },
 		'101' => { SUBJECT => '名前長すぎ', MESSAGE => '名前が長すぎます！' },
@@ -60,8 +63,9 @@ sub Load {
 		'153' => { SUBJECT => '認証されてない', MESSAGE => 'Captcha認証をしてください。' },
 		'154' => { SUBJECT => '認証失敗', MESSAGE => 'Captcha認証に失敗しました。' },
 		'155' => { SUBJECT => 'ユーザー認証失敗', MESSAGE => 'ユーザー認証に失敗しました。' },
-		'158' => { SUBJECT => '認証されてない', MESSAGE => 'ユーザー認証をしてください。' },
-		'159' => { SUBJECT => '認証用ワンタイムパスワード発行', MESSAGE => 'パスワードは<br><br>!auth:{!PASSWORD!}<br><br>です。この書き込みから3分以内にコマンド欄にパスワードを入力して、専用ブラウザから書き込んでください。' },
+		'156' => { SUBJECT => '認証期限切れ', MESSAGE => 'ユーザー認証をしてください。<br>通常ブラウザで、コマンド欄に<br><br>!auth<br><br>と入れて書き込みをしてください。認証用パスワードを発行します。' },
+		'160' => { SUBJECT => '認証用ワンタイムパスワード発行', MESSAGE => 'パスワードは<br><br>!auth:{!PASSWORD!}<br><br>です。この書き込みから3分以内にコマンド欄にパスワードを入力して、専用ブラウザから書き込んでください。' },
+		'161' => { SUBJECT => '忍法帖保存ページ', MESSAGE => '時刻:{!TIME!} (UTC)<br>あなたの忍法帖パスワード:{!NIN_PASS!}<br><br>これはあなたの忍法帖パスワードなので大切に保管してください。<br>最新のパスワードのみが有効です。キャンセルを押して戻ってください。' },
 		'200' => { SUBJECT => 'スレッド停止', MESSAGE => 'このスレッドは停止されてます。もう書けない。。。' },
 		'201' => { SUBJECT => '書き込み限界', MESSAGE => '{!RESMAX!}を超えてます。このスレッドにはもう書けない。。。' },
 		'202' => { SUBJECT => 'スレッド移転', MESSAGE => 'このスレッドは移転されたようです。詳しくは（略' },
@@ -103,10 +107,8 @@ sub Load {
 	};
 
 	# メッセージデータをオブジェクトに格納
-	foreach my $id (keys %{$messages}) {
-		$this->{'SUBJECT'}->{$id} = $messages->{$id}->{SUBJECT};
-		$this->{'MESSAGE'}->{$id} = $messages->{$id}->{MESSAGE};
-	}
+	$this->{'SUBJECT'} = { map { $_ => $messages->{$_}->{SUBJECT} } keys %{$messages} };
+	$this->{'MESSAGE'} = { map { $_ => $messages->{$_}->{MESSAGE} } keys %{$messages} };
 }
 
 
@@ -174,82 +176,79 @@ sub Print
 	$Log->Load($Sys, 'ERR', '');
 	$Log->Set('', $err, $version, $koyuu, $mode);
 	$Log->Save($Sys);
-	
-	my $name = &$sanitize($Form->Get('NAME')) || '';
-	my $mail = &$sanitize($Form->Get('MAIL')) || '';
-	my $key = $Form->Get('key');
-	my $t = &$sanitize($Form->Get('subject','')) || '';
-	my $msg = $Form->Get('MESSAGE') || '';
 
-	#酉バレ防止
-	$name = (split(/#/,$name))[0];
-	$mail = (split(/#/,$mail))[0];
+	# 書き込み失敗ログ保存
+	if($err != ($ZP::E_PAGE_CAPTCHA||$ZP::E_PAGE_COOKIE||$ZP::E_FORM_NOCAPTCHA)){
+		my $name = &$sanitize($Form->Get('NAME')) || '';
+		my $mail = &$sanitize($Form->Get('MAIL')) || '';
+		my $key = $Form->Get('key');
+		my $t = &$sanitize($Form->Get('subject','')) || '';
+		my $msg = $Form->Get('MESSAGE') || '';
+		$msg =~ s/\n/<br>/g;
 
-	#超過対策
-	if($Set->Get('BBS_MESSAGE_COUNT') < length($msg)){
-		$msg = substr($msg,0,$Set->Get('BBS_MESSAGE_COUNT'));
-		$msg .= ' ...(長すぎたので省略)';
-	}
-	if($Set->Get('BBS_NAME_COUNT') < length($name)){
-		$name = substr($name,0,$Set->Get('BBS_NAME_COUNT'));
-		$name .= ' ...(長すぎたので省略)';
-	}
-	if($Set->Get('BBS_MAIL_COUNT') < length($mail)){
-		$mail = substr($mail,0,$Set->Get('BBS_MAIL_COUNT'));
-		$mail .= ' ...(長すぎたので省略)';
-	}
-	if($Set->Get('BBS_SUBJECT_COUNT') < length($t) && $t){
-		$t = substr($t,0,$Set->Get('BBS_SUBJECT_COUNT'));
-		$t .= ' ...(長すぎたので省略)';
-	}
-	my $title = $t?"(New)$t":"$key";
-	
-	$Log->Load($Sys, 'FLR', '');
-	$Log->Set('', $err,"$title<>$name<>$mail<>$msg", $koyuu, $mode);
-	$Log->Save($Sys);
-	
-	#$Page->Print("Status: 412 Precondition Failed\n");
-	
-	if (0) {
-		my $subject = $this->{'SUBJECT'}->{$err};
-		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
-		$Page->Print("<html><head><title>");
-		$Page->Print("ＥＲＲＯＲ！</title></head><!--nobanner-->\n");
-		$Page->Print("<body><font color=red>ERROR:$subject</font><hr>");
-		$Page->Print("$message<hr><a href=\"$bbsPath/i/\">こちら</a>");
-		$Page->Print("から戻ってください</body></html>");
-	}
-	else {
-		my $Cookie = $CGI->{'COOKIE'};
-		my $Set = $CGI->{'SET'};
-		my $subject = $this->{'SUBJECT'}->{$err};
-		
-		my $name = &$sanitize($Form->Get('NAME'));
-		my $mail = &$sanitize($Form->Get('MAIL'));
-		my $msg = $Form->Get('MESSAGE');
-		
-		# cookie情報の出力
-		if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked')) {
-			$Cookie->Set('NAME', $name, 'utf8');
+		#酉バレ防止
+		$name = (split(/#/,$name))[0];
+		$mail = (split(/#/,$mail))[0];
+
+		#超過対策
+		if($Set->Get('BBS_MESSAGE_COUNT') < length($msg)){
+			$msg = substr($msg,0,$Set->Get('BBS_MESSAGE_COUNT'));
+			$msg .= ' ...(長すぎたので省略)';
 		}
-		if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked')) {
-			$Cookie->Set('MAIL', $mail, 'utf8');
+		if($Set->Get('BBS_NAME_COUNT') < length($name)){
+			$name = substr($name,0,$Set->Get('BBS_NAME_COUNT'));
+			$name .= ' ...(長すぎたので省略)';
 		}
-		# セキュリティキー生成
-		if($Sys->Get('SID')){
-			my $ctx = Digest::MD5->new;
-			$ctx->add($Sys->Get('SECURITY_KEY'));
-			$ctx->add(':', $Sys->Get('SID'));
-			my $sec = $Sys->Get('SID') ? $ctx->b64digest : "";
-			$Cookie->Set('countsession', $Sys->Get('SID'));
-			$Cookie->Set('securitykey', $sec);
+		if($Set->Get('BBS_MAIL_COUNT') < length($mail)){
+			$mail = substr($mail,0,$Set->Get('BBS_MAIL_COUNT'));
+			$mail .= ' ...(長すぎたので省略)';
 		}
-		$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
+		if($Set->Get('BBS_SUBJECT_COUNT') < length($t) && $t){
+			$t = substr($t,0,$Set->Get('BBS_SUBJECT_COUNT'));
+			$t .= ' ...(長すぎたので省略)';
+		}
+		my $title = $t?"(New)$t":"$key";
 		
-		$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
-		
-		if ($err < $ZP::E_REG_SAMBA_CAUTION || $err > $ZP::E_REG_SAMBA_STILL) {
-			$Page->Print(<<HTML);
+		$Log->Load($Sys, 'FLR', '');
+		$Log->Set('', $err,"$title<>$name<>$mail<>$msg", $koyuu, $mode);
+		$Log->Save($Sys);
+	}
+	
+	my $Cookie = $CGI->{'COOKIE'};
+	my $subject = $this->{'SUBJECT'}->{$err};
+
+	# 存在しないエラーコードの場合
+	unless($subject){
+		$subject = $Sys->Get('_ORIGERRSUB_') || "不明なエラー";
+		$message = $Sys->Get('_ORIGERRMES_') || "定義されていないエラーです。";
+	}
+	
+	my $name = &$sanitize($Form->Get('NAME'));
+	my $mail = &$sanitize($Form->Get('MAIL'));
+	my $msg = $Form->Get('MESSAGE');
+	
+	# cookie情報の出力
+	if ($Set->Equal('BBS_NAMECOOKIE_CHECK', 'checked')) {
+		$Cookie->Set('NAME', $name, 'utf8');
+	}
+	if ($Set->Equal('BBS_MAILCOOKIE_CHECK', 'checked')) {
+		$Cookie->Set('MAIL', $mail, 'utf8');
+	}
+	# セキュリティキー生成
+	if($Sys->Get('SID')){
+		my $ctx = Digest::MD5->new;
+		$ctx->add($Sys->Get('SECURITY_KEY'));
+		$ctx->add(':', $Sys->Get('SID'));
+		my $sec = $Sys->Get('SID') ? $ctx->b64digest : "";
+		$Cookie->Set('countsession', $Sys->Get('SID'));
+		$Cookie->Set('securitykey', $sec);
+	}
+	$Cookie->Out($Page, $Set->Get('BBS_COOKIEPATH'), 60 * 24 * $Sys->Get('COOKIE_EXPIRY'));
+	
+	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
+	
+	if ($err < $ZP::E_REG_SAMBA_CAUTION || $err > $ZP::E_REG_SAMBA_STILL) {
+		$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
 <head>
@@ -282,27 +281,27 @@ $msg
 <hr>
 <div class="reload">こちらでリロードしてください。&nbsp;<a href="$bbsPath/">&lt;&lt;掲示板に戻る</a>
 HTML
-		if($Sys->Equal('MODE', 1)){
-			$Page->Print("<a href=\"$bbsPath/#new_thread\">&lt;&lt;スレッド作成フォームに戻る</a></div>");
-		}else{
-			$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
-		}
+	if($Sys->Equal('MODE', 1)){
+		$Page->Print("<a href=\"$bbsPath/#new_thread\">&lt;&lt;スレッド作成フォームに戻る</a></div>");
+	}else{
+		$Page->Print("&nbsp;<a href=\"$threadPath\">スレッドに戻る&gt;&gt;</a></div>");
+	}
 			
 $Page->Print(<<HTML);
 <div align="right">$version</div>
 </body>
 </html>
 HTML
-		}
-		else {
-			my $sambaerr = {
-				$ZP::E_REG_SAMBA_CAUTION	=> $ZP::E_REG_SAMBA_2CH1,
-				$ZP::E_REG_SAMBA_WARNING	=> $ZP::E_REG_SAMBA_2CH2,
-				$ZP::E_REG_SAMBA_LISTED		=> $ZP::E_REG_SAMBA_2CH3,
-				$ZP::E_REG_SAMBA_STILL		=> $ZP::E_REG_SAMBA_2CH3,
-			}->{$err};
-			
-			$Page->Print(<<HTML);
+	}
+	else {
+		my $sambaerr = {
+			$ZP::E_REG_SAMBA_CAUTION	=> $ZP::E_REG_SAMBA_2CH1,
+			$ZP::E_REG_SAMBA_WARNING	=> $ZP::E_REG_SAMBA_2CH2,
+			$ZP::E_REG_SAMBA_LISTED		=> $ZP::E_REG_SAMBA_2CH3,
+			$ZP::E_REG_SAMBA_STILL		=> $ZP::E_REG_SAMBA_2CH3,
+		}->{$err};
+		
+		$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
 <head>
@@ -330,7 +329,6 @@ HTML
 </body>
 </html>
 HTML
-		}
 		
 	}
 }

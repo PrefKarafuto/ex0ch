@@ -103,6 +103,7 @@ sub CreateIndex
 		
 		PrintIndexHead($this, $Index, $Caption);
 		PrintIndexMenu($this, $Index);
+		PrintTimeLine($this,$Index);
 		PrintIndexPreview($this, $Index);
 		PrintIndexFoot($this, $Index, $Caption);
 		
@@ -498,6 +499,93 @@ MENU
 
 #------------------------------------------------------------------------------------------------------------
 #
+#	index.html生成(タイムライン部分)
+#	-------------------------------------------------------------------------------------
+#	@param	$Page
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintTimeLine
+{
+	my $this = shift;
+	my ($Page) = @_;
+	
+	my $Conv = $this->{'CONV'};
+	my $Sys = $this->{'SYS'};
+	my $Set = $this->{'SET'};
+	my $menuCol = $this->{'SET'}->Get('BBS_MENU_COLOR');
+	my $tl_max = $Set->Get('BBS_TL_MAX');
+
+	return unless $tl_max;
+
+	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/timeline';
+    opendir(my $dir, $TLpath) or die "Cannot open directory: $!";
+    my @files = sort { (stat("$TLpath/$b"))[9] <=> (stat("$TLpath/$a"))[9] } 
+    grep { /\.cgi$/ && -f "$TLpath/$_" } readdir($dir);
+    closedir($dir);
+	
+	$Page->Print(<<MENU);
+<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$menuCol" style="margin:1.2em auto;" align="center">
+<tbody>
+ <tr>
+  <td>
+  <small>
+  <div style="height: 200px; overflow-y: scroll;" id="timeline" >
+MENU
+	if(@files){
+		foreach my $file (@files) {
+			my $filepath = "$TLpath/$file";
+			open(my $fh, '<', $filepath) or die "Cannot open file: $!";
+			my $line = <$fh>;
+			close($fh);
+			
+			my $mtime = (stat($filepath))[9];
+
+			my @lines = split(/<>/, $line);
+			my $message = $lines[3];
+			$message =~ s/<br>//g;
+			$message = (split(/</,$message))[0];
+			my $title  = $lines[4];
+			my $url = $lines[5];
+
+			my $str_max = 60;
+
+			if (length($message) > $str_max) {
+				$message = substr($message, 0, $str_max) . "...";
+			}
+			if (length($title) > $str_max) {
+				$title = substr($title, 0, $str_max) . "...";
+			}
+
+			$Page->Print(<<MENU);
+		<a href="$url" class="timeline-entry" data-mtime="$mtime">
+			<div class="tl_title">
+				<span class="tl_time"> - </span> $title
+			</div>
+			<div class="tl_message">$message</div>
+		</a>
+MENU
+    	}
+	}else{
+		$Page->Print("投稿はありません");
+	}
+
+	$Page->Print(<<MENU);
+	</div>
+  </small>
+  </td>
+ </tr><tr><td>
+<button type="button" onclick="window.location.href='./'; window.location.reload();">
+    再読み込み
+</button>
+ </td></tr>
+ </tbody>
+</table>
+
+MENU
+}
+#------------------------------------------------------------------------------------------------------------
+#
 #	index.html生成(スレッドプレビュー部分)
 #	-------------------------------------------------------------------------------------
 #	@param	$Page		
@@ -652,7 +740,7 @@ FORM
 		$Page->Print(<<FORM);
 
 <form method="POST" action="$cgipath/bbs.cgi">
-<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="#CCFFCC" style="margin-bottom:1.2em;" align="center">
+<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>
   <input type="submit" value="　新規スレッド作成　">
@@ -668,6 +756,7 @@ FORM
    </span>
 	<input type="hidden" name="bbs" value="$bbs">
   <input type="hidden" name="time" value="$tm">
+  <input type="hidden" name="from_index" value="1">
 </td>
  </tr>
 </table>
@@ -698,6 +787,7 @@ FORM
 <a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
 BBS.CGI - $ver (Perl$is_fcgi)
 @{[ $Sys->Get('DNSBL_TOREXIT') ? '+dan.me.uk' : '' ]}
+@{[ $Sys->Get('DNSBL_SPAMHAUS') ? '+S5H' : '' ]}
 @{[ $Sys->Get('DNSBL_S5H') ? '+S5H' : '' ]}
 @{[ $Sys->Get('DNSBL_DRONEBL') ? '+DeoneBL' : '' ]}
 @{[ $Set->Get('BBS_NINJA') ? '+忍法帖' : '' ]}
@@ -778,6 +868,7 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
    <input type="hidden" name="time" value="$tm">
+   <input type="hidden" name="from_index" value="1">
    <input type="submit" value="　書き込む　" name="submit"><br class="smartphone">
    <input type="text" name="FROM" size="19" placeholder="名前（任意）">
    <input type="text" name="mail" size="19" placeholder="コマンド・Cap（$status）"><br>

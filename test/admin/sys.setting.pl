@@ -534,8 +534,8 @@ sub PrintOtherSetting
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">動作モード(read.cgi)</td></tr>\n");
 	$Page->Print("<tr><td>PATH種別</td>");
-	$Page->Print("<td><input type=radio name=PATHKIND value=\"0\" $pathInfo>PATHINFO　");
-	$Page->Print("<input type=radio name=PATHKIND value=\"1\" $pathQuery>QUERYSTRING</td></tr>\n");
+	$Page->Print("<td><label><input type=radio name=PATHKIND value=\"0\" $pathInfo>PATHINFO</label>　");
+	$Page->Print("<label><input type=radio name=PATHKIND value=\"1\" $pathQuery>QUERYSTRING</label></td></tr>\n");
 	
 	#$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
 	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
@@ -601,11 +601,15 @@ sub PrintPlusViewSetting
 	my $Prlink		= $SYS->Get('PRLINK');
 	my $Msec		= $SYS->Get('MSEC');
 	my $hide_hits	= $SYS->Get('HIDE_HITS');
+	my $refresh_mode	= $SYS->Get('REFRESH_MODE');
 	
 	my $bannerindex	= ($Banner & 3 ? 'checked' : '');
 	my $banner		= ($Banner & 5 ? 'checked' : '');
 	my $msec		= ($Msec == 1 ? 'checked' : '');
 	my $hide		= ($hide_hits == 0 ? 'checked' : '');
+	my $def			= ($refresh_mode eq 'default' ? 'checked' : '');
+	my $ind			= ($refresh_mode eq 'index' ? 'checked' : '');
+	my $red			= ($refresh_mode eq 'readcgi' ? 'checked' : '');
 	
 	my $common = "onclick=\"DoSubmit('sys.setting','FUNC','VIEW');\"";
 	
@@ -632,6 +636,12 @@ sub PrintPlusViewSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">規制情報公開</td></tr>\n");
 	$Page->Print("<tr><td>規制ユーザーの情報を公開する <br><small>(madakana.cgi、ユーザー規制のエラー画面)</small></td>");
 	$Page->Print("<td><input type=checkbox name=HIDE_HITS $hide value=on></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">書き込み後の遷移先</td></tr>\n");
+	$Page->Print("<tr><td>掲示板に書き込まれた後どこに自動遷移するか指定します。</td>");
+	$Page->Print("<td><label><input type=radio name=REFRESH_MODE value=\"default\" $def>DEFAULT</label>\n");
+	$Page->Print("<label><input type=radio name=REFRESH_MODE value=\"index\" $ind>INDEX</label>\n");
+	$Page->Print("<label><input type=radio name=REFRESH_MODE value=\"readcgi\" $red>READ.CGI</label></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -657,8 +667,8 @@ sub PrintPlusSecSetting
 {
 	
 	my ($Page, $SYS, $Form) = @_;
-	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha);
-	my ($kakiko, $trip12, $torexit, $s5h, $dronebl);
+	my ($Kakiko, $Samba, $DefSamba, $DefHoushi, $Trip12, $TOREXIT,$Captcha,$Captcha_IP,$spamhaus);
+	my ($kakiko, $trip12, $torexit, $s5h, $dronebl, $bgdsl, $DSL);
 	my ($common);
 	
 	$SYS->Set('_TITLE', 'System Regulation Setting');
@@ -670,31 +680,38 @@ sub PrintPlusSecSetting
 	$Trip12		= $SYS->Get('TRIP12');
 	$TOREXIT	= $SYS->Get('DNSBL_TOREXIT');
 	$Captcha	= $SYS->Get('CAPTCHA');
+	$Captcha_IP	= $SYS->Get('CAPTCHA_LENIENCY');
+	$DSL		= $SYS->Get('BGDSL');
 	
-	my $noCapSet = $Captcha ? '':'selected';
-	my $hCapSet = $Captcha eq 'h-captcha' ? 'selected' : '';
-	my $reCapSet = $Captcha eq 'g-recaptcha' ? 'selected' : '';
-	my $TurnSet = $Captcha eq 'cf-turnstile' ? 'selected' : '';
+	my $noCapSet 	= $Captcha ? '':'selected';
+	my $hCapSet 	= $Captcha eq 'h-captcha' ? 'selected' : '';
+	my $reCapSet 	= $Captcha eq 'g-recaptcha' ? 'selected' : '';
+	my $TurnSet 	= $Captcha eq 'cf-turnstile' ? 'selected' : '';
+	my $noCapIP 	= $Captcha_IP ? '':'selected';
+	my $CapIPRelax 	= $Captcha_IP eq 'relaxed' ? 'selected' : '';
+	my $CapIPStrict = $Captcha_IP eq 'strict' ? 'selected' : '';
 	my $Captcha_sitekey 	= $SYS->Get('CAPTCHA_SITEKEY');
-	my $Captcha_secretkey  = $SYS->Get('CAPTCHA_SECRETKEY');
-	my $Proxy_apikey  = $SYS->Get('PROXYCHECK_APIKEY');
+	my $Captcha_secretkey  	= $SYS->Get('CAPTCHA_SECRETKEY');
+	my $Proxy_apikey  	= $SYS->Get('PROXYCHECK_APIKEY');
 	my $Proxy_api		= $SYS->Get('PROXYCHECK_API');
-	my $noApiSet = $Proxy_api ? '':'selected';
-	my $pApiSet = $Proxy_api eq 'proxycheck.io' ? 'selected' : '';
-	my $IP2ApiSet = $Proxy_api eq 'ip2location' ? 'selected' : '';
-	my $IPApiSet = $Proxy_api eq 'ipqualityscore' ? 'selected' : '';
-	my $AApiSet = $Proxy_api eq 'abstract' ? 'selected' : '';
-	my $IPDApiSet = $Proxy_api eq 'ipdata' ? 'selected' : '';
+	my $noApiSet 	= $Proxy_api ? '':'selected';
+	my $pApiSet 	= $Proxy_api eq 'proxycheck.io' ? 'selected' : '';
+	my $IP2ApiSet 	= $Proxy_api eq 'ip2location' ? 'selected' : '';
+	my $IPApiSet 	= $Proxy_api eq 'ipqualityscore' ? 'selected' : '';
+	my $AApiSet 	= $Proxy_api eq 'abstract' ? 'selected' : '';
+	my $IPDApiSet 	= $Proxy_api eq 'ipdata' ? 'selected' : '';
 	my $admCap		= $SYS->Get('ADMINCAP');
 	my $srcCap		= $SYS->Get('SEARCHCAP');
 
 	$kakiko		= ($Kakiko == 1 ? 'checked' : '');
 	$trip12		= ($Trip12 == 1 ? 'checked' : '');
 	$torexit	= ($TOREXIT == 1 ? 'checked' : '');
+	$spamhaus	= ($SYS->Get('DNSBL_SPAMHAUS') == 1 ? 'checked' : '');
 	$s5h		= ($SYS->Get('DNSBL_S5H') == 1 ? 'checked' : '');
 	$dronebl	= ($SYS->Get('DNSBL_DRONEBL') == 1 ? 'checked' : '');
 	$admCap		= ($admCap == 1 ? 'checked' : '');
 	$srcCap		= ($srcCap == 1 ? 'checked' : '');
+	$bgdsl		= ($DSL == 1 ? 'checked' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','SEC');\"";
 	
@@ -725,24 +742,15 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr><td colspan=2>適用するDNSBLにチェックをいれてください(規制を行う場合は各掲示板の設定で有効にしてください)<br>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_TOREXIT $torexit value=on>");
 	$Page->Print("<a href=\"https://www.dan.me.uk/dnsbl\" target=\"_blank\">Dan.me.uk</a>(Tor出口ノード判定)\n");
+	$Page->Print("<input type=checkbox name=DNSBL_SPAMHAUS $spamhaus value=on>");
+	$Page->Print("<a href=\"https://www.spamhaus.org/\" target=\"_blank\">Spamhaus</a>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_S5H $s5h value=on>");
 	$Page->Print("<a href=\"http://www.usenix.org.uk/content/rbl.html\" target=\"_blank\">S5H</a>\n");
 	$Page->Print("<input type=checkbox name=DNSBL_DRONEBL $dronebl value=on>");
 	$Page->Print("<a href=\"https://dronebl.org/\" target=\"_blank\">DroneBL</a>\n");
 	$Page->Print("</td></tr>\n");
-	
+
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">外部APIキー</td></tr>\n");
-	$Page->Print("<tr><td>Captcha種別<br><td>");
-	$Page->Print("<select name=CAPTCHA required>");
-	$Page->Print("<option value=\"\" $noCapSet>なし</option>");
-	$Page->Print("<option value=\"h-captcha\" $hCapSet>hCaptcha</option>");
-	$Page->Print("<option value=\"g-recaptcha\" $reCapSet>reCAPTCHA v2</option>");
-	$Page->Print("<option value=\"cf-turnstile\" $TurnSet>Turnstile</option>");
-	$Page->Print("</select></td></tr>\n");
-	$Page->Print("<tr><td>Captchaサイトキー<br>");
-	$Page->Print("<td><input type=text size=60  name=CAPTCHA_SITEKEY value=\"$Captcha_sitekey\"></td></tr>\n");
-	$Page->Print("<tr><td>Captchaシークレットキー</td>");
-	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
 	$Page->Print("<tr><td>プロキシチェックAPI種別<br><td>");
 	$Page->Print("<select name=PROXYCHECK_API required>");
 	$Page->Print("<option value=\"\" $noApiSet>なし</option>");
@@ -755,6 +763,25 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr><td>APIキー</td>");
 	$Page->Print("<td><input type=text size=60 name=PROXYCHECK_APIKEY value=\"$Proxy_apikey\"></td></tr>\n");
 
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Captcha設定</td></tr>\n");
+	$Page->Print("<tr><td>Captcha種別<br><td>");
+	$Page->Print("<select name=CAPTCHA required>");
+	$Page->Print("<option value=\"\" $noCapSet>なし</option>");
+	$Page->Print("<option value=\"h-captcha\" $hCapSet>hCaptcha</option>");
+	$Page->Print("<option value=\"g-recaptcha\" $reCapSet>reCAPTCHA v2</option>");
+	$Page->Print("<option value=\"cf-turnstile\" $TurnSet>Turnstile</option>");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>(Turnstileのみ)IPの検証<br><td>");
+	$Page->Print("<select name=CAPTCHA_LENIENCY required>");
+	$Page->Print("<option value=\"\" $noCapIP>なし</option>");
+	$Page->Print("<option value=\"relaxed\" $CapIPRelax>普通</option>");
+	$Page->Print("<option value=\"strict\" $CapIPStrict>厳格</option>");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>Captchaサイトキー<br>");
+	$Page->Print("<td><input type=text size=60  name=CAPTCHA_SITEKEY value=\"$Captcha_sitekey\"></td></tr>\n");
+	$Page->Print("<tr><td>Captchaシークレットキー</td>");
+	$Page->Print("<td><input type=text size=60 name=CAPTCHA_SECRETKEY value=\"$Captcha_secretkey\"></td></tr>\n");
+
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">Captchaを課すCGI</td></tr>\n");
 	$Page->Print("<tr><td>admin.cgi</td>");
 	$Page->Print("<td><input type=checkbox name=ADMINCAP $admCap value=on></td></tr>\n");
@@ -762,6 +789,10 @@ sub PrintPlusSecSetting
 	$Page->Print("<td><input type=checkbox name=SEARCHCAP $srcCap value=on></td></tr>\n");
 	$Page->Print("<tr><td>bbs.cgi</td>");
 	$Page->Print("<td>各掲示板の設定で有効化してください</td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">BoardGuard DSL(実験的)</td></tr>\n");
+	$Page->Print("<tr><td>強力な複合式ユーザー規制を有効化する(注意：<a href=\"https://github.com/PrefKarafuto/ex0ch/wiki/BoardGuard-DSL\">このDSLの文法・機能</a>をしっかり理解していないと、datやデータファイルが破損する恐れがあります！)</td>");
+	$Page->Print("<td><input type=checkbox name=BGDSL $bgdsl value=on></td></tr>\n");
 
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -889,6 +920,7 @@ sub PrintPluginOptionSetting
 	$Page->Print("<td class=\"DetailTitle\">Type</td></tr>\n");
 	
 	%conftype = (
+		0	=>	'変更不可',
 		1	=>	'数値',
 		2	=>	'文字列',
 		3	=>	'真偽値',
@@ -906,8 +938,9 @@ sub PrintPluginOptionSetting
 			$Page->Print("<tr><td>$key</td>");
 			if ($type eq 3) {
 				$Page->Print("<td><input type=checkbox name=PLUGIN_OPT_@{[unpack('H*', $key)]}@{[$val ? ' checked' : '']}></td>");
-			}
-			else {
+			}elsif ($type eq 0) {
+				$Page->Print("<td>$val</td>");
+			}else {
 				$Page->Print("<td><input type=text name=PLUGIN_OPT_@{[unpack('H*', $key)]} value=\"$val\" size=30></td>");
 			}
 			$Page->Print("<td>$desc</td><td>$conftype{$type}</td></tr>\n");
@@ -1250,6 +1283,7 @@ sub FunctionPlusViewSetting
 	$SYSTEM->Set('BANNER', $banner);
 	$SYSTEM->Set('MSEC', ($Form->Equal('MSEC', 'on') ? 1 : 0));
 	$SYSTEM->Set('HIDE_HITS', ($Form->Equal('HIDE_HITS', 'on') ? 0 : 1));
+	$SYSTEM->Set('REFRESH_MODE', $Form->Get('REFRESH_MODE'));
 	
 	$SYSTEM->Save();
 	
@@ -1261,6 +1295,7 @@ sub FunctionPlusViewSetting
 		push @$pLog, '　　　 バナー表示：' . $SYSTEM->Get('BANNER');
 		push @$pLog, '　　　 ミリ秒表示：' . $SYSTEM->Get('MSEC');
 		push @$pLog, '　　　 規制情報公開：' . $SYSTEM->Get('HIDE_HITS');
+		push @$pLog, '　　　 書き込み後遷移先：' . $SYSTEM->Get('REFRESH_MODE');
 	}
 	return 0;
 }
@@ -1302,15 +1337,18 @@ sub FunctionPlusSecSetting
 	$SYSTEM->Set('DEFHOUSHI', $Form->Get('DEFHOUSHI'));
 	$SYSTEM->Set('TRIP12', ($Form->Equal('TRIP12', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_TOREXIT', ($Form->Equal('DNSBL_TOREXIT', 'on') ? 1 : 0));
+	$SYSTEM->Set('DNSBL_SPAMHAUS', ($Form->Equal('DNSBL_SPAMHAUS', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_S5H', ($Form->Equal('DNSBL_S5H', 'on') ? 1 : 0));
 	$SYSTEM->Set('DNSBL_DRONEBL', ($Form->Equal('DNSBL_DRONEBL', 'on') ? 1 : 0));
 	$SYSTEM->Set('CAPTCHA', $Form->Get('CAPTCHA'));
+	$SYSTEM->Set('CAPTCHA_LENIENCY', $Form->Get('CAPTCHA_LENIENCY'));
 	$SYSTEM->Set('CAPTCHA_SITEKEY', $Form->Get('CAPTCHA_SITEKEY'));
 	$SYSTEM->Set('CAPTCHA_SECRETKEY', $Form->Get('CAPTCHA_SECRETKEY'));
 	$SYSTEM->Set('PROXYCHECK_API', $Form->Get('PROXYCHECK_API'));
 	$SYSTEM->Set('PROXYCHECK_APIKEY', $Form->Get('PROXYCHECK_APIKEY'));
 	$SYSTEM->Set('ADMINCAP', ($Form->Equal('ADMINCAP', 'on') ? 1 : 0));
 	$SYSTEM->Set('SEARCHCAP', ($Form->Equal('SEARCHCAP', 'on') ? 1 : 0));
+	$SYSTEM->Set('BGDSL', ($Form->Equal('BGDSL', 'on') ? 1 : 0));
 	$SYSTEM->Save();
 	
 	{
@@ -1325,6 +1363,7 @@ sub FunctionPlusSecSetting
 		push @$pLog, '　　　 ProxyChecker APIキー：' . $SYSTEM->Get('PROXYCHECK_APIKEY');
 		push @$pLog, '　　　 admin.cgiへのCaptcha：' . $SYSTEM->Get('ADMINCAP');
 		push @$pLog, '　　　 search.cgiへのCaptcha：' . $SYSTEM->Get('SEARCHCAP');
+		push @$pLog, '　　　 BoardGuard DSL：' . $SYSTEM->Get('BGDSL');
 	}
 	return 0;
 }
@@ -1371,7 +1410,28 @@ sub FunctionPluginSetting
 				last;
 			}
 		}
-		push @$pLog, $Plugin->Get('NAME', $id) . ' を' . ($valid ? '有効' : '無効') . 'に設定しました。';
+		
+		if($Plugin->Get('TYPE', $id) & 64)
+		{
+			# パッチ用
+			my $file = $Plugin->Get('FILE', $id);
+			my $className = $Plugin->Get('CLASS', $id);
+			
+			require "./plugin/$file";
+			my $Config = PLUGINCONF->new($Plugin, $id);
+			my $command = $className->new($Config);
+			my $status = $Config->GetConfig('patch_status');
+			my $result = $command->execute($Sys, $Form, 64);
+
+			if($result){
+				push @$pLog, 'パッチ '.$Plugin->Get('NAME', $id) . 'の適用に失敗しました。' if $valid;
+			}else{
+				push @$pLog, 'パッチ '.$Plugin->Get('NAME', $id) . ($status ? ' は適用済みです。':' を適用しました。') if $valid;
+			}
+		}else{
+			push @$pLog, $Plugin->Get('NAME', $id) . ' を' . ($valid ? '有効' : '無効') . 'に設定しました。';
+		}
+
 		$Plugin->Set($id, 'VALID', $valid);
 		
 		$_ = $Form->Get("PLUGIN_${id}_ORDER", $i + 1);

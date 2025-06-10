@@ -108,7 +108,7 @@ sub PrintLogin
 
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
-	my $Captcha = $sitekey && $classname && $Sys->Get('ADMINCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+	my $Captcha = $sitekey && $classname && $Sys->Get('ADMINCAP') ? "<div id=\"captcha-widget\" class=\"$classname\" data-sitekey=\"$sitekey\"></div><div id=\"captcha-placeholder\">CAPTCHA読み込み中…</div><br>" : '';
 	my $text = $sitekey && $classname && $Captcha ? 'Captcha認証に失敗したか、' : "" ;
 	
 $Page->Print(<<HTML);
@@ -140,7 +140,7 @@ $Page->Print(<<HTML);
 	<div class="Sorce">
 	 <b>
 	 <font face="Arial" size="3" color="red">Ex0ch Administration Page</font><br>
-	 <font face="Arial">Powered by 0ch/0ch+/ex0ch script and 0ch/0ch+/ex0ch modules 2001-2024</font>
+	 <font face="Arial">Powered by 0ch/0ch+/ex0ch script and 0ch/0ch+/ex0ch modules 2001-2025</font>
 	 </b>
 	</div>
 	

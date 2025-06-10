@@ -254,7 +254,7 @@ sub PrintBBSList
 				$subject	= $BBS->Get('SUBJECT', $id);
 				$category	= $BBS->Get('CATEGORY', $id);
 				$category	= $Category->Get('NAME', $category);
-				$url		= $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', '')).$BBS->Get('DIR', $belongID);
+				$url		= $SYS->Get('SERVER', '').DATA_UTILS::MakePath($SYS->Get('CGIPATH', ''), $SYS->Get('BBSPATH', '')).'/'.$BBS->Get('DIR', $belongID);
 
 				$common1 = "\"javascript:SetOption('TARGET_BBS','$id');";
 				$common1 .= "DoSubmit('bbs.thread','DISP','LIST');\"";
@@ -646,6 +646,9 @@ sub FunctionBBSCreate
 	FILE_UTILS::CreateDirectory("$createPath/kako", $Sys->Get('PM-BDIR'));
 	FILE_UTILS::CreateDirectory("$createPath/pool", $Sys->Get('PM-ADIR'));
 	FILE_UTILS::CreateDirectory("$createPath/info", $Sys->Get('PM-ADIR'));
+
+	FILE_UTILS::CreateDirectory("$createPath/info/attr", $Sys->Get('PM-ADIR'));
+	FILE_UTILS::CreateDirectory("$createPath/info/timeline", $Sys->Get('PM-ADIR'));
 	
 	# デフォルトデータのコピー
 	FILE_UTILS::Copy("$dataPath/default_img.gif", "$createPath/kanban.gif");

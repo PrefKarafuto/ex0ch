@@ -44,10 +44,14 @@ sub PrintResAutoDelete
 	$sWORD  = &$sanitize($Form->Get('WORD'));
 	@sTYPE  = $Form->GetAtArray('TYPE', 0);
 	$id = $Form->Get('TARGET_BBS', '');
-	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0);
+	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0) | ($sTYPE[3] || 0) | ($sTYPE[4] || 0) | ($sTYPE[5] || 0) | ($sTYPE[6] || 0);
 	$cTYPE[0] = ($types & 1 ? 'checked' : '');
 	$cTYPE[1] = ($types & 2 ? 'checked' : '');
 	$cTYPE[2] = ($types & 4 ? 'checked' : '');
+	$cTYPE[3] = ($types & 8 ? 'checked' : '');
+	$cTYPE[4] = ($types & 16 ? 'checked' : '');
+	$cTYPE[5] = ($types & 32 ? 'checked' : '');
+	$cTYPE[6] = ($types & 64 ? 'checked' : '');
    
 	$SYS->Set('_TITLE', 'Res Auto Delete');
    
@@ -78,9 +82,13 @@ HTML
   <tr>
 	<td>検索種別</td>
 	<td>
-	  <input type="checkbox" name="TYPE" value="2" $cTYPE[1] checked>本文検索<br>
+	  <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>
 	  <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
 	  <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
+	  <input type="checkbox" name="TYPE" value="8" $cTYPE[3] disabled>IP検索<br>
+	  <input type="checkbox" name="TYPE" value="16" $cTYPE[4] disabled>HOST検索<br>
+	  <input type="checkbox" name="TYPE" value="32" $cTYPE[5] disabled>UA検索<br>
+	  <input type="checkbox" name="TYPE" value="64" $cTYPE[6] disabled>SessionID検索<br>
 	</td>
   </tr>
   <tr>
@@ -105,6 +113,7 @@ HTML
 	  if(keyCode==13) DoSubmit('bbs.thread','DISP','AUTORESDEL');
 	}
   </script>
+
 HTML
 }
 
@@ -129,11 +138,11 @@ sub Search
 	#$Mode = 0 if ($Form->Equal('SMODE', 'ALL'));
 	#$Mode = 1 if ($Form->Equal('SMODE', 'BBS'));
 	#$Mode = 2 if ($Form->Equal('SMODE', 'THREAD'));
-	my $Mode = 1;
+	$Mode = 1;
 	#my $BBS = $Sys->Get('BBS');
    
 	@types = $Form->GetAtArray('TYPE', 0);
-	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0);
+	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0) | ($types[3] || 0) | ($types[4] || 0) | ($types[5] || 0) | ($types[6] || 0);
    
 	my $sanitize = sub {
 		$_ = shift;
@@ -323,7 +332,7 @@ sub PrintResult
 	</td>
 	<td class=Response >
 	<dt>
-	<a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
+	<a href="javascript:SetOption('TARGET_THREAD', '$$pResult[1]');SetOption('DISP_FORMAT', '$$pResult[2]');DoSubmit('thread.res','DISP','LIST');"> $$pResult[2]</a>：<b>
 HTML
 		if ($$pResult[4] eq '') {
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
@@ -407,7 +416,7 @@ HTML
 sub PrintResLumpDelete
 {
 	my ($Page, $Sys, $Form, $BBS, $mode) = @_;
-	my (@valueSet, @bbsSet, @threadSet, @resSet, @elem, $pRes, $num, $common, $isAbone);
+	my (@valueSet, @bbsSet, @threadSet, @resSet, @elem, $pRes, $num, $common, $isAbone, $target_bbs);
 	my ($bbsID, $threadKey, $bbsResNum, @keyAndResSet, $keyAndRes, %wholeSet);
 	my ($Threads, $DAT);
    
@@ -421,6 +430,7 @@ sub PrintResLumpDelete
 	#$wholeSet{12}{35} = (58, 79);
 	#$Page->Print(%wholeSet."AA<br>");
 	@valueSet = $Form->GetAtArray('RESS');
+	$target_bbs = $Sys->Get('BBS');
 	foreach (@valueSet){
 		($bbsID, $threadKey, $bbsResNum) = split /\//;
 		if (!exists($wholeSet{$bbsID}{$threadKey})){
@@ -441,7 +451,6 @@ sub PrintResLumpDelete
 		my $bbsName = $BBS->Get('NAME', $bbsID);
 		my $bbsDir = $BBS->Get('DIR', $bbsID);
 		$Sys->Set('BBS', $bbsDir);
-		$Page->Print("<tr><td><div class=\"FuncTitle\">$bbsName</div></td></tr>\n");
 		foreach my $threadID (keys %{$wholeSet{$bbsID}}){
 			$Threads = THREAD->new;
 			$Threads->Load($Sys);
@@ -485,6 +494,7 @@ sub PrintResLumpDelete
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
+	$Sys->Set('BBS',$target_bbs);
 }
  
 #------------------------------------------------------------------------------------------------------------
@@ -501,7 +511,7 @@ sub PrintResLumpDelete
 sub FunctionResLumpDelete
 {
 	my ($Sys, $Form, $pLog, $BBS, $mode) = @_;
-	my (@resSet, $pRes, $abone, $path, $tm, $user, $delCnt, $num, $datPath, $LOG, $logsize, $lastnum);
+	my (@resSet, $pRes, $abone, $path, $tm, $user, $delCnt, $num, $datPath, $LOG, $logsize, $lastnum,$target_bbs);
 	my (@valueSet, @bbsSet, @threadSet, @elem, $common, $isAbone);
 	my ($bbsID, $threadKey, $bbsResNum, %wholeSet);
 	my ($Threads, $Dat, $logMessage);
@@ -514,6 +524,7 @@ sub FunctionResLumpDelete
    
 	%wholeSet = ();
 	@valueSet = $Form->GetAtArray('RESS');
+	$target_bbs = $Sys->Get('BBS');
 	foreach (@valueSet){
 		#$Page->Print($_."<br>");
 		($bbsID, $threadKey, $bbsResNum) = split /\//;
@@ -658,6 +669,8 @@ sub FunctionResLumpDelete
 	$BBSAid->Init($Sys, undef);
 	$BBSAid->CreateIndex();
 	$BBSAid->CreateSubback();
+	
+	$Sys->Set('BBS','');
    
 	return 0;
 }

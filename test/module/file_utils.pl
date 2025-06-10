@@ -297,6 +297,26 @@ sub fsearch {
 
   return $result;
 }
+
+# 期限切れファイルのクリア
+sub ClearExpiredFiles
+{
+	my ($dir, $reg_file, $expiry) = @_;
+
+	opendir(my $targetDir, "$dir/") or die "Cannot open directory: $!";
+	my @files = grep { /$reg_file/ && -f "$dir/$_" } readdir($targetDir);
+	closedir($targetDir);
+
+	my $count = 0;
+	foreach my $file (@files){
+
+		my $filename = "$dir/$file";
+		unlink $filename if(time - (stat($filename))[9] > $expiry);
+		$count++;
+
+	}
+	return $count;
+}
 #============================================================================================================
 #	Module END
 #============================================================================================================

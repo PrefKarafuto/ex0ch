@@ -393,6 +393,8 @@ sub InitSettingData
   		'BBS_COMMAND'			=> 0 ,
 		'BBS_HIDENUSI'			=> '',
 		'BBS_MAILFIELD'			=> 'checked',
+		'BBS_VOTE'				=> 10,
+		'BBS_TL_MAX'			=> 100,
 
 		#忍法帖関連(必要Lv-消費Lv)
 		'NINJA_WRITE_MESSAGE'	=> 0,
@@ -406,6 +408,17 @@ sub InitSettingData
 	
 	while (my ($key, $val) = each(%set)) {
 		$pSET->{$key} = $val;
+	}
+}
+
+# 全設定ハッシュをそのまま返す
+sub All {
+    my $this = shift;
+	my ($hash) = @_;
+	if($hash){
+		$this->{'SETTING'} = $hash;
+	}else{
+		return $this->{'SETTING'} ||= {};
 	}
 }
 

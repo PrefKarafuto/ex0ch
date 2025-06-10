@@ -48,13 +48,21 @@ sub DoPrint
 {
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
-	my ($subMode, $BASE, $Page);
+	my ($subMode, $BASE, $BBS, $Page);
 	
 	require './admin/admin_cgi_base.pl';
 	$BASE = ADMIN_CGI_BASE->new;
+	$BBS = $pSys->{'AD_BBS'};
 	
-	# 管理情報を登録
-	$Sys->Set('ADMIN', $pSys);
+	# 掲示板情報の読み込みとグループ設定
+	if (! defined $BBS){
+		require './module/bbs_info.pl';
+		$BBS = BBS_INFO->new;
+		
+		$BBS->Load($Sys);
+		$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
+		$pSys->{'SECINFO'}->SetGroupInfo($BBS->Get('DIR', $Form->Get('TARGET_BBS')));
+	}
 	
 	# 管理マスタオブジェクトの生成
 	$Page		= $BASE->Create($Sys, $Form);
@@ -81,7 +89,6 @@ sub DoPrint
 		PrintNinjaDelete($Page, $Sys, $Form);
 	}
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
-	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 	$BASE->Print($Sys->Get('_TITLE'), 4);
 }
 
@@ -179,6 +186,7 @@ sub PrintNinjaEdit
 	#忍法帖の情報
 	my $lv = $Ninja->Get('ninLv');
 	my $count = $Ninja->Get('count');
+	my $today_count = int(time / (60 * 60 * 24)) == int($Ninja->Get('last_wtime') / (60 * 60 * 24)) ? $Ninja->Get('today_count') : 0 ;
 	my $thread_count = $Ninja->Get('thread_count');
 	my $lvuptime = $Ninja->Get('lvuptime') ? strftime "%Y-%m-%d %H:%M:%S", localtime($Ninja->Get('lvuptime')) : '';
 	my $ninID = crypt($sid,$sid);
@@ -223,7 +231,7 @@ sub PrintNinjaEdit
 	my $is_force_774 = $Ninja->Get('force_774') ? 'checked' : '';
 	my $is_force_captcha = $Ninja->Get('force_captcha') ? 'checked' : '';
 
-	my $password = $Ninja->Get('password');
+	my $password = $Ninja->Get('password_is_randomized');
 	my $description = $Ninja->Get('user_desc');
 
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
@@ -261,7 +269,8 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td class=\"DetailTitle\">最新ロードUA</td><td>$load_ua</td></tr>\n");
 
 		$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>■Statistics</td></tr>\n");
-		$Page->Print("<tr><td class=\"DetailTitle\">書き込み数</td><td>$count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">合計書き込み数</td><td>$count</td></tr>\n");
+		$Page->Print("<tr><td class=\"DetailTitle\">今日の書き込み数</td><td>$today_count</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">スレ立て数</td><td>$thread_count</td></tr>\n");
 		$Page->Print("<tr><td class=\"DetailTitle\">忍法帖ロード回数</td><td>$load_count</td></tr>\n");
 
@@ -371,6 +380,8 @@ sub PrintNinjaSidSearch
 			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
 			$n++;
 		}
+		$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
+		$Page->HTMLInput('hidden', 'DISP_FORMAT', '');
 	}
 	# 検索ヒット無し
 	else {
@@ -498,13 +509,13 @@ sub PrintResult
 	#$name = $BBS->Get('NAME', $bbsSet[0]);
 	$value = "$bbsID/$$pResult[1]/$$pResult[2]";
 		if($isAbone && $$pResult[2]!=1){
-			$Page->Print("<input type=checkbox name=RESS value=\"$value\" disabled>");
+			$Page->Print("<input type=checkbox name=RESS value=\"$value\">");
 		}
 	$Page->Print(<<HTML);
 	</td>
 	<td class=Response >
 	<dt>
-	<a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
+	<a href="javascript:SetOption('TARGET_THREAD', '$$pResult[1]');SetOption('DISP_FORMAT', '$$pResult[2]');DoSubmit('thread.res','DISP','LIST');"> $$pResult[2]</a>：<b>
 HTML
 		if ($$pResult[4] eq '') {
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
@@ -512,7 +523,7 @@ HTML
 		else {
 			$Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
 		}
-	   
+	
 	$Page->Print(<<HTML);
  </b>：$$pResult[5]</dt>
 	<dd>
@@ -545,8 +556,8 @@ sub PrintResultFoot
 	<td colspan=2 align=right>
 	<hr>
 	<br>
-	  <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
-	 <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
+	  <input type=button value="　あぼ～ん　"  $common,'ABONELUMPRES')">
+	 <input type=button value="　透明あぼ～ん　"  $common,'DELLUMPRES')">
 	</td>
   </tr>
 HTML

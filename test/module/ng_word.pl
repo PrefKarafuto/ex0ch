@@ -196,43 +196,54 @@ sub Clear
 #	-------------------------------------------
 #	引　数：$Form  : FORM
 #			$pList : チェックリスト(リファレンス)
+#			$List  : NGワードチェック用(リファレンス)
 #	戻り値：検知番号
 #
 #------------------------------------------------------------------------------------------------------------
-sub Check
-{
-	my $this = shift;
-	my ($Form, $pList) = @_;
-	my $regexWord;
-	foreach my $word (@{$this->{'NGWORD'}}) {
-		next if ($word eq '');
-		foreach my $key (@$pList) {
-			my $work = $Form->Get($key);
-			# ここでデコード
-			my $decoded_work = decode_entities($work);
+sub Check {
+    my $this  = shift;
+    my ($Form, $pList, $cList) = @_;
+	my @hList;
+	my @List = $cList ? @$cList : @{$this->{'NGWORD'}} ;
+    foreach my $word (@List) {
+        next if $word eq '';
 
-			if($word =~ /^(!reg:)/ && $word !~ /\Q(?{\E/ && $word !~ /\Q(??{\E/) {
-				$regexWord = substr($word, 5);
-				if ($decoded_work =~ /$regexWord/) {
-					return 3;
+        foreach my $key (@$pList) {
+            my $work         = $Form->Get($key);
+            my $decoded_work = decode_entities($work);
+
+            # 「!reg:」付きなら正規表現モード
+            if ($word =~ /^!reg:(.*)$/) {
+                my $pattern_str = $1;
+                # 実行コード挿入は拒否
+                next if (index($pattern_str, '(?{') >= 0 or index($pattern_str, '(??{') >= 0);
+
+                # コンパイルを試みる
+                my $pat = eval { qr/$pattern_str/ };
+                next if $@;    # エラーがあればスキップ
+
+                # マッチしたら即規制
+                if ($decoded_work =~ $pat) {
+					return 3 unless $cList;
+					push @hList,$word;
 				}
 			}
-			else {
-				if ($decoded_work =~ /\Q$word\E/) {
-					if ($this->{'METHOD'} eq 'host') {
-						return 2;
-					}
-					elsif ($this->{'METHOD'} eq 'disable') {
-						return 3;
-					}
-					else {
-						return 1;
-					}
-				}
-			}
-		}
-	}
-	return 0;
+            else {
+                # リテラルマッチ用に \Q…\E でコンパイル
+                my $pat = eval { qr/\Q$word\E/ };
+                next if $@;    # エラーがあればスキップ
+
+                if ($decoded_work =~ $pat) {
+                    return $this->{'METHOD'} eq 'host'    ? 2
+                         : $this->{'METHOD'} eq 'disable' ? 3
+                         : 1 unless $cList;
+					push @hList,$word;
+                }
+            }
+        }
+    }
+
+    return $cList ? \@hList : 0;
 }
 
 

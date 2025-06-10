@@ -158,7 +158,7 @@ sub Print
 	
 	$Page->Print(<<HEAD);
 <a name="info"></a>
-<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tcol" style="margin-bottom:1.2em;" align="center">
+<table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tcol" style="margin-bottom:1.2em;word-break: break-all;" align="center">
  <tr>
   <td colspan="3">
   <table border="0" width="100%">

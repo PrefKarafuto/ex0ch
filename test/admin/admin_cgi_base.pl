@@ -107,7 +107,7 @@ sub Print
 	PrintInner($Tad, $Tin, $ttl);														# 機能内容出力
 	PrintCommonInfo($Tad, $this->{'FORM'});
 	PrintFoot($Tad, $this->{'FORM'}->Get('UserName'), $this->{'SYS'}->Get('VERSION'),
-						$this->{'SYS'}->Get('ADMIN')->{'UPDATE_NOTICE'}->Get('Update'));	# フッタ出力
+			$this->{'SYS'}->Get('ADMIN')->{'UPDATE_NOTICE'}->Get('Update'),$this->{'SYS'}->Get('CM_THEME'));	# フッタ出力
 	
 	$Tad->Flush(0, 0, '');																# 画面出力
 }
@@ -174,9 +174,10 @@ HTML
 sub PrintCSS
 {
 	my ($Page, $Sys, $ttl) = @_;
-	my ($data);
+	my ($data, $theme);
 	
 	$data = $Sys->Get('DATA');
+	$theme = $Sys->Get('CM_THEME');
 
 	if($Sys->Get('ADMINCAP')){
 		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
@@ -193,6 +194,10 @@ $Page->Print(<<HTML);
  <meta name="robots" content="noindex,nofollow">
  
  <link rel="stylesheet" href=".$data/admin.css" type="text/css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${theme}.min.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.css">
  <script language="javascript" src=".$data/admin.js"></script>
  
 </head>
@@ -384,23 +389,56 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintFoot
 {
-	my ($Page, $user, $ver, $nverflag) = @_;
+	my ($Page, $user, $ver, $nverflag, $theme) = @_;
 	
 $Page->Print(<<HTML);
  </tr>
 </table>
 
 <div class="MainFoot">
- Copyright 2001 - 2024 EX0ch BBS : Loggin User - <b>$user</b><br>
+ Copyright 2001 - 2025 EX0ch BBS : Loggin User - <b>$user</b><br>
  Build Version:<b>$ver</b>@{[$nverflag ? " (New Version is Available.)" : '']}
 </div>
 
 </form>
-
-</body>
-</html>
 HTML
-	
+
+	if($theme){
+		$Page->Print(<<HTML);
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/perl/perl.min.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/trailingspace.min.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/match-highlighter.min.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.js"></script>
+  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/scrollpastend.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const textarea = document.getElementById("perl-editor");
+      
+      const editor = CodeMirror.fromTextArea(textarea, {
+        mode: "text/x-perl",   // Perl 用のシンタックスハイライト
+        lineNumbers: true,     // 行番号を表示
+		styleActiveLine: true, // アクティブ行ハイライト
+        indentUnit: 4,         // インデント幅を半角スペース4文字に
+        indentWithTabs: false, // タブの代わりにスペースでインデント
+        lineWrapping: true,    // 長い行を自動で折り返す
+        theme: "${theme}",     // デフォルトのテーマ指定（必要に応じて変更可）
+		// その他アドオン
+		matchBrackets: true,
+		autoCloseBrackets: true,
+		showTrailingSpace: true,
+		highlightSelectionMatches: true,
+		scrollbarStyle: "simple",
+		scrollPastEnd: true
+      });
+    });
+  </script>
+HTML
+	}
+	$Page->Print("</body></html>");
 }
 
 #------------------------------------------------------------------------------------------------------------

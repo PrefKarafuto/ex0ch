@@ -100,7 +100,11 @@ sub Initialize
 	$oSYS->{'MainCGI'} = $pSYS;
 	
 	# ホスト情報設定(DNS逆引き)
-	$ENV{'REMOTE_ADDR'} = $ENV{'HTTP_CF_CONNECTING_IP'} if $ENV{'HTTP_CF_CONNECTING_IP'};
+	my $client_ip = $oCONV->is_cdn_ip($ENV{'REMOTE_ADDR'}) ;
+	if ($client_ip) {
+		# 信用できるプロキシ経由と判断
+		$ENV{'REMOTE_ADDR'} = $client_ip;
+	}
 	$ENV{'REMOTE_HOST'} = $oCONV->reverse_lookup($ENV{'REMOTE_ADDR'}) unless ($ENV{'REMOTE_HOST'});
 	$pSYS->{'FORM'}->Set('HOST', $ENV{'REMOTE_HOST'});
 	

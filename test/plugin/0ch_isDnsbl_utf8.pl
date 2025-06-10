@@ -1,12 +1,12 @@
 #============================================================================================================
 #
-#	拡張機能 - テンプレート
-#	0ch_templete_utf8.pl
+#	Tor表示機能
+#	0ch_isDnsbl_utf8.pl
 #	---------------------------------------------------------------------------
 #	202x.xx.xx start
 #
 #============================================================================================================
-package ZPL_templete;
+package ZPL_isDnsbl;
 use utf8;
 use open IO =>':encoding(cp932)';
 #------------------------------------------------------------------------------------------------------------
@@ -41,7 +41,7 @@ sub new
 sub getName
 {
 	my	$this = shift;
-	return 'テンプレート';
+	return 'DNSBL開示';
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -52,7 +52,7 @@ sub getName
 sub getExplanation
 {
 	my	$this = shift;
-	return 'これはテンプレートです。有効にしても意味ないですよ。';
+	return 'DNSBLに載っているIPのユーザーを判別できるようにします。システムの規制設定でDNSBLを選択してください。';
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -64,7 +64,7 @@ sub getExplanation
 sub getType
 {
 	my	$this = shift;
-	return (1 | 2);
+	return (16);
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ sub getType
 #		\%config = (
 #			'設定名'	=> {
 #				'default'		=> 初期値,			# 真偽値の場合は on/true: 1, off/false: 0
-#				'valuetype'		=> 値のタイプ,		# 数値: 1, 文字列: 2, 真偽値: 3, 内部用: 0
+#				'valuetype'		=> 値のタイプ,		# 数値: 1, 文字列: 2, 真偽値: 3
 #				'description'	=> '設定の説明',	# 無くても構いません
 #			},
 #		);
@@ -86,9 +86,10 @@ sub getConfig
 	my	%config;
 	
 	%config = (
-		'testnum'	=> {
-			'default'		=> 123,
-			'valuetype'		=> 1,
+		'bbs'	=> {
+			'default'		=> '',
+			'valuetype'		=> 2,
+			'description'	=> '対象BBSディレクトリ名',
 		},
 #		'testtext'	=> {
 #			'default'		=> 'test',
@@ -112,12 +113,16 @@ sub execute
 	my	$this = shift;
 	my	($sys, $form, $type) = @_;
 	
-	if ($type & (1 | 2)) {
-		
-	#	my $num = $this->GetConf('testnum');
-		
-	#	$this->SetConf('testnum', $num + 1);
-		
+	if ($type & (16)) {
+		my $target_bbs = $this->GetConf('bbs');
+		my $bbs = $sys->Get('BBS');
+		if(!$target_bbs||$target_bbs =~ /$bbs/){
+			if($sys->Get('DNSBL_TOREXIT') && $sys->Get('ISPROXY') eq 'bl'){
+				my $from = $form->Gey('FROM');
+				my $host = $ENV{'REMOTE_HOST'};
+				$form->Set('FROM', "</b> [—\{}\@{}\@{}- ($host)] <b>$from");
+			}
+		}
 	}
 	
 	return 0;

@@ -13,6 +13,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use Encode;
+use Module::Load; 
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -87,6 +88,9 @@ sub DoPrint
 	elsif ($subMode eq 'NGWORD') {													# NGワード編集画面
 		PrintNGWordsEdit($Page, $Sys, $Form);
 	}
+	elsif ($subMode eq 'BGDSL') {													# BGDSL編集画面
+		PrintBoardGuardDSLEdit($Page, $Sys, $Form);
+	}
 	elsif ($subMode eq 'LAST') {													# 1001編集画面
 		PrintLastEdit($Page, $Sys, $Form);
 	}
@@ -148,6 +152,12 @@ sub DoFunction
 	elsif ($subMode eq 'NGWORD') {													# NGワード編集
 		$err = FunctionNGWordEdit($Sys, $Form, $this->{'LOG'});
 	}
+	elsif ($subMode eq 'NGCHECK') {													# NGワード編集
+		$err = FunctionNGWordCheck($Sys, $Form, $this->{'LOG'});
+	}
+	elsif ($subMode eq 'BGDSL') {													# BGDSL編集
+		$err = FunctionBoardGuardEdit($Sys, $Form, $this->{'LOG'});
+	}
 	elsif ($subMode eq 'LAST') {													# 1001編集
 		$err = FunctionLastEdit($Sys, $Form, $this->{'LOG'});
 	}
@@ -193,6 +203,11 @@ sub SetMenuList
 	# 管理グループ設定権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_NGWORDS, $bbs)) {
 		$Base->SetMenu("NGワードの編集","'bbs.edit','DISP','NGWORD'");
+		$bAuth = 1;
+	}
+	# 管理グループ設定権限のみ
+	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_BGDSLEDIT, $bbs)) {
+		$Base->SetMenu("BoardGuars DSLの編集(実験的)","'bbs.edit','DISP','BGDSL'");
 		$bAuth = 1;
 	}
 	if ($bAuth) {
@@ -439,16 +454,18 @@ sub PrintValidUserEdit
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.0.123</b><br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.1.0-192.168.10.255</b><br>");
 	$Page->Print("<b style=\"margin-left: 20px\">192.168.0.0/16</b><br>");
+	$Page->Print("・IPv6(省略記法対応)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">fc00::/7</b><br>");
 	$Page->Print("・端末固有番号<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">12345678901234_xx</b> (au)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">AbCd123</b> (docomo)<br>");
 	$Page->Print("・ユーザーエージェント<br>");
-	$Page->Print("<b style=\"margin-left: 20px\">Mozilla/5.0 ([UA文字列])</b> (通常ブラウザ)<br>");
-	$Page->Print("<b style=\"margin-left: 20px\">Monazilla/1.0 ([UA文字列])</b> (専ブラ)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">Mozilla/5.0 [UA文字列]</b> (任意のブラウザUAを指定)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">Safari</b> (特定のブラウザすべて)<br>");
 	$Page->Print("・セッションID<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">fb665de3cfa1857555532696ea0c1539</b> (十六進数32桁)<br>");
 	$Page->Print("<br>・拡張コマンド<br>");
-	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:expires=2013/07/29 00:00:00!\.example\.jp</b> (期限付き規制)<br>");
+	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:expires=2024/07/29 00:00:00!\.example\.jp</b> (期限付き規制)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:tate=1!\.example\.jp</b> (スレ立て限定規制)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:method=disable!\.example\.jp</b> (書込み禁止)<br>");
 	$Page->Print("<b style=\"margin-left: 20px\">!exdeny:method=host!\.example\.jp</b> (host表示)<br>");
@@ -556,15 +573,94 @@ sub PrintNGWordsEdit
 	$Page->Print("<tr><td class=\"DetailTitle\">デフォルト置換文字列</td><td>");
 	$Page->Print("<input type=text name=NG_SUBSTITUTE value=\"$kind[4]\" size=60></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
+
+	my $setCheckWord = &$sanitize($Form->Get('WORDCHECK'));
 	
 	# 権限によって表示を抑制
 	if ($isAuth) {
 		$common = "onclick=\"DoSubmit('bbs.edit'";
 		$Page->Print("<tr><td colspan=2 align=left>");
-		$Page->Print("<input type=button value=\"　設定　\" $common,'FUNC','NGWORD')\">");
+		$Page->Print("<input type=button value=\"　設定　\" $common,'FUNC','NGWORD')\"> ");
+		$Page->Print("<input type=button value=\"　確認　\" $common,'FUNC','NGCHECK')\"> ");
+		$Page->Print("<textarea rows=1 cols=60 name=WORDCHECK placeholder=\"ここに確認したいワードを入力\" style=\"font-size:1em\"></textarea>");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	BGDSL編集画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintBoardGuardDSLEdit {
+    my ($Page, $SYS, $Form) = @_;
+    my ($dsl_text, $isAuth);
+
+    $SYS->Set('_TITLE', 'BBS BoardGuard Edit');
+
+    # DSLエンジン読み込み
+    require './module/dsl_engine.pl';
+    my $dsl = DSL::Engine->new($SYS);
+    $dsl->Load();
+
+    # フォームからの再描画（POST後の再表示） or 初回はファイル内容
+    my $from_form = $Form->Get('BGDSL');
+	my $status = $SYS->Get('BGDSL') ? "有効" : "無効" ;
+	$dsl_text = (defined $from_form && $from_form ne '') ? $from_form : ($dsl->Get() // '');
+
+    # 権限取得
+    $isAuth = $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_BGDSLEDIT, $SYS->Get('BBS'));
+
+	# 出力
+    $Page->Print(<<HTML);
+	<center><table border=0 cellspacing=1 width=100%>
+	<tr><td colspan=1><hr>BoardGuard DSL：$status<hr></td></tr>
+	<tr>
+		<td>
+		<textarea
+				id="perl-editor"
+				class="dsl-text"
+				name="BGDSL"
+				spellcheck="false"
+				wrap="off"
+		>
+HTML
+		# HTMLエスケープ
+			my $sanitize = sub {
+					my $s = shift;
+					$s =~ s/&/&amp;/g;
+					$s =~ s/</&lt;/g;
+					$s =~ s/>/&gt;/g;
+					return $s;
+			};
+		$Page->Print($sanitize->($dsl_text));
+			$Page->Print(<<'HTML');
+</textarea>
+		</td>
+	</tr>
+	<tr><td colspan=2><hr></td></tr>
+HTML
+
+    # 保存ボタン（権限があれば）
+    if ($isAuth) {
+        $Page->Print(<<'HTML');
+<tr><td colspan=2 align="left">
+  <input
+    type="button"
+    value="　保存　"
+    onclick="DoSubmit('bbs.edit','FUNC','BGDSL')"
+  >
+</td></tr>
+HTML
+    }
+
+    $Page->Print("</table><br>\n");
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -881,6 +977,115 @@ sub FunctionNGWordEdit
 	
 	$Words->Save($Sys);
 	
+	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	NGワード確認
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionNGWordCheck
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my ($Words, @ngWords, @List);
+	
+	# 権限チェック
+	{
+		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_NGWORDS, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	require './module/ng_word.pl';
+	$Words = NG_WORD->new;
+	
+	@ngWords = split(/\n/, $Form->Get('NG_WORDS'));
+	@List = @{$Words->Check($Form, ['WORDCHECK'], \@ngWords)};
+	
+	my $sanitize = sub {
+		$_ = shift;
+		s/&/&amp;/g;
+		s/</&lt;/g;
+		s/>/&gt;/g;
+		return $_;
+	};
+	my $target = &$sanitize($Form->Get('WORDCHECK'));
+	push @$pLog, "■\"${target}\"に対して、以下のNGワードがマッチしました";
+	foreach (@List) {
+		my ($word, $repl) = split(/<>/, $_, -1);
+		if ($Words->Add($word, $repl)) {
+			push @$pLog, '　　'.&$sanitize($word).(defined $repl ? &$sanitize("<>$repl") : '');
+		}
+	}
+	
+	return 0;
+}
+#------------------------------------------------------------------------------------------------------------
+#
+#	BGDSL編集
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionBoardGuardEdit {
+    my ($Sys, $Form, $pLog) = @_;
+
+    my $SEC  = $Sys->Get('ADMIN')->{'SECINFO'};
+    my $user = $Sys->Get('ADMIN')->{'USER'};
+    unless ($SEC->IsAuthority($user, $ZP::AUTH_BGDSLEDIT, $Sys->Get('BBS'))) {
+        return 1000;
+    }
+
+    require './module/dsl_engine.pl';
+    my $dsl = DSL::Engine->new($Sys);
+    # 既存のファイルを読み込んでおく（構文チェック・評価モードのどちらにも必要）
+    $dsl->Load();
+
+    push @$pLog, '■BoardGuard DSL ルール一覧:';
+
+    my $new_text = $Form->Get('BGDSL') // '';
+	$new_text =~ s/\s+\z//;
+	$dsl->Set($new_text);
+    my $status_ref = $dsl->Check(undef, 'syntax');
+    # 例: $status_ref = { RuleA => 0, RuleB => 2, RuleC => 4, … }
+
+    # ステータス表示用テーブル
+    my %STATUS = (
+        0 => 'OK',
+        1 => 'なし',
+        2 => 'ルール文法エラー',
+        3 => '正規表現文法エラー',
+        4 => '重複ルール名',
+    );
+
+    my @all_rules = DSL::Engine::_parse_all_rules($new_text);
+    foreach my $rule (@all_rules) {
+        my $name   = $rule->{name};
+        # 存在しないキーは「1 => 'なし'」とみなす
+        my $code   = exists $status_ref->{$name} ? $status_ref->{$name} : 1;
+        my $label  = $STATUS{$code} // "不明($code)";
+        push @$pLog, sprintf("  %s : %s", $name, $label);
+
+        # エラーの場合はエラーメッセージもログに出しておく
+        if ($code != 0) {
+            my $errmsg = $dsl->{_rule_error}{$name} // '';
+            push @$pLog, "    → エラー内容: $errmsg" if $errmsg ne '';
+        }
+    }
+    $dsl->Save();
+    push @$pLog, '→ 保存完了';
+
 	return 0;
 }
 

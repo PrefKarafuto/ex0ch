@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS 0.10.2 20241020',				# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS 0.10.3 20250610',				# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -298,6 +298,7 @@ sub InitSystemValue
 		
 		# DNSBL設定
 		'DNSBL_TOREXIT'	=> 0,									# torexit.dan.me.uk
+		'DNSBL_SPAMHAUS'		=> 0,							# zen.spamhaus.org
 		'DNSBL_S5H'		=> 0,									# all.s5h.net
 		'DNSBL_DRONEBL'	=> 0,									# dnsbl.dronebl.org
 
@@ -305,13 +306,17 @@ sub InitSystemValue
 		'LAST_FLUSH'	=> '',									# 定期的に動かす必要がある機能用
 
 		'CAPTCHA'			=> '',								# キャプチャの種類
+		'CAPTCHA_LENIENCY'	=> '',								# IP検証強度（Turnstileのみ）
 		'CAPTCHA_SITEKEY'	=> '',								# Captchaサイトキー
 		'CAPTCHA_SECRETKEY'	=> '',								# Captchaシークレットキー
+
 		'PROXYCHECK_API'	=> '',								# プロキシ判定API
 		'PROXYCHECK_APIKEY'	=> '',								# APIキー
 
 		'ADMINCAP'		=> '',									# admin.cgiにCaptchaを課すか
 		'SEARCHCAP'		=> '',									# search.cgiにCaptchaを課すか
+
+		'BGDSL'			=> '',									# 強力な複合規制機能を許可(実験的)
 
 		'LASTMOD'		=> '',									# 最後にシステム管理者がログインした時刻
 		'LOGOUT'		=> 30,									# 無操作状態で管理画面から自動ログアウトするまでの時間
@@ -321,6 +326,8 @@ sub InitSystemValue
 		'BANMAX'		=> 10,									# スレッドあたり最大BAN可能人数
 		'NINLVMAX'		=> 40,									# 忍法帖Lv最大値
 		'HIDE_HITS'		=> 1,									# 規制ユーザー非公開
+		'CM_THEME'		=> 'eclipse',							# CodeMirror テーマ
+		'REFRESH_MODE'	=> 'default',							# 書き込み後の遷移先
 
 		'COOKIE_EXPIRY'	=> 30,									# Cookie期限
 		'NIN_EXPIRY'	=> 30,									# 忍法帖データ保持期限
@@ -335,21 +342,19 @@ sub InitSystemValue
 		'PERM_DIR'		=> 0711,
 	);
 	
-	if ('Permission') {
-		my $uid = (stat $ENV{'SCRIPT_FILENAME'})[4];
-		if ($uid == 0) { # root / not linux
-		} elsif ($uid == $<) { # suEXEC
-		} else {
-			$sys{'PM-DAT'} = 0666;
-			$sys{'PM-STOP'} = 0444;
-			$sys{'PM-TXT'} = 0666;
-			$sys{'PM-LOG'} = 0666;
-			$sys{'PM-ADM'} = 0666;
-			$sys{'PM-ADIR'} = 0777;
-			$sys{'PM-BDIR'} = 0777;
-			$sys{'PM-LDIR'} = 0777;
-			$sys{'PM-KDIR'} = 0777;
-		}
+	my $uid = (stat $ENV{'SCRIPT_FILENAME'})[4];
+	if ($uid == 0) { # root / not linux
+	} elsif ($uid == $<) { # suEXEC
+	} else {
+		$sys{'PM-DAT'} = 0666;
+		$sys{'PM-STOP'} = 0444;
+		$sys{'PM-TXT'} = 0666;
+		$sys{'PM-LOG'} = 0666;
+		$sys{'PM-ADM'} = 0666;
+		$sys{'PM-ADIR'} = 0777;
+		$sys{'PM-BDIR'} = 0777;
+		$sys{'PM-LDIR'} = 0777;
+		$sys{'PM-KDIR'} = 0777;
 	}
 	
 	while (my ($key, $val) = each %sys) {
@@ -361,6 +366,17 @@ sub InitSystemValue
 	
 	splice @$pKey, 0, scalar(@$pKey);
 	push @$pKey, @key;
+}
+
+# 全設定ハッシュをそのまま返す
+sub All {
+    my $this = shift;
+	my ($hash) = @_;
+	if($hash){
+		$this->{'SYS'} = $hash;
+	}else{
+		return $this->{'SYS'} ||= {};
+	}
 }
 
 #------------------------------------------------------------------------------------------------------------

@@ -328,6 +328,7 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=A_BBSEDIT $authNum[13] value=on>各種編集<br>");
 	$Page->Print("<input type=checkbox name=A_NGWORDS $authNum[9] value=on>NGワード編集<br>");
 	$Page->Print("<input type=checkbox name=A_ACCESUSER $authNum[10] value=on>アクセス制限編集<br>");
+	$Page->Print("<input type=checkbox name=A_BGDSL $authNum[16] value=on>BoardGuard DSL編集<br>");
 	$Page->Print("<hr>");
 	$Page->Print("<input type=checkbox name=A_RESABONE $authNum[11] value=on>レスあぼーん<br>");
 	$Page->Print("<input type=checkbox name=A_RESEDIT $authNum[12] value=on>レス編集<br>");
@@ -516,6 +517,7 @@ sub FunctionGroupSetting
 		'A_BBSEDIT'		=> $ZP::AUTH_BBSEDIT,
 		'A_LOGVIEW'		=> $ZP::AUTH_LOGVIEW,
 		'A_NINJAEDIT'	=> $ZP::AUTH_NINJAEDIT,
+		'A_BGDSL'		=> $ZP::A_BGDSLEDIT,
 	);
 	my @auths = ();
 	foreach (keys %field2auth) {

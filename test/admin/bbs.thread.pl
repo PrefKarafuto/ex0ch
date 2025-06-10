@@ -13,6 +13,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use HTML::Entities;
+no warnings 'once';
 
 # 共通スレッド属性情報
 my %threadAttr = (
@@ -29,7 +30,8 @@ my %threadAttr = (
 	'hidenusi'  => { 'name' => 'スレ主表示なし', 'type' => 'checkbox' },
 	'nopool'    => { 'name' => '不落', 'type' => 'checkbox' },
 	'ninlv'     => { 'name' => '忍法帖Lv制限', 'type' => 'number' },
-	'ban'       => { 'name' => 'アクセス禁止<small>(対象SessionIDをカンマで区切る)</small>', 'type' => 'text' },
+	'ban'       => { 'name' => 'アクセス禁止<small>SessionID（:投票数）</small>', 'type' => 'hash' },
+	'sub'    	=> { 'name' => '副主', 'type' => 'text' },
 );
 
 #------------------------------------------------------------------------------------------------------------
@@ -138,9 +140,12 @@ sub DoPrint
 	}
 	
 	# 掲示板情報を設定
-	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
-	
-	$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
+	if($subMode eq 'ABONELUMPRES'||'DELLUMPRES' && !$Form->Get('TARGET_BBS')){	# システム画面から来た場合
+		$BASE->Print($Sys->Get('_TITLE'), 1);
+	}else{																		# 掲示板画面から来た場合
+		$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
+		$BASE->Print($Sys->Get('_TITLE') . ' - ' . $BBS->Get('NAME', $Form->Get('TARGET_BBS')), 2);
+	}
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -193,9 +198,6 @@ sub DoFunction
 	elsif ($subMode eq 'DETAILATTR') {													# 属性解除
 		$err = FunctionThreadDetailAttr($Sys, $Form, $this->{'LOG'},0);
 	}
-	elsif ($subMode eq 'DETAILATTRDELETE') {													# 属性解除
-		$err = FunctionThreadDetailAttr($Sys, $Form, $this->{'LOG'},1);
-	}
 	elsif ($subMode eq 'POOL') {													# DAT落ち
 		$err = FunctionThreadPooling($Sys, $Form, $this->{'LOG'});
 	}
@@ -216,6 +218,9 @@ sub DoFunction
 	}
 	elsif ($subMode eq 'DELLUMPRES') {                                          # レス一括削除
 		$err = FunctionResLumpDelete($Sys, $Form, $this->{'LOG'}, $BBS, 0);
+	}
+	elsif ($subMode eq 'CLEAR') {                                          # TLクリア
+		$err = FunctionClearTimeline($Sys, $Form, $this->{'LOG'});
 	}
 	# 処理結果表示
 	if ($err) {
@@ -242,14 +247,15 @@ sub DoFunction
 sub SetMenuList
 {
 	my ($Base, $pSys, $bbs) = @_;
-	
-	$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
-	$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
-	# スレッドdat落ち権限のみ
-	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {
-		$Base->SetMenu('一括DAT落ち', "'bbs.thread','DISP','AUTOPOOL'");
+	if($bbs){
+		$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
+		$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
+		# スレッドdat落ち権限のみ
+		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {
+			$Base->SetMenu('一括DAT落ち', "'bbs.thread','DISP','AUTOPOOL'");
+		}
+		$Base->SetMenu('<hr>', '');
 	}
-	$Base->SetMenu('<hr>', '');
 	$Base->SetMenu('システム管理へ戻る', "'sys.bbs','DISP','LIST'");
 }
 
@@ -277,6 +283,7 @@ sub PrintThreadList
 	$Threads = THREAD->new;
 	
 	$Threads->Load($SYS);
+	$Threads->LoadAttrAll($SYS);
 	$Threads->GetKeySet('ALL', '', \@threadSet);
 	$ThreadNum = $Threads->GetNum();
 	$base = $SYS->Get('BBSPATH') . '/' . $SYS->Get('BBS') . '/dat';
@@ -395,6 +402,7 @@ sub PrintThreadList
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
 	$Page->Print("<input type=button value=\"DAT落ち\" $common,'POOL')\"> ")				if ($isPool);
 	
+	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")				if ($isResAbone);
 	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")				if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
@@ -577,7 +585,7 @@ sub PrintThreadAttr
 
 	require './module/thread.pl';
 	my $Threads = THREAD->new;
-	$Threads->LoadAttr($Sys);
+	$Threads->LoadAttr($Sys,$target_thread);
 
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>スレッドに属性を付加します。</td></tr>");
@@ -588,7 +596,7 @@ sub PrintThreadAttr
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250\">Value</td>");
 	
 	foreach my $attrkey (sort keys %threadAttr) {
-		my $attr = $Threads->GetAttr($target_thread,$attrkey);
+		my $attr = $Threads->GetAttr($target_thread, $attrkey);
 		my $name = $threadAttr{$attrkey}->{'name'};
 		my $type = $threadAttr{$attrkey}->{'type'};
 		my $checked = $type eq 'checkbox' && $attr ? 'checked' : '';
@@ -614,10 +622,26 @@ sub PrintThreadAttr
 			$Page->Print("<option value=\"vvvvvv\" $vvvvvv>vvvvvv</option>\n");
 			$Page->Print("</select></td></tr>\n");
 		}
+		elsif($type eq 'hash'){
+			my $viewStr = '';
+			# $attr がハッシュリファレンスか確認
+			if (ref($attr) eq 'HASH') {
+				foreach my $userID (sort keys %{$attr}){    
+					if(defined $userID && $attr->{$userID} == 0){
+						$viewStr .= $userID."\n";
+					} elsif(defined $userID && exists $attr->{$userID}){
+						my $count = scalar keys %{$attr->{$userID}};
+						$viewStr .= $userID .':'.$count."\n";
+					}
+				}
+			}
+			$Page->Print("<td><textarea name=\"$attrkey\" cols=\"60\" rows=\"5\" $disabled>$viewStr</textarea></td></tr>\n");
+		}
 		else{
 			$Page->Print("<td><input name=\"$attrkey\" type=\"$type\" value=\"$attr\" $min $size $disabled></td></tr>\n");
 		}
 	}
+
 	my $common = "DoSubmit('bbs.thread','FUNC'";
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
@@ -626,7 +650,6 @@ sub PrintThreadAttr
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', $target_thread);
 	if($isStop){
 		$Page->Print("<input type=button value=\"　保存　\" onclick=\"$common,'DETAILATTR');\"> ");
-		$Page->Print("<input type=button value=\"　一括削除　\" onclick=\"$common,'DETAILATTRDELETE');\" class=\"delete\"> ");
 	}
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
@@ -872,7 +895,7 @@ sub FunctionThreadStop
 	my $Threads	= THREAD->new; # use from 0.8.x
 	@threadList	= $Form->GetAtArray('THREADS');
 	$base		= $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat';
-	$Threads->LoadAttr($Sys);
+	$Threads->LoadAttrAll($Sys);
 	
 	# スレッドの停止
 	if ($mode) {
@@ -909,7 +932,7 @@ sub FunctionThreadStop
 		}
 	}
 	
-	$Threads->SaveAttr($Sys); # use from 0.8.x
+	$Threads->SaveAttrAll($Sys); # use from 0.8.x
 	
 	return 0;
 }
@@ -1057,52 +1080,78 @@ sub FunctionThreadAttr
 
 sub FunctionThreadDetailAttr
 {
-	my ($Sys, $Form, $pLog, $mode) = @_;
-	
-	# 権限チェック
-	{
-		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
-		my $chkID = $Sys->Get('ADMIN')->{'USER'};
-		
-		if (($SEC->IsAuthority($chkID, $ZP::AUTH_THREADSTOP, $Sys->Get('BBS'))) == 0) {
-			return 1000;
-		}
-	}
+    my ($Sys, $Form, $pLog) = @_;
+    
+    # 権限チェック
+    {
+        my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+        my $chkID = $Sys->Get('ADMIN')->{'USER'};
+        
+        if (($SEC->IsAuthority($chkID, $ZP::AUTH_THREADSTOP, $Sys->Get('BBS'))) == 0) {
+            return 1000;
+        }
+    }
 
-	require './module/thread.pl';
-	
-	my $Threads	= THREAD->new;
-	$Threads->LoadAttr($Sys);
-	my $target_thread = $Form->Get('TARGET_THREAD');
+    require './module/thread.pl';
+    
+    my $Threads = THREAD->new;
+    $Threads->LoadAttrAll($Sys);
+    my $target_thread = $Form->Get('TARGET_THREAD');
 
-	if($mode){
-		$Threads->DeleteAttr($target_thread);
-		push @$pLog, "属性を一括削除しました。";
-	}else{
-		foreach my $attrkey (sort keys %threadAttr) {
-			my $defAttr = $Threads->GetAttr($target_thread,$attrkey);
-			my $attr = $Form->Get($attrkey);
-			my $name = $threadAttr{$attrkey}->{'name'};
-			my $type = $threadAttr{$attrkey}->{'type'};
+    foreach my $attrkey (sort keys %threadAttr) {
+        my $defAttr = $Threads->GetAttr($target_thread, $attrkey);
+        my $attr = $Form->Get($attrkey);
+        my $name = $threadAttr{$attrkey}->{'name'};
+        my $type = $threadAttr{$attrkey}->{'type'};
 
-			return 1002 if ($attr && ($type eq 'number' && $attr !~ /[0-9]*/));
-			if($attrkey eq 'pass' && $attr ne $defAttr && $attr){
-				require Digest::SHA::PurePerl;
-				my $ctx = Digest::SHA::PurePerl->new;
-				$ctx->add(':', $Sys->Get('SERVER'));
-				$ctx->add(':', $target_thread);
-				$ctx->add(':', $attr);
-				$attr = $ctx->b64digest;
-			}
+        # 数値型のバリデーション修正
+        return 1002 if ($attr && $type eq 'number' && $attr !~ /^\d+$/);
 
-			$Threads->SetAttr($target_thread,$attrkey,$attr) if ($defAttr || $attr);
-			push @$pLog, "[$attrkey]属性を".($attr?'付加':'解除');
-		}
-	}
-	$Threads->SaveAttr($Sys);
-	
-	return 0;
+        if ($attrkey eq 'ban' && $attr){
+            my @userData = split(/\n/, $attr);
+            my %hash = ();
+
+            # $defAttr がハッシュリファレンスか確認
+            my %defHash = ();
+            if (ref($defAttr) eq 'HASH') {
+                %defHash = %{$defAttr};
+            }
+
+            foreach my $userID (@userData){
+                chomp $userID;
+                if($userID =~ /^([0-9a-f]{32})(?::([1-9][0-9]*))?$/){
+                    my ($id, $count) = ($1, $2);
+                    if(defined $count){
+                        # 既存の値をコピー
+                        $hash{$id} = $defHash{$id} // {};
+                    }else{
+                        $hash{$id} = 0;
+                    }
+                }elsif($userID eq ''){
+                    next;
+                }else{
+                    return 1002;
+                }
+            }
+            $attr = \%hash;  # ハッシュリファレンスを代入
+        }
+        if($attrkey eq 'pass' && $attr ne $defAttr && $attr){
+            require Digest::SHA::PurePerl;
+            my $ctx = Digest::SHA::PurePerl->new;
+            $ctx->add(':', $Sys->Get('SERVER'));
+            $ctx->add(':', $target_thread);
+            $ctx->add(':', $attr);
+            $attr = $ctx->b64digest;
+        }
+
+        $Threads->SetAttr($target_thread, $attrkey, $attr) if ($defAttr || $attr);
+        push @$pLog, "[$attrkey]属性を".($attr ? '付加' : '解除');
+    }
+    $Threads->SaveAttrAll($Sys);
+    
+    return 0;
 }
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	スレッドdat落ち
@@ -1184,7 +1233,7 @@ sub FunctionThreadDelete
 	$BBSAid = BBS_SERVICE->new;
 	
 	$Threads->Load($Sys);
-	$Threads->LoadAttr($Sys);
+	$Threads->LoadAttrAll($Sys);
 	
 	@threadList = $Form->GetAtArray('THREADS');
 	$bbs		= $Sys->Get('BBS');
@@ -1199,7 +1248,7 @@ sub FunctionThreadDelete
 		unlink "$path/log/$id.cgi";
 		unlink "$path/log/del_$id.cgi";
 	}
-	$Threads->SaveAttr($Sys);
+	$Threads->SaveAttrAll($Sys);
 	#subject.txt更新
 	$Threads->Load($Sys);
 	$Threads->UpdateAll($Sys);
@@ -1213,6 +1262,52 @@ sub FunctionThreadDelete
 	#$BBSAid->CreateIndex();
 	#$BBSAid->CreateSubback();
 	#$Sys->Set('MODE',$originalMODE);
+	
+	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	タイムラインのクリア
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionClearTimeline
+{
+	my ($Sys, $Form, $pLog) = @_;
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+
+	my $TLpath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/info/timeline';
+    opendir(my $dh, $TLpath) or die "Can't open $TLpath: $!";
+
+	# ディレクトリ内のファイルを取得して処理
+	while (my $file = readdir($dh)) {
+		next if ($file =~ m/^\./);  # 「.」や「..」をスキップ
+		if ($file =~ /\.cgi$/) {
+			my $file_path = $TLpath.'/'.$file;
+			if (-f $file_path) {
+				unlink($file_path) or warn "Could not unlink $file_path: $!";
+			}
+		}
+	}
+
+	# ディレクトリを閉じる
+	closedir($dh);
+	
+	push @$pLog, 'タイムラインをクリアしました。';
 	
 	return 0;
 }

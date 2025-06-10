@@ -209,37 +209,45 @@ sub Get
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
-sub Put
-{
-	my $this = shift;
-	my (@datas) = @_;
-	
-	my $tm = time;
-	my $logData = join('<>', $tm, @datas);
-	my @time=localtime;
-	$time[5] += 1900;
-	$time[4] ++;
-	push @{$this->{'LOGS'}}, $logData;
-	$this->{'SIZE'}++;
-	
-	if ($this->{'SIZE'} + 10 > $this->{'LIMIT'}) {
-		mkdir ($this->{'PATH'},0600);
-		my $logName = "$this->{'PATH'}/$time[5]\_$time[4].cgi";
-		if (open(my $fh, '>>', $logName)) {
-			flock($fh, 2);
-			#binmode($fh);
-			while ($this->{'SIZE'} > $this->{'LIMIT'}) {
-				my $old = shift @{$this->{'LOGS'}};
-				$this->{'SIZE'}--;
-				if ($this->{'MODE'} & 4) {
-					print $fh "$old\n";
-				}
-			}
-			close($fh);
-		}
-	}
-}
+sub Put {
+    my $this = shift;
+    my (@datas) = @_;
 
+    my $tm = time;
+    my $logData = join('<>', $tm, @datas);
+    my @time = localtime($tm);
+    $time[5] += 1900;
+    $time[4] += 1;
+
+    push @{$this->{'LOGS'}}, $logData;
+    $this->{'SIZE'}++;
+
+    if ($this->{'SIZE'} > $this->{'LIMIT'}) {
+        # ディレクトリの存在確認と作成
+        unless (-d $this->{'PATH'}) {
+            mkdir($this->{'PATH'}, 0700) or die "ディレクトリを作成できません: $!";
+        }
+
+        # 年と月をフォーマットしてファイル名を生成
+        my $year  = $time[5];
+        my $month = sprintf("%02d", $time[4]);
+        my $logName = $this->{'PATH'} . '/' . $year . '_' . $month . '.cgi';
+
+        # ファイルを開く
+        open(my $fh, '>>', $logName) or die "ファイルを開けません: $!";
+        flock($fh, 2); # 排他的ロック
+
+        # サイズがリミットを超えている場合、古いログを削除
+        while ($this->{'SIZE'} > $this->{'LIMIT'}) {
+            my $old = shift @{$this->{'LOGS'}};
+            $this->{'SIZE'}--;
+            if ($this->{'MODE'} & 4) {
+                print $fh "$old\n";
+            }
+        }
+        close($fh);
+    }
+}
 #------------------------------------------------------------------------------------------------------------
 #
 #	サイズ取得

@@ -49,11 +49,11 @@ sub SearchCGI
 	$Form->DecodeForm(1);
 	$Sys->Init();
 	$BBS->Load($Sys);
-	$capt = Certification_Captcha($Sys,$Form) if $Sys->Get('SEARCHCAP');
+	$capt = $Sys->Get('SEARCHCAP') ? Certification_Captcha($Sys,$Form) : 1;
 	PrintHead($Sys, $Page, $BBS, $Form);
 	
 	# 検索ワードがある場合は検索を実行する
-	if ($Form->Get('WORD', '') ne '' && !$capt) {
+	if ($Form->Get('WORD', '') ne '' && $capt) {
 		Search($Sys, $Form, $Page, $BBS);
 	}
 	PrintFoot($Sys, $Page);
@@ -132,7 +132,7 @@ HTML
 	}
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
-	my $Captcha = $sitekey && $classname && $Sys->Get('SEARCHCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+	my $Captcha = $sitekey && $classname && $Sys->Get('SEARCHCAP') ? "<div id=\"captcha-widget\" class=\"$classname\" data-sitekey=\"$sitekey\"></div><div id=\"captcha-placeholder\">CAPTCHA読み込み中…</div><br>" : '';
 
 	$Page->Print("</head>\n<!--nobanner-->\n<body>\n");
 
@@ -238,7 +238,7 @@ HTML
 			next if ( -e "$BBSpath/$dir/.0ch_hidden" && $sBBS ne $dir );
 
 			# 選択肢
-			$isSelC = $sBBS eq $dir ? "selected" : "";
+			$isSelB = $sBBS eq $dir ? "selected" : "";
 			$Page->Print("<option value=\"$dir\" $isSelB>$name</option>\n") if $catid eq $BBS->Get('CATEGORY', $id);
 		}
 		$Page->Print("</optgroup>");
@@ -552,6 +552,7 @@ sub Certification_Captcha {
 	my ($captcha_response,$url);
 
 	my $captcha_kind = $Sys->Get('CAPTCHA');
+	my $captcha_leniency = $Sys->Get('CAPTCHA_LENIENCY');
 	my $secretkey = $Sys->Get('CAPTCHA_SECRETKEY');
 	if($captcha_kind eq 'h-captcha'){
 		$captcha_response = $Form->Get('h-captcha-response');
@@ -563,7 +564,7 @@ sub Certification_Captcha {
 		$captcha_response = $Form->Get('cf-turnstile-response');
 		$url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 	}else{
-		return 0;
+		return 1;
 	}
 
 	if($captcha_response){
@@ -572,6 +573,7 @@ sub Certification_Captcha {
 			secret => $secretkey,
 			response => $captcha_response,
 			remoteip => $ENV{'REMOTE_ADDR'},
+			remoteip_leniency => $captcha_leniency,
 		});
 		if ($response->is_success()) {
 			my $json_text = $response->decoded_content();
@@ -580,14 +582,16 @@ sub Certification_Captcha {
 			my $out = decode_json($json_text);
 			
 			if ($out->{success}) {
-				return 0;
-			}else{
+				# パス
 				return 1;
+			}else{
+				# 失敗
+				return 0;
 			}
 		} else {
 			# Captchaを素通りする場合、HTTPS関連のエラーの疑いあり
 			# LWP::Protocol::httpsおよびNet::SSLeayが入っているか確認
-			# このエラーの場合、スルー
+			# このエラーの場合、検索は実行されない
 			return 0;
 		}
 	}else{

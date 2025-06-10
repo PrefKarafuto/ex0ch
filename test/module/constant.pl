@@ -63,8 +63,10 @@ our $E_FORM_NONAME			= 152;
 our $E_FORM_NOCAPTCHA		= 153;
 our $E_FORM_FAILEDCAPTCHA	= 154;
 our $E_FORM_FAILEDAUTH	    = 155;
-our $E_FORM_FAILEDUSERAUTH  = 158;
-our $E_FORM_AUTHCOMMAND 	= 159;
+our $E_FORM_EXPIREDUSERAUTH = 156;
+#  パス発行画面
+our $E_FORM_AUTHCOMMAND 	= 160;
+our $E_FORM_SAVECOMMAND 	= 161;
 #  制限に関するエラー
 our $E_LIMIT_STOPPEDTHREAD	= 200;
 our $E_LIMIT_OVERMAXRES		= 201;
@@ -124,9 +126,13 @@ our $E_SYSTEM_CAPTCHAERROR	= 991;
 our $E_PAGE_FINDTHREAD		= $E_READ_FAILEDLOADDAT;
 our $E_PAGE_THREAD			= 9000; # 廃止
 our $E_PAGE_COOKIE			= 9001;
-our $E_PAGE_WRITE			= 9002;
+our $E_PAGE_WRITE			= 9002; # 未使用
 our $E_PAGE_THREADMOBILE	= 9003; # 廃止
 our $E_PAGE_CAPTCHA     	= 9004;
+our $E_PAGE_CHECK     	    = 9005;
+#　特殊
+our $E_SUCCESS_FAKE			= -1;
+our $E_SUCCESS_DELETE	    = -2;
 
 
 # CAP PERMISSION
@@ -159,7 +165,8 @@ our $CAP_REG_NOATTR				= 26; # スレッド属性による規制解除
 our $CAP_REG_NOHOST             = 27; # 逆引き不可規制解除
 our $CAP_REG_NONINJA            = 28; # 忍法帖規制解除
 our $CAP_REG_NOCAPTCHA          = 29; # キャプチャ規制解除
-our $CAP_MAXNUM					= 29;
+our $CAP_REG_BGDSL              = 30; # BGDSL規制解除
+our $CAP_MAXNUM					= 30;
 # USER AUTHORITY
 our $AUTH_SYSADMIN		=  0; # システム管理権限(形式的に)
 our $AUTH_USERGROUP		=  1; # 管理グループ設定
@@ -178,7 +185,8 @@ our $AUTH_RESEDIT		= 13; # レス編集
 our $AUTH_BBSEDIT		= 14; # 各種編集
 our $AUTH_LOGVIEW		= 15; # ログの閲覧・削除
 our $AUTH_NINJAEDIT		= 16; # 忍法帖の閲覧・編集
-our $AUTH_MAXNUM		= 16;
+our $AUTH_BGDSLEDIT		= 17; # BGDSL編集
+our $AUTH_MAXNUM		= 17;
 
 
 # REGEXP

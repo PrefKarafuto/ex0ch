@@ -89,8 +89,8 @@ sub DoPrint
 	elsif ($subMode eq 'DELETE') {                                             # 忍法帖削除画面
 		PrintNinjaDelete($Page, $Sys, $Form);
 	}
-	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
-	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
+	#$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
+	#$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 	$BASE->Print($Sys->Get('_TITLE'), 1);
 }
 
@@ -224,7 +224,7 @@ sub PrintNinjaList
 			$common .= "DoSubmit('sys.ninja','DISP','EDIT')\"";
 			$Page->Print("<td>$n: <a href=$common>$id</a></td>");
 		}else{
-			$Page->Print("<td>$n: $id</td>");
+			$Page->Print("<td></td><td>$n: $id</td>");
 		}
 		$Page->Print("<td>$size</td><td>$mtime</td></tr>\n");
 	}
@@ -667,6 +667,9 @@ sub PrintNinjaSidSearch
 			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
 			$n++;
 		}
+		$Page->HTMLInput('hidden', 'TARGET_BBS', '');
+		$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
+		$Page->HTMLInput('hidden', 'DISP_FORMAT', '');
 	}
 	# 検索ヒット無し
 	else {
@@ -794,13 +797,13 @@ sub PrintResult
 	#$name = $BBS->Get('NAME', $bbsSet[0]);
 	$value = "$bbsID/$$pResult[1]/$$pResult[2]";
 		if($isAbone && $$pResult[2]!=1){
-			$Page->Print("<input type=checkbox name=RESS value=\"$value\" disabled>");
+			$Page->Print("<input type=checkbox name=RESS value=\"$value\">");
 		}
 	$Page->Print(<<HTML);
 	</td>
 	<td class=Response >
 	<dt>
-	<a target="_blank" href="./read.cgi/$bbsDir/$$pResult[1]/$$pResult[2]"> $$pResult[2]</a>：<b>
+	<a href="javascript:SetOption('TARGET_BBS', '$$pResult[0]');('TARGET_THREAD', '$$pResult[1]');SetOption('DISP_FORMAT', '$$pResult[2]');DoSubmit('thread.res','DISP','LIST');"> $$pResult[2]</a>：<b>
 HTML
 		if ($$pResult[4] eq '') {
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
@@ -841,8 +844,8 @@ sub PrintResultFoot
 	<td colspan=2 align=right>
 	<hr>
 	<br>
-	  <input type=button value="　あぼ～ん　" disabled $common,'ABONELUMPRES')">
-	 <input type=button value="　透明あぼ～ん　" disabled $common,'DELLUMPRES')">
+	  <input type=button value="　あぼ～ん　" $common,'ABONELUMPRES')">
+	 <input type=button value="　透明あぼ～ん　" $common,'DELLUMPRES')">
 	</td>
   </tr>
 HTML

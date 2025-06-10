@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------------
-	基本
+	??{
  *------------------------------------------------------------------------------*/
  *				{
 	box-sizing : border-box;
@@ -24,7 +24,7 @@ a				{
 }
 
 /*------------------------------------------------------------------------------
-ヘッダ
+?w?b?_
 *------------------------------------------------------------------------------*/
 div.MainHead {
 vertical-align: middle;
@@ -35,30 +35,30 @@ color: #ffffff;
 padding-right: 20px;
 padding-top: 5px;
 padding-bottom: 5px;
-position: fixed; /* 固定表示にする */
-top: 20px; /* MainMenuの下に固定 */
-left: 0; /* 左端に固定 */
-width: 100%; /* 横幅を全体に広げる */
+position: fixed; /* ???\??????? */
+top: 20px; /* MainMenu??????? */
+left: 0; /* ???[???? */
+width: 100%; /* ??????S???L???? */
 }
 
 /*------------------------------------------------------------------------------
-システムメニュー
+?V?X?e?????j???[
 *------------------------------------------------------------------------------*/
 div.MainMenu {
 background-color: #ffffff;
 font-family: Arial;
 font-size: 12px;
 height: 20px;
-position: fixed; /* 固定表示にする */
-top: 0; /* ページの上部に固定 */
-left: 0; /* 左端に固定 */
-width: 100%; /* 横幅を全体に広げる */
-text-align: right; /* 右寄せ */
+position: fixed; /* ???\??????? */
+top: 0; /* ?y?[?W??????? */
+left: 0; /* ???[???? */
+width: 100%; /* ??????S???L???? */
+text-align: right; /* ?E?? */
 padding-top: 2px;
 }
 
 /*------------------------------------------------------------------------------
-フッタ
+?t?b?^
 *------------------------------------------------------------------------------*/
 div.MainFoot {
 background-color: white;
@@ -69,27 +69,27 @@ border-color: black;
 border-width: 1px 0px 0px 0px;
 padding-top: 3px;
 color: #336666;
-position: fixed; /* 固定表示にする */
-bottom: 0; /* ページの下部に固定 */
-left: 0; /* 左端に固定 */
-width: 100%; /* 横幅を全体に広げる */
-z-index: 1000; /* 他の要素の上に表示するためのスタッキング順序 */
+position: fixed; /* ???\??????? */
+bottom: 0; /* ?y?[?W????????? */
+left: 0; /* ???[???? */
+width: 100%; /* ??????S???L???? */
+z-index: 1000; /* ????v?f????\?????????X?^?b?L???O???? */
 }
 
 /*------------------------------------------------------------------------------
-フッタ
+?t?b?^
 *------------------------------------------------------------------------------*/
 td.Content {
 padding-top: 10px;
-position: fixed; /* 固定表示にする */
-top: 70px; /* MainMenuとMainHeadの下に配置 */
-left: 0; /* 左端に固定 */
-width: 20%; /* 横幅を設定 */
-height: calc(100% - 120px); /* 上下の固定要素を除いた高さ */
-overflow-y: auto; /* オーバーフロー時にスクロール */
+position: fixed; /* ???\??????? */
+top: 70px; /* MainMenu??MainHead?????z?u */
+left: 0; /* ???[???? */
+width: 20%; /* ???????? */
+height: calc(100% - 120px); /* ??????v?f???????????? */
+overflow-y: auto; /* ?I?[?o?[?t???[????X?N???[?? */
 }
 /*------------------------------------------------------------------------------
-機能メニューリスト
+?@?\???j???[???X?g
 *------------------------------------------------------------------------------*/
 td.FunctionList	{
 	background-color: whitesmoke;
@@ -102,7 +102,7 @@ td.FunctionList	{
 }
 
 /*------------------------------------------------------------------------------
-機能ブロック
+?@?\?u???b?N
 *------------------------------------------------------------------------------*/
 td.Function {
 background-color: white;
@@ -110,13 +110,13 @@ font-size: 12px;
 padding-left: 10px;
 padding-top: 60px;
 padding-bottom: 60px;
-margin-left: 20%; /* Contentの横幅を引いた分 */
-height: calc(100% - 120px); /* 上下の固定要素を除いた高さ */
-overflow-y: auto; /* オーバーフロー時にスクロール */
+margin-left: 20%; /* Content??????????????? */
+height: calc(100% - 120px); /* ??????v?f???????????? */
+overflow-y: auto; /* ?I?[?o?[?t???[????X?N???[?? */
 }
 
 /*------------------------------------------------------------------------------
-機能タイトル
+?@?\?^?C?g??
 *------------------------------------------------------------------------------*/
 div.FuncTitle	{
 	vertical-align: middle;
@@ -132,7 +132,7 @@ div.FuncTitle	{
 }
 
 /*------------------------------------------------------------------------------
-機能詳細タイトル
+?@?\???^?C?g??
 *------------------------------------------------------------------------------*/
 th.DetailTitle,
 td.DetailTitle	{
@@ -146,17 +146,18 @@ td.DetailTitle	{
 }
 
 /*------------------------------------------------------------------------------
-レス表示
+???X?\??
 *------------------------------------------------------------------------------*/
 td.Response		{
 	font-size: 12px;
 	border-width: 0px 0px 1px 0px;
 	border-color: silver;
 	border-style: solid;
+	word-break: break-all;
 }
 
 /*------------------------------------------------------------------------------
-ログ表示
+???O?\??
 *------------------------------------------------------------------------------*/
 .LogExport		{
 	font-size: 10px;
@@ -189,7 +190,7 @@ div.LoginForm	{
 }
 
 /*------------------------------------------------------------------------------
-その他
+?????
 *------------------------------------------------------------------------------*/
 .NormalStyle	{
 	font-weight: normal;
@@ -207,3 +208,33 @@ input.delete	{
 	float: right;
 	color: red;
 }
+
+/*captcha placeholder*/
+#captcha-placeholder {
+	padding: 1em;
+	background: #f9f9f9;
+	color: #666;
+	text-align: center;
+	border: 1px dashed #ccc;
+	margin-top: 0.5em;
+	width: fit-content;
+  }
+  #captcha-widget:not(:empty) + #captcha-placeholder {
+	display: none;
+  }
+
+  /* CodeMirror */
+  .CodeMirror {
+	border: 1px solid #ddd;
+	height: 500px;
+	min-height: 300px;
+	font-size: 14px;
+  }
+  .cm-trailingspace {
+	  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QUXCToH00Y1UgAAACFJREFUCNdjPMDBUc/AwNDAAAFMTAwMDA0OP34wQgX/AQBYgwYEx4f9lQAAAABJRU5ErkJggg==);
+	  background-position: bottom left;
+	  background-repeat: repeat-x;
+  }
+  .cm-matchhighlight {
+	  background-color: lightgreen;
+  }

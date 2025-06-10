@@ -534,6 +534,7 @@ sub PrintLimitSetting
 	my $Setting = SETTING->new;
 	$Setting->Load($Sys);
 	my $DNSBL = $Sys->Get('DNSBL_TOREXIT');
+	$DNSBL += $Sys->Get('DNSBL_SPAMHAUS');
 	$DNSBL += $Sys->Get('DNSBL_S5H');
 	$DNSBL += $Sys->Get('DNSBL_DRONEBL');
 	my $isDNSBL = ($DNSBL?'':'disabled');
@@ -733,8 +734,12 @@ sub PrintCommandSetting
 	my $setnopool	= $setBitMask & 2 ** 18 ? 'checked' : '';
 	my $setdelete	= $setBitMask & 2 ** 19 ? 'checked' : '';
 	my $setextend	= $setBitMask & 2 ** 20 ? 'checked' : '';
+	my $setsubowner	= $setBitMask & 2 ** 21 ? 'checked' : '';
+	my $setvoteban	= $setBitMask & 2 ** 22 ? 'checked' : '';
+	my $setloadattr	= $setBitMask & 2 ** 23 ? 'checked' : '';
 
 	my $resmax = $Setting->Get('BBS_MAX_RES') || $Sys->Get('RESMAX');
+	my $setvotenum = $Setting->Get('BBS_VOTE');
 	$resmax *= 2;
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
@@ -751,6 +756,9 @@ sub PrintCommandSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">extendコマンド（本文行頭!extend:[id]:[slip]:[maxres]:[maxsize]）</td><td>");
 	$Page->Print("<input type=checkbox name=EXTEND value=1048576 $setextend>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">スレッド設定引き継ぎ（本文行頭!loadattr:[対象のスレッドID]）</td><td>");
+	$Page->Print("<input type=checkbox name=ATTR value=8388608 $setloadattr>有効</td></tr>");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 
 	$Page->Print("<tr><td colspan=4>いつでも</td></tr>");
@@ -809,8 +817,17 @@ sub PrintCommandSetting
 	$Page->Print("<td class=\"DetailTitle\">追記（!add:[>>レス番]:[追記内容]）</td><td>");
 	$Page->Print("<input type=checkbox name=ADD value=65536 $setadd>有効</td></tr>");
 	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番] </td><td>");
+	$Page->Print("<td class=\"DetailTitle\">レス削除（!delete:[>>レス番]） </td><td>");
 	$Page->Print("<input type=checkbox name=DELETE value=524288 $setdelete>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">副主（!sub:[>>レス番]）</td><td>");
+	$Page->Print("<input type=checkbox name=SUB value=2097152 $setsubowner>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">BAN投票（!vote:[>>レス番]） </td><td>");
+	$Page->Print("<input type=checkbox name=VOTE value=4194304 $setvoteban>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">　　有効票数 </td><td>");
+	$Page->Print("<input type=number name=VOTE_NUM value=$setvotenum>有効</td></tr>");
 	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
@@ -841,10 +858,11 @@ sub PrintNinpochoSetting
 	my $setWrite		= $Setting->Get('NINJA_WRITE_MESSAGE');
 	my $setSage			= $Setting->Get('NINJA_FORCE_SAGE');
 
-	my ($setThread,$thcost)		= split(/-/,$Setting->Get('NINJA_MAKE_THREAD'));
+	my ($setThread,$thcost)			= split(/-/,$Setting->Get('NINJA_MAKE_THREAD'));
 	my ($setCommand,$comcost)		= split(/-/,$Setting->Get('NINJA_USE_COMMAND'));
 	my ($setStop,$stopcost)			= split(/-/,$Setting->Get('NINJA_THREAD_STOP'));
 	my ($setBan,$bancost)			= split(/-/,$Setting->Get('NINJA_USER_BAN'));
+	my ($setVote,$votecost)			= split(/-/,$Setting->Get('NINJA_BAN_VOTE'));
 	my ($setDelete,$delcost)		= split(/-/,$Setting->Get('NINJA_RES_DELETE'));
 
 	
@@ -873,6 +891,10 @@ sub PrintNinpochoSetting
 	$Page->Print("<input type=text size=8 name=NINJA_USER_BAN value=\"$setBan\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=COST_BAN value=\"$bancost\"></td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">BAN投票参加可能レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=NINJA_BAN_VOTE value=\"$setVote\">以上</td>");
+	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
+	$Page->Print("<input type=text size=8 name=COST_VOTE value=\"$votecost\"></td>");
 	$Page->Print("<tr><td class=\"DetailTitle\">レス削除可能レベル</td><td>");
 	$Page->Print("<input type=text size=8 name=NINJA_RES_DELETE value=\"$setDelete\">以上</td>");
 	$Page->Print("<td class=\"DetailTitle\">消費レベル</td><td>");
@@ -943,6 +965,7 @@ sub PrintOtherSetting
 	my $setNinja		= $Setting->Get('BBS_NINJA');
 	my $setHideNusi		= $Setting->Get('BBS_HIDENUSI');
 	my $setTitleID		= $Setting->Get('BBS_TITLEID');
+	my $setTLMAX		= $Setting->Get('BBS_TL_MAX');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
@@ -1002,11 +1025,12 @@ sub PrintOtherSetting
 	$Page->Print("<input type=text size=8 name=BBS_MAX_MENU_THREAD value=\"$setThreadMenu\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">スレッド作成確認画面</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_NEWSUBJECT $setConfirm value=on disabled>確認あり</td></tr>");
-	
-	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
-	$Page->Print("</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\">タイムライン表示数<small>（0で非表示）</small></td><td>");
+	$Page->Print("<input type=text size=8 name=BBS_TL_MAX value=\"$setTLMAX\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">${type}画像埋め込み表示</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_IMGTAG value=on $setImage>有効</tr>");
+	$Page->Print("<input type=checkbox name=BBS_IMGTAG value=on $setImage>有効</td></tr>");
+
+	$Page->Print("<tr><td rowspan=5 class=\"DetailTitle\"></td><td rowspan=5>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">X(旧Twitter) 埋め込み表示</td><td>");
 	$Page->Print("<input type=checkbox name=BBS_TWITTER value=on $setTwitter>有効</td></tr>");
@@ -1200,6 +1224,7 @@ sub FunctionLimitSetting
 	my ($Sys, $Form, $pLog) = @_;
 	my ($Setting);
 	my $DNSBL = $Sys->Get('DNSBL_TOREXIT');
+	$DNSBL += $Sys->Get('DNSBL_SPAMHAUS');
 	$DNSBL += $Sys->Get('DNSBL_S5H');
 	$DNSBL += $Sys->Get('DNSBL_DRONEBL');
 	# 権限チェック
@@ -1325,17 +1350,23 @@ sub FunctionCommandSetting
 	$Setting->Load($Sys);
 	
 	my $commandSet = 0;
-	my @inList = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
-					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND);
+	my @List = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
+					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE ATTR);
 
-	foreach (@inList) {
+	foreach (@List) {
 		# 入力チェック	
 		my $status = $Form->Get($_) ?  '有効' : '無効';
 		$commandSet |= $Form->Get($_);
 		push @$pLog, "「$_」を「" . $status. '」に設定';
 	}
+	# 規定外文字
+	my @inList = qw(VOTE_NUM);
+	if (!$Form->IsNumber(\@inList)) {
+		return 1002;
+	}
 	
 	$Setting->Set('BBS_COMMAND', $commandSet);
+	$Setting->Set('BBS_VOTE', $Form->Get('VOTE_NUM'));
 	$Setting->Save($Sys);
 	
 	return 0;
@@ -1367,7 +1398,7 @@ sub FunctionNinpochoSetting
 	# 入力チェック
 	{
 		my @inList = qw(NINJA_WRITE_MESSAGE NINJA_FORCE_SAGE NINJA_MAKE_THREAD NINJA_USER_BAN
-		 NINJA_USE_COMMAND NINJA_THREAD_STOP NINJA_RES_DELETE);
+		 NINJA_BAN_VOTE NINJA_USE_COMMAND NINJA_THREAD_STOP NINJA_RES_DELETE);
 		foreach (@inList) {
 			push @$pLog, "「$_」を「" . $Form->Get($_) . '」に設定';
 		}
@@ -1380,6 +1411,7 @@ sub FunctionNinpochoSetting
 	$Setting->Set('NINJA_FORCE_SAGE', $Form->Get('NINJA_FORCE_SAGE'));
 	$Setting->Set('NINJA_MAKE_THREAD', $Form->Get('NINJA_MAKE_THREAD').'-'.$Form->Get('COST_TH'));
 	$Setting->Set('NINJA_USER_BAN', $Form->Get('NINJA_USER_BAN').'-'.$Form->Get('COST_BAN'));
+	$Setting->Set('NINJA_BAN_VOTE', $Form->Get('NINJA_BAN_VOTE').'-'.$Form->Get('COST_VOTE'));
 	$Setting->Set('NINJA_USE_COMMAND', $Form->Get('NINJA_USE_COMMAND').'-'.$Form->Get('COST_COM'));
 	$Setting->Set('NINJA_THREAD_STOP', $Form->Get('NINJA_THREAD_STOP').'-'.$Form->Get('COST_STOP'));
 	$Setting->Set('NINJA_RES_DELETE', $Form->Get('NINJA_RES_DELETE').'-'.$Form->Get('COST_DEL'));
@@ -1446,6 +1478,7 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_IMGTAG', ($Form->Equal('BBS_IMGTAG', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_TL_MAX', $Form->Get('BBS_TL_MAX'));
 	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	
 	# ID表示設定

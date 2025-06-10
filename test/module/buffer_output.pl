@@ -97,7 +97,7 @@ sub Flush
 	}
 	# 標準出力に出力
 	else {
-		if (exists $ENV{'FCGI_ROLE'}) {
+		if (exists $ENV{'FCGI_ROLE'}) {		# for nginx, if(grep {$_ eq 'FCGI.pm'} keys %INC){
 			my $enc = Encode::find_encoding('cp932');
 			foreach (@{$this->{'BUFF'}}) {
 				print $enc->encode($_);

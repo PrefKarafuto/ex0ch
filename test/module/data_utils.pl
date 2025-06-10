@@ -14,6 +14,8 @@ use Socket qw(inet_pton AF_INET6 AF_INET);
 use HTML::Entities;
 use JSON;
 use Storable;
+use File::Spec;
+use LWP::UserAgent;
 no warnings qw(once);
 
 #------------------------------------------------------------------------------------------------------------
@@ -662,6 +664,12 @@ sub CIDRHIT {
             $target_bin = inet_pton(AF_INET, $target);
         }
 
+        # inet_pton の結果をチェック
+        unless (defined $ipaddr_bin && defined $target_bin) {
+            warn "Invalid IP address detected. HO: $ho, Target: $target";
+            next; # 無効なエントリはスキップ
+        }
+
         # バイナリデータをビット列に変換
         my $ipaddr_bits = unpack("B*", $ipaddr_bin);
         my $target_bits = unpack("B*", $target_bin);
@@ -674,6 +682,7 @@ sub CIDRHIT {
 
     return 0;
 }
+
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -1337,172 +1346,105 @@ sub IsReferer
 #
 #------------------------------------------------------------------------------------------------------------
 sub IsJPIP {
-	my $this = shift;
-	my ($Sys) = @_;
-	my $ipAddr = $ENV{'REMOTE_ADDR'};
-	my $infoDir = $Sys->Get('INFO');
+    my ($self, $Sys) = @_;
+    my $ipAddr     = $ENV{'REMOTE_ADDR'}  // '';
+    my $remoteHost = $ENV{'REMOTE_HOST'}  // '';
 
-	return 1 if $ENV{'REMOTE_HOST'} =~ /\.jp$/;
+    # ホスト名が .jp なら即 true
+    return 1 if $remoteHost =~ /\.jp$/i;
 
-	my $filename_ipv4 = ".$infoDir/IP_List/jp_ipv4.cgi";
-	my $filename_ipv6 = ".$infoDir/IP_List/jp_ipv6.cgi";
+    # IP をバイナリ化
+    my $ip_bin = ip_to_bin($ipAddr) or return 0;
 
-	if(time - (stat($filename_ipv4))[9] > 60*60*24*30 || !(-e $filename_ipv4)){
-		GetApnicJPIPList($filename_ipv4,$filename_ipv6);
-	}
+    my $infoDir    = '.'.$Sys->Get('INFO');
+    my $cache_file = $infoDir. '/IP_List/jpn_ip_cache.cgi';
 
-	my $result = '';
-	if ($ipAddr =~ /\./){
-		$result = binary_search_ip_range($ipAddr,$filename_ipv4);
-	}else{
-		$result = binary_search_ip_range($ipAddr,$filename_ipv6);
-	}
-	return if $result == -1;
+    # キャッシュが無い or 30日以上古いときは更新
+    if (!-e $cache_file or (-M $cache_file) > 30) {
+        update_ip_cache($cache_file, $infoDir);
+    }
 
-	return $result;
+    # キャッシュ読み込み
+    my $cache = retrieve($cache_file);
+    my $list = length($ip_bin)==4 ? $cache->{v4} : $cache->{v6};
+
+    return ip_in_list_binary($ip_bin, $list);
 }
-# 日本IPリスト取得用
-sub GetApnicJPIPList {
-	my ($filename_ipv4, $filename_ipv6) = @_;
-	my $ua = LWP::UserAgent->new;
-	$ua->timeout(1);
-	my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
-
-	my $response = $ua->get($url);
-	unless ($response->is_success) {
-		warn "データの取得に失敗: " . $response->status_line;
-		return 0; # 失敗時に0を返す
-	}
-	my $data = $response->decoded_content;
-	require Math::BigInt;
-
-	my @jp_ipv4_ranges;
-	my @jp_ipv6_ranges;
-	my $last_end_ipv4 = -1;
-	my $last_end_ipv6 = Math::BigInt->new(-1);
-
-	foreach my $line (split /\n/, $data) {
-		if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|.*$/) {
-			# IPv4の範囲処理
-			my $start_ip_num = ip_to_number($1);
-			my $end_ip_num = $start_ip_num + $2 - 1;
-
-			if ($start_ip_num == $last_end_ipv4 + 1) {
-				$jp_ipv4_ranges[-1]->{end} = $end_ip_num;
-			} else {
-				push @jp_ipv4_ranges, { start => $start_ip_num, end => $end_ip_num };
-			}
-			$last_end_ipv4 = $end_ip_num;
-		}
-		elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|.*$/) {
-			# IPv6の範囲処理
-			my $start_ip_num = ip_to_number($1);
-			my $end_ip_num = $start_ip_num + Math::BigInt->new(2)->bpow($2) - 1;
-
-			if ($start_ip_num == $last_end_ipv6 + 1) {
-				$jp_ipv6_ranges[-1]->{end} = $end_ip_num;
-			} else {
-				push @jp_ipv6_ranges, { start => $start_ip_num, end => $end_ip_num };
-			}
-			$last_end_ipv6 = $end_ip_num;
-		}
-	}
-
-	eval {
-		open my $file_ipv4, '>', $filename_ipv4 or die "ファイルを開けません: $!";
-		foreach my $range (@jp_ipv4_ranges) {
-			print $file_ipv4 "$range->{start}-$range->{end}\n";
-		}
-		close $file_ipv4;
-		chmod 0600, $filename_ipv4;
-
-		open my $file_ipv6, '>', $filename_ipv6 or die "ファイルを開けません: $!";
-		foreach my $range (@jp_ipv6_ranges) {
-			print $file_ipv6 "$range->{start}-$range->{end}\n";
-		}
-		close $file_ipv6;
-		chmod 0600, $filename_ipv6;
-	};
-	if ($@) {
-		warn "ファイル書き込みに失敗しました: $@";
-		return 0; # 失敗時に0を返す
-	}
-
-	return 1; # 成功時に1を返す
+sub ip_to_bin {
+    my ($ip) = @_;
+    return inet_pton(AF_INET,  $ip) if inet_pton(AF_INET,  $ip);
+    return inet_pton(AF_INET6, $ip) if inet_pton(AF_INET6, $ip);
+    return;  # 無効な IP
 }
-sub binary_search_ip_range {
-	my ($ipAddr, $filename) = @_;
-	my $ip_num = ip_to_number($ipAddr);
-	my $ranges = load_ip_ranges($filename);
-	return -1 unless $ranges;
-	my $low = 0;
-	my $high = @$ranges - 1;
-
-	while ($low <= $high) {
-		my $mid = int(($low + $high) / 2);
-		if ($ip_num < $ranges->[$mid]->{start}) {
-			$high = $mid - 1;
-		} elsif ($ip_num > $ranges->[$mid]->{end}) {
-			$low = $mid + 1;
-		} else {
-			return 1; # IPアドレスは範囲内にあります
-		}
-	}
-
-	return 0; # IPアドレスは範囲外です
+sub make_mask {
+    my ($prefix, $alen) = @_;
+    my $full = int($prefix/8);
+    my $rem  = $prefix % 8;
+    return ("\xFF" x $full)
+         . ($rem ? chr((0xFF << (8-$rem)) & 0xFF) : '')
+         . ("\x00" x ($alen - $full - ($rem?1:0)));
 }
-sub load_ip_ranges {
-	my $filename = shift;
-	my @ranges;
+sub update_ip_cache {
+    my ($cache_file, $infoDir) = @_;
 
-	# ファイルオープンと例外処理
-	open my $file, '<', $filename or do {
-		warn "ファイルを開けません: $filename";
-		return 0; # 失敗時に0を返す
-	};
-	
-	# ファイル読み込みと例外処理
-	eval {
-		require Math::BigInt;
-		while (my $line = <$file>) {
-			chomp $line;
-			my ($start, $end) = split /-/, $line;
-			push @ranges, {
-				start => Math::BigInt->new($start),
-				end => Math::BigInt->new($end)
-			};
-		}
-		close $file;
-	};
-	if ($@) {
-		warn "ファイル読み込み中にエラーが発生しました: $@";
-		return 0; # 失敗時に0を返す
-	}
+    # キャッシュディレクトリを作成（存在しなければ）
+    use File::Basename qw(dirname);
+    use File::Path     qw(make_path);
+    my $cache_dir = dirname($cache_file);
+    unless (-d $cache_dir) {
+        make_path($cache_dir)
+            or die "ディレクトリ $cache_dir の作成に失敗: $!";
+    }
 
-	return \@ranges; # 成功時にIP範囲の配列のリファレンスを返す
+    # — LWP::UserAgent を使って APNIC データ取得 —
+    my $url = 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest';
+    my $ua  = LWP::UserAgent->new(
+        agent   => 'MyApp/1.0',
+        timeout => 10,
+    );
+    my $res = $ua->get($url);
+    die "APNIC 取得失敗: " . $res->status_line . "\n"
+        unless $res->is_success;
+
+    my $content = $res->decoded_content(charset => 'none');
+
+    # — 取得データをパースしてバイナリリスト作成 —
+    my (@v4, @v6);
+    for my $line (split /\n/, $content) {
+        next if $line =~ /^#/;
+        if ($line =~ /^apnic\|JP\|ipv4\|(\d+\.\d+\.\d+\.\d+)\|(\d+)\|/) {
+            my ($addr, $count) = ($1, $2);
+            my $prefix = 32 - int(log($count)/log(2));
+            if (my $bin = inet_pton(AF_INET, $addr)) {
+                push @v4, { net_bin => $bin, mask => make_mask($prefix, length $bin) };
+            }
+        }
+        elsif ($line =~ /^apnic\|JP\|ipv6\|([0-9a-f:]+)\|(\d+)\|/i) {
+            my ($addr, $prefix) = ($1, $2);
+            if (my $bin = inet_pton(AF_INET6, $addr)) {
+                push @v6, { net_bin => $bin, mask => make_mask($prefix, length $bin) };
+            }
+        }
+    }
+
+    # — Storable でキャッシュ書き出し —
+    store { v4 => \@v4, v6 => \@v6 }, $cache_file;
 }
-sub ip_to_number {
-	my $ip = shift;
-
-	if ($ip =~ /^\d{1,3}(?:\.\d{1,3}){3}$/) { # IPv4
-		return unpack("N", pack("C4", split(/\./, $ip)));
-	} elsif ($ip =~ /^[0-9a-f:]+$/i) { # IPv6
-		# 省略記法の処理
-		if ($ip =~ /::/) {
-			my $filler = ':' . ('0:' x (8 - (() = $ip =~ /:/g))) . '0';
-			$ip =~ s/::/$filler/;
-			$ip =~ s/^:/0:/; # 先頭が省略された場合
-			$ip =~ s/:$/:0/; # 末尾が省略された場合
-		}
-		require Math::BigInt;
-		my $bigint = Math::BigInt->new(0);
-		foreach my $part (split /:/, $ip) {
-			$bigint = ($bigint << 16) + hex($part);
-		}
-		return $bigint;
-	} else {
-		return undef;
-	}
+sub ip_in_list_binary {
+    my ($ip_bin, $list) = @_;
+    my ($lo, $hi, $idx) = (0, $#$list, -1);
+    while ($lo <= $hi) {
+        my $mid = int(($lo + $hi) / 2);
+        if ($ip_bin lt $list->[$mid]{net_bin}) {
+            $hi = $mid - 1;
+        } else {
+            $idx = $mid;
+            $lo  = $mid + 1;
+        }
+    }
+    return 0 if $idx < 0;
+    my $e = $list->[$idx];
+    return (($ip_bin & $e->{mask}) eq $e->{net_bin}) ? 1 : 0;
 }
 #------------------------------------------------------------------------------------------------------------
 #
@@ -1563,7 +1505,7 @@ sub IsProxyAPI {
 }
 #------------------------------------------------------------------------------------------------------------
 #
-#	プロクシチェック - IsProxyDNSBL
+#	プロクシチェック - IsListedDNSBL
 #	--------------------------------------
 #	引　数：$Sys   : SYSTEM
 #			$Form  : 
@@ -1572,7 +1514,7 @@ sub IsProxyAPI {
 #	戻り値：プロクシなら対象ポート番号
 #
 #------------------------------------------------------------------------------------------------------------
-sub IsProxyDNSBL
+sub IsListedDNSBL
 {
 	my $this = shift;
 	my ($Sys, $Form, $from, $mode) = @_;
@@ -1580,6 +1522,7 @@ sub IsProxyDNSBL
 	my @dnsbls = ();
 	
 	push(@dnsbls, 'torexit.dan.me.uk') if($Sys->Get('DNSBL_TOREXIT'));# Tor検出用
+	push(@dnsbls, 'zen.spamhaus.org') if($Sys->Get('DNSBL_SPAMHAUS'));
 	push(@dnsbls, 'all.s5h.net') if($Sys->Get('DNSBL_S5H'));
 	push(@dnsbls, 'dnsbl.dronebl.org') if($Sys->Get('DNSBL_DRONEBL'));
 	
@@ -1593,6 +1536,13 @@ sub IsProxyDNSBL
 	}
 	
 	return 0;
+}
+
+sub IsProxyDNSBL
+{
+	my $this = shift;
+	my ($Sys, $Form, $from, $mode) = @_;
+	return IsListedDNSBL($Sys, $Form, $from, $mode);
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -1737,6 +1687,24 @@ sub expand_ipv6 {
 	return join(':', @blocks);
 }
 
+# CDNのIPを判定
+sub is_cdn_ip {
+    my ($class, $ip) = @_;
+    require './module/cidr_list.pl';
+	my $cidr = $ZP_CIDR::cidr;
+	
+	if($ip =~ /:/){
+		return $ENV{'HTTP_CF_CONNECTING_IP'} if CIDRHIT($cidr->{cf_v6}, $ip);
+		return $ENV{'HTTP_FASTLY_CLIENT_IP'} if CIDRHIT($cidr->{fs_v6}, $ip);
+		return $ENV{'HTTP_TRUE_CLIENT_IP'} if CIDRHIT($cidr->{ak_v6}, $ip);
+	}else{
+		return $ENV{'HTTP_CF_CONNECTING_IP'} if CIDRHIT($cidr->{cf_v4}, $ip);
+		return $ENV{'HTTP_FASTLY_CLIENT_IP'} if CIDRHIT($cidr->{fs_v4}, $ip);
+		return $ENV{'HTTP_TRUE_CLIENT_IP'} if CIDRHIT($cidr->{ak_v4}, $ip);
+	}
+
+    return;
+}
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================

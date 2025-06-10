@@ -121,8 +121,8 @@ sub Create
 		$this->{'DAT'} = DAT->new;
 	}
 	if (! defined $this->{'LOG'}) {
-		require './module/manager_log.pl';
-		$this->{'LOG'} = MANAGER_LOG->new;
+		require './module/log.pl';
+		$this->{'LOG'} = LOG->new;
 	}
 }
  
@@ -272,15 +272,41 @@ sub LogSearch
 	my $LOG = $this->{'LOG'};
 	my $Sys = $this->{'SYS'};
 
-	$LOG->Load($Sys,'WRT',$key);
-	if($LOG->Size()){
+	my $logPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/' . $Sys->Get('KEY');
+	$LOG->Open($logPath, 0, 1 | 2);
+	$DAT->Load($this->{'SYS'}, $Path, 1);
+	my $datsize = $DAT->Size();
+	my $logsize = $LOG->Size();
+
+	my $base_offset = $logsize - $datsize;
+	if($logsize){
 		my $pResultSet = $this->{'RESULTSET'};
-		if($DAT->Load($this->{'SYS'}, $Path, 1)){
-			for (my $i = 0; $i < $LOG->Size(); $i++) {
+		if($datsize){
+			for (my $i = 0; $i < $logsize; $i++) {
+				my $offset = $base_offset;
 				my $match_count = 0;
 				my $condition_count = 0;
-				my @data = $LOG->Get($i);
-				my ($log_ip, $log_host, $log_ua, $log_sid) = ($data[6], $data[5], $data[8], $data[9]);
+				my @data;
+				my $pRes	= $DAT->Get($i);
+				next unless defined $pRes;
+				my @elem	= split(/<>/, $$pRes,-1);
+				
+				for my $d (0, 1, -1, 2, 3, -2, -3) {
+					my $idx = $offset + $i + $d;
+					next if $idx < 0 || $idx >= $logsize;
+					
+					my $log = $LOG->Get($offset + $d + $i);
+					@data = split(/<>/, $log, -1) if (defined $log);
+					if (defined $log && $data[2] eq $elem[2]) {
+						# ログとレスが一致
+						$offset += $d;
+						last;
+					}
+					$log = undef;
+					@data = ();
+				}
+				my ($log_ip, $log_host, $log_ua) = ($data[6], $data[5], $data[8]);
+				my $log_sid = defined $data[9] ? $data[9] : '';
 
 				if ($ip_addr) {
 					$condition_count++;
@@ -309,9 +335,8 @@ sub LogSearch
 
 				if ($match_count == $condition_count) {
 					my $SetStr = "$bbsID<>$key<>" . ($i + 1) . '<>';
-					my $pDat = $DAT->Get($i);
-					if(defined $pDat){
-						$SetStr .= $$pDat;
+					if(defined $pRes){
+						$SetStr .= $$pRes;
 						push @$pResultSet, $SetStr;
 					}
 				}
