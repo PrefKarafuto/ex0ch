@@ -486,6 +486,8 @@ sub LoadAttrAll
     $this->{'ATTR'} = {};  # 属性データの初期化
     
     my $attr_dir = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info/attr';
+	require './module/file_utils.pl';
+	FILE_UTILS::CreateDirectory("$attr_dir", $Sys->Get('PM-ADIR'));
     
     # attrディレクトリ内のすべての "attr_xxx.cgi" ファイルを探索
     opendir(my $dh, $attr_dir) or die "Could not open '$attr_dir' for reading: $!";

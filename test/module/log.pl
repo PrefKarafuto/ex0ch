@@ -14,6 +14,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use File::Path;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -225,7 +226,7 @@ sub Put {
     if ($this->{'SIZE'} > $this->{'LIMIT'}) {
         # ディレクトリの存在確認と作成
         unless (-d $this->{'PATH'}) {
-            mkdir($this->{'PATH'}, 0700) or die "ディレクトリを作成できません: $!";
+            mkpath($this->{'PATH'}, 0700) or die "ディレクトリを作成できません: $!";
         }
 
         # 年と月をフォーマットしてファイル名を生成

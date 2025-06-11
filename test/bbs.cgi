@@ -16,7 +16,7 @@ use CGI::Cookie;
 use Digest::MD5;
 use JSON;
 use LWP::UserAgent;
-use File::Path qw(make_path);
+use File::Path;
 use File::Copy;
 use Storable qw(lock_store lock_retrieve);
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
@@ -715,8 +715,8 @@ sub LoadSessionID {
     require './module/ninpocho.pl';
     my $infoDir = $Sys->Get('INFO');
     my $baseDir = "$infoDir/.ninpocho";
-    my $hashDir = "$baseDir/hash";
-    make_path($hashDir) unless -d $hashDir;
+    my $hashDir = ".$baseDir/hash";
+    mkpath($hashDir,0,$Sys->Get('PM_ADIR')) unless -d $hashDir;
 
     # Cookie から取得
     my $sid = $Cookie->Get('countsession');
