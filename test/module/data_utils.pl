@@ -666,7 +666,6 @@ sub CIDRHIT {
 
         # inet_pton の結果をチェック
         unless (defined $ipaddr_bin && defined $target_bin) {
-            warn "Invalid IP address detected. HO: $ho, Target: $target";
             next; # 無効なエントリはスキップ
         }
 

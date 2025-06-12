@@ -435,7 +435,9 @@ sub PrintBBSCaptcha
 	my $tm = int(time);
 	my $name = &$sanitize($Form->Get('FROM'));
 	my $mail = &$sanitize($Form->Get('mail'));
-	my $msg = &$sanitize($Form->Get('MESSAGE'));
+	my $raw = $Form->Get('MESSAGE');
+	$raw =~ s/<br>/\n/g;
+	my $msg = &$sanitize($raw);
 	my $subject = &$sanitize($Form->Get('subject'));
 	my $key = &$sanitize($Form->Get('key'));
 	my $fi = $Form->Get('from_index');
