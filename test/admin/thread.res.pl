@@ -330,20 +330,18 @@ sub PrintResList
 		substr($str, 0, $half) = '*' x $half;
 
 		# 鯖内掲示板のURLをリンクに
-		if ( $elem[3] =~ /$regstr/ ) {
-				my ($bbs_name, $thread_id, $disp_fmt) = ($1, $2, defined($3) ? $3 : '');
-				if ( exists $keySet{$bbs_name} ) {
-						my $bbs_key = $keySet{$bbs_name};
-						$elem[3] =~ s|$regstr|
-								qq{<a href="javascript:
-										SetOption('TARGET_BBS','$bbs_key');
-										SetOption('TARGET_THREAD','$thread_id');
-										SetOption('DISP_FORMAT','$disp_fmt');
-										DoSubmit('thread.res','DISP','LIST');
-								">[掲示板内リンク：$bbs_name/$thread_id/$disp_fmt]</a>}
-						|gex;
-				}
+		$elem[3] =~ s{$regstr}{
+		my ($bbs_name, $thread_id, $disp_fmt) = ($1, $2, defined $3 ? $3 : '');
+
+		if (exists $keySet{$bbs_name}) {
+			my $bbs_key = $keySet{$bbs_name};
+			qq{<a href="javascript:SetOption('TARGET_BBS','$bbs_key');SetOption('TARGET_THREAD','$thread_id');SetOption('DISP_FORMAT','$disp_fmt');DoSubmit('thread.res','DISP','LIST');">[掲示板内リンク：$bbs_name/$thread_id/$disp_fmt]</a>}
 		}
+		else {
+			${^MATCH};
+		}
+		}gexp;
+
 
 		$Page->Print("：<font color=forestgreen><b>$elem[0]</b></font>[$elem[1]]");
 		$Page->Print("：$elem[2]</dt><dd>$elem[3]");
