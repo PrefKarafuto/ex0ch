@@ -480,7 +480,7 @@ sub FunctionGroupSetting
 		'C_NOATTR'			=> $ZP::CAP_REG_NOATTR,
 		'C_NONINJA'			=> $ZP::CAP_REG_NONINJA,
 		'C_NOCAPTCHA'		=> $ZP::CAP_REG_NOCAPTCHA,
-		'C_NOBGDSL'			=> $ZP::CAP_REG_DNSBL,
+		'C_NOBGDSL'			=> $ZP::CAP_REG_BGDSL,
 	);
 	my @auths = ();
 	foreach (keys %field2auth) {
