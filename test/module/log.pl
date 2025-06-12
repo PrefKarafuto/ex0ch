@@ -235,7 +235,7 @@ sub Put {
         my $logName = $this->{'PATH'} . '/' . $year . '_' . $month . '.cgi';
 
         # ファイルを開く
-        open(my $fh, '>>', $logName) or die "ファイルを開けません: $!";
+        open(my $fh, '>>', $logName) or die "ファイル${logName}を開けません: $!";
         flock($fh, 2); # 排他的ロック
 
         # サイズがリミットを超えている場合、古いログを削除
