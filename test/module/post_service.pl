@@ -1804,6 +1804,7 @@ sub AddDatFile
 	my $AttrResMax = $Threads->GetAttr($Sys->Get('KEY'),'maxres');
 	if ($err2 == 0) {
 		# レス数が最大数を超えたらover設定をする
+		$resNum++;
 		my $MAXRES = $AttrResMax ? $AttrResMax : $Sys->Get('RESMAX');
 		if ($resNum >= $MAXRES) {
 			# datにOVERスレッドレスを書き込む
