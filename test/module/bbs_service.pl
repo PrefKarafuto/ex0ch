@@ -9,7 +9,6 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
-use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use warnings;
 
 #------------------------------------------------------------------------------------------------------------

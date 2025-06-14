@@ -12,7 +12,6 @@ use LWP::UserAgent;
 use Digest::MD5;
 use JSON;
 use File::Copy;
-use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 use Encode qw(encode);
 use Storable qw(lock_store lock_retrieve dclone);
 use warnings;
@@ -2514,7 +2513,7 @@ sub Certification_Captcha {
 			secret => $secretkey,
 			response => $captcha_response,
 			remoteip => $ENV{'REMOTE_ADDR'},
-			remoteip_leniency => $captcha_leniency,
+			#remoteip_leniency => $captcha_leniency,
 		   });
 		if ($response->is_success()) {
 			my $json_text = $response->decoded_content();
