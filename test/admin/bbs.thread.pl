@@ -338,12 +338,6 @@ sub PrintThreadList
 		$id = $slice[$offset];
 		$subj	= $Threads->Get('SUBJECT', $id);
 		$res	= $Threads->Get('RES', $id);
-
-		$n-- if $pinnedThread && $flag;
-		if($id eq $pinnedThread && !$flag){
-			$n = '&#x1f4cc;';
-			$flag = 1;
-		}
 		
 		my $permt = DAT::GetPermission("$base/$id.dat");
 		my $perms = $SYS->Get('PM-STOP');
@@ -362,7 +356,14 @@ sub PrintThreadList
 		$common .= "DoSubmit('thread.res','DISP','LIST')\"";
 		
 		$Page->Print("<tr bgcolor=$bgColor>");
-		$Page->Print("<td><input type=checkbox name=THREADS value=$id></td>");
+		if($id eq $pinnedThread && !$flag){
+			$Page->Print("<td>　&#x1f4cc;</td>");
+			$flag = 1;
+			$n = '0';
+		}else{
+			$Page->Print("<td><input type=checkbox name=THREADS value=$id></td>");
+			$n-- if $pinnedThread && $flag;
+		}
 		if ($isResEdit || $isResAbone) {
 			if (! ($subj =~ /[^\s　]/) || $subj eq '') {
 				$subj = '(空欄もしくは空白のみ)';
@@ -995,9 +996,13 @@ sub FunctionThreadCopy
 	@threadList = $Form->GetAtArray('THREADS');
 	return 1 if (!@threadList || !$tobbs);
 
+	# IDの重複を除く
+	my %seen;
+	my @uniq = grep { !$seen{$_}++ } @threadList;
+
 	my $text = $mode ? 'コピー':'移動';
 	
-	foreach $id (@threadList) {
+	foreach $id (@uniq) {
 		next if (! defined $Threads->Get('RES', $id));
 		if($withAttr){
 			$Threads->LoadAttr($Sys);
