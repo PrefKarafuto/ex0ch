@@ -19,7 +19,7 @@ use LWP::UserAgent;
 use File::Path;
 use File::Copy;
 use Storable qw(lock_store lock_retrieve);
-use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
+#use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 # 実行時間の計測開始 (デバッグ用)
 # sys.top.plのSetMenuList関数でコメントアウトを解除すると管理画面からログが閲覧できます
