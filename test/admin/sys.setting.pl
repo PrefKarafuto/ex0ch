@@ -772,7 +772,7 @@ sub PrintPlusSecSetting
 	$Page->Print("<option value=\"cf-turnstile\" $TurnSet>Turnstile</option>");
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<tr><td>(Turnstileのみ)IPの検証<br><td>");
-	$Page->Print("<select name=CAPTCHA_LENIENCY required>");
+	$Page->Print("<select name=CAPTCHA_LENIENCY required disabled>");
 	$Page->Print("<option value=\"\" $noCapIP>なし</option>");
 	$Page->Print("<option value=\"relaxed\" $CapIPRelax>普通</option>");
 	$Page->Print("<option value=\"strict\" $CapIPStrict>厳格</option>");

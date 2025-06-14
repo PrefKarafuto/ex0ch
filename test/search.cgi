@@ -573,7 +573,7 @@ sub Certification_Captcha {
 			secret => $secretkey,
 			response => $captcha_response,
 			remoteip => $ENV{'REMOTE_ADDR'},
-			remoteip_leniency => $captcha_leniency,
+			#remoteip_leniency => $captcha_leniency,
 		});
 		if ($response->is_success()) {
 			my $json_text = $response->decoded_content();
