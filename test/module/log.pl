@@ -228,6 +228,9 @@ sub Put {
         unless (-d $this->{'PATH'}) {
             mkpath($this->{'PATH'}, 0, 0700) or die "ディレクトリを作成できません: $!";
         }
+		unless ( -w $this->{'PATH'} ) {
+			chmod 700, $this->{'PATH'};
+		}
 
         # 年と月をフォーマットしてファイル名を生成
         my $year  = $time[5];
@@ -235,7 +238,7 @@ sub Put {
         my $logName = $this->{'PATH'} . '/' . $year . '_' . $month . '.cgi';
 
         # ファイルを開く
-        open(my $fh, '>>', $logName) or die "ファイル${logName}を開けません: $!";
+        open(my $fh, '>>', $logName) or die "ファイルを開けません: $!";
         flock($fh, 2); # 排他的ロック
 
         # サイズがリミットを超えている場合、古いログを削除
