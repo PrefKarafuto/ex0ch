@@ -334,6 +334,7 @@ HTML
 	}
 	
 	# ユーザ一覧を表示
+	@userSet = sort @userSet;
 	foreach $id (@userSet) {
 		$name = $User->Get('NAME', $id);
 		$full = $User->Get('FULL', $id);

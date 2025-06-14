@@ -95,7 +95,7 @@ sub DoPrint
 	SetMenuList($BASE, $pSys, $Sys->Get('BBS'));
 	
 	if ($subMode eq 'LIST') {														# スレッド一覧画面
-		PrintThreadList($Page, $Sys, $Form);
+		PrintThreadList($Page, $Sys, $Form, $BBS);
 	}
 	elsif ($subMode eq 'COPY') {													# スレッドコピー確認画面
 		PrintThreadCopy($Page, $Sys, $Form, 1);
@@ -222,6 +222,9 @@ sub DoFunction
 	elsif ($subMode eq 'CLEAR') {                                          # TLクリア
 		$err = FunctionClearTimeline($Sys, $Form, $this->{'LOG'});
 	}
+	elsif ($subMode eq 'PINNED') {                                          # TLクリア
+		$err = FunctionThreadPinned($Sys, $Form, $this->{'LOG'}, $BBS);
+	}
 	# 処理結果表示
 	if ($err) {
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", "ERROR:$err");
@@ -271,9 +274,9 @@ sub SetMenuList
 #------------------------------------------------------------------------------------------------------------
 sub PrintThreadList
 {
-	my ($Page, $SYS, $Form) = @_;
+	my ($Page, $SYS, $Form, $BBS) = @_;
 	my (@threadSet, $ThreadNum, $key, $res, $subj, $i);
-	my ($dispSt, $dispEd, $dispNum, $bgColor, $base);
+	my ($dispSt, $dispEd, $dispNum, $bgColor, $base, $pinnedThread);
 	my ($common, $common2, $n, $Threads, $id);
 	
 	$SYS->Set('_TITLE', 'Thread List');
@@ -287,6 +290,8 @@ sub PrintThreadList
 	$Threads->GetKeySet('ALL', '', \@threadSet);
 	$ThreadNum = $Threads->GetNum();
 	$base = $SYS->Get('BBSPATH') . '/' . $SYS->Get('BBS') . '/dat';
+
+	$pinnedThread = $BBS->Get('PINNED',$Form->Get('TARGET_BBS')) // '';
 	
 	# 表示数の設定
 	$dispNum	= $Form->Get('DISPNUM', 10);
@@ -324,10 +329,13 @@ sub PrintThreadList
 	my $Set = SETTING->new;
 	$Set->Load($SYS);
 	my $resmax = $Set->Get('BBS_RES_MAX') || $SYS->Get('RESMAX');
-	
-	for ($i = $dispSt ; $i < $dispEd ; $i++) {
-		$n		= $i + 1;
-		$id		= $threadSet[$i];
+
+	my @slice = @threadSet[ $dispSt .. $dispEd - 1 ];
+	unshift @slice, $pinnedThread if $pinnedThread;
+	my $flag = 0;
+	for my $offset (0 .. $#slice) {
+		$n  = $dispSt + $offset + 1;
+		$id = $slice[$offset];
 		$subj	= $Threads->Get('SUBJECT', $id);
 		$res	= $Threads->Get('RES', $id);
 		
@@ -337,7 +345,8 @@ sub PrintThreadList
 		
 		# 表示背景色設定
 		#if ($Threads->GetAttr($id, 'stop')) { # use from 0.8.x
-		if ($isstop) {				$bgColor = '#ffcfff'; }	# 停止スレッド
+		if ($id == $pinnedThread) {				$bgColor = '#eeeeee'; }	# ピン留めスレッド
+		elsif ($isstop) {				$bgColor = '#ffcfff'; }	# 停止スレッド
 		elsif ($res > $resmax) {		$bgColor = '#cfffff'; }	# 最大数スレッド
 		elsif ($Threads->GetAttr($id, 'pass')) {$bgColor = '#cfcfff'; }	# パス設定スレッド
 		elsif (DAT::IsMoved("$base/$id.dat")) {	$bgColor = '#ffffcf'; }	# 移転スレッド
@@ -347,7 +356,14 @@ sub PrintThreadList
 		$common .= "DoSubmit('thread.res','DISP','LIST')\"";
 		
 		$Page->Print("<tr bgcolor=$bgColor>");
-		$Page->Print("<td><input type=checkbox name=THREADS value=$id></td>");
+		if($id eq $pinnedThread && !$flag){
+			$Page->Print("<td>　&#x1f4cc;</td>");
+			$flag = 1;
+			$n = '0';
+		}else{
+			$Page->Print("<td><input type=checkbox name=THREADS value=$id></td>");
+			$n-- if $pinnedThread && $flag;
+		}
 		if ($isResEdit || $isResAbone) {
 			if (! ($subj =~ /[^\s　]/) || $subj eq '') {
 				$subj = '(空欄もしくは空白のみ)';
@@ -402,8 +418,9 @@ sub PrintThreadList
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
 	$Page->Print("<input type=button value=\"DAT落ち\" $common,'POOL')\"> ")				if ($isPool);
 	
-	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")				if ($isResAbone);
-	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")				if ($isDelete);
+	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")		if ($isResAbone);
+	$Page->Print("<input type=button value=\"ピン留め\" $common2,'PINNED')\"> ")				if ($isResAbone);
+	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	
@@ -979,9 +996,13 @@ sub FunctionThreadCopy
 	@threadList = $Form->GetAtArray('THREADS');
 	return 1 if (!@threadList || !$tobbs);
 
+	# IDの重複を除く
+	my %seen;
+	my @uniq = grep { !$seen{$_}++ } @threadList;
+
 	my $text = $mode ? 'コピー':'移動';
 	
-	foreach $id (@threadList) {
+	foreach $id (@uniq) {
 		next if (! defined $Threads->Get('RES', $id));
 		if($withAttr){
 			$Threads->LoadAttr($Sys);
@@ -1309,6 +1330,49 @@ sub FunctionClearTimeline
 	
 	push @$pLog, 'タイムラインをクリアしました。';
 	
+	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	スレッドピン止め
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionThreadPinned
+{
+	my ($Sys, $Form, $pLog, $BBS) = @_;
+	
+	# 権限チェック
+	{
+		my $SEC	= $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+
+	my @threadList = $Form->GetAtArray('THREADS');
+	my $pinnedThread = $threadList[0];
+	if( scalar(@threadList) != 1){
+		push @$pLog, 'ピン留めできるのは１スレッドのみです。';
+		return 0;
+	}
+
+	if($BBS->Get('PINNED', $Form->Get('TARGET_BBS')) eq $pinnedThread){
+		$BBS->Set($Form->Get('TARGET_BBS'),'PINNED','');
+		push @$pLog, 'ピン留め解除しました。';
+	}else{
+		$BBS->Set($Form->Get('TARGET_BBS'),'PINNED',$pinnedThread);
+		push @$pLog, 'スレッドをピン留めしました。';
+	}
+
+	$BBS->Save($Sys);
 	return 0;
 }
 

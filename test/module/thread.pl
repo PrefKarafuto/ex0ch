@@ -486,7 +486,6 @@ sub LoadAttrAll
     $this->{'ATTR'} = {};  # 属性データの初期化
     
     my $attr_dir = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . '/info/attr';
-
 	require './module/file_utils.pl';
 	FILE_UTILS::CreateDirectory("$attr_dir", $Sys->Get('PM-ADIR'));
     
@@ -590,7 +589,7 @@ sub GetAttr
     
     # スレッド属性データがロードされていない場合
     unless (defined $this->{'ATTR'}->{$key}) {
-        warn "Attr info for thread '$key' is not loaded.";
+        #warn "Attr info for thread '$key' is not loaded.";
         return undef;
     }
     
@@ -632,7 +631,7 @@ sub SetAttr
     
     # スレッド属性データがロードされていない場合
     unless (defined $this->{'ATTR'}->{$key}) {
-        warn "Attr info for thread '$key' is not loaded.";
+        #warn "Attr info for thread '$key' is not loaded.";
         return;
     }
     

@@ -16,7 +16,7 @@ use CGI::Cookie;
 use Digest::MD5;
 use JSON;
 use LWP::UserAgent;
-use File::Path qw(make_path);
+use File::Path;
 use File::Copy;
 use Storable qw(lock_store lock_retrieve);
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
@@ -433,7 +433,9 @@ sub PrintBBSCaptcha
 	my $tm = int(time);
 	my $name = &$sanitize($Form->Get('FROM'));
 	my $mail = &$sanitize($Form->Get('mail'));
-	my $msg = &$sanitize($Form->Get('MESSAGE'));
+	my $raw = $Form->Get('MESSAGE');
+	$raw =~ s/<br>/\n/g;
+	my $msg = &$sanitize($raw);
 	my $subject = &$sanitize($Form->Get('subject'));
 	my $key = &$sanitize($Form->Get('key'));
 	my $fi = $Form->Get('from_index');
@@ -713,8 +715,8 @@ sub LoadSessionID {
     require './module/ninpocho.pl';
     my $infoDir = $Sys->Get('INFO');
     my $baseDir = "$infoDir/.ninpocho";
-    my $hashDir = "$baseDir/hash";
-    make_path($hashDir) unless -d $hashDir;
+    my $hashDir = ".$baseDir/hash";
+    mkpath($hashDir,0,$Sys->Get('PM_ADIR')) unless -d $hashDir;
 
     # Cookie から取得
     my $sid = $Cookie->Get('countsession');

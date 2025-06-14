@@ -517,7 +517,7 @@ sub FunctionGroupSetting
 		'A_BBSEDIT'		=> $ZP::AUTH_BBSEDIT,
 		'A_LOGVIEW'		=> $ZP::AUTH_LOGVIEW,
 		'A_NINJAEDIT'	=> $ZP::AUTH_NINJAEDIT,
-		'A_BGDSL'		=> $ZP::A_BGDSLEDIT,
+		'A_BGDSL'		=> $ZP::AUTH_BGDSLEDIT,
 	);
 	my @auths = ();
 	foreach (keys %field2auth) {

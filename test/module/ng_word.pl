@@ -209,8 +209,7 @@ sub Check {
         next if $word eq '';
 
         foreach my $key (@$pList) {
-            my $work         = $Form->Get($key);
-            my $decoded_work = decode_entities($work);
+            my $work         = $Form->Get($key) // '';
 
             # 「!reg:」付きなら正規表現モード
             if ($word =~ /^!reg:(.*)$/) {
@@ -223,7 +222,8 @@ sub Check {
                 next if $@;    # エラーがあればスキップ
 
                 # マッチしたら即規制
-                if ($decoded_work =~ $pat) {
+				$work =~ s/<br>/\n/g;
+                if (decode_entities($work) =~ $pat) {
 					return 3 unless $cList;
 					push @hList,$word;
 				}
@@ -233,7 +233,7 @@ sub Check {
                 my $pat = eval { qr/\Q$word\E/ };
                 next if $@;    # エラーがあればスキップ
 
-                if ($decoded_work =~ $pat) {
+                if (decode_entities($work) =~ $pat) {
                     return $this->{'METHOD'} eq 'host'    ? 2
                          : $this->{'METHOD'} eq 'disable' ? 3
                          : 1 unless $cList;

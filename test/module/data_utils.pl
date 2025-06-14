@@ -666,7 +666,6 @@ sub CIDRHIT {
 
         # inet_pton の結果をチェック
         unless (defined $ipaddr_bin && defined $target_bin) {
-            warn "Invalid IP address detected. HO: $ho, Target: $target";
             next; # 無効なエントリはスキップ
         }
 
@@ -1389,10 +1388,10 @@ sub update_ip_cache {
 
     # キャッシュディレクトリを作成（存在しなければ）
     use File::Basename qw(dirname);
-    use File::Path     qw(make_path);
+    use File::Path     qw(mkpath);
     my $cache_dir = dirname($cache_file);
     unless (-d $cache_dir) {
-        make_path($cache_dir)
+        mkpath($cache_dir,0,0700)
             or die "ディレクトリ $cache_dir の作成に失敗: $!";
     }
 

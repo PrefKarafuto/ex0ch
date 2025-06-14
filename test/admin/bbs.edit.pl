@@ -207,7 +207,7 @@ sub SetMenuList
 	}
 	# 管理グループ設定権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_BGDSLEDIT, $bbs)) {
-		$Base->SetMenu("BoardGuars DSLの編集(実験的)","'bbs.edit','DISP','BGDSL'");
+		$Base->SetMenu("BoardGuard DSLの編集(実験的)","'bbs.edit','DISP','BGDSL'");
 		$bAuth = 1;
 	}
 	if ($bAuth) {

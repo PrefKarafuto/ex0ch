@@ -10,13 +10,12 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 
-use File::Path qw(make_path);
+use File::Path qw(mkpath);
 use POSIX qw(strftime);
 use CGI::Session;
 use CGI::Cookie;
 use Digest::MD5;
 use Storable qw(lock_store lock_retrieve);
-use File::Path qw(make_path);
 use File::Basename qw(dirname);
 use MIME::Base64 ();  # encode_base64url
 
@@ -47,11 +46,6 @@ sub Load {
     my ($this, $Sys, $password) = @_;
     my $infoDir = $Sys->Get('INFO');
     my $ninDir  = ".$infoDir/.ninpocho/";
-
-    # ディレクトリ確実に作成
-    unless (-d $ninDir) {
-        make_path($ninDir, "$ninDir/hash");
-    }
 
     my $sid = $Sys->Get('SID');
     my $sid_before;
@@ -290,7 +284,7 @@ sub Save {
 sub _ensure_dir {
     my ($file) = @_;
     my $dir = dirname($file);
-    make_path($dir) unless -d $dir;
+    mkpath($dir,0,0700) unless -d $dir;
 }
 
 # -----------------------------------------------------------------------------

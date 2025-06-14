@@ -39,6 +39,7 @@ sub new
 		'DIR'		=> undef,
 		'SUBJECT'	=> undef,
 		'CATEGORY'	=> undef,
+		'PINNED'	=> undef,
 	};
 	
 	bless $obj, $class;
@@ -63,6 +64,7 @@ sub Load
 	$this->{'DIR'} = {};
 	$this->{'SUBJECT'} = {};
 	$this->{'CATEGORY'} = {};
+	$this->{'PINNED'} = {};
 	
 	my $path = '.' . $Sys->Get('INFO') . '/bbss.cgi';
 	
@@ -86,6 +88,7 @@ sub Load
 			$this->{'DIR'}->{$id} = $elem[2];
 			$this->{'SUBJECT'}->{$id} = $elem[3];
 			$this->{'CATEGORY'}->{$id} = $elem[4];
+			$this->{'PINNED'}->{$id} = $elem[5];
 		}
 	}
 	else {
@@ -120,7 +123,8 @@ sub Save
 				$this->{'NAME'}->{$_},
 				$this->{'DIR'}->{$_},
 				$this->{'SUBJECT'}->{$_},
-				$this->{'CATEGORY'}->{$_}
+				$this->{'CATEGORY'}->{$_},
+				$this->{'PINNED'}->{$_}
 			);
 			
 			print $fh "$data\n";
@@ -248,6 +252,7 @@ sub Delete
 	delete $this->{'DIR'}->{$id};
 	delete $this->{'SUBJECT'}->{$id};
 	delete $this->{'CATEGORY'}->{$id};
+	delete $this->{'PINNED'}->{$id};
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -269,6 +274,7 @@ sub Update
 	$this->{'DIR'} = {};
 	$this->{'SUBJECT'} = {};
 	$this->{'CATEGORY'} = {};
+	$this->{'PINNED'} = {};
 	
 	my $bbsroot = $Sys->Get('BBSPATH');
 	$skey = 'BBS_TITLE' if ($skey eq '');
