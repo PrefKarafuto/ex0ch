@@ -589,7 +589,7 @@ sub GetAttr
     
     # スレッド属性データがロードされていない場合
     unless (defined $this->{'ATTR'}->{$key}) {
-        warn "Attr info for thread '$key' is not loaded.";
+        #warn "Attr info for thread '$key' is not loaded.";
         return undef;
     }
     
@@ -631,7 +631,7 @@ sub SetAttr
     
     # スレッド属性データがロードされていない場合
     unless (defined $this->{'ATTR'}->{$key}) {
-        warn "Attr info for thread '$key' is not loaded.";
+        #warn "Attr info for thread '$key' is not loaded.";
         return;
     }
     
