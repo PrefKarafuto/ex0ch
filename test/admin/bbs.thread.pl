@@ -1354,7 +1354,7 @@ sub FunctionThreadPinned
 
 	my @threadList = $Form->GetAtArray('THREADS');
 	my $pinnedThread = $threadList[0];
-	if( scalar(@threadList) > 2 || !scalar(@threadList)){
+	if( scalar(@threadList) != 1){
 		push @$pLog, 'ピン留めできるのは１スレッドのみです。';
 		return 0;
 	}
