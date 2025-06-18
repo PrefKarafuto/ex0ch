@@ -109,11 +109,24 @@ sub Write
 	# 書き込み前準備
 	$this->ReadyBeforeCheck();
 	
+	# 管理モジュールを用意
+	require './module/dat.pl';
+	my $Sys = $this->{'SYS'};
+	my $Set = $this->{'SET'};
+	my $Form = $this->{'FORM'};
+	my $Conv = $this->{'CONV'};
+	my $Threads = $this->{'THREADS'};
+	my $Sec = $this->{'SECURITY'};
+	
 	my $err = $ZP::E_SUCCESS;
 
 	# キャプチャ
 	$err = $this->CaptchaAuthentication();
-	return $err if $err;
+	if($err){
+		# オリジナル復元
+		$Form->Set('mail', $Form->Get('MAIL'));
+		return $err;
+	}
 	
 	# 入力内容チェック(名前、メール)
 	$err = $this->NormalizationNameMail();
@@ -126,16 +139,6 @@ sub Write
 	# 規制チェック
 	$err = $this->IsRegulation();
 	return $err if $err;
-	
-
-	# 管理モジュールを用意
-	require './module/dat.pl';
-	my $Sys = $this->{'SYS'};
-	my $Set = $this->{'SET'};
-	my $Form = $this->{'FORM'};
-	my $Conv = $this->{'CONV'};
-	my $Threads = $this->{'THREADS'};
-	my $Sec = $this->{'SECURITY'};
 	
 	# 停止チェック
 	my $threadid = $Sys->Get('KEY');
