@@ -462,9 +462,11 @@ HTML
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
 
-	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($classname eq 'h-captcha');
-	$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($classname eq 'g-recaptcha');
-	$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($classname eq 'cf-turnstile');
+	$Page->Print('<script src="https://js.hcaptcha.com/1/api.js?onload=initCaptcha" defer></script>') if ($classname eq 'h-captcha');
+	$Page->Print('<script src="https://www.google.com/recaptcha/api.js?onload=initCaptcha&render=explicit" defer></script>') if ($classname eq 'g-recaptcha');
+	$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=initCaptcha" defer></script>') if ($classname eq 'cf-turnstile');
+
+	$Page->Print("<script src=\"./datas/form-captcha.js\" defer></script>");
 	
 	$Page->Print("</head>\n<!--nobanner-->\n");
 	
@@ -504,9 +506,8 @@ HTML
 	}
 
 	$Page->Print(<<HTML);
-<div id="captcha-widget" class="$classname" data-sitekey="$sitekey"></div>
-<div id="captcha-placeholder">CAPTCHA読み込み中…</div><br>
-<input type="submit" value="　認証する　"><br>
+<div class="$classname" data-sitekey="$sitekey"></div><br>
+<input type="submit" id="form-btn" value="　認証する　"><br>
 </form>
 <br>
 HTML

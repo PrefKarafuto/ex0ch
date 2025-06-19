@@ -108,7 +108,7 @@ sub PrintLogin
 
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
-	my $Captcha = $sitekey && $classname && $Sys->Get('ADMINCAP') ? "<div id=\"captcha-widget\" class=\"$classname\" data-sitekey=\"$sitekey\"></div><div id=\"captcha-placeholder\">CAPTCHA読み込み中…</div><br>" : '';
+	my $Captcha = $sitekey && $classname && $Sys->Get('ADMINCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
 	my $text = $sitekey && $classname && $Captcha ? 'Captcha認証に失敗したか、' : "" ;
 	
 $Page->Print(<<HTML);
@@ -118,6 +118,9 @@ HTML
 	
 	if ($Form->Get('FALSE') == 1) {
 		$Page->Print("    <div class=\"xExcuted\">${text}ユーザ名もしくはパスワードが間違っています。</div>\n");
+	}
+	if($Captcha){
+		$Page->Print("<script src=\"./datas/form-captcha.js\" defer></script>");
 	}
 	
 $Page->Print(<<HTML);
@@ -132,7 +135,7 @@ $Page->Print(<<HTML);
 	  <td colspan="2" align="center">
 	  <hr>
 	  $Captcha
-	  <input type="submit" value="　ログイン　">
+	  <input type="submit" id="form-btn" value="　ログイン　">
 	  </td>
 	 </tr>
 	</table>

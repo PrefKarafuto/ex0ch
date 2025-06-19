@@ -209,20 +209,6 @@ input.delete	{
 	color: red;
 }
 
-/*captcha placeholder*/
-#captcha-placeholder {
-	padding: 1em;
-	background: #f9f9f9;
-	color: #666;
-	text-align: center;
-	border: 1px dashed #ccc;
-	margin-top: 0.5em;
-	width: fit-content;
-  }
-  #captcha-widget:not(:empty) + #captcha-placeholder {
-	display: none;
-  }
-
   /* CodeMirror */
   .CodeMirror {
 	border: 1px solid #ddd;

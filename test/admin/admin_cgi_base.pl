@@ -180,9 +180,9 @@ sub PrintCSS
 	$theme = $Sys->Get('CM_THEME');
 
 	if($Sys->Get('ADMINCAP')){
-		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
-		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
-		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js?onload=initCaptcha" defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js?onload=initCaptcha&render=explicit" defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=initCaptcha" defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
 	}
 	
 $Page->Print(<<HTML);

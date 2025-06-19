@@ -126,13 +126,17 @@ sub PrintHead
 HTML
 
 	if($Sys->Get('SEARCHCAP')){
-		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
-		$Page->Print('<script src="https://www.google.com/recaptcha/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
-		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
+		$Page->Print('<script src="https://js.hcaptcha.com/1/api.js?onload=initCaptcha" defer></script>') if ($Sys->Get('CAPTCHA') eq 'h-captcha');
+		$Page->Print('<script src="https://www.google.com/recaptcha/api.js?onload=initCaptcha&render=explicit" defer></script>') if ($Sys->Get('CAPTCHA') eq 'g-recaptcha');
+		$Page->Print('<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=initCaptcha" defer></script>') if ($Sys->Get('CAPTCHA') eq 'cf-turnstile');
 	}
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
-	my $Captcha = $sitekey && $classname && $Sys->Get('SEARCHCAP') ? "<div id=\"captcha-widget\" class=\"$classname\" data-sitekey=\"$sitekey\"></div><div id=\"captcha-placeholder\">CAPTCHA読み込み中…</div><br>" : '';
+	my $Captcha = $sitekey && $classname && $Sys->Get('SEARCHCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+
+	if($Captcha){
+		$Page->Print("<script src=\"$data_url/form-captcha.js\" defer></script>");
+	}
 
 	$Page->Print("</head>\n<!--nobanner-->\n<body>\n");
 
@@ -269,7 +273,7 @@ HTML
 	<td colspan="2" align="right">
 	<hr>
 	$Captcha
-	<input type="submit" value="検索" style="width:150px;">
+	<input type="submit" id="form-btn" value="検索" style="width:150px;">
 	</td>
    </tr>
   </table>
