@@ -615,7 +615,7 @@ sub GetConfig
 	my $id = $this->{'id'};
 	my $config = $this->{'PLUGIN'}->{'CONFIG'}->{$id};
 	
-	return $config->{$key};
+	return defined $key ? $config->{$key} : $config;
 }
 
 #============================================================================================================
