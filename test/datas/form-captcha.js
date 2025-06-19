@@ -4,14 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const btn          = document.getElementById('form-btn');
   const defaultLabel = btn.value;
 
-  // åˆæœŸåŒ–
+  // ‰Šú‰»Fƒ{ƒ^ƒ“–³Œø{ƒ[ƒh’†•¶Œ¾
   btn.disabled = true;
-  btn.value    = 'ã‚­ãƒ£ãƒ—ãƒãƒ£ã®ãƒ­ãƒ¼ãƒ‰ä¸­';
+  btn.value    = 'ƒLƒƒƒvƒ`ƒƒ‚Ìƒ[ƒh’†';
 
-  // å…±é€šã‚³ãƒ¼ãƒ«ãƒãƒƒã‚¯
+  // ƒ{ƒ^ƒ“§Œä—pƒR[ƒ‹ƒoƒbƒN
   function onLoad() {
     btn.disabled = true;
-    btn.value    = 'ã‚­ãƒ£ãƒ—ãƒãƒ£ã‚’ã‚¯ãƒªã‚¢ã—ã¦ãã ã•ã„';
+    btn.value    = 'ƒLƒƒƒvƒ`ƒƒ‚ğƒNƒŠƒA‚µ‚Ä‚­‚¾‚³‚¢';
   }
   function onSuccess(token) {
     btn.disabled = false;
@@ -19,53 +19,47 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   function onError() {
     btn.disabled = true;
-    btn.value    = 'ã‚­ãƒ£ãƒ—ãƒãƒ£ã‚’ã‚¯ãƒªã‚¢ã—ã¦ãã ã•ã„';
+    btn.value    = 'ƒLƒƒƒvƒ`ƒƒ‚ğƒNƒŠƒA‚µ‚Ä‚­‚¾‚³‚¢';
   }
 
-  // Turnstile ã‚’ explicit render ã§åˆæœŸåŒ–
-  document.querySelectorAll('.cf-turnstile').forEach((el, i) => {
-    // explicit ãƒ¢ãƒ¼ãƒ‰ã§ãƒ¬ãƒ³ãƒ€ãƒ¼
-    if (window.turnstile) {
+  // Turnstile explicit render
+  if (window.turnstile) {
+    document.querySelectorAll('.cf-turnstile').forEach(el => {
       turnstile.render(el, {
-        sitekey: el.dataset.sitekey,
+        sitekey:        el.dataset.sitekey,
         'load-callback': onLoad,
-        callback: onSuccess,
-        'error-callback': onError,
+        callback:        onSuccess,
+        'error-callback': onError
       });
-    }
-  });
+    });
+  }
 
-  // reCAPTCHA v2 ã‚’ explicit render ã§åˆæœŸåŒ–
-  // ï¼ˆHTML API ã ã‘ã®å ´åˆã¯ data-* ã‚’ä½¿ã†å¿…è¦ãŒã‚ã‚Šã¾ã™ãŒã€
-  // ã“ã“ã§ã¯ JS render ã‚’ä½¿ã†ä¾‹ï¼‰
-  document.querySelectorAll('.g-recaptcha').forEach((el, i) => {
-    if (window.grecaptcha) {
-      // è¦ç´ ã« id ãŒãªã‘ã‚Œã°è‡ªå‹•ã§ä»˜ä¸
+  // reCAPTCHA explicit render
+  if (window.grecaptcha) {
+    document.querySelectorAll('.g-recaptcha').forEach((el, i) => {
       if (!el.id) el.id = `js-recaptcha-${i}`;
       grecaptcha.render(el.id, {
-        sitekey: el.dataset.sitekey,
-        callback: onSuccess,
-        'expired-callback': onError,
+        sitekey:          el.dataset.sitekey,
+        callback:         onSuccess,
+        'expired-callback': onError
       });
-      // grecaptcha.ready ãŒå‘¼ã°ã‚ŒãŸã‚‰ãƒ­ãƒ¼ãƒ‰å®Œäº†ã¨ã¿ãªã™
-      grecaptcha.ready(onLoad);
-    }
-  });
+    });
+    // ƒEƒBƒWƒFƒbƒg•`‰æŒã‚Éƒ[ƒhŠ®—¹‚Æ‚İ‚È‚·
+    grecaptcha.ready(onLoad);
+  }
 
-  // hCaptcha ã‚’ explicit render ã§åˆæœŸåŒ–
-  document.querySelectorAll('.h-captcha').forEach((el, i) => {
-    if (window.hcaptcha) {
-      // è¦ç´ ã« id ãŒãªã‘ã‚Œã°è‡ªå‹•ã§ä»˜ä¸
+  // hCaptcha explicit render
+  if (window.hcaptcha) {
+    document.querySelectorAll('.h-captcha').forEach((el, i) => {
       if (!el.id) el.id = `js-hcaptcha-${i}`;
       hcaptcha.render(el.id, {
-        sitekey: el.dataset.sitekey,
-        callback: onSuccess,
-        'error-callback': onError,
+        sitekey:           el.dataset.sitekey,
+        callback:          onSuccess,
+        'expired-callback': onError,
+        'error-callback':   onError
       });
-      // API.js èª­ã¿è¾¼ã¿å¾Œã¯ãƒ­ãƒ¼ãƒ‰å®Œäº†ã¨ã¿ãªã™
-      onLoad();
-    }
-  });
+    });
+    // API.js “ÇŒã‚Íƒ[ƒhŠ®—¹‚Æ‚İ‚È‚·
+    onLoad();
+  }
 });
-
-  
