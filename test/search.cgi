@@ -132,7 +132,11 @@ HTML
 	}
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
-	my $Captcha = $sitekey && $classname && $Sys->Get('SEARCHCAP') ? "<div id=\"captcha-widget\" class=\"$classname\" data-sitekey=\"$sitekey\"></div><div id=\"captcha-placeholder\">CAPTCHA読み込み中…</div><br>" : '';
+	my $Captcha = $sitekey && $classname && $Sys->Get('SEARCHCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
+
+	if($Captcha){
+		$Page->Print("<script src=\"$data_url/form-captcha.js\" defer></script>");
+	}
 
 	$Page->Print("</head>\n<!--nobanner-->\n<body>\n");
 
@@ -269,7 +273,7 @@ HTML
 	<td colspan="2" align="right">
 	<hr>
 	$Captcha
-	<input type="submit" value="検索" style="width:150px;">
+	<input type="submit" id="form-btn" value="検索" style="width:150px;">
 	</td>
    </tr>
   </table>
