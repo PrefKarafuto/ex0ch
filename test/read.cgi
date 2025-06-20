@@ -208,7 +208,7 @@ sub PrintReadHead
 	}
 	
 	if($image !~ /^https?:\/\//){
-		$image = $Sys->Get('SERVER').$Sys->Get('CGIPATH').'/'.$image;
+		$image = $Sys->Get('SERVER').$image;
 	}
 	if($favicon !~ /^https?:\/\//){
 		$favicon = $Sys->Get('SERVER').'/'.$bbspath.'/'.$favicon;

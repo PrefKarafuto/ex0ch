@@ -271,6 +271,10 @@ sub PrintIndexHead
 	$data_url =~ s/^https?://;
 	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
+	my $ogpimage = $image;
+	if($image !~ /^https?:\/\//){
+		$ogpimage = $this->{'SYS'}->Get('SERVER').$image;
+	}
 
 	# HTMLヘッダの出力
 	$Page->Print(<<HEAD);
@@ -284,7 +288,7 @@ sub PrintIndexHead
  <meta property="og:title" content="$title">
  <meta property="og:description" content="$bbsinfo">
  <meta property="og:type" content="website">
- <meta property="og:image" content="$image">
+ <meta property="og:image" content="$ogpimage">
  <meta property="og:site_name" content="EXぜろちゃんねる">
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="$data_url/design.css">
