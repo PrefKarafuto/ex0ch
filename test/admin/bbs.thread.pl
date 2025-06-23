@@ -98,7 +98,7 @@ sub DoPrint
 		PrintThreadList($Page, $Sys, $Form, $BBS);
 	}
 	elsif ($subMode eq 'CREATE') {                                          # レス一括削除確認画面
-		PrintResPost($Page, $Sys, $Form, $BBS, 1);
+		PrintResCreate($Page, $Sys, $Form, $BBS, 1);
 	}
 	elsif ($subMode eq 'COPY') {													# スレッドコピー確認画面
 		PrintThreadCopy($Page, $Sys, $Form, 1);
@@ -260,7 +260,7 @@ sub SetMenuList
 		$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
 		# スレッド編集権限のみ
 		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_RESEDIT, $bbs)) {
-			$Base->SetMenu('スレッド新規作成', "'thread.res','DISP','CREATE'");
+			$Base->SetMenu('スレッド新規作成', "'bbs.thread','DISP','CREATE'");
 		}
 		$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
 		# スレッドdat落ち権限のみ
@@ -436,6 +436,51 @@ sub PrintThreadList
 	
 	$Page->HTMLInput('hidden', 'DISPST', '');
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	レス投稿画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Dat	dat変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintResCreate
+{
+	my ($Page, $Sys, $Form) = @_;
+	my ($thread_id, $pRes, $isEdit, $common);
+	
+	$Sys->Set('_TITLE', 'Res Create');
+	$thread_id = $Form->Get('TARGET_THREAD');
+	
+	$isEdit = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'));
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">スレッドタイトル</td><td>");
+	$Page->Print("<input type=text size=50 name=subject></td></tr>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
+	$Page->Print("<input type=text size=50 name=FROM></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">メール（コマンド）</td><td>");
+	$Page->Print("<input type=text size=50 name=mail></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">本文</td><td>");
+	$Page->Print("<textarea name=MESSAGE cols=70 rows=10></textarea></td></tr>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	
+	$Page->HTMLInput('hidden', 'TARGET_THREAD', $thread_id);
+	
+	# システム権限有無による表示抑制
+	if ($isEdit) {
+		$common = "onclick=\"DoSubmit('thread.res','FUNC'";
+		$Page->Print("<tr><td colspan=2 align=right>");
+		$Page->Print("<input type=button value=\"　投稿　\" $common,'POST')\"> ");
+		$Page->Print("</td></tr>\n");
+	}
+	$Page->Print("</table><br>");
 }
 #------------------------------------------------------------------------------------------------------------
 #

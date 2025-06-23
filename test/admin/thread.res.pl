@@ -12,6 +12,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use Storable qw(dclone);
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -538,11 +539,6 @@ sub PrintResPost
 	$thread_id = $Form->Get('TARGET_THREAD');
 	
 	$isEdit = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'));
-	if($isCreate){
-		$Page->Print("<tr><td colspan=2><hr></td></tr>");
-		$Page->Print("<tr><td class=\"DetailTitle\">スレッドタイトル</td><td>");
-		$Page->Print("<input type=text size=50 name=subject></td></tr>");
-	}
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
@@ -784,36 +780,48 @@ sub FunctionResPost
 	}
 	
 	# Dat形式に整形
+	my $cSys = dclone($Sys);
 	require './module/post_service.pl';
 	$PS = POST_SERVICE->new;
 	$PS->Init($Sys, $Form);
 	$PS->ReadyBeforeCheck();
 	$PS->NormalizationNameMail();
 
-	my $threadKey = $isCreate || !$Sys->Get('KEY') ? time : $Sys->Get('KEY');
-
-	my $datLine = $PS->MakeDatLine();
-	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $threadKey . '.dat';
-	my $err = $Dat->DirectAppend($Sys, $datPath, $datLine);
-
-	if($err){
-		push @$pLog, 'Datファイルを開けませんでした。' if $err == 1;
-		push @$pLog, 'スレッドが停止されています。' if $err == 2; 
-		return 0;
+	my $threadKey = $isCreate ? time : $Sys->Get('KEY');
+	my $from = $Form->Get('FROM', '');
+	if (($from eq ''||$PS->{'THREADS'}->GetAttr($threadKey,'force774'))) {
+		if($PS->{'THREADS'}->GetAttr($threadKey,'change774')){
+			require HTML::Entities;
+			$from = HTML::Entities::decode($PS->{'THREADS'}->GetAttr($threadKey,'change774'));
+		}
+		else{
+			$from = $PS->{'SET'}->Get('BBS_NONAME_NAME');
+		}
+		$Form->Set('FROM', $from);
 	}
+	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $threadKey . '.dat';
+	my $datLine = $PS->MakeDatLine();
 
+	if($isCreate){
+		DAT::DirectAppend($Sys, $datPath, $datLine);
+	}else{
+		$Dat->ReLoad($Sys, 0);
+		$Dat->Add($datLine);
+		$Dat->Save($Sys);
+	}
+	
 	# subject.txt更新
 	require './module/thread.pl';
 	my $Threads = THREAD->new;
-	$Threads->Load($Sys);
-	$Threads->UpdateAll($Sys);
-	$Threads->Save($Sys);
+	$Threads->Load($cSys);
+	$Threads->UpdateAll($cSys);
+	$Threads->Save($cSys);
 
 	# indexの更新
 	require './module/bbs_service.pl';
 	my $BBSAid = BBS_SERVICE->new;
 	$Sys->Set('MODE', 'CREATE');
-	$BBSAid->Init($Sys, undef);
+	$BBSAid->Init($cSys, undef);
 	$BBSAid->CreateIndex();
 	$BBSAid->CreateSubback();
 	
