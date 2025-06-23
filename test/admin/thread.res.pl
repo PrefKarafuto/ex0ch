@@ -12,7 +12,6 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
-use Storable qw(dclone);
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -165,10 +164,7 @@ sub DoFunction
 		$err = FunctionResEdit($Sys, $Form, $DAT, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'POST') {												# レス投稿
-		$err = FunctionResPost($Sys, $Form, $DAT, $this->{'LOG'}, 0);
-	}
-	elsif ($subMode eq 'CREATE') {												# スレたて
-		$err = FunctionResPost($Sys, $Form, $DAT, $this->{'LOG'}, 1);
+		$err = FunctionResPost($Sys, $Form, $DAT, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'ABONE') {												# レスあぼ～ん
 		$err = FunctionResDelete($Sys, $Form, $DAT, $this->{'LOG'}, 1);
@@ -766,8 +762,8 @@ sub FunctionResEdit
 #------------------------------------------------------------------------------------------------------------
 sub FunctionResPost
 {
-	my ($Sys, $Form, $Dat, $pLog, $isCreate) = @_;
-	my (@elem, $PS, $Conv, $Sec, $pRes, $data);
+	my ($Sys, $Form, $Dat, $pLog) = @_;
+	my (@elem, $PS, $Conv);
 	
 	# 権限チェック
 	{
@@ -778,16 +774,23 @@ sub FunctionResPost
 			return 1000;
 		}
 	}
+
+	my $threadKey = $Sys->Get('KEY');
+	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $threadKey . '.dat';
 	
 	# Dat形式に整形
-	my $cSys = dclone($Sys);
 	require './module/post_service.pl';
 	$PS = POST_SERVICE->new;
 	$PS->Init($Sys, $Form);
 	$PS->ReadyBeforeCheck();
 	$PS->NormalizationNameMail();
 
-	my $threadKey = $isCreate ? time : $Sys->Get('KEY');
+	if ($Form->Get('MESSAGE') eq '' ){
+		push @$pLog, "本文がありません。";
+		return 0;
+	}
+	
+	# 名前欄設定
 	my $from = $Form->Get('FROM', '');
 	if (($from eq ''||$PS->{'THREADS'}->GetAttr($threadKey,'force774'))) {
 		if($PS->{'THREADS'}->GetAttr($threadKey,'change774')){
@@ -799,38 +802,14 @@ sub FunctionResPost
 		}
 		$Form->Set('FROM', $from);
 	}
-	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $threadKey . '.dat';
-	my $datLine = $PS->MakeDatLine();
-
-	if($isCreate){
-		DAT::DirectAppend($Sys, $datPath, $datLine);
-	}else{
-		$Dat->ReLoad($Sys, 0);
-		$Dat->Add($datLine);
-		$Dat->Save($Sys);
-	}
 	
-	# subject.txt更新
-	require './module/thread.pl';
-	my $Threads = THREAD->new;
-	$Threads->Load($cSys);
-	$Threads->UpdateAll($cSys);
-	$Threads->Save($cSys);
-
-	# indexの更新
-	require './module/bbs_service.pl';
-	my $BBSAid = BBS_SERVICE->new;
-	$Sys->Set('MODE', 'CREATE');
-	$BBSAid->Init($cSys, undef);
-	$BBSAid->CreateIndex();
-	$BBSAid->CreateSubback();
+	my $datLine = $PS->MakeDatLine();
+	$Dat->ReLoad($Sys, 0);
+	$Dat->Add($datLine);
+	$Dat->Save($Sys);
 	
 	# ログの設定
-	if($isCreate){
-		push @$pLog, "新規スレッドを作成しました。";
-	}else{
-		push @$pLog, "スレッド：$threadKey にレスを投稿しました。";
-	}
+	push @$pLog, "スレッド：$threadKey にレスを投稿しました。";
 	
 	return 0;
 }

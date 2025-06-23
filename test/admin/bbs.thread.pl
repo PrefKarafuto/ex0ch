@@ -98,7 +98,7 @@ sub DoPrint
 		PrintThreadList($Page, $Sys, $Form, $BBS);
 	}
 	elsif ($subMode eq 'CREATE') {                                          # レス一括削除確認画面
-		PrintResCreate($Page, $Sys, $Form, $BBS, 1);
+		PrintResCreate($Page, $Sys, $Form);
 	}
 	elsif ($subMode eq 'COPY') {													# スレッドコピー確認画面
 		PrintThreadCopy($Page, $Sys, $Form, 1);
@@ -187,7 +187,7 @@ sub DoFunction
 		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 0);
 	}
 	elsif ($subMode eq 'CREATE') {													# コピー
-		$err = FunctionResPost($Sys, $Form, $this->{'LOG'}, 1);
+		$err = FunctionResCreate($Sys, $Form ,$this->{'LOG'});
 	}
 	elsif ($subMode eq 'COPY') {													# コピー
 		$err = FunctionThreadCopy($Sys, $Form, $this->{'LOG'}, 1);
@@ -1275,6 +1275,80 @@ sub FunctionThreadPooling
 	}
 	$Threads->Save($Sys);
 	$Pools->Save($Sys);
+	
+	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	レス投稿
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Dat	Dat変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionResCreate
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my (@elem, $PS, $Conv);
+	
+	# 権限チェック
+	{
+		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+
+	my $threadKey = time;
+	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $threadKey . '.dat';
+	
+	# Dat形式に整形
+	require './module/post_service.pl';
+	$PS = POST_SERVICE->new;
+	$threadKey++ while -e $datPath;
+	$Sys->Set('KEY',$threadKey);
+	$PS->Init($Sys, $Form);
+	$PS->ReadyBeforeCheck();
+	$PS->NormalizationNameMail();
+
+	if ($Form->Get('subject') eq ''){
+		push @$pLog, "スレタイがありません。";
+		return 0;
+	}
+	if ($Form->Get('MESSAGE') eq '' ){
+		push @$pLog, "本文がありません。";
+		return 0;
+	}
+	
+	# 名前欄設定
+	my $from = $Form->Get('FROM', '');
+	if (($from eq ''||$PS->{'THREADS'}->GetAttr($threadKey,'force774'))) {
+		if($PS->{'THREADS'}->GetAttr($threadKey,'change774')){
+			require HTML::Entities;
+			$from = HTML::Entities::decode($PS->{'THREADS'}->GetAttr($threadKey,'change774'));
+		}
+		else{
+			$from = $PS->{'SET'}->Get('BBS_NONAME_NAME');
+		}
+		$Form->Set('FROM', $from);
+	}
+	
+	my $datLine = $PS->MakeDatLine();
+	my $err = DAT::DirectAppend($Sys, $datPath, $datLine);
+	if ($err){
+		push @$pLog, "ファイルを開けません。" if $err == 1;
+		push @$pLog, "停止パーミッションです。" if $err == 2;
+		return 0;
+	}
+	
+	# ログの設定
+	push @$pLog, "新規スレッド「".$Form->Get('subject')."」を作成しました。";
 	
 	return 0;
 }
