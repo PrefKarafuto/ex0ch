@@ -1281,7 +1281,7 @@ sub FunctionThreadPooling
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	レス投稿
+#	スレッド作成
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	システム変数
 #	@param	$Form	フォーム変数
@@ -1340,6 +1340,7 @@ sub FunctionResCreate
 	}
 	
 	my $datLine = $PS->MakeDatLine();
+	require './module/dat.pl';
 	my $err = DAT::DirectAppend($Sys, $datPath, $datLine);
 	if ($err){
 		push @$pLog, "ファイルを開けません。" if $err == 1;
