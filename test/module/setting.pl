@@ -362,16 +362,6 @@ sub InitSettingData
 		'BBS_INDEX_LINE_NUMBER'	=> 12,
 
 		# 改造版で追加部分
-		'BBS_SPAMKILLI_ASCII'	=> 2,
-		'BBS_SPAMKILLI_MAIL'	=> 5,
-		'BBS_SPAMKILLI_HOST'	=> 7,
-		'BBS_SPAMKILLI_URL'		=> 5,
-		'BBS_SPAMKILLI_MESSAGE'	=> 95,
-		'BBS_SPAMKILLI_LINK'	=> 3,
-		'BBS_SPAMKILLI_MESPOINT'=> 2,
-		'BBS_SPAMKILLI_DOMAIN'	=> 'jp,com,net,org=2;*=3',
-		'BBS_SPAMKILLI_POINT'	=> 10,
-
 		'BBS_IMGTAG'            => '',
 		'BBS_TWITTER'           => '',
 		'BBS_MOVIE'             => '',
