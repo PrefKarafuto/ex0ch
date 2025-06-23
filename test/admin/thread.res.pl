@@ -363,8 +363,8 @@ sub PrintResList
 		$common = "onclick=\"DoSubmit('thread.res','DISP'";
 		$Page->Print("<tr><td colspan=2>");
 		$Page->Print("<input type=button value=\"レス投稿\" $common,'POST')\"> ") if $isEdit;
-		$Page->Print("<input type=button align=right value=\"あぼ～ん\" $common,'ABONE')\"> ") if $isAbone;
-		$Page->Print("<input type=button align=right value=\"透明あぼ～ん\" $common,'DELETE')\">") if $isAbone;
+		$Page->Print("<input type=button class=\"delete\" value=\"あぼ～ん\" $common,'ABONE')\"> ") if $isAbone;
+		$Page->Print("<input type=button class=\"delete\" value=\"透明あぼ～ん\" $common,'DELETE')\">") if $isAbone;
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
@@ -550,7 +550,7 @@ sub PrintResPost
 	# システム権限有無による表示抑制
 	if ($isEdit) {
 		$common = "onclick=\"DoSubmit('thread.res','FUNC'";
-		$Page->Print("<tr><td colspan=2 align=right>");
+		$Page->Print("<tr><td colspan=2>");
 		$Page->Print("<input type=button value=\"　投稿　\" $common,'POST')\"> ");
 		$Page->Print("</td></tr>\n");
 	}

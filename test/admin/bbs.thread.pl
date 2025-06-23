@@ -475,8 +475,8 @@ sub PrintResCreate
 	
 	# システム権限有無による表示抑制
 	if ($isEdit) {
-		$common = "onclick=\"DoSubmit('thread.res','FUNC'";
-		$Page->Print("<tr><td colspan=2 align=right>");
+		$common = "onclick=\"DoSubmit('bbs.thread','FUNC'";
+		$Page->Print("<tr><td colspan=2>");
 		$Page->Print("<input type=button value=\"　投稿　\" $common,'POST')\"> ");
 		$Page->Print("</td></tr>\n");
 	}
