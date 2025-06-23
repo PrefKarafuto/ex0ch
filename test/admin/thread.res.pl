@@ -112,7 +112,6 @@ sub DoPrint
 	elsif ($subMode eq 'COMPLETE') {												# 完了画面
 		$Sys->Set('_TITLE', 'Process Complete');
 		$BASE->PrintComplete('過去ログ処理', $this->{'LOG'});
-		$BASE->Reflesh($Sys);
 	}
 	elsif ($subMode eq 'FALSE') {													# 失敗画面
 		$Sys->Set('_TITLE', 'Process Failed');
