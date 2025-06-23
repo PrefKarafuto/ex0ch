@@ -94,6 +94,9 @@ sub DoPrint
 	elsif ($subMode eq 'EDIT') {													# レス編集画面
 		PrintResEdit($Page, $Sys, $Form, $DAT);
 	}
+	elsif ($subMode eq 'POST') {													# レス投稿画面
+		PrintResPost($Page, $Sys, $Form, 0);
+	}
 	elsif ($subMode eq 'ABONE') {													# レス削除確認画面
 		PrintResDelete($Page, $Sys, $Form, $DAT, 1);
 	}
@@ -159,6 +162,12 @@ sub DoFunction
 	
 	if ($subMode eq 'EDIT') {													# レス編集
 		$err = FunctionResEdit($Sys, $Form, $DAT, $this->{'LOG'});
+	}
+	elsif ($subMode eq 'POST') {												# レス投稿
+		$err = FunctionResPost($Sys, $Form, $DAT, $this->{'LOG'}, 0);
+	}
+	elsif ($subMode eq 'CREATE') {												# スレたて
+		$err = FunctionResPost($Sys, $Form, $DAT, $this->{'LOG'}, 1);
 	}
 	elsif ($subMode eq 'ABONE') {												# レスあぼ～ん
 		$err = FunctionResDelete($Sys, $Form, $DAT, $this->{'LOG'}, 1);
@@ -353,11 +362,12 @@ sub PrintResList
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	# システム権限有無による表示抑制
-	if ($isAbone) {
+	if ($isAbone || $isEdit) {
 		$common = "onclick=\"DoSubmit('thread.res','DISP'";
-		$Page->Print("<tr><td colspan=2 align=right>");
-		$Page->Print("<input type=button value=\"あぼ～ん\" $common,'ABONE')\"> ");
-		$Page->Print("<input type=button value=\"透明あぼ～ん\" $common,'DELETE')\">");
+		$Page->Print("<tr><td colspan=2>");
+		$Page->Print("<input type=button value=\"レス投稿\" $common,'POST')\"> ") if $isEdit;
+		$Page->Print("<input type=button align=right value=\"あぼ～ん\" $common,'ABONE')\"> ") if $isAbone;
+		$Page->Print("<input type=button align=right value=\"透明あぼ～ん\" $common,'DELETE')\">") if $isAbone;
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
@@ -503,6 +513,53 @@ sub PrintResEdit
 		$common = "onclick=\"DoSubmit('thread.res','FUNC'";
 		$Page->Print("<tr><td colspan=2 align=right>");
 		$Page->Print("<input type=button value=\"　変更　\" $common,'EDIT')\"> ");
+		$Page->Print("</td></tr>\n");
+	}
+	$Page->Print("</table><br>");
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	レス投稿画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Dat	dat変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintResPost
+{
+	my ($Page, $Sys, $Form, $isCreate) = @_;
+	my ($thread_id, $pRes, $isEdit, $common);
+	
+	$Sys->Set('_TITLE', 'Res Post');
+	$thread_id = $Form->Get('TARGET_THREAD');
+	
+	$isEdit = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'));
+	if($isCreate){
+		$Page->Print("<tr><td colspan=2><hr></td></tr>");
+		$Page->Print("<tr><td class=\"DetailTitle\">スレッドタイトル</td><td>");
+		$Page->Print("<input type=text size=50 name=subject></td></tr>");
+	}
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
+	$Page->Print("<input type=text size=50 name=FROM></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">メール（コマンド）</td><td>");
+	$Page->Print("<input type=text size=50 name=mail></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">本文</td><td>");
+	$Page->Print("<textarea name=MESSAGE cols=70 rows=10></textarea></td></tr>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	
+	$Page->HTMLInput('hidden', 'TARGET_THREAD', $thread_id);
+	
+	# システム権限有無による表示抑制
+	if ($isEdit) {
+		$common = "onclick=\"DoSubmit('thread.res','FUNC'";
+		$Page->Print("<tr><td colspan=2 align=right>");
+		$Page->Print("<input type=button value=\"　投稿　\" $common,'POST')\"> ");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -695,6 +752,76 @@ sub FunctionResEdit
 	push @$pLog, '番号[' . $Form->Get('SELECT_RES') . ']のレスを以下のように変更しました。';
 	foreach (@elem) {
 		push @$pLog, $_;
+	}
+	
+	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	レス投稿
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Dat	Dat変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionResPost
+{
+	my ($Sys, $Form, $Dat, $pLog, $isCreate) = @_;
+	my (@elem, $PS, $Conv, $Sec, $pRes, $data);
+	
+	# 権限チェック
+	{
+		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+	
+	# Dat形式に整形
+	require './module/post_service.pl';
+	$PS = POST_SERVICE->new;
+	$PS->Init($Sys, $Form);
+	$PS->ReadyBeforeCheck();
+	$PS->NormalizationNameMail();
+
+	my $threadKey = $isCreate || !$Sys->Get('KEY') ? time : $Sys->Get('KEY');
+
+	my $datLine = $PS->MakeDatLine();
+	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $threadKey . '.dat';
+	my $err = $Dat->DirectAppend($Sys, $datPath, $datLine);
+
+	if($err){
+		push @$pLog, 'Datファイルを開けませんでした。' if $err == 1;
+		push @$pLog, 'スレッドが停止されています。' if $err == 2; 
+		return 0;
+	}
+
+	# subject.txt更新
+	require './module/thread.pl';
+	my $Threads = THREAD->new;
+	$Threads->Load($Sys);
+	$Threads->UpdateAll($Sys);
+	$Threads->Save($Sys);
+
+	# indexの更新
+	require './module/bbs_service.pl';
+	my $BBSAid = BBS_SERVICE->new;
+	$Sys->Set('MODE', 'CREATE');
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
+	
+	# ログの設定
+	if($isCreate){
+		push @$pLog, "新規スレッドを作成しました。";
+	}else{
+		push @$pLog, "スレッド：$threadKey にレスを投稿しました。";
 	}
 	
 	return 0;

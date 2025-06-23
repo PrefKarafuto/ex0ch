@@ -1013,7 +1013,7 @@ sub CreatePath
 sub GetDate
 {
 	my $this = shift;
-	my ($Set, $msect,$time) = @_;
+	my ($Set, $msect, $time) = @_;
 	
 	$ENV{'TZ'} = 'JST-9';
 	$time = $time ? $time : time;

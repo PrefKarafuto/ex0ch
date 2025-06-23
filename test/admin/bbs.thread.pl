@@ -97,6 +97,9 @@ sub DoPrint
 	if ($subMode eq 'LIST') {														# スレッド一覧画面
 		PrintThreadList($Page, $Sys, $Form, $BBS);
 	}
+	elsif ($subMode eq 'CREATE') {                                          # レス一括削除確認画面
+		PrintResPost($Page, $Sys, $Form, $BBS, 1);
+	}
 	elsif ($subMode eq 'COPY') {													# スレッドコピー確認画面
 		PrintThreadCopy($Page, $Sys, $Form, 1);
 	}
@@ -183,6 +186,9 @@ sub DoFunction
 	elsif ($subMode eq 'RESTART') {													# 再開
 		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 0);
 	}
+	elsif ($subMode eq 'CREATE') {													# コピー
+		$err = FunctionResPost($Sys, $Form, $this->{'LOG'}, 1);
+	}
 	elsif ($subMode eq 'COPY') {													# コピー
 		$err = FunctionThreadCopy($Sys, $Form, $this->{'LOG'}, 1);
 	}
@@ -252,6 +258,10 @@ sub SetMenuList
 	my ($Base, $pSys, $bbs) = @_;
 	if($bbs){
 		$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
+		# スレッド編集権限のみ
+		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_RESEDIT, $bbs)) {
+			$Base->SetMenu('スレッド新規作成', "'thread.res','DISP','CREATE'");
+		}
 		$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
 		# スレッドdat落ち権限のみ
 		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {

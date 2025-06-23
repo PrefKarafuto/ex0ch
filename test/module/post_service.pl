@@ -180,7 +180,7 @@ sub Write
 	}
 
 	# Datに保存する一行データを生成
-	my $line = $this->MakeDatLine($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result);
+	my $line = $this->MakeDatLine($Ninja, $idEnd, $slip_result);
 
 	# ログ書き込み
 	$this->AddLog($Sys,$Set,$Form,$line);
@@ -189,7 +189,7 @@ sub Write
 	SaveHost($Sys, $Form);
 	
 	# datファイルへ直接書き込み
-	($err,my $resNum) = $this->AddDatFile($Sys,$Threads,$line);
+	($err,my $resNum) = $this->AddDatFile($line);
 	
 	if ($err == $ZP::E_SUCCESS) {
 		# タイムラインへ追加
@@ -406,12 +406,20 @@ sub ReadyBeforeWrite
 
 			my $Unique = [];	# 独自拡張用
 			my $is_captcha = $Form->Get($Sys->Get('CAPTCHA').'-response');
+
+			# スレッドがすでにあればそのタイトル
+			require './module/dat.pl';
+			my $Dat = DAT->new;
+			my $subject = $Dat->GetSubjectFromFile($Sys);
+
+			# コンテキスト
 			$dsl->SetCtx({
 			message     => $Form->Get('MESSAGE')    // '',
 			mail        => $Form->Get('mail')       // '',
 			name        => $Form->Get('FROM')       // '',
-			title     => $Form->Get('subject')    // '',
+			title     	=> $Form->Get('subject')    // '',
 			time        => $Form->Get('time')       // time(),
+			thread_title=> $subject					// '',
 			thread_id   => $threadid		        // '',
 			bbs         => $Form->Get('bbs')        // '',
 			fp          => $Form->Get('fp')         // '',
@@ -1696,7 +1704,15 @@ sub LevelLimit
 sub MakeDatLine
 {
 	my $this = shift;
-	my ($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result) = @_;
+	my ($Ninja, $idEnd, $slip_result) = @_;
+	my ($Sys, $Set,$Form, $Threads, $Sec, $Conv);
+
+	$Sys = $this->{'SYS'};
+	$Form = $this->{'FORM'};
+	$Set = $this->{'SET'};
+	$Threads = $this->{'THREADS'};
+	$Conv = $this->{'CONV'};
+	$Sec = $this->{'SECURITY'};
 
 	my $threadid = $Sys->Get('KEY');
 	my $sid = $Sys->Get('SID');
@@ -1716,17 +1732,18 @@ sub MakeDatLine
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
 	my $bepart = '';
 	my $extrapart = '';
+	# プラグインに渡す用のデータを設定
 	$Form->Set('datepart', $datepart);
 	$Form->Set('idpart', $idpart);
-	#$Form->Set('BEID', ''); # type=1|2
+	# $Form->Set('BEID', ''); # type=1|2
 	$Form->Set('extrapart', $extrapart);
 	
 	# age/sage
 	my $updown = 'top';
 	$updown = '' if ($Form->Contain('mail', 'sage'));
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
-	$updown = '' if ($Set->Get('BBS_NINJA') && $Ninja->Get('force_sage') && !$noNinja);
-	$updown = '' if ($Set->Get('BBS_NINJA') && $Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && !$noNinja);
+	$updown = '' if ($Set->Get('BBS_NINJA') && defined $Ninja && $Ninja->Get('force_sage') && !$noNinja);
+	$updown = '' if ($Set->Get('BBS_NINJA') && defined $Ninja && $Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && !$noNinja);
 	$Sys->Set('updown', $updown);
 
 	# pluginに渡す値を設定
@@ -1792,7 +1809,10 @@ sub MakeDatLine
 sub AddDatFile
 {
 	my $this = shift;
-	my ($Sys,$Threads,$line) = @_;
+	my ($line) = @_;
+	my ($Sys,$Threads);
+	$Sys = $this->{'SYS'};
+	$Threads = $this->{'THREADS'};
 
 	my $resNum = $Sys->Get('RESNUM') // 0;
 	my $err = 0;
