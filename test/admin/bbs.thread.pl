@@ -477,7 +477,7 @@ sub PrintResCreate
 	if ($isEdit) {
 		$common = "onclick=\"DoSubmit('bbs.thread','FUNC'";
 		$Page->Print("<tr><td colspan=2>");
-		$Page->Print("<input type=button value=\"　投稿　\" $common,'POST')\"> ");
+		$Page->Print("<input type=button value=\"　投稿　\" $common,'CREATE')\"> ");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
