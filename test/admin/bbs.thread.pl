@@ -417,6 +417,8 @@ sub PrintThreadList
 	}
 	$common		= "onclick=\"DoSubmit('bbs.thread','DISP'";
 	$common2	= "onclick=\"DoSubmit('bbs.thread','FUNC'";
+
+	my $tl_max = $Set->Get('BBS_TL_MAX');
 	
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
@@ -428,7 +430,7 @@ sub PrintThreadList
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
 	$Page->Print("<input type=button value=\"DAT落ち\" $common,'POOL')\"> ")				if ($isPool);
 	
-	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")		if ($isResAbone);
+	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")		if ($isResAbone && $tl_max);
 	$Page->Print("<input type=button value=\"ピン留め\" $common2,'PINNED')\"> ")				if ($isResAbone);
 	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")if ($isDelete);
 	$Page->Print("</td></tr>\n");
