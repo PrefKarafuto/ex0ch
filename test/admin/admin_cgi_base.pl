@@ -434,6 +434,7 @@ HTML
 		scrollbarStyle: "simple",
 		scrollPastEnd: true
       });
+	  editor.setSize("100%", 500);
     });
   </script>
 HTML
