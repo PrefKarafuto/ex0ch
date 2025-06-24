@@ -1347,6 +1347,22 @@ sub FunctionResCreate
 		push @$pLog, "停止パーミッションです。" if $err == 2;
 		return 0;
 	}
+
+	chomp($datLine);
+	require './module/manager_log.pl';
+	my $Log = MANAGER_LOG->new;
+	my $host = $ENV{'REMOTE_HOST'};
+	my $ip = $ENV{'REMOTE_ADDR'};
+	my $ua = $ENV{'HTTP_USER_AGENT'};
+	$ENV{'REMOTE_HOST'}	= $Form->Get('UserName');
+	$ENV{'REMOTE_ADDR'}	= 'N/A';
+	$ENV{'HTTP_USER_AGENT'}	= 'N/A';
+	$Log->Load($Sys, 'WRT', $Sys->Get('KEY'));
+	$Log->Set(undef, length($Form->Get('MESSAGE')),undef, undef, $datLine);
+	$ENV{'REMOTE_HOST'}	= $host;
+	$ENV{'REMOTE_ADDR'}	= $ip;
+	$ENV{'HTTP_USER_AGENT'}	= $ua;
+	$Log->Save($Sys);
 	
 	# ログの設定
 	push @$pLog, "新規スレッド「".$Form->Get('subject')."」を作成しました。";
