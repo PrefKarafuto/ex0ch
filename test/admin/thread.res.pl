@@ -363,8 +363,8 @@ sub PrintResList
 		$common = "onclick=\"DoSubmit('thread.res','DISP'";
 		$Page->Print("<tr><td colspan=2>");
 		$Page->Print("<input type=button value=\"レス投稿\" $common,'POST')\">") if $isEdit;
-		$Page->Print("<span style=\"float: right;\"><input type=button class=\"delete\" value=\"あぼ～ん\" $common,'ABONE')\"> ") if $isAbone;
-		$Page->Print("<input type=button class=\"delete\" value=\"透明あぼ～ん\" $common,'DELETE')\"></span>") if $isAbone;
+		$Page->Print("<span style=\"float: right;\"><input type=button value=\"あぼ～ん\" $common,'ABONE')\"> ") if $isAbone;
+		$Page->Print("<input type=button value=\"透明あぼ～ん\" $common,'DELETE')\"></span>") if $isAbone;
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
