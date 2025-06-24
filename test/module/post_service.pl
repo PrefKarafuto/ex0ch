@@ -377,10 +377,6 @@ sub ReadyBeforeWrite
 		}
 	}
 	
-	my $text = $Form->Get('MESSAGE');
-	$text =~ s/<br>/ <br> /g;
-	$Form->Set('MESSAGE', " $text ");
-	
 	# 名無し設定
 	$from = $Form->Get('FROM', '');
 	if (($from eq ''||$Threads->GetAttr($threadid,'force774')) && !$noAttr) {
@@ -1522,7 +1518,7 @@ sub NormalizationNameMail
 	
 	# スレッド作成時
 	if ($Sys->Equal('MODE', 1)) {
-		return $ZP::E_FORM_NOSUBJECT if ($subject eq '');
+		return $ZP::E_FORM_NOSUBJECT if ($subject eq '' || $subject =~ /\A(?:[\s　]|<br>)*\z/);
 		return $ZP::E_REG_SAMETITLE if ($this->SameTitleCheck($subject) && $Set->Get('BBS_SAMETHREAD') eq 'checked');
 		# サブジェクト欄の文字数確認
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGSUBJECT, $bbs)) {
@@ -1777,7 +1773,7 @@ sub MakeDatLine
 	# 無意味なタグを除去
 	$name =~ s|<b></b>||g;
 	# 末尾の空白文字（スペース、タブ、改行など）をすべて削除
-	$text =~ s{(?:\s*<br\s*/?>\s*)+\z}{}gi;
+	$text =~ s{[\p{Zs}]+(?=<br>)|(?:[\p{Zs}]*<br>[\p{Zs}]*)+\z}{}gux;
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
@@ -1949,7 +1945,7 @@ sub NormalizationContents
 	my ($ln, $cl) = $Conv->GetTextInfo(\$text);
 	
 	# 本文が無い
-	return $ZP::E_FORM_NOTEXT if ($text eq '');
+	return $ZP::E_FORM_NOTEXT if ($text eq '' || $text =~ /\A(?:[\s　]|<br>)*\z/);
 	
 	# 本文が長すぎ
 	if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGTEXT, $bbs)) {

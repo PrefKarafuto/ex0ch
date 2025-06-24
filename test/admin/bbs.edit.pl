@@ -753,7 +753,7 @@ sub PrintLastEdit
 			$elem[3] =~ s/>/&gt;/g;
 		}
 		
-		$elem[3] =~ s/\n/ <br> /g;
+		$elem[3] =~ s/\n/<br>/g;
 		$elem[0] =~ s/<>/&lt;&gt;/g;
 		$elem[1] =~ s/<>/&lt;&gt;/g;
 		$elem[2] =~ s/<>/&lt;&gt;/g;
@@ -1161,7 +1161,7 @@ sub FunctionLastEdit
 			$cont =~ s/>/&gt;/g;
 		}
 		
-		$cont =~ s/\n/ <br> /g;
+		$cont =~ s/\n/<br>/g;
 		$name =~ s/<>/&lt;&gt;/g;
 		$mail =~ s/<>/&lt;&gt;/g;
 		$date =~ s/<>/&lt;&gt;/g;

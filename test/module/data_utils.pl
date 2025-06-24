@@ -176,7 +176,6 @@ sub ConvertURL
 			$work =~ s/(www\.|\.com|\.net|\.jp|\.co|\.ne)//g;
 			$$text =~ s|$reg2|<a href="$1://$2">$work</a>|;
 		}
-		$$text =~ s/ <br> /<br>/g;
 		$$text =~ s/\s*<br>/<br>/g;
 		$$text =~ s/(?:<br>){2}/<br>/g;
 		$$text =~ s/(?:<br>){3,}/<br><br>/g;
