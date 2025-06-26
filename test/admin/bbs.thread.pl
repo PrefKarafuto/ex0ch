@@ -456,7 +456,7 @@ sub PrintResCreate
 	my ($Page, $Sys, $Form) = @_;
 	my ($thread_id, $pRes, $isEdit, $common);
 	
-	$Sys->Set('_TITLE', 'Res Create');
+	$Sys->Set('_TITLE', 'Thread Create');
 	$thread_id = $Form->Get('TARGET_THREAD');
 	
 	$isEdit = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'));
