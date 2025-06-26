@@ -1432,15 +1432,12 @@ sub FunctionThreadDelete
 	$Threads->Load($Sys);
 	$Threads->UpdateAll($Sys);
 	$Threads->Save($Sys);
-
-	#my $originalMODE = $Sys->Get('MODE');
 	
 	#index.html&subback.html更新
-	#$Sys->Set('MODE', 'CREATE');
-	#$BBSAid->Init($Sys, undef);
-	#$BBSAid->CreateIndex();
-	#$BBSAid->CreateSubback();
-	#$Sys->Set('MODE',$originalMODE);
+	$Sys->Set('MODE', 'CREATE');
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
 	
 	return 0;
 }
