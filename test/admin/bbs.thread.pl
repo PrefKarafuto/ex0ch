@@ -13,6 +13,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use HTML::Entities;
+use POSIX qw(ceil);
 no warnings 'once';
 
 # 共通スレッド属性情報
@@ -228,7 +229,7 @@ sub DoFunction
 	elsif ($subMode eq 'CLEAR') {                                          # TLクリア
 		$err = FunctionClearTimeline($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'PINNED') {                                          # TLクリア
+	elsif ($subMode eq 'PINNED') {                                          # ピン留め
 		$err = FunctionThreadPinned($Sys, $Form, $this->{'LOG'}, $BBS);
 	}
 	# 処理結果表示
@@ -287,7 +288,7 @@ sub PrintThreadList
 	my ($Page, $SYS, $Form, $BBS) = @_;
 	my (@threadSet, $ThreadNum, $key, $res, $subj, $i);
 	my ($dispSt, $dispEd, $dispNum, $bgColor, $base, $pinnedThread);
-	my ($common, $common2, $n, $Threads, $id);
+	my ($common, $common2, $n, $Threads, $id, $is_checked);
 	
 	$SYS->Set('_TITLE', 'Thread List');
 	
@@ -304,10 +305,43 @@ sub PrintThreadList
 	$pinnedThread = $BBS->Get('PINNED',$Form->Get('TARGET_BBS')) // '';
 	
 	# 表示数の設定
-	$dispNum	= $Form->Get('DISPNUM', 10);
+	$dispNum	= $Form->Get('DISPNUM', 15);
 	$dispSt		= $Form->Get('DISPST', 0) || 0;
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	$dispEd		= (($dispSt + $dispNum) > $ThreadNum ? $ThreadNum : ($dispSt + $dispNum));
+
+	# 総スレッド数
+	my $totalItems  = $ThreadNum;
+	# 総ページ数を計算（切り上げ）
+	my $totalPages  = ceil($totalItems / $dispNum);
+	# 現在のページ番号（1始まり）
+	my $currentPage = int($dispSt / $dispNum) + 1;
+
+	# ページ番号リンクのウィンドウ幅（中央に currentPage を表示）
+	my $windowSize  = 7;   # 全体で最大何個の数字を見せるか
+	my $halfWindow  = int($windowSize / 2);
+
+	# ウィンドウの開始/終了ページ番号
+	my $startPage = $currentPage - $halfWindow;
+	$startPage = 1 if $startPage < 1;
+	my $endPage   = $startPage + $windowSize - 1;
+	$endPage   = $totalPages if $endPage > $totalPages;
+	# 開始位置を再調整
+	$startPage = $endPage - $windowSize + 1 if $endPage - $startPage + 1 < $windowSize && $endPage - $windowSize + 1 > 0;
+
+
+	# スレッド上げ下げ
+	my @threadList = $Form->GetAtArray('THREADS');
+	require './module/data_utils.pl';
+	if ($Form->Get('UPDOWN') eq 'UP'){
+		DATA_UTILS::move_threads(-1, \@threadSet, \@threadList);
+		$Threads->Set(undef, 'SORT', \@threadSet);
+		$Threads->Save($SYS);
+	}elsif($Form->Get('UPDOWN') eq 'DOWN'){
+		DATA_UTILS::move_threads(1, \@threadSet, \@threadList);
+		$Threads->Set(undef, 'SORT', \@threadSet);
+		$Threads->Save($SYS);
+	}
 	
 	# 権限取得
 	my ($isStop, $isPool, $isDelete, $isUpdate, $isResEdit, $isResAbone);
@@ -321,10 +355,48 @@ sub PrintThreadList
 	# ヘッダ部分の表示
 	$common = "DoSubmit('bbs.thread','DISP','LIST');";
 	
-	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
-	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
-	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
+	# ページャーの出力開始
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=3 align=center>");
+
+	# 「<< PREV」リンク
+	if ($currentPage > 1) {
+		my $prevSt = ($currentPage - 2) * $dispNum; 
+		$Page->Print("<a href=\"javascript:SetOption('DISPST',$prevSt);$common\">&lt;&lt; PREV</a> ");
+	} else {
+		$Page->Print("&lt;&lt; PREV ");
+	}
+
+	# 最初のページと省略
+	if ($startPage > 1) {
+		$Page->Print("<a href=\"javascript:SetOption('DISPST',0);$common\">1</a> ");
+		$Page->Print("... ");
+	}
+
+	# 中央ウィンドウのページ番号リンク
+	for my $p ($startPage .. $endPage) {
+		if ($p == $currentPage) {
+			$Page->Print("<b>$p</b> ");            # 現在ページは強調
+		} else {
+			my $st = ($p - 1) * $dispNum;
+			$Page->Print("<a href=\"javascript:SetOption('DISPST',$st);$common\">$p</a> ");
+		}
+	}
+
+	# 最後のページと省略
+	if ($endPage < $totalPages) {
+		$Page->Print("... ");
+		my $lastSt = ($totalPages - 1) * $dispNum;
+		$Page->Print("<a href=\"javascript:SetOption('DISPST',$lastSt);$common\">$totalPages</a> ");
+	}
+
+	# 「NEXT >>」リンク
+	if ($currentPage < $totalPages) {
+		my $nextSt = $currentPage * $dispNum;
+		$Page->Print("<a href=\"javascript:SetOption('DISPST',$nextSt);$common\">NEXT &gt;&gt;</a>");
+	} else {
+		$Page->Print("NEXT &gt;&gt;");
+	}
+
 	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
@@ -343,6 +415,7 @@ sub PrintThreadList
 	my @slice = @threadSet[ $dispSt .. $dispEd - 1 ];
 	unshift @slice, $pinnedThread if $pinnedThread;
 	my $flag = 0;
+	my %in_List = map { $_ => 1 } @threadList;
 	for my $offset (0 .. $#slice) {
 		$n  = $dispSt + $offset + 1;
 		$id = $slice[$offset];
@@ -371,7 +444,8 @@ sub PrintThreadList
 			$flag = 1;
 			$n = '0';
 		}else{
-			$Page->Print("<td><input type=checkbox name=THREADS value=$id></td>");
+			$is_checked = $in_List{$id} ? 'checked' : '';
+			$Page->Print("<td><input type=checkbox name=THREADS value=$id $is_checked></td>");
 			$n-- if $pinnedThread && $flag;
 		}
 		if ($isResEdit || $isResAbone) {
@@ -422,8 +496,12 @@ sub PrintThreadList
 	
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
+	$Page->Print("<input type=button value=\"&#x1f53a;\" onclick=\"SetOption('UPDOWN','UP');DoSubmit('bbs.thread','DISP','LIST');\"> ");
+	$Page->Print("<input type=button value=\"&#x1f53b;\" onclick=\"SetOption('UPDOWN','DOWN');DoSubmit('bbs.thread','DISP','LIST');\"> ");
+
 	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ")				if ($isDelete);
 	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ")				if ($isDelete);
+
 	$Page->Print("<input type=button value=\"subject更新\" $common2,'UPDATE')\"> ")			if ($isUpdate);
 	$Page->Print("<input type=button value=\"subject再作成\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
 	$Page->Print("<input type=button value=\"　停止　\" $common,'STOP')\"> ")				if ($isStop);
@@ -437,6 +515,7 @@ sub PrintThreadList
 	$Page->Print("</table><br>");
 	
 	$Page->HTMLInput('hidden', 'DISPST', '');
+	$Page->HTMLInput('hidden', 'UPDOWN', '');
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
 }
 

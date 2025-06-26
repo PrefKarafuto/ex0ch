@@ -1703,6 +1703,33 @@ sub is_cdn_ip {
 
     return;
 }
+
+# スレッド上げ下げ
+sub move_threads {
+    my ($offset, $thread_set_ref, $thread_list_ref) = @_;
+
+    # 選択 ID のセット
+    my %is_sel = map { $_ => 1 } @$thread_list_ref;
+    my $max    = $#$thread_set_ref;
+
+    # thread_set 中で選択対象のインデックス一覧
+    my @idxs = grep { $is_sel{$thread_set_ref->[$_]} } 0..$max;
+    # 下方向移動なら大きい index から、上方向なら小さい index から処理
+    @idxs = $offset > 0 ? reverse @idxs : @idxs;
+
+    for my $i (@idxs) {
+        my $id = $thread_set_ref->[$i];
+        # 新しい位置をクリップ付きで計算
+        my $to = $i + $offset;
+        $to = 0    if $to < 0;
+        $to = $max if $to > $max;
+
+        # splice で抜き出して挿入
+        splice @$thread_set_ref, $i, 1;
+        splice @$thread_set_ref, $to, 0, $id;
+    }
+}
+
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================

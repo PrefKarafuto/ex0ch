@@ -357,8 +357,10 @@ sub Set
 	my $this = shift;
 	my ($id, $kind, $val) = @_;
 	
-	if (exists $this->{$kind}->{$id}) {
+	if (defined $id && exists $this->{$kind}->{$id}) {
 		$this->{$kind}->{$id} = $val;
+	}else{
+		$this->{$kind} = $val;
 	}
 }
 
