@@ -482,6 +482,13 @@ sub FunctionAllowMessage
 			$Threads->Load($Sys);
 			$Threads->UpdateAll($Sys);
 			$Threads->Save($Sys);
+
+			require './module/bbs_service.pl';
+			my $BBSAid = BBS_SERVICE->new;
+			$Sys->Set('MODE', 'CREATE');
+			$BBSAid->Init($Sys, undef);
+			$BBSAid->CreateIndex();
+			$BBSAid->CreateSubback();
 			
 			# ログの設定
 			push @$pLog, "スレッドキー:${key}に対して、メッセージの投稿を追認しました。";
