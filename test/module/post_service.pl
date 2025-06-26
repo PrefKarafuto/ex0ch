@@ -1847,6 +1847,8 @@ sub AddLog
 	my $this = shift;
 	my ($Sys,$Set,$Form,$data) = @_;
 
+	return if $Sys->Get('FAKE');
+
 	chomp($data);
 	require './module/manager_log.pl';
 	my $Log = MANAGER_LOG->new;
