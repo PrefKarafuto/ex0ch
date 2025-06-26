@@ -823,6 +823,16 @@ sub FunctionResPost
 	$ENV{'REMOTE_ADDR'}	= $ip;
 	$ENV{'HTTP_USER_AGENT'}	= $ua;
 	$Log->Save($Sys);
+
+	$PS->{'THREADS'}->UpdateAll($Sys);
+	$PS->{'THREADS'}->Save($Sys);
+
+	require './module/bbs_service.pl';
+	my $BBSAid = BBS_SERVICE->new;
+	$Sys->Set('MODE', 'CREATE');
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
 	
 	# ログの設定
 	push @$pLog, "スレッド：$threadKey にレスを投稿しました。";

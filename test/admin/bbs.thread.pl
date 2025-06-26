@@ -187,7 +187,7 @@ sub DoFunction
 		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 0);
 	}
 	elsif ($subMode eq 'CREATE') {													# コピー
-		$err = FunctionResCreate($Sys, $Form ,$this->{'LOG'});
+		$err = FunctionThreadCreate($Sys, $Form ,$this->{'LOG'});
 	}
 	elsif ($subMode eq 'COPY') {													# コピー
 		$err = FunctionThreadCopy($Sys, $Form, $this->{'LOG'}, 1);
@@ -1292,7 +1292,7 @@ sub FunctionThreadPooling
 #	@return	エラーコード
 #
 #------------------------------------------------------------------------------------------------------------
-sub FunctionResCreate
+sub FunctionThreadCreate
 {
 	my ($Sys, $Form, $pLog) = @_;
 	my (@elem, $PS, $Conv);
@@ -1365,6 +1365,16 @@ sub FunctionResCreate
 	$ENV{'REMOTE_ADDR'}	= $ip;
 	$ENV{'HTTP_USER_AGENT'}	= $ua;
 	$Log->Save($Sys);
+
+	$PS->{'THREADS'}->UpdateAll($Sys);
+	$PS->{'THREADS'}->Save($Sys);
+
+	require './module/bbs_service.pl';
+	my $BBSAid = BBS_SERVICE->new;
+	$Sys->Set('MODE', 'CREATE');
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
 	
 	# ログの設定
 	push @$pLog, "新規スレッド「".$Form->Get('subject')."」を作成しました。";
