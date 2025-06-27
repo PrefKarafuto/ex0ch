@@ -1712,7 +1712,30 @@ sub move_threads {
     my %is_sel = map { $_ => 1 } @$thread_list_ref;
     my $max    = $#$thread_set_ref;
 
-    # thread_set 中で選択対象のインデックス一覧
+    # === 'top'／'bottom' の場合 ===
+    if ( defined $offset && $offset eq 'top' ) {
+        # 先頭へ移動
+        my @selected = grep { $is_sel{$_} } @$thread_set_ref;
+        my @others   = grep { !$is_sel{$_} } @$thread_set_ref;
+        @$thread_set_ref = ( @selected, @others );
+        return;
+    }
+    elsif ( defined $offset && $offset eq 'bottom' ) {
+        # 末尾へ移動
+        my @selected = grep { $is_sel{$_} } @$thread_set_ref;
+        my @others   = grep { !$is_sel{$_} } @$thread_set_ref;
+        @$thread_set_ref = ( @others, @selected );
+        return;
+    }
+
+    # === 数値の場合 ===
+    # オフセットが数値でないなら無視
+    unless ( defined $offset && $offset =~ /^-?\d+$/ ) {
+        warn "Invalid offset: $offset\n";
+        return;
+    }
+
+    # インデックス一覧を取得
     my @idxs = grep { $is_sel{$thread_set_ref->[$_]} } 0..$max;
     # 下方向移動なら大きい index から、上方向なら小さい index から処理
     @idxs = $offset > 0 ? reverse @idxs : @idxs;

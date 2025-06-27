@@ -287,7 +287,7 @@ sub PrintThreadList
 	my ($Page, $SYS, $Form, $BBS) = @_;
 	my (@threadSet, $ThreadNum, $key, $res, $subj, $i);
 	my ($dispSt, $dispEd, $dispNum, $bgColor, $base, $pinnedThread);
-	my ($common, $common2, $n, $Threads, $id, $is_checked);
+	my ($common, $common2, $common3, $n, $Threads, $id, $is_checked);
 	
 	$SYS->Set('_TITLE', 'Thread List');
 	
@@ -312,12 +312,21 @@ sub PrintThreadList
 	# スレッド上げ下げ
 	my @threadList = $Form->GetAtArray('THREADS');
 	require './module/data_utils.pl';
-	if ($Form->Get('UPDOWN') eq 'UP'){
-		DATA_UTILS::move_threads(-1, \@threadSet, \@threadList);
-		$Threads->Set(undef, 'SORT', \@threadSet);
-		$Threads->Save($SYS);
-	}elsif($Form->Get('UPDOWN') eq 'DOWN'){
-		DATA_UTILS::move_threads(1, \@threadSet, \@threadList);
+	# UP/DOWN/TOP/BOTTOM を move_threads に渡すオフセットへマッピング
+	my %offset_map = (
+		UP     => -1,
+		DOWN   =>  1,
+		TOP    => 'top',
+		BOTTOM => 'bottom',
+	);
+
+	# フォームからの指示を取得
+	my $cmd = $Form->Get('UPDOWN');
+
+	# 有効なコマンドなら実行
+	if ( exists $offset_map{$cmd} ) {
+		my $offset = $offset_map{$cmd};
+		DATA_UTILS::move_threads($offset, \@threadSet, \@threadList);
 		$Threads->Set(undef, 'SORT', \@threadSet);
 		$Threads->Save($SYS);
 	}
@@ -431,13 +440,18 @@ sub PrintThreadList
 	}
 	$common		= "onclick=\"DoSubmit('bbs.thread','DISP'";
 	$common2	= "onclick=\"DoSubmit('bbs.thread','FUNC'";
+	$common3	= "SetOption('DISPST','$dispSt');DoSubmit('bbs.thread','DISP','LIST');";
 
 	my $tl_max = $Set->Get('BBS_TL_MAX');
 	
 	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=5 align=left>");
-	$Page->Print("<input type=button value=\"&#x1f53a;\" onclick=\"SetOption('UPDOWN','UP');DoSubmit('bbs.thread','DISP','LIST');\"> ");
-	$Page->Print("<input type=button value=\"&#x1f53b;\" onclick=\"SetOption('UPDOWN','DOWN');DoSubmit('bbs.thread','DISP','LIST');\"> ");
+
+	# スレッド表示順変更ボタン
+	$Page->Print("<input type=button value=\"&#x23eb;\" onclick=\"SetOption('UPDOWN','TOP');$common3\"> ");		# 最上部
+	$Page->Print("<input type=button value=\"&#x1f53c;\" onclick=\"SetOption('UPDOWN','UP');$common3\"> ");		# 1上げ
+	$Page->Print("<input type=button value=\"&#x1f53d;\" onclick=\"SetOption('UPDOWN','DOWN');$common3\"> ");	# 1下げ
+	$Page->Print("<input type=button value=\"&#x23ec;\" onclick=\"SetOption('UPDOWN','BOTTOM');$common3\"> ");	# 最下部
 
 	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ")				if ($isDelete);
 	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ")				if ($isDelete);
