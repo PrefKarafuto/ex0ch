@@ -215,6 +215,7 @@ input.delete	{
 	height: 500px;
 	min-height: 300px;
 	font-size: 14px;
+	font-family:SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
   }
   .cm-trailingspace {
 	  background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAACCAYAAAB/qH1jAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QUXCToH00Y1UgAAACFJREFUCNdjPMDBUc/AwNDAAAFMTAwMDA0OP34wQgX/AQBYgwYEx4f9lQAAAABJRU5ErkJggg==);
@@ -223,4 +224,7 @@ input.delete	{
   }
   .cm-matchhighlight {
 	  background-color: lightgreen;
+  }
+  .cm-fullwidth-space {
+	  background-color: rgba(255, 200, 0, 0.5);
   }

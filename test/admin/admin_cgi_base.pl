@@ -193,11 +193,12 @@ $Page->Print(<<HTML);
  
  <meta name="robots" content="noindex,nofollow">
  
- <link rel="stylesheet" href=".$data/admin.css" type="text/css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${theme}.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.css">
+
+ <link rel="stylesheet" href=".$data/admin.css" type="text/css">
  <script language="javascript" src=".$data/admin.js"></script>
  
 </head>
@@ -407,6 +408,10 @@ HTML
 		$Page->Print(<<HTML);
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/perl/perl.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
   <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.js"></script>
   <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
   <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
@@ -414,29 +419,67 @@ HTML
   <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/match-highlighter.min.js"></script>
   <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.js"></script>
   <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/scrollpastend.min.js"></script>
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-      const textarea = document.getElementById("perl-editor");
-      
-      const editor = CodeMirror.fromTextArea(textarea, {
-        mode: "text/x-perl",   // Perl 用のシンタックスハイライト
-        lineNumbers: true,     // 行番号を表示
-		styleActiveLine: true, // アクティブ行ハイライト
-        indentUnit: 4,         // インデント幅を半角スペース4文字に
-        indentWithTabs: false, // タブの代わりにスペースでインデント
-        lineWrapping: true,    // 長い行を自動で折り返す
-        theme: "${theme}",     // デフォルトのテーマ指定（必要に応じて変更可）
-		// その他アドオン
-		matchBrackets: true,
-		autoCloseBrackets: true,
-		showTrailingSpace: true,
-		highlightSelectionMatches: true,
-		scrollbarStyle: "simple",
-		scrollPastEnd: true
-      });
-	  editor.setSize("100%", 500);
-    });
-  </script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // ─── 全角スペースオーバーレイ ─────────────────────────
+  const fullwidthSpaceOverlay = {
+    token: function(stream) {
+      // stream.match で今の位置に "\u3000" があれば消費し、トークンを返す
+      if (stream.match("　")) {
+        return "fullwidth-space";
+      }
+      // それ以外は１文字だけ進めて無視
+      stream.next();
+      return null;
+    }
+  };
+  // ────────────────────────────────────────────────────────
+  const baseOpt = {
+    lineNumbers: true,
+    styleActiveLine: true,
+    indentUnit: 4,
+    indentWithTabs: false,
+    lineWrapping: true,
+    theme: "${theme}",
+    matchBrackets: true,
+    autoCloseBrackets: true,
+    showTrailingSpace: true,
+    highlightSelectionMatches: true,
+    scrollbarStyle: "simple",
+    scrollPastEnd: true
+  };
+
+  // Perl エディタがあるときだけ初期化
+  const perlTA = document.getElementById("perl-editor");
+  if (perlTA) {
+    const perlEd = CodeMirror.fromTextArea(
+      perlTA,
+      Object.assign({}, baseOpt, { mode: "text/x-perl" })
+    );
+    perlEd.setSize("100%", 400);
+    perlEd.addOverlay(fullwidthSpaceOverlay, { opaque: true });
+    perlEd.refresh();
+  }
+
+  // HTML エディタがあるときだけ初期化
+  const htmlTA = document.getElementById("html-editor");
+  if (htmlTA) {
+    const htmlEd = CodeMirror.fromTextArea(
+      htmlTA,
+      Object.assign({}, baseOpt, {
+        mode: "htmlmixed",
+        autoCloseTags: true,
+        matchTags: { bothTags: true }
+      })
+    );
+    htmlEd.setSize("100%", 250);
+    htmlEd.addOverlay(fullwidthSpaceOverlay, { opaque: true });
+    htmlEd.refresh();
+  }
+});
+</script>
+
 HTML
 	}
 	$Page->Print("</body></html>");
@@ -576,16 +619,22 @@ sub PrintPagenation
 	my $currentPage = int($dispSt / $dispNum) + 1;
 
 	# ページ番号リンクのウィンドウ幅（中央に currentPage を表示）
-	my $windowSize  = 7;   # 全体で最大何個の数字を見せるか
+	my $windowSize  = 15;   # 全体で最大何個の数字を見せるか
 	my $halfWindow  = int($windowSize / 2);
 
 	# ウィンドウの開始/終了ページ番号
+	# （1）まず、ウィンドウが全ページを超えないよう最大の開始位置を計算
+	my $maxStart = $totalPages - $windowSize + 1;
+	$maxStart    = 1 if $maxStart < 1;
+
+	# （2）currentPage を中心にウィンドウ開始を計算
 	my $startPage = $currentPage - $halfWindow;
-	$startPage = 1 if $startPage < 1;
+	$startPage    = 1           if $startPage < 1;
+	$startPage    = $maxStart   if $startPage > $maxStart;
+
+	# （3）endPage を決定
 	my $endPage   = $startPage + $windowSize - 1;
-	$endPage   = $totalPages if $endPage > $totalPages;
-	# 開始位置を再調整
-	$startPage = $endPage - $windowSize + 1 if $endPage - $startPage + 1 < $windowSize && $endPage - $windowSize + 1 > 0;
+	$endPage      = $totalPages if $endPage > $totalPages;
 
 	$optionName //= 'DISPST';
 
@@ -597,10 +646,14 @@ sub PrintPagenation
 		$Page->Print("&lt;&lt; PREV ");
 	}
 
-	# 最初のページと省略
+	# 先頭リンクと前省略
 	if ($startPage > 1) {
-		$Page->Print("<a href=\"javascript:SetOption('$optionName',0);$common\">1</a> ");
-		$Page->Print("... ");
+		# 必ず「1」を表示
+		$Page->Print("<a href=\"javascript:SetOption('DISPST',0);$common\">1</a> ");
+		# 省略は「1」と startPage が2つ以上離れているときだけ
+		if ($startPage > 2) {
+			$Page->Print("... ");
+		}
 	}
 
 	# 中央ウィンドウのページ番号リンク
@@ -615,9 +668,12 @@ sub PrintPagenation
 
 	# 最後のページと省略
 	if ($endPage < $totalPages) {
-		$Page->Print("... ");
+		# 省略は endPage と totalPages が2つ以上離れているときだけ
+		if ($endPage < $totalPages - 1) {
+			$Page->Print("... ");
+		}
 		my $lastSt = ($totalPages - 1) * $dispNum;
-		$Page->Print("<a href=\"javascript:SetOption('$optionName',$lastSt);$common\">$totalPages</a> ");
+		$Page->Print("<a href=\"javascript:SetOption('DISPST',$lastSt);$common\">$totalPages</a> ");
 	}
 
 	# 「NEXT >>」リンク
