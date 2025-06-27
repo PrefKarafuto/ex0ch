@@ -558,6 +558,76 @@ HTML
 
 }
 
+package	MODULE;
+
+use strict;
+use utf8;
+use open IO => ':encoding(cp932)';
+use warnings;
+use POSIX qw(ceil);
+
+sub PrintPagenation
+{
+	my ($Page, $totalItems, $dispNum, $dispSt, $common, $optionName) = @_;
+
+	# 総ページ数を計算（切り上げ）
+	my $totalPages  = ceil($totalItems / $dispNum);
+	# 現在のページ番号（1始まり）
+	my $currentPage = int($dispSt / $dispNum) + 1;
+
+	# ページ番号リンクのウィンドウ幅（中央に currentPage を表示）
+	my $windowSize  = 7;   # 全体で最大何個の数字を見せるか
+	my $halfWindow  = int($windowSize / 2);
+
+	# ウィンドウの開始/終了ページ番号
+	my $startPage = $currentPage - $halfWindow;
+	$startPage = 1 if $startPage < 1;
+	my $endPage   = $startPage + $windowSize - 1;
+	$endPage   = $totalPages if $endPage > $totalPages;
+	# 開始位置を再調整
+	$startPage = $endPage - $windowSize + 1 if $endPage - $startPage + 1 < $windowSize && $endPage - $windowSize + 1 > 0;
+
+	$optionName //= 'DISPST';
+
+	# 「<< PREV」リンク
+	if ($currentPage > 1) {
+		my $prevSt = ($currentPage - 2) * $dispNum; 
+		$Page->Print("<a href=\"javascript:SetOption('$optionName',$prevSt);$common\">&lt;&lt; PREV</a> ");
+	} else {
+		$Page->Print("&lt;&lt; PREV ");
+	}
+
+	# 最初のページと省略
+	if ($startPage > 1) {
+		$Page->Print("<a href=\"javascript:SetOption('$optionName',0);$common\">1</a> ");
+		$Page->Print("... ");
+	}
+
+	# 中央ウィンドウのページ番号リンク
+	for my $p ($startPage .. $endPage) {
+		if ($p == $currentPage) {
+			$Page->Print("<b>$p</b> ");            # 現在ページは強調
+		} else {
+			my $st = ($p - 1) * $dispNum;
+			$Page->Print("<a href=\"javascript:SetOption('$optionName',$st);$common\">$p</a> ");
+		}
+	}
+
+	# 最後のページと省略
+	if ($endPage < $totalPages) {
+		$Page->Print("... ");
+		my $lastSt = ($totalPages - 1) * $dispNum;
+		$Page->Print("<a href=\"javascript:SetOption('$optionName',$lastSt);$common\">$totalPages</a> ");
+	}
+
+	# 「NEXT >>」リンク
+	if ($currentPage < $totalPages) {
+		my $nextSt = $currentPage * $dispNum;
+		$Page->Print("<a href=\"javascript:SetOption('$optionName',$nextSt);$common\">NEXT &gt;&gt;</a>");
+	} else {
+		$Page->Print("NEXT &gt;&gt;");
+	}
+}
 
 #============================================================================================================
 #	モジュール終端

@@ -13,7 +13,6 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use HTML::Entities;
-use POSIX qw(ceil);
 no warnings 'once';
 
 # 共通スレッド属性情報
@@ -310,26 +309,6 @@ sub PrintThreadList
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	$dispEd		= (($dispSt + $dispNum) > $ThreadNum ? $ThreadNum : ($dispSt + $dispNum));
 
-	# 総スレッド数
-	my $totalItems  = $ThreadNum;
-	# 総ページ数を計算（切り上げ）
-	my $totalPages  = ceil($totalItems / $dispNum);
-	# 現在のページ番号（1始まり）
-	my $currentPage = int($dispSt / $dispNum) + 1;
-
-	# ページ番号リンクのウィンドウ幅（中央に currentPage を表示）
-	my $windowSize  = 7;   # 全体で最大何個の数字を見せるか
-	my $halfWindow  = int($windowSize / 2);
-
-	# ウィンドウの開始/終了ページ番号
-	my $startPage = $currentPage - $halfWindow;
-	$startPage = 1 if $startPage < 1;
-	my $endPage   = $startPage + $windowSize - 1;
-	$endPage   = $totalPages if $endPage > $totalPages;
-	# 開始位置を再調整
-	$startPage = $endPage - $windowSize + 1 if $endPage - $startPage + 1 < $windowSize && $endPage - $windowSize + 1 > 0;
-
-
 	# スレッド上げ下げ
 	my @threadList = $Form->GetAtArray('THREADS');
 	require './module/data_utils.pl';
@@ -356,47 +335,8 @@ sub PrintThreadList
 	$common = "DoSubmit('bbs.thread','DISP','LIST');";
 	
 	# ページャーの出力開始
-	$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=3 align=center>");
-
-	# 「<< PREV」リンク
-	if ($currentPage > 1) {
-		my $prevSt = ($currentPage - 2) * $dispNum; 
-		$Page->Print("<a href=\"javascript:SetOption('DISPST',$prevSt);$common\">&lt;&lt; PREV</a> ");
-	} else {
-		$Page->Print("&lt;&lt; PREV ");
-	}
-
-	# 最初のページと省略
-	if ($startPage > 1) {
-		$Page->Print("<a href=\"javascript:SetOption('DISPST',0);$common\">1</a> ");
-		$Page->Print("... ");
-	}
-
-	# 中央ウィンドウのページ番号リンク
-	for my $p ($startPage .. $endPage) {
-		if ($p == $currentPage) {
-			$Page->Print("<b>$p</b> ");            # 現在ページは強調
-		} else {
-			my $st = ($p - 1) * $dispNum;
-			$Page->Print("<a href=\"javascript:SetOption('DISPST',$st);$common\">$p</a> ");
-		}
-	}
-
-	# 最後のページと省略
-	if ($endPage < $totalPages) {
-		$Page->Print("... ");
-		my $lastSt = ($totalPages - 1) * $dispNum;
-		$Page->Print("<a href=\"javascript:SetOption('DISPST',$lastSt);$common\">$totalPages</a> ");
-	}
-
-	# 「NEXT >>」リンク
-	if ($currentPage < $totalPages) {
-		my $nextSt = $currentPage * $dispNum;
-		$Page->Print("<a href=\"javascript:SetOption('DISPST',$nextSt);$common\">NEXT &gt;&gt;</a>");
-	} else {
-		$Page->Print("NEXT &gt;&gt;");
-	}
-
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=3 style=\"font-size:1.2em\">");
+	PrintPagenation($Page, $ThreadNum, $dispNum ,$dispSt, $common);
 	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");

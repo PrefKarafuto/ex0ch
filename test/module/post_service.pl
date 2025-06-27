@@ -406,32 +406,31 @@ sub ReadyBeforeWrite
 			# スレッドがすでにあればそのタイトル
 			require './module/dat.pl';
 			my $Dat = DAT->new;
-			my $subject = $Dat->GetSubjectFromFile($Sys);
 
 			# コンテキスト
 			$dsl->SetCtx({
-			message     => $Form->Get('MESSAGE')    // '',
-			mail        => $Form->Get('mail')       // '',
-			name        => $Form->Get('FROM')       // '',
-			title     	=> $Form->Get('subject')    // '',
-			time        => $Form->Get('time')       // time(),
-			thread_title=> $subject					// '',
-			thread_id   => $threadid		        // '',
-			bbs         => $Form->Get('bbs')        // '',
-			fp          => $Form->Get('fp')         // '',
-			from_index  => $Form->Get('from_index') // '',
-			ip          => $ENV{REMOTE_ADDR}        // '',
-			host        => $ENV{REMOTE_HOST}        // '',
-			ua          => $ENV{HTTP_USER_AGENT}    // '',
-			session_id  => $Sys->Get('SID')         // '',
-			cap_id		=> $capID 					// '',
-			is_captcha	=> $is_captcha				// '',
-			setting     => $Set->All()              // {},
-			#system		=> $Sys->All()				// {},
+			message     => $Form->Get('MESSAGE')    	// '',
+			mail        => $Form->Get('mail')       	// '',
+			name        => $Form->Get('FROM')       	// '',
+			title     	=> $Form->Get('subject')    	// '',
+			time        => $Form->Get('time')       	// time(),
+			thread_title=> $Dat->GetSubjectFromFile($Sys)// '',
+			thread_id   => $threadid		        	// '',
+			bbs         => $Form->Get('bbs')        	// '',
+			fp          => $Form->Get('fp')         	// '',
+			from_index  => $Form->Get('from_index') 	// '',
+			ip          => $ENV{REMOTE_ADDR}        	// '',
+			host        => $ENV{REMOTE_HOST}        	// '',
+			ua          => $ENV{HTTP_USER_AGENT}    	// '',
+			session_id  => $Sys->Get('SID')         	// '',
+			cap_id		=> $capID 						// '',
+			is_captcha	=> $is_captcha					// '',
+			setting     => $Set->All()              	// {},
+			#system		=> $Sys->All()					// {},
 			attr        => $Threads->GetAttr($threadid) // {},  # スレッド属性ハッシュ
-			user_info   => $Ninja->All() 			// {},      # 忍法帖情報ハッシュ
+			user_info   => $Ninja->All() 				// {},      # 忍法帖情報ハッシュ
 			score       => 0,
-			unique      => $Unique                  // {},  # 拡張用
+			unique      => $Unique                  	// {},  # 拡張用
 			# 以下、値の返却時に使用
 			error_code 	=> 0,
 			error_subject	=> '',

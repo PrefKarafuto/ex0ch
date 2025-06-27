@@ -278,11 +278,9 @@ sub PrintLogs
 	$dispEd		= (($dispSt + $dispNum) > $listNum ? $listNum : ($dispSt + $dispNum));
 	$common		= "DoSubmit('bbs.log','DISP','" . $Form->Get('MODE_SUB') . "');";
 	
-	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=2><b><a href=\"javascript:SetOption('$keySt', " . ($dispSt - $dispNum));
-	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('$keySt', ");
-	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
-	$Page->Print("</td><td align=right colspan=2>");
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=3 style=\"font-size:1.2em\">");
+	PrintPagenation($Page, $listNum, $dispNum ,$dispSt, $common, $keySt);
+	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("表示数<input type=text name=$keyNum size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");

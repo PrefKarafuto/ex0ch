@@ -202,9 +202,10 @@ $Page->Print(<<HTML);
    <tr>
 	<td>
 	</td>
-	<td>
-	<a href="javascript:SetOption('DISPST_NOTICE', $orz);$common">&lt;&lt; PREV</a> |
-	<a href="javascript:SetOption('DISPST_NOTICE', $or2);$common">NEXT &gt;&gt;</a>
+	<td style="font-size:1.2em">
+HTML
+	PrintPagenation($Page, $listNum, $dispNum ,$dispSt, $common ,'DISPST_NOTICE');
+	$Page->Print(<<HTML);
 	</td>
 	<td align=right colspan="2">
 	表示数 <input type=text name="DISPNUM_NOTICE" size="4" value="$dispNum">
@@ -390,9 +391,10 @@ sub PrintAdminLog
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
    <tr>
-	<td colspan="2">
-	<a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
-	<a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
+	<td colspan="2" style="font-size:1.2em">
+HTML
+	PrintPagenation($Page, $listNum, $dispNum ,$dispSt, $common ,'DISPST_LOG');
+	$Page->Print(<<HTML);
 	</td>
 	<td align="right" colspan="2">
 	表示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
@@ -477,9 +479,10 @@ sub PrintExecutionTimeLog
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
    <tr>
-	<td colspan="2">
-	<a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
-	<a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
+	<td colspan="2" style="font-size:1.2em">
+HTML
+	PrintPagenation($Page, $listNum, $dispNum ,$dispSt, $common ,'DISPST_LOG');
+	$Page->Print(<<HTML);
 	</td>
 	<td align="right" colspan="2">
 	表示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
