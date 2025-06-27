@@ -247,6 +247,10 @@ sub OnDemand
 		$this->AGE($id);
 	} elsif ($updown eq 'bottom') {
 		$this->DAME($id);
+	} elsif ($updown eq 'age') {
+		$this->UpDown($id, 1);
+	} elsif ($updown eq 'sink') {
+		$this->UpDown($id, -1);
 	} elsif ($updown =~ /^([\+\-][0-9]+)$/) {
 		$this->UpDown($id, int($1));
 	}

@@ -435,6 +435,7 @@ sub ReadyBeforeWrite
 			error_code 	=> 0,
 			error_subject	=> '',
 			error_message	=> '',
+			thread_updown	=> '',
 			});
 
 			my $result = $dsl->Check(5);	# タイムアウト5秒
@@ -455,6 +456,7 @@ sub ReadyBeforeWrite
 
 			$Set->All($out{setting});
 			#$Sys->All($out{system});
+			$Sys->Set('updown',$out{thread_updown});
 
 			# 規制
 			if ($result){
@@ -1733,11 +1735,17 @@ sub MakeDatLine
 	$Form->Set('extrapart', $extrapart);
 	
 	# age/sage
-	my $updown = 'top';
-	$updown = '' if ($Form->Contain('mail', 'sage'));
+	my $updown = 'top';											# デフォルト（最上部）
+	$updown = 'up' if ($Form->Contain('mail', 'age'));			# 1上げ
+	$updown = '' if ($Form->Contain('mail', 'sage'));			# そのまま
+	$updown = 'down' if ($Form->Contain('mail', 'sink'));		# 1下げ
+	$updown = 'bottom' if ($Form->Contain('mail', 'bottom'));	# 最下部
+
+	$updown = $Threads->GetAttr($threadid, 'floatmode') || $updown;
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
 	$updown = '' if ($Set->Get('BBS_NINJA') && defined $Ninja && $Ninja->Get('force_sage') && !$noNinja);
 	$updown = '' if ($Set->Get('BBS_NINJA') && defined $Ninja && $Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && !$noNinja);
+	$updown = $Sys->Get('updown') || $updown;
 	$Sys->Set('updown', $updown);
 
 	# pluginに渡す値を設定
