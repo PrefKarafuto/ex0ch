@@ -221,28 +221,40 @@ sub PrintSystemInfo
 	my $servername = $ENV{'SERVER_NAME'};
 	my $serversoft = $ENV{'SERVER_SOFTWARE'};
 	my @checklist = (qw(
-		Encode
-		Time::HiRes
-		Time::Local
-		Socket
-	), qw(
-		CGI::Session
-		Storable
-		Digest::SHA::PurePerl
-		Digest::MD5
-		Net::DNS::Lite
-		List::MoreUtils
 		LWP::UserAgent
-		XML::Simple
-	), qw(
-		Net::DNS
 		LWP::Protocol::https
 		Net::SSLeay
+		Net::DNS
+		Net::DNS::Lite
+		Socket
 	), qw(
-		HTML::Entities
+		CGI::Cookie
 		CGI::Carp
-		JSON
+		CGI::Session
 		FCGI
+	), qw(
+		JSON
+		XML::Simple
+		HTML::Entities
+		Encode
+		MIME::Base64
+		Storable
+	), qw(
+		Digest::MD5
+		Digest::SHA::PurePerl
+	), qw(
+		File::Spec
+		File::Basename
+		File::Path
+		File::Copy
+		File::Glob
+	), qw(
+		Time::HiRes
+		Time::Local
+		POSIX
+	), qw(
+		Carp
+		Safe
 	));
 	
 	my $core = {};
