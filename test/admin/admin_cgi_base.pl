@@ -197,6 +197,7 @@ $Page->Print(<<HTML);
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${theme}.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.css">
+ <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/xavierog/codemirror-mode-pcre\@2.0.0/src/pcre.css">
 
  <link rel="stylesheet" href=".$data/admin.css" type="text/css">
  <script language="javascript" src=".$data/admin.js"></script>
@@ -408,28 +409,30 @@ HTML
 		$Page->Print(<<HTML);
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/perl/perl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/xavierog/codemirror-mode-pcre\@2.0.0/src/pcre.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/xml/xml.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/css/css.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/htmlmixed/htmlmixed.min.js"></script>
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.js"></script>
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/trailingspace.min.js"></script>
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/match-highlighter.min.js"></script>
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.js"></script>
-  <script async src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/scrollpastend.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/closebrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/edit/trailingspace.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/search/match-highlighter.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/scrollpastend.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/multiplex.min.js"></script>
+
+  <script language="javascript" src="./datas/cm.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   // ─── 全角スペースオーバーレイ ─────────────────────────
   const fullwidthSpaceOverlay = {
     token: function(stream) {
-      // stream.match で今の位置に "\u3000" があれば消費し、トークンを返す
       if (stream.match("　")) {
         return "fullwidth-space";
       }
-      // それ以外は１文字だけ進めて無視
       stream.next();
       return null;
     }
@@ -455,7 +458,7 @@ document.addEventListener("DOMContentLoaded", function() {
   if (perlTA) {
     const perlEd = CodeMirror.fromTextArea(
       perlTA,
-      Object.assign({}, baseOpt, { mode: "text/x-perl" })
+      Object.assign({}, baseOpt, { mode: "perl-with-pcre" })
     );
     perlEd.setSize("100%", 400);
     perlEd.addOverlay(fullwidthSpaceOverlay, { opaque: true });
