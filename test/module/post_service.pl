@@ -1752,7 +1752,7 @@ sub MakeDatLine
 	my $updown = 'top';											# デフォルト（最上部）
 	$updown = 'up' if ($Form->Contain('mail', 'age'));			# 1上げ
 	$updown = '' if ($Form->Contain('mail', 'sage'));			# そのまま
-	$updown = 'down' if ($Form->Contain('mail', 'sink'));		# 1下げ
+	$updown = 'down' if ($Form->Contain('mail', 'down'));		# 1下げ
 	$updown = 'bottom' if ($Form->Contain('mail', 'bottom'));	# 最下部
 
 	$updown = $Threads->GetAttr($threadid, 'floatmode') || $updown;

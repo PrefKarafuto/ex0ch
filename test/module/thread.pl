@@ -249,7 +249,7 @@ sub OnDemand
 		$this->DAME($id);
 	} elsif ($updown eq 'age') {
 		$this->UpDown($id, 1);
-	} elsif ($updown eq 'sink') {
+	} elsif ($updown eq 'down') {
 		$this->UpDown($id, -1);
 	} elsif ($updown =~ /^([\+\-][0-9]+)$/) {
 		$this->UpDown($id, int($1));
