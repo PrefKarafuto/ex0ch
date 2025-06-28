@@ -452,18 +452,18 @@ sub PrintThreadList
 	$Page->Print("<input type=button value=\"&#x1f53c;\" onclick=\"SetOption('UPDOWN','UP');$common3\"> ");		# 1上げ
 	$Page->Print("<input type=button value=\"&#x1f53d;\" onclick=\"SetOption('UPDOWN','DOWN');$common3\"> ");	# 1下げ
 	$Page->Print("<input type=button value=\"&#x23ec;\" onclick=\"SetOption('UPDOWN','BOTTOM');$common3\"> ");	# 最下部
-
-	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ")				if ($isDelete);
-	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ")				if ($isDelete);
-
+	$Page->Print("<input type=button value=\"ピン留め\" $common2,'PINNED')\"> ")				if ($isResAbone);
+	$Page->Print("<span style=\"float:right\">");
 	$Page->Print("<input type=button value=\"subject更新\" $common2,'UPDATE')\"> ")			if ($isUpdate);
 	$Page->Print("<input type=button value=\"subject再作成\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
+	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")		if ($isResAbone && $tl_max);
+	$Page->Print("</span><hr>");
+	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ")				if ($isDelete);
+	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ")				if ($isDelete);
 	$Page->Print("<input type=button value=\"　停止　\" $common,'STOP')\"> ")				if ($isStop);
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
 	$Page->Print("<input type=button value=\"DAT落ち\" $common,'POOL')\"> ")				if ($isPool);
 	
-	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")		if ($isResAbone && $tl_max);
-	$Page->Print("<input type=button value=\"ピン留め\" $common2,'PINNED')\"> ")				if ($isResAbone);
 	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
