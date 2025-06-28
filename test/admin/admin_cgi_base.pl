@@ -460,9 +460,13 @@ document.addEventListener("DOMContentLoaded", function() {
       perlTA,
       Object.assign({}, baseOpt, { mode: "perl-with-pcre" })
     );
-    perlEd.setSize("100%", 400);
+    perlEd.setSize("100%", window.innerHeight *0.85 - 200);
     perlEd.addOverlay(fullwidthSpaceOverlay, { opaque: true });
     perlEd.refresh();
+	window.addEventListener('resize', () => {
+		perlEd.setSize("100%", window.innerHeight *0.85 - 200);
+		perlEd.refresh();
+	});
   }
 
   // HTML エディタがあるときだけ初期化
