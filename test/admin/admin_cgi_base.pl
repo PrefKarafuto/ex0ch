@@ -198,7 +198,6 @@ HTML
 		$Page->Print(<<HTML);
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${theme}.min.css">
- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.css">
  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/xavierog/codemirror-mode-pcre\@2.0.0/src/pcre.css">
@@ -436,83 +435,9 @@ HTML
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/comment-fold.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/indent-fold.js"></script>
 
+  <script>window.CM_THEME = "${theme}";</script>
   <script language="javascript" src="./datas/cm.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-  // ─── 全角スペースオーバーレイ ─────────────────────────
-  const fullwidthSpaceOverlay = {
-    token: function(stream) {
-      if (stream.match("　")) {
-        return "fullwidth-space";
-      }
-      stream.next();
-      return null;
-    }
-  };
-  // ────────────────────────────────────────────────────────
-  const baseOpt = {
-    lineNumbers: true,
-	foldGutter: true,
-    gutters: [
-      "CodeMirror-linenumbers",
-      "CodeMirror-foldgutter"
-    ],
-    styleActiveLine: true,
-    indentUnit: 4,
-    indentWithTabs: false,
-    lineWrapping: true,
-    theme: "${theme}",
-    matchBrackets: true,
-    autoCloseBrackets: true,
-    showTrailingSpace: true,
-    highlightSelectionMatches: true,
-    scrollbarStyle: "simple",
-    scrollPastEnd: true
-  };
-
-  // Perl エディタがあるときだけ初期化
-  const perlTA = document.getElementById("perl-editor");
-  if (perlTA) {
-    const perlEd = CodeMirror.fromTextArea(
-      perlTA,
-      Object.assign({}, baseOpt, { mode: "perl-with-pcre" },{foldOptions: {
-		rangeFinder: function(cm, start) {
-			var r = CodeMirror.fold.brace(cm, start);
-			if (r) return r;
-			r = CodeMirror.fold.indent(cm, start);
-			if (r) return r;
-			return CodeMirror.fold.xml(cm, start) || CodeMirror.fold.comment(cm, start);
-		}
-	}}),
-    );
-    perlEd.setSize("100%", window.innerHeight *0.85 - 200);
-    perlEd.addOverlay(fullwidthSpaceOverlay, { opaque: true });
-    perlEd.refresh();
-	window.addEventListener('resize', () => {
-		perlEd.setSize("100%", window.innerHeight *0.85 - 200);
-		perlEd.refresh();
-	});
-  }
-
-  // HTML エディタがあるときだけ初期化
-  const htmlTA = document.getElementById("html-editor");
-  if (htmlTA) {
-    const htmlEd = CodeMirror.fromTextArea(
-      htmlTA,
-      Object.assign({}, baseOpt, {
-        mode: "htmlmixed",
-        autoCloseTags: true,
-        matchTags: { bothTags: true }
-      })
-    );
-    htmlEd.setSize("100%", 250);
-    htmlEd.addOverlay(fullwidthSpaceOverlay, { opaque: true });
-    htmlEd.refresh();
-  }
-});
-</script>
-
+  
 HTML
 	}
 	$Page->Print("</body></html>");
