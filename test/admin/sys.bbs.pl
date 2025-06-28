@@ -12,6 +12,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use JSON;
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -792,7 +793,7 @@ sub FunctionBBSMenuUpdate
 {
 	my ($SYS, $Form, $pLog) = @_;
 	my ($BBS,$Page,$Category);
-	use JSON::PP;
+
 	require './module/buffer_output.pl';
 	require './module/bbs_info.pl';
 	$BBS = BBS_INFO->new;
@@ -868,8 +869,7 @@ sub FunctionBBSMenuUpdate
 		}
 		open my $fh, '>:raw', '../bbsmenu.json' or die "Could not open file: $!";
 		chmod $fh,$SYS->Get('PM-TXT');
-		my $json = JSON::PP->new->canonical(1);  # キーを辞書順にソート
-		my $json_text = $json->encode(\%bbsmenu_json);
+		my $json_text = JSON->new->canonical(1)->encode(\%bbsmenu_json);
 		print $fh $json_text;
 		close $fh;
 	
