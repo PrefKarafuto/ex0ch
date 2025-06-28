@@ -590,6 +590,8 @@ sub PrintOtherSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">エディタのテーマ</td></tr>\n");
 	$Page->Print("<tr><td>HTML/BGDSL編集画面のエディタのテーマを設定します。</td>");
 	$Page->Print("<td><select name=\"CM_THEME\">\n");
+	my $sel = $is_selected eq '' ? ' selected="selected"' : '';
+	$Page->Print("<option value=\"\" $sel>なし</option>\n");
 	for my $theme (@themes) {
 		my $sel = ($theme eq $is_selected) ? ' selected="selected"' : '';
 		$Page->Print("<option value=\"$theme\" $sel>$theme</option>\n");

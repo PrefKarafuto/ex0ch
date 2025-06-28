@@ -192,13 +192,20 @@ $Page->Print(<<HTML);
  <meta http-equiv="Content-Style-Type" content="text/css">
  
  <meta name="robots" content="noindex,nofollow">
- 
+HTML
+
+	if($theme){
+		$Page->Print(<<HTML);
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/theme/${theme}.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/selection/active-line.min.css">
  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.css">
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.css">
  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/xavierog/codemirror-mode-pcre\@2.0.0/src/pcre.css">
+HTML
+	}
 
+	$Page->Print(<<HTML);
  <link rel="stylesheet" href=".$data/admin.css" type="text/css">
  <script language="javascript" src=".$data/admin.js"></script>
  
@@ -422,6 +429,12 @@ HTML
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/simplescrollbars.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/scroll/scrollpastend.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/multiplex.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldcode.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/foldgutter.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/brace-fold.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/xml-fold.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/comment-fold.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/indent-fold.js"></script>
 
   <script language="javascript" src="./datas/cm.js"></script>
 
@@ -440,6 +453,11 @@ document.addEventListener("DOMContentLoaded", function() {
   // ────────────────────────────────────────────────────────
   const baseOpt = {
     lineNumbers: true,
+	foldGutter: true,
+    gutters: [
+      "CodeMirror-linenumbers",
+      "CodeMirror-foldgutter"
+    ],
     styleActiveLine: true,
     indentUnit: 4,
     indentWithTabs: false,
@@ -458,7 +476,15 @@ document.addEventListener("DOMContentLoaded", function() {
   if (perlTA) {
     const perlEd = CodeMirror.fromTextArea(
       perlTA,
-      Object.assign({}, baseOpt, { mode: "perl-with-pcre" })
+      Object.assign({}, baseOpt, { mode: "perl-with-pcre" },{foldOptions: {
+		rangeFinder: function(cm, start) {
+			var r = CodeMirror.fold.brace(cm, start);
+			if (r) return r;
+			r = CodeMirror.fold.indent(cm, start);
+			if (r) return r;
+			return CodeMirror.fold.xml(cm, start) || CodeMirror.fold.comment(cm, start);
+		}
+	}}),
     );
     perlEd.setSize("100%", window.innerHeight *0.85 - 200);
     perlEd.addOverlay(fullwidthSpaceOverlay, { opaque: true });

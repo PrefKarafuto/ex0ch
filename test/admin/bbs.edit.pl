@@ -268,8 +268,8 @@ sub PrintHeaderEdit
 	$Page->Merge($PreviewPage);
 	
 	$Page->Print("</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">内容編集</td><td>");
-	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=HEAD_TEXT>");
+	$Page->Print("<tr><td class=\"DetailTitle\" width=\"10%\">内容編集</td><td>");
+	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=HEAD_TEXT rows=\"11\" cols=\"80\">");
 	
 	# ヘッダ内容テキストの表示
 	$data =~ s/&/&amp;/g;
@@ -338,8 +338,8 @@ sub PrintFooterEdit
 	$Page->Merge($PreviewPage);
 	
 	$Page->Print("</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">内容編集</td><td>");
-	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=FOOT_TEXT>");
+	$Page->Print("<tr><td class=\"DetailTitle\" width=\"10%\">内容編集</td><td>");
+	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=FOOT_TEXT rows=\"11\" cols=\"80\">");
 	
 	# フッタ内容テキストの表示
 	$data =~ s/&/&amp;/g;
@@ -391,7 +391,7 @@ sub PrintMETAEdit
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\" width=\"10%\">内容編集</td><td>");
-	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=META_TEXT>");
+	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=META_TEXT rows=\"11\" cols=\"80\">");
 	
 	# フッタ内容テキストの表示
 	$data =~ s/&/&amp;/g;
@@ -629,6 +629,8 @@ sub PrintBoardGuardDSLEdit {
 				name="BGDSL"
 				spellcheck="false"
 				wrap="off"
+				rows="11"
+				cols="80"
 		>
 HTML
 		# HTMLエスケープ
