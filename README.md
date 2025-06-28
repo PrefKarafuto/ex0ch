@@ -9,7 +9,7 @@ https://github.com/PrefKarafuto/ex0ch/wiki
   
 ## 今後の開発予定機能   
 - [ ] 過去ログ周りを整備
-- [ ] タイムラインの実装
+- [+] タイムラインの実装
 - [ ] 検索関連をJSに
 - [ ] read.html
 - [ ] スクリプトをPHPで書き換え
