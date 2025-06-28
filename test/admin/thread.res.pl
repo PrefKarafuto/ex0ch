@@ -279,7 +279,7 @@ sub PrintResList
 			}
 		}
 	}
-	my $regstr = qr/\Q$BBSurl\E\/([A-Za-z0-9_]+)\/(\d{10})(?:\/((?:l\d+|\d+-\d+|\d+-|-\d+|\d+)?))?/;
+	my $regstr = qr/(\Q$BBSurl\E\/([A-Za-z0-9_]+)\/(\d{10})(?:\/((?:l\d+|\d+-\d+|\d+-|-\d+|\d+)?))?)/;
 	
 	# レス一覧を出力
 	my $offset = $logsize - $datsize;
@@ -337,11 +337,11 @@ sub PrintResList
 
 		# 鯖内掲示板のURLをリンクに
 		$elem[3] =~ s{$regstr}{
-		my ($bbs_name, $thread_id, $disp_fmt) = ($1, $2, defined $3 ? $3 : '');
+		my ($url, $bbs_name, $thread_id, $disp_fmt) = ($1, $2, $3, defined $4 ? $4 : '');
 
 		if (exists $keySet{$bbs_name}) {
 			my $bbs_key = $keySet{$bbs_name};
-			qq{<a href="javascript:SetOption('TARGET_BBS','$bbs_key');SetOption('TARGET_THREAD','$thread_id');SetOption('DISP_FORMAT','$disp_fmt');DoSubmit('thread.res','DISP','LIST');">[掲示板内リンク：$bbs_name/$thread_id/$disp_fmt]</a>}
+			qq{<a href="javascript:SetOption('TARGET_BBS','$bbs_key');SetOption('TARGET_THREAD','$thread_id');SetOption('DISP_FORMAT','$disp_fmt');DoSubmit('thread.res','DISP','LIST');">$url</a>}
 		}
 		else {
 			${^MATCH};

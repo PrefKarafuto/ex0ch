@@ -18,7 +18,7 @@ use JSON;
 use LWP::UserAgent;
 use File::Path;
 use File::Copy;
-use Storable qw(lock_store lock_retrieve);
+use Storable qw(lock_nstore lock_retrieve);
 use CGI::Carp qw(fatalsToBrowser warningsToBrowser);
 
 # 実行時間の計測開始 (デバッグ用)

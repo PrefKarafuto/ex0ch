@@ -21,7 +21,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
-use Storable qw(lock_store lock_retrieve);
+use Storable qw(lock_nstore lock_retrieve);
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -459,7 +459,7 @@ sub LoadAttr
 				
 				# スレッドIDごとのファイルに保存
 				eval {
-					lock_store($this->{'ATTR'}->{$id}, $new_path);
+					lock_nstore($this->{'ATTR'}->{$id}, $new_path);
 				};
 				if ($@) {
 					warn "Failed to store data to $new_path: $@";
@@ -508,7 +508,7 @@ sub LoadAttrAll
         $thread_id =~ s/\.cgi$//;  # 拡張子を削除
         
         eval {
-            my $data = lock_retrieve($filepath);
+            my $data = lock_nretrieve($filepath);
             $this->{'ATTR'}->{$thread_id} = $data if defined $data;
         };
         if ($@) {
@@ -535,7 +535,7 @@ sub SaveAttr
 
     # データをファイルに保存
     eval {
-        lock_store($this->{'ATTR'}->{$threadID}, $AttrPath);
+        lock_nstore($this->{'ATTR'}->{$threadID}, $AttrPath);
     };
     if ($@) {
         warn "Failed to store data to $AttrPath: $@";
@@ -567,7 +567,7 @@ sub SaveAttrAll
         
         # データをファイルに保存
         eval {
-            lock_store($this->{'ATTR'}->{$thread_id}, $AttrPath);
+            lock_nstore($this->{'ATTR'}->{$thread_id}, $AttrPath);
         };
         if ($@) {
             warn "Failed to store data to $AttrPath: $@";

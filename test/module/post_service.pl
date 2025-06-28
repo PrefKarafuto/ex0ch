@@ -13,7 +13,7 @@ use Digest::MD5;
 use JSON;
 use File::Copy;
 use Encode qw(encode);
-use Storable qw(lock_store lock_retrieve dclone);
+use Storable qw(lock_nstore lock_retrieve dclone);
 use warnings;
 no warnings 'once';
 
@@ -2376,7 +2376,7 @@ sub CaptchaAuthentication
 					# 認証時とIP一致
 					$sid = $authed_sid->{'sid'};
 					$Sys->Set('SID',$sid);
-					lock_store({'crtime'=>time}, "$Dir/sid-$sid.cgi");
+					lock_nstore({'crtime'=>time}, "$Dir/sid-$sid.cgi");
 					chmod 0600, "$Dir/sid-$sid.cgi";
 					unlink $codeFile;
 
@@ -2401,7 +2401,7 @@ sub CaptchaAuthentication
 				$auth_code = substr($ctx->hexdigest, 0, 6);
 				my $issueCodeFile = "$Dir/code-$auth_code.cgi";
 
-				lock_store({'sid'=>$sid,'ip_addr'=>$ENV{'REMOTE_ADDR'},'crtime'=>time}, $issueCodeFile);
+				lock_nstore({'sid'=>$sid,'ip_addr'=>$ENV{'REMOTE_ADDR'},'crtime'=>time}, $issueCodeFile);
 				chmod 0600, $issueCodeFile;
 				$Sys->Set('PASSWORD', $auth_code);
 

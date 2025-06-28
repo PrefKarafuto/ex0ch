@@ -29,7 +29,7 @@ sub execute
     use Digest::MD5;
     use File::Glob ':bsd_glob';
     use MIME::Base64;
-    use Storable qw(lock_store lock_retrieve);
+    use Storable qw(lock_nstore lock_retrieve);
 
     use CGI::Session;
 
@@ -50,7 +50,7 @@ sub execute
         value => $value,
         time => $time,
         };
-        lock_store($hash_table, $filename);
+        lock_nstore($hash_table, $filename);
         chmod 0600, $filename,
     }
 
