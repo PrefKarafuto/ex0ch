@@ -441,6 +441,8 @@ sub PrintBBSCaptcha
 	my $subject = &$sanitize($Form->Get('subject'));
 	my $key = &$sanitize($Form->Get('key'));
 	my $fi = $Form->Get('from_index');
+
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
 	
 	# cookie情報の出力
 	$Cookie->Set('countsession', $Sys->Get('SID'));
@@ -458,7 +460,7 @@ sub PrintBBSCaptcha
 
  <meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
- <link rel="stylesheet" href="./datas/design.css" type="text/css">
+ <link rel="stylesheet" href="$data_url/design.css" type="text/css">
  <title>■ Captcha認証 ■</title>
 HTML
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');

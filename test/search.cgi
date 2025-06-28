@@ -105,7 +105,6 @@ sub PrintHead
 	$Banner->Load($Sys);
 
 	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
-	$data_url =~ s/^https?://;
 
 	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print(<<HTML);
