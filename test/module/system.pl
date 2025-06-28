@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード(未使用)
-		'VERSION'	=> 'ex0ch BBS dev-r191 20250623',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r192 20250628',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -326,7 +326,7 @@ sub InitSystemValue
 		'BANMAX'		=> 10,									# スレッドあたり最大BAN可能人数
 		'NINLVMAX'		=> 40,									# 忍法帖Lv最大値
 		'HIDE_HITS'		=> 1,									# 規制ユーザー非公開
-		'CM_THEME'		=> 'eclipse',							# CodeMirror テーマ
+		'CM_THEME'		=> 'abcdef',							# CodeMirror テーマ
 		'REFRESH_MODE'	=> 'default',							# 書き込み後の遷移先
 
 		'COOKIE_EXPIRY'	=> 30,									# Cookie期限

@@ -207,7 +207,7 @@ sub SetMenuList
 	}
 	# 管理グループ設定権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_BGDSLEDIT, $bbs)) {
-		$Base->SetMenu("BoardGuard DSLの編集(実験的)","'bbs.edit','DISP','BGDSL'");
+		$Base->SetMenu("BoardGuard DSLの編集","'bbs.edit','DISP','BGDSL'");
 		$bAuth = 1;
 	}
 	if ($bAuth) {
@@ -602,7 +602,7 @@ sub PrintBoardGuardDSLEdit {
     my ($Page, $SYS, $Form) = @_;
     my ($dsl_text, $isAuth);
 
-    $SYS->Set('_TITLE', 'BBS BoardGuard Edit');
+    $SYS->Set('_TITLE', 'BBS BoardGuard DSL Edit');
 
     # DSLエンジン読み込み
     require './module/dsl_engine.pl';

@@ -477,7 +477,7 @@ sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout, $is_selected);
 	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -499,6 +499,7 @@ sub PrintOtherSetting
 	$nin_exp	= $SYS->Get('NIN_EXPIRY');
 	$pass_exp	= $SYS->Get('PASS_EXPIRY');
 	$logout		= $SYS->Get('LOGOUT');
+	$is_selected= $SYS->Get('CM_THEME');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
@@ -567,6 +568,33 @@ sub PrintOtherSetting
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">その他</td></tr>\n");
 	$Page->Print("<tr><td>管理画面からの自動ログアウト時間</td>");
 	$Page->Print("<td><input type=text size=2 name=LOGOUT value=\"$logout\">分間操作なしでログアウト(無記入または0で三十分)</td></tr>\n");
+
+	# テーマ名のリスト
+	my @themes = (
+		'default', '3024-day', '3024-night', 'abbott', 'abcdef', 'ambiance',
+		'ayu-dark', 'ayu-mirage', 'base16-dark', 'base16-light', 'bespin',
+		'blackboard', 'cobalt', 'colorforth', 'darcula', 'dracula',
+		'duotone-dark', 'duotone-light', 'eclipse', 'elegant', 'erlang-dark',
+		'gruvbox-dark', 'hopscotch', 'icecoder', 'idea', 'isotope',
+		'juejin', 'lesser-dark', 'liquibyte', 'lucario', 'material',
+		'material-darker', 'material-palenight', 'material-ocean', 'mbo',
+		'mdn-like', 'midnight', 'monokai', 'moxer', 'neat', 'neo', 'night',
+		'nord', 'oceanic-next', 'panda-syntax', 'paraiso-dark',
+		'paraiso-light', 'pastel-on-dark', 'railscasts', 'rubyblue', 'seti',
+		'shadowfox', 'solarized dark', 'solarized light', 'the-matrix',
+		'tomorrow-night-bright', 'tomorrow-night-eighties', 'ttcn', 'twilight',
+		'vibrant-ink', 'xq-dark', 'xq-light', 'yeti', 'yonce', 'zenburn',
+	);
+
+	# セレクトボックス生成
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">エディタのテーマ</td></tr>\n");
+	$Page->Print("<tr><td>HTML/BGDSL編集画面のエディタのテーマを設定します。</td>");
+	$Page->Print("<td><select name=\"CM_THEME\">\n");
+	for my $theme (@themes) {
+		my $sel = ($theme eq $is_selected) ? ' selected="selected"' : '';
+		$Page->Print("<option value=\"$theme\" $sel>$theme</option>\n");
+	}
+	$Page->Print("</select></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -601,7 +629,7 @@ sub PrintPlusViewSetting
 	my $Prlink		= $SYS->Get('PRLINK');
 	my $Msec		= $SYS->Get('MSEC');
 	my $hide_hits	= $SYS->Get('HIDE_HITS');
-	my $refresh_mode	= $SYS->Get('REFRESH_MODE');
+	my $refresh_mode= $SYS->Get('REFRESH_MODE');
 	
 	my $bannerindex	= ($Banner & 3 ? 'checked' : '');
 	my $banner		= ($Banner & 5 ? 'checked' : '');
@@ -790,8 +818,9 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr><td>bbs.cgi</td>");
 	$Page->Print("<td>各掲示板の設定で有効化してください</td></tr>\n");
 
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">BoardGuard DSL(実験的)</td></tr>\n");
-	$Page->Print("<tr><td>強力な複合式ユーザー規制を有効化する(注意：<a href=\"https://github.com/PrefKarafuto/ex0ch/wiki/BoardGuard-DSL\">このDSLの文法・機能</a>をしっかり理解していないと、datやデータファイルが破損する恐れがあります！)</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">BoardGuard DSL（高度）</td></tr>\n");
+	$Page->Print("<tr><td>条件付きユーザー規制を有効化する<br><small>注意：<a href=\"https://github.com/PrefKarafuto/ex0ch/wiki/BoardGuard-DSL\">");
+	$Page->Print("このDSLの文法・機能</a>を十分に把握した上で使用してください。datやデータファイルが破損する恐れがあります。</small></td>\n");
 	$Page->Print("<td><input type=checkbox name=BGDSL $bgdsl value=on></td></tr>\n");
 
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
@@ -1219,6 +1248,7 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('COOKIE_EXPIRY', $Form->Get('COOKIE_EXPIRY'));
 	$SYSTEM->Set('AUTH_EXPIRY', $Form->Get('AUTH_EXPIRY'));
 	$SYSTEM->Set('LOGOUT', $Form->Get('LOGOUT'));
+	$SYSTEM->Set('CM_THEME', $Form->Get('CM_THEME'));
 	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
 	
 	$SYSTEM->Save();
