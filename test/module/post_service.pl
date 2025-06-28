@@ -442,7 +442,15 @@ sub ReadyBeforeWrite
 
 			my %out = %{ $dsl->GetOutResult };
 
-			# 変更を反映
+			# 禁則文字変換
+			$out{message}	=~ s/<>/&lt;&gt;/g;
+			$out{message}	=~ s/\r\n|\r|\n/<br>/g;
+			$out{mail}		=~ s/<>/&lt;&gt;/g;
+			$out{mail}		=~ s/\r\n|\r|\n|<br>/ /g;
+			$out{name}		=~ s/<>/&lt;&gt;/g;
+			$out{name}		=~ s/\r\n|\r|\n|<br>/ /g;
+			$out{title}		=~ s/<>/&lt;&gt;/g;
+			$out{title}		=~ s/\r\n|\r|\n|<br>/ /g;
 			$Form->Set('MESSAGE',$out{message});
 			$Form->Set('mail', $out{mail});
 			$Form->Set('FROM', $out{name});
