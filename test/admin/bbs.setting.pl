@@ -713,6 +713,7 @@ sub PrintCommandSetting
 	my $setsubowner	= $setBitMask & 2 ** 21 ? 'checked' : '';
 	my $setvoteban	= $setBitMask & 2 ** 22 ? 'checked' : '';
 	my $setloadattr	= $setBitMask & 2 ** 23 ? 'checked' : '';
+	my $setcap		= $setBitMask & 2 ** 24 ? 'checked' : '';
 
 	my $resmax = $Setting->Get('BBS_MAX_RES') || $Sys->Get('RESMAX');
 	my $setvotenum = $Setting->Get('BBS_VOTE');
@@ -798,6 +799,9 @@ sub PrintCommandSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">副主（!sub:[>>レス番]）</td><td>");
 	$Page->Print("<input type=checkbox name=SUB value=2097152 $setsubowner>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">強制キャップ（!cap:[>>レス番]:[キャップ名]）</td><td>");
+	$Page->Print("<input type=checkbox name=CAP value=16777216 $setcap>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">BAN投票（!vote:[>>レス番]） </td><td>");
 	$Page->Print("<input type=checkbox name=VOTE value=4194304 $setvoteban>有効</td></tr>");
@@ -1315,7 +1319,7 @@ sub FunctionCommandSetting
 	
 	my $commandSet = 0;
 	my @List = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
-					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE ATTR);
+					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE ATTR CAP);
 
 	foreach (@List) {
 		# 入力チェック	

@@ -369,6 +369,12 @@ sub ReadyBeforeWrite
 				}
 			}
 			elsif($commandAuth || (GetSessionID($Sys,$Threads,1)||$Threads->GetAttr($threadid,'sub')) eq $Sys->Get('SID')){
+				if($Threads->GetAttr($threadid,'sub') eq $Sys->Get('SID')){
+					my @clear_bits = (8, 21);
+					my $mask = 0;
+					$mask |= 1 << $_ for @clear_bits;
+					$CommandSet &= ~$mask;
+				}
 				Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 			}
 
@@ -881,14 +887,14 @@ sub Command
 		}
 	}
 	#強制キャップ
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!cap:&gt;&gt;([1-9][0-9]*):(.*)(<br>|$)/ && ($setBitMask & 2 ** 23)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!cap:&gt;&gt;([1-9][0-9]*):(.*)(<br>|$)/ && ($setBitMask & 2 ** 24)){
 		my $target = GetSessionID($Sys,$Threads,$2);
 		if($target){
 			if($Set->Get('BBS_NAME_COUNT') >= length($3)){
 				require HTML::Entities;
-				my $cap_name = HTML::Entities::encode_entities($3);
+				my $cap_name = '▲'.HTML::Entities::encode_entities($3);
 				$Threads->SetAttr($threadid, 'cap',$target,$cap_name);
-				$Command .= "※&gt;&gt;$2に副主にキャップを付加しました<br>";
+				$Command .= "※&gt;&gt;$2にキャップを付加しました<br>";
 			}else{
 				$Command .= '※キャップ長すぎ<br>';
 			}
@@ -1757,7 +1763,7 @@ sub MakeDatLine
 	$Sys->Set('updown', $updown);
 
 	# pluginに渡す値を設定
-	$Sys->Set('_ERR', 0);
+	$Sys->Set('_ERR_', 0);
 	$Sys->Set('_NUM_', $Sys->Get('RESNUM') + 1);
 	$Sys->Set('_THREAD_', $this->{'THREADS'});
 	$Sys->Set('_SET_', $this->{'SET'});
@@ -1770,6 +1776,7 @@ sub MakeDatLine
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
 
+	# コマンドからの強制キャップ
 	if(!$Sys->Get('CAPID')){
 		my $cap_ref = $Threads->GetAttr($threadid,'cap');
 		my %cap = ();
@@ -1793,7 +1800,11 @@ sub MakeDatLine
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
 	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
-		$idpart .= '(主)' if (($sid eq GetSessionID($Sys,$Threads,1)) || $Sys->Equal('MODE', 1));
+		if (($sid eq GetSessionID($Sys,$Threads,1)) || $Sys->Equal('MODE', 1)){
+			$idpart .= '(主)';
+		}elsif($sid eq $Threads->GetAttr($threadid,'sub')){
+			$idpart .= '(副)';
+		}
 	}
 
 	$bepart = $Form->Get('BEID', '');
