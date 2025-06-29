@@ -286,7 +286,7 @@ sub PrintPhotoGallery
 	$common	= "onclick=\"DoSubmit('sys.gallery','FUNC'";
 	
 	$Page->Print("</div><hr></td></tr>\n");
-	$Page->Print("<tr><td align=left>");
+	$Page->Print("<tr><td align=left colspan=2>");
 	if($SYS->Get('IMGUR_ID') && $SYS->Get('IMGUR_SECRET') && $SYS->Get('UPLOAD') eq 'imgur'){
 		$Page->Print("<input type=button value=\" 履歴更新 \" $common,'REFRESH')\"> ");
 		$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")if ($isDelete);
