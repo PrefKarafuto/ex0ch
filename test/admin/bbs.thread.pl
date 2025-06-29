@@ -452,7 +452,7 @@ sub PrintThreadList
 	$Page->Print("<input type=button value=\"&#x1f53c;\" onclick=\"SetOption('UPDOWN','UP');$common3\"> ");		# 1上げ
 	$Page->Print("<input type=button value=\"&#x1f53d;\" onclick=\"SetOption('UPDOWN','DOWN');$common3\"> ");	# 1下げ
 	$Page->Print("<input type=button value=\"&#x23ec;\" onclick=\"SetOption('UPDOWN','BOTTOM');$common3\"> ");	# 最下部
-	$Page->Print("<input type=button value=\"ピン留め\" $common2,'PINNED')\"> ")				if ($isResAbone);
+	$Page->Print("<input type=button value=\"&#x1f4cc;\" $common2,'PINNED')\"> ")				if ($isResAbone);
 	$Page->Print("<span style=\"float:right\">");
 	$Page->Print("<input type=button value=\"subject更新\" $common2,'UPDATE')\"> ")			if ($isUpdate);
 	$Page->Print("<input type=button value=\"subject再作成\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
