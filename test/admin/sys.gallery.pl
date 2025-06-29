@@ -373,7 +373,7 @@ sub FunctionPhotoDelete
 #	@return	エラーコード
 #
 #------------------------------------------------------------------------------------------------------------
-sub FunctionHistoryrefresh
+sub FunctionHistoryRefresh
 {
 	my ($Sys, $Form, $pLog) = @_;
 	my ($BBSAid, $BBS, @bbsSet, $id, $bbs, $name);
