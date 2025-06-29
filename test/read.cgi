@@ -526,6 +526,7 @@ sub PrintReadFoot
 	my $permt = DAT::GetPermission($datPath);
 	my $perms = $Sys->Get('PM-STOP');
 	my $isstop = $permt == $perms;
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
 	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop &&!$threadStop &&!$threadPool) {
@@ -591,6 +592,7 @@ width:95%;
 margin:0;
 }
 </style>
+<script language="javascript" src="$data_url/script.js"></script>
 </body>
 </html>
 HTML

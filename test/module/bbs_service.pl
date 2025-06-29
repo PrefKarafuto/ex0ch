@@ -142,7 +142,6 @@ sub CreateSubback
 	my $title = $Set->Get('BBS_TITLE');
 	my $code = $this->{'CODE'};
 	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
-	$data_url =~ s/^https?://;
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
@@ -268,7 +267,6 @@ sub PrintIndexHead
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
 	my $data_url = $this->{'SYS'}->Get('SERVER').$this->{'SYS'}->Get('CGIPATH').$this->{'SYS'}->Get('DATA');
-	$data_url =~ s/^https?://;
 	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
 	my $ogpimage = $image;
@@ -292,7 +290,6 @@ sub PrintIndexHead
  <meta property="og:site_name" content="EXぜろちゃんねる">
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="$data_url/design.css">
- <script language="javascript" src="$data_url/script.js"></script>
  <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
@@ -722,6 +719,7 @@ sub PrintIndexFoot
 	'<input type="file" id="fileInput" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
     video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">
 	<button type="button" id="clearBtn" style="display:none">選択解除</button>' : '';
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
 
 	if ($Set->Get('BBS_READONLY') ne 'on'){
 	# スレッド作成画面を別画面で表示
@@ -814,6 +812,7 @@ img {
 	height:auto;
 }
 </style>
+ <script language="javascript" src="$data_url/script.js"></script>
 FOOT
 	
 	$Page->Print("</body>\n</html>\n");
