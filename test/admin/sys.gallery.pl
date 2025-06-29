@@ -135,7 +135,7 @@ sub SetMenuList
 	my ($Base, $pSys) = @_;
 	
 	$Base->SetMenu('画像一覧', "'sys.gallery','DISP','LIST'");
-	$Base->SetMenu('画像一覧', "'sys.gallery','DISP','GALLERY'");
+	$Base->SetMenu('ギャラリー', "'sys.gallery','DISP','GALLERY'");
 	# システム管理権限のみ
 	#if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_SYSADMIN, '*')) {
 	#}
@@ -265,8 +265,8 @@ sub PrintPhotoGallery
 	PrintPagenation($Page, $PhotoNum, $dispNum ,$dispSt, $common);
 	$Page->Print("</td><td align=right>");
 	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
-	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr><tr><td><hr>\n");
-	$Page->Print('<div class="gallery">');
+	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>");
+	$Page->Print("<tr><td colspan=2><hr><div class=\"gallery\">\n");
 	my @slice = @histSet[ $dispSt .. $dispEd - 1 ];
 	for my $offset (0 .. $#slice) {
 		my $photo = $slice[$offset];
