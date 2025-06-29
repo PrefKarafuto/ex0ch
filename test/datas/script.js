@@ -82,3 +82,24 @@ function updateTimelineTimes() {
 
 // 30秒ごとに時間表示を更新する
 setInterval(updateTimelineTimes, 30000);
+
+// 選択ファイル取り消し
+const fileInput = document.getElementById('fileInput');
+const clearBtn   = document.getElementById('clearBtn');
+
+// ファイルが選択されるたびに呼ばれる
+fileInput.addEventListener('change', () => {
+    if (fileInput.value) {
+    clearBtn.style.display = 'inline-block';
+    } else {
+    clearBtn.style.display = 'none';
+    }
+});
+
+// 取り消しボタンをクリックしたとき
+clearBtn.addEventListener('click', () => {
+    // ファイル選択をクリア
+    fileInput.value = '';
+    // ボタンを隠す
+    clearBtn.style.display = 'none';
+});

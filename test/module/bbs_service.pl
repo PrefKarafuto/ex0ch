@@ -719,8 +719,9 @@ sub PrintIndexFoot
 	my $tm = time;
 
 	my $upform = ($Sys->Get('UPLOAD') && $Sys->Get('IMGUR_ID') && $Sys->Get('IMGUR_SECRET') && $Set->Get('BBS_UPLOAD')) ? 
-	'<input type="file" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
-    video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">' : '';
+	'<input type="file" id="fileInput" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
+    video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">
+	<button type="button" id="clearBtn" style="display:none">選択解除</button>' : '';
 
 	if ($Set->Get('BBS_READONLY') ne 'on'){
 	# スレッド作成画面を別画面で表示
@@ -870,8 +871,9 @@ sub PrintThreadPreviewOne
 		# 書き込みフォームの表示
 		my $status = $this->{'SET'}->Equal('BBS_READONLY', 'caps') ? '必須' : '任意';
 		my $upform = ($Sys->Get('UPLOAD') && $Sys->Get('IMGUR_ID') && $Sys->Get('IMGUR_SECRET') && $Set->Get('BBS_UPLOAD')) ? 
-	'<input type="file" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
-    video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">' : '';
+	'<input type="file" id="fileInput" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
+    video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">
+	<button type="button" id="clearBtn" style="display:none">選択解除</button>' : '';
 		$Page->Print(<<KAKIKO);
   </dl>
   <hr>
