@@ -46,7 +46,6 @@ sub SearchCGI
 	$Form	= FORM->new(1);
 	$BBS	= new BBS_INFO;
 	
-	$Form->DecodeForm(1);
 	$Sys->Init();
 	$BBS->Load($Sys);
 	$capt = $Sys->Get('SEARCHCAP') ? Certification_Captcha($Sys,$Form) : 1;

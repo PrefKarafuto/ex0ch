@@ -88,7 +88,7 @@ sub Initialize
 		'CODE'	=> 'Shift_JIS',
 	);
 	
-	$pSYS->{'FORM'} = FORM->new($oSYS->Get('BBSGET')),
+	$pSYS->{'FORM'} = FORM->new;
 	
 	# システム初期化
 	$oSYS->Init();

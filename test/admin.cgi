@@ -62,7 +62,6 @@ sub AdminCGI
 	# フォーム情報を取得
 	require "./module/form.pl";
 	my $Form = FORM->new(0);
-	$Form->DecodeForm(0);
 	$Form->Set('FALSE', 0);
 	
 	# ログインユーザ設定

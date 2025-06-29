@@ -291,7 +291,6 @@ sub InitSystemValue
 		'PRLINK'	=> 'https://github.com/PrefKarafuto/ex0ch',	# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
-		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
 		'CONFVER'	=> '',										# システム設定ファイルのバージョン
 		'UPCHECK'	=> 7,										# 更新チェック間隔(日)
 		'LASTCHECK'	=> 0,										# 前回チェック時刻

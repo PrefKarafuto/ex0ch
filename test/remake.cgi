@@ -95,9 +95,6 @@ sub Initialize
 		'PAGE'		=> $Page,
 	);
 	
-	# form情報設定
-	$Sys->{'FORM'}->DecodeForm(1);
-	
 	# システム情報設定
 	if ($Sys->{'SYS'}->Init()) {
 		return 990;

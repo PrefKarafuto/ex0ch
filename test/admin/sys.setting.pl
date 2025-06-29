@@ -228,6 +228,7 @@ sub PrintSystemInfo
 		Net::DNS::Lite
 		Socket
 	), qw(
+		CGI
 		CGI::Cookie
 		CGI::Carp
 		CGI::Session
@@ -488,7 +489,7 @@ sub PrintLimitterSetting
 sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
-	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
+	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $upCheck, $imageTag);
 	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout, $is_selected);
 	my ($imgurID, $imgurSecret, $uploadMode, $is_local, $is_imgur, $is_none);
 	my ($common,$nin_exp,$pass_exp);
@@ -503,7 +504,6 @@ sub PrintOtherSetting
 	$headText	= $SYS->Get('HEADTEXT');
 	$headUrl	= $SYS->Get('HEADURL');
 	$FastMode	= $SYS->Get('FASTMODE');
-	$BBSGET		= $SYS->Get('BBSGET');
 	$upCheck	= $SYS->Get('UPCHECK');
 	$CSP		= $SYS->Get('CSP');
 	$ninLvmax	= $SYS->Get('NINLVMAX');
@@ -522,7 +522,6 @@ sub PrintOtherSetting
 	$imgtag		= ($imageTag == 1 ? 'checked' : '');
 	$pathInfo	= ($pathKind == 0 ? 'checked' : '');
 	$pathQuery	= ($pathKind == 1 ? 'checked' : '');
-	$bbsget		= ($BBSGET == 1 ? 'checked' : '');
 	$CSPSet		= ($CSP == 1 ? 'checked' : '');
 	$is_none	= ($uploadMode eq '' ? 'selected' : '');
 	$is_imgur	= ($uploadMode eq 'imgur' ? 'selected' : '');
@@ -571,10 +570,6 @@ sub PrintOtherSetting
 	
 	#$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
 	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
-	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgiのGETメソッド</td></tr>\n");
-	$Page->Print("<tr><td>bbs.cgiでGETメソッドを使用する</td>");
-	$Page->Print("<td><input type=checkbox name=BBSGET $bbsget value=on></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック</td></tr>\n");
 	$Page->Print("<tr><td>更新チェックの間隔</td>");
@@ -1273,7 +1268,6 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('PATHKIND', $Form->Get('PATHKIND'));
 	$SYSTEM->Set('IMGTAG', ($Form->Equal('IMGTAG', 'on') ? 1 : 0));
 	$SYSTEM->Set('FASTMODE', ($Form->Equal('FASTMODE', 'on') ? 1 : 0));
-	$SYSTEM->Set('BBSGET', ($Form->Equal('BBSGET', 'on') ? 1 : 0));
 	$SYSTEM->Set('UPCHECK', $Form->Get('UPCHECK'));
 	$SYSTEM->Set('NINLVMAX', $Form->Get('NINLVMAX'));
 	$SYSTEM->Set('NIN_EXPIRY', $Form->Get('NIN_EXPIRY'));
@@ -1301,7 +1295,6 @@ sub FunctionOtherSetting
 		push @$pLog, '　　　 　終了時間：' . $SYSTEM->Get('LINKED');
 		push @$pLog, '　　　 PATH種別：' . $SYSTEM->Get('PATHKIND');
 		push @$pLog, '　　　 index.htmlを更新しない：' . $SYSTEM->Get('FASTMODE');
-		push @$pLog, '　　　 bbs.cgiのGETメソッド：' . $SYSTEM->Get('BBSGET');
 		push @$pLog, '　　　 Cookie有効期限：' . $SYSTEM->Get('COOKIE_EXPIRY');
 		push @$pLog, '　　　 認証有効期限：' . $SYSTEM->Get('AUTH_EXPIRY');
 		push @$pLog, '　　　 忍法帖最大レベル：' . $SYSTEM->Get('NINLVMAX');

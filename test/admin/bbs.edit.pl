@@ -682,7 +682,6 @@ sub PrintLastEdit
 	my ($resmax, $resmax1, $resmaxz, $resmaxz1);
 	
 	$SYS->Set('_TITLE', 'BBS 1001 Edit');
-	$Form->DecodeForm(1);
 	
 	require './module/setting.pl';
 	my $Set = SETTING->new;
@@ -1115,7 +1114,6 @@ sub FunctionLastEdit
 			return 1000;
 		}
 	}
-	$Form->DecodeForm(1);
 	
 	# 1000.txtのパス
 	$lastPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/1000.txt';

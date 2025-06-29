@@ -162,7 +162,7 @@ sub Initialize
 	# システム情報設定
 	return $ZP::E_SYSTEM_ERROR if ($Sys->Init());
 	
-	my $Form = FORM->new($Sys->Get('BBSGET'));
+	my $Form = FORM->new();
 	
 	%$CGI = (
 		'SYS'		=> $Sys,
@@ -176,9 +176,6 @@ sub Initialize
 	
 	# 夢が広がりんぐ
 	$Sys->Set('MainCGI', $CGI);
-	
-	# form情報設定
-	$Form->DecodeForm(1);
 	
 	# ホスト情報設定(DNS逆引き)
 	#変数初期化チェックを挿入。
