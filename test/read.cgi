@@ -235,7 +235,6 @@ sub PrintReadHead
  <meta name="twitter:card" content="summary">
   <link rel="stylesheet" type="text/css" href="$data_url/design.css">
  <link rel="icon" href="$favicon">
- <script language="javascript" src="$data_url/script.js"></script>
 
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));

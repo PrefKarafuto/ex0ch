@@ -150,7 +150,6 @@ sub CreateSubback
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="$data_url/design.css">
- <script language="javascript" src="$data_url/script.js"></script>
 
 HTML
 	
