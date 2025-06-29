@@ -172,6 +172,7 @@ sub ImgurCallback
 {
 	my ($Sys, $Form) = @_;
 	return 0 unless $Sys->Get('IMGUR_ID') && $Sys->Get('IMGUR_SECRET');
+
 	my $code = $Form->Get('code');
 	if ($code && $Sys->Get('IMGUR_AUTH') =~ /\A[0-9A-Fa-f]{32}\z/ && $Sys->Get('IMGUR_AUTH') eq $Form->Get('state')) {
 		require './module/imgur.pl';

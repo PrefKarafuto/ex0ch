@@ -545,16 +545,17 @@ sub PrintOtherSetting
 			my $redirect = $Form->modCGI->url(-full=>1);
 			my $state = $ctx->hexdigest;
 			my $auth_url = $Img->GetAuthorizationUrl($redirect, $state);
-			
+
 			$SYS->Set('IMGUR_AUTH',$state);
 			$SYS->Save();
 			$imgurAuth = qq{<a href="$auth_url" target="_blank">Imgur 連携ページへ</a>};
 		}elsif($uploadMode ne 'imgur'){
+			$imgurAuth = '<small>Imgurを使う場合、設定とClient IDとClient Secretを保存したら<b>ここ</b>から連携ページに移動して連携を完了させてください。</small>';
 			$SYS->Set('IMGUR_AUTH','');
 			$SYS->Save();
 		}
 	}else{
-		$imgurAuth = 'Client IDとClient Secretを保存したら、<b>ここ</b>から連携ページに移動して設定を完了させてください。';
+		$imgurAuth = '<small>Imgurを使う場合、Client IDとClient Secretを保存したら<b>ここ</b>から連携ページに移動して連携を完了させてください。</small>';
 	}
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
