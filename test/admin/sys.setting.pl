@@ -490,6 +490,7 @@ sub PrintOtherSetting
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
 	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout, $is_selected);
+	my ($imgurID, $imgurSecret, $uploadMode, $is_local, $is_imgur, $is_none);
 	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -512,6 +513,9 @@ sub PrintOtherSetting
 	$pass_exp	= $SYS->Get('PASS_EXPIRY');
 	$logout		= $SYS->Get('LOGOUT');
 	$is_selected= $SYS->Get('CM_THEME');
+	$imgurID	= $SYS->Get('IMGUR_ID');
+	$imgurSecret= $SYS->Get('IMGUR_SECRET');
+	$uploadMode = $SYS->Get('UPLOAD');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
@@ -520,6 +524,9 @@ sub PrintOtherSetting
 	$pathQuery	= ($pathKind == 1 ? 'checked' : '');
 	$bbsget		= ($BBSGET == 1 ? 'checked' : '');
 	$CSPSet		= ($CSP == 1 ? 'checked' : '');
+	$is_none	= ($uploadMode eq '' ? 'selected' : '');
+	$is_imgur	= ($uploadMode eq 'imgur' ? 'selected' : '');
+	$is_local	= ($uploadMode eq 'local' ? 'selected' : '');
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
 	
@@ -532,6 +539,18 @@ sub PrintOtherSetting
 	$Page->Print("<td><input type=text size=60 name=HEADTEXT value=\"$headText\" ></td></tr>\n");
 	$Page->Print("<tr><td>上記テキストに貼るリンクのURL</td>");
 	$Page->Print("<td><input type=text size=60 name=HEADURL value=\"$headUrl\" ></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">画像アップロード</td></tr>\n");
+	$Page->Print("<tr><td>ユーザーによる画像のアップロード方法を指定します。</td>");
+	$Page->Print("<td><select name=\"CM_THEME\">\n");
+	$Page->Print("<option value=\"\" $is_none>なし</option>\n");
+	$Page->Print("<option value=\"imgur\" $is_imgur>Imgur</option>\n");
+	$Page->Print("<option value=\"local\" $is_local disabled>ローカル</option>\n");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>Imgur Client ID</td>");
+	$Page->Print("<td><input type=text size=60 name=IMGUR_ID value=\"$imgurID\"></td></tr>\n");
+	$Page->Print("<tr><td>Imgur Client Secret</td>");
+	$Page->Print("<td><input type=text size=60 name=IMGUR_SECRET value=\"$imgurSecret\"></td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
@@ -577,7 +596,7 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td>忍法帖Lv上限</td>");
 	$Page->Print("<td><input type=text size=2 name=NINLVMAX value=\"$ninLvmax\"></td></tr>\n");
 
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">その他</td></tr>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ログアウト</td></tr>\n");
 	$Page->Print("<tr><td>管理画面からの自動ログアウト時間</td>");
 	$Page->Print("<td><input type=text size=2 name=LOGOUT value=\"$logout\">分間操作なしでログアウト(無記入または0で三十分)</td></tr>\n");
 
@@ -1264,6 +1283,9 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('LOGOUT', $Form->Get('LOGOUT'));
 	$SYSTEM->Set('CM_THEME', $Form->Get('CM_THEME'));
 	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
+	$SYSTEM->Set('IMGUR_ID', $Form->Get('IMGUR_ID'));
+	$SYSTEM->Set('IMGUR_SECRET', $Form->Get('IMGUR_SECRET'));
+	$SYSTEM->Set('UPLOAD', $Form->Get('UPLOAD'));
 	
 	$SYSTEM->Save();
 	
@@ -1273,6 +1295,7 @@ sub FunctionOtherSetting
 		push @$pLog, '　　　 ヘッダテキスト：' . $SYSTEM->Get('HEADTEXT');
 		push @$pLog, '　　　 ヘッダURL：' . $SYSTEM->Get('HEADURL');
 		push @$pLog, '　　　 Imgurのみ変換許可：' . $SYSTEM->Get('IMGTAG');
+		push @$pLog, '　　　 画像アップロード：' . $SYSTEM->Get('UPLOAD');
 		push @$pLog, '　　　 URL自動リンク：' . $SYSTEM->Get('URLLINK');
 		push @$pLog, '　　　 　開始時間：' . $SYSTEM->Get('LINKST');
 		push @$pLog, '　　　 　終了時間：' . $SYSTEM->Get('LINKED');

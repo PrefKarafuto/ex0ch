@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード(未使用)
-		'VERSION'	=> 'ex0ch BBS dev-r192 20250628',			# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS dev-r193 20250629',			# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -312,6 +312,10 @@ sub InitSystemValue
 
 		'PROXYCHECK_API'	=> '',								# プロキシ判定API
 		'PROXYCHECK_APIKEY'	=> '',								# APIキー
+
+		'UPLOAD'		=> '',									# 画像アップロード
+		'IMGUR_ID'		=> '',									# Imgur ID
+		'IMGUR_SECRET'	=> '',									# Imgur シークレットID
 
 		'ADMINCAP'		=> '',									# admin.cgiにCaptchaを課すか
 		'SEARCHCAP'		=> '',									# search.cgiにCaptchaを課すか

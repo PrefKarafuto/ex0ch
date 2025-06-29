@@ -946,6 +946,7 @@ sub PrintOtherSetting
 	my $setHideNusi		= $Setting->Get('BBS_HIDENUSI');
 	my $setTitleID		= $Setting->Get('BBS_TITLEID');
 	my $setTLMAX		= $Setting->Get('BBS_TL_MAX');
+	my $setUpload		= $Setting->Get('BBS_UPLOAD');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
@@ -982,8 +983,8 @@ sub PrintOtherSetting
 
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
-	$Page->Print("<td class=\"DetailTitle\"><s>文字参照</s></td><td>");
-	$Page->Print("<input type=checkbox name=BBS_UNICODE checked value=on disabled>使用可能</td>");
+	$Page->Print("<td class=\"DetailTitle\">Imgur画像アップロード</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_UPLOAD value=\"$setUpload\">使用可能</td>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">トリップ桁数</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_TRIPCOLUMN value=\"$setTripColumn\"></td>");
@@ -1446,6 +1447,7 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_IMGTAG', ($Form->Equal('BBS_IMGTAG', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_UPLOAD', ($Form->Equal('BBS_UPLOAD', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TL_MAX', $Form->Get('BBS_TL_MAX'));
 	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	

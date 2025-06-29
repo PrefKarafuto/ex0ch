@@ -179,6 +179,10 @@ sub Write
 		return $err if $err;
 	}
 
+	# 画像アップロード
+	$err = $this->ImageUpload();
+	return $err if $err;
+
 	# Datに保存する一行データを生成
 	my $line = $this->MakeDatLine($Ninja, $idEnd, $slip_result);
 
@@ -1708,6 +1712,29 @@ sub LevelLimit
 			}
 		}
 	}
+	return 0;
+}
+
+sub ImageUpload
+{
+	my $this = shift;
+	my ($Sys, $Form, $Set, $imfh);
+	$Sys = $this->{'SYS'};
+	$Form = $this->{'FORM'};
+	$Set = $this->{'SET'};
+
+	return 0 if (!$Sys->Get('UPLOAD') || !$Sys->Get('IMGUR_ID') || !$Sys->Get('IMGUR_SECRET') || !$Set->Get('BBS_UPLOAD'));
+
+	$imfh = $Form->modCGI()->upload('image_file');
+	return 0 unless fileno(FH);
+
+	require './module/imgur.pl';
+	my $Img = IMGUR->new;
+	$Img->Load($Sys);
+	my ($err, $img_url) = $Img->Upload($imfh);
+	return $err if $err;
+
+	$Form->Set('MESSAGE',$Form->Get('MESSAGE')."<br>$img_url") if $img_url;
 	return 0;
 }
 
