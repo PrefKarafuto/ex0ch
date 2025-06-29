@@ -1715,28 +1715,106 @@ sub LevelLimit
 	return 0;
 }
 
-sub ImageUpload
-{
-	my $this = shift;
-	my ($Sys, $Form, $Set, $imfh);
-	$Sys = $this->{'SYS'};
-	$Form = $this->{'FORM'};
-	$Set = $this->{'SET'};
+# Imgurアップロード
+sub ImageUpload {
+    my $this = shift;
+    my ($Sys, $Form, $Set, $imfh);
+    $Sys  = $this->{SYS};
+    $Form = $this->{FORM};
+    $Set  = $this->{SET};
 
-	return 0 if (!$Sys->Get('UPLOAD') || !$Sys->Get('IMGUR_ID') || !$Sys->Get('IMGUR_SECRET') || !$Set->Get('BBS_UPLOAD'));
+    return 0
+      if !$Sys->Get('UPLOAD')
+      || !$Sys->Get('IMGUR_ID')
+      || !$Sys->Get('IMGUR_SECRET')
+      || !$Set->Get('BBS_UPLOAD');
 
-	$imfh = $Form->modCGI()->upload('image_file');
-	return 0 unless fileno(FH);
+    $imfh = $Form->modCGI()->upload('image_file');
+    return 0 unless fileno($imfh);
 
-	require './module/imgur.pl';
-	my $Img = IMGUR->new;
-	$Img->Load($Sys);
-	my ($err, $img_url) = $Img->Upload($imfh);
-	return $err if $err;
+    # --- ヘッダー Content-Type を取得 ---
+    my $info        = $Form->modCGI()->uploadInfo($imfh);
+    my $mime_header = $info->{'Content-Type'} || '';
 
-	$Form->Set('MESSAGE',$Form->Get('MESSAGE')."<br>$img_url") if $img_url;
-	return 0;
+    # --- File::Type が使えるなら中身も判定 ---
+    my $mime_body = '';
+    my $ft_loaded = 0;
+    eval {
+        require File::Type;
+        File::Type->import();
+        my $ft = File::Type->new();
+        $mime_body = $ft->mime_type($imfh);
+        $ft_loaded = 1;
+        1;
+    };
+
+    # --- 許可リスト定義 ---
+    my %static_allow = map { $_ => 1 }
+      qw(image/jpeg image/png image/gif image/apng image/tiff);
+    my %anim_allow = map { $_ => 1 }
+      qw(image/gif image/apng);
+    my %video_allow = map { $_ => 1 }
+      qw(
+      video/mp4    video/mpeg   video/avi   video/webm
+      video/quicktime video/x-matroska video/x-flv
+      video/x-msvideo video/x-ms-wmv
+    );
+
+    # --- 形式チェック ---
+    my $ok = 0;
+    # ヘッダーのみで通るケース
+    if ( $static_allow{$mime_header}
+       or $anim_allow{$mime_header}
+       or $video_allow{$mime_header}
+    ) {
+        $ok = 1;
+    }
+    # かつ File::Type で判定できるなら二重チェック
+    if ( $ok && $ft_loaded ) {
+        $ok = (
+               ($static_allow{$mime_body})
+            or ($anim_allow{$mime_body})
+            or ($video_allow{$mime_body})
+        );
+    }
+
+    unless ($ok) {
+        return $ZP::E_IMG_FAIEDPOST;
+    }
+
+    # --- サイズチェック ---
+    my $pos  = tell($imfh);
+    seek($imfh, 0, 2);
+    my $size = tell($imfh);
+    seek($imfh, $pos, 0);
+
+    # どの閾値を使うか決定
+    my $max_size;
+    if ( $static_allow{$mime_header} ) {
+        $max_size = 50 * 1024 * 1024;
+    }
+    else {
+        # アニメ or 動画扱い
+        $max_size = 200 * 1024 * 1024;
+    }
+
+    if ( $size > $max_size ) {
+        return $ZP::E_IMG_FAIEDPOST;
+    }
+
+    # --- Imgur へアップロード ---
+    require './module/imgur.pl';
+    my $Img = IMGUR->new;
+    $Img->Load($Sys);
+    my ($err, $img_url) = $Img->Upload($imfh);
+    return $err if $err;
+
+    if ($img_url) {
+        $Form->Set('MESSAGE', $Form->Get('MESSAGE') . "<br>$img_url");
+    }
+    return 0;
 }
+
 
 sub MakeDatLine
 {
