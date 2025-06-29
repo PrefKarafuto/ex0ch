@@ -491,7 +491,7 @@ sub PrintOtherSetting
 	my ($Page, $SYS, $Form) = @_;
 	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $upCheck, $imageTag);
 	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout, $is_selected);
-	my ($imgurID, $imgurSecret, $uploadMode, $is_local, $is_imgur, $is_none);
+	my ($imgurID, $imgurSecret, $imgurAuth, $uploadMode, $is_local, $is_imgur, $is_none);
 	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -515,6 +515,7 @@ sub PrintOtherSetting
 	$is_selected= $SYS->Get('CM_THEME');
 	$imgurID	= $SYS->Get('IMGUR_ID');
 	$imgurSecret= $SYS->Get('IMGUR_SECRET');
+	$imgurAuth	= $SYS->Get('IMGUR_AUTH');
 	$uploadMode = $SYS->Get('UPLOAD');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
@@ -526,6 +527,21 @@ sub PrintOtherSetting
 	$is_none	= ($uploadMode eq '' ? 'selected' : '');
 	$is_imgur	= ($uploadMode eq 'imgur' ? 'selected' : '');
 	$is_local	= ($uploadMode eq 'local' ? 'selected' : '');
+
+	if($imgurSecret && $imgurID){
+		require './module/imgur.pl';
+		my $Img = IMGUR->new;
+		$Img->Load($SYS);
+		if($imgurAuth eq ''){
+			my $redirect = $Form->modCGI->url(-full=>1);
+			my $auth_url = $Img->GetAuthorizationUrl($redirect);
+			$imgurAuth = qq{<p><a href="$auth_url" target="_blank">Imgur 連携へ</a></p>};
+		}elsif($imgurAuth eq 'authed'){
+			$imgurAuth = "Imgur 連携済み";
+		}
+	}else{
+		$imgurAuth = 'Imgur IDとImgur Secretを設定したら、ここから 連携ページ に移動して設定を完了させてください。';
+	}
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
 	
@@ -550,6 +566,8 @@ sub PrintOtherSetting
 	$Page->Print("<td><input type=text size=60 name=IMGUR_ID value=\"$imgurID\"></td></tr>\n");
 	$Page->Print("<tr><td>Imgur Client Secret</td>");
 	$Page->Print("<td><input type=text size=60 name=IMGUR_SECRET value=\"$imgurSecret\"></td></tr>\n");
+	$Page->Print("<tr><td>Imgur 連携</td>");
+	$Page->Print("<td>$imgurAuth</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");

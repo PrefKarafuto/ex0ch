@@ -2,269 +2,342 @@ package IMGUR;
 use strict;
 use warnings;
 use utf8;
+use open IO => ':encoding(cp932)';
 use LWP::UserAgent;
+use HTTP::Request::Common qw(POST GET DELETE);
 use MIME::Base64;
 use JSON;
 use Storable qw(lock_retrieve lock_nstore);
-use File::Spec;
 use Digest::MD5 qw(md5_hex);
 
 #------------------------------------------------------------------------------------------------------------
 # コンストラクタ
-# @return IMGURオブジェクト
 #------------------------------------------------------------------------------------------------------------
 sub new {
     my $class = shift;
-    my $this = {
+    my $self = {
         client_id     => undef,
         client_secret => undef,
         access_token  => undef,
         refresh_token => undef,
+        expires_at    => 0,          # トークン有効期限タイムスタンプ
+        username      => undef,      # OAuth 時のアカウント名
         state_file    => undef,
-        history       => [],
+        history       => [],         # { time, mode, link, deletehash, digest, title, description, information }
     };
-    bless $this, $class;
-    return $this;
+    return bless $self, $class;
 }
 
 #------------------------------------------------------------------------------------------------------------
 # 設定と履歴読み込み
-# @param $Sys SYSTEMオブジェクト
 #------------------------------------------------------------------------------------------------------------
 sub Load {
-    my ($this, $Sys) = @_;
-    # 設定取得
-    $this->{client_id}     = $Sys->Get('IMGUR_ID');
-    $this->{client_secret} = $Sys->Get('IMGUR_SECRET');
-    # 状態ファイルパス
-    $this->{state_file}    = File::Spec->catfile('.', $Sys->Get('INFO'), '/imgur_history.cgi');
-    # 状態読み込み
-    my $st = eval { lock_retrieve($this->{state_file}) };
-    chmod($Sys->Get('PM-ADM'), $this->{state_file});
-    if (ref $st eq 'HASH') {
-        $this->{refresh_token} = $st->{refresh_token};
-        $this->{access_token}  = $st->{access_token};
-        $this->{history}       = $st->{history} || [];
+    my ($self, $Sys) = @_;
+
+    $self->{client_id}     = $Sys->Get('IMGUR_ID');
+    $self->{client_secret} = $Sys->Get('IMGUR_SECRET');
+
+    # 先頭スラッシュを外して相対パスに
+    $self->{state_file} = '.' . $Sys->Get('INFO') . '/imgur_history.cgi';
+
+    # 状態ファイル読み込み
+    my $st = eval { lock_retrieve($self->{state_file}) };
+    if ($@) {
+        warn "IMGUR: state_file read error: $@";
     }
+    if (ref $st eq 'HASH') {
+        $self->{access_token}  = $st->{access_token};
+        $self->{refresh_token} = $st->{refresh_token};
+        $self->{expires_at}    = $st->{expires_at}    // 0;
+        $self->{username}      = $st->{username};
+        $self->{history}       = $st->{history}       || [];
+    }
+
+    # パーミッション設定
+    chmod $Sys->Get('PM-ADM'), $self->{state_file};
+}
+
+#------------------------------------------------------------------------------------------------------------
+# 履歴保存
+#------------------------------------------------------------------------------------------------------------
+sub Save {
+    my $self = shift;
+    my $st = {
+        access_token  => $self->{access_token},
+        refresh_token => $self->{refresh_token},
+        expires_at    => $self->{expires_at},
+        username      => $self->{username},
+        history       => $self->{history},
+    };
+    eval { lock_nstore($st, $self->{state_file}) }
+      or warn "IMGUR: state_file write error: $@";
+}
+
+#------------------------------------------------------------------------------------------------------------
+# 最初の OAuth 認可用 URL を返す
+#------------------------------------------------------------------------------------------------------------
+sub GetAuthorizationUrl {
+    my ($self, $redirect_uri) = @_;
+    return unless $self->{client_id};
+    return sprintf
+      "https://api.imgur.com/oauth2/authorize?client_id=%s&response_type=code&state=APPLICATION_STATE&redirect_uri=%s",
+      $self->{client_id}, $redirect_uri;
+}
+
+#------------------------------------------------------------------------------------------------------------
+# OAuth Code からアクセストークンを取得（最初の一度だけ）
+#------------------------------------------------------------------------------------------------------------
+sub ObtainAccessToken {
+    my ($self, $code) = @_;
+    my $ua = LWP::UserAgent->new( timeout => 10 );
+    my $res = $ua->post(
+        'https://api.imgur.com/oauth2/token',
+        Content => {
+            client_id     => $self->{client_id},
+            client_secret => $self->{client_secret},
+            grant_type    => 'authorization_code',
+            code          => $code,
+        },
+    );
+    return 0 unless $res->is_success;
+    my $json = eval { decode_json($res->decoded_content) };
+    return 0 unless $json && $json->{access_token};
+
+    $self->{access_token}  = $json->{access_token};
+    $self->{refresh_token} = $json->{refresh_token};
+    $self->{expires_at}    = time + ($json->{expires_in} || 0);
+    return 1;
+}
+
+#------------------------------------------------------------------------------------------------------------
+# アクセストークン有効期限チェック＆必要時リフレッシュ
+#------------------------------------------------------------------------------------------------------------
+sub _ensure_access_token {
+    my $self = shift;
+    # OAuth 未設定 or anonymous 時はスキップ
+    return 1 unless $self->{refresh_token};
+
+    if (!$self->{access_token} || time >= $self->{expires_at}) {
+        return $self->_refresh_access_token();
+    }
+    return 1;
+}
+
+#------------------------------------------------------------------------------------------------------------
+# リフレッシュトークンからアクセストークン更新
+#------------------------------------------------------------------------------------------------------------
+sub _refresh_access_token {
+    my $self = shift;
+    my $ua = LWP::UserAgent->new( timeout => 10 );
+    my $res = $ua->post(
+        'https://api.imgur.com/oauth2/token',
+        Content => {
+            client_id     => $self->{client_id},
+            client_secret => $self->{client_secret},
+            grant_type    => 'refresh_token',
+            refresh_token => $self->{refresh_token},
+        },
+    );
+    return 0 unless $res->is_success;
+    my $json = eval { decode_json($res->decoded_content) };
+    return 0 unless $json && $json->{access_token};
+
+    $self->{access_token}  = $json->{access_token};
+    $self->{refresh_token} = $json->{refresh_token} // $self->{refresh_token};
+    $self->{expires_at}    = time + ($json->{expires_in} || 0);
+    return 1;
 }
 
 #------------------------------------------------------------------------------------------------------------
 # 画像アップロード
-# @param $this IMGURオブジェクト
-# @param $upload_fh ファイルハンドル
-# @param $title    タイトル (任意)
-# @param $desc     説明 (任意)
 # @return ($err_code, $link)
 #------------------------------------------------------------------------------------------------------------
 sub Upload {
-    my ($this, $upload_fh, $title, $desc, $info) = @_;
+    my ($self, $upload_fh, $title, $desc, $info) = @_;
     binmode $upload_fh;
     local $/;
     my $data = <$upload_fh>;
-    # 重複検出用 MD5
+
+    # 重複 MD5 チェック
     my $digest = md5_hex($data);
-    if (my ($old) = grep { $_->{digest} eq $digest } @{$this->{history}}) {
+    if (my ($old) = grep { $_->{digest} eq $digest } @{ $self->{history} }) {
         return (0, $old->{link});
     }
 
-    # アクセストークンを更新（リフレッシュトークンから再取得）
-    if ($this->{refresh_token}) {
-        my $err = $this->_refresh_access_token();
-        return $ZP::E_IMG_FAILEDGETTOKEN unless $err;
+    # トークン有効性チェック
+    unless ($self->_ensure_access_token()) {
+        return ($ZP::E_IMG_FAILEDGETTOKEN, undef);
     }
 
     # 認証ヘッダ
-    my $auth = $this->{access_token} ?
-        "Bearer $this->{access_token}" :
-        "Client-ID $this->{client_id}";
+    my $auth = $self->{access_token}
+      ? "Bearer $self->{access_token}"
+      : "Client-ID $self->{client_id}";
 
-    # Base64 エンコード
+    # Base64
     my $img64 = encode_base64($data, '');
-    my $ua = LWP::UserAgent->new(timeout => 10);
-    my $res = $ua->post(
-        'https://api.imgur.com/3/image',
-        'Authorization' => $auth,
-        Content => {
-            image       => $img64,
-            type        => 'base64',
-            title       => $title // '',
-            description => $desc  // '',
-        },
-    );
-    return $ZP::E_IMG_FAIEDPOST unless $res->is_success;
-    my $json = decode_json($res->decoded_content);
-    return $ZP::E_IMG_FAILEDUPLOAD unless $json->{success};
 
-    # 結果
+    # リクエスト作成
+    my $req = POST 'https://api.imgur.com/3/image',
+      Content_Type => 'application/x-www-form-urlencoded',
+      Content      => {
+        image       => $img64,
+        type        => 'base64',
+        title       => $title // '',
+        description => $desc  // '',
+      };
+    $req->header( Authorization => $auth );
+
+    my $ua  = LWP::UserAgent->new( timeout => 10 );
+    my $res = $ua->request($req);
+    return ($ZP::E_IMG_FAILEDPOST, undef) unless $res->is_success;
+
+    my $json = eval { decode_json($res->decoded_content) };
+    return ($ZP::E_IMG_FAILEDUPLOAD, undef) unless $json && $json->{success};
+
     my $link       = $json->{data}{link};
     my $deletehash = $json->{data}{deletehash};
 
     # 履歴追加
-    push @{$this->{history}}, {
-        time       => time,
-        mode       => $this->{access_token} ? 'oauth' : 'anonymous',
-        link       => $link,
-        deletehash => $deletehash,
-        digest     => $digest,
-        title      => $title // '',
-        description=> $desc  // '',
-        information=> $info  // '',
+    push @{ $self->{history} }, {
+        time        => time,
+        mode        => $self->{access_token} ? 'oauth' : 'anonymous',
+        link        => $link,
+        deletehash  => $deletehash,
+        digest      => $digest,
+        title       => $title // '',
+        description => $desc  // '',
+        information => $info  // '',
     };
-
-    $this->Save();
+    $self->Save;
     return (0, $link);
 }
 
 #------------------------------------------------------------------------------------------------------------
 # 画像削除
-# @param $this IMGURオブジェクト
-# @param $deletehash 削除ハッシュ
 # @return $success
 #------------------------------------------------------------------------------------------------------------
 sub Delete {
-    my ($this, $deletehash) = @_;
+    my ($self, $deletehash) = @_;
     return 0 unless $deletehash;
 
-    # アクセストークンを更新（リフレッシュトークンから再取得）
-    if ($this->{refresh_token}) {
-        my $err = $this->_refresh_access_token();
-        return 0 unless $err;
+    unless ($self->_ensure_access_token()) {
+        warn "IMGUR: token refresh failed";
+        return 0;
     }
 
-    my $auth = $this->{access_token} ?
-        "Bearer $this->{access_token}" :
-        "Client-ID $this->{client_id}";
-    
-    my $ua = LWP::UserAgent->new(timeout => 10);
-    my $res = $ua->delete(
-        "https://api.imgur.com/3/image/$deletehash",
-        'Authorization' => $auth,
-    );
+    my $auth = $self->{access_token}
+      ? "Bearer $self->{access_token}"
+      : "Client-ID $self->{client_id}";
+
+    my $ua = LWP::UserAgent->new( timeout => 10 );
+    my $url;
+
+    if ($self->{access_token}) {
+        # OAuth 時は /account/{username}/image/{deletehash}
+        unless ($self->{username}) {
+            # username が未取得なら一度取得
+            my $req0 = GET 'https://api.imgur.com/3/account/me',
+              Authorization => $auth;
+            my $res0 = $ua->request($req0);
+            if ($res0->is_success) {
+                my $j = eval { decode_json($res0->decoded_content) };
+                $self->{username} = $j->{data}{url} if $j && $j->{data}{url};
+                $self->Save;
+            }
+        }
+        $url = sprintf "https://api.imgur.com/3/account/%s/image/%s",
+          $self->{username}, $deletehash;
+    }
+    else {
+        # 匿名アップロード
+        $url = "https://api.imgur.com/3/image/$deletehash";
+    }
+
+    my $req = HTTP::Request->new( DELETE => $url );
+    $req->header( Authorization => $auth );
+    my $res = $ua->request($req);
     return 0 unless $res->is_success;
-    my $json = decode_json($res->decoded_content);
-    return 0 unless $json->{success};
 
-    # 履歴から除外
-    my @new = grep { $_->{deletehash} ne $deletehash } @{$this->{history}};
-    $this->{history} = \@new;
+    my $json = eval { decode_json($res->decoded_content) };
+    return 0 unless $json && $json->{success};
 
-    $this->Save();
+    # 履歴から除去
+    $self->{history} = [
+        grep { $_->{deletehash} ne $deletehash } @{ $self->{history} }
+    ];
+    $self->Save;
     return 1;
 }
 
 #------------------------------------------------------------------------------------------------------------
-# 履歴取得
-# @param $this IMGURオブジェクト
-#------------------------------------------------------------------------------------------------------------
-sub GetHist {
-    my $this = shift;
-    return @{ $this->{history} };
-}
-
-#------------------------------------------------------------------------------------------------------------
-# 履歴保存
-# @param $this IMGURオブジェクト
-#------------------------------------------------------------------------------------------------------------
-sub Save {
-    my $this = shift;
-    my $st = {
-        access_token  => $this->{access_token},
-        refresh_token => $this->{refresh_token},
-        history       => $this->{history},
-    };
-    lock_nstore($st, $this->{state_file});
-}
-
-#------------------------------------------------------------------------------------------------------------
-# リンク存在チェック
-# @param $this IMGURオブジェクト
-# @param $link チェック対象リンク
-# @return 履歴エントリ (存在時) / undef (未存在)
-#------------------------------------------------------------------------------------------------------------
-sub ExistsLink {
-    my ($this, $link) = @_;
-    for my $entry (@{$this->{history}}) {
-        return $entry if defined $entry->{link} && $entry->{link} eq $link;
-    }
-    return;
-}
-
-#------------------------------------------------------------------------------------------------------------
-# アップロード一覧取得＆ローカル履歴更新
-# @param $this IMGURオブジェクト
+# 自分のアカウント画像一覧取得＆ページネーション対応
 # @return 更新件数
 #------------------------------------------------------------------------------------------------------------
 sub Refresh {
-    my $this = shift;
-    return 0 unless $this->{access_token};
+    my $self = shift;
+    return 0 unless $self->{access_token};
+    return 0 unless $self->_ensure_access_token();
 
-    # アクセストークン更新
-    if ($this->{refresh_token}) {
-        my $ok = eval { $this->_refresh_access_token() };  
-        return 0 if $@;
+    my $auth = "Bearer $self->{access_token}";
+    my $ua   = LWP::UserAgent->new( timeout => 10 );
+    my @all_imgs;
+    my $page = 0;
+
+    while (1) {
+        my $url = "https://api.imgur.com/3/account/me/images?page=$page";
+        my $req = GET $url, Authorization => $auth;
+        my $res = $ua->request($req);
+        last unless $res->is_success;
+
+        my $json = eval { decode_json($res->decoded_content) };
+        last unless $json && $json->{success};
+
+        my $data = $json->{data};
+        last unless ref $data eq 'ARRAY' && @$data;
+        push @all_imgs, @$data;
+        $page++;
     }
 
-    my $auth = "Bearer $this->{access_token}";
-    my $ua = LWP::UserAgent->new(timeout => 10);
-    my $res = $ua->get(
-        'https://api.imgur.com/3/account/me/images',
-        'Authorization' => $auth,
-    );
-    return 0 unless $res->is_success;
-    my $json = decode_json($res->decoded_content);
-    return 0 unless $json->{success};
-
-    # APIから全画像を取得
-    my @imgs = @{ $json->{data} };
-    # 既存履歴コピー
-    my @old_hist = @{$this->{history}};
-
     # 新履歴生成
-    my @new_history = map {
+    my @old = @{ $self->{history} };
+    my @new = map {
         my $img = $_;
-        # 同じdeletehashの既存エントリを探す
-        my ($old) = grep { $_->{deletehash} eq $img->{deletehash} } @old_hist;
+        my ($old_ent) = grep { $_->{deletehash} eq $img->{deletehash} } @old;
         {
             time        => $img->{datetime},
             mode        => 'oauth',
             link        => $img->{link},
             deletehash  => $img->{deletehash},
-            digest      => $old ? $old->{digest} : undef,
+            digest      => $old_ent ? $old_ent->{digest} : undef,
             title       => $img->{title}       || '',
             description => $img->{description} || '',
-            information => $old ? $old->{information} : undef,
+            information => $old_ent  ? $old_ent->{information} : undef,
         }
-    } @imgs;
-    $this->{history} = \@new_history;
-    $this->Save();
-    return scalar @new_history;
+    } @all_imgs;
+
+    $self->{history} = \@new;
+    $self->Save;
+    return scalar @new;
 }
 
 #------------------------------------------------------------------------------------------------------------
-# アクセストークン更新
-# @param $this IMGURオブジェクト
+# 履歴取得
 #------------------------------------------------------------------------------------------------------------
-sub _refresh_access_token {
-    my $this = shift;
-    my $ua = LWP::UserAgent->new(timeout => 10);
-    my $res = $ua->post(
-        'https://api.imgur.com/oauth2/token',
-        Content => {
-            client_id     => $this->{client_id},
-            client_secret => $this->{client_secret},
-            grant_type    => 'refresh_token',
-            refresh_token => $this->{refresh_token},
-        },
-    );
-    return 0 unless $res->is_success;
-    my $json = decode_json($res->decoded_content);
-    return 0 unless $json->{access_token};
+sub GetHist {
+    my $self = shift;
+    return @{ $self->{history} };
+}
 
-    # 新しいトークンを設定
-    $this->{access_token}  = $json->{access_token};
-    $this->{refresh_token} = $json->{refresh_token} // $this->{refresh_token};
-    
-    return 1;
+#------------------------------------------------------------------------------------------------------------
+# リンク存在チェック
+#------------------------------------------------------------------------------------------------------------
+sub ExistsLink {
+    my ($self, $link) = @_;
+    for my $e (@{ $self->{history} }) {
+        return $e if defined $e->{link} && $e->{link} eq $link;
+    }
+    return;
 }
 
 1;

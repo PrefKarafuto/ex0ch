@@ -315,6 +315,7 @@ sub InitSystemValue
 		'UPLOAD'		=> '',									# 画像アップロード
 		'IMGUR_ID'		=> '',									# Imgur ID
 		'IMGUR_SECRET'	=> '',									# Imgur シークレットID
+		'IMGUR_AUTH'	=> '',									# Imgur API 認証状況
 
 		'ADMINCAP'		=> '',									# admin.cgiにCaptchaを課すか
 		'SEARCHCAP'		=> '',									# search.cgiにCaptchaを課すか

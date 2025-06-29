@@ -106,10 +106,18 @@ sub PrintLogin
 {
 	my ($Sys, $Page, $Form) = @_;
 
+	my $auth = ImgurCallback($Sys, $Form);
+
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
 	my $Captcha = $sitekey && $classname && $Sys->Get('ADMINCAP') ? "<div class=\"$classname\" data-sitekey=\"$sitekey\"></div><br>" : '';
 	my $text = $sitekey && $classname && $Captcha ? 'Captcha認証に失敗したか、' : "" ;
+	$text .= 'ユーザ名もしくはパスワードが間違っています。';
+
+	if($auth){
+		$text = 'Imgur連携に成功しました。' if $auth eq 'success';
+		$text = 'Imgur連携に失敗しました。' if $auth eq 'failed';
+	}
 	
 $Page->Print(<<HTML);
   <center>
@@ -117,7 +125,7 @@ $Page->Print(<<HTML);
 HTML
 	
 	if ($Form->Get('FALSE') == 1) {
-		$Page->Print("    <div class=\"xExcuted\">${text}ユーザ名もしくはパスワードが間違っています。</div>\n");
+		$Page->Print("    <div class=\"xExcuted\">${text}</div>\n");
 	}
 	if($Captcha){
 		$Page->Print("<script src=\"./datas/form-captcha.js\" defer></script>");
@@ -158,6 +166,27 @@ $Page->Print(<<HTML);
   
 HTML
 	
+}
+
+sub ImgurCallback
+{
+	my ($Sys, $Form) = @_;
+	return 0 unless $Sys->Get('IMGUR_ID') || $Sys->Get('IMGUR_SECRET');
+
+	if (my $code = $Form->Get('code')) {
+		require './module/imgur.pl';
+
+		my $Img = IMGUR->new;
+		$Img->Load($Sys);
+    	my $err = $Img->ObtainAccessToken($code);
+		return 'failed' unless $err;
+
+		$Img->Save();
+		$Sys->Set('IMGUR_AUTH','authed');
+		$Sys->Save();
+		return 'success';
+	}
+	return 0;
 }
 
 #============================================================================================================
