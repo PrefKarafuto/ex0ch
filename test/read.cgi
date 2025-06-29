@@ -551,6 +551,9 @@ sub PrintReadFoot
 		}
 
 		my $status = $Set->Equal('BBS_READONLY', 'caps') ? '必須' : '任意';
+		my $upform = ($Sys->Get('UPLOAD') && $Sys->Get('IMGUR_ID') && $Sys->Get('IMGUR_SECRET') && $Set->Get('BBS_UPLOAD')) ? 
+	'<input type="file" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
+    video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">' : '';
 
 		$Page->Print(<<HTML);
 <a id="bottom"></a>
@@ -561,7 +564,7 @@ sub PrintReadFoot
 <input type="hidden" name="from_index" value="0">
 <input type="submit" value="　書き込む　"><br class="smartphone">
 <input type="text" name="FROM" value="$cookName" size="19" placeholder="名前（任意）">
-<input type="text" name="mail" value="$cookMail" size="19" placeholder="コマンド・Cap（$status）"><br>
+<input type="text" name="mail" value="$cookMail" size="19" placeholder="コマンド・Cap（$status）"> $upform<br>
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
