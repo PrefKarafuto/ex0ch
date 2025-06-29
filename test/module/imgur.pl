@@ -77,10 +77,10 @@ sub Save {
 # 最初の OAuth 認可用 URL を返す
 #------------------------------------------------------------------------------------------------------------
 sub GetAuthorizationUrl {
-    my ($self, $redirect_uri) = @_;
+    my ($self, $redirect_uri, $state) = @_;
     return unless $self->{client_id};
     return sprintf
-      "https://api.imgur.com/oauth2/authorize?client_id=%s&response_type=code&state=APPLICATION_STATE&redirect_uri=%s",
+      "https://api.imgur.com/oauth2/authorize?client_id=%s&response_type=code&state=$state&redirect_uri=%s",
       $self->{client_id}, $redirect_uri;
 }
 

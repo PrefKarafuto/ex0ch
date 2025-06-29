@@ -171,18 +171,20 @@ HTML
 sub ImgurCallback
 {
 	my ($Sys, $Form) = @_;
-	return 0 unless $Sys->Get('IMGUR_ID') || $Sys->Get('IMGUR_SECRET');
-
-	if (my $code = $Form->Get('code')) {
+	return 0 unless $Sys->Get('IMGUR_ID') && $Sys->Get('IMGUR_SECRET');
+	my $code = $Form->Get('code');
+	if ($code && $Sys->Get('IMGUR_AUTH') =~ /\A[0-9A-Fa-f]{32}\z/ && $Sys->Get('IMGUR_AUTH') eq $Form->Get('state')) {
 		require './module/imgur.pl';
-
 		my $Img = IMGUR->new;
 		$Img->Load($Sys);
     	my $err = $Img->ObtainAccessToken($code);
-		return 'failed' unless $err;
-
+		unless ($err){
+			$Sys->Set('IMGUR_AUTH','');
+			return 'failed';
+		}else{
+			$Sys->Set('IMGUR_AUTH','authed');
+		}
 		$Img->Save();
-		$Sys->Set('IMGUR_AUTH','authed');
 		$Sys->Save();
 		return 'success';
 	}

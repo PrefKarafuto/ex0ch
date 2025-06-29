@@ -532,15 +532,29 @@ sub PrintOtherSetting
 		require './module/imgur.pl';
 		my $Img = IMGUR->new;
 		$Img->Load($SYS);
-		if($imgurAuth eq ''){
-			my $redirect = $Form->modCGI->url(-full=>1);
-			my $auth_url = $Img->GetAuthorizationUrl($redirect);
-			$imgurAuth = qq{<p><a href="$auth_url" target="_blank">Imgur 連携へ</a></p>};
-		}elsif($imgurAuth eq 'authed'){
+		if($imgurAuth eq 'authed'){
 			$imgurAuth = "Imgur 連携済み";
+		}elsif($uploadMode eq 'imgur'){
+			require Digest::MD5;
+			my $ctx = Digest::MD5->new;
+			$ctx->add('ex0ch ID Generation');
+			$ctx->add(':', $SYS->Get('SERVER'));
+			$ctx->add(':', $SYS->Get('SECURITY_KEY'));
+			$ctx->add(':', rand);
+
+			my $redirect = $Form->modCGI->url(-full=>1);
+			my $state = $ctx->hexdigest;
+			my $auth_url = $Img->GetAuthorizationUrl($redirect, $state);
+			
+			$SYS->Set('IMGUR_AUTH',$state);
+			$SYS->Save();
+			$imgurAuth = qq{<a href="$auth_url" target="_blank">Imgur 連携ページへ</a>};
+		}elsif($uploadMode ne 'imgur'){
+			$SYS->Set('IMGUR_AUTH','');
+			$SYS->Save();
 		}
 	}else{
-		$imgurAuth = 'Imgur IDとImgur Secretを設定したら、ここから 連携ページ に移動して設定を完了させてください。';
+		$imgurAuth = 'Client IDとClient Secretを保存したら、<b>ここ</b>から連携ページに移動して設定を完了させてください。';
 	}
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
