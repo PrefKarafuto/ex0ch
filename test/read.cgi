@@ -557,7 +557,7 @@ sub PrintReadFoot
 
 		$Page->Print(<<HTML);
 <a id="bottom"></a>
-<form method="POST" action="$cgipath/bbs.cgi">
+<form method="POST" action="$cgipath/bbs.cgi" enctype="multipart/form-data">
 <input type="hidden" name="bbs" value="$bbs">
 <input type="hidden" name="key" value="$key">
 <input type="hidden" name="time" value="$tm">

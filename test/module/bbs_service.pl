@@ -747,7 +747,7 @@ FORM
 		my $status = $Set->Equal('BBS_READONLY', 'caps') || $Set->Equal('BBS_THREADCAPONLY', 'checked') ? '必須' : '任意';
 		$Page->Print(<<FORM);
 
-<form method="POST" action="$cgipath/bbs.cgi">
+<form method="POST" action="$cgipath/bbs.cgi" enctype="multipart/form-data">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>
@@ -875,7 +875,7 @@ sub PrintThreadPreviewOne
 		$Page->Print(<<KAKIKO);
   </dl>
   <hr>
-  <form method="POST" action="$cgiPath/bbs.cgi">
+  <form method="POST" action="$cgiPath/bbs.cgi" enctype="multipart/form-data">
    <blockquote>
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">

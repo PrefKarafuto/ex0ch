@@ -1730,7 +1730,7 @@ sub ImageUpload {
       || !$Set->Get('BBS_UPLOAD');
 
     $imfh = $Form->modCGI()->upload('image_file');
-    return 0 unless fileno($imfh);
+    return 0 unless defined $imfh && fileno($imfh);
 
     # --- ヘッダー Content-Type を取得 ---
     my $info        = $Form->modCGI()->uploadInfo($imfh);
@@ -1907,7 +1907,7 @@ sub MakeDatLine
 	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
 		if (($sid eq GetSessionID($Sys,$Threads,1)) || $Sys->Equal('MODE', 1)){
 			$idpart .= '(主)';
-		}elsif($sid eq $Threads->GetAttr($threadid,'sub')){
+		}elsif($sid && $sid eq $Threads->GetAttr($threadid,'sub')){
 			$idpart .= '(副)';
 		}
 	}
