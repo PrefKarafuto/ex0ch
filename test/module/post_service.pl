@@ -1626,6 +1626,7 @@ sub MakeSlip
 	return ($slip_result,$idEnd);
 }
 
+# 忍法帖のロード
 sub LoadNinpocho
 {
 	my $this = shift;
@@ -1815,7 +1816,7 @@ sub ImageUpload {
     return 0;
 }
 
-
+# Datのデータ形式に整形
 sub MakeDatLine
 {
 	my $this = shift;
@@ -1932,6 +1933,7 @@ sub MakeDatLine
 	return "$name<>$mail<>$info<>$text<>$subject\n";
 }
 
+# datファイルに追加
 sub AddDatFile
 {
 	my $this = shift;
@@ -1973,6 +1975,7 @@ sub AddDatFile
 	return ($err,$resNum);
 }
 
+# ログに追加
 sub AddLog
 {
 	my $this = shift;
@@ -1988,6 +1991,7 @@ sub AddLog
 	$Log->Save($Sys);
 }
 
+# 新規スレたての場合
 sub AddSubjectNewThread
 {
 	my $this = shift;
