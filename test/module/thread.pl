@@ -506,9 +506,9 @@ sub LoadAttrAll
         my $thread_id = $file;
         $thread_id =~ s/^attr_//;  # "attr_"を削除
         $thread_id =~ s/\.cgi$//;  # 拡張子を削除
-        
+		
         eval {
-            my $data = lock_nretrieve($filepath);
+            my $data = lock_retrieve($filepath);
             $this->{'ATTR'}->{$thread_id} = $data if defined $data;
         };
         if ($@) {
@@ -532,7 +532,6 @@ sub SaveAttr
     $threadID //= $Sys->Get('KEY');
 
 	my $AttrPath = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . "/info/attr/attr_$threadID.cgi";
-
     # データをファイルに保存
     eval {
         lock_nstore($this->{'ATTR'}->{$threadID}, $AttrPath);

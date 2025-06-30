@@ -477,18 +477,18 @@ sub PrintThreadList
 	$Page->Print("<tr><td colspan=5 align=left>");
 
 	# スレッド表示順変更ボタン
-	$Page->Print("<input type=button value=\"&#x1F504;\" onclick=\"SetOption('UPDATE','1');$common3\"> ");	
-	$Page->Print("<input type=button value=\"&#x23eb;\" onclick=\"SetOption('UPDOWN','TOP');$common3\"> ");		# 最上部
-	$Page->Print("<input type=button value=\"&#x1f53c;\" onclick=\"SetOption('UPDOWN','UP');$common3\"> ");		# 1上げ
-	$Page->Print("<input type=button value=\"&#x1f53d;\" onclick=\"SetOption('UPDOWN','DOWN');$common3\"> ");	# 1下げ
-	$Page->Print("<input type=button value=\"&#x23ec;\" onclick=\"SetOption('UPDOWN','BOTTOM');$common3\"> ");	# 最下部
-	$Page->Print("<input type=button value=\"&#x1f4cc;\" onclick=\"SetOption('PINNED','1');$common3\">  ")	if ($isResAbone);
+	$Page->Print("<input type=button title=\"index更新\" value=\"&#x1F504;\" onclick=\"SetOption('UPDATE','1');$common3\"> ");	
+	$Page->Print("<input type=button title=\"最上部へ移動\" value=\"&#x23eb;\" onclick=\"SetOption('UPDOWN','TOP');$common3\"> ");		# 最上部
+	$Page->Print("<input type=button title=\"一つ上へ移動\" value=\"&#x1f53c;\" onclick=\"SetOption('UPDOWN','UP');$common3\"> ");		# 1上げ
+	$Page->Print("<input type=button title=\"一つ下へ移動\" value=\"&#x1f53d;\" onclick=\"SetOption('UPDOWN','DOWN');$common3\"> ");	# 1下げ
+	$Page->Print("<input type=button title=\"最下部へ移動\" value=\"&#x23ec;\" onclick=\"SetOption('UPDOWN','BOTTOM');$common3\"> ");	# 最下部
+	$Page->Print("<input type=button title=\"ピン留め（管理画面のみ）\" value=\"&#x1f4cc;\" onclick=\"SetOption('PINNED','1');$common3\">  ")	if ($isResAbone);
 	$Page->Print("<span style=\"float:right\">");
 	$Page->Print("<input type=button value=\"subject更新\" $common2,'UPDATE')\"> ")			if ($isUpdate);
 	$Page->Print("<input type=button value=\"subject再作成\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
 	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")		if ($isResAbone && $tl_max);
 	$Page->Print("</span><hr>");
-	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ")				if ($isDelete);
+	$Page->Print("<input type=button value=\"　コピー　\" $common,'COPY')\"> ")				if ($isDelete);
 	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ")				if ($isDelete);
 	$Page->Print("<input type=button value=\"　停止　\" $common,'STOP')\"> ")				if ($isStop);
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
@@ -1241,8 +1241,8 @@ sub FunctionThreadDetailAttr
     require './module/thread.pl';
     
     my $Threads = THREAD->new;
-    $Threads->LoadAttrAll($Sys);
     my $target_thread = $Form->Get('TARGET_THREAD');
+	$Threads->LoadAttr($Sys, $target_thread);
 
     foreach my $attrkey (sort keys %threadAttr) {
         my $defAttr = $Threads->GetAttr($target_thread, $attrkey);
@@ -1293,7 +1293,7 @@ sub FunctionThreadDetailAttr
         $Threads->SetAttr($target_thread, $attrkey, $attr) if ($defAttr || $attr);
         push @$pLog, "[$attrkey]属性を".($attr ? '付加' : '解除');
     }
-    $Threads->SaveAttrAll($Sys);
+    $Threads->SaveAttr($Sys, $target_thread);
     
     return 0;
 }
