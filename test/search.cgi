@@ -91,10 +91,10 @@ sub PrintHead
 	@sTYPE	= $Form->GetAtArray('TYPE', 0);
 	
 	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0) | ($sTYPE[3] || 0);
-	$cTYPE[0] = ($types & 0x1 ? 'checked' : '');
-	$cTYPE[1] = ($types & 0x2 ? 'checked' : '');
-	$cTYPE[2] = ($types & 0x4 ? 'checked' : '');
-	$cTYPE[3] = ($types & 0x8 ? 'checked' : '');
+	$cTYPE[0] = ($types & 1 ? 'checked' : '');
+	$cTYPE[1] = ($types & 2 ? 'checked' : '');
+	$cTYPE[2] = ($types & 4 ? 'checked' : '');
+	$cTYPE[3] = ($types & 8 ? 'checked' : '');
 	
 	$BBSpath = $Sys->Get('BBSPATH');
 	

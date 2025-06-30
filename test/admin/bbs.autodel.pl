@@ -27,7 +27,7 @@ sub PrintResAutoDelete
 	my ($Page, $SYS, $Form, $BBS) = @_;
 	my ($common);
 	my ($name, $dir);
-	my ($sMODE, $sBBS, $sKEY, $sWORD, @sTYPE, @cTYPE, $types, $BBSpath, @bbsSet, $id);
+	my ($sWORD, @sTYPE, @cTYPE, @mcTYPE, @lcTYPE, $types, $BBSpath, @bbsSet, $id);
    
 	my $sanitize = sub {
 		$_ = shift;
@@ -37,21 +37,27 @@ sub PrintResAutoDelete
 		s/"/&#34;/g;#"
 		return $_;
 	};
-   
-	$sMODE  = "BBS";#&$sanitize($Form->Get('SMODE', ''));
-	$sBBS = &$sanitize($Form->Get('SBBS', ''));
-	$sKEY   = &$sanitize($Form->Get('KEY', ''));
+
 	$sWORD  = &$sanitize($Form->Get('WORD'));
-	@sTYPE  = $Form->GetAtArray('TYPE', 0);
 	$id = $Form->Get('TARGET_BBS', '');
-	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0) | ($sTYPE[3] || 0) | ($sTYPE[4] || 0) | ($sTYPE[5] || 0) | ($sTYPE[6] || 0);
-	$cTYPE[0] = ($types & 1 ? 'checked' : '');
-	$cTYPE[1] = ($types & 2 ? 'checked' : '');
-	$cTYPE[2] = ($types & 4 ? 'checked' : '');
-	$cTYPE[3] = ($types & 8 ? 'checked' : '');
-	$cTYPE[4] = ($types & 16 ? 'checked' : '');
-	$cTYPE[5] = ($types & 32 ? 'checked' : '');
-	$cTYPE[6] = ($types & 64 ? 'checked' : '');
+
+	# レス検索モードの設定
+	$types = 0;
+	@sTYPE  = $Form->GetAtArray('TYPE_CHECK', 0);
+	$types |= $_ for @sTYPE;
+	@cTYPE = map { ($types & (1 << $_)) ? 'checked' : '' } 0..4;
+
+	# ログ検索モードの設定
+	my $selected1 = $Form->Get('TYPE_RADIO') // '';
+	my @values1 = qw(ip host ua sid);
+	$selected1 = 'ip' unless grep { $_ eq $selected1 } @values1;
+	@lcTYPE = map { $_ eq $selected1 ? 'checked' : '' } @values1;
+
+	# 検索モードの設定
+	my $selected2 = $Form->Get('TYPE_MODE') // '';
+	my @values2 = qw(res res-delth log);
+	$selected2 = 'res' unless grep { $_ eq $selected2 } @values2;
+	@mcTYPE = map { $_ eq $selected2 ? 'checked' : '' } @values2;
    
 	$SYS->Set('_TITLE', 'Res Auto Delete');
    
@@ -64,15 +70,11 @@ sub PrintResAutoDelete
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<input type=hidden name=SBBS value=$id>");
 	$Page->Print(<<HTML);
-  <!--<tr>
-	<td>指定スレッドキー</td>
-	<td><input type=text size=20 name=KEY value="$sKEY"></td>
-  </tr>-->
   <tr>
 	<td>検索ワード(正規表現)</td>
 	<td>
 HTML
-	$Page->Print("<input type=text size=60 name=WORD onkeydown=\"go(event.keyCode);\" value=\"$sWORD\" accept-charset=\"Shift_JIS\">");
+	$Page->Print("<input type=text size=60 name=WORD onkeydown=\"go(event.keyCode);\" value=\"$sWORD\" accept-charset=\"Shift_JIS\" style=\"flex:1; max-width: 800px; width:100%\">");
    
 	$common = "DoSubmit('bbs.thread','DISP','AUTORESDEL')";
    
@@ -82,13 +84,23 @@ HTML
   <tr>
 	<td>検索種別</td>
 	<td>
-	  <input type="checkbox" name="TYPE" value="2" $cTYPE[1]>本文検索<br>
-	  <input type="checkbox" name="TYPE" value="1" $cTYPE[0]>名前検索<br>
-	  <input type="checkbox" name="TYPE" value="4" $cTYPE[2]>ID・日付検索<br>
-	  <input type="checkbox" name="TYPE" value="8" $cTYPE[3] disabled>IP検索<br>
-	  <input type="checkbox" name="TYPE" value="16" $cTYPE[4] disabled>HOST検索<br>
-	  <input type="checkbox" name="TYPE" value="32" $cTYPE[5] disabled>UA検索<br>
-	  <input type="checkbox" name="TYPE" value="64" $cTYPE[6] disabled>SessionID検索<br>
+	  <hr>
+	  <label><input type="radio" name="TYPE_MODE" value="res" $mcTYPE[0]>レス検索モード</label>
+	  <label>　<input type="radio" name="TYPE_MODE" value="res-delth" $mcTYPE[1] disabled>スレッド削除許可</label><br>
+
+	  <label><input type="checkbox" name="TYPE_CHECK" value="2" $cTYPE[1]>本文</label><br>
+	  <label><input type="checkbox" name="TYPE_CHECK" value="1" $cTYPE[0]>名前検索</label><br>
+	  <label><input type="checkbox" name="TYPE_CHECK" value="4" $cTYPE[2]>ID・日付</label><br>
+	  <label><input type="checkbox" name="TYPE_CHECK" value="16" $cTYPE[4]>メール</label><br>
+	  <label><input type="checkbox" name="TYPE_CHECK" value="8" $cTYPE[3] >スレタイ</label>
+	  
+	  <hr>
+	  <label><input type="radio" name="TYPE_MODE" value="log" $mcTYPE[2]>ログ検索モード</label>　
+
+	  <label><input type="radio" name="TYPE_RADIO" value="ip" $lcTYPE[0]>IPアドレス</label>
+	  <label><input type="radio" name="TYPE_RADIO" value="host" $lcTYPE[1]>HOST名</label>
+	  <label><input type="radio" name="TYPE_RADIO" value="ua" $lcTYPE[2]>ユーザーエージェント</label>
+	  <label><input type="radio" name="TYPE_RADIO" value="sid" $lcTYPE[3]>SessionID</label>
 	</td>
   </tr>
   <tr>
@@ -129,7 +141,7 @@ sub Search
 {
 	my ($Sys, $Form, $Page,$BBS) = @_;
 	my ($Search, $Mode, $Result, @elem, $n, $base, $word, $id, $dir);
-	my (@types, $Type);
+	my (@typesC, $TypeM, $TypeC, $TypeR);
 	my (@resList, %bbsCount, %threadCount);
    
 	require './module/admin_search.pl';
@@ -141,8 +153,10 @@ sub Search
 	$Mode = 1;
 	#my $BBS = $Sys->Get('BBS');
    
-	@types = $Form->GetAtArray('TYPE', 0);
-	$Type = ($types[0] || 0) | ($types[1] || 0) | ($types[2] || 0) | ($types[3] || 0) | ($types[4] || 0) | ($types[5] || 0) | ($types[6] || 0);
+	@typesC = $Form->GetAtArray('TYPE_CHECK', 0);
+	$TypeC = ($typesC[0] || 0) | ($typesC[1] || 0) | ($typesC[2] || 0) | ($typesC[3] || 0) | ($typesC[4] || 0);
+	$TypeM = $Form->Get('TYPE_MODE');
+	$TypeR = $Form->Get('TYPE_RADIO');
    
 	my $sanitize = sub {
 		$_ = shift;
@@ -156,8 +170,18 @@ sub Search
 	$dir = $BBS->Get('DIR', $id);
    
 	# 検索オブジェクトの設定と検索の実行
-	$Search->Create($Sys, $Mode, $Type, $id, $dir, $Form->Get('KEY', ''));
-	$Search->Run(&$sanitize($Form->Get('WORD')));
+	$Search->Create($Sys, $Mode, $TypeC, $id, $dir, $Form->Get('KEY', ''));
+	if($TypeM eq 'res'){
+		$Search->Run(&$sanitize($Form->Get('WORD')));
+	}elsif ($TypeM eq 'log' && $TypeR) {
+		my $str = $sanitize->($Form->Get('WORD'));
+		$Search->Run_LogS(
+		($TypeR eq 'ip') ? $str : undef,
+		($TypeR eq 'host') ? $str : undef,
+		($TypeR eq 'ua') ? $str : undef,
+		($TypeR eq 'sid') ? $str : undef,
+		);
+	}
    
 	if ($@ ne '') {
 		PrintSystemError($Page, $@);

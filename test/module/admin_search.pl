@@ -224,7 +224,7 @@ sub Search
 
 	if ($DAT->Load($this->{'SYS'}, $Path, 1)) {
 		my $pResultSet = $this->{'RESULTSET'};
-		my $type = $this->{'TYPE'} || 0x7;
+		my $type = $this->{'TYPE'} || 31;
 	   
 		# すべてのレス数でループ
 		for (my $i = 0 ; $i < $DAT->Size() ; $i++) {
@@ -232,22 +232,40 @@ sub Search
 			my $pDat = $DAT->Get($i);
 			my @elem = split(/<>/, $$pDat, -1);
 		   
-			# 名前検索
-			if ($type & 0x1) {
-				if ($elem[0] =~ s/($word)(?![^<>]*>)/<span class="res">$1<\/span> /g) {
+		   	# スレタイ検索
+			if (!$i && $type & 8) {
+				my $sub = $elem[4];
+				chomp $sub;
+				if ($sub =~ s/($word)(?![^<>]*>)/<span class="res">$1<\/span> /g) {
 					$bFind = 1;
 				}
 			}
-			# 本文検索
-			if ($type & 0x2) {
-				if ($elem[3] =~ s/($word)(?![^<>]*>)/<span class="res">$1<\/span> /g) {
-					$bFind = 1;
+
+			# スレタイ検索のみだったら飛ばす
+			unless ($type == 8){
+				# 名前検索
+				if ($type & 1) {
+					if ($elem[0] =~ s/($word)(?![^<>]*>)/<span class="res">$1<\/span> /g) {
+						$bFind = 1;
+					}
 				}
-			}
-			# ID or 日付検索
-			if ($type & 0x4) {
-				if ($elem[2] =~ s/($word)(?![^<>]*>)/<span class="res">$1<\/span> /g) {
-					$bFind = 1;
+				# 本文検索
+				if ($type & 2) {
+					if ($elem[3] =~ s/($word)(?![^<>]*>)/<span class="res">$1<\/span> /g) {
+						$bFind = 1;
+					}
+				}
+				# ID or 日付検索
+				if ($type & 4) {
+					if ($elem[2] =~ s/($word)(?![^<>]*>)/<span class="res">$1<\/span> /g) {
+						$bFind = 1;
+					}
+				}
+				# メール欄検索
+				if ($type & 16) {
+					if ($elem[1] =~ s/($word)(?![^<>]*>)/<span class="res">$1<\/span> /g) {
+						$bFind = 1;
+					}
 				}
 			}
 			if ($bFind) {
@@ -255,6 +273,7 @@ sub Search
 				$SetStr .= join('<>', @elem);
 				push @$pResultSet, $SetStr;
 			}
+			last if $type == 8;
 		}
 	}
 	$DAT->Close();
@@ -310,25 +329,25 @@ sub LogSearch
 
 				if ($ip_addr) {
 					$condition_count++;
-					if ($ip_addr eq $log_ip) {
+					if ($log_ip =~ /$ip_addr/) {
 						$match_count++;
 					}
 				}
 				if ($host) {
 					$condition_count++;
-					if ($host eq $log_host) {
+					if ($log_host =~ /$host/) {
 						$match_count++;
 					}
 				}
 				if ($ua) {
 					$condition_count++;
-					if ($ua eq $log_ua) {
+					if ($log_ua =~ /$ua/) {
 						$match_count++;
 					}
 				}
 				if ($sid) {
 					$condition_count++;
-					if ($sid eq $log_sid) {
+					if ($log_sid eq $sid) {
 						$match_count++;
 					}
 				}
