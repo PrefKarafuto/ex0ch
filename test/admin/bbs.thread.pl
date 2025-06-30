@@ -293,6 +293,10 @@ sub PrintThreadList
 	
 	require './module/thread.pl';
 	require './module/dat.pl';
+	require './module/setting.pl';
+	my $Set = SETTING->new;
+	$Set->Load($SYS);
+	my $resmax = $Set->Get('BBS_RES_MAX') || $SYS->Get('RESMAX');
 	$Threads = THREAD->new;
 	
 	$Threads->Load($SYS);
@@ -322,13 +326,43 @@ sub PrintThreadList
 
 	# フォームからの指示を取得
 	my $cmd = $Form->Get('UPDOWN');
+	my $cmd2 = $Form->Get('UPDATE');
+	my $cmd3 = $Form->Get('PINNED');
 
 	# 有効なコマンドなら実行
+	# スレッド順変更
 	if ( exists $offset_map{$cmd} ) {
 		my $offset = $offset_map{$cmd};
 		DATA_UTILS::move_threads($offset, \@threadSet, \@threadList);
 		$Threads->Set(undef, 'SORT', \@threadSet);
 		$Threads->Save($SYS);
+	}
+	# index更新
+	if ($cmd2) {
+		require './module/bbs_service.pl';
+		require './module/banner.pl';
+		my $BBSAid = BBS_SERVICE->new;
+		$SYS->Set('MODE', 'CREATE');
+		$BBSAid->{'SYS'} = $SYS;
+		$BBSAid->{'SET'} = $Set;
+		$BBSAid->{'THREADS'} = $Threads;
+		$BBSAid->{'CONV'} = DATA_UTILS->new;
+		$BBSAid->{'BANNER'} = BANNER->new;
+		$BBSAid->CreateIndex();
+		$BBSAid->CreateSubback();
+	}
+	# スレッドピン留め
+	my $num = @threadList;
+	if ($cmd3 && $num ==1){
+		if($pinnedThread eq $threadList[0]){
+			$BBS->Set($Form->Get('TARGET_BBS'),'PINNED','');
+			$pinnedThread = '';
+		}else{
+			$BBS->Set($Form->Get('TARGET_BBS'),'PINNED',$threadList[0]);
+			$pinnedThread = $threadList[0];
+		}
+		@threadList = ();	# 選択解除
+		$BBS->Save($SYS);
 	}
 	
 	# 権限取得
@@ -355,11 +389,6 @@ sub PrintThreadList
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Thread Key</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Res</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">Attribute</td></tr>\n");
-	
-	require './module/setting.pl';
-	my $Set = SETTING->new;
-	$Set->Load($SYS);
-	my $resmax = $Set->Get('BBS_RES_MAX') || $SYS->Get('RESMAX');
 
 	my @slice = @threadSet[ $dispSt .. $dispEd - 1 ];
 	unshift @slice, $pinnedThread if $pinnedThread;
@@ -448,11 +477,12 @@ sub PrintThreadList
 	$Page->Print("<tr><td colspan=5 align=left>");
 
 	# スレッド表示順変更ボタン
+	$Page->Print("<input type=button value=\"&#x1F504;\" onclick=\"SetOption('UPDATE','1');$common3\"> ");	
 	$Page->Print("<input type=button value=\"&#x23eb;\" onclick=\"SetOption('UPDOWN','TOP');$common3\"> ");		# 最上部
 	$Page->Print("<input type=button value=\"&#x1f53c;\" onclick=\"SetOption('UPDOWN','UP');$common3\"> ");		# 1上げ
 	$Page->Print("<input type=button value=\"&#x1f53d;\" onclick=\"SetOption('UPDOWN','DOWN');$common3\"> ");	# 1下げ
 	$Page->Print("<input type=button value=\"&#x23ec;\" onclick=\"SetOption('UPDOWN','BOTTOM');$common3\"> ");	# 最下部
-	$Page->Print("<input type=button value=\"&#x1f4cc;\" $common2,'PINNED')\"> ")				if ($isResAbone);
+	$Page->Print("<input type=button value=\"&#x1f4cc;\" onclick=\"SetOption('PINNED','1');$common3\">  ")	if ($isResAbone);
 	$Page->Print("<span style=\"float:right\">");
 	$Page->Print("<input type=button value=\"subject更新\" $common2,'UPDATE')\"> ")			if ($isUpdate);
 	$Page->Print("<input type=button value=\"subject再作成\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
@@ -468,8 +498,13 @@ sub PrintThreadList
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	
-	$Page->HTMLInput('hidden', 'DISPST', '');
+	# ボタン制御用
 	$Page->HTMLInput('hidden', 'UPDOWN', '');
+	$Page->HTMLInput('hidden', 'UPDATE', '');
+	$Page->HTMLInput('hidden', 'PINNED', '');
+	
+	# 表示指定用
+	$Page->HTMLInput('hidden', 'DISPST', '');
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
 }
 

@@ -959,18 +959,38 @@ sub PrintResponse
 	if ($contLine <= $dispLine || $n == 1) {
 		$Page->Print("：$elem[2]</dt>\n    <dd $aa>$elem[3]<br><br></dd>\n");
 	}
-	# 表示行数を超えたら省略表示を付加する
+	# 表示行数を超えたら折りたたみ表示にする
 	else {
-		my @dispBuff = split(/<br>/i, $elem[3]);
-		my $path = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), "${n}n");
-		
-		$Page->Print("：$elem[2]</dt>\n    <div $aa><dd>");
-		for (my $k = 0; $k < $dispLine; $k++) {
-			$Page->Print("$dispBuff[$k]<br>");
+		my @lines = split(/<br>/i, $elem[3]);
+		my $total     = @lines;
+		my $remaining = $total - $dispLine;
+
+		# 見出し部分
+		$Page->Print("：$elem[2]</dt>\n");
+		$Page->Print("    <dd $aa>\n");
+
+		# 最初の dispLine 行を全部出力
+		for my $k (0 .. $dispLine - 1) {
+			$Page->Print("$lines[$k]<br>\n");
 		}
-		$Page->Print("</div><font color=\"green\">（省略されました・・全てを読むには");
-		$Page->Print("<a href=\"$path\" target=\"_blank\">ここ</a>");
-		$Page->Print("を押してください）</font><br><br></dd>\n");
+
+		# <details>／<summary> で折りたたみ
+		$Page->Print(<<HTML);
+		<details>
+		<summary style="cursor:pointer; user-select:none; color:green">
+		<span class="closed">（全て表示：残り${remaining}行）</span>
+		<span class="opened">（折りたたむ）</span>
+		</summary>
+		<div>
+HTML
+		# 折りたたまれた中身（残り）
+		for my $k ($dispLine .. $#lines) {
+			$Page->Print("    $lines[$k]<br>\n");
+		}
+
+		# </details> 閉じ
+		$Page->Print('</div></details>');
+		$Page->Print("    </dd>\n");
 	}
 }
 

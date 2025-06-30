@@ -365,3 +365,7 @@ a.timeline-entry:hover {
     color: #888;
     margin-right: 10px;
 }
+
+details summary .opened { display: none; }
+details[open] summary .closed { display: none; }
+details[open] summary .opened { display: inline; }
