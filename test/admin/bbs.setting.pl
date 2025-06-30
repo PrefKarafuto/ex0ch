@@ -984,7 +984,7 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
 	$Page->Print("<td class=\"DetailTitle\">Imgur画像アップロード</td><td>");
-	$Page->Print("<input type=checkbox name=BBS_UPLOAD value=on $setUpload>使用可能</td>");
+	$Page->Print("<input type=checkbox name=BBS_UPLOAD value=on $setUpload disabled>Coming Soon!!</td>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">トリップ桁数</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_TRIPCOLUMN value=\"$setTripColumn\"></td>");

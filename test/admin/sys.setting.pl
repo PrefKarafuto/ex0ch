@@ -572,15 +572,15 @@ sub PrintOtherSetting
 
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">画像アップロード</td></tr>\n");
 	$Page->Print("<tr><td>ユーザーによる画像のアップロード方法を指定します。</td>");
-	$Page->Print("<td><select name=\"UPLOAD\">\n");
+	$Page->Print("<td><select name=\"UPLOAD\" disabled>\n");
 	$Page->Print("<option value=\"\" $is_none>なし</option>\n");
 	$Page->Print("<option value=\"imgur\" $is_imgur>Imgur</option>\n");
 	$Page->Print("<option value=\"local\" $is_local disabled>ローカル</option>\n");
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<tr><td>Imgur Client ID</td>");
-	$Page->Print("<td><input type=text size=60 name=IMGUR_ID value=\"$imgurID\"></td></tr>\n");
+	$Page->Print("<td><input type=text size=60 name=IMGUR_ID value=\"$imgurID\" disabled></td></tr>\n");
 	$Page->Print("<tr><td>Imgur Client Secret</td>");
-	$Page->Print("<td><input type=text size=60 name=IMGUR_SECRET value=\"$imgurSecret\"></td></tr>\n");
+	$Page->Print("<td><input type=text size=60 name=IMGUR_SECRET value=\"$imgurSecret\" disabled></td></tr>\n");
 	$Page->Print("<tr><td>Imgur 連携</td>");
 	$Page->Print("<td>$imgurAuth</td></tr>\n");
 	

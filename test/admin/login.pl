@@ -106,7 +106,7 @@ sub PrintLogin
 {
 	my ($Sys, $Page, $Form) = @_;
 
-	my $auth = ImgurCallback($Sys, $Form);
+	my $auth = '';# ImgurCallback($Sys, $Form);
 
 	my $sitekey = $Sys->Get('CAPTCHA_SITEKEY');
 	my $classname = $Sys->Get('CAPTCHA');
