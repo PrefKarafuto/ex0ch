@@ -341,7 +341,7 @@ sub LogSearch
 				}
 				if ($ua) {
 					$condition_count++;
-					if ($log_ua =~ /$ua/) {
+					if ($log_ua =~ m{\Q$ua\E}) {
 						$match_count++;
 					}
 				}
