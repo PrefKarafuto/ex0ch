@@ -472,7 +472,7 @@ sub PrintValidUserEdit
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">規制対象一覧</td><td>");
-	$Page->Print("<textarea name=VALID_USERS rows=10 cols=70 wrap=off>");
+	$Page->Print("<textarea name=VALID_USERS rows=10 style=\"width:80%\" wrap=off>");
 	
 	my $sanitize = sub {
 		$_ = shift;
@@ -544,9 +544,9 @@ sub PrintNGWordsEdit
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">NGワード一覧");
+	$Page->Print("<tr><td class=\"DetailTitle\" style=\"width:20%\">NGワード一覧");
 	$Page->Print("<br><br>NGワード<br>NGワード&lt;&gt;置換文字列<br>!reg:正規表現によるNGワード</td><td>");
-	$Page->Print("<textarea name=NG_WORDS rows=10 cols=70 wrap=off>");
+	$Page->Print("<textarea name=NG_WORDS rows=10 style=\"width:80%\" wrap=off>");
 	
 	my $sanitize = sub {
 		$_ = shift;
@@ -571,7 +571,7 @@ sub PrintNGWordsEdit
 	$Page->Print("<option value=substitute $kind[3]>NGワード置換</option>");
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">デフォルト置換文字列</td><td>");
-	$Page->Print("<input type=text name=NG_SUBSTITUTE value=\"$kind[4]\" size=60></td></tr>\n");
+	$Page->Print("<input type=text name=NG_SUBSTITUTE value=\"$kind[4]\" style=\"width:80%\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 
 	my $setCheckWord = &$sanitize($Form->Get('WORDCHECK'));
@@ -582,7 +582,7 @@ sub PrintNGWordsEdit
 		$Page->Print("<tr><td colspan=2 align=left>");
 		$Page->Print("<input type=button value=\"　設定　\" $common,'FUNC','NGWORD')\"> ");
 		$Page->Print("<input type=button value=\"　確認　\" $common,'FUNC','NGCHECK')\"> ");
-		$Page->Print("<textarea rows=1 cols=60 name=WORDCHECK placeholder=\"ここに確認したいワードを入力\" style=\"font-size:1em\"></textarea>");
+		$Page->Print("<textarea rows=1 cols=60 name=WORDCHECK placeholder=\"ここに確認したいワードを入力\" style=\"font-size:1em;width:50%\"></textarea>");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
