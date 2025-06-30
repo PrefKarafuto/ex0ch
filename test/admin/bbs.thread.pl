@@ -262,7 +262,11 @@ sub SetMenuList
 		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_RESEDIT, $bbs)) {
 			$Base->SetMenu('スレッド新規作成', "'bbs.thread','DISP','CREATE'");
 		}
-		$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
+		# ログ閲覧権限のみ
+		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_ACCESUSER, $bbs)) {
+			$Base->SetMenu('<hr>', '');
+			$Base->SetMenu('掲示板内検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
+		}
 		# スレッドdat落ち権限のみ
 		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {
 			$Base->SetMenu('一括DAT落ち', "'bbs.thread','DISP','AUTOPOOL'");
