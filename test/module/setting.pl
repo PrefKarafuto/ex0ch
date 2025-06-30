@@ -363,6 +363,7 @@ sub InitSettingData
 
 		# 改造版で追加部分
 		'BBS_IMGTAG'            => '',
+		'BBS_UPLOAD'			=> '',
 		'BBS_TWITTER'           => '',
 		'BBS_MOVIE'             => '',
 		'BBS_URL_TITLE'         => '',
