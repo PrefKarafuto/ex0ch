@@ -626,6 +626,15 @@ sub FunctionResLumpDelete
 			# >>1が指定されていた場合、スレッドごと削除
 			if ($resSet[0] == 0){
 				next if (!defined $threadSubj);
+				# 権限チェック
+				{
+					my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+					my $chkID   = $Sys->Get('ADMIN')->{'USER'};
+					
+					if (($SEC->IsAuthority($chkID, $ZP::AUTH_THREADDELETE, $Sys->Get('BBS'))) == 0) {
+						return 1000;
+					}
+				}
 				push @$pLog, '「' . $threadSubj. '」を削除';
 				$Threads->Delete($threadID);
 				$Threads->DeleteAttr($threadID);
