@@ -48,9 +48,9 @@ sub PrintResAutoDelete
 	my $isDelete	= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_TREADDELETE, $SYS->Get('BBS')) ? '' : 'disabled';
 
 	# レス検索モードの設定
-	$types = 0;                       # 先に下位ビットを立てておく
+	$types = 0;
 	@sTYPE = $Form->GetAtArray('TYPE_CHECK', 0);
-	$types |= $_ for @sTYPE;             # ユーザー選択分を OR
+	$types |= $_ for @sTYPE;
 	$types ||= 1;
 	@cTYPE = map { ($types & (1 << $_)) ? 'checked' : '' } 0..4;
 	$delth = $Form->Get('DELTHREAD') ? 'checked' : '';
