@@ -71,7 +71,7 @@ sub PrintResAutoDelete
 	$SYS->Set('_TITLE', 'Res Auto Delete');
    
 	$Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
-	$Page->Print("  <tr><td colspan=2>以下の各条件に当てはまるレスを削除します。（注意：スレッドの>>1のレスはここでは削除できません。削除したい場合はメニューのスレッド一覧からスレッドごと削除してください。）</td></tr>\n");
+	$Page->Print("  <tr><td colspan=2>以下の各条件に当てはまるレスもしくはスレッドを削除します。</td></tr>\n");
 	$Page->Print("  <tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("  <tr>\n");
 	$Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
