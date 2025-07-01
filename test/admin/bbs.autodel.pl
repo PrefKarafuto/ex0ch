@@ -29,7 +29,7 @@ sub PrintResAutoDelete
 	my ($Page, $SYS, $Form, $BBS) = @_;
 	my ($common);
 	my ($name, $dir);
-	my ($dFROM, $dTO, $sWORD, @sTYPE, @cTYPE, @mcTYPE, @lcTYPE, $types, $BBSpath, @bbsSet, $id);
+	my ($dFROM, $dTO, $sWORD, @sTYPE, @cTYPE, @mcTYPE, @lcTYPE, $types, $BBSpath, @bbsSet, $id, $delth);
    
 	my $sanitize = sub {
 		$_ = shift;
@@ -53,6 +53,7 @@ sub PrintResAutoDelete
 	$types |= $_ for @sTYPE;             # ユーザー選択分を OR
 	$types ||= 1;
 	@cTYPE = map { ($types & (1 << $_)) ? 'checked' : '' } 0..4;
+	$delth = $Form->Get('DELTHREAD') ? 'checked' : '';
 
 	# ログ検索モードの設定
 	my $selected1 = $Form->Get('TYPE_RADIO') // '';
@@ -62,16 +63,16 @@ sub PrintResAutoDelete
 
 	# 検索モードの設定
 	my $selected2 = $Form->Get('TYPE_MODE') // '';
-	my @values2 = qw(res res-delth log);
+	my @values2 = qw(res log);
 	$selected2 = 'res' unless grep { $_ eq $selected2 } @values2;
 	@mcTYPE = map { $_ eq $selected2 ? 'checked' : '' } @values2;
 
 	my $today = strftime "%Y-%m-%d", localtime;
    
-	$SYS->Set('_TITLE', 'Res Auto Delete');
+	$SYS->Set('_TITLE', 'Search and Delete');
    
 	$Page->Print("<center><table border=0 cellspacing=2 width=\"100%\">\n");
-	$Page->Print("  <tr><td colspan=2>以下の各条件に当てはまるレスもしくはスレッドを削除します。</td></tr>\n");
+	$Page->Print("  <tr><td colspan=2>以下の各条件に当てはまるレスもしくはスレッドを検索します。</td></tr>\n");
 	$Page->Print("  <tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("  <tr>\n");
 	$Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
@@ -102,17 +103,16 @@ HTML
   <tr>
 	<td>検索種別</td>
 	<td>
+	  <label><input type="checkbox" name="DELTHREAD" value="1" $delth style="accent-color:red;" $isDelete>&#x26a0;&#xfe0f;スレッド削除を許可</label>
 	  <hr>
-	  <label><input type="radio" name="TYPE_MODE" value="res" $mcTYPE[0]>レス検索モード</label>
-	  <label>　<input type="radio" name="TYPE_MODE" value="res-delth" $mcTYPE[1] style="accent-color:red;" $isDelete>&#x26a0;&#xfe0f;スレッド削除を許可</label>
-	  <br>
-	  <label>　　　<input type="checkbox" name="TYPE_CHECK" value="1" $cTYPE[0]>本文</label>
+	  <label><input type="radio" name="TYPE_MODE" value="res" $mcTYPE[0]>レス検索モード</label>　
+	  <label><input type="checkbox" name="TYPE_CHECK" value="1" $cTYPE[0]>本文</label>
 	  <label><input type="checkbox" name="TYPE_CHECK" value="2" $cTYPE[1]>名前</label>
 	  <label><input type="checkbox" name="TYPE_CHECK" value="4" $cTYPE[2]>ID・日付</label>
 	  <label><input type="checkbox" name="TYPE_CHECK" value="8" $cTYPE[3]>メール</label>
 	  <label><input type="checkbox" name="TYPE_CHECK" value="16" $cTYPE[4] >スレタイ</label>
 	  <hr>
-	  <label><input type="radio" name="TYPE_MODE" value="log" $mcTYPE[2]>ログ検索モード</label>　
+	  <label><input type="radio" name="TYPE_MODE" value="log" $mcTYPE[1]>ログ検索モード</label>　
 	  <label><input type="radio" name="TYPE_RADIO" value="ip" $lcTYPE[0] style="accent-color:peru;">IPアドレス</label>
 	  <label><input type="radio" name="TYPE_RADIO" value="host" $lcTYPE[1] style="accent-color:peru;">HOST名</label>
 	  <label><input type="radio" name="TYPE_RADIO" value="ua" $lcTYPE[2] style="accent-color:peru;">ユーザーエージェント</label>
@@ -210,7 +210,7 @@ sub Search
 	$n      = $Result ? @$Result : 0;
 	$base   = $Sys->Get('BBSPATH');
 	$word   = $Form->Get('WORD');
-	$enableThread = $TypeM eq 'res-delth' ? 1 : 0;
+	$enableThread = $Form->Get('DELTHREAD') ? 1 : 0;
    
 	PrintResultHead($Page, $n);
    
