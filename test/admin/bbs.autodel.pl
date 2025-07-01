@@ -45,13 +45,14 @@ sub PrintResAutoDelete
 	$dTO	= $Form->Get('TO');
 	$id = $Form->Get('TARGET_BBS', '');
 
+	my $isDelete	= $SYS->Get('ADMIN')->{'SECINFO'}->IsAuthority($SYS->Get('ADMIN')->{'USER'}, $ZP::AUTH_TREADDELETE, $SYS->Get('BBS')) ? '' : 'disabled';
+
 	# レス検索モードの設定
 	$types = 0;                       # 先に下位ビットを立てておく
 	@sTYPE = $Form->GetAtArray('TYPE_CHECK', 0);
 	$types |= $_ for @sTYPE;             # ユーザー選択分を OR
 	$types ||= 1;
 	@cTYPE = map { ($types & (1 << $_)) ? 'checked' : '' } 0..4;
-
 
 	# ログ検索モードの設定
 	my $selected1 = $Form->Get('TYPE_RADIO') // '';
@@ -103,17 +104,15 @@ HTML
 	<td>
 	  <hr>
 	  <label><input type="radio" name="TYPE_MODE" value="res" $mcTYPE[0]>レス検索モード</label>
-	  <label>　<input type="radio" name="TYPE_MODE" value="res-delth" $mcTYPE[1]>スレッド削除許可</label><br>
-
+	  <label>　<input type="radio" name="TYPE_MODE" value="res-delth" $mcTYPE[1] style="accent-color:red;" $isDelete>&#x26a0;&#xfe0f;スレッド削除を許可</label>
+	  <br>
 	  <label>　　　<input type="checkbox" name="TYPE_CHECK" value="1" $cTYPE[0]>本文</label>
 	  <label><input type="checkbox" name="TYPE_CHECK" value="2" $cTYPE[1]>名前</label>
 	  <label><input type="checkbox" name="TYPE_CHECK" value="4" $cTYPE[2]>ID・日付</label>
 	  <label><input type="checkbox" name="TYPE_CHECK" value="8" $cTYPE[3]>メール</label>
 	  <label><input type="checkbox" name="TYPE_CHECK" value="16" $cTYPE[4] >スレタイ</label>
-	  
 	  <hr>
 	  <label><input type="radio" name="TYPE_MODE" value="log" $mcTYPE[2]>ログ検索モード</label>　
-
 	  <label><input type="radio" name="TYPE_RADIO" value="ip" $lcTYPE[0] style="accent-color:peru;">IPアドレス</label>
 	  <label><input type="radio" name="TYPE_RADIO" value="host" $lcTYPE[1] style="accent-color:peru;">HOST名</label>
 	  <label><input type="radio" name="TYPE_RADIO" value="ua" $lcTYPE[2] style="accent-color:peru;">ユーザーエージェント</label>
@@ -370,7 +369,8 @@ sub PrintResult
 	#$name = $BBS->Get('NAME', $bbsSet[0]);
 	$value = "$bbsID/$$pResult[1]/$$pResult[2]";
 		if($isAbone && ($$pResult[2]!=1||$enableThread)){
-			$Page->Print("<input type=checkbox name=RESS value=\"$value\" checked=checked>");
+			my $is_checked = $$pResult[2] != 1 ? 'checked' : '';
+			$Page->Print("<input type=checkbox name=RESS value=\"$value\" $is_checked>");
 		}
 	$Page->Print(<<HTML);
 	</td>
