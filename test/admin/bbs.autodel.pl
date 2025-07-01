@@ -12,6 +12,8 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
+use Time::Local;
+use POSIX qw(strftime);
 #------------------------------------------------------------------------------------------------------------
 #
 #   レス一括削除設定画面表示
@@ -27,7 +29,7 @@ sub PrintResAutoDelete
 	my ($Page, $SYS, $Form, $BBS) = @_;
 	my ($common);
 	my ($name, $dir);
-	my ($sWORD, @sTYPE, @cTYPE, @mcTYPE, @lcTYPE, $types, $BBSpath, @bbsSet, $id);
+	my ($dFROM, $dTO, $sWORD, @sTYPE, @cTYPE, @mcTYPE, @lcTYPE, $types, $BBSpath, @bbsSet, $id);
    
 	my $sanitize = sub {
 		$_ = shift;
@@ -39,13 +41,17 @@ sub PrintResAutoDelete
 	};
 
 	$sWORD  = &$sanitize($Form->Get('WORD'));
+	$dFROM	= $Form->Get('FROM');
+	$dTO	= $Form->Get('TO');
 	$id = $Form->Get('TARGET_BBS', '');
 
 	# レス検索モードの設定
-	$types = 0;
-	@sTYPE  = $Form->GetAtArray('TYPE_CHECK', 0);
-	$types |= $_ for @sTYPE;
+	$types = 0;                       # 先に下位ビットを立てておく
+	@sTYPE = $Form->GetAtArray('TYPE_CHECK', 0);
+	$types |= $_ for @sTYPE;             # ユーザー選択分を OR
+	$types ||= 1;
 	@cTYPE = map { ($types & (1 << $_)) ? 'checked' : '' } 0..4;
+
 
 	# ログ検索モードの設定
 	my $selected1 = $Form->Get('TYPE_RADIO') // '';
@@ -58,6 +64,8 @@ sub PrintResAutoDelete
 	my @values2 = qw(res res-delth log);
 	$selected2 = 'res' unless grep { $_ eq $selected2 } @values2;
 	@mcTYPE = map { $_ eq $selected2 ? 'checked' : '' } @values2;
+
+	my $today = strftime "%Y-%m-%d", localtime;
    
 	$SYS->Set('_TITLE', 'Res Auto Delete');
    
@@ -68,7 +76,9 @@ sub PrintResAutoDelete
 	$Page->Print("    <td class=\"DetailTitle\" style=\"width:150\">条件</td>\n");
 	$Page->Print("    <td class=\"DetailTitle\">条件設定値</td></tr>\n");
 	$Page->Print("</select></td></tr>\n");
-	$Page->Print("<input type=hidden name=SBBS value=$id>");
+	$Page->HTMLInput('hidden', 'TARGET_THREAD', "");
+	$Page->HTMLInput('hidden', 'SBBS', $id);
+	$Page->HTMLInput('hidden', 'DISP_FORMAT', "");
 	$Page->Print(<<HTML);
   <tr>
 	<td>検索ワード(正規表現)</td>
@@ -82,25 +92,32 @@ HTML
 	</td>
   </tr>
   <tr>
+	<td>検索範囲(任意)</td>
+	<td>
+	<input type="date" name="FROM" value="$dFROM" min="2000-01-01" max="$today"><small>から</small>
+	<input type="date" name="TO" value="$dTO" min="2000-01-01" max="$today"><small>まで</small><br>
+	</td>
+   </tr>
+  <tr>
 	<td>検索種別</td>
 	<td>
 	  <hr>
 	  <label><input type="radio" name="TYPE_MODE" value="res" $mcTYPE[0]>レス検索モード</label>
-	  <label>　<input type="radio" name="TYPE_MODE" value="res-delth" $mcTYPE[1] disabled>スレッド削除許可</label><br>
+	  <label>　<input type="radio" name="TYPE_MODE" value="res-delth" $mcTYPE[1]>スレッド削除許可</label><br>
 
-	  <label><input type="checkbox" name="TYPE_CHECK" value="2" $cTYPE[1]>本文</label><br>
-	  <label><input type="checkbox" name="TYPE_CHECK" value="1" $cTYPE[0]>名前検索</label><br>
-	  <label><input type="checkbox" name="TYPE_CHECK" value="4" $cTYPE[2]>ID・日付</label><br>
-	  <label><input type="checkbox" name="TYPE_CHECK" value="16" $cTYPE[4]>メール</label><br>
-	  <label><input type="checkbox" name="TYPE_CHECK" value="8" $cTYPE[3] >スレタイ</label>
+	  <label>　　　<input type="checkbox" name="TYPE_CHECK" value="1" $cTYPE[0]>本文</label>
+	  <label><input type="checkbox" name="TYPE_CHECK" value="2" $cTYPE[1]>名前</label>
+	  <label><input type="checkbox" name="TYPE_CHECK" value="4" $cTYPE[2]>ID・日付</label>
+	  <label><input type="checkbox" name="TYPE_CHECK" value="8" $cTYPE[3]>メール</label>
+	  <label><input type="checkbox" name="TYPE_CHECK" value="16" $cTYPE[4] >スレタイ</label>
 	  
 	  <hr>
 	  <label><input type="radio" name="TYPE_MODE" value="log" $mcTYPE[2]>ログ検索モード</label>　
 
-	  <label><input type="radio" name="TYPE_RADIO" value="ip" $lcTYPE[0]>IPアドレス</label>
-	  <label><input type="radio" name="TYPE_RADIO" value="host" $lcTYPE[1]>HOST名</label>
-	  <label><input type="radio" name="TYPE_RADIO" value="ua" $lcTYPE[2]>ユーザーエージェント</label>
-	  <label><input type="radio" name="TYPE_RADIO" value="sid" $lcTYPE[3]>SessionID</label>
+	  <label><input type="radio" name="TYPE_RADIO" value="ip" $lcTYPE[0] style="accent-color:peru;">IPアドレス</label>
+	  <label><input type="radio" name="TYPE_RADIO" value="host" $lcTYPE[1] style="accent-color:peru;">HOST名</label>
+	  <label><input type="radio" name="TYPE_RADIO" value="ua" $lcTYPE[2] style="accent-color:peru;">ユーザーエージェント</label>
+	  <label><input type="radio" name="TYPE_RADIO" value="sid" $lcTYPE[3] style="accent-color:peru;">SessionID</label>
 	</td>
   </tr>
   <tr>
@@ -140,8 +157,8 @@ HTML
 sub Search
 {
 	my ($Sys, $Form, $Page,$BBS) = @_;
-	my ($Search, $Mode, $Result, @elem, $n, $base, $word, $id, $dir);
-	my (@typesC, $TypeM, $TypeC, $TypeR);
+	my ($Search, $Mode, $Result, @elem, $n, $base, $word, $id, $dir, $enableThread);
+	my (@typesC, $TypeM, $TypeC, $TypeR, $FROM, $TO, @dFROM, @dTO);
 	my (@resList, %bbsCount, %threadCount);
    
 	require './module/admin_search.pl';
@@ -154,9 +171,20 @@ sub Search
 	#my $BBS = $Sys->Get('BBS');
    
 	@typesC = $Form->GetAtArray('TYPE_CHECK', 0);
-	$TypeC = ($typesC[0] || 0) | ($typesC[1] || 0) | ($typesC[2] || 0) | ($typesC[3] || 0) | ($typesC[4] || 0);
+	$TypeC = 0;
+	for my $bit (@typesC) {
+		# 数字以外のゴミを排除
+		next unless defined $bit && $bit =~ /^\d+$/;
+		$TypeC |= int($bit);
+	}
 	$TypeM = $Form->Get('TYPE_MODE');
 	$TypeR = $Form->Get('TYPE_RADIO');
+
+	# 日付範囲指定
+	@dFROM	= split(/-/,$Form->Get('FROM', ''));
+	$FROM = $Form->Get('FROM', '') ? timelocal(0,0,0,$dFROM[2],$dFROM[1]-1,$dFROM[0]) : 0;
+	@dTO	= split(/-/,$Form->Get('TO', ''));
+	$TO = $Form->Get('TO', '') ? timelocal(0,0,0,$dTO[2]+1,$dTO[1]-1,$dTO[0]) - 1 : 0;
    
 	my $sanitize = sub {
 		$_ = shift;
@@ -170,18 +198,8 @@ sub Search
 	$dir = $BBS->Get('DIR', $id);
    
 	# 検索オブジェクトの設定と検索の実行
-	$Search->Create($Sys, $Mode, $TypeC, $id, $dir, $Form->Get('KEY', ''));
-	if($TypeM eq 'res'){
-		$Search->Run(&$sanitize($Form->Get('WORD')));
-	}elsif ($TypeM eq 'log' && $TypeR) {
-		my $str = $sanitize->($Form->Get('WORD'));
-		$Search->Run_LogS(
-		($TypeR eq 'ip') ? $str : undef,
-		($TypeR eq 'host') ? $str : undef,
-		($TypeR eq 'ua') ? $str : undef,
-		($TypeR eq 'sid') ? $str : undef,
-		);
-	}
+	$Search->Create($Sys, $TypeM, $TypeC, $TypeR, $id, $dir, $FROM, $TO);
+	$Search->Run(&$sanitize($Form->Get('WORD')));
    
 	if ($@ ne '') {
 		PrintSystemError($Page, $@);
@@ -193,6 +211,7 @@ sub Search
 	$n      = $Result ? @$Result : 0;
 	$base   = $Sys->Get('BBSPATH');
 	$word   = $Form->Get('WORD');
+	$enableThread = $TypeM eq 'res-delth' ? 1 : 0;
    
 	PrintResultHead($Page, $n);
    
@@ -220,7 +239,7 @@ sub Search
 			}
 			#PrintBBSHeader($Page, $BBS, $Conv, $n, $base, \@elem) if !$bbsCount{$elem[0]}++;
 			PrintThreadHeader($Page, $Sys, $BBS, $Conv, $n, $base, \@elem) if !$threadCount{$elem[1]}++;
-			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
+			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem, $enableThread);
 			$n++;
 		}
 	}
@@ -338,9 +357,10 @@ HTML
 #------------------------------------------------------------------------------------------------------------
 sub PrintResult
 {
-	my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult) = @_;
-	my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone,$checkbox);
+	my ($Sys, $Page, $BBS, $Conv, $n, $base, $pResult, $enableThread) = @_;
+	my ($bbsID, $bbsDir, $bbsName, @bbsSet, $value, $isAbone, $checkbox, $isAccessUser, $common);
 	$isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
+	$isAccessUser = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_ACCESUSER, $Sys->Get('BBS'));
 	$bbsID = $$pResult[0];
 	$bbsDir = $BBS->Get('DIR', $bbsID);
 	$bbsName = $BBS->Get('NAME', $bbsID);
@@ -349,7 +369,7 @@ sub PrintResult
 	if ($bbsID) {
 	#$name = $BBS->Get('NAME', $bbsSet[0]);
 	$value = "$bbsID/$$pResult[1]/$$pResult[2]";
-		if($isAbone && $$pResult[2]!=1){
+		if($isAbone && ($$pResult[2]!=1||$enableThread)){
 			$Page->Print("<input type=checkbox name=RESS value=\"$value\" checked=checked>");
 		}
 	$Page->Print(<<HTML);
@@ -360,8 +380,7 @@ sub PrintResult
 HTML
 		if ($$pResult[4] eq '') {
 			$Page->Print("<font color=\"green\">$$pResult[3]</font>");
-		}
-		else {
+		}else {
 			$Page->Print("<a href=\"mailto:$$pResult[4]\">$$pResult[3]</a>");
 		}
 	   
@@ -371,9 +390,11 @@ HTML
 	$$pResult[6]
 	<br>
 	</dd>
-  </td>
-</tr>
 HTML
+	if($isAccessUser){
+		$Page->Print("<br><br><hr>HOST:$$pResult[8]<br>IP:$$pResult[9]<br>UA:$$pResult[10]<br>SessionID:$$pResult[11]");
+	}
+	$Page->Print('</td></tr>');
 	}
 }
  
@@ -467,7 +488,7 @@ sub PrintResLumpDelete
 	$isAbone = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESDELETE, $Sys->Get('BBS'));
    
 	$Page->Print("<center><dl><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td>以下のレスを" . ($mode ? 'あぼ～ん' : '削除') . "します。</td></tr>\n");
+	$Page->Print("<tr><td>以下のレス・スレッドを" . ($mode ? 'あぼ～ん' : '削除') . "します。</td></tr>\n");
 	$Page->Print("<tr><td><hr></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">Contents</td></tr>\n");
    
@@ -535,7 +556,7 @@ sub PrintResLumpDelete
 sub FunctionResLumpDelete
 {
 	my ($Sys, $Form, $pLog, $BBS, $mode) = @_;
-	my (@resSet, $pRes, $abone, $path, $tm, $user, $delCnt, $num, $datPath, $LOG, $logsize, $lastnum,$target_bbs);
+	my (@resSet, $pRes, $abone, $path, $logPath, $tm, $user, $delCnt, $num, $datPath, $LOG, $logsize, $lastnum,$target_bbs);
 	my (@valueSet, @bbsSet, @threadSet, @elem, $common, $isAbone);
 	my ($bbsID, $threadKey, $bbsResNum, %wholeSet);
 	my ($Threads, $Dat, $logMessage);
@@ -543,14 +564,16 @@ sub FunctionResLumpDelete
 	$numResInLine = 20;
 	push @$pLog, '以下のレスを' . ($mode ? 'あぼ～ん' : '削除') . 'しました。';
    
-	require './module/thread.pl'; # read Threads
+	require './module/thread.pl';
 	require './module/bbs_service.pl';
-   
+	require './module/setting.pl';
+	require './module/dat.pl';
+	require './module/manager_log.pl';
+	
 	%wholeSet = ();
 	@valueSet = $Form->GetAtArray('RESS');
 	$target_bbs = $Sys->Get('BBS');
 	foreach (@valueSet){
-		#$Page->Print($_."<br>");
 		($bbsID, $threadKey, $bbsResNum) = split /\//;
 		if (!exists($wholeSet{$bbsID}{$threadKey})){
 			@{$wholeSet{$bbsID}{$threadKey}} = ();
@@ -577,43 +600,57 @@ sub FunctionResLumpDelete
 		# あぼ～ん時は削除名を取得
 		if ($mode) {
 			my $Setting;
-			require './module/setting.pl';
+			
 			$Setting = SETTING->new;
 			$Setting->Load($Sys);
 			$abone  = $Setting->Get('BBS_DELETE_NAME');
 		}
-	   
+		$Threads = THREAD->new;
+		$Threads->Load($Sys);
+		$Threads->LoadAttrAll($Sys);
 		foreach my $threadID (keys %{$wholeSet{$bbsID}}){
 			$Sys->Set('KEY', $threadID);
-			$Threads = THREAD->new;
-			$Threads->Load($Sys);
 			my $threadSubj = $Threads->Get('SUBJECT', $threadID);
 			if (! ($threadSubj =~ /[^\s　]/) || $threadSubj eq '') {
 				$threadSubj = '(空欄もしくは空白のみ)';
 			}
 		   
-			push @$pLog, '「'.$threadSubj.'」の';
-		   
-			# datの読み込み
-			require './module/dat.pl';
-			$Dat = DAT->new;
-		   
-			$Sys->Set('KEY', $threadID);
 			my $datPath = $Sys->Get('BBSPATH') . '/' . $bbsDir . '/dat/' . $threadID . '.dat';
+			$logPath = $Sys->Get('BBSPATH') . '/' . $bbsDir . '/log/' . $threadID . '.dat';
+			$path   = $Sys->Get('BBSPATH') . '/' . $bbsDir . '/log/del_' . $threadID . '.cgi';
+
+			@resSet = @{$wholeSet{$bbsID}{$threadID}};
+			@resSet = map {$_ - 1} @resSet;
+			@resSet = sort {$a <=> $b} @resSet;
+			
+			# >>1が指定されていた場合、スレッドごと削除
+			if ($resSet[0] == 0){
+				next if (!defined $threadSubj);
+				push @$pLog, '「' . $threadSubj. '」を削除';
+				$Threads->Delete($threadID);
+				$Threads->DeleteAttr($threadID);
+				unlink $datPath;
+				unlink $logPath;
+				unlink $path;
+
+				# 以降のレス番をパスするため、キー削除
+				delete $wholeSet{$bbsID}{$threadID};
+				next;
+			}
+			push @$pLog, '「'.$threadSubj.'」の';
+
+			# datの読み込み
+			$Dat = DAT->new;
 			$Dat->Load($Sys, $datPath, 1);
 		   
 			if (!$mode) {
-				require './module/manager_log.pl';
 				$LOG = MANAGER_LOG->new;
-				$LOG->Load($Sys, 'WRT', $Sys->Get('KEY'));
+				$LOG->Load($Sys, 'WRT', $threadID);
 				$logsize = $LOG->Size();
 				$lastnum = $Dat->Size() - 1;
 			}
 		   
 			# 各値を設定
-			@resSet = @{$wholeSet{$bbsID}{$threadID}};
-			$datPath= $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $Sys->Get('KEY') . '.dat';
-			$path   = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/log/del_' . $Sys->Get('KEY') . '.cgi';
 			$tm     = time;
 			$user   = $Form->Get('UserName');
 			$delCnt = 0;
@@ -632,8 +669,7 @@ sub FunctionResLumpDelete
 				flock($f_dellog, 2);
 				#binmode($f_dellog);
 				# レス番号が0から始まるようにする
-				@resSet = map {$_ - 1} @resSet;
-				foreach $num (sort {$b <=> $a} @resSet) {
+				foreach $num (reverse @resSet) {
 					next if ($num == 0);
 					if ($delCnt > $numResInLine) {
 						push @$pLog, $logMessage;
@@ -682,9 +718,10 @@ sub FunctionResLumpDelete
 				$LOG->Save($Sys) if (! $mode);
 			}
 		}
+		$Threads->SaveAttrAll($Sys);
 	}
+	
 	#subject.txt更新
-	$Threads->Load($Sys);
 	$Threads->UpdateAll($Sys);
 	$Threads->Save($Sys);
 	my $BBSAid = BBS_SERVICE->new;

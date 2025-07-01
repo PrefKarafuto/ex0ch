@@ -620,7 +620,9 @@ sub PrintNinjaSidSearch
    
 	# 検索オブジェクトの設定と検索の実行
 	$Search->Create($Sys, 0);
-	$Search->Run_LogS(undef,undef,undef,$sid);
+	$Search->{TYPE_M} = 'log';
+	$Search->{TYPE_R} = 'sid';
+	$Search->Run($sid);
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>SessionID:$sid\のユーザーの書き込み履歴を表示します。</td></tr>");
    
