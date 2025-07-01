@@ -1,0 +1,154 @@
+body {
+	background-color: #FFFFFF;
+	background-image: url("./ba.gif");
+	color: #443333;
+	text-align: center;
+	
+	/* AA設定 */
+	font-size: 12pt;
+	font-family: "MS PGothic","ＭＳ Ｐゴシック","MS Pｺﾞｼｯｸ","MS Pゴシック","Mona","IPA モナー Pゴシック","IPA MONAPGOTHIC",sans-serif;
+	line-height: 115% !important;
+}
+
+a {
+	color: #000080;
+}
+
+a:active {
+	color: #8B0000;
+}
+
+a:visited {
+	color: #AA0088;
+}
+
+div#kanban {
+	margin: 0;
+	padding: 0;
+}
+
+div.box {
+	width: 95%;
+	margin: 0 auto 1.2em auto;
+	border-top: 1px solid #888;
+	border-right: 1px solid #222;
+	border-bottom: 1px solid #222;	
+	border-left: 1px solid #888;
+}
+
+.content {
+	margin: 7px;
+	border-top: 1px solid #222;
+	border-right: 1px solid #888;
+	border-bottom: 1px solid #888;
+	border-left: 1px solid #222;
+	text-align: left;
+}
+
+div.indexmenu {
+	background-color: #CCFFCC;
+}
+
+div.content {
+	padding: 3px;
+}
+
+div.indexmenu div#header {
+	padding: 6px;
+}
+
+div.indexmenu div#menulink {
+	padding: 3px;
+	text-align: center;
+}
+
+div.indexmenu ol#threadindex {
+	margin: 0;
+	padding: 0;
+	font-size: 0.8em;
+	list-style-type: none;
+}
+
+ol#threadindex li {
+	display: inline;
+	padding-right: 0.6em;
+}
+
+div.content h1 {
+	margin: 0;
+	/*font-size: large;*/
+	font-size: 1.15em;
+	float: left;
+}
+
+div.navi {
+	text-align: right;
+}
+
+div.indexmenu .navi {
+	float: right;
+}
+
+div#headtxt {
+}
+
+div#subback {
+	text-align: right;
+	font-size: 0.8em;
+	font-weight: bold;
+}
+
+
+div#newentry form{
+	margin: 0;
+}
+
+div.thread {
+	background-color: #EFEFEF;
+}
+
+div.thread .title {
+	margin: 0 0 0.2em 0;
+	font-weight: bold;
+}
+
+div.thread .title h2 {
+	display: inline;
+	color: #CC0000;
+	font-size: 1.5em;
+}
+
+div.thread form.entry {
+	margin: 0 0 1em 40px;
+}
+
+form.entry textarea {
+	margin: 0 40px;
+}
+
+form.entry .threadnav {
+	margin: 0 40px;
+	font-weight: bold;
+}
+
+#footer {
+	text-align: left;
+}
+
+#footer img {
+	vertical-align: bottom;
+}
+
+.clear {
+	clear: both;
+	visibility: hidden;
+	height: 0;
+	margin: 0;
+	padding: 0;
+	font-size: 0;
+}
+
+.clear hr {
+	display: none;
+}
+
