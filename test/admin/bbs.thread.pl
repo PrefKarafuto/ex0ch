@@ -13,6 +13,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use HTML::Entities;
+use POSIX qw(strftime);
 no warnings 'once';
 
 # 共通スレッド属性情報
@@ -382,16 +383,17 @@ sub PrintThreadList
 	$common = "DoSubmit('bbs.thread','DISP','LIST');";
 	
 	# ページャーの出力開始
-	$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=3 style=\"font-size:1.2em\">");
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=4 style=\"font-size:1.2em\">");
 	PrintPagenation($Page, $ThreadNum, $dispNum ,$dispSt, $common);
 	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
-	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
+	$Page->Print("<tr><td colspan=6><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">全</a></th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250px\">Thread Title</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Thread Key</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Res</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Created Time</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Updated Time</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">Attribute</td></tr>\n");
 
 	my @slice = @threadSet[ $dispSt .. $dispEd - 1 ];
@@ -403,6 +405,9 @@ sub PrintThreadList
 		$id = $slice[$offset];
 		$subj	= $Threads->Get('SUBJECT', $id);
 		$res	= $Threads->Get('RES', $id);
+
+		my $btime = strftime "%Y/%m/%d %H:%M:%S", localtime($id);
+		my $mtime = strftime "%Y/%m/%d %H:%M:%S", localtime((stat("$base/$id.dat"))[9]);
 		
 		my $permt = DAT::GetPermission("$base/$id.dat");
 		my $perms = $SYS->Get('PM-STOP');
@@ -439,7 +444,7 @@ sub PrintThreadList
 		else {
 			$Page->Print("<td>$n: $subj</td>");
 		}
-		$Page->Print("<td align=center>$id</td><td align=center>$res</td>");
+		$Page->Print("<td align=center>$res</td><td align=center>$btime</td><td align=center>$mtime</td>");
 		
 		my $isSLIP = $Threads->GetAttr($id, 'slip');
 		my $is774 = $Threads->GetAttr($id, 'change774');
@@ -477,8 +482,8 @@ sub PrintThreadList
 
 	my $tl_max = $Set->Get('BBS_TL_MAX');
 	
-	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><td colspan=5 align=left>");
+	$Page->Print("<tr><td colspan=6><hr></td></tr>\n");
+	$Page->Print("<tr><td colspan=6 align=left>");
 
 	# スレッド表示順変更ボタン
 	$Page->Print("<input type=button title=\"index更新\" value=\"&#x1F504;\" onclick=\"SetOption('UPDATE','1');$common3\"> ");	
