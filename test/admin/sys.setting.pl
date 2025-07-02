@@ -221,28 +221,41 @@ sub PrintSystemInfo
 	my $servername = $ENV{'SERVER_NAME'};
 	my $serversoft = $ENV{'SERVER_SOFTWARE'};
 	my @checklist = (qw(
-		Encode
-		Time::HiRes
-		Time::Local
-		Socket
-	), qw(
-		CGI::Session
-		Storable
-		Digest::SHA::PurePerl
-		Digest::MD5
-		Net::DNS::Lite
-		List::MoreUtils
 		LWP::UserAgent
-		XML::Simple
-	), qw(
-		Net::DNS
 		LWP::Protocol::https
 		Net::SSLeay
+		Net::DNS
+		Net::DNS::Lite
+		Socket
 	), qw(
-		HTML::Entities
+		CGI
+		CGI::Cookie
 		CGI::Carp
-		JSON
+		CGI::Session
 		FCGI
+	), qw(
+		JSON
+		XML::Simple
+		HTML::Entities
+		Encode
+		MIME::Base64
+		Storable
+	), qw(
+		Digest::MD5
+		Digest::SHA::PurePerl
+	), qw(
+		File::Spec
+		File::Basename
+		File::Path
+		File::Copy
+		File::Glob
+	), qw(
+		Time::HiRes
+		Time::Local
+		POSIX
+	), qw(
+		Carp
+		Safe
 	));
 	
 	my $core = {};
@@ -476,8 +489,9 @@ sub PrintLimitterSetting
 sub PrintOtherSetting
 {
 	my ($Page, $SYS, $Form) = @_;
-	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $BBSGET, $upCheck, $imageTag);
-	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout);
+	my ($urlLink, $linkSt, $linkEd, $pathKind, $headText, $headUrl, $FastMode, $upCheck, $imageTag);
+	my ($linkChk, $pathInfo, $pathQuery, $fastMode, $bbsget, $imgtag, $CSP, $CSPSet, $ninLvmax, $cookieExp, $authExp, $admCap, $srcCap, $logout, $is_selected);
+	my ($imgurID, $imgurSecret, $imgurAuth, $uploadMode, $is_local, $is_imgur, $is_none);
 	my ($common,$nin_exp,$pass_exp);
 	
 	$SYS->Set('_TITLE', 'System Other Setting');
@@ -490,7 +504,6 @@ sub PrintOtherSetting
 	$headText	= $SYS->Get('HEADTEXT');
 	$headUrl	= $SYS->Get('HEADURL');
 	$FastMode	= $SYS->Get('FASTMODE');
-	$BBSGET		= $SYS->Get('BBSGET');
 	$upCheck	= $SYS->Get('UPCHECK');
 	$CSP		= $SYS->Get('CSP');
 	$ninLvmax	= $SYS->Get('NINLVMAX');
@@ -499,14 +512,51 @@ sub PrintOtherSetting
 	$nin_exp	= $SYS->Get('NIN_EXPIRY');
 	$pass_exp	= $SYS->Get('PASS_EXPIRY');
 	$logout		= $SYS->Get('LOGOUT');
+	$is_selected= $SYS->Get('CM_THEME');
+	$imgurID	= $SYS->Get('IMGUR_ID');
+	$imgurSecret= $SYS->Get('IMGUR_SECRET');
+	$imgurAuth	= $SYS->Get('IMGUR_AUTH');
+	$uploadMode = $SYS->Get('UPLOAD');
 	
 	$linkChk	= ($urlLink eq 'TRUE' ? 'checked' : '');
 	$fastMode	= ($FastMode == 1 ? 'checked' : '');
 	$imgtag		= ($imageTag == 1 ? 'checked' : '');
 	$pathInfo	= ($pathKind == 0 ? 'checked' : '');
 	$pathQuery	= ($pathKind == 1 ? 'checked' : '');
-	$bbsget		= ($BBSGET == 1 ? 'checked' : '');
 	$CSPSet		= ($CSP == 1 ? 'checked' : '');
+	$is_none	= ($uploadMode eq '' ? 'selected' : '');
+	$is_imgur	= ($uploadMode eq 'imgur' ? 'selected' : '');
+	$is_local	= ($uploadMode eq 'local' ? 'selected' : '');
+
+	if($imgurSecret && $imgurID){
+		require './module/imgur.pl';
+		my $Img = IMGUR->new;
+		$Img->Load($SYS);
+		if($imgurAuth eq 'authed'){
+			$imgurAuth = "Imgur 連携済み";
+		}elsif($uploadMode eq 'imgur'){
+			require Digest::MD5;
+			my $ctx = Digest::MD5->new;
+			$ctx->add('ex0ch ID Generation');
+			$ctx->add(':', $SYS->Get('SERVER'));
+			$ctx->add(':', $SYS->Get('SECURITY_KEY'));
+			$ctx->add(':', rand);
+
+			my $redirect = $Form->modCGI->url(-full=>1);
+			my $state = $ctx->hexdigest;
+			my $auth_url = $Img->GetAuthorizationUrl($redirect, $state);
+
+			$SYS->Set('IMGUR_AUTH',$state);
+			$SYS->Save();
+			$imgurAuth = qq{<a href="$auth_url" target="_blank">Imgur 連携ページへ</a>};
+		}elsif($uploadMode ne 'imgur'){
+			$imgurAuth = '<small>Imgurを使う場合、設定とClient IDとClient Secretを保存したら<b>ここ</b>から連携ページに移動して連携を完了させてください。</small>';
+			$SYS->Set('IMGUR_AUTH','');
+			$SYS->Save();
+		}
+	}else{
+		$imgurAuth = '<small>Imgurを使う場合、Client IDとClient Secretを保存したら<b>ここ</b>から連携ページに移動して連携を完了させてください。</small>';
+	}
 	
 	$common = "onclick=\"DoSubmit('sys.setting','FUNC','OTHER');\"";
 	
@@ -519,6 +569,20 @@ sub PrintOtherSetting
 	$Page->Print("<td><input type=text size=60 name=HEADTEXT value=\"$headText\" ></td></tr>\n");
 	$Page->Print("<tr><td>上記テキストに貼るリンクのURL</td>");
 	$Page->Print("<td><input type=text size=60 name=HEADURL value=\"$headUrl\" ></td></tr>\n");
+
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">画像アップロード</td></tr>\n");
+	$Page->Print("<tr><td>ユーザーによる画像のアップロード方法を指定します。</td>");
+	$Page->Print("<td><select name=\"UPLOAD\" disabled>\n");
+	$Page->Print("<option value=\"\" $is_none>なし</option>\n");
+	$Page->Print("<option value=\"imgur\" $is_imgur>Imgur</option>\n");
+	$Page->Print("<option value=\"local\" $is_local disabled>ローカル</option>\n");
+	$Page->Print("</select></td></tr>\n");
+	$Page->Print("<tr><td>Imgur Client ID</td>");
+	$Page->Print("<td><input type=text size=60 name=IMGUR_ID value=\"$imgurID\" disabled></td></tr>\n");
+	$Page->Print("<tr><td>Imgur Client Secret</td>");
+	$Page->Print("<td><input type=text size=60 name=IMGUR_SECRET value=\"$imgurSecret\" disabled></td></tr>\n");
+	$Page->Print("<tr><td>Imgur 連携</td>");
+	$Page->Print("<td>$imgurAuth</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
 	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
@@ -540,10 +604,6 @@ sub PrintOtherSetting
 	#$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
 	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
 	
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">bbs.cgiのGETメソッド</td></tr>\n");
-	$Page->Print("<tr><td>bbs.cgiでGETメソッドを使用する</td>");
-	$Page->Print("<td><input type=checkbox name=BBSGET $bbsget value=on></td></tr>\n");
-	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック</td></tr>\n");
 	$Page->Print("<tr><td>更新チェックの間隔</td>");
 	$Page->Print("<td><input type=text size=2 name=UPCHECK value=\"$upCheck\">日(0でチェック無効)</td></tr>\n");
@@ -564,9 +624,38 @@ sub PrintOtherSetting
 	$Page->Print("<tr><td>忍法帖Lv上限</td>");
 	$Page->Print("<td><input type=text size=2 name=NINLVMAX value=\"$ninLvmax\"></td></tr>\n");
 
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">その他</td></tr>\n");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">ログアウト</td></tr>\n");
 	$Page->Print("<tr><td>管理画面からの自動ログアウト時間</td>");
 	$Page->Print("<td><input type=text size=2 name=LOGOUT value=\"$logout\">分間操作なしでログアウト(無記入または0で三十分)</td></tr>\n");
+
+	# テーマ名のリスト
+	my @themes = (
+		'default', '3024-day', '3024-night', 'abbott', 'abcdef', 'ambiance',
+		'ayu-dark', 'ayu-mirage', 'base16-dark', 'base16-light', 'bespin',
+		'blackboard', 'cobalt', 'colorforth', 'darcula', 'dracula',
+		'duotone-dark', 'duotone-light', 'eclipse', 'elegant', 'erlang-dark',
+		'gruvbox-dark', 'hopscotch', 'icecoder', 'idea', 'isotope',
+		'juejin', 'lesser-dark', 'liquibyte', 'lucario', 'material',
+		'material-darker', 'material-palenight', 'material-ocean', 'mbo',
+		'mdn-like', 'midnight', 'monokai', 'moxer', 'neat', 'neo', 'night',
+		'nord', 'oceanic-next', 'panda-syntax', 'paraiso-dark',
+		'paraiso-light', 'pastel-on-dark', 'railscasts', 'rubyblue', 'seti',
+		'shadowfox', 'solarized dark', 'solarized light', 'the-matrix',
+		'tomorrow-night-bright', 'tomorrow-night-eighties', 'ttcn', 'twilight',
+		'vibrant-ink', 'xq-dark', 'xq-light', 'yeti', 'yonce', 'zenburn',
+	);
+
+	# セレクトボックス生成
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">エディタのテーマ</td></tr>\n");
+	$Page->Print("<tr><td>HTML/BGDSL編集画面のエディタのテーマを設定します。</td>");
+	$Page->Print("<td><select name=\"CM_THEME\">\n");
+	my $sel = $is_selected eq '' ? ' selected="selected"' : '';
+	$Page->Print("<option value=\"\" $sel>なし</option>\n");
+	for my $theme (@themes) {
+		my $sel = ($theme eq $is_selected) ? ' selected="selected"' : '';
+		$Page->Print("<option value=\"$theme\" $sel>$theme</option>\n");
+	}
+	$Page->Print("</select></td></tr>\n");
 	
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=2 align=left>");
@@ -601,7 +690,7 @@ sub PrintPlusViewSetting
 	my $Prlink		= $SYS->Get('PRLINK');
 	my $Msec		= $SYS->Get('MSEC');
 	my $hide_hits	= $SYS->Get('HIDE_HITS');
-	my $refresh_mode	= $SYS->Get('REFRESH_MODE');
+	my $refresh_mode= $SYS->Get('REFRESH_MODE');
 	
 	my $bannerindex	= ($Banner & 3 ? 'checked' : '');
 	my $banner		= ($Banner & 5 ? 'checked' : '');
@@ -790,8 +879,9 @@ sub PrintPlusSecSetting
 	$Page->Print("<tr><td>bbs.cgi</td>");
 	$Page->Print("<td>各掲示板の設定で有効化してください</td></tr>\n");
 
-	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">BoardGuard DSL(実験的)</td></tr>\n");
-	$Page->Print("<tr><td>強力な複合式ユーザー規制を有効化する(注意：<a href=\"https://github.com/PrefKarafuto/ex0ch/wiki/BoardGuard-DSL\">このDSLの文法・機能</a>をしっかり理解していないと、datやデータファイルが破損する恐れがあります！)</td>");
+	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">BoardGuard DSL（高度）</td></tr>\n");
+	$Page->Print("<tr><td>条件付きユーザー規制を有効化する<br><small>注意：<a href=\"https://github.com/PrefKarafuto/ex0ch/wiki/BoardGuard-DSL\">");
+	$Page->Print("このDSLの文法・機能</a>を十分に把握した上で使用してください。datやデータファイルが破損する恐れがあります。</small></td>\n");
 	$Page->Print("<td><input type=checkbox name=BGDSL $bgdsl value=on></td></tr>\n");
 
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
@@ -1211,7 +1301,6 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('PATHKIND', $Form->Get('PATHKIND'));
 	$SYSTEM->Set('IMGTAG', ($Form->Equal('IMGTAG', 'on') ? 1 : 0));
 	$SYSTEM->Set('FASTMODE', ($Form->Equal('FASTMODE', 'on') ? 1 : 0));
-	$SYSTEM->Set('BBSGET', ($Form->Equal('BBSGET', 'on') ? 1 : 0));
 	$SYSTEM->Set('UPCHECK', $Form->Get('UPCHECK'));
 	$SYSTEM->Set('NINLVMAX', $Form->Get('NINLVMAX'));
 	$SYSTEM->Set('NIN_EXPIRY', $Form->Get('NIN_EXPIRY'));
@@ -1219,7 +1308,11 @@ sub FunctionOtherSetting
 	$SYSTEM->Set('COOKIE_EXPIRY', $Form->Get('COOKIE_EXPIRY'));
 	$SYSTEM->Set('AUTH_EXPIRY', $Form->Get('AUTH_EXPIRY'));
 	$SYSTEM->Set('LOGOUT', $Form->Get('LOGOUT'));
+	$SYSTEM->Set('CM_THEME', $Form->Get('CM_THEME'));
 	$SYSTEM->Set('CSP', ($Form->Equal('CSP', 'on') ? 1 : 0));
+	$SYSTEM->Set('IMGUR_ID', $Form->Get('IMGUR_ID'));
+	$SYSTEM->Set('IMGUR_SECRET', $Form->Get('IMGUR_SECRET'));
+	$SYSTEM->Set('UPLOAD', $Form->Get('UPLOAD'));
 	
 	$SYSTEM->Save();
 	
@@ -1229,12 +1322,12 @@ sub FunctionOtherSetting
 		push @$pLog, '　　　 ヘッダテキスト：' . $SYSTEM->Get('HEADTEXT');
 		push @$pLog, '　　　 ヘッダURL：' . $SYSTEM->Get('HEADURL');
 		push @$pLog, '　　　 Imgurのみ変換許可：' . $SYSTEM->Get('IMGTAG');
+		push @$pLog, '　　　 画像アップロード：' . $SYSTEM->Get('UPLOAD');
 		push @$pLog, '　　　 URL自動リンク：' . $SYSTEM->Get('URLLINK');
 		push @$pLog, '　　　 　開始時間：' . $SYSTEM->Get('LINKST');
 		push @$pLog, '　　　 　終了時間：' . $SYSTEM->Get('LINKED');
 		push @$pLog, '　　　 PATH種別：' . $SYSTEM->Get('PATHKIND');
 		push @$pLog, '　　　 index.htmlを更新しない：' . $SYSTEM->Get('FASTMODE');
-		push @$pLog, '　　　 bbs.cgiのGETメソッド：' . $SYSTEM->Get('BBSGET');
 		push @$pLog, '　　　 Cookie有効期限：' . $SYSTEM->Get('COOKIE_EXPIRY');
 		push @$pLog, '　　　 認証有効期限：' . $SYSTEM->Get('AUTH_EXPIRY');
 		push @$pLog, '　　　 忍法帖最大レベル：' . $SYSTEM->Get('NINLVMAX');

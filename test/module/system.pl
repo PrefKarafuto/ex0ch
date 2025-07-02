@@ -255,7 +255,7 @@ sub InitSystemValue
 		'BBSPATH'	=> '..',									# 掲示板設置パス
 		'SITENAME'	=> '',										# サイトの名前
 		'DEBUG'		=> 0,										# デバグモード
-		'VERSION'	=> 'ex0ch BBS 0.10.4 20250620',				# CGIバージョン
+		'VERSION'	=> 'ex0ch BBS 0.10.5 20250702',				# CGIバージョン
 		'PM-DAT'	=> 0644,									# datパーミション
 		'PM-STOP'	=> 0444,									# スレストパーミション
 		'PM-TXT'	=> 0644,									# TXTパーミション
@@ -291,7 +291,6 @@ sub InitSystemValue
 		'PRLINK'	=> 'https://github.com/PrefKarafuto/ex0ch',	# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
-		'BBSGET'	=> 0,										# bbs.cgiでGETメソッドを使用するかどうか
 		'CONFVER'	=> '',										# システム設定ファイルのバージョン
 		'UPCHECK'	=> 7,										# 更新チェック間隔(日)
 		'LASTCHECK'	=> 0,										# 前回チェック時刻
@@ -313,6 +312,11 @@ sub InitSystemValue
 		'PROXYCHECK_API'	=> '',								# プロキシ判定API
 		'PROXYCHECK_APIKEY'	=> '',								# APIキー
 
+		'UPLOAD'		=> '',									# 画像アップロード
+		'IMGUR_ID'		=> '',									# Imgur ID
+		'IMGUR_SECRET'	=> '',									# Imgur シークレットID
+		'IMGUR_AUTH'	=> '',									# Imgur API 認証状況
+
 		'ADMINCAP'		=> '',									# admin.cgiにCaptchaを課すか
 		'SEARCHCAP'		=> '',									# search.cgiにCaptchaを課すか
 
@@ -326,7 +330,7 @@ sub InitSystemValue
 		'BANMAX'		=> 10,									# スレッドあたり最大BAN可能人数
 		'NINLVMAX'		=> 40,									# 忍法帖Lv最大値
 		'HIDE_HITS'		=> 1,									# 規制ユーザー非公開
-		'CM_THEME'		=> 'eclipse',							# CodeMirror テーマ
+		'CM_THEME'		=> 'abcdef',							# CodeMirror テーマ
 		'REFRESH_MODE'	=> 'default',							# 書き込み後の遷移先
 
 		'COOKIE_EXPIRY'	=> 30,									# Cookie期限

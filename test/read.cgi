@@ -216,7 +216,6 @@ sub PrintReadHead
 	
 	# HTMLヘッダの出力
 	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
-	$data_url =~ s/^https?://;
   $Page->Print("Content-type: text/html;charset=Shift_JIS\n");
   $Page->Print("Cache-Control: max-age=0, s-maxage=1, stale-while-revalidate=2\n\n");
 	$Page->Print(<<HTML);
@@ -236,7 +235,6 @@ sub PrintReadHead
  <meta name="twitter:card" content="summary">
   <link rel="stylesheet" type="text/css" href="$data_url/design.css">
  <link rel="icon" href="$favicon">
- <script language="javascript" src="$data_url/script.js"></script>
 
 HTML
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($Set->Get('BBS_TWITTER'));
@@ -527,6 +525,7 @@ sub PrintReadFoot
 	my $permt = DAT::GetPermission($datPath);
 	my $perms = $Sys->Get('PM-STOP');
 	my $isstop = $permt == $perms;
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
 	# 投稿フォームの表示
 	# レス最大数を超えている場合はフォーム表示しない
 	if ($rmax > $Dat->Size() && $Set->Get('BBS_READONLY') ne 'on' && !$isstop &&!$threadStop &&!$threadPool) {
@@ -552,17 +551,21 @@ sub PrintReadFoot
 		}
 
 		my $status = $Set->Equal('BBS_READONLY', 'caps') ? '必須' : '任意';
+		my $upform = ($Sys->Get('UPLOAD') && $Sys->Get('IMGUR_ID') && $Sys->Get('IMGUR_SECRET') && $Set->Get('BBS_UPLOAD')) ? 
+	'<input type="file" id="fileInput" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
+    video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">
+	<button type="button" id="clearBtn" style="display:none">選択解除</button>' : '';
 
 		$Page->Print(<<HTML);
 <a id="bottom"></a>
-<form method="POST" action="$cgipath/bbs.cgi">
+<form method="POST" action="$cgipath/bbs.cgi" enctype="multipart/form-data">
 <input type="hidden" name="bbs" value="$bbs">
 <input type="hidden" name="key" value="$key">
 <input type="hidden" name="time" value="$tm">
 <input type="hidden" name="from_index" value="0">
 <input type="submit" value="　書き込む　"><br class="smartphone">
 <input type="text" name="FROM" value="$cookName" size="19" placeholder="名前（任意）">
-<input type="text" name="mail" value="$cookMail" size="19" placeholder="コマンド・Cap（$status）"><br>
+<input type="text" name="mail" value="$cookMail" size="19" placeholder="コマンド・Cap（$status）"> $upform<br>
 <textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 </form>
 HTML
@@ -588,6 +591,7 @@ width:95%;
 margin:0;
 }
 </style>
+<script language="javascript" src="$data_url/script.js"></script>
 </body>
 </html>
 HTML

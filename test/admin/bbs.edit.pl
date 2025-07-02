@@ -207,7 +207,7 @@ sub SetMenuList
 	}
 	# 管理グループ設定権限のみ
 	if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_BGDSLEDIT, $bbs)) {
-		$Base->SetMenu("BoardGuard DSLの編集(実験的)","'bbs.edit','DISP','BGDSL'");
+		$Base->SetMenu("BoardGuard DSLの編集","'bbs.edit','DISP','BGDSL'");
 		$bAuth = 1;
 	}
 	if ($bAuth) {
@@ -268,8 +268,8 @@ sub PrintHeaderEdit
 	$Page->Merge($PreviewPage);
 	
 	$Page->Print("</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">内容編集</td><td>");
-	$Page->Print("<textarea name=HEAD_TEXT rows=11 cols=80 wrap=off>");
+	$Page->Print("<tr><td class=\"DetailTitle\" width=\"10%\">内容編集</td><td>");
+	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=HEAD_TEXT rows=\"11\" cols=\"80\">");
 	
 	# ヘッダ内容テキストの表示
 	$data =~ s/&/&amp;/g;
@@ -338,8 +338,8 @@ sub PrintFooterEdit
 	$Page->Merge($PreviewPage);
 	
 	$Page->Print("</td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\">内容編集</td><td>");
-	$Page->Print("<textarea name=FOOT_TEXT rows=11 cols=80 wrap=off>");
+	$Page->Print("<tr><td class=\"DetailTitle\" width=\"10%\">内容編集</td><td>");
+	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=FOOT_TEXT rows=\"11\" cols=\"80\">");
 	
 	# フッタ内容テキストの表示
 	$data =~ s/&/&amp;/g;
@@ -390,8 +390,8 @@ sub PrintMETAEdit
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">内容編集</td><td>");
-	$Page->Print("<textarea name=META_TEXT rows=11 cols=80 wrap=off>");
+	$Page->Print("<tr><td class=\"DetailTitle\" width=\"10%\">内容編集</td><td>");
+	$Page->Print("<textarea id=\"html-editor\" spellcheck=\"false\" wrap=off name=META_TEXT rows=\"11\" cols=\"80\">");
 	
 	# フッタ内容テキストの表示
 	$data =~ s/&/&amp;/g;
@@ -472,7 +472,7 @@ sub PrintValidUserEdit
 	$Page->Print("</td></tr>\n");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">規制対象一覧</td><td>");
-	$Page->Print("<textarea name=VALID_USERS rows=10 cols=70 wrap=off>");
+	$Page->Print("<textarea name=VALID_USERS rows=10 style=\"width:80%\" wrap=off>");
 	
 	my $sanitize = sub {
 		$_ = shift;
@@ -544,9 +544,9 @@ sub PrintNGWordsEdit
 	
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
-	$Page->Print("<tr><td class=\"DetailTitle\">NGワード一覧");
+	$Page->Print("<tr><td class=\"DetailTitle\" style=\"width:20%\">NGワード一覧");
 	$Page->Print("<br><br>NGワード<br>NGワード&lt;&gt;置換文字列<br>!reg:正規表現によるNGワード</td><td>");
-	$Page->Print("<textarea name=NG_WORDS rows=10 cols=70 wrap=off>");
+	$Page->Print("<textarea name=NG_WORDS rows=10 style=\"width:80%\" wrap=off>");
 	
 	my $sanitize = sub {
 		$_ = shift;
@@ -571,7 +571,7 @@ sub PrintNGWordsEdit
 	$Page->Print("<option value=substitute $kind[3]>NGワード置換</option>");
 	$Page->Print("</select></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">デフォルト置換文字列</td><td>");
-	$Page->Print("<input type=text name=NG_SUBSTITUTE value=\"$kind[4]\" size=60></td></tr>\n");
+	$Page->Print("<input type=text name=NG_SUBSTITUTE value=\"$kind[4]\" style=\"width:80%\"></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 
 	my $setCheckWord = &$sanitize($Form->Get('WORDCHECK'));
@@ -582,7 +582,7 @@ sub PrintNGWordsEdit
 		$Page->Print("<tr><td colspan=2 align=left>");
 		$Page->Print("<input type=button value=\"　設定　\" $common,'FUNC','NGWORD')\"> ");
 		$Page->Print("<input type=button value=\"　確認　\" $common,'FUNC','NGCHECK')\"> ");
-		$Page->Print("<textarea rows=1 cols=60 name=WORDCHECK placeholder=\"ここに確認したいワードを入力\" style=\"font-size:1em\"></textarea>");
+		$Page->Print("<textarea rows=1 cols=60 name=WORDCHECK placeholder=\"ここに確認したいワードを入力\" style=\"font-size:1em;width:50%\"></textarea>");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -602,7 +602,7 @@ sub PrintBoardGuardDSLEdit {
     my ($Page, $SYS, $Form) = @_;
     my ($dsl_text, $isAuth);
 
-    $SYS->Set('_TITLE', 'BBS BoardGuard Edit');
+    $SYS->Set('_TITLE', 'BBS BoardGuard DSL Edit');
 
     # DSLエンジン読み込み
     require './module/dsl_engine.pl';
@@ -629,6 +629,8 @@ sub PrintBoardGuardDSLEdit {
 				name="BGDSL"
 				spellcheck="false"
 				wrap="off"
+				rows="11"
+				cols="80"
 		>
 HTML
 		# HTMLエスケープ
@@ -680,7 +682,6 @@ sub PrintLastEdit
 	my ($resmax, $resmax1, $resmaxz, $resmaxz1);
 	
 	$SYS->Set('_TITLE', 'BBS 1001 Edit');
-	$Form->DecodeForm(1);
 	
 	require './module/setting.pl';
 	my $Set = SETTING->new;
@@ -753,7 +754,7 @@ sub PrintLastEdit
 			$elem[3] =~ s/>/&gt;/g;
 		}
 		
-		$elem[3] =~ s/\n/ <br> /g;
+		$elem[3] =~ s/\n/<br>/g;
 		$elem[0] =~ s/<>/&lt;&gt;/g;
 		$elem[1] =~ s/<>/&lt;&gt;/g;
 		$elem[2] =~ s/<>/&lt;&gt;/g;
@@ -1113,7 +1114,6 @@ sub FunctionLastEdit
 			return 1000;
 		}
 	}
-	$Form->DecodeForm(1);
 	
 	# 1000.txtのパス
 	$lastPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/1000.txt';
@@ -1161,7 +1161,7 @@ sub FunctionLastEdit
 			$cont =~ s/>/&gt;/g;
 		}
 		
-		$cont =~ s/\n/ <br> /g;
+		$cont =~ s/\n/<br>/g;
 		$name =~ s/<>/&lt;&gt;/g;
 		$mail =~ s/<>/&lt;&gt;/g;
 		$date =~ s/<>/&lt;&gt;/g;

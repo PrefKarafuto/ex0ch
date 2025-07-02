@@ -76,6 +76,10 @@ our $E_LIMIT_MOBILETHREAD	= 204;
 our $E_LIMIT_FORBIDDENCGI	= 205;
 our $E_LIMIT_OVERDATSIZE	= 206;
 our $E_LIMIT_THREADCAPONLY	= 504;
+#  画像アップロードに関するエラー
+our $E_IMG_FAILEDUPLOAD	    = 300;
+our $E_IMG_FAIEDPOST	    = 301;
+our $E_IMG_FAILEDGETTOKEN	= 302;
 #  規制に関するエラー
 our $E_REG_MANYTHREAD		= 500;
 our $E_REG_NOBREAKPOST		= 501;
@@ -181,7 +185,7 @@ our $AUTH_BBSSETTING	=  9; # 掲示板設定
 our $AUTH_NGWORDS		= 10; # NGワード編集
 our $AUTH_ACCESUSER		= 11; # アクセス制限編集
 our $AUTH_RESDELETE		= 12; # レスあぼーん
-our $AUTH_RESEDIT		= 13; # レス編集
+our $AUTH_RESEDIT		= 13; # レス編集・作成
 our $AUTH_BBSEDIT		= 14; # 各種編集
 our $AUTH_LOGVIEW		= 15; # ログの閲覧・削除
 our $AUTH_NINJAEDIT		= 16; # 忍法帖の閲覧・編集

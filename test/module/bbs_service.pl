@@ -142,7 +142,6 @@ sub CreateSubback
 	my $title = $Set->Get('BBS_TITLE');
 	my $code = $this->{'CODE'};
 	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
-	$data_url =~ s/^https?://;
 	$Page->Print(<<HTML);
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="ja">
@@ -151,7 +150,6 @@ sub CreateSubback
  <meta http-equiv="Content-Type" content="text/html;charset=Shift_JIS">
  <meta name="viewport" content="width=device-width,initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="$data_url/design.css">
- <script language="javascript" src="$data_url/script.js"></script>
 
 HTML
 	
@@ -268,7 +266,6 @@ sub PrintIndexHead
 
 	my $url = $this->{'SYS'}->Get('SERVER').'/'.$this->{'SYS'}->Get('BBS').'/';
 	my $data_url = $this->{'SYS'}->Get('SERVER').$this->{'SYS'}->Get('CGIPATH').$this->{'SYS'}->Get('DATA');
-	$data_url =~ s/^https?://;
 	my $favicon = $this->{'SET'}->Get('BBS_FAVICON');
 	my $bbsinfo = $this->{'SET'}->Get('BBS_SUBTITLE');
 	my $ogpimage = $image;
@@ -292,7 +289,6 @@ sub PrintIndexHead
  <meta property="og:site_name" content="EXぜろちゃんねる">
  <meta name="twitter:card" content="summary_large_image">
  <link rel="stylesheet" type="text/css" href="$data_url/design.css">
- <script language="javascript" src="$data_url/script.js"></script>
  <link rel="icon" href="$favicon">
 HEAD
 	$Page->Print('<script src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>') if ($this->{'SET'}->Get('BBS_TWITTER'));
@@ -717,6 +713,13 @@ sub PrintIndexFoot
 	my $samba = int ($Set->Get('BBS_SAMBATIME', '') eq ''
 					? $Sys->Get('DEFSAMBA') : $Set->Get('BBS_SAMBATIME'));
 	my $tm = time;
+
+	my $upform = ($Sys->Get('UPLOAD') && $Sys->Get('IMGUR_ID') && $Sys->Get('IMGUR_SECRET') && $Set->Get('BBS_UPLOAD')) ? 
+	'<input type="file" id="fileInput" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
+    video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">
+	<button type="button" id="clearBtn" style="display:none">選択解除</button>' : '';
+	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
+
 	if ($Set->Get('BBS_READONLY') ne 'on'){
 	# スレッド作成画面を別画面で表示
 	if (0) {
@@ -742,7 +745,7 @@ FORM
 		my $status = $Set->Equal('BBS_READONLY', 'caps') || $Set->Equal('BBS_THREADCAPONLY', 'checked') ? '必須' : '任意';
 		$Page->Print(<<FORM);
 
-<form method="POST" action="$cgipath/bbs.cgi">
+<form method="POST" action="$cgipath/bbs.cgi" enctype="multipart/form-data">
 <table border="1" cellspacing="7" cellpadding="3" width="95%" bgcolor="$tblCol" style="margin-bottom:1.2em;" align="center">
  <tr>
   <td>
@@ -753,7 +756,7 @@ FORM
   </div>
   <br class="smartphone">
   <input type="text" name="FROM" size="19" placeholder="名前（任意）">
-  <input type="text" name="mail" size="19" placeholder="コマンド・Cap（$status）"><br>
+  <input type="text" name="mail" size="19" placeholder="コマンド・Cap（$status）"> $upform<br>
    <span style="margin-top:0px;">
    <div class="bbs_service_textarea"><textarea rows="5" cols="70" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea></div>
    </span>
@@ -808,6 +811,7 @@ img {
 	height:auto;
 }
 </style>
+ <script language="javascript" src="$data_url/script.js"></script>
 FOOT
 	
 	$Page->Print("</body>\n</html>\n");
@@ -829,6 +833,7 @@ sub PrintThreadPreviewOne
 	my ($Page, $Dat, $commands) = @_;
 	
 	my $Sys = $this->{'SYS'};
+	my $Set = $this->{'SET'};
 	
 	# 前準備
 	my $contNum = $this->{'SET'}->Get('BBS_CONTENTS_NUMBER');
@@ -863,10 +868,14 @@ sub PrintThreadPreviewOne
 	if($rmax > $Dat->Size() && $this->{'SET'}->Get('BBS_READONLY') ne 'on' && !$isstop && !$threadStop && !$threadPool){
 		# 書き込みフォームの表示
 		my $status = $this->{'SET'}->Equal('BBS_READONLY', 'caps') ? '必須' : '任意';
+		my $upform = ($Sys->Get('UPLOAD') && $Sys->Get('IMGUR_ID') && $Sys->Get('IMGUR_SECRET') && $Set->Get('BBS_UPLOAD')) ? 
+	'<input type="file" id="fileInput" name="image_file" accept="image/jpeg,image/png,image/gif,image/apng,image/tiff,
+    video/mp4,video/mpeg,video/avi,video/webm,video/quicktime,video/x-matroska,video/x-flv,video/x-msvideo,video/x-ms-wmv">
+	<button type="button" id="clearBtn" style="display:none">選択解除</button>' : '';
 		$Page->Print(<<KAKIKO);
   </dl>
   <hr>
-  <form method="POST" action="$cgiPath/bbs.cgi">
+  <form method="POST" action="$cgiPath/bbs.cgi" enctype="multipart/form-data">
    <blockquote>
    <input type="hidden" name="bbs" value="$bbs">
    <input type="hidden" name="key" value="$key">
@@ -874,7 +883,7 @@ sub PrintThreadPreviewOne
    <input type="hidden" name="from_index" value="1">
    <input type="submit" value="　書き込む　" name="submit"><br class="smartphone">
    <input type="text" name="FROM" size="19" placeholder="名前（任意）">
-   <input type="text" name="mail" size="19" placeholder="コマンド・Cap（$status）"><br>
+   <input type="text" name="mail" size="19" placeholder="コマンド・Cap（$status）"> $upform<br>
 	<div class ="bbs_service_textarea">
 	<textarea rows="5" cols="64" name="MESSAGE" placeholder="投稿したい内容を入力してください（必須）"></textarea>
 	</div>
@@ -950,18 +959,38 @@ sub PrintResponse
 	if ($contLine <= $dispLine || $n == 1) {
 		$Page->Print("：$elem[2]</dt>\n    <dd $aa>$elem[3]<br><br></dd>\n");
 	}
-	# 表示行数を超えたら省略表示を付加する
+	# 表示行数を超えたら折りたたみ表示にする
 	else {
-		my @dispBuff = split(/<br>/i, $elem[3]);
-		my $path = $Conv->CreatePath($Sys, 0, $Sys->Get('BBS'), $Sys->Get('KEY'), "${n}n");
-		
-		$Page->Print("：$elem[2]</dt>\n    <div $aa><dd>");
-		for (my $k = 0; $k < $dispLine; $k++) {
-			$Page->Print("$dispBuff[$k]<br>");
+		my @lines = split(/<br>/i, $elem[3]);
+		my $total     = @lines;
+		my $remaining = $total - $dispLine;
+
+		# 見出し部分
+		$Page->Print("：$elem[2]</dt>\n");
+		$Page->Print("    <dd $aa>\n");
+
+		# 最初の dispLine 行を全部出力
+		for my $k (0 .. $dispLine - 1) {
+			$Page->Print("$lines[$k]<br>\n");
 		}
-		$Page->Print("</div><font color=\"green\">（省略されました・・全てを読むには");
-		$Page->Print("<a href=\"$path\" target=\"_blank\">ここ</a>");
-		$Page->Print("を押してください）</font><br><br></dd>\n");
+
+		# <details>／<summary> で折りたたみ
+		$Page->Print(<<HTML);
+		<details>
+		<summary style="cursor:pointer; user-select:none; color:green">
+		<span class="closed">（全て表示：残り${remaining}行）</span>
+		<span class="opened">（折りたたむ）</span>
+		</summary>
+		<div>
+HTML
+		# 折りたたまれた中身（残り）
+		for my $k ($dispLine .. $#lines) {
+			$Page->Print("    $lines[$k]<br>\n");
+		}
+
+		# </details> 閉じ
+		$Page->Print('</div></details>');
+		$Page->Print("    </dd>\n");
 	}
 }
 

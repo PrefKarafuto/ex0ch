@@ -94,6 +94,9 @@ sub DoPrint
 	elsif ($subMode eq 'EDIT') {													# レス編集画面
 		PrintResEdit($Page, $Sys, $Form, $DAT);
 	}
+	elsif ($subMode eq 'POST') {													# レス投稿画面
+		PrintResPost($Page, $Sys, $Form, 0);
+	}
 	elsif ($subMode eq 'ABONE') {													# レス削除確認画面
 		PrintResDelete($Page, $Sys, $Form, $DAT, 1);
 	}
@@ -159,6 +162,9 @@ sub DoFunction
 	
 	if ($subMode eq 'EDIT') {													# レス編集
 		$err = FunctionResEdit($Sys, $Form, $DAT, $this->{'LOG'});
+	}
+	elsif ($subMode eq 'POST') {												# レス投稿
+		$err = FunctionResPost($Sys, $Form, $DAT, $this->{'LOG'});
 	}
 	elsif ($subMode eq 'ABONE') {												# レスあぼ～ん
 		$err = FunctionResDelete($Sys, $Form, $DAT, $this->{'LOG'}, 1);
@@ -332,10 +338,11 @@ sub PrintResList
 		# 鯖内掲示板のURLをリンクに
 		$elem[3] =~ s{$regstr}{
 		my ($bbs_name, $thread_id, $disp_fmt) = ($1, $2, defined $3 ? $3 : '');
+		my $url = "$bbs_name/$thread_id/$disp_fmt";
 
 		if (exists $keySet{$bbs_name}) {
 			my $bbs_key = $keySet{$bbs_name};
-			qq{<a href="javascript:SetOption('TARGET_BBS','$bbs_key');SetOption('TARGET_THREAD','$thread_id');SetOption('DISP_FORMAT','$disp_fmt');DoSubmit('thread.res','DISP','LIST');">[掲示板内リンク：$bbs_name/$thread_id/$disp_fmt]</a>}
+			qq{$BBSurl/<a href="javascript:SetOption('TARGET_BBS','$bbs_key');SetOption('TARGET_THREAD','$thread_id');SetOption('DISP_FORMAT','$disp_fmt');DoSubmit('thread.res','DISP','LIST');">$url</a>}
 		}
 		else {
 			${^MATCH};
@@ -353,11 +360,12 @@ sub PrintResList
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	# システム権限有無による表示抑制
-	if ($isAbone) {
+	if ($isAbone || $isEdit) {
 		$common = "onclick=\"DoSubmit('thread.res','DISP'";
-		$Page->Print("<tr><td colspan=2 align=right>");
-		$Page->Print("<input type=button value=\"あぼ～ん\" $common,'ABONE')\"> ");
-		$Page->Print("<input type=button value=\"透明あぼ～ん\" $common,'DELETE')\">");
+		$Page->Print("<tr><td colspan=2>");
+		$Page->Print("<input type=button value=\"レス投稿\" $common,'POST')\">") if $isEdit;
+		$Page->Print("<span style=\"float: right;\"><input type=button value=\"あぼ～ん\" $common,'ABONE')\"> ") if $isAbone;
+		$Page->Print("<input type=button value=\"透明あぼ～ん\" $common,'DELETE')\"></span>") if $isAbone;
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table></dl><br>");
@@ -503,6 +511,48 @@ sub PrintResEdit
 		$common = "onclick=\"DoSubmit('thread.res','FUNC'";
 		$Page->Print("<tr><td colspan=2 align=right>");
 		$Page->Print("<input type=button value=\"　変更　\" $common,'EDIT')\"> ");
+		$Page->Print("</td></tr>\n");
+	}
+	$Page->Print("</table><br>");
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	レス投稿画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Dat	dat変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintResPost
+{
+	my ($Page, $Sys, $Form, $isCreate) = @_;
+	my ($thread_id, $pRes, $isEdit, $common);
+	
+	$Sys->Set('_TITLE', 'Res Post');
+	$thread_id = $Form->Get('TARGET_THREAD');
+	
+	$isEdit = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'));
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
+	$Page->Print("<input type=text size=50 name=FROM></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">メール（コマンド）</td><td>");
+	$Page->Print("<input type=text size=50 name=mail></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">本文</td><td>");
+	$Page->Print("<textarea name=MESSAGE cols=70 rows=10></textarea></td></tr>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	
+	$Page->HTMLInput('hidden', 'TARGET_THREAD', $thread_id);
+	
+	# システム権限有無による表示抑制
+	if ($isEdit) {
+		$common = "onclick=\"DoSubmit('thread.res','FUNC'";
+		$Page->Print("<tr><td colspan=2>");
+		$Page->Print("<input type=button value=\"　投稿　\" $common,'POST')\"> ");
 		$Page->Print("</td></tr>\n");
 	}
 	$Page->Print("</table><br>");
@@ -671,7 +721,7 @@ sub FunctionResEdit
 	}
 	
 	# 改行・禁則文字の変換
-	$elem[3] =~ s/\r\n|\r|\n/ <br> /g;
+	$elem[3] =~ s/\r\n|\r|\n/<br>/g;
 	$elem[3] =~ s/<>/&lt;&gt;/g;
 	$elem[3] = " $elem[3] ";
 	
@@ -696,6 +746,97 @@ sub FunctionResEdit
 	foreach (@elem) {
 		push @$pLog, $_;
 	}
+	
+	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	レス投稿
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Dat	Dat変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionResPost
+{
+	my ($Sys, $Form, $Dat, $pLog) = @_;
+	my (@elem, $PS, $Conv);
+	
+	# 権限チェック
+	{
+		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+
+	my $threadKey = $Sys->Get('KEY');
+	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $threadKey . '.dat';
+	
+	# Dat形式に整形
+	require './module/post_service.pl';
+	$PS = POST_SERVICE->new;
+	$PS->Init($Sys, $Form);
+	$PS->ReadyBeforeCheck();
+	$PS->NormalizationNameMail();
+
+	if ($Form->Get('MESSAGE') eq '' ){
+		push @$pLog, "本文がありません。";
+		return 0;
+	}
+	
+	# 名前欄設定
+	my $from = $Form->Get('FROM', '');
+	if (($from eq ''||$PS->{'THREADS'}->GetAttr($threadKey,'force774'))) {
+		if($PS->{'THREADS'}->GetAttr($threadKey,'change774')){
+			require HTML::Entities;
+			$from = HTML::Entities::decode($PS->{'THREADS'}->GetAttr($threadKey,'change774'));
+		}
+		else{
+			$from = $PS->{'SET'}->Get('BBS_NONAME_NAME');
+		}
+		$Form->Set('FROM', $from);
+	}
+	
+	my $datLine = $PS->MakeDatLine();
+	$Dat->ReLoad($Sys, 0);
+	$Dat->Add($datLine);
+	$Dat->Save($Sys);
+
+	chomp($datLine);
+	require './module/manager_log.pl';
+	my $Log = MANAGER_LOG->new;
+	my $host = $ENV{'REMOTE_HOST'};
+	my $ip = $ENV{'REMOTE_ADDR'};
+	my $ua = $ENV{'HTTP_USER_AGENT'};
+	$ENV{'REMOTE_HOST'}	= $Form->Get('UserName');
+	$ENV{'REMOTE_ADDR'}	= 'N/A';
+	$ENV{'HTTP_USER_AGENT'}	= 'N/A';
+	$Log->Load($Sys, 'WRT', $Sys->Get('KEY'));
+	$Log->Set(undef, length($Form->Get('MESSAGE')),undef, undef, $datLine);
+	$ENV{'REMOTE_HOST'}	= $host;
+	$ENV{'REMOTE_ADDR'}	= $ip;
+	$ENV{'HTTP_USER_AGENT'}	= $ua;
+	$Log->Save($Sys);
+
+	$PS->{'THREADS'}->UpdateAll($Sys);
+	$PS->{'THREADS'}->Save($Sys);
+
+	require './module/bbs_service.pl';
+	my $BBSAid = BBS_SERVICE->new;
+	$Sys->Set('MODE', 'CREATE');
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
+	
+	# ログの設定
+	push @$pLog, "スレッド：$threadKey にレスを投稿しました。";
 	
 	return 0;
 }

@@ -176,7 +176,6 @@ sub ConvertURL
 			$work =~ s/(www\.|\.com|\.net|\.jp|\.co|\.ne)//g;
 			$$text =~ s|$reg2|<a href="$1://$2">$work</a>|;
 		}
-		$$text =~ s/ <br> /<br>/g;
 		$$text =~ s/\s*<br>/<br>/g;
 		$$text =~ s/(?:<br>){2}/<br>/g;
 		$$text =~ s/(?:<br>){3,}/<br><br>/g;
@@ -1013,7 +1012,7 @@ sub CreatePath
 sub GetDate
 {
 	my $this = shift;
-	my ($Set, $msect,$time) = @_;
+	my ($Set, $msect, $time) = @_;
 	
 	$ENV{'TZ'} = 'JST-9';
 	$time = $time ? $time : time;
@@ -1704,6 +1703,56 @@ sub is_cdn_ip {
 
     return;
 }
+
+# スレッド上げ下げ
+sub move_threads {
+    my ($offset, $thread_set_ref, $thread_list_ref) = @_;
+
+    # 選択 ID のセット
+    my %is_sel = map { $_ => 1 } @$thread_list_ref;
+    my $max    = $#$thread_set_ref;
+
+    # === 'top'／'bottom' の場合 ===
+    if ( defined $offset && $offset eq 'top' ) {
+        # 先頭へ移動
+        my @selected = grep { $is_sel{$_} } @$thread_set_ref;
+        my @others   = grep { !$is_sel{$_} } @$thread_set_ref;
+        @$thread_set_ref = ( @selected, @others );
+        return;
+    }
+    elsif ( defined $offset && $offset eq 'bottom' ) {
+        # 末尾へ移動
+        my @selected = grep { $is_sel{$_} } @$thread_set_ref;
+        my @others   = grep { !$is_sel{$_} } @$thread_set_ref;
+        @$thread_set_ref = ( @others, @selected );
+        return;
+    }
+
+    # === 数値の場合 ===
+    # オフセットが数値でないなら無視
+    unless ( defined $offset && $offset =~ /^-?\d+$/ ) {
+        warn "Invalid offset: $offset\n";
+        return;
+    }
+
+    # インデックス一覧を取得
+    my @idxs = grep { $is_sel{$thread_set_ref->[$_]} } 0..$max;
+    # 下方向移動なら大きい index から、上方向なら小さい index から処理
+    @idxs = $offset > 0 ? reverse @idxs : @idxs;
+
+    for my $i (@idxs) {
+        my $id = $thread_set_ref->[$i];
+        # 新しい位置をクリップ付きで計算
+        my $to = $i + $offset;
+        $to = 0    if $to < 0;
+        $to = $max if $to > $max;
+
+        # splice で抜き出して挿入
+        splice @$thread_set_ref, $i, 1;
+        splice @$thread_set_ref, $to, 0, $id;
+    }
+}
+
 #============================================================================================================
 #	モジュール終端
 #============================================================================================================

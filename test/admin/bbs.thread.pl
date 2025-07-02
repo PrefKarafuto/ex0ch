@@ -13,6 +13,7 @@ use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
 use HTML::Entities;
+use POSIX qw(strftime);
 no warnings 'once';
 
 # 共通スレッド属性情報
@@ -96,6 +97,9 @@ sub DoPrint
 	
 	if ($subMode eq 'LIST') {														# スレッド一覧画面
 		PrintThreadList($Page, $Sys, $Form, $BBS);
+	}
+	elsif ($subMode eq 'CREATE') {                                          # レス一括削除確認画面
+		PrintResCreate($Page, $Sys, $Form);
 	}
 	elsif ($subMode eq 'COPY') {													# スレッドコピー確認画面
 		PrintThreadCopy($Page, $Sys, $Form, 1);
@@ -183,6 +187,9 @@ sub DoFunction
 	elsif ($subMode eq 'RESTART') {													# 再開
 		$err = FunctionThreadStop($Sys, $Form, $this->{'LOG'}, 0);
 	}
+	elsif ($subMode eq 'CREATE') {													# コピー
+		$err = FunctionThreadCreate($Sys, $Form ,$this->{'LOG'});
+	}
 	elsif ($subMode eq 'COPY') {													# コピー
 		$err = FunctionThreadCopy($Sys, $Form, $this->{'LOG'}, 1);
 	}
@@ -222,7 +229,7 @@ sub DoFunction
 	elsif ($subMode eq 'CLEAR') {                                          # TLクリア
 		$err = FunctionClearTimeline($Sys, $Form, $this->{'LOG'});
 	}
-	elsif ($subMode eq 'PINNED') {                                          # TLクリア
+	elsif ($subMode eq 'PINNED') {                                          # ピン留め
 		$err = FunctionThreadPinned($Sys, $Form, $this->{'LOG'}, $BBS);
 	}
 	# 処理結果表示
@@ -252,7 +259,15 @@ sub SetMenuList
 	my ($Base, $pSys, $bbs) = @_;
 	if($bbs){
 		$Base->SetMenu('スレッド一覧', "'bbs.thread','DISP','LIST'");
-		$Base->SetMenu('レス全体検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
+		# スレッド編集権限のみ
+		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_RESEDIT, $bbs)) {
+			$Base->SetMenu('スレッド新規作成', "'bbs.thread','DISP','CREATE'");
+		}
+		# ログ閲覧権限のみ
+		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_ACCESUSER, $bbs)) {
+			$Base->SetMenu('<hr>', '');
+			$Base->SetMenu('掲示板内検索・削除', "'bbs.thread','DISP','AUTORESDEL'");
+		}
 		# スレッドdat落ち権限のみ
 		if ($pSys->{'SECINFO'}->IsAuthority($pSys->{'USER'}, $ZP::AUTH_THREADPOOL, $bbs)) {
 			$Base->SetMenu('一括DAT落ち', "'bbs.thread','DISP','AUTOPOOL'");
@@ -277,12 +292,16 @@ sub PrintThreadList
 	my ($Page, $SYS, $Form, $BBS) = @_;
 	my (@threadSet, $ThreadNum, $key, $res, $subj, $i);
 	my ($dispSt, $dispEd, $dispNum, $bgColor, $base, $pinnedThread);
-	my ($common, $common2, $n, $Threads, $id);
+	my ($common, $common2, $common3, $n, $Threads, $id, $is_checked);
 	
 	$SYS->Set('_TITLE', 'Thread List');
 	
 	require './module/thread.pl';
 	require './module/dat.pl';
+	require './module/setting.pl';
+	my $Set = SETTING->new;
+	$Set->Load($SYS);
+	my $resmax = $Set->Get('BBS_RES_MAX') || $SYS->Get('RESMAX');
 	$Threads = THREAD->new;
 	
 	$Threads->Load($SYS);
@@ -294,10 +313,62 @@ sub PrintThreadList
 	$pinnedThread = $BBS->Get('PINNED',$Form->Get('TARGET_BBS')) // '';
 	
 	# 表示数の設定
-	$dispNum	= $Form->Get('DISPNUM', 10);
+	$dispNum	= $Form->Get('DISPNUM', 15);
 	$dispSt		= $Form->Get('DISPST', 0) || 0;
 	$dispSt		= ($dispSt < 0 ? 0 : $dispSt);
 	$dispEd		= (($dispSt + $dispNum) > $ThreadNum ? $ThreadNum : ($dispSt + $dispNum));
+
+	# スレッド上げ下げ
+	my @threadList = $Form->GetAtArray('THREADS');
+	require './module/data_utils.pl';
+	# UP/DOWN/TOP/BOTTOM を move_threads に渡すオフセットへマッピング
+	my %offset_map = (
+		UP     => -1,
+		DOWN   =>  1,
+		TOP    => 'top',
+		BOTTOM => 'bottom',
+	);
+
+	# フォームからの指示を取得
+	my $cmd = $Form->Get('UPDOWN');
+	my $cmd2 = $Form->Get('UPDATE');
+	my $cmd3 = $Form->Get('PINNED');
+
+	# 有効なコマンドなら実行
+	# スレッド順変更
+	if ( exists $offset_map{$cmd} ) {
+		my $offset = $offset_map{$cmd};
+		DATA_UTILS::move_threads($offset, \@threadSet, \@threadList);
+		$Threads->Set(undef, 'SORT', \@threadSet);
+		$Threads->Save($SYS);
+	}
+	# index更新
+	if ($cmd2) {
+		require './module/bbs_service.pl';
+		require './module/banner.pl';
+		my $BBSAid = BBS_SERVICE->new;
+		$SYS->Set('MODE', 'CREATE');
+		$BBSAid->{'SYS'} = $SYS;
+		$BBSAid->{'SET'} = $Set;
+		$BBSAid->{'THREADS'} = $Threads;
+		$BBSAid->{'CONV'} = DATA_UTILS->new;
+		$BBSAid->{'BANNER'} = BANNER->new;
+		$BBSAid->CreateIndex();
+		$BBSAid->CreateSubback();
+	}
+	# スレッドピン留め
+	my $num = @threadList;
+	if ($cmd3 && $num ==1){
+		if($pinnedThread eq $threadList[0]){
+			$BBS->Set($Form->Get('TARGET_BBS'),'PINNED','');
+			$pinnedThread = '';
+		}else{
+			$BBS->Set($Form->Get('TARGET_BBS'),'PINNED',$threadList[0]);
+			$pinnedThread = $threadList[0];
+		}
+		@threadList = ();	# 選択解除
+		$BBS->Save($SYS);
+	}
 	
 	# 権限取得
 	my ($isStop, $isPool, $isDelete, $isUpdate, $isResEdit, $isResAbone);
@@ -311,33 +382,32 @@ sub PrintThreadList
 	# ヘッダ部分の表示
 	$common = "DoSubmit('bbs.thread','DISP','LIST');";
 	
-	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
-	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
-	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
+	# ページャーの出力開始
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=4 style=\"font-size:1.2em\">");
+	PrintPagenation($Page, $ThreadNum, $dispNum ,$dispSt, $common);
 	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");
-	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
+	$Page->Print("<tr><td colspan=6><hr></td></tr>\n");
 	$Page->Print("<tr><th style=\"width:30px\"><a href=\"javascript:toggleAll('THREADS')\">全</a></th>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:250px\">Thread Title</td>");
-	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Thread Key</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:20px\">Res</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Created Time</td>");
+	$Page->Print("<td class=\"DetailTitle\" style=\"width:30px\">Updated Time</td>");
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:100px\">Attribute</td></tr>\n");
-	
-	require './module/setting.pl';
-	my $Set = SETTING->new;
-	$Set->Load($SYS);
-	my $resmax = $Set->Get('BBS_RES_MAX') || $SYS->Get('RESMAX');
 
 	my @slice = @threadSet[ $dispSt .. $dispEd - 1 ];
 	unshift @slice, $pinnedThread if $pinnedThread;
 	my $flag = 0;
+	my %in_List = map { $_ => 1 } @threadList;
 	for my $offset (0 .. $#slice) {
 		$n  = $dispSt + $offset + 1;
 		$id = $slice[$offset];
 		$subj	= $Threads->Get('SUBJECT', $id);
 		$res	= $Threads->Get('RES', $id);
+
+		my $btime = strftime "%Y/%m/%d %H:%M:%S", localtime($id);
+		my $mtime = strftime "%Y/%m/%d %H:%M:%S", localtime((stat("$base/$id.dat"))[9]);
 		
 		my $permt = DAT::GetPermission("$base/$id.dat");
 		my $perms = $SYS->Get('PM-STOP');
@@ -361,7 +431,8 @@ sub PrintThreadList
 			$flag = 1;
 			$n = '0';
 		}else{
-			$Page->Print("<td><input type=checkbox name=THREADS value=$id></td>");
+			$is_checked = $in_List{$id} ? 'checked' : '';
+			$Page->Print("<td><input type=checkbox name=THREADS value=$id $is_checked></td>");
 			$n-- if $pinnedThread && $flag;
 		}
 		if ($isResEdit || $isResAbone) {
@@ -373,7 +444,7 @@ sub PrintThreadList
 		else {
 			$Page->Print("<td>$n: $subj</td>");
 		}
-		$Page->Print("<td align=center>$id</td><td align=center>$res</td>");
+		$Page->Print("<td align=center>$res</td><td align=center>$btime</td><td align=center>$mtime</td>");
 		
 		my $isSLIP = $Threads->GetAttr($id, 'slip');
 		my $is774 = $Threads->GetAttr($id, 'change774');
@@ -407,25 +478,88 @@ sub PrintThreadList
 	}
 	$common		= "onclick=\"DoSubmit('bbs.thread','DISP'";
 	$common2	= "onclick=\"DoSubmit('bbs.thread','FUNC'";
+	$common3	= "SetOption('DISPST','$dispSt');DoSubmit('bbs.thread','DISP','LIST');";
+
+	my $tl_max = $Set->Get('BBS_TL_MAX');
 	
-	$Page->Print("<tr><td colspan=5><hr></td></tr>\n");
-	$Page->Print("<tr><td colspan=5 align=left>");
-	$Page->Print("<input type=button value=\" コピー \" $common,'COPY')\"> ")				if ($isDelete);
-	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ")				if ($isDelete);
+	$Page->Print("<tr><td colspan=6><hr></td></tr>\n");
+	$Page->Print("<tr><td colspan=6 align=left>");
+
+	# スレッド表示順変更ボタン
+	$Page->Print("<input type=button title=\"index更新\" value=\"&#x1F504;\" onclick=\"SetOption('UPDATE','1');$common3\"> ");	
+	$Page->Print("<input type=button title=\"最上部へ移動\" value=\"&#x23eb;\" onclick=\"SetOption('UPDOWN','TOP');$common3\"> ");		# 最上部
+	$Page->Print("<input type=button title=\"一つ上へ移動\" value=\"&#x1f53c;\" onclick=\"SetOption('UPDOWN','UP');$common3\"> ");		# 1上げ
+	$Page->Print("<input type=button title=\"一つ下へ移動\" value=\"&#x1f53d;\" onclick=\"SetOption('UPDOWN','DOWN');$common3\"> ");	# 1下げ
+	$Page->Print("<input type=button title=\"最下部へ移動\" value=\"&#x23ec;\" onclick=\"SetOption('UPDOWN','BOTTOM');$common3\"> ");	# 最下部
+	$Page->Print("<input type=button title=\"ピン留め（管理画面上のみ）\" value=\"&#x1f4cc;\" onclick=\"SetOption('PINNED','1');$common3\">  ")	if ($isResAbone);
+	$Page->Print("<span style=\"float:right\">");
 	$Page->Print("<input type=button value=\"subject更新\" $common2,'UPDATE')\"> ")			if ($isUpdate);
 	$Page->Print("<input type=button value=\"subject再作成\" $common2,'UPDATEALL')\"> ")	if ($isUpdate);
+	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")		if ($isResAbone && $tl_max);
+	$Page->Print("</span><hr>");
+	$Page->Print("<input type=button value=\"　コピー　\" $common,'COPY')\"> ")				if ($isDelete);
+	$Page->Print("<input type=button value=\"　移動　\" $common,'MOVE')\"> ")				if ($isDelete);
 	$Page->Print("<input type=button value=\"　停止　\" $common,'STOP')\"> ")				if ($isStop);
 	$Page->Print("<input type=button value=\"　再開　\" $common,'RESTART')\"> ")			if ($isStop);
 	$Page->Print("<input type=button value=\"DAT落ち\" $common,'POOL')\"> ")				if ($isPool);
 	
-	$Page->Print("<input type=button value=\"タイムラインのクリア\" $common2,'CLEAR')\"> ")		if ($isResAbone);
-	$Page->Print("<input type=button value=\"ピン留め\" $common2,'PINNED')\"> ")				if ($isResAbone);
 	$Page->Print("<input type=button value=\"　削除　\" $common,'DELETE')\" class=\"delete\"> ")if ($isDelete);
 	$Page->Print("</td></tr>\n");
 	$Page->Print("</table><br>");
 	
+	# ボタン制御用
+	$Page->HTMLInput('hidden', 'UPDOWN', '');
+	$Page->HTMLInput('hidden', 'UPDATE', '');
+	$Page->HTMLInput('hidden', 'PINNED', '');
+	
+	# 表示指定用
 	$Page->HTMLInput('hidden', 'DISPST', '');
 	$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
+#	レス投稿画面の表示
+#	-------------------------------------------------------------------------------------
+#	@param	$Page	ページコンテキスト
+#	@param	$SYS	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Dat	dat変数
+#	@return	なし
+#
+#------------------------------------------------------------------------------------------------------------
+sub PrintResCreate
+{
+	my ($Page, $Sys, $Form) = @_;
+	my ($thread_id, $pRes, $isEdit, $common);
+	
+	$Sys->Set('_TITLE', 'Thread Create');
+	$thread_id = $Form->Get('TARGET_THREAD');
+	
+	$isEdit = $Sys->Get('ADMIN')->{'SECINFO'}->IsAuthority($Sys->Get('ADMIN')->{'USER'}, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'));
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">スレッドタイトル</td><td>");
+	$Page->Print("<input type=text size=50 name=subject></td></tr>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
+	$Page->Print("<input type=text size=50 name=FROM></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">メール（コマンド）</td><td>");
+	$Page->Print("<input type=text size=50 name=mail></td></tr>");
+	$Page->Print("<tr><td class=\"DetailTitle\">本文</td><td>");
+	$Page->Print("<textarea name=MESSAGE cols=70 rows=10></textarea></td></tr>");
+	$Page->Print("<tr><td colspan=2><hr></td></tr>");
+	
+	$Page->HTMLInput('hidden', 'TARGET_THREAD', $thread_id);
+	
+	# システム権限有無による表示抑制
+	if ($isEdit) {
+		$common = "onclick=\"DoSubmit('bbs.thread','FUNC'";
+		$Page->Print("<tr><td colspan=2>");
+		$Page->Print("<input type=button value=\"　投稿　\" $common,'CREATE')\"> ");
+		$Page->Print("</td></tr>\n");
+	}
+	$Page->Print("</table><br>");
 }
 #------------------------------------------------------------------------------------------------------------
 #
@@ -1116,8 +1250,8 @@ sub FunctionThreadDetailAttr
     require './module/thread.pl';
     
     my $Threads = THREAD->new;
-    $Threads->LoadAttrAll($Sys);
     my $target_thread = $Form->Get('TARGET_THREAD');
+	$Threads->LoadAttr($Sys, $target_thread);
 
     foreach my $attrkey (sort keys %threadAttr) {
         my $defAttr = $Threads->GetAttr($target_thread, $attrkey);
@@ -1168,7 +1302,7 @@ sub FunctionThreadDetailAttr
         $Threads->SetAttr($target_thread, $attrkey, $attr) if ($defAttr || $attr);
         push @$pLog, "[$attrkey]属性を".($attr ? '付加' : '解除');
     }
-    $Threads->SaveAttrAll($Sys);
+    $Threads->SaveAttr($Sys, $target_thread);
     
     return 0;
 }
@@ -1226,6 +1360,107 @@ sub FunctionThreadPooling
 
 #------------------------------------------------------------------------------------------------------------
 #
+#	スレッド作成
+#	-------------------------------------------------------------------------------------
+#	@param	$Sys	システム変数
+#	@param	$Form	フォーム変数
+#	@param	$Dat	Dat変数
+#	@param	$pLog	ログ用
+#	@return	エラーコード
+#
+#------------------------------------------------------------------------------------------------------------
+sub FunctionThreadCreate
+{
+	my ($Sys, $Form, $pLog) = @_;
+	my (@elem, $PS, $Conv);
+	
+	# 権限チェック
+	{
+		my $SEC = $Sys->Get('ADMIN')->{'SECINFO'};
+		my $chkID = $Sys->Get('ADMIN')->{'USER'};
+		
+		if (($SEC->IsAuthority($chkID, $ZP::AUTH_RESEDIT, $Sys->Get('BBS'))) == 0) {
+			return 1000;
+		}
+	}
+
+	my $threadKey = time;
+	my $datPath = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS') . '/dat/' . $threadKey . '.dat';
+	
+	# Dat形式に整形
+	require './module/post_service.pl';
+	$PS = POST_SERVICE->new;
+	$threadKey++ while -e $datPath;
+	$Sys->Set('KEY',$threadKey);
+	$PS->Init($Sys, $Form);
+	$PS->ReadyBeforeCheck();
+	$PS->NormalizationNameMail();
+
+	if ($Form->Get('subject') eq ''){
+		push @$pLog, "スレタイがありません。";
+		return 0;
+	}
+	if ($Form->Get('MESSAGE') eq '' ){
+		push @$pLog, "本文がありません。";
+		return 0;
+	}
+	
+	# 名前欄設定
+	my $from = $Form->Get('FROM', '');
+	if (($from eq ''||$PS->{'THREADS'}->GetAttr($threadKey,'force774'))) {
+		if($PS->{'THREADS'}->GetAttr($threadKey,'change774')){
+			require HTML::Entities;
+			$from = HTML::Entities::decode($PS->{'THREADS'}->GetAttr($threadKey,'change774'));
+		}
+		else{
+			$from = $PS->{'SET'}->Get('BBS_NONAME_NAME');
+		}
+		$Form->Set('FROM', $from);
+	}
+	
+	my $datLine = $PS->MakeDatLine();
+	require './module/dat.pl';
+	my $err = DAT::DirectAppend($Sys, $datPath, $datLine);
+	if ($err){
+		push @$pLog, "ファイルを開けません。" if $err == 1;
+		push @$pLog, "停止パーミッションです。" if $err == 2;
+		return 0;
+	}
+
+	chomp($datLine);
+	require './module/manager_log.pl';
+	my $Log = MANAGER_LOG->new;
+	my $host = $ENV{'REMOTE_HOST'};
+	my $ip = $ENV{'REMOTE_ADDR'};
+	my $ua = $ENV{'HTTP_USER_AGENT'};
+	$ENV{'REMOTE_HOST'}	= $Form->Get('UserName');
+	$ENV{'REMOTE_ADDR'}	= 'N/A';
+	$ENV{'HTTP_USER_AGENT'}	= 'N/A';
+	$Log->Load($Sys, 'WRT', $Sys->Get('KEY'));
+	$Log->Set(undef, length($Form->Get('MESSAGE')),undef, undef, $datLine);
+	$ENV{'REMOTE_HOST'}	= $host;
+	$ENV{'REMOTE_ADDR'}	= $ip;
+	$ENV{'HTTP_USER_AGENT'}	= $ua;
+	$Log->Save($Sys);
+
+	$PS->{'THREADS'}->UpdateAll($Sys);
+	$PS->{'THREADS'}->Save($Sys);
+
+	require './module/bbs_service.pl';
+	my $BBSAid = BBS_SERVICE->new;
+	$Sys->Set('MODE', 'CREATE');
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
+	
+	# ログの設定
+	push @$pLog, "新規スレッド「".$Form->Get('subject')."」を作成しました。";
+	
+	return 0;
+}
+
+#------------------------------------------------------------------------------------------------------------
+#
 #	スレッド削除
 #	-------------------------------------------------------------------------------------
 #	@param	$Sys	システム変数
@@ -1274,15 +1509,12 @@ sub FunctionThreadDelete
 	$Threads->Load($Sys);
 	$Threads->UpdateAll($Sys);
 	$Threads->Save($Sys);
-
-	#my $originalMODE = $Sys->Get('MODE');
 	
 	#index.html&subback.html更新
-	#$Sys->Set('MODE', 'CREATE');
-	#$BBSAid->Init($Sys, undef);
-	#$BBSAid->CreateIndex();
-	#$BBSAid->CreateSubback();
-	#$Sys->Set('MODE',$originalMODE);
+	$Sys->Set('MODE', 'CREATE');
+	$BBSAid->Init($Sys, undef);
+	$BBSAid->CreateIndex();
+	$BBSAid->CreateSubback();
 	
 	return 0;
 }

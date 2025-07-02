@@ -299,6 +299,7 @@ sub PrintNinjaEdit
 
 	$Page->HTMLInput('hidden', 'SID', $sid);
 	$Page->HTMLInput('hidden', 'TARGET_BBS', $Form->Get('TARGET_BBS'));
+	$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 	
 	$Page->Print("<tr><td colspan=3><hr></td></tr>\n");
 	$Page->Print("<tr><td colspan=3>");
@@ -337,7 +338,9 @@ sub PrintNinjaSidSearch
 	my $bbsid = $Form->Get('TARGET_BBS');
 	my $bbsdir = $BBS->Get('DIR',$bbsid);
 	$Search->Create($Sys, 1,undef,$bbsid,$bbsdir);
-	$Search->Run_LogS(undef,undef,undef,$sid);
+	$Search->{TYPE_M} = 'log';
+	$Search->{TYPE_R} = 'sid';
+	$Search->Run($sid);
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>この掲示板内での、SessionID:$sid\のユーザーの書き込み履歴を表示します。</td></tr>");
    
@@ -380,7 +383,7 @@ sub PrintNinjaSidSearch
 			PrintResult($Sys, $Page, $BBS, $Conv, $n, $base, \@elem);
 			$n++;
 		}
-		$Page->HTMLInput('hidden', 'TARGET_THREAD', '');
+		$Page->HTMLInput('hidden', 'TARGET_THREAD', $Form->Get('TARGET_THREAD'));
 		$Page->HTMLInput('hidden', 'DISP_FORMAT', '');
 	}
 	# 検索ヒット無し

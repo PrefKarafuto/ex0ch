@@ -218,9 +218,8 @@ sub PrintThreadList
 		$Page->Print("※注：過去ログ保存先には[".$Set->Get('BBS_KAKO')."]が設定されています。<br></td></tr>");
 	}
 
-	$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
-	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
-	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
+	$Page->Print("<tr><td colspan=3 style=\"font-size:1.2em\">");
+	PrintPagenation($Page, $ThreadNum, $dispNum ,$dispSt, $common);
 	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
 	$Page->Print("<input type=button value=\"　表示　\" onclick=\"$common\"></td></tr>\n");

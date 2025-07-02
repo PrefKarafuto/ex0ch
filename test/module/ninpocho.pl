@@ -15,7 +15,7 @@ use POSIX qw(strftime);
 use CGI::Session;
 use CGI::Cookie;
 use Digest::MD5;
-use Storable qw(lock_store lock_retrieve);
+use Storable qw(lock_nstore lock_retrieve);
 use File::Basename qw(dirname);
 use MIME::Base64 ();  # encode_base64url
 
@@ -207,7 +207,7 @@ sub Delete {
                 delete $table->{$key};
             }
         }
-        lock_store($table, $file);
+        lock_nstore($table, $file);
         chmod 0600, $file;
     }
     return $count;
@@ -309,14 +309,14 @@ sub GetHash {
         if ($entry->{time} + $expiry < time) {
             delete $table->{$key};
             _ensure_dir($file);
-            lock_store($table, $file);
+            lock_nstore($table, $file);
             chmod 0600, $file;
             return undef;
         }
         # 有効期限内 → タイムスタンプ更新
         $entry->{time} = time;
         _ensure_dir($file);
-        lock_store($table, $file);
+        lock_nstore($table, $file);
         chmod 0600, $file;
         return $entry->{value};
     }
@@ -343,7 +343,7 @@ sub SetHash {
     $table->{$key} = { value => $value, time => $time };
 
     _ensure_dir($file);
-    lock_store($table, $file);
+    lock_nstore($table, $file);
     chmod 0600, $file;
 
     return 1;
@@ -366,7 +366,7 @@ sub DeleteHash {
     delete $table->{$key};
 
     _ensure_dir($file);
-    lock_store($table, $file);
+    lock_nstore($table, $file);
     chmod 0600, $file;
 
     return 1;
@@ -397,7 +397,7 @@ sub DeleteHashValue {
 
     if ($deleted) {
         _ensure_dir($file);
-        lock_store($table, $file);
+        lock_nstore($table, $file);
         chmod 0600, $file;
     }
 

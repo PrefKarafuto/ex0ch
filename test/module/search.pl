@@ -225,11 +225,11 @@ sub Search {
     my $word_regex = qr/(\Q$word\E)(?![^<>]*>)/;
 
     my $pResultSet = $this->{'RESULTSET'};
-    my $type = $this->{'TYPE'} || 0x15;
+    my $type = $this->{'TYPE'} || 15;
     my $line_num = 0;
 
     while (my $line = <$fh>) {
-		last if ($type == 0x8 && $line_num);
+		last if ($type == 8 && $line_num);
 
         $line_num++;
         my @elem = split(/<>/, $line, -1);
@@ -244,16 +244,16 @@ sub Search {
         my $bFind = 0;
 
         # 各種検索タイプに応じた処理
-        if ($type & 0x1 && $elem[0] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
+        if ($type & 1 && $elem[0] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
             $bFind = 1;
         }
-        if ($type & 0x2 && $elem[3] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
+        if ($type & 2 && $elem[3] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
             $bFind = 1;
         }
-        if ($type & 0x4 && $elem[2] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
+        if ($type & 4 && $elem[2] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
             $bFind = 1;
         }
-        if ($type & 0x8 && $elem[4] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
+        if ($type & 8 && $elem[4] =~ s/$word_regex/<span class="res">$1<\/span>/g) {
             $bFind = 1;
             last;  # スレタイ検索のみの場合、最初の行で終了
         }

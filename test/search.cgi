@@ -46,7 +46,6 @@ sub SearchCGI
 	$Form	= FORM->new(1);
 	$BBS	= new BBS_INFO;
 	
-	$Form->DecodeForm(1);
 	$Sys->Init();
 	$BBS->Load($Sys);
 	$capt = $Sys->Get('SEARCHCAP') ? Certification_Captcha($Sys,$Form) : 1;
@@ -92,10 +91,10 @@ sub PrintHead
 	@sTYPE	= $Form->GetAtArray('TYPE', 0);
 	
 	$types = ($sTYPE[0] || 0) | ($sTYPE[1] || 0) | ($sTYPE[2] || 0) | ($sTYPE[3] || 0);
-	$cTYPE[0] = ($types & 0x1 ? 'checked' : '');
-	$cTYPE[1] = ($types & 0x2 ? 'checked' : '');
-	$cTYPE[2] = ($types & 0x4 ? 'checked' : '');
-	$cTYPE[3] = ($types & 0x8 ? 'checked' : '');
+	$cTYPE[0] = ($types & 1 ? 'checked' : '');
+	$cTYPE[1] = ($types & 2 ? 'checked' : '');
+	$cTYPE[2] = ($types & 4 ? 'checked' : '');
+	$cTYPE[3] = ($types & 8 ? 'checked' : '');
 	
 	$BBSpath = $Sys->Get('BBSPATH');
 	
@@ -105,7 +104,6 @@ sub PrintHead
 	$Banner->Load($Sys);
 
 	my $data_url = $Sys->Get('SERVER').$Sys->Get('CGIPATH').$Sys->Get('DATA');
-	$data_url =~ s/^https?://;
 
 	$Page->Print("Content-type: text/html;charset=Shift_JIS\n\n");
 	$Page->Print(<<HTML);

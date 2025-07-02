@@ -167,7 +167,7 @@ sub SetMenuList
 sub PrintNoticeList
 {
 	my ($Page, $Sys, $Form) = @_;
-	my ($Notices, @noticeSet, $from, $subj, $text, $date, $id, $common);
+	my ($Notices, @noticeSet, @usersSet, $from, $to, $subj, $text, $date, $id, $userID, $fromUserID, $color, $common);
 	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isAuth, $curUser);
 	my ($orz, $or2);
 	
@@ -202,9 +202,10 @@ $Page->Print(<<HTML);
    <tr>
 	<td>
 	</td>
-	<td>
-	<a href="javascript:SetOption('DISPST_NOTICE', $orz);$common">&lt;&lt; PREV</a> |
-	<a href="javascript:SetOption('DISPST_NOTICE', $or2);$common">NEXT &gt;&gt;</a>
+	<td style="font-size:1.2em">
+HTML
+	PrintPagenation($Page, $listNum, $dispNum ,$dispSt, $common ,'DISPST_NOTICE');
+	$Page->Print(<<HTML);
 	</td>
 	<td align=right colspan="2">
 	表示数 <input type=text name="DISPNUM_NOTICE" size="4" value="$dispNum">
@@ -219,28 +220,40 @@ HTML
 	
 	# カレントユーザ
 	$curUser = $Sys->Get('ADMIN')->{'USER'};
+	$userID = $Sys->Get('ADMIN')->{'SECINFO'}->{'USER'};
 	
 	# 通知一覧を出力
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$id = $noticeSet[$i];
-		if ($Notices->IsInclude($id, $curUser) && ! $Notices->IsLimitOut($id)) {
-			if ($Notices->Get('FROM', $id) eq '0000000000') {
+		$fromUserID = $Notices->Get('FROM', $id);
+		$from = $userID->Get('NAME', $fromUserID);
+
+		# 宛先
+		if($Notices->Get('TO',$id) eq '*'){
+			$to = '@ALL';
+		}else{
+			@usersSet = split(/\, ?/, $Notices->Get('TO',$id));
+			$to = join ' ',map { '@' . $userID->Get('NAME', $_ )} grep { $_ ne $fromUserID} @usersSet if scalar(@usersSet);
+		}
+		
+		if (($curUser eq $from || $Notices->IsInclude($id, $curUser)) && ! $Notices->IsLimitOut($id)) {
+			if ($fromUserID eq '0000000000') {
 				$from = 'ex0ch管理システム';
-			}
-			else {
-				$from = $Sys->Get('ADMIN')->{'SECINFO'}->{'USER'}->Get('NAME', $Notices->Get('FROM', $id));
+				$to = '@SYSTEM_ADMIN'
 			}
 			$subj = $Notices->Get('SUBJECT', $id);
 			$text = $Notices->Get('TEXT', $id);
 			$date = DATA_UTILS::GetDateFromSerial(undef, $Notices->Get('DATE', $id), 0);
+			$color = $curUser eq $fromUserID ? 'border: 1px solid rgb(255, 200, 0);' : '';
 			
 $Page->Print(<<HTML);
    <tr>
 	<td><input type=checkbox name="NOTICES" value="$id"></td>
 	<td class="Response" colspan="3">
-	<dl style="margin:0px;">
+	<dl style="margin:0px; $color">
 	 <dt><b>$subj</b> <font color="blue">From：$from</font> $date</dt>
 	  <dd>
+	  <font color='peru'>$to</font><br>
 	  $text<br>
 	  <br></dd>
 	</dl>
@@ -336,6 +349,7 @@ HTML
 	# ユーザ一覧を表示
 	@userSet = sort @userSet;
 	foreach $id (@userSet) {
+		next if $Sys->Get('ADMIN')->{'USER'} eq $id;
 		$name = $User->Get('NAME', $id);
 		$full = $User->Get('FULL', $id);
 		$Page->Print("      <input type=\"checkbox\" name=\"NOTICE_USERS\" value=\"$id\"> $name($full)<br>\n");
@@ -390,9 +404,10 @@ sub PrintAdminLog
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
    <tr>
-	<td colspan="2">
-	<a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
-	<a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
+	<td colspan="2" style="font-size:1.2em">
+HTML
+	PrintPagenation($Page, $listNum, $dispNum ,$dispSt, $common ,'DISPST_LOG');
+	$Page->Print(<<HTML);
 	</td>
 	<td align="right" colspan="2">
 	表示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
@@ -477,9 +492,10 @@ sub PrintExecutionTimeLog
 $Page->Print(<<HTML);
   <table border="0" cellspacing="2" width="100%">
    <tr>
-	<td colspan="2">
-	<a href="javascript:SetOption('DISPST_LOG', $orz);$common">&lt;&lt; PREV</a> |
-	<a href="javascript:SetOption('DISPST_LOG', $or2);$common">NEXT &gt;&gt;</a>
+	<td colspan="2" style="font-size:1.2em">
+HTML
+	PrintPagenation($Page, $listNum, $dispNum ,$dispSt, $common ,'DISPST_LOG');
+	$Page->Print(<<HTML);
 	</td>
 	<td align="right" colspan="2">
 	表示数 <input type="text" name="DISPNUM_LOG" size="4" value="$dispNum">
@@ -565,7 +581,7 @@ sub FunctionNoticeCreate
 			return 1001;
 		}
 		@inList = ('NOTICE_USERS');
-		if ($Form->Equal('NOTICE_KIND', 'ONE') && ! $Form->IsInput(\@inList)) {
+		if ($Form->Equal('NOTICE_KIND', 'ONE') && ! $Form->IsInput(\@inList) && !$Form->GetAtArray('NOTICE_USERS')) {
 			return 1001;
 		}
 	}
@@ -588,6 +604,7 @@ sub FunctionNoticeCreate
 	}
 	else {
 		my @toSet = $Form->GetAtArray('NOTICE_USERS');
+		push @toSet, $Sys->Get('ADMIN')->{'USER'};
 		$users = join(',', @toSet);
 		$limit = 0;
 	}

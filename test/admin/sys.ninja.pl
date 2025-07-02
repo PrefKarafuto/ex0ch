@@ -194,10 +194,8 @@ sub PrintNinjaList
 	# ヘッダ部分の表示
 	$common = "DoSubmit('sys.ninja','DISP','LIST');";
 	
-	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
-	$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
-	$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
+	$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=3 style=\"font-size:1.2em\">");
+	PrintPagenation($Page, $sessnum, $dispNum ,$dispSt, $common);
 	$Page->Print("</td><td colspan=2 align=right>");
 	$Page->Print("忍法帖総数：$sessnum　");
 	$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
@@ -544,10 +542,8 @@ sub PrintNinjaSearchResult
 		# ヘッダ部分の表示
 		my $common = "DoSubmit('sys.ninja','DISP','NIN_SEARCH');";
 		
-		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-		$Page->Print("<tr><td colspan=3><b><a href=\"javascript:SetOption('DISPST', " . ($dispSt - $dispNum));
-		$Page->Print(");$common\">&lt;&lt; PREV</a> | <a href=\"javascript:SetOption('DISPST', ");
-		$Page->Print("" . ($dispSt + $dispNum) . ");$common\">NEXT &gt;&gt;</a></b>");
+		$Page->Print("<center><table border=0 cellspacing=2 width=100%><tr><td colspan=3 style=\"font-size:1.2em\">");
+		PrintPagenation($Page, $n, $dispNum ,$dispSt, $common);
 		$Page->Print("</td><td colspan=2 align=right>");
 		$Page->Print("合計：$n");
 		$Page->Print("表示数<input type=text name=DISPNUM size=4 value=$dispNum>");
@@ -624,7 +620,9 @@ sub PrintNinjaSidSearch
    
 	# 検索オブジェクトの設定と検索の実行
 	$Search->Create($Sys, 0);
-	$Search->Run_LogS(undef,undef,undef,$sid);
+	$Search->{TYPE_M} = 'log';
+	$Search->{TYPE_R} = 'sid';
+	$Search->Run($sid);
 	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 	$Page->Print("<tr><td colspan=3>SessionID:$sid\のユーザーの書き込み履歴を表示します。</td></tr>");
    

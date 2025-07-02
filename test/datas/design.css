@@ -42,7 +42,7 @@
   border-color: #ddd;
   margin-bottom: 8px;
   padding: 8px;
-  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 .meta {
   font-size: 14px;
@@ -66,6 +66,9 @@
 	line-height:1;
 	white-space:nowrap;
 }
+td {
+    overflow-wrap: anywhere;
+  }
 /*
 ???????????????X?|???V?u??
 https://akros-ac.jp/8277/
@@ -362,3 +365,7 @@ a.timeline-entry:hover {
     color: #888;
     margin-right: 10px;
 }
+
+details summary .opened { display: none; }
+details[open] summary .closed { display: none; }
+details[open] summary .opened { display: inline; }

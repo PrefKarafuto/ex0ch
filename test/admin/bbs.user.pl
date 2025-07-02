@@ -331,7 +331,7 @@ sub PrintGroupSetting
 	$Page->Print("<input type=checkbox name=A_BGDSL $authNum[16] value=on>BoardGuard DSL編集<br>");
 	$Page->Print("<hr>");
 	$Page->Print("<input type=checkbox name=A_RESABONE $authNum[11] value=on>レスあぼーん<br>");
-	$Page->Print("<input type=checkbox name=A_RESEDIT $authNum[12] value=on>レス編集<br>");
+	$Page->Print("<input type=checkbox name=A_RESEDIT $authNum[12] value=on>レス編集・作成<br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示

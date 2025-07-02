@@ -21,7 +21,7 @@ use strict;
 use utf8;
 use open IO => ':encoding(cp932)';
 use warnings;
-use Storable qw(lock_store lock_retrieve);
+use Storable qw(lock_nstore lock_retrieve);
 
 #------------------------------------------------------------------------------------------------------------
 #
@@ -247,6 +247,10 @@ sub OnDemand
 		$this->AGE($id);
 	} elsif ($updown eq 'bottom') {
 		$this->DAME($id);
+	} elsif ($updown eq 'age') {
+		$this->UpDown($id, 1);
+	} elsif ($updown eq 'down') {
+		$this->UpDown($id, -1);
 	} elsif ($updown =~ /^([\+\-][0-9]+)$/) {
 		$this->UpDown($id, int($1));
 	}
@@ -357,8 +361,10 @@ sub Set
 	my $this = shift;
 	my ($id, $kind, $val) = @_;
 	
-	if (exists $this->{$kind}->{$id}) {
+	if (defined $id && exists $this->{$kind}->{$id}) {
 		$this->{$kind}->{$id} = $val;
+	}else{
+		$this->{$kind} = $val;
 	}
 }
 
@@ -453,7 +459,7 @@ sub LoadAttr
 				
 				# スレッドIDごとのファイルに保存
 				eval {
-					lock_store($this->{'ATTR'}->{$id}, $new_path);
+					lock_nstore($this->{'ATTR'}->{$id}, $new_path);
 				};
 				if ($@) {
 					warn "Failed to store data to $new_path: $@";
@@ -500,7 +506,7 @@ sub LoadAttrAll
         my $thread_id = $file;
         $thread_id =~ s/^attr_//;  # "attr_"を削除
         $thread_id =~ s/\.cgi$//;  # 拡張子を削除
-        
+		
         eval {
             my $data = lock_retrieve($filepath);
             $this->{'ATTR'}->{$thread_id} = $data if defined $data;
@@ -526,10 +532,9 @@ sub SaveAttr
     $threadID //= $Sys->Get('KEY');
 
 	my $AttrPath = $Sys->Get('BBSPATH') . '/' .$Sys->Get('BBS') . "/info/attr/attr_$threadID.cgi";
-
     # データをファイルに保存
     eval {
-        lock_store($this->{'ATTR'}->{$threadID}, $AttrPath);
+        lock_nstore($this->{'ATTR'}->{$threadID}, $AttrPath);
     };
     if ($@) {
         warn "Failed to store data to $AttrPath: $@";
@@ -561,7 +566,7 @@ sub SaveAttrAll
         
         # データをファイルに保存
         eval {
-            lock_store($this->{'ATTR'}->{$thread_id}, $AttrPath);
+            lock_nstore($this->{'ATTR'}->{$thread_id}, $AttrPath);
         };
         if ($@) {
             warn "Failed to store data to $AttrPath: $@";

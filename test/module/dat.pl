@@ -295,6 +295,24 @@ sub GetSubject
 	return $elem[4];
 }
 
+sub GetSubjectFromFile
+{
+	my $this = shift;
+	my ($Sys) = @_;
+
+	my $Path = $Sys->Get('BBSPATH') . '/' . $Sys->Get('BBS'). '/dat/' . $Sys->Get('KEY') . '.dat';
+	my $subject = '';
+
+	if (open(my $fh, '<', $Path)) {
+		my $line = <$fh>;
+		$subject = (split(/<>/, $line, -1))[4];
+		$subject =~ s/[\r\n]+\z//;
+		close $fh;
+	}
+
+	return $subject;
+}
+
 #------------------------------------------------------------------------------------------------------------
 #
 #	スレッド停止 * 0.8.xから非推奨

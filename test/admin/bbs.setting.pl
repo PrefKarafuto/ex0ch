@@ -568,16 +568,6 @@ sub PrintLimitSetting
 	my $setTateCount2	= $Setting->Get('BBS_TATESUGI_COUNT2');
 	my $setTateHour		= $Setting->Get('BBS_TATESUGI_HOUR');
 	my $setTateCount	= $Setting->Get('BBS_TATESUGI_COUNT');
-	
-	my $setAskiiPoint	= $Setting->Get('BBS_SPAMKILLI_ASCII');
-	my $setMailPoint	= $Setting->Get('BBS_SPAMKILLI_MAIL');
-	my $setHostPoint	= $Setting->Get('BBS_SPAMKILLI_HOST');
-	my $setURLPoint		= $Setting->Get('BBS_SPAMKILLI_URL');
-	my $setAskiiMessage	= $Setting->Get('BBS_SPAMKILLI_MESSAGE');
-	my $setSpamLink		= $Setting->Get('BBS_SPAMKILLI_LINK');
-	my $setMesPoint		= $Setting->Get('BBS_SPAMKILLI_MESPOINT');
-	my $setDomain		= $Setting->Get('BBS_SPAMKILLI_DOMAIN');
-	my $setSpamPoint	= $Setting->Get('BBS_SPAMKILLI_POINT');
 
 	# 改造版で追加
 	my $Captcha			= $Setting->Get('BBS_CAPTCHA');
@@ -673,19 +663,6 @@ sub PrintLimitSetting
 	$Page->Print("全体で<input type=text size=5 name=BBS_TATESUGI_COUNT value=\"$setTateCount\" style=\"text-align: right\">スレッドまで立てられる");
 	$Page->Print("</td></tr>");
 	
-		$Page->Print("<tr><td class=\"DetailTitle\" colspan=4>スパムブロック</td></tr>");
-	$Page->Print("<tr><td colspan=4>");
-	$Page->Print("名前欄がASCIIのみで<input type=text size=3 name=BBS_SPAMKILL_ASCII value=\"$setAskiiPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
-	$Page->Print("本文のASCIIの割合が<input type=text size=3 name=BBS_SPAMKILL_MESSAGE value=\"$setAskiiMessage\" style=\"text-align: right\" maxlength=\"3\">％以上で");
-	$Page->Print("<input type=text size=3 name=BBS_SPAMKILL_MESPOINT value=\"$setMesPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
-	$Page->Print("メール欄（コマンド欄）に半角＠を含むと<input type=text size=3 name=BBS_SPAMKILL_MAIL value=\"$setMailPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
-	$Page->Print("ホスト名が逆引き不可だと&#009;<input type=text size=3 name=BBS_SPAMKILL_HOST value=\"$setHostPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
-	$Page->Print("本文に<;a href=か[url=を含むと<input type=text size=3 name=BBS_SPAMKILL_URL value=\"$setURLPoint\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
-	$Page->Print("本文にリンクを含むと<input type=text size=3 name=BBS_SPAMKILL_LINK value=\"$setSpamLink\" style=\"text-align: right\" maxlength=\"2\">ポイント加点<br>");
-	$Page->Print("（↑が0の時のみ）本文中リンクのTLドメインの種類<input type=text size=30 name=BBS_SPAMKILL_DOMAIN value=\"$setDomain\" style=\"text-align: right\">でポイント加点<br>");
-	$Page->Print("合計<input type=text size=3 name=BBS_SPAMKILL_POINT value=\"$setSpamPoint\" style=\"text-align: right\" maxlength=\"3\">ポイントでスパムと判定");
-	$Page->Print("</td></tr>");
-	
 	$Page->Print("<tr><td colspan=4><hr></td></tr>");
 	$Page->Print("<tr><td colspan=4 align=left><input type=button value=\"　設定　\"");
 	$Page->Print("onclick=\"DoSubmit('bbs.setting','FUNC','SETLIMIT');\"></td></tr></table>");
@@ -736,6 +713,7 @@ sub PrintCommandSetting
 	my $setsubowner	= $setBitMask & 2 ** 21 ? 'checked' : '';
 	my $setvoteban	= $setBitMask & 2 ** 22 ? 'checked' : '';
 	my $setloadattr	= $setBitMask & 2 ** 23 ? 'checked' : '';
+	my $setcap		= $setBitMask & 2 ** 24 ? 'checked' : '';
 
 	my $resmax = $Setting->Get('BBS_MAX_RES') || $Sys->Get('RESMAX');
 	my $setvotenum = $Setting->Get('BBS_VOTE');
@@ -821,6 +799,9 @@ sub PrintCommandSetting
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">副主（!sub:[>>レス番]）</td><td>");
 	$Page->Print("<input type=checkbox name=SUB value=2097152 $setsubowner>有効</td></tr>");
+	$Page->Print("<tr>");
+	$Page->Print("<td class=\"DetailTitle\">強制キャップ（!cap:[>>レス番]:[キャップ名]）</td><td>");
+	$Page->Print("<input type=checkbox name=CAP value=16777216 $setcap>有効</td></tr>");
 	$Page->Print("<tr>");
 	$Page->Print("<td class=\"DetailTitle\">BAN投票（!vote:[>>レス番]） </td><td>");
 	$Page->Print("<input type=checkbox name=VOTE value=4194304 $setvoteban>有効</td></tr>");
@@ -965,6 +946,7 @@ sub PrintOtherSetting
 	my $setHideNusi		= $Setting->Get('BBS_HIDENUSI');
 	my $setTitleID		= $Setting->Get('BBS_TITLEID');
 	my $setTLMAX		= $Setting->Get('BBS_TL_MAX');
+	my $setUpload		= $Setting->Get('BBS_UPLOAD');
 	
 	$setUnicode			= ($setUnicode eq 'pass' ? 'checked' : '');
 	$setCookie			= ($setCookie eq '1' ? 'checked' : '');
@@ -1001,8 +983,8 @@ sub PrintOtherSetting
 
 	$Page->Print("<tr><td class=\"DetailTitle\">曜日文字</td><td>");
 	$Page->Print("<input type=text size=20 name=BBS_YMD_WEEKS value=\"$setWeek\"></td>");
-	$Page->Print("<td class=\"DetailTitle\"><s>文字参照</s></td><td>");
-	$Page->Print("<input type=checkbox name=BBS_UNICODE checked value=on disabled>使用可能</td>");
+	$Page->Print("<td class=\"DetailTitle\">Imgur画像アップロード</td><td>");
+	$Page->Print("<input type=checkbox name=BBS_UPLOAD value=on $setUpload disabled>Coming Soon!!</td>");
 	
 	$Page->Print("<tr><td class=\"DetailTitle\">トリップ桁数</td><td>");
 	$Page->Print("<input type=text size=8 name=BBS_TRIPCOLUMN value=\"$setTripColumn\"></td>");
@@ -1245,9 +1227,7 @@ sub FunctionLimitSetting
 		my @inList = qw(BBS_SUBJECT_COUNT BBS_NAME_COUNT BBS_MAIL_COUNT BBS_MESSAGE_COUNT
 						BBS_LINE_NUMBER BBS_COLUMN_NUMBER BBS_DATMAX
 						timecount timeclose BBS_THREAD_TATESUGI BBS_TATESUGI_COUNT2
-						BBS_TATESUGI_HOUR BBS_TATESUGI_COUNT BBS_SPAMKILL_ASCII BBS_SPAMKILL_MAIL
-						BBS_SPAMKILL_HOST BBS_SPAMKILL_URL BBS_SPAMKILL_MESSAGE BBS_SPAMKILL_LINK
-						BBS_SPAMKILL_MESPOINT BBS_SPAMKILL_POINT);
+						BBS_TATESUGI_HOUR BBS_TATESUGI_COUNT);
 		# 入力有無
 		if (! $Form->IsInput(\@inList)) {
 			return 1001;
@@ -1300,16 +1280,6 @@ sub FunctionLimitSetting
 	$Setting->Set('BBS_TATESUGI_COUNT', $Form->Get('BBS_TATESUGI_COUNT'));
 	$Setting->Set('BBS_TATESUGI_COUNT2', $Form->Get('BBS_TATESUGI_COUNT2'));
 
-	$Setting->Set('BBS_SPAMKILLI_ASKII', $Form->Get('BBS_SPAMKILL_ASCII'));
-	$Setting->Set('BBS_SPAMKILLI_MAIL', $Form->Get('BBS_SPAMKILL_MAIL'));
-	$Setting->Set('BBS_SPAMKILLI_HOST', $Form->Get('BBS_SPAMKILL_HOST'));
-	$Setting->Set('BBS_SPAMKILLI_URL', $Form->Get('BBS_SPAMKILL_URL'));
-	$Setting->Set('BBS_SPAMKILLI_MESSAGE', $Form->Get('BBS_SPAMKILL_MESSAGE'));
-	$Setting->Set('BBS_SPAMKILLI_LINK', $Form->Get('BBS_SPAMKILL_LINK'));
-	$Setting->Set('BBS_SPAMKILLI_MESPOINT', $Form->Get('BBS_SPAMKILL_MESPOINT'));
-	$Setting->Set('BBS_SPAMKILLI_DOMAIN', $Form->Get('BBS_SPAMKILL_DOMAIN'));
-	$Setting->Set('BBS_SPAMKILLI_POINT', $Form->Get('BBS_SPAMKILL_POINT'));
-
 	# 改造版で追加
 	$Setting->Set('BBS_CAPTCHA', $Form->Get('BBS_CAPTCHA'));
 	$Setting->Set('BBS_SAMETHREAD', ($Form->Equal('BBS_SAMETHREAD', 'on') ? 'checked' : ''));
@@ -1350,7 +1320,7 @@ sub FunctionCommandSetting
 	
 	my $commandSet = 0;
 	my @List = qw(PASS MAXRES SAGE SLIP NOID CHID FC774 CH774 LIVE 
-					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE ATTR);
+					NONUSI AGE NOPOOL NINLV STOP POOL DELCMD BAN CHTT ADD DELETE EXTEND SUB VOTE ATTR CAP);
 
 	foreach (@List) {
 		# 入力チェック	
@@ -1477,6 +1447,7 @@ sub FunctionOtherSetting
 	$Setting->Set('BBS_URL_TITLE', ($Form->Equal('BBS_URL_TITLE', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TITLEID', ($Form->Equal('BBS_TITLEID', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_IMGTAG', ($Form->Equal('BBS_IMGTAG', 'on') ? 'checked' : ''));
+	$Setting->Set('BBS_UPLOAD', ($Form->Equal('BBS_UPLOAD', 'on') ? 'checked' : ''));
 	$Setting->Set('BBS_TL_MAX', $Form->Get('BBS_TL_MAX'));
 	#$Setting->Set('BBS_VIDEO', ($Form->Equal('BBS_VIDEO', 'on') ? 'checked' : ''));
 	

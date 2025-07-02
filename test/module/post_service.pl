@@ -13,7 +13,7 @@ use Digest::MD5;
 use JSON;
 use File::Copy;
 use Encode qw(encode);
-use Storable qw(lock_store lock_retrieve dclone);
+use Storable qw(lock_nstore lock_retrieve dclone);
 use warnings;
 no warnings 'once';
 
@@ -179,8 +179,12 @@ sub Write
 		return $err if $err;
 	}
 
+	# 画像アップロード
+	$err = $this->ImageUpload();
+	return $err if $err;
+
 	# Datに保存する一行データを生成
-	my $line = $this->MakeDatLine($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result);
+	my $line = $this->MakeDatLine($Ninja, $idEnd, $slip_result);
 
 	# ログ書き込み
 	$this->AddLog($Sys,$Set,$Form,$line);
@@ -189,7 +193,7 @@ sub Write
 	SaveHost($Sys, $Form);
 	
 	# datファイルへ直接書き込み
-	($err,my $resNum) = $this->AddDatFile($Sys,$Threads,$line);
+	($err,my $resNum) = $this->AddDatFile($line);
 	
 	if ($err == $ZP::E_SUCCESS) {
 		# タイムラインへ追加
@@ -369,6 +373,12 @@ sub ReadyBeforeWrite
 				}
 			}
 			elsif($commandAuth || (GetSessionID($Sys,$Threads,1)||$Threads->GetAttr($threadid,'sub')) eq $Sys->Get('SID')){
+				if($Threads->GetAttr($threadid,'sub') eq $Sys->Get('SID')){
+					my @clear_bits = (8, 21);
+					my $mask = 0;
+					$mask |= 1 << $_ for @clear_bits;
+					$CommandSet &= ~$mask;
+				}
 				Command($Sys,$Form,$Set,$Threads,$Ninja,$CommandSet,$noNinja);
 			}
 
@@ -376,10 +386,6 @@ sub ReadyBeforeWrite
 			VoteBanCommand($Sys,$Form,$Set,$Threads) if $Set->Get('BBS_VOTE');
 		}
 	}
-	
-	my $text = $Form->Get('MESSAGE');
-	$text =~ s/<br>/ <br> /g;
-	$Form->Set('MESSAGE', " $text ");
 	
 	# 名無し設定
 	$from = $Form->Get('FROM', '');
@@ -406,39 +412,55 @@ sub ReadyBeforeWrite
 
 			my $Unique = [];	# 独自拡張用
 			my $is_captcha = $Form->Get($Sys->Get('CAPTCHA').'-response');
+
+			# スレッドがすでにあればそのタイトル
+			require './module/dat.pl';
+			my $Dat = DAT->new;
+
+			# コンテキスト
 			$dsl->SetCtx({
-			message     => $Form->Get('MESSAGE')    // '',
-			mail        => $Form->Get('mail')       // '',
-			name        => $Form->Get('FROM')       // '',
-			title     => $Form->Get('subject')    // '',
-			time        => $Form->Get('time')       // time(),
-			thread_id   => $threadid		        // '',
-			bbs         => $Form->Get('bbs')        // '',
-			fp          => $Form->Get('fp')         // '',
-			from_index  => $Form->Get('from_index') // '',
-			ip          => $ENV{REMOTE_ADDR}        // '',
-			host        => $ENV{REMOTE_HOST}        // '',
-			ua          => $ENV{HTTP_USER_AGENT}    // '',
-			session_id  => $Sys->Get('SID')         // '',
-			cap_id		=> $capID 					// '',
-			is_captcha	=> $is_captcha				// '',
-			setting     => $Set->All()              // {},
-			#system		=> $Sys->All()				// {},
+			message     => $Form->Get('MESSAGE')    	// '',
+			mail        => $Form->Get('mail')       	// '',
+			name        => $Form->Get('FROM')       	// '',
+			title     	=> $Form->Get('subject')    	// '',
+			time        => $Form->Get('time')       	// time(),
+			thread_title=> $Dat->GetSubjectFromFile($Sys)// '',
+			thread_id   => $threadid		        	// '',
+			bbs         => $Form->Get('bbs')        	// '',
+			fp          => $Form->Get('fp')         	// '',
+			from_index  => $Form->Get('from_index') 	// '',
+			ip          => $ENV{REMOTE_ADDR}        	// '',
+			host        => $ENV{REMOTE_HOST}        	// '',
+			ua          => $ENV{HTTP_USER_AGENT}    	// '',
+			session_id  => $Sys->Get('SID')         	// '',
+			cap_id		=> $capID 						// '',
+			is_captcha	=> $is_captcha					// '',
+			setting     => $Set->All()              	// {},
+			#system		=> $Sys->All()					// {},
 			attr        => $Threads->GetAttr($threadid) // {},  # スレッド属性ハッシュ
-			user_info   => $Ninja->All() 			// {},      # 忍法帖情報ハッシュ
+			user_info   => $Ninja->All() 				// {},      # 忍法帖情報ハッシュ
 			score       => 0,
-			unique      => $Unique                  // {},  # 拡張用
+			unique      => $Unique                  	// {},  # 拡張用
 			# 以下、値の返却時に使用
 			error_code 	=> 0,
 			error_subject	=> '',
 			error_message	=> '',
+			thread_updown	=> '',
 			});
 
 			my $result = $dsl->Check(5);	# タイムアウト5秒
 
 			my %out = %{ $dsl->GetOutResult };
 
-			# 変更を反映
+			# 禁則文字変換
+			$out{message}	=~ s/<>/&lt;&gt;/g;
+			$out{message}	=~ s/\r\n|\r|\n/<br>/g;
+			$out{mail}		=~ s/<>/&lt;&gt;/g;
+			$out{mail}		=~ s/\r\n|\r|\n|<br>/ /g;
+			$out{name}		=~ s/<>/&lt;&gt;/g;
+			$out{name}		=~ s/\r\n|\r|\n|<br>/ /g;
+			$out{title}		=~ s/<>/&lt;&gt;/g;
+			$out{title}		=~ s/\r\n|\r|\n|<br>/ /g;
 			$Form->Set('MESSAGE',$out{message});
 			$Form->Set('mail', $out{mail});
 			$Form->Set('FROM', $out{name});
@@ -452,6 +474,7 @@ sub ReadyBeforeWrite
 
 			$Set->All($out{setting});
 			#$Sys->All($out{system});
+			$Sys->Set('updown',$out{thread_updown});
 
 			# 規制
 			if ($result){
@@ -868,14 +891,14 @@ sub Command
 		}
 	}
 	#強制キャップ
-	if($Form->Get('MESSAGE') =~ /(^|<br>)!cap:&gt;&gt;([1-9][0-9]*):(.*)(<br>|$)/ && ($setBitMask & 2 ** 23)){
+	if($Form->Get('MESSAGE') =~ /(^|<br>)!cap:&gt;&gt;([1-9][0-9]*):(.*)(<br>|$)/ && ($setBitMask & 2 ** 24)){
 		my $target = GetSessionID($Sys,$Threads,$2);
 		if($target){
 			if($Set->Get('BBS_NAME_COUNT') >= length($3)){
 				require HTML::Entities;
-				my $cap_name = HTML::Entities::encode_entities($3);
+				my $cap_name = '▲'.HTML::Entities::encode_entities($3);
 				$Threads->SetAttr($threadid, 'cap',$target,$cap_name);
-				$Command .= "※&gt;&gt;$2に副主にキャップを付加しました<br>";
+				$Command .= "※&gt;&gt;$2にキャップを付加しました<br>";
 			}else{
 				$Command .= '※キャップ長すぎ<br>';
 			}
@@ -1478,7 +1501,6 @@ sub NormalizationNameMail
 	
 	# プラグイン実行 フォーム情報再取得
 	$this->ExecutePlugin($Sys->Get('MODE'));
-	return $ZP::E_REG_SPAMKILL if($this->SpamBlock($Set,$Form));
 	
 	$name = $Form->Get('FROM', '');
 	$mail = $Form->Get('mail', '');
@@ -1515,7 +1537,7 @@ sub NormalizationNameMail
 	
 	# スレッド作成時
 	if ($Sys->Equal('MODE', 1)) {
-		return $ZP::E_FORM_NOSUBJECT if ($subject eq '');
+		return $ZP::E_FORM_NOSUBJECT if ($subject eq '' || $subject =~ /\A(?:[\s　]|<br>)*\z/);
 		return $ZP::E_REG_SAMETITLE if ($this->SameTitleCheck($subject) && $Set->Get('BBS_SAMETHREAD') eq 'checked');
 		# サブジェクト欄の文字数確認
 		if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGSUBJECT, $bbs)) {
@@ -1604,6 +1626,7 @@ sub MakeSlip
 	return ($slip_result,$idEnd);
 }
 
+# 忍法帖のロード
 sub LoadNinpocho
 {
 	my $this = shift;
@@ -1693,10 +1716,119 @@ sub LevelLimit
 	return 0;
 }
 
+# Imgurアップロード
+sub ImageUpload {
+    my $this = shift;
+    my ($Sys, $Form, $Set, $imfh);
+    $Sys  = $this->{SYS};
+    $Form = $this->{FORM};
+    $Set  = $this->{SET};
+
+    return 0
+      if !$Sys->Get('UPLOAD')
+      || !$Sys->Get('IMGUR_ID')
+      || !$Sys->Get('IMGUR_SECRET')
+      || !$Set->Get('BBS_UPLOAD');
+
+    $imfh = $Form->modCGI()->upload('image_file');
+    return 0 unless defined $imfh && fileno($imfh);
+
+    # --- ヘッダー Content-Type を取得 ---
+    my $info        = $Form->modCGI()->uploadInfo($imfh);
+    my $mime_header = $info->{'Content-Type'} || '';
+
+    # --- File::Type が使えるなら中身も判定 ---
+    my $mime_body = '';
+    my $ft_loaded = 0;
+    eval {
+        require File::Type;
+        File::Type->import();
+        my $ft = File::Type->new();
+        $mime_body = $ft->mime_type($imfh);
+        $ft_loaded = 1;
+        1;
+    };
+
+    # --- 許可リスト定義 ---
+    my %static_allow = map { $_ => 1 }
+      qw(image/jpeg image/png image/gif image/apng image/tiff);
+    my %anim_allow = map { $_ => 1 }
+      qw(image/gif image/apng);
+    my %video_allow = map { $_ => 1 }
+      qw(
+      video/mp4    video/mpeg   video/avi   video/webm
+      video/quicktime video/x-matroska video/x-flv
+      video/x-msvideo video/x-ms-wmv
+    );
+
+    # --- 形式チェック ---
+    my $ok = 0;
+    # ヘッダーのみで通るケース
+    if ( $static_allow{$mime_header}
+       or $anim_allow{$mime_header}
+       or $video_allow{$mime_header}
+    ) {
+        $ok = 1;
+    }
+    # かつ File::Type で判定できるなら二重チェック
+    if ( $ok && $ft_loaded ) {
+        $ok = (
+               ($static_allow{$mime_body})
+            or ($anim_allow{$mime_body})
+            or ($video_allow{$mime_body})
+        );
+    }
+
+    unless ($ok) {
+        return $ZP::E_IMG_FAIEDPOST;
+    }
+
+    # --- サイズチェック ---
+    my $pos  = tell($imfh);
+    seek($imfh, 0, 2);
+    my $size = tell($imfh);
+    seek($imfh, $pos, 0);
+
+    # どの閾値を使うか決定
+    my $max_size;
+    if ( $static_allow{$mime_header} ) {
+        $max_size = 50 * 1024 * 1024;
+    }
+    else {
+        # アニメ or 動画扱い
+        $max_size = 200 * 1024 * 1024;
+    }
+
+    if ( $size > $max_size ) {
+        return $ZP::E_IMG_FAIEDPOST;
+    }
+
+    # --- Imgur へアップロード ---
+    require './module/imgur.pl';
+    my $Img = IMGUR->new;
+    $Img->Load($Sys);
+    my ($err, $img_url) = $Img->Upload($imfh);
+    return $err if $err;
+
+    if ($img_url) {
+        $Form->Set('MESSAGE', $Form->Get('MESSAGE') . "<br>$img_url");
+    }
+    return 0;
+}
+
+# Datのデータ形式に整形
 sub MakeDatLine
 {
 	my $this = shift;
-	my ($Sys, $Set,$Form, $Threads, $Sec, $Conv, $Ninja, $idEnd, $slip_result) = @_;
+	my ($Ninja, $idEnd, $slip_result) = @_;
+	my ($Sys, $Set,$Form, $Threads, $Sec, $Conv);
+
+	$Sys = $this->{'SYS'};
+	$Form = $this->{'FORM'};
+	$Set = $this->{'SET'};
+	$Threads = $this->{'THREADS'};
+	$Conv = $this->{'CONV'};
+	$Sec = $this->{'SECURITY'};
 
 	my $threadid = $Sys->Get('KEY');
 	my $sid = $Sys->Get('SID');
@@ -1716,21 +1848,28 @@ sub MakeDatLine
 	my $datepart = $Conv->GetDate($Set, $Sys->Get('MSEC'));
 	my $bepart = '';
 	my $extrapart = '';
+	# プラグインに渡す用のデータを設定
 	$Form->Set('datepart', $datepart);
 	$Form->Set('idpart', $idpart);
-	#$Form->Set('BEID', ''); # type=1|2
+	# $Form->Set('BEID', ''); # type=1|2
 	$Form->Set('extrapart', $extrapart);
 	
 	# age/sage
-	my $updown = 'top';
-	$updown = '' if ($Form->Contain('mail', 'sage'));
+	my $updown = 'top';											# デフォルト（最上部）
+	$updown = 'up' if ($Form->Contain('mail', 'age'));			# 1上げ
+	$updown = '' if ($Form->Contain('mail', 'sage'));			# そのまま
+	$updown = 'down' if ($Form->Contain('mail', 'down'));		# 1下げ
+	$updown = 'bottom' if ($Form->Contain('mail', 'bottom'));	# 最下部
+
+	$updown = $Threads->GetAttr($threadid, 'floatmode') || $updown;
 	$updown = '' if ($Threads->GetAttr($threadid, 'sagemode'));
-	$updown = '' if ($Set->Get('BBS_NINJA') && $Ninja->Get('force_sage') && !$noNinja);
-	$updown = '' if ($Set->Get('BBS_NINJA') && $Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && !$noNinja);
+	$updown = '' if ($Set->Get('BBS_NINJA') && defined $Ninja && $Ninja->Get('force_sage') && !$noNinja);
+	$updown = '' if ($Set->Get('BBS_NINJA') && defined $Ninja && $Set->Get('NINJA_FORCE_SAGE') >= $Ninja->Get('ninLv') && !$noNinja);
+	$updown = $Sys->Get('updown') || $updown;
 	$Sys->Set('updown', $updown);
 
 	# pluginに渡す値を設定
-	$Sys->Set('_ERR', 0);
+	$Sys->Set('_ERR_', 0);
 	$Sys->Set('_NUM_', $Sys->Get('RESNUM') + 1);
 	$Sys->Set('_THREAD_', $this->{'THREADS'});
 	$Sys->Set('_SET_', $this->{'SET'});
@@ -1743,6 +1882,7 @@ sub MakeDatLine
 	my $mail = $Form->Get('mail', '');
 	my $text = $Form->Get('MESSAGE', '');
 
+	# コマンドからの強制キャップ
 	if(!$Sys->Get('CAPID')){
 		my $cap_ref = $Threads->GetAttr($threadid,'cap');
 		my %cap = ();
@@ -1761,12 +1901,16 @@ sub MakeDatLine
 	# 無意味なタグを除去
 	$name =~ s|<b></b>||g;
 	# 末尾の空白文字（スペース、タブ、改行など）をすべて削除
-	$text =~ s{(?:\s*<br\s*/?>\s*)+\z}{}gi;
+	$text =~ s{[\p{Zs}]+(?=<br>)|(?:[\p{Zs}]*<br>[\p{Zs}]*)+\z}{}gux;
 
 	$datepart = $Form->Get('datepart', '');
 	$idpart = $Form->Get('idpart', '');
 	if (!$Set->Get('BBS_HIDENUSI') && !$Threads->GetAttr($threadid,'hidenusi') && !$handle){
-		$idpart .= '(主)' if (($sid eq GetSessionID($Sys,$Threads,1)) || $Sys->Equal('MODE', 1));
+		if (($sid eq GetSessionID($Sys,$Threads,1)) || $Sys->Equal('MODE', 1)){
+			$idpart .= '(主)';
+		}elsif($sid && $sid eq $Threads->GetAttr($threadid,'sub')){
+			$idpart .= '(副)';
+		}
 	}
 
 	$bepart = $Form->Get('BEID', '');
@@ -1789,10 +1933,14 @@ sub MakeDatLine
 	return "$name<>$mail<>$info<>$text<>$subject\n";
 }
 
+# datファイルに追加
 sub AddDatFile
 {
 	my $this = shift;
-	my ($Sys,$Threads,$line) = @_;
+	my ($line) = @_;
+	my ($Sys,$Threads);
+	$Sys = $this->{'SYS'};
+	$Threads = $this->{'THREADS'};
 
 	my $resNum = $Sys->Get('RESNUM') // 0;
 	my $err = 0;
@@ -1827,10 +1975,13 @@ sub AddDatFile
 	return ($err,$resNum);
 }
 
+# ログに追加
 sub AddLog
 {
 	my $this = shift;
 	my ($Sys,$Set,$Form,$data) = @_;
+
+	return if $Sys->Get('FAKE');
 
 	chomp($data);
 	require './module/manager_log.pl';
@@ -1840,6 +1991,7 @@ sub AddLog
 	$Log->Save($Sys);
 }
 
+# 新規スレたての場合
 sub AddSubjectNewThread
 {
 	my $this = shift;
@@ -1930,7 +2082,7 @@ sub NormalizationContents
 	my ($ln, $cl) = $Conv->GetTextInfo(\$text);
 	
 	# 本文が無い
-	return $ZP::E_FORM_NOTEXT if ($text eq '');
+	return $ZP::E_FORM_NOTEXT if ($text eq '' || $text =~ /\A(?:[\s　]|<br>)*\z/);
 	
 	# 本文が長すぎ
 	if (!$Sec->IsAuthority($capID, $ZP::CAP_FORM_LONGTEXT, $bbs)) {
@@ -2218,92 +2370,6 @@ sub AddTimeLine {
     }
 }
 
-
-#SPAMBLOCK
-sub SpamBlock
-{
-	my	$this = shift;
-	my	($Setting, $form) = @_;
-	
-	my $name_ascii_point	= $Setting->Get('BBS_SPAMKILLI_ASCII');		#名前欄がASCIIのみ
-	my $mail_atsign_point	= $Setting->Get('BBS_SPAMKILLI_MAIL');		#メール欄（コマンド欄）に半角\@を含む
-	my $nohost_point		= $Setting->Get('BBS_SPAMKILLI_HOST');		#ホスト名が逆引き不可
-	my $text_ahref_point	= $Setting->Get('BBS_SPAMKILLI_URL');		#本文に<;a href=か[url=を含む
-	my $text_ascii_ratio	= $Setting->Get('BBS_SPAMKILLI_MESSAGE');	#本文のASCIIの割合
-	my $text_url_point		= $Setting->Get('BBS_SPAMKILLI_LINK');		#本文にリンクを含む
-	my $text_ascii_point	= $Setting->Get('BBS_SPAMKILLI_MESPOINT');	#本文のASCIIの割合加点
-	my $tldomain_setting	= $Setting->Get('BBS_SPAMKILLI_DOMAIN');	#本文中リンクのTLドメインの種類
-	my $threshold_point		= $Setting->Get('BBS_SPAMKILLI_POINT');		#閾値
-	
-	my $name = $form->Get('FROM');
-	my $mail = $form->Get('mail');
-	my $text = $form->Get('MESSAGE');
-	
-	my $point = 0;
-	
-	if ($ENV{'REMOTE_HOST'} eq ($ENV{'REMOTE_ADDR'})) {
-		$point += $nohost_point;
-	}
-	if ($name ne '' && $name !~ /[^\x09\x0a\x0d\x20-\x7e]/) {
-		$point += $name_ascii_point;
-	}
-	if ($mail =~ /@/) {
-		$point += $mail_atsign_point;
-	}
-	if ($text =~ /&lt;a href=|\[url=/i) {
-		$point += $text_ahref_point;
-	}
-	if ($text =~ m|https?://|) {
-		$point += $text_url_point;
-	}
-	
-	if ('ASCII text') {
-		$text =~ s/<br>//gi;
-		$text =~ s/[\x00-\x1f\x7f\s]//g;
-		my $c_asc = @_ = $text =~ /[\x20-\x7e]/g;
-		my $c_nasc = @_ = $text =~ /[^\x20-\x7e]/g;
-		if ($c_asc * 100 >= ($c_asc + $c_nasc) * $text_ascii_ratio) {
-			$point += $text_ascii_point;
-		}
-	}
-	
-	if ('TLD of links' && $text_url_point == 0) {
-		my %tld2pt = ('*' => 0);
-		my $r_num = '^-?[0-9]+$';
-		my $r_tld = '^[a-z](?:[a-z0-9\-](?:[a-z0-9])?)?$|^\*$';
-		
-		# 設定文を解釈し点数マップを作成
-		foreach (split(/[^0-9a-zA-Z\-=,\*]/, $tldomain_setting)) {
-			my @buf = split(/[=,]/, $_);
-			my @num = grep { /$r_num/ } @buf;
-			if (scalar(@num) == 1) {
-				map { $tld2pt{$_} = $num[0] } grep { /$r_tld/i } @buf;
-			} elsif (scalar(@num) > 1) {
-				foreach (split(/,/, $_)) {
-					my @buf2 = split(/=/, $_);
-					next if (!defined (my $p = pop @{[grep { /$r_num/ } @buf2]}));
-					map { $tld2pt{$_} = $p } grep { /$r_tld/i } @buf2;
-				}
-			}
-		}
-		
-		# 本文リンクからTLDを抽出し重複排除
-		my @tldlist = keys %{ {map { pop(@{[split(/\./, $_)]}), 1 }
-						($text =~ m|https?://([a-z0-9\-\.]+)|gi)} };
-		
-		# TLDの種類ごとに加点
-		foreach my $tld (@tldlist) {
-			$tld = '*' if (!defined $tld2pt{$tld});
-			$point += $tld2pt{$tld};
-		}
-	}
-	
-	if ($point >= $threshold_point) {
-		return 1;
-	}
-	
-	return 0;
-}
 #UA開示
 sub tasukeruyo
 {
@@ -2430,7 +2496,7 @@ sub CaptchaAuthentication
 					# 認証時とIP一致
 					$sid = $authed_sid->{'sid'};
 					$Sys->Set('SID',$sid);
-					lock_store({'crtime'=>time}, "$Dir/sid-$sid.cgi");
+					lock_nstore({'crtime'=>time}, "$Dir/sid-$sid.cgi");
 					chmod 0600, "$Dir/sid-$sid.cgi";
 					unlink $codeFile;
 
@@ -2455,7 +2521,7 @@ sub CaptchaAuthentication
 				$auth_code = substr($ctx->hexdigest, 0, 6);
 				my $issueCodeFile = "$Dir/code-$auth_code.cgi";
 
-				lock_store({'sid'=>$sid,'ip_addr'=>$ENV{'REMOTE_ADDR'},'crtime'=>time}, $issueCodeFile);
+				lock_nstore({'sid'=>$sid,'ip_addr'=>$ENV{'REMOTE_ADDR'},'crtime'=>time}, $issueCodeFile);
 				chmod 0600, $issueCodeFile;
 				$Sys->Set('PASSWORD', $auth_code);
 
