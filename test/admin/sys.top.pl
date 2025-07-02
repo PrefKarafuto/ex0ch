@@ -167,7 +167,7 @@ sub SetMenuList
 sub PrintNoticeList
 {
 	my ($Page, $Sys, $Form) = @_;
-	my ($Notices, @noticeSet, @usersSet, $from, $to, $subj, $text, $date, $id, $userID, $common);
+	my ($Notices, @noticeSet, @usersSet, $from, $to, $subj, $text, $date, $id, $userID, $fromUserID, $color, $common);
 	my ($dispNum, $i, $dispSt, $dispEd, $listNum, $isAuth, $curUser);
 	my ($orz, $or2);
 	
@@ -225,30 +225,32 @@ HTML
 	# 通知一覧を出力
 	for ($i = $dispSt ; $i < $dispEd ; $i++) {
 		$id = $noticeSet[$i];
-		$from = $userID->Get('NAME', $Notices->Get('FROM', $id));
+		$fromUserID = $Notices->Get('FROM', $id);
+		$from = $userID->Get('NAME', $fromUserID);
 
 		# 宛先
 		if($Notices->Get('TO',$id) eq '*'){
 			$to = '@ALL';
 		}else{
 			@usersSet = split(/\, ?/, $Notices->Get('TO',$id));
-			$to = join ' ',map { '@' . $userID->Get('NAME', $_ )} grep { $_ ne $Notices->Get('FROM', $id)} @usersSet if scalar(@usersSet);
+			$to = join ' ',map { '@' . $userID->Get('NAME', $_ )} grep { $_ ne $fromUserID} @usersSet if scalar(@usersSet);
 		}
 		
 		if (($curUser eq $from || $Notices->IsInclude($id, $curUser)) && ! $Notices->IsLimitOut($id)) {
-			if ($Notices->Get('FROM', $id) eq '0000000000') {
+			if ($fromUserID eq '0000000000') {
 				$from = 'ex0ch管理システム';
 				$to = '@SYSTEM_ADMIN'
 			}
 			$subj = $Notices->Get('SUBJECT', $id);
 			$text = $Notices->Get('TEXT', $id);
 			$date = DATA_UTILS::GetDateFromSerial(undef, $Notices->Get('DATE', $id), 0);
+			$color = $curUser eq $fromUserID ? 'border: 1px solid rgb(255, 200, 0);' : '';
 			
 $Page->Print(<<HTML);
    <tr>
 	<td><input type=checkbox name="NOTICES" value="$id"></td>
 	<td class="Response" colspan="3">
-	<dl style="margin:0px;">
+	<dl style="margin:0px; $color">
 	 <dt><b>$subj</b> <font color="blue">From：$from</font> $date</dt>
 	  <dd>
 	  <font color='peru'>$to</font><br>
