@@ -607,7 +607,7 @@ sub PrintPagenation
 	# 先頭リンクと前省略
 	if ($startPage > 1) {
 		# 必ず「1」を表示
-		$Page->Print("<a href=\"javascript:SetOption('DISPST',0);$common\">1</a> ");
+		$Page->Print("<a href=\"javascript:SetOption('$optionName',0);$common\">1</a> ");
 		# 省略は「1」と startPage が2つ以上離れているときだけ
 		if ($startPage > 2) {
 			$Page->Print("... ");
@@ -631,7 +631,7 @@ sub PrintPagenation
 			$Page->Print("... ");
 		}
 		my $lastSt = ($totalPages - 1) * $dispNum;
-		$Page->Print("<a href=\"javascript:SetOption('DISPST',$lastSt);$common\">$totalPages</a> ");
+		$Page->Print("<a href=\"javascript:SetOption('$optionName',$lastSt);$common\">$totalPages</a> ");
 	}
 
 	# 「NEXT >>」リンク
