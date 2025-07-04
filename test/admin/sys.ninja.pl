@@ -911,8 +911,12 @@ sub FunctionNinjaLimDelete
 
 	foreach my $sid(@session_files){
 		$sid =~ s/^cgisess_//;
-		unless($Ninja->LoadOnly($Sys,$sid)){
-			$count++;
+		if($Ninja->LoadOnly($Sys,$sid)){
+			if ($Ninja->{SESSION}->is_expired) {
+				$Ninja->{SESSION}->delete;
+				$Ninja->{SESSION}->flush;
+				$count++;
+			}
 		}
 	}
 	push @$pLog, "${count}/${sessnum}の忍法帖が期限切れ削除";

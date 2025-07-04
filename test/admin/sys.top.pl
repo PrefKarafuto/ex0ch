@@ -352,7 +352,7 @@ HTML
 		next if $Sys->Get('ADMIN')->{'USER'} eq $id;
 		$name = $User->Get('NAME', $id);
 		$full = $User->Get('FULL', $id);
-		$Page->Print("      <input type=\"checkbox\" name=\"NOTICE_USERS\" value=\"$id\"> $name($full)<br>\n");
+		$Page->Print("<label><input type=\"checkbox\" name=\"NOTICE_USERS\" value=\"$id\"> $name($full)</label><br>\n");
 	}
 	
 $Page->Print(<<HTML);

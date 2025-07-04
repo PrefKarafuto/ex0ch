@@ -454,7 +454,6 @@ sub ReadyBeforeWrite
 
 			# 禁則文字変換
 			$out{message}	=~ s/<>/&lt;&gt;/g;
-			$out{message}	=~ s/\r\n|\r|\n/<br>/g;
 			$out{mail}		=~ s/<>/&lt;&gt;/g;
 			$out{mail}		=~ s/\r\n|\r|\n|<br>/ /g;
 			$out{name}		=~ s/<>/&lt;&gt;/g;
