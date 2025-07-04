@@ -109,7 +109,7 @@
         const opts = Object.assign(
           {},
           getBaseOptions(),
-          { mode: "perl-with-pcre" },
+          { mode: "perl" },
           { foldOptions: {
               rangeFinder: (cm, start) => {
                 return CodeMirror.fold.brace(cm, start)
