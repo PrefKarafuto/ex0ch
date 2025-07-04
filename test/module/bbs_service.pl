@@ -989,7 +989,7 @@ HTML
 		}
 
 		# </details> 閉じ
-		$Page->Print('</div></details>');
+		$Page->Print('</div></details><br>');
 		$Page->Print("    </dd>\n");
 	}
 }
