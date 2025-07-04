@@ -436,7 +436,7 @@ HTML
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/fold/indent-fold.js"></script>
 
   <script>window.CM_THEME = "${theme}";</script>
-  <script language="javascript" src="./datas/cm.js"></script>
+  <script language="javascript" charset="utf-8" src="./datas/cm.js"></script>
   
 HTML
 	}
