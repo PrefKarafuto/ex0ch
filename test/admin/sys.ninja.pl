@@ -898,31 +898,58 @@ sub FunctionNinjaDelete
 
 	return 0;
 }
-sub FunctionNinjaLimDelete
-{
-	my ($Sys, $Form, $pLog) =@_;
-	require './module/ninpocho.pl';
-	my $Ninja = NINPOCHO->new;
-	my $infoDir = $Sys->Get('INFO');
-	my $ninDir = ".$infoDir/.ninpocho/"; 
-	my @session_files = sort { (stat($b))[9] <=> (stat($a))[9] } glob($ninDir.'cgisess_*');
-	my $sessnum = @session_files;
-	my $count = 0;
 
-	foreach my $sid(@session_files){
-		$sid =~ s/^cgisess_//;
-		if($Ninja->LoadOnly($Sys,$sid)){
-			if ($Ninja->{SESSION}->is_expired) {
-				$Ninja->{SESSION}->delete;
-				$Ninja->{SESSION}->flush;
-				$count++;
-			}
-		}
-	}
-	push @$pLog, "${count}/${sessnum}の忍法帖が期限切れ削除";
+sub FunctionNinjaLimDelete {
+    my ($Sys, $Form, $pLog) = @_;
+    require './module/ninpocho.pl';
+    my $Ninja   = NINPOCHO->new;
+    my $infoDir = $Sys->Get('INFO');
+    my $ninDir  = ".$infoDir/.ninpocho/";
+    return 0 unless -d $ninDir;
 
-	return 0;
+    # 1) expire 前の ID リスト
+    my @before_files = glob("$ninDir/cgisess_*");
+    my @before_ids = map {
+        my $base = File::Basename::basename($_);
+        $base =~ /^cgisess_([0-9A-Fa-f]{32})$/ ? $1 : ()
+    } @before_files;
+
+    # 2) CGI::Session::ExpireSessions で一括 expire
+    if (eval { require CGI::Session::ExpireSessions; 1 }) {
+        CGI::Session::ExpireSessions->new(
+            cgi_session_dsn => 'driver:File;serializer:Storable',
+            dsn_args        => { Directory => $ninDir },
+            delta           => 60*60*24*30,  # 30日
+            verbose         => 0,
+        )->expire_sessions();
+    }
+    else {
+        push @$pLog, "CGI::Session::ExpireSessions がありません。インストールしてください。";
+        return 0;
+    }
+
+    # 3) expire 後の ID マップ
+    my @after_files = glob("$ninDir/cgisess_*");
+    my %after_ids = map {
+        my $base = File::Basename::basename($_);
+        $base =~ /^cgisess_([0-9A-Fa-f]{32})$/ ? ($1 => 1) : ()
+    } @after_files;
+
+    # 4) 削除されたセッションだけを抽出
+    my @deletedSessionIDList = grep { not exists $after_ids{$_} } @before_ids;
+
+    # 5) Delete メソッドにリファレンスで渡す
+    my $deleted_count = scalar(@deletedSessionIDList);
+	$Ninja->Delete($Sys, \@deletedSessionIDList) if $deleted_count;
+
+    # 6) ログ出力
+    my $before_count = scalar @before_ids;
+    push @$pLog, "期限切れの ${deleted_count}/${before_count} 件を削除しました";
+
+    return 0;
 }
+
+
 sub FunctionNinjaSave
 {
 	my ($Sys, $Form, $pLog) = @_;

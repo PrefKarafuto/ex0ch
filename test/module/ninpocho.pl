@@ -77,7 +77,7 @@ sub Load {
 
     # セッション読み込み or 新規作成
     my $session = CGI::Session->new(
-        "driver:file;serializer:storable", $sid,
+        "driver:file;serializer:Storable", $sid,
         { Directory => $ninDir }
     );
     if ($session->is_new) {
@@ -124,7 +124,7 @@ sub LoadOnly {
     my $ninDir = "." . $Sys->Get('INFO') . "/.ninpocho/";
     return 0 unless -d $ninDir;
     my $session = CGI::Session->load(
-        "driver:file;serializer:storable", $sid,
+        "driver:file;serializer:Storable", $sid,
         { Directory => $ninDir }
     );
     return 0 unless $session;
@@ -183,15 +183,8 @@ sub Delete {
     my $ninDir = "." . $Sys->Get('INFO') . "/.ninpocho/";
     my $count = 0;
     foreach my $sid (@$sid_array_ref) {
-        my $session = CGI::Session->load(
-            "driver:file;serializer:storable", $sid,
-            { Directory => $ninDir }
-        );
-        next unless $session;
-        # 期限切れ判定
-        if ($session->is_expired) {
-            $session->delete;
-            $session->flush;
+        if(-e $ninDir.'cgisess_'.$sid){
+            unlink $ninDir.'cgisess_'.$sid;
             $count++;
         }
     }
@@ -211,13 +204,6 @@ sub Delete {
         chmod 0600, $file;
     }
     return $count;
-}
-
-sub DeleteOnly {
-    my $this = shift;
-    return unless $this->{SESSION};
-    $this->{SESSION}->delete;
-    $this->{SESSION}->flush;
 }
 
 #------------------------------------------------------------------------------------------------------------

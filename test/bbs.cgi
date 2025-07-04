@@ -742,7 +742,7 @@ sub LoadSessionID {
     $ctx_ip->add('', $Sys->Get('SERVER'), ':', $ENV{REMOTE_ADDR});
     my $ipKey   = $ctx_ip->b64digest;
     my $ipFile  = "$hashDir/ip_addr.cgi";
-    my $expiry  = 60 * 30;   # 30分
+    my $expiry  = 60 * 60 * 24;   # 一日
 
     # JPIP の場合、既存バインドをロード
     if ($Conv->IsJPIP($Sys)) {
