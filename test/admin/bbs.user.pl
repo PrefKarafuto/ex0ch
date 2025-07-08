@@ -313,25 +313,25 @@ sub PrintGroupSetting
 	$Page->Print("<td class=\"DetailTitle\">所属ユーザ</td></tr><tr><td valign=top>");
 	
 	# 権限一覧表示
-	$Page->Print("<input type=checkbox name=A_USERGROUP $authNum[0] value=on>管理グループ設定<br>");
-	$Page->Print("<input type=checkbox name=A_CAPGROUP $authNum[1] value=on>キャップグループ設定<br>");
-	$Page->Print("<input type=checkbox name=A_LOGVIEW $authNum[14] value=on>ログの閲覧・削除<br>");
-	$Page->Print("<input type=checkbox name=A_NINJAEDIT $authNum[15] value=on>忍法帖編集<br>");
+	$Page->Print("<label><input type=checkbox name=A_USERGROUP $authNum[0] value=on>管理グループ設定</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_CAPGROUP $authNum[1] value=on>キャップグループ設定</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_LOGVIEW $authNum[14] value=on>ログの閲覧・削除</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_NINJAEDIT $authNum[15] value=on>忍法帖編集</label><br>");
 	$Page->Print("<hr>");
-	$Page->Print("<input type=checkbox name=A_THREADSTOP $authNum[2] value=on>スレッド停止・再開<br>");
-	$Page->Print("<input type=checkbox name=A_THREADPOOL $authNum[3] value=on>スレッドdat落ち・復活<br>");
-	$Page->Print("<input type=checkbox name=A_TREADDELETE $authNum[4] value=on>スレッド削除<br>");
-	$Page->Print("<input type=checkbox name=A_THREADINFO $authNum[5] value=on>スレッド情報更新<br>");
-	$Page->Print("<input type=checkbox name=A_PASTCREATE $authNum[6] value=on>過去ログ生成<br>");
-	$Page->Print("<input type=checkbox name=A_PASTDELETE $authNum[7] value=on>過去ログ削除<br>");
-	$Page->Print("<input type=checkbox name=A_BBSSETTING $authNum[8] value=on>掲示板設定<br>");
-	$Page->Print("<input type=checkbox name=A_BBSEDIT $authNum[13] value=on>各種編集<br>");
-	$Page->Print("<input type=checkbox name=A_NGWORDS $authNum[9] value=on>NGワード編集<br>");
-	$Page->Print("<input type=checkbox name=A_ACCESUSER $authNum[10] value=on>アクセス制限編集<br>");
-	$Page->Print("<input type=checkbox name=A_BGDSL $authNum[16] value=on>BoardGuard DSL編集<br>");
+	$Page->Print("<label><input type=checkbox name=A_THREADSTOP $authNum[2] value=on>スレッド停止・再開</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_THREADPOOL $authNum[3] value=on>スレッドdat落ち・復活</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_TREADDELETE $authNum[4] value=on>スレッド削除</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_THREADINFO $authNum[5] value=on>スレッド情報更新</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_PASTCREATE $authNum[6] value=on>過去ログ生成</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_PASTDELETE $authNum[7] value=on>過去ログ削除</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_BBSSETTING $authNum[8] value=on>掲示板設定</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_BBSEDIT $authNum[13] value=on>各種編集</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_NGWORDS $authNum[9] value=on>NGワード編集</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_ACCESUSER $authNum[10] value=on>アクセス制限編集</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_BGDSL $authNum[16] value=on>BoardGuard DSL編集</label><br>");
 	$Page->Print("<hr>");
-	$Page->Print("<input type=checkbox name=A_RESABONE $authNum[11] value=on>レスあぼーん<br>");
-	$Page->Print("<input type=checkbox name=A_RESEDIT $authNum[12] value=on>レス編集・作成<br>");
+	$Page->Print("<label><input type=checkbox name=A_RESABONE $authNum[11] value=on>レスあぼーん</label><br>");
+	$Page->Print("<label><input type=checkbox name=A_RESEDIT $authNum[12] value=on>レス編集・作成</label><br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示
@@ -347,7 +347,7 @@ sub PrintGroupSetting
 					$check = 'checked';
 				}
 			}
-			$Page->Print("<input type=checkbox name=BELONGUSER value=$id $check>$userName($fullName)<br>");
+			$Page->Print("<label><input type=checkbox name=BELONGUSER value=$id $check>$userName($fullName)</label><br>");
 		}
 	}
 	

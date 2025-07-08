@@ -286,36 +286,36 @@ sub PrintGroupSetting
 	$Page->Print("<td class=\"DetailTitle\">所属キャップ</td></tr><tr><td valign=top>");
 	
 	# 権限一覧表示
-	$Page->Print("<input type=checkbox name=C_SUBJECT $authNum[0] value=on>タイトル文字数規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_NAME $authNum[1] value=on>名前文字数規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_MAIL $authNum[2] value=on>メール（コマンド）文字数規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_CONTENTS $authNum[3] value=on>本文文字数規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_CONTLINE $authNum[4] value=on>本文行数規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_LINECOUNT $authNum[5] value=on>本文1行文字数規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_NONAME $authNum[6] value=on>名無し規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_THREAD $authNum[7] value=on>スレッド作成規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_THREADCAP $authNum[8] value=on>スレッド作成可能(キャップ)<br>");
-	$Page->Print("<input type=checkbox name=C_CONTINUAS $authNum[9] value=on>連続投稿規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_DUPLICATE $authNum[10] value=on>二重書き込み規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_SHORTWRITE $authNum[11] value=on>短時間投稿規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_READONLY $authNum[12] value=on>読取専用規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_CUSTOMID $authNum[23] value=on>専用ID許可<br>");
-	$Page->Print("<input type=checkbox name=C_IDDISP $authNum[13] value=on>ID非表示<br>");
-	$Page->Print("<input type=checkbox name=C_NOSLIP $authNum[22] value=on>端末識別子非表示<br>");
-	$Page->Print("<input type=checkbox name=C_HOSTDISP $authNum[14] value=on>本文ホスト非表示<br>");
-	$Page->Print("<input type=checkbox name=C_MOBILETHREAD $authNum[15] value=on>携帯からのスレッド作成<br>");
-	$Page->Print("<input type=checkbox name=C_FIXHANLDLE $authNum[16] value=on>コテハン★表示<br>");
-	$Page->Print("<input type=checkbox name=C_SAMBA $authNum[17] value=on>Samba規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_PROXY $authNum[18] value=on>プロキシ規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_JPHOST $authNum[19] value=on>海外ホスト規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_NOHOST $authNum[26] value=on>逆引き不可規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_NGUSER $authNum[20] value=on>ユーザー規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_NGWORD $authNum[21] value=on>NGワード規制解除<br>");
-	$Page->Print("<input type=checkbox name=C_COMMAND $authNum[24] value=on>コマンド使用可<br>");
-	$Page->Print("<input type=checkbox name=C_NOATTR $authNum[25] value=on>スレッド属性無効<br>");
-	$Page->Print("<input type=checkbox name=C_NONINJA $authNum[27] value=on>忍法帖規制無効<br>");
-	$Page->Print("<input type=checkbox name=C_NOCAPTCHA $authNum[28] value=on>Captcha無効<br>");
-	$Page->Print("<input type=checkbox name=C_NOBGDSL $authNum[29] value=on>BGDSL規制無効<br>");
+	$Page->Print("<label><input type=checkbox name=C_SUBJECT $authNum[0] value=on>タイトル文字数規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NAME $authNum[1] value=on>名前文字数規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_MAIL $authNum[2] value=on>メール（コマンド）文字数規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_CONTENTS $authNum[3] value=on>本文文字数規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_CONTLINE $authNum[4] value=on>本文行数規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_LINECOUNT $authNum[5] value=on>本文1行文字数規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NONAME $authNum[6] value=on>名無し規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_THREAD $authNum[7] value=on>スレッド作成規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_THREADCAP $authNum[8] value=on>スレッド作成可能(キャップ)</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_CONTINUAS $authNum[9] value=on>連続投稿規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_DUPLICATE $authNum[10] value=on>二重書き込み規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_SHORTWRITE $authNum[11] value=on>短時間投稿規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_READONLY $authNum[12] value=on>読取専用規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_CUSTOMID $authNum[23] value=on>専用ID許可</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_IDDISP $authNum[13] value=on>ID非表示</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NOSLIP $authNum[22] value=on>端末識別子非表示</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_HOSTDISP $authNum[14] value=on>本文ホスト非表示</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_MOBILETHREAD $authNum[15] value=on>携帯からのスレッド作成</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_FIXHANLDLE $authNum[16] value=on>コテハン★表示</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_SAMBA $authNum[17] value=on>Samba規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_PROXY $authNum[18] value=on>プロキシ規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_JPHOST $authNum[19] value=on>海外ホスト規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NOHOST $authNum[26] value=on>逆引き不可規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NGUSER $authNum[20] value=on>ユーザー規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NGWORD $authNum[21] value=on>NGワード規制解除</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_COMMAND $authNum[24] value=on>コマンド使用可</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NOATTR $authNum[25] value=on>スレッド属性無効</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NONINJA $authNum[27] value=on>忍法帖規制無効</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NOCAPTCHA $authNum[28] value=on>Captcha無効</label><br>");
+	$Page->Print("<label><input type=checkbox name=C_NOBGDSL $authNum[29] value=on>BGDSL規制無効</label><br>");
 	$Page->Print("</td>\n<td valign=top>");
 	
 	# 所属ユーザ一覧表示
@@ -332,7 +332,7 @@ sub PrintGroupSetting
 					$check = 'checked'
 				}
 			}
-			$Page->Print("<input type=checkbox name=BELONGUSER_CAP value=$id $check>$userName($fullName)<br>");
+			$Page->Print("<label><input type=checkbox name=BELONGUSER_CAP value=$id $check>$userName($fullName)</label><br>");
 		}
 	}
 	

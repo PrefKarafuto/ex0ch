@@ -791,17 +791,17 @@ sub PrintLastEdit
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2>内容編集</td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\">名前</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_FROM value=\"$elem[0]\"><br>");
-	$Page->Print("<input type=checkbox name=SANIT_NAME value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</td></tr>\n");
+	$Page->Print("<label><input type=checkbox name=SANIT_NAME value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</label></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">メール（コマンド）</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_mail value=\"$elem[1]\"><br>");
-	$Page->Print("<input type=checkbox name=SANIT_MAIL value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</td></tr>\n");
+	$Page->Print("<label><input type=checkbox name=SANIT_MAIL value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</label></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">日付・ID</td><td>");
 	$Page->Print("<input type=text size=60 name=LAST_date value=\"$elem[2]\"><br>");
-	$Page->Print("<input type=checkbox name=SANIT_DATE value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</td></tr>\n");
+	$Page->Print("<label><input type=checkbox name=SANIT_DATE value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</label></td></tr>\n");
 	$Page->Print("<tr><td class=\"DetailTitle\">本文</td><td>");
 	$Page->Print("<textarea name=LAST_MESSAGE rows=10 cols=70 wrap=off>");
 	$Page->Print("$elem[3]</textarea><br>");
-	$Page->Print("<input type=checkbox name=SANIT_TEXT value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</td></tr>\n");
+	$Page->Print("<label><input type=checkbox name=SANIT_TEXT value=on>エスケープ(サニタイズ)を行う。無効でHTML直接編集</label></td></tr>\n");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>\n");
 	
 	# 権限によって表示を抑制

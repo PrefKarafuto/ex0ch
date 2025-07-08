@@ -291,7 +291,7 @@ sub PrintUserSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">説明</td><td>");
 	$Page->Print("<input type=text size=30 name=EXPL value=\"$expl\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2 valign=absmiddle>");
-	$Page->Print("<input type=checkbox name=SYSAD $sysad value=on>システム管理者権限</td></tr>");
+	$Page->Print("<label><input type=checkbox name=SYSAD $sysad value=on>システム管理者権限</label></td></tr>");
 	
 	$Page->HTMLInput('hidden', 'SELECT_USER', $Form->Get('SELECT_USER'));
 	

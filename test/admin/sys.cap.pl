@@ -294,7 +294,7 @@ sub PrintCapSetting
 	$Page->Print("<tr><td class=\"DetailTitle\">専用ID(要権限)</td><td>");
 	$Page->Print("<input type=text size=30 name=CUSTOMID value=\"$customid\"></td></tr>");
 	$Page->Print("<tr><td class=\"DetailTitle\" colspan=2 valign=absmiddle>");
-	$Page->Print("<input type=checkbox name=SYSAD $sysad value=on>システム共通権限</td></tr>");
+	$Page->Print("<label><input type=checkbox name=SYSAD $sysad value=on>全掲示板で通用</label></td></tr>");
 	
 	$Page->HTMLInput('hidden', 'SELECT_CAP', $Form->Get('SELECT_CAP'));
 	

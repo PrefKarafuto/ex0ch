@@ -653,7 +653,7 @@ sub PrintThreadCopy
 			}
 		}
 		$Page->Print("</select> ");
-		$Page->Print("<input type=checkbox value=on name=RENAME $status>同名のファイルがあればリネーム");
+		$Page->Print("<label><input type=checkbox value=on name=RENAME $status>同名のファイルがあればリネーム</label>");
 		$Page->Print('<input type=button value="　' . $text . "　\" onclick=\"$common;\" $status> ");
 	}
 	$Page->Print("</td></tr>\n");
@@ -992,20 +992,20 @@ sub PrintThreadAutoPooling
 	$Page->Print("<td class=\"DetailTitle\" style=\"width:150\">条件(OR)</td>");
 	$Page->Print("<td class=\"DetailTitle\">条件設定値</td></tr>\n");
 	
-	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYDATE value=on>");
-	$Page->Print("<b>最終書き込み</b></td><td>最終書き込みが");
+	$Page->Print("<tr><td><label><input type=checkbox name=CONDITION_BYDATE value=on>");
+	$Page->Print("<b>最終書き込み</b></label></td><td>最終書き込みが");
 	$Page->Print("<input type=text size=4 name=POOLDATE value=30>日以前</td></tr>\n");
-	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYPOS value=on>");
-	$Page->Print("<b>スレッド位置</b></td><td>スレッド位置が");
+	$Page->Print("<tr><td><label><input type=checkbox name=CONDITION_BYPOS value=on>");
+	$Page->Print("<b>スレッド位置</b></label></td><td>スレッド位置が");
 	$Page->Print("<input type=text size=4 name=POOLPOS value=500>以降</td></tr>\n");
-	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYRES value=on>");
-	$Page->Print("<b>レス数</b></td><td>レス数が");
+	$Page->Print("<tr><td><label><input type=checkbox name=CONDITION_BYRES value=on>");
+	$Page->Print("<b>レス数</b></label></td><td>レス数が");
 	$Page->Print("<input type=text size=4 name=POOLRES value=1000>を超えたもの</td></tr>\n");
-	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYTITLE value=on>");
-	$Page->Print("<b>タイトル</b></td><td>タイトルが");
+	$Page->Print("<tr><td><label><input type=checkbox name=CONDITION_BYTITLE value=on>");
+	$Page->Print("<b>タイトル</b></label></td><td>タイトルが");
 	$Page->Print("<input type=text size=15 name=POOLTITLE value=>にマッチするもの(正規表現)</td></tr>\n");
-	$Page->Print("<tr><td><input type=checkbox name=CONDITION_BYSTOP value=on>");
-	$Page->Print("<b>停止スレッド</b></td><td>スレッドが停止・または移転されているもの</td></tr>");
+	$Page->Print("<tr><td><label><input type=checkbox name=CONDITION_BYSTOP value=on>");
+	$Page->Print("<b>停止スレッド</b></label></td><td>スレッドが停止・または移転されているもの</td></tr>");
 	
 	$common = "DoSubmit('bbs.thread','FUNC','AUTOPOOL')";
 	

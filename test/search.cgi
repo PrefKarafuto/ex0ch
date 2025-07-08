@@ -261,10 +261,10 @@ HTML
    </tr>
    <tr>
 	<td>検索種別<br>
-	<input type="checkbox" name="TYPE" value="1" $cTYPE[0]><small>名前検索</small><br>
-	<input type="checkbox" name="TYPE" value="2" $cTYPE[1]><small>本文検索</small><br>
-	<input type="checkbox" name="TYPE" value="4" $cTYPE[2]><small>ID検索</small><br>
-	<input type="checkbox" name="TYPE" value="8" $cTYPE[3]><small>スレタイ検索</small><br>
+	<label><input type="checkbox" name="TYPE" value="1" $cTYPE[0]><small>名前検索</small></label><br>
+	<label><input type="checkbox" name="TYPE" value="2" $cTYPE[1]><small>本文検索</small></label><br>
+	<label><input type="checkbox" name="TYPE" value="4" $cTYPE[2]><small>ID検索</small></label><br>
+	<label><input type="checkbox" name="TYPE" value="8" $cTYPE[3]><small>スレタイ検索</small></label><br>
 	</td>
    </tr>
    <tr>

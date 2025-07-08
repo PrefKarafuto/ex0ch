@@ -585,12 +585,12 @@ sub PrintOtherSetting
 	$Page->Print("<td>$imgurAuth</td></tr>\n");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">本文中のURL</td></tr>\n");
-	$Page->Print("<tr><td colspan=2><input type=checkbox name=IMGTAG $imgtag value=on>");
-	$Page->Print("imgur/twimg画像のみIMGタグ変換を許可</td>");
-	$Page->Print("<tr><td colspan=2><input type=checkbox name=CSP $CSPSet value=on>");
-	$Page->Print("Youtube/niconico埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</td>");
-	$Page->Print("<tr><td colspan=2><input type=checkbox name=URLLINK $linkChk value=on>");
-	$Page->Print("本文中URLへの自動リンク</td>");
+	$Page->Print("<tr><td colspan=2><label><input type=checkbox name=IMGTAG $imgtag value=on>");
+	$Page->Print("imgur/twimg画像のみIMGタグ変換を許可</label></td>");
+	$Page->Print("<tr><td colspan=2><label><input type=checkbox name=CSP $CSPSet value=on>");
+	$Page->Print("Youtube/niconico埋め込み用　metaタグでCSPを設定（非推奨・HTTPヘッダで設定できない場合）</label></td>");
+	$Page->Print("<tr><td colspan=2><label><input type=checkbox name=URLLINK $linkChk value=on>");
+	$Page->Print("本文中URLへの自動リンク</label></td>");
 	$Page->Print("<tr><td colspan=2><b>以下自動リンクOFF時のみ有効</b></td></tr>\n");
 	$Page->Print("<tr><td>　　リンク禁止時間帯</td>");
 	$Page->Print("<td><input type=text size=2 name=LINKST value=\"$linkSt\" >時 ～ ");
@@ -601,8 +601,8 @@ sub PrintOtherSetting
 	$Page->Print("<td><label><input type=radio name=PATHKIND value=\"0\" $pathInfo>PATHINFO</label>　");
 	$Page->Print("<label><input type=radio name=PATHKIND value=\"1\" $pathQuery>QUERYSTRING</label></td></tr>\n");
 	
-	#$Page->Print("<tr><td colspan=2><input type=checkbox name=FASTMODE $fastMode value=on>");
-	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</td>");
+	#$Page->Print("<tr><td colspan=2><label><input type=checkbox name=FASTMODE $fastMode value=on>");
+	#$Page->Print("書き込み時にindex.htmlを更新しない(高速書き込みモード)</label></td>");
 	
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">更新チェック</td></tr>\n");
 	$Page->Print("<tr><td>更新チェックの間隔</td>");
