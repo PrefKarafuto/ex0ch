@@ -880,7 +880,7 @@ sub PrintPlusSecSetting
 	$Page->Print("<td>各掲示板の設定で有効化してください</td></tr>\n");
 
 	$Page->Print("<tr bgcolor=silver><td colspan=2 class=\"DetailTitle\">BoardGuard DSL（高度）</td></tr>\n");
-	$Page->Print("<tr><td>条件付きユーザー規制を有効化する<br><small>注意：<a href=\"https://github.com/PrefKarafuto/ex0ch/wiki/BoardGuard-DSL\">");
+	$Page->Print("<tr><td>条件付きユーザー規制を有効化する<br><small>注意：<a href=\"https://prefkarafuto.github.io/docs/bgdsl/\">");
 	$Page->Print("このDSLの文法・機能</a>を十分に把握した上で使用してください。datやデータファイルが破損する恐れがあります。</small></td>\n");
 	$Page->Print("<td><input type=checkbox name=BGDSL $bgdsl value=on></td></tr>\n");
 

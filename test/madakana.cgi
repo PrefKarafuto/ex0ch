@@ -280,7 +280,7 @@ sub PrintMadaFoot
 <hr>
 
 <div>
-<a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
+<a href="https://prefkarafuto.github.io/">EXぜろちゃんねる</a>
 MADAKANA.CGI - $ver
 </div>
 

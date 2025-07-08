@@ -790,7 +790,7 @@ FORM
 	
 	$Page->Print(<<FOOT);
 <div style="margin-top:1.2em;">
-<a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
+<a href="https://prefkarafuto.github.io/">EXぜろちゃんねる</a>
 BBS.CGI - $ver (Perl$is_fcgi)
 @{[ $Sys->Get('DNSBL_TOREXIT') ? '+dan.me.uk' : '' ]}
 @{[ $Sys->Get('DNSBL_SPAMHAUS') ? '+S5H' : '' ]}

@@ -4,8 +4,8 @@
 バグ報告・機能要望・その他サポート用のDiscordはこちら  
 https://discord.gg/jXCUpTZgbE
 
-Wikiページ  
-https://github.com/PrefKarafuto/ex0ch/wiki  
+ドキュメント  
+https://prefkarafuto.github.io/docs
   
 ## 今後の開発予定機能   
 - [ ] 過去ログ周りを整備
@@ -18,9 +18,6 @@ https://github.com/PrefKarafuto/ex0ch/wiki
 ## お知らせ  
 v0.10.5から、**CGI.pm**モジュールが必要です。  
 もし入っていない場合はcpanからインストールしてください。  
-
-## プラグインの互換性について  
-[Wikiページ](https://github.com/PrefKarafuto/ex0ch/wiki/%E6%97%A7%E4%BB%95%E6%A7%98%E3%83%97%E3%83%A9%E3%82%B0%E3%82%A4%E3%83%B3%E3%81%AE%E5%AF%BE%E5%BF%9C%E3%81%AE%E3%83%92%E3%83%B3%E3%83%88)を参照。
   
 2023/1/14 PrefKarafuto  
 

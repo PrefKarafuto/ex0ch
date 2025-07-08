@@ -106,7 +106,7 @@ EXぜろちゃんねる初期設定：
 
 ## その他
 
-Wiki: https://github.com/PrefKarafuto/ex0ch/wiki
+ドキュメント: https://prefkarafuto.github.io/docs
 
 
 ## 不具合報告・改善要望について

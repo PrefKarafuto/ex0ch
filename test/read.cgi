@@ -577,7 +577,7 @@ HTML
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="https://github.com/PrefKarafuto/ex0ch">EXぜろちゃんねる</a>
+<a href="https://prefkarafuto.github.io/">EXぜろちゃんねる</a>
 </div>
 </div>
 </main>
@@ -753,7 +753,7 @@ sub PrintReadSearch
 	$Page->Print(<<HTML);
 <div style="margin-top:4em;">
 READ.CGI - $var<br>
-<a href="https://github.com/PrefKarafuto/ex0ch/">EXぜろちゃんねる</a>
+<a href="https://prefkarafuto.github.io/">EXぜろちゃんねる</a>
 </div>
 
 </body>
@@ -875,7 +875,7 @@ sub PrintDiscovery
 
 <div style="margin-top:4em;">
 READ.CGI - $ver<br>
-<a href="https://github.com/PrefKarafuto/ex0ch/">EXぜろちゃんねる</a>
+<a href="https://prefkarafuto.github.io/">EXぜろちゃんねる</a>
 </div>
 
 </body>

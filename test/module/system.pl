@@ -288,7 +288,7 @@ sub InitSystemValue
 		'KAKIKO'	=> 1,										# 2重かきこですか？？
 		'COUNTER'	=> '',										# 機能削除済につき未使用
 		'PRTEXT'	=> 'EXぜろちゃんねる',						# PR欄の表示文字列
-		'PRLINK'	=> 'https://github.com/PrefKarafuto/ex0ch',	# PR欄のリンクURL
+		'PRLINK'	=> 'https://prefkarafuto.github.io/',	# PR欄のリンクURL
 		'TRIP12'	=> 1,										# 12桁トリップを変換するかどうか
 		'MSEC'		=> 0,										# msecまで表示するか
 		'CONFVER'	=> '',										# システム設定ファイルのバージョン
