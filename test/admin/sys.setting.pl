@@ -916,7 +916,7 @@ sub PrintPluginSetting
 	
 	# 拡張機能が存在する場合は有効・無効設定画面を表示
 	if ($num > 0) {
-		my ($id, $file, $class, $name, $expl, $valid);
+		my ($id, $file, $class, $name, $expl, $v, $valid);
 		
 		$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
 		$Page->Print("<tr><td colspan=5>有効にする機能にチェックを入れてください。<br>");
@@ -935,9 +935,10 @@ sub PrintPluginSetting
 			$class = $Plugin->Get('CLASS', $id);
 			$name = $Plugin->Get('NAME', $id);
 			$expl = $Plugin->Get('EXPL', $id);
-			$valid = $Plugin->Get('VALID', $id) == 1 ? 'checked' : '';
+			$v     = $Plugin->Get('VALID', $id);
+			$valid = ($v == -1 && 'disabled') || ($v == 1  && 'checked') || '';
 			$Page->Print("<tr><td><input type=text name=PLUGIN_${id}_ORDER value=@{[$i+1]} size=3></td>");
-			$Page->Print("<td><input type=checkbox name=PLUGIN_VALID value=$id $valid> $name</td>");
+			$Page->Print("<td><label><input type=checkbox name=PLUGIN_VALID value=$id $valid> $name</label></td>");
 			$Page->Print("<td>$expl</td><td>$file</td>");
 			if ($class->can('getConfig') && scalar(keys %{$class->getConfig()}) > 0) {
 				$Page->Print("<td><a href=\"javascript:SetOption('PLGID','$id');");
@@ -967,83 +968,117 @@ sub PrintPluginSetting
 
 #------------------------------------------------------------------------------------------------------------
 #
-#	拡張機能個別設定設定画面の表示
-#	-------------------------------------------------------------------------------------
-#	@param	$Page	ページコンテキスト
-#	@param	$SYS	システム変数
-#	@param	$Form	フォーム変数
-#	@return	なし
+#   拡張機能個別設定設定画面の表示
+#   @param   $Page   ページコンテキスト
+#   @param   $SYS    システム変数
+#   @param   $Form   フォーム変数
+#   @return  なし
 #
 #------------------------------------------------------------------------------------------------------------
-sub PrintPluginOptionSetting
-{
-	my ($Page, $SYS, $Form) = @_;
-	my ($common, $Plugin, $Config, %conftype);
-	my ($id, $file, $className, $conf);
-	
-	$id = $Form->Get('PLGID');
-	
-	require './module/plugin.pl';
-	$Plugin = PLUGIN->new;
-	$Plugin->Load($SYS);
-	$Config = PLUGINCONF->new($Plugin, $id);
-	
-	$SYS->Set('_TITLE', 'System Plugin Option Setting - ' . $Plugin->Get('NAME', $id));
-	$common = "onclick=\"DoSubmit('sys.setting','FUNC'";
-	
-	$file = $Plugin->Get('FILE', $id);
-	require "./plugin/$file";
-	$file =~ /^0ch_(.*)_utf8\.pl$/;
-	$className = "ZPL_$1";
-	if ($className->can('getConfig')) {
-		my $plugin = $className->new;
-		$conf = $plugin->getConfig();
-	}
-	
-	$Page->Print("<center><table border=0 cellspacing=2 width=100%>");
-	$Page->Print("<tr><td colspan=4>個別設定</td></tr>\n");
-	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
-	$Page->Print("<tr>");
-	$Page->Print("<td class=\"DetailTitle\">Name</td>");
-	$Page->Print("<td class=\"DetailTitle\">Value</td>");
-	$Page->Print("<td class=\"DetailTitle\" width=50%>Explanation</td>");
-	$Page->Print("<td class=\"DetailTitle\">Type</td></tr>\n");
-	
-	%conftype = (
-		0	=>	'変更不可',
-		1	=>	'数値',
-		2	=>	'文字列',
-		3	=>	'真偽値',
-	);
-	
-	if (defined $conf) {
-		foreach my $key (sort keys %$conf) {
-			my ($val, $type, $desc);
-			$val = $Config->GetConfig($key);
-			$type = $conf->{$key}->{'valuetype'};
-			$desc = $conf->{$key}->{'description'};
-			
-			$val =~ s/([\"<>\x5c])/\x5c$1/g if ($type eq 2);
-			
-			$Page->Print("<tr><td>$key</td>");
-			if ($type eq 3) {
-				$Page->Print("<td><input type=checkbox name=PLUGIN_OPT_@{[unpack('H*', $key)]}@{[$val ? ' checked' : '']}></td>");
-			}elsif ($type eq 0) {
-				$Page->Print("<td>$val</td>");
-			}else {
-				$Page->Print("<td><input type=text name=PLUGIN_OPT_@{[unpack('H*', $key)]} value=\"$val\" size=30></td>");
+sub PrintPluginOptionSetting {
+    my ($Page, $SYS, $Form) = @_;
+    my ($common, $Plugin, $Config, %conftype);
+    my ($id, $file, $className, $conf, $err);
+
+    $id = $Form->Get('PLGID');
+
+    require './module/plugin.pl';
+    $Plugin = PLUGIN->new;
+    $Plugin->Load($SYS);
+    $Config = PLUGINCONF->new($Plugin, $id);
+
+    $SYS->Set('_TITLE', 'System Plugin Option Setting - ' . $Plugin->Get('NAME', $id));
+    $common = "onclick=\"DoSubmit('sys.setting','FUNC'";
+
+	# 設定画面本体のレンダリング
+    $Page->Print("<center><table border=0 cellspacing=2 width=100%>");
+    $Page->Print("<tr><td colspan=4>個別設定</td></tr>\n");
+    $Page->Print("<tr><td colspan=4><hr></td></tr>\n");
+    $Page->Print("<tr>");
+    $Page->Print("<td class=\"DetailTitle\">Name</td>");
+    $Page->Print("<td class=\"DetailTitle\">Value</td>");
+    $Page->Print("<td class=\"DetailTitle\" width=50%>Explanation</td>");
+    $Page->Print("<td class=\"DetailTitle\">Type</td></tr>\n");
+
+    %conftype = (
+        0 => '変更不可',
+        1 => '数値',
+        2 => '文字列',
+        3 => '真偽値',
+    );
+
+    # プラグイン .pl ファイル名
+    $file = $Plugin->Get('FILE', $id);
+	$err = '';
+    my $load_ok = eval {
+        require "./plugin/$file";
+        1;
+    };
+    if (not $load_ok) {
+        chomp($err = $@ || '不明なエラー');
+    }
+
+    # クラス名生成
+    if ($file =~ /^0ch_(.*)_utf8\.pl$/) {
+        $className = "ZPL_$1";
+    }
+
+    # getConfig 呼び出しも eval でガード
+    if ($className->can('getConfig')) {
+        my $conf_ok = eval {
+            my $plugin = $className->new;
+            $conf = $plugin->getConfig();
+            1;
+        };
+        if (not $conf_ok) {
+            chomp($err = $@ || '不明なエラー');
+        }
+    }
+
+	if(!$err){
+		if (defined $conf) {
+			foreach my $key (sort keys %$conf) {
+				my ($val, $type, $desc);
+				$val  = $Config->GetConfig($key);
+				$type = $conf->{$key}{valuetype};
+				$desc = $conf->{$key}{description};
+
+				# 特殊文字エスケープ
+				$val =~ s/([\"<>\x5c])/\x5c$1/g if $type eq 2;
+
+				$Page->Print("<tr><td>$key</td>");
+				if ($type eq 3) {
+					$Page->Print(
+						"<td><input type=checkbox name=PLUGIN_OPT_"
+						. unpack('H*', $key)
+						. ($val ? ' checked' : '')
+						. "></td>"
+					);
+				}
+				elsif ($type eq 0) {
+					$Page->Print("<td>$val</td>");
+				}
+				else {
+					$Page->Print(
+						"<td><input type=text name=PLUGIN_OPT_"
+						. unpack('H*', $key)
+						. " value=\"$val\" size=30></td>"
+					);
+				}
+				$Page->Print("<td>$desc</td><td>$conftype{$type}</td></tr>\n");
 			}
-			$Page->Print("<td>$desc</td><td>$conftype{$type}</td></tr>\n");
 		}
+	}else{
+		$Page->Print("<tr><td>エラー</td><td>プラグインファイルにエラーがあります。</td><td>$err</td><td>システムメッセージ</td></tr>\n");
+		$err = 'disabled';
 	}
-	
-	$Page->Print("<tr><td colspan=4><hr></td></tr>\n");
-	$Page->Print("<tr><td colspan=4 align=left>");
-	$Page->Print("<input type=hidden name=PLGID value=\"$id\">");
-	$Page->Print("<input type=button value=\"　設定　\" $common,'SET_PLUGINCONF');\">");
-	
-	$Page->Print("</td></tr>");
-	$Page->Print("</table>");
+
+    $Page->Print("<tr><td colspan=4><hr></td></tr>\n");
+    $Page->Print("<tr><td colspan=4 align=left>");
+    $Page->Print("<input type=hidden name=PLGID value=\"$id\">");
+    $Page->Print("<input type=button value=\"　設定　\" $common,'SET_PLUGINCONF');\" $err>");
+    $Page->Print("</td></tr>");
+    $Page->Print("</table>");
 }
 
 #------------------------------------------------------------------------------------------------------------
@@ -1553,7 +1588,7 @@ sub FunctionPluginSetting
 sub FunctionPluginUpdate
 {
 	my ($Sys, $Form, $pLog) = @_;
-	my ($Plugin);
+	my ($Plugin, $errors_ref);
 	
 	# 権限チェック
 	{
@@ -1569,12 +1604,23 @@ sub FunctionPluginUpdate
 	
 	# 情報の更新と保存
 	$Plugin->Load($Sys);
-	$Plugin->Update();
+	$errors_ref = $Plugin->Update();
+	if (%$errors_ref) {
+		foreach my $id (keys %$errors_ref) {
+			$Plugin->Set($id, 'VALID', -1);
+		}
+	}
 	$Plugin->Save($Sys);
 	
 	# ログの設定
 	{
 		push @$pLog, '■ プラグイン情報の更新';
+		if (%$errors_ref) {
+			push @$pLog, '[以下のプラグインでエラーが発生しています。]';
+			foreach my $id (keys %$errors_ref) {
+				push @$pLog, "Plugin ID $id: $errors_ref->{$id}\n";
+			}
+		}
 		push @$pLog, '　プラグイン情報の更新を完了しました。';
 	}
 	return 0;

@@ -455,68 +455,86 @@ sub Delete
 #	@return	なし
 #
 #------------------------------------------------------------------------------------------------------------
-sub Update
-{
-	my $this = shift;
-	my ($plugin, $exist);
-	
-	my @files = ();
-	if (opendir(my $dh, './plugin')) {
-		@files = readdir($dh);
-		closedir($dh);
-	}
-	else {
-		$this->{'FILE'} = {};
-		$this->{'CLASS'} = {};
-		$this->{'NAME'} = {};
-		$this->{'EXPL'} = {};
-		$this->{'TYPE'} = {};
-		$this->{'VALID'} = {};
-		$this->{'CONFIG'} = {};
-		$this->{'CONFTYPE'} = {};
-		$this->{'ORDER'} = [];
-		return;
-	}
-	
-	# プラグイン追加・更新フェイズ
-	foreach my $file (@files) {
-		if ($file =~ /^0ch_(.*)_utf8\.pl/) {
-			my $className = "ZPL_$1";
-			my @keySet = ();
-			if (scalar $this->GetKeySet('FILE', $file, \@keySet) > 0) {
-				my $id = $keySet[0];
-				require "./plugin/$file";
-				my $plugin = $className->new;
-				$this->{'NAME'}->{$id} = $plugin->getName;
-				$this->{'EXPL'}->{$id} = $plugin->getExplanation;
-				$this->{'TYPE'}->{$id} = $plugin->getType;
-				$this->SetDefaultConfig($id);
-				$this->LoadConfig($id);
-				$this->SaveConfig($id);
-			}
-			else {
-				$this->Add($file, 0);
-			}
-		}
-	}
-	# プラグイン削除フェイズ
-	my @keySet = ();
-	if ($this->GetKeySet('ALL', '', \@keySet) > 0) {
-		foreach my $id (@keySet) {
-			my $exist = 0;
-			foreach my $file (@files) {
-				if ($this->Get('FILE', $id) eq $file) {
-					$exist = 1;
-					last;
-				}
-			}
-			if ($exist == 0) {
-				$this->Delete($id);
-			}
-		}
-	}
-}
+sub Update {
+    my $this = shift;
+    my %errors;    # プラグインID => エラーメッセージ
 
+    # ディレクトリ読み込み
+    my @files;
+    if (opendir(my $dh, './plugin')) {
+        @files = readdir($dh);
+        closedir($dh);
+    }
+    else {
+        # プラグイン情報を初期化して空のエラー戻し
+        $this->{'FILE'}     = {};
+        $this->{'CLASS'}    = {};
+        $this->{'NAME'}     = {};
+        $this->{'EXPL'}     = {};
+        $this->{'TYPE'}     = {};
+        $this->{'VALID'}    = {};
+        $this->{'CONFIG'}   = {};
+        $this->{'CONFTYPE'} = {};
+        $this->{'ORDER'}    = [];
+        return \%errors;
+    }
+
+    # プラグイン追加・更新フェイズ
+    foreach my $file (@files) {
+        next unless $file =~ /^0ch_(.*)_utf8\.pl/;
+        my $className = "ZPL_$1";
+
+        # 既存プラグインかどうか判定
+        my @keySet;
+        if ($this->GetKeySet('FILE', $file, \@keySet) > 0) {
+            my $id = $keySet[0];
+
+            # エラーチェック付きでプラグイン読み込み〜初期化
+            my $ok = eval {
+                require "./plugin/$file";
+                my $plugin = $className->new;
+
+                $this->{'NAME'}->{$id} = $plugin->getName;
+                $this->{'EXPL'}->{$id} = $plugin->getExplanation;
+                $this->{'TYPE'}->{$id} = $plugin->getType;
+
+                $this->SetDefaultConfig($id);
+                $this->LoadConfig($id);
+                $this->SaveConfig($id);
+                1;
+            };
+            unless ($ok) {
+                chomp(my $err = $@ || '不明なエラー');
+                $errors{$id} = "プラグイン '$file' の読み込み/初期化に失敗: $err";
+                # エラーが出たプラグインはスキップ
+                next;
+            }
+        }
+        else {
+            # 新規プラグイン
+            $this->Add($file, 0);
+        }
+    }
+
+    # プラグイン削除フェイズ
+    my @allKeys;
+    if ($this->GetKeySet('ALL', '', \@allKeys) > 0) {
+        foreach my $id (@allKeys) {
+            my $exist = 0;
+            foreach my $file (@files) {
+                if ($this->Get('FILE', $id) eq $file) {
+                    $exist = 1;
+                    last;
+                }
+            }
+            if (!$exist) {
+                $this->Delete($id);
+            }
+        }
+    }
+
+    return \%errors;
+}
 
 #============================================================================================================
 #
