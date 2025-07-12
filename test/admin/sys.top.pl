@@ -323,7 +323,7 @@ HTML
 $Page->Print(<<HTML);
 	 <tr>
 	  <td class="DetailTitle">
-	  <input type="radio" name="NOTICE_KIND" value="ALL">全体通知
+	  <label><input type="radio" name="NOTICE_KIND" value="ALL">全体通知</label>
 	  </td>
 	  <td>
 	  有効期限：<input type="text" name="NOTICE_LIMIT" size="10" value="30">日
@@ -331,7 +331,7 @@ $Page->Print(<<HTML);
 	 </tr>
 	 <tr>
 	  <td class="DetailTitle">
-	  <input type="radio" name="NOTICE_KIND" value="ONE" checked>個別通知
+	  <label><input type="radio" name="NOTICE_KIND" value="ONE" checked>個別通知</label>
 	  </td>
 	  <td>
 HTML
@@ -340,7 +340,7 @@ HTML
 $Page->Print(<<HTML);
 	 <tr>
 	  <td class="DetailTitle">
-	  <input type="radio" name="NOTICE_KIND" value="ONE" checked>個別通知
+	  <label><input type="radio" name="NOTICE_KIND" value="ONE" checked>個別通知</label>
 	  </td>
 	  <td>
 HTML

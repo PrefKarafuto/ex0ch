@@ -1053,8 +1053,8 @@ sub PrintSettingImport
 	
 	$Page->Print("<center><table cellspcing=2 width=100%>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
-	$Page->Print("<tr><td class=\"DetailTitle\"><input type=radio name=IMPORT_KIND value=FROM_BBS");
-	$Page->Print(" checked>既存BBSからインポート</td>");
+	$Page->Print("<tr><td class=\"DetailTitle\"><label><input type=radio name=IMPORT_KIND value=FROM_BBS");
+	$Page->Print(" checked>既存BBSからインポート</label></td>");
 	$Page->Print("<td><select name=IMPORT_BBS><option value=\"\">--掲示板を選択--</option>");
 	
 	# 掲示板一覧の出力
@@ -1065,7 +1065,7 @@ sub PrintSettingImport
 	
 	$Page->Print("</select></td></tr>");
 	$Page->Print("<tr><td valign=top class=\"DetailTitle\">");
-	$Page->Print("<input type=radio name=IMPORT_KIND value=FROM_DIRECT>直接インポート</td>");
+	$Page->Print("<label><input type=radio name=IMPORT_KIND value=FROM_DIRECT>直接インポート</label></td>");
 	$Page->Print("<td><textarea rows=10 cols=60 wrap=off name=IMPORT_DIRECT></textarea></td></tr>");
 	$Page->Print("<tr><td colspan=2><hr></td></tr>");
 	$Page->Print("<tr><td colspan=2 align=left><input type=button value=\"インポート\"");
