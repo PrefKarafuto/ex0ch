@@ -106,10 +106,16 @@ sub DoFunction
 {
 	my $this = shift;
 	my ($Sys, $Form, $pSys) = @_;
-	my ($subMode, $err);
+	my ($subMode, $err, $BBS);
+
+	require './module/bbs_info.pl';
+	$BBS = BBS_INFO->new;
 	
 	# 管理情報を登録
+	$BBS->Load($Sys);
+	$Sys->Set('BBS', $BBS->Get('DIR', $Form->Get('TARGET_BBS')));
 	$Sys->Set('ADMIN', $pSys);
+	$pSys->{'SECINFO'}->SetGroupInfo($Sys->Get('BBS'));
 	
 	$subMode	= $Form->Get('MODE_SUB');
 	$err		= 0;
@@ -130,6 +136,7 @@ sub DoFunction
 		$pSys->{'LOGGER'}->Put($Form->Get('UserName'),"THREAD($subMode)", 'COMPLETE');
 		$Form->Set('MODE_SUB', 'COMPLETE');
 	}
+	$pSys->{'AD_BBS'} = $BBS;
 	$this->DoPrint($Sys, $Form, $pSys);
 }
 
@@ -284,7 +291,7 @@ sub PrintNinjaEdit
 		$Page->Print("<tr><td>コマンド禁止</td>");
 		$Page->Print("<td><input type=checkbox name=BAN_COM value=on $is_ban_command $is_disable></td></tr>\n");
 		$Page->Print("<tr><td>URL禁止</td>");
-		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled></td></tr>\n");
+		$Page->Print("<td><input type=checkbox name=BAN_URL value=on disabled $is_disable></td></tr>\n");
 		$Page->Print("<tr><td>強制sage</td>");
 		$Page->Print("<td><input type=checkbox name=FORCE_SAGE value=on $is_force_sage $is_disable></td></tr>\n");
 		$Page->Print("<tr><td>Captcha強制</td>");
